@@ -8,7 +8,7 @@ Cette mise à niveau permet de bénéficier des dernières mises à jour de séc
 
 ## Nettoyage du dépôt GIT
 
-L'historique du dépôt GIT a été modifié afin d'en supprimer des archives volumineuses et inutiles depuis plusieurs version (< Creed). **Vous devriez donc au moment du *fetch* constater que vous avez sur votre copie locale plusieurs milliers de *commits* en attente**. C'est normal. L'utilisation d'un *reset* à la place d'un *pull* réglera le problème.
+L'historique du dépôt GIT a été modifié afin d'en supprimer des archives volumineuses et inutiles depuis plusieurs versions (< Creed). **Vous devriez donc au moment du *fetch* constater que vous avez sur votre copie locale plusieurs milliers de *commits* en attente**. C'est normal. L'utilisation d'un *reset* à la place d'un *pull* réglera le problème.
 
 ## Nouveautés
 
@@ -20,7 +20,7 @@ L'historique du dépôt GIT a été modifié afin d'en supprimer des archives vo
 
  - **Nouveau projet / nouvelle activité** : Le privilège permettant de créer des activités/projets était initialement réservé au niveau application (et donc effectif uniquement pour les rôles déterminés au sein de l'application). Ce privilège a maintenant été étendu aux rôles liès aux organisations afin de permettre une meilleure décentralisation de l'ajout de projet/activité. Pour les droits obtenus via l'organisation, une zone de saisie supplémentaire sera visible dans les formulaires pour y renseigner le rôle de l'organisation de rattachement (la liste des rôles sera limitée aux rôles donnant un accès NB: c'est cette affectation qui par la suite donnera accès à l'activié/projet créé).
  
- - **[Oscar API](../config-api.md)** : Première version de l'API Oscar. Cette API permet à d'autre  application du SI d'accéder à Oscar en lecture 
+ - **[Oscar API](../config-api.md)** : Première version de l'API Oscar. Cette API permet à d'autres applications du SI d'accéder à Oscar en lecture 
  
  - **Gearman** Utilisation d'un serveur de gestion des tâches (**Gearman**) afin d'optimiser certaines opérations : Génération des notifications, planification de la reconstruction/optimisation des indices de recherche. [Installer et configurer Gearman](../config-gearman.md)
  
@@ -62,7 +62,7 @@ Suivez la procédure : [installation et configuration de Gearman](../config-gear
 
 ### Mise à jour du modèle
 
-Puis on mets à jour le modèle : 
+Puis on met à jour le modèle : 
 
 ```bash
 php vendor/bin/doctrine-module orm:schema-tool:update --force
@@ -74,7 +74,7 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 php bin/oscar.php check:privileges
 ``` 
 
-**ATTENTION** Le privilège **création d'une activité** a évoluer, il faut penser à le réactiver aux rôles idoines.
+**ATTENTION** Le privilège **création d'une activité** a évolué, il faut penser à le réactiver aux rôles idoines.
 
 ### Création de Projet/Activité
 
