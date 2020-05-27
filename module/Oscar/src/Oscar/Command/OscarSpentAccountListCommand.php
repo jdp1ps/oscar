@@ -29,16 +29,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class OscarSpentListCommand extends OscarCommandAbstract
+class OscarSpentAccountListCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'spent:list';
+    protected static $defaultName = 'spent:accounts';
     const pfi = 'PFI';
 
     protected function configure()
     {
         $this
-            ->setDescription("Affiche la liste des dépenses")
-            ->addArgument(self::pfi, InputArgument::REQUIRED, "PFI")
+            ->setDescription("Affiche la liste des comptes utilisés dans Oscar par masse")
         ;
     }
 
@@ -46,14 +45,9 @@ class OscarSpentListCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
-
         $io = new SymfonyStyle($input, $output);
 
-        $pfi = $input->getArgument(self::pfi);
-
-        $io->title("Dépenses pour $pfi");
+        $io->title("Comptes utilisés : ");
 
 
         /** @var OscarConfigurationService $oscarConfig */
@@ -63,34 +57,24 @@ class OscarSpentListCommand extends OscarCommandAbstract
         $spentService = $this->getServicemanager()->get(SpentService::class);
 
         try {
+            $masses = $spentService->getMasses();
+            // var_dump($masses);
 
-            $grouped = $spentService->getGroupedSpentsDatas($pfi);
 
-            foreach ($grouped as $numPiece=>$infos) {
-                $out[] = [
-                    $numPiece,
-                    //implode(',', $infos['syncIds']),
-                    implode(',', $infos['text']),
-                    $infos['montant'],
-                    implode(',', $infos['compteBudgetaire']),
-                    $infos['datecomptable'],
-                    $infos['datepaiement'],
-                    $infos['annee'],
-                    $infos['refPiece'],
-                    $infos['ids'][0].' +'.count($infos['ids']),
-                ];
+
+            $accounts = $spentService->getAccountsUsed();
+            $table = [];
+
+            foreach ($accounts as $masseCode=>$masse) {
+
+                foreach ($masse['comptes'] as $compte) {
+                    $table[] = [
+                        $masseCode, $masse['label'], $masse['inherit'], $compte['code'], $compte['label']
+                    ];
+                }
             }
-            $headers = ['N°Pièce', /*'SIFACID',*/ 'Description', 'Montant', 'Date Comptable', 'Date Paiement', 'Année', 'N° Réf Pièce', 'IDs'];
+            $io->table(['Masse(cd)','Masse', 'Hérité', 'Compte', 'Intitulé'], $table);
 
-            $io->table($headers, $out);
-//            $repport = $connector->execute();
-//            foreach ($repport->getRepportStates() as $type => $out) {
-//                $short = substr($type, 0, 3);
-//                $io->section( "Opération " . strtoupper($type));
-//                foreach ($out as $line) {
-//                    $io->writeln("$short\t " . date('Y-m-d H:i:s', $line['time']) . " " . $line['message'] );
-//                }
-//            }
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }
