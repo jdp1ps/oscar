@@ -40,6 +40,9 @@ use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
+use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
+use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
+use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -65,8 +68,10 @@ use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Log\LogLevel;
 use Zend\Http\PhpEnvironment\Request;
+use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Controlleur pour les Activités de recherche. Le nom du controlleur est (il
@@ -1365,6 +1370,125 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
     }
 
+    public function estimatedSpentExportAction() {
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        // Format
+        $format = $this->params()->fromQuery('format', 'pdf');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+
+        // Services
+        $spentService = $this->getSpentService();
+
+        // Datas visualization
+        $lines = $spentService->getLinesByMasse();
+        $masses = $spentService->getMasses();
+        $years = $spentService->getYearsListActivity($entity);
+        $values = $out = $spentService->getPrevisionnalSpentsActivity($entity, true);
+
+        $totaux = [
+            "years" => [],
+            "lines" => [],
+            'total' => 0.0
+        ];
+
+        foreach ($years as $year) {
+            $totaux['years'][$year] = 0.0;
+        }
+
+        foreach ($masses as $masse=>$label) {
+            $code = $masse;
+            $totaux['lines'][$code] = [
+                'total' => 0.0
+            ];
+            foreach ($years as $year) {
+                $totaux['lines'][$code][$year] = 0.0;
+            }
+        }
+
+        //var_dump($totaux); die();
+
+        foreach ($lines as $line) {
+            $masse = $line['annexe'];
+            //echo $masse."\n";
+
+            $code = $line['code'];
+
+            $totaux['lines'][$code] = [
+                'total' => 0.0
+            ];
+
+            foreach ($years as $year) {
+                $totaux['lines'][$code][$year] = 0.0;
+                if( array_key_exists($code, $values) && array_key_exists($year, $values[$code]) ){
+                    //echo "$code>$year>$masse : " . $values[$code][$year]." <br>";
+                    $value = $values[$code][$year];
+                    $totaux['lines'][$code][$year] += $value;
+                    $totaux['lines'][$code]['total'] += $value;
+                    $totaux['lines']['total'] += $value;
+                    $totaux['years'][$year] += $value;
+                    $totaux['total'] += $value;
+
+                    $totaux['lines'][$masse]['total'] += $value;
+                    $totaux['lines'][$masse][$year] += $value;
+                    $totaux['years'][$year] += $value;
+                }
+            }
+        }
+
+        if( $format == 'pdf' ) {
+            $formatter =  new EstimatedSpentActivityPDFFormater(
+                $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+                $this->getViewRenderer(),
+                [
+                    'lines' => $lines,
+                    'masses' => $masses,
+                    'years' => $years,
+                    'totaux' => $totaux,
+                    'values' => $values,
+                    'activity' => $entity
+                ]
+            );
+            $formatter->format(['download' => true]);
+            die();
+        }
+        else if ($format == "html"){
+            //
+            $formatter =  new EstimatedSpentActivityHTMLFormater(
+                $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+                $this->getViewRenderer(),
+                [
+                    'lines' => $lines,
+                    'masses' => $masses,
+                    'years' => $years,
+                    'totaux' => $totaux,
+                    'values' => $values,
+                    'activity' => $entity
+                ]
+            );
+            die($formatter->format());
+        }
+
+        else {
+            throw new OscarException("Format non-pris en charge");
+        }
+    }
+
+    /**
+     * On pourrait déplacer dans la factory idoine...
+     * @return Renderer
+     */
+    public function getViewRenderer(): PhpRenderer
+    {
+        return $this->getServiceContainer()->get('ViewRenderer');
+    }
+
     /**
      * Détail des dépenses pour une activité de recherche
      */
@@ -1396,10 +1520,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $method == 'GET' ){
             // Get Value
-            if( $pfi )
-                $values = $out = $spentService->getPrevisionnalSpentsByPfi($pfi, true);
-            else
-                $values = [];
+            $values = $out = $spentService->getPrevisionnalSpentsActivity($entity, true);
 
             foreach( $masses as $masseCode=>$masse ){
 
@@ -1431,7 +1552,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $previsionnals  = $_POST['previsionnel'];
 
             // Récupération du prévisionnel existant
-            $out = $spentService->getPrevisionnalSpentsByPfi($pfi);
+            $out = $spentService->getPrevisionnalSpentsActivity($entity);
 
             foreach ($previsionnals as $compte=>$compteDatas) {
                 foreach ($compteDatas as $year=>$amount) {
@@ -1448,7 +1569,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         $out[$compte][$year]->setAmount($amount);
                         $out[$compte][$year]->setYear($year);
-                        $out[$compte][$year]->setPfi($pfi);
+                        $out[$compte][$year]->setActivity($entity);
                         $out[$compte][$year]->setAccount($compte);
 
                     } else {

@@ -117,7 +117,8 @@
                 </section>
 
                 <nav>
-                    <button><i class="icon-floppy"></i>Enregistrer</button>
+                    <button class="btn btn-primary"><i class="icon-floppy"></i>Enregistrer</button>
+                    <a class="btn btn-default" href="<?= $this->url('contract/estimated-spent-export', ['id'=>$activity->getId()]) ?>"><i class="icon-file-pdf"></i>Exporter</a>
                 </nav>
             </form>
         </section>
@@ -262,6 +263,7 @@
 
                methods: {
                    handlerSave(event){
+                       this.loadingMsg = "Enregistrement...";
                        let formData = new FormData(event.target);
                        this.$http.post('', formData).then(
                            ok => {

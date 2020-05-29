@@ -28,9 +28,10 @@ class EstimatedSpentLine
     private $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @var Activity
+     * @ORM\ManyToOne(targetEntity="Activity")
      */
-    private $pfi;
+    private $activity;
 
     /**
      * @ORM\Column(type="integer")
@@ -53,6 +54,22 @@ class EstimatedSpentLine
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return Activity
+     */
+    public function getActivity(): Activity
+    {
+        return $this->activity;
+    }
+
+    /**
+     * @param Activity $activity
+     */
+    public function setActivity(Activity $activity): void
+    {
+        $this->activity = $activity;
     }
 
     /**

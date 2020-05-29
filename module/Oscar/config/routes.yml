@@ -862,6 +862,13 @@ contract:
                 defaults:
                     action: estimatedSpent
 
+        estimated-spent-export:
+            type: segment
+            options:
+                route: /depenses-previsionnelles-export/:id
+                defaults:
+                    action: estimatedSpentExport
+
         list-spent:
             type: segment
             options:

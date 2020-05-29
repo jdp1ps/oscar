@@ -204,6 +204,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('export.computedFields', []);
     }
 
+    public function getEstimatedSpentActivityTemplate(){
+        return $this->getConfiguration('estimated_spent_activity_template');
+    }
+
     public function getGearmanHost(){
         return $this->getConfiguration('gearman-job-server-host');
     }

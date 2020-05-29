@@ -379,8 +379,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     public function getLinesByMasse()
     {
         $query = $this->getSpentTypeRepository()->createQueryBuilder('s')
+
             ->orderBy('s.annexe', 'ASC')
-            ->addOrderBy('s.code', 'ASC')
+            ->orderBy('s.lft', 'ASC')
             ->where("s.annexe != ''");
 
         $result = $query->getQuery()->getArrayResult();
@@ -940,16 +941,23 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $grouped;
     }
 
-    public function getPrevisionnalSpentsByPfi($pfi, $justValue = false)
+    /**
+     * Retourne les dépenses prévisionnelles de l'activité.
+     *
+     * @param $activity
+     * @param bool $justValue
+     * @return array
+     */
+    public function getPrevisionnalSpentsActivity($activity, $justValue = false)
     {
         $out = [];
 
         $query = $this->getEntityManager()->getRepository(EstimatedSpentLine::class)
             ->createQueryBuilder('e')
-            ->where('e.pfi = :pfi')
+            ->where('e.activity = :activity')
             ->getQuery();
 
-        $estimatedSpents = $query->setParameter('pfi', $pfi)->getResult();
+        $estimatedSpents = $query->setParameter('activity', $activity)->getResult();
 
         /** @var EstimatedSpentLine $estimatedSpent */
         foreach ($estimatedSpents as $estimatedSpent) {
@@ -962,6 +970,17 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
 
         return $out;
+    }
+
+
+    /**
+     * FIX : Les dépenses prévisionnelles peuvent être renseignée sur des activités qui n'ont pas encore de PFI
+     * (le prévisionnel est d'ailleurs réalisé avant d'obtenir le financement)
+     * @deprecated
+     */
+    public function getPrevisionnalSpentsByPfi($pfi, $justValue = false)
+    {
+        throw new OscarException("DEPRECATED : getPrevisionnalSpentsByPfi");
     }
 
     public function getConnector()
