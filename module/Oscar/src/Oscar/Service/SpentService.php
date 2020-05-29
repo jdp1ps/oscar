@@ -674,7 +674,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     public function getSpentsByPFI($pfi)
     {
         $qb = $this->getEntityManager()->getRepository(SpentLine::class)->createQueryBuilder('s');
-        $qb->where('s.pfi = :pfi');
+
+        // TODO Trouver un moyen moins "random" d'exclure les recettes
+        $qb->where('s.pfi = :pfi AND s.montant < 0');
         $qb->orderBy('s.datePaiement', 'ASC');
 
         $filtreCompte = $this->getOscarConfigurationService()->getSpentAccountFilter();
@@ -729,8 +731,13 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
             $compte = $spent->getCompteGeneral();
+
+            //
             $compteInfos = $this->getCompte($compte);
             $annexe = $compteInfos['annexe'];
+            if( !$annexe ){
+                $annexe = $compteInfos['masse_inherit'];
+            }
 
             if ($annexe == '') {
                 $annexe = 'N.B';
@@ -880,7 +887,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $numPiece = $spent->getNumPiece();
             $compteBudg = $spent->getCompteBudgetaire();
             $compte = $this->getCompte($spent->getCompteGeneral());
-            $masse = $compte['annexe'];
+
+
+            $masse = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
+
 
             $type = $this->getTypeByCode($spent->getCompteGeneral());
 
