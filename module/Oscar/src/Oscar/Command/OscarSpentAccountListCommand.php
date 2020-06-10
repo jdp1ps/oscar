@@ -57,11 +57,6 @@ class OscarSpentAccountListCommand extends OscarCommandAbstract
         $spentService = $this->getServicemanager()->get(SpentService::class);
 
         try {
-            $masses = $spentService->getMasses();
-            // var_dump($masses);
-
-
-
             $accounts = $spentService->getAccountsUsed();
             $table = [];
 
@@ -69,11 +64,11 @@ class OscarSpentAccountListCommand extends OscarCommandAbstract
 
                 foreach ($masse['comptes'] as $compte) {
                     $table[] = [
-                        $masseCode, $masse['label'], $masse['inherit'], $compte['code'], $compte['label']
+                        $masseCode, $masse['label'], $compte['masse_inherit'], $compte['code'], $compte['label']
                     ];
                 }
             }
-            $io->table(['Masse(cd)','Masse', 'Hérité', 'Compte', 'Intitulé'], $table);
+            $io->table(['Masse(cd)','Masse', 'Masse Héritée', 'Compte', 'Intitulé'], $table);
 
         } catch (\Exception $e) {
             $io->error($e->getMessage());
