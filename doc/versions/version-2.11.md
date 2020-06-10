@@ -120,20 +120,21 @@ php bin/oscar.php organizations:sync rest
 ```
 
 ### SIFAC (Experimental)
-
 La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
 
 Vous pouvez commencer à tester cette fonctionnalité [Configurer l'accès à SIFAC](../config-sifac.md) 
 
 ### Docker  (déploiment rapide)
-
 Dans la perspective de démo / test rapide (Version préprod par exemple). Oscar est disponible en version DOCKER. **Ce système sera amélioré pour permettre le déploiment en production**.
  
 ## Correctifs
-
  - Augmentation des résultats des recherches pour les organisations
  - Augmentation des résultats des recherches pour les personnes
  
+## Commandes
+ - Ajout de la commande `php bin/oscar.php person:roles <ID|login>` qui permet de voir la liste des rôles endossés par une personne sur les différentes parties de l'application (Rôles applicatif/organisation/projet/activité)
+ - Ajout des commandes liées aux dépenses (Plus de détails sur les commandes dans la [Documentation des commandes](../commands/liste_des_commandes.md))
+
 ## En cours
 
  - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
