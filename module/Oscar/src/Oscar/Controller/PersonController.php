@@ -363,22 +363,15 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $allow = true;
             $justXHR = false;
         } else {
-
-            // CAS PARTICULIER
-            // ===============
-            // Si la personne est un responsable d'organisation,
-            // on doit l'autoriser à accéder au service pour l'autocompéteur
-            // des personnes.
-
-            foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
-                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization->getOrganization()) ){
-                    $allow = true;
-                }
-            }
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]);
         }
 
         if( !$allow ){
-            throw new UnAuthorizedException();
+            $this->getLoggerService()->info("Accès non authorisé à la recherche des personnes pour " . $this->getCurrentPerson());
+            if( $justXHR )
+                return $this->getResponseUnauthorized();
+            else
+                throw new UnAuthorizedException();
         }
 
         // Donnèes GET

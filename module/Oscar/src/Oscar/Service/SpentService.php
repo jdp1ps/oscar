@@ -79,10 +79,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $compteMasse = $compteInfos['annexe'];
             $compteCode = strval($compteInfos['code']);
             $compteLabel = $compteInfos['label'];
-            $compteInherit = $compteInfos['masse_inherit'];
-            $masseInherit = $compteInfos['compte_inherit'];
+            $compteInherit = $compteInfos['compte_inherit'];
+            $masseInherit = $compteInfos['masse_inherit'];
             if( !$compteMasse )
-                $compteMasse = $compteInherit;
+                $compteMasse = $masseInherit;
 
             if (!array_key_exists($compteMasse, $out)) {
                 $out[$compteMasse] = [
@@ -102,27 +102,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 ];
             }
         }
-//        echo "Cd\tMs\tLP\tAP\n";
-//        foreach ($out as $m=>$dt) {
-//            echo "\n#".$dt['label']."\n";
-//            foreach ($dt['comptes'] as $c=>$compteDt) {
-//                echo " " . $compteDt['code']
-//                    ." \t" . $compteDt['annexe']
-//                    ." \t-" . $compteDt['compte_inherit']
-//                    ." \t-" . $compteDt['masse_inherit']
-//                    ."\n";
-//            }
-//        }
-//        die();
 
-        return $out;
-
-
-//        $accounts = $this->getEntityManager()->getRepository(SpentTypeGroup::class)->findAll();
-//        /** @var SpentTypeGroup $account */
-//        foreach ($accounts as $account) {
-//            $out[$account->getId()] = $account->getCode() . " : " . $account->getLabel();
-//        }
         return $out;
     }
 

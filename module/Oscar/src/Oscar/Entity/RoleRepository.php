@@ -8,8 +8,11 @@
 namespace Oscar\Entity;
 
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Oscar\Exception\OscarException;
 
 class RoleRepository extends EntityRepository
 {
@@ -167,5 +170,64 @@ class RoleRepository extends EntityRepository
             $qb->where('r.ldapFilter IS NOT NULL');
         }
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne la liste des différents rôles endossés par la personne dans toutes les activitès.
+     *
+     * @param Person $person
+     */
+    public function getDistinctRolesPersonInActivities( Person $person )
+    {
+
+        $sql = "SELECT DISTINCT ur.id FROM user_role ur "
+            ."LEFT JOIN activityperson ap ON ur.id = ap.roleobj_id "
+            ."LEFT JOIN projectmember pm ON ur.id = pm.roleobj_id "
+            ."WHERE ap.person_id = :idPerson OR pm.person_id = :idPerson";
+
+        $query = $this->getEntityManager()->getConnection()->prepare($sql);
+        $idPerson = $person->getId();
+
+        if( !$query->execute(['idPerson'=>$idPerson]) ){
+            throw new OscarException("Impossible de charger les rôles de $person dans les activités");
+        }
+        $idsRoles = $query->fetchAll();
+
+        $results = $this->createQueryBuilder('r')
+            ->where('r.id IN(:ids)')
+            ->setParameter('ids', $idsRoles)
+            ->getQuery()
+            ->getResult();
+
+        return $results;
+    }
+
+    /**
+     * Retourne la liste des différents rôles endossés par la personne dans toutes les activitès.
+     *
+     * @param Person $person
+     */
+    public function getDistinctRolesPersonInOrganizations( Person $person )
+    {
+
+        $sql = "SELECT DISTINCT ur.id FROM user_role ur "
+            ."LEFT JOIN organizationperson op ON ur.id = op.roleobj_id "
+            ."WHERE op.person_id = :idPerson";
+
+        $query = $this->getEntityManager()->getConnection()->prepare($sql);
+        $idPerson = $person->getId();
+
+        if( !$query->execute(['idPerson'=>$idPerson]) ){
+            throw new OscarException("Impossible de charger les rôles de $person dans les organisations");
+        }
+        $idsRoles = $query->fetchAll();
+
+        $results = $this->createQueryBuilder('r')
+            ->where('r.id IN(:ids)')
+            ->setParameter('ids', $idsRoles)
+            ->getQuery()
+            ->getResult();
+
+        return $results;
     }
 }

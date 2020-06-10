@@ -30,6 +30,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
@@ -82,6 +83,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->userContext;
     }
 
+    /**
+     * @return PersonService
+     */
     public function getPersonService(){
         return $this->getServiceContainer()->get(PersonService::class);
     }
@@ -1073,21 +1077,55 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
     }
 
-    public function getPrivilegesPerson( Person $person ){
 
+    /**
+     * @param $roles Role[]
+     * @param $privilege string
+     */
+    public function hasPrivilegeInRoles($roles, $privilege) {
+        foreach ($roles as $role) {
+            if( $role->hasPrivilege($privilege) ){
+                return true;
+            }
+        }
+        return false;
     }
 
-////    public function getPrivilegesOrganization( Organization $organization ){
-//        if (!$this->getCurrentPerson()) {
-//            return [];
-//        } else {
-//            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
-//            var_dump($roles);
-//            die();
-//        }
-//    }
+    /**
+     * Retourne TRUE si la personne dispose du privilège dans un des rôles obtenus via une activité/projet et/ou une
+     * organisation.
+     *
+     * @param $privilege Code du privilège à tester
+     * @return bool
+     */
+    public function hasPrivilegeInAnyRoles($privilege){
+        $rolesInActivities = $this->getPersonService()->getRolesPersonInActivities($this->getCurrentPerson());
+        if( $this->hasPrivilegeInRoles($rolesInActivities, $privilege) ){
+            return true;
+        }
 
+        $rolesInOrganisation = $this->getPersonService()->getRolesPersonInOrganizations($this->getCurrentPerson());
+        if( $this->hasPrivilegeInRoles($rolesInOrganisation, $privilege) ){
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * Retourne TRUE si le personnes dispose d'UN des privilèges dans un de ces rôles parmi
+     * les activités/Projets/Organisations.
+     *
+     * @param $privileges
+     * @return bool
+     */
+    public function hasOneOfPrivilegesInAnyRoles( $privileges ){
+        foreach ($privileges as $privilege) {
+            if( $this->hasPrivilegeInAnyRoles($privilege) ){
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Retourne un booléen indiquant si l'utilisateur courant dispose du privilége
@@ -1106,11 +1144,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 return true;
             }
 
+
             // Puis si besoin, les rôles hérités de l'application
             if ($ressource) {
+                // $this->getLoggerService()->info("hasPrivilege $privilege dans $ressource non global");
                 $privileges = $this->getPrivileges($ressource);
                 return in_array($privilege, $privileges);
             }
+            // $this->getLoggerService()->info("hasPrivilege $privilege PAS DE RESSOURCE");
         } catch (\Exception $e) {
 
         }
