@@ -95,18 +95,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $allow = true;
             $justXHR = false;
         } else {
-
-            // CAS PARTICULIER
-            // ===============
-            // Si la personne est un responsable d'organisation,
-            // on doit l'autoriser à accéder au service pour l'autocompéteur
-            // des personnes.
-
-            foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
-                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization->getOrganization()) ){
-                    $allow = true;
-                }
-            }
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([Privileges::ACTIVITY_ORGANIZATION_MANAGE, Privileges::PROJECT_ORGANIZATION_MANAGE]);
         }
 
         if( !$allow ){
