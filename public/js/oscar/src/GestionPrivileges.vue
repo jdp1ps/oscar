@@ -12,6 +12,11 @@
                 Les privilèges proposés ici ne concernent QUE les rôles obtenues via les filtres LDAP (ou accordé manuellement).
             </p>
 
+            <p class="alert alert-info" v-if="selectedSpot == 2">
+                Rôles accordès au personnes dans les organisations. <br>Accorde ainsi des accès aux activités
+                <strong>si l'organisation est impliquée <br>avec un <i>rôle d'organisation</i> marqué comme principal.</strong>
+            </p>
+
             <section v-if="privileges" class="privileges-ui">
 
                 <header class="privilege">

@@ -71,11 +71,21 @@ cd /etc/systemd/system
 ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
 
 # On active le service
-service enable oscarworker
+systemctl status oscarworker.service
+# Ancienne syntaxe avec SYSTEM : service enable oscarworker
+
 
 # On lance le service
-service oscarworker start
+systemctl start oscarworker
+# ANCIENNE SYNTAXE : service oscarworker start
 ```
+
+```bash
+# Voir la liste des services
+systemctl list-units --type=service
+
+```
+
 
 Vous pouvez surveiller le *Worker Oscar* avec la commande : 
 
