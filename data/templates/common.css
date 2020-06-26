@@ -1,6 +1,8 @@
-body {
-    font-size: 12px;
-    font-family: Helvetica, Arial, sans-serif;
+body, th, td {
+    font-size: 9px;
+    font-family: Arial, sans-serif;
+    padding: 0;
+    margin: 2px;
 }
 
 table {
@@ -11,7 +13,7 @@ table {
 
 tr { border: thin solid #adb6bd}
 
-td {}
+td { padding: 0; margin: 0; }
 
 thead h1 {
     font-weight: normal;
@@ -30,11 +32,10 @@ thead th {
 }
 .dateHeading th {
     font-weight: bold;
-    font-size: .8em;
 }
 
 .subgroup {
-    font-size: 9px;
+
 }
 .subgroup .label {
     font-weight: normal;
@@ -46,38 +47,32 @@ thead td {
     /*background: #e3e8e6;*/
     border-bottom: dotted 1px #333;
 }
-.value {
-    text-align: right;
-    font-weight: 900;
-    font-size: 12px;
-}
 thead td.valueLabel, tfoot td.valueLabel {
     text-align: right;
 }
 
 td, th {
     text-align: right;
-    padding: 1px;
     border-top: thin solid rgba(255,255,255,.7);
-    border-right: thin solid rgba(255,255,255,.3)
+    border-right: thin solid rgba(255,255,255,.3);
+}
+.value {
+    font-weight: bold;
 }
 
 .feed {
     font-weight: bold;
 }
 .empty {
-    font-size: 10px;
 }
 .lock {
     background: #fff !important;
 }
 .soustotal {
     font-weight: bold;
-    font-size: 12px;
 }
 .total {
     font-weight: 700;
-    font-size: 14px;
 }
 
 small {
@@ -108,7 +103,7 @@ th {
 }
 
 .labelvalue {
-    font-size: 10px;
+
 }
 
 
@@ -128,6 +123,9 @@ th {
 tr {
     border: none;
 }
+
+.table { width: 99% }
+
 .table tr > th {
     border: none;
 }
@@ -139,8 +137,6 @@ tr {
 .group > th { font-weight: bold; text-align: left }
 .group th {
     font-weight: 800;
-    font-size: 1em;
-    margin-top: 1em;
     color: rgba(0,0,0,.8);
 }
 
