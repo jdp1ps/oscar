@@ -295,7 +295,7 @@ $durationRounded = function( $duration ) {
         <td>&nbsp;</td>
         <td colspan="6" class="valueLabel">Commentaire : </td>
         <td>&nbsp;</td>
-        <td colspan="<?= $width-7 ?>" class="value" style="white-space: pre-wrap"><?= $commentaires ?></td>
+        <td colspan="<?= $width-7 ?>" class="" style=""><?= $commentaires ?></td>
         <td>&nbsp;</td>
     </tr>
 
