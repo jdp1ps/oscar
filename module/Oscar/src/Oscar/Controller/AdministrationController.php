@@ -313,7 +313,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     try {
                         $id = intval($this->params()->fromPost('id', null));
                         $active = boolval($this->params()->fromPost('active', false));
-                        if( $active == 'false' ) $active = false;
+                        if( $active == 'true' ) $active = true;
                         $label = $this->params()->fromPost('label', "PAS d'INTITULÉ");
                         $rate = floatval($this->params()->fromPost('rate', 0.0));
 
