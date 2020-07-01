@@ -18,14 +18,18 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\NotificationForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
+use Oscar\Traits\UsePersonService;
+use Oscar\Traits\UsePersonServiceTrait;
 use Zend\View\Model\JsonModel;
 
 /**
  * Class NotificationController
  * @package Oscar\Controller
  */
-class NotificationController extends AbstractOscarController
+class NotificationController extends AbstractOscarController implements UsePersonService
 {
+    use UsePersonServiceTrait;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /** @var NotificationService */
@@ -113,7 +117,7 @@ class NotificationController extends AbstractOscarController
 
     public function notifyPersonAction()
     {
-        $this->getOscarUserContext()->check(Privileges::MAINTENANCE_NOTIFICATION_PERSON);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NOTIFICATION_PERSON);
         $method = $this->getHttpXMethod();
         $form = new NotificationForm();
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('idperson'));
@@ -123,7 +127,7 @@ class NotificationController extends AbstractOscarController
             $form->setData($request->getPost());
             if( $form->isValid() ) {
                 /** @var NotificationService $serviceNotification */
-                $serviceNotification = $this->getServiceLocator()->get('NotificationService');
+                $serviceNotification = $this->getNotificationService();
                 $message = $form->get('message')->getValue();
                 $serviceNotification->notification(
                     $message,

@@ -15,6 +15,7 @@ use Interop\Container\Exception\ContainerException;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\PersonService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -29,6 +30,7 @@ class NotificationControllerFactory implements FactoryInterface
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setNotificationService($container->get(NotificationService::class));
+        $c->setPersonService($container->get(PersonService::class));
         return $c;
     }
 }
