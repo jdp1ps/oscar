@@ -4,7 +4,7 @@
         <span v-show="loading">
             <i class="icon-spinner animate-spin"></i>
         </span>
-        <div class="choose" style="position: absolute; z-index: 3000" v-show="organizations.length > 0 && showSelector">
+        <div class="choose" style="position: absolute; z-index: 3000; max-height: 200px; overflow: scroll; overflow-y: scroll; overflow-x: hidden" v-show="organizations.length > 0 && showSelector">
             <div class="choice" :key="c.id" v-for="c in organizations" @click.prevent.stop="handlerSelectPerson(c)">
                 <div class="infos">
                     <strong>{{ c.label }}</strong>
