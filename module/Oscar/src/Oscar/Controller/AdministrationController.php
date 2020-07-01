@@ -24,17 +24,21 @@ use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
+use Oscar\Service\ConnectorService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Traits\UseAdministrativeDocumentService;
 use Oscar\Traits\UseAdministrativeDocumentServiceTrait;
 use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTypeDocumentService;
 use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
@@ -44,9 +48,42 @@ use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait;
+
+    private $serviceLocator;
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getServiceLocator(){
+        return $this->serviceLocator;
+    }
+
+    private $connectorService;
+
+    /**
+     * @return mixed
+     */
+    public function getConnectorService()
+    {
+        return $this->connectorService;
+    }
+
+    /**
+     * @param mixed $connectorService
+     */
+    public function setConnectorService( ConnectorService $connectorService)
+    {
+        $this->connectorService = $connectorService;
+    }
+
+
+
+    public function setServiceLocator(ContainerInterface $s) {
+        $this->serviceLocator = $s;
+    }
 
     public function indexAction()
     {
@@ -464,7 +501,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
-        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configOscar = $this->getOscarConfigurationService();
         $configConnectors = $configOscar->getConfiguration('connectors');
 
         $labels = [
@@ -499,7 +536,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
     private function getRouteConnector($connectorType, $connectorName)
     {
         /** @var ConfigurationParser $configOscar */
-        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configOscar = $this->getOscarConfigurationService();
 
         try {
             $connectorsConfig = $configOscar->getConfiguration('connectors');
@@ -518,7 +555,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $connectorConfig = $connectorTypeConfig[$connectorName];
 
             return $this->getServiceLocator()
-                ->get("ConnectorService")
+                ->get(ConnectorService::class)
                 ->getConnector($connectorType.'.'.$connectorName);
 
         } catch(\Exception $e ){
@@ -536,7 +573,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
 
-        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configOscar = $this->getOscarConfigurationService();
         $connector = $this->getRouteConnector($connectorType, $connectorName);
 
         if( $this->getHttpXMethod() == "POST" ){
@@ -563,7 +600,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $connectorType = $this->params()->fromRoute('connectortype');
         $connectorName = $this->params()->fromRoute('connectorname');
         $force = $this->params()->fromQuery('force', false);
-        $configOscar = $this->getServiceLocator()->get('OscarConfig');
+        $configOscar = $this->getOscarConfigurationService();
 
         try {
             $connectorsConfig = $configOscar->getConfiguration('connectors');
@@ -582,7 +619,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $connectorConfig = $connectorTypeConfig[$connectorName];
 
 
-            $connector = $this->getServiceLocator()->get("ConnectorService")->getConnector($connectorType.'.'.$connectorName);
+            $connector = $this->getConnectorService()->getConnector($connectorType.'.'.$connectorName);
             $repport = $connector->execute(true);
             return [
                 'repport' => $repport,
@@ -604,8 +641,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
         ///////////////////////////////////// Connecteurs PERSON <> ORGANIZATION
-        $personOrganizationConnectors = $this->getServiceLocator()
-            ->get('OscarConfig')
+        $personOrganizationConnectors = $this->getOscarConfigurationService()
             ->getConfiguration('connectors.person_organization');
 
 

@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Oscar\Factory\AbstractOscarFactory;
+use Oscar\Service\ConnectorService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -24,6 +25,8 @@ class AdministrationControllerFactory extends AbstractOscarFactory
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $c = new AdministrationController();
+        $c->setServiceLocator($container);
+        $c->setConnectorService($container->get(ConnectorService::class));
         $this->init($c, $container);
         return $c;
     }
