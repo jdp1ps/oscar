@@ -2,12 +2,12 @@ image: localhost:5000/unicaen-dev-php7.3-apache
 before_script:
   - export http_proxy=http://10.14.128.99:3128
   - export https_proxy=http://10.14.128.99:3128
-  - apt-get -qq update && apt-get -qq install -y curl wget gnupg2 build-essential libssl-dev git subversion php7.0 php7.0-cli php7.0-gd php7.0-curl php7.0-intl php7.0-xml php7.0-ldap php7.0-mbstring php7.0-mcrypt php7.0-zip
+  - apt-get -qq update && apt-get -qq install -y curl wget gnupg2 build-essential libssl-dev git
   - wget https://getcomposer.org/composer.phar
   - php composer.phar install --no-plugins --with-all-dependencies
-  - curl -sL https://deb.nodesource.com/setup_6.x | bash
-  - apt-get -qq install -y nodejs
-  - npm install --silent
+#  - curl -sL https://deb.nodesource.com/setup_6.x | bash
+#  - apt-get -qq install -y nodejs
+#  - npm install --silent
 
 
 test:
