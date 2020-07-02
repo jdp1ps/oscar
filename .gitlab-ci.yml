@@ -4,7 +4,7 @@ before_script:
   - export https_proxy=http://10.14.128.99:3128
   - apt-get -qq update && apt-get -qq install -y curl wget gnupg2 build-essential libssl-dev git
   - wget https://getcomposer.org/composer.phar
-  - php composer.phar install
+  - php composer.phar install --no-plugins
 #  - curl -sL https://deb.nodesource.com/setup_6.x | bash
 #  - apt-get -qq install -y nodejs
 #  - npm install --silent
