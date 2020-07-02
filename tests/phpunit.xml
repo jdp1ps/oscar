@@ -15,5 +15,8 @@
     <testsuite name="Entity">
       <directory>Oscar/Entity</directory>
     </testsuite>
+    <testsuite name="Service">
+      <directory>Oscar/Service</directory>
+    </testsuite>
   </testsuites>
 </phpunit>

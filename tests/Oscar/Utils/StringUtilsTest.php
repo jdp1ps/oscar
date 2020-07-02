@@ -21,8 +21,4 @@ class StringUtilsTest extends TestCase
         $this->assertEquals("00000000", StringUtils::feedString(null));
         $this->assertEquals("40000000", StringUtils::feedString(4));
     }
-
-    public function testPurgeZero(){
-        //$this->assertEquals("6", StringUtils::purgeZero('00600'));
-    }
 }
