@@ -17,6 +17,7 @@ sandbox
 debug
 DEV.md
 composer.phar
+composer-stable.phar
 
 # Prototype
 prototype/timesheet/*
