@@ -975,6 +975,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $handler = fopen($filePath, 'w');
 
+
+        $delimiter = ";";
+        $enclosure = "\"";
         fputcsv($handler, $formatter->csvHeaders());
 
         /** @var ActivityPayment $payment */
