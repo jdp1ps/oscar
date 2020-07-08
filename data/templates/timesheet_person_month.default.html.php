@@ -163,7 +163,7 @@ $durationRounded = function( $duration ) {
                     ?>
                     <td class="<?= $class ?> research"><?= $duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= $durationRounded($dataGroup['total']) ?></td>
+                <td class="soustotal research"><?= $durationRounded($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
