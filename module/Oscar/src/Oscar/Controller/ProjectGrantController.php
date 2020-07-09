@@ -2139,16 +2139,22 @@ class ProjectGrantController extends AbstractOscarController
 
 
             $activities = null;
+
+
             if( $startEmpty === false ) {
 
                 if( $projectview == 'on' ){
+                    $qbIds = $qb->select('DISTINCT c.id');
+                    $idsExport = array_map('current', $qbIds->getQuery()->getResult());
+
                     $qbIds = $qb->select('DISTINCT pr.id');
+                    $ids = array_map('current', $qbIds->getQuery()->getResult());
+
                 } else {
                     $qbIds = $qb->select('DISTINCT c.id');
+                    $ids = array_map('current', $qbIds->getQuery()->getResult());
+                    $idsExport = $ids;
                 }
-
-                $ids = array_map('current', $qbIds->getQuery()->getResult());
-
 
                 if ( $projectview == 'on' ) {
                    $qb->select('pr');
@@ -2177,7 +2183,7 @@ class ProjectGrantController extends AbstractOscarController
 
             $view = new ViewModel([
                 'projectview' => $projectview,
-                'exportIds' => implode(',', $ids),
+                'exportIds' => implode(',', $idsExport),
                 'filtersType' => $filtersType,
                 'error' => $error,
                 'criteria' => $criterias,
