@@ -51,6 +51,21 @@ class DateTimeUtilsTest extends TestCase
         $this->assertEquals('2019-06', $periods[12]);
     }
 
+    public function testAllPeriodsFromDates(){
+        $periods = DateTimeUtils::allPeriodsFromDates(['2018-01', '2018-06'],['2019-01', '2019-02'], ['2018-03', '2018-07']);
+        $this->assertEquals(9, count($periods));
+        $this->assertEquals('2018-01', $periods[0]);
+        $this->assertEquals('2018-02', $periods[1]);
+        $this->assertEquals('2018-03', $periods[2]);
+        $this->assertEquals('2018-04', $periods[3]);
+        $this->assertEquals('2018-05', $periods[4]);
+        $this->assertEquals('2018-06', $periods[5]);
+        $this->assertEquals('2018-07', $periods[6]);
+        $this->assertEquals('2019-01', $periods[7]);
+        $this->assertEquals('2019-02', $periods[8]);
+
+    }
+
     public function testPeriodInside(){
 
         $period = '2019-07';

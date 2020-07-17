@@ -81,6 +81,11 @@ class DateTimeUtils {
         return $datas;
     }
 
+    public static function  getPeriodStrFromDateStr( $dateStr ) {
+        $date = new \DateTime($dateStr);
+        return $date->format('Y-m');
+    }
+
     /**
      * Retourne la liste des périodes entre 2 périodes.
      *
@@ -119,7 +124,25 @@ class DateTimeUtils {
         $periods[] = self::getCodePeriod($startYear, $startMonth);
 
         return $periods;
+    }
 
+    /**
+     * Retourne un tableau contenant la liste des périodes retenues entre une liste de date.
+     *
+     * @param mixed ...$bounds
+     * @return array
+     */
+    public function allPeriodsFromDates( ...$bounds) {
+        $out = [];
+        foreach ($bounds as $bound) {
+            $periodStart = DateTimeUtils::getPeriodStrFromDateStr($bound[0]);
+            $periodEnd = DateTimeUtils::getPeriodStrFromDateStr($bound[1]);
+            $periodsBound = self::allperiodsBetweenTwo($periodStart, $periodEnd);
+            $out = array_merge($out, $periodsBound);
+        }
+        $out = array_unique($out);
+        sort($out);
+        return $out;
     }
 
     public static function toDatetime( $value )

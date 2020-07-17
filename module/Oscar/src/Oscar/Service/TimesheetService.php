@@ -2368,6 +2368,81 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $result;
     }
 
+    /**
+     * Retourne la liste des périodes où la personnes est idéntifiée comme déclarant.
+     * @param Person $declarer
+     */
+    public function getPeriodsPerson( Person $declarer ){
+
+        $periodsBounds = $this->getTimesheetRepository()->getPeriodsPerson($declarer->getId());
+        $periods = DateTimeUtils::allPeriodsFromDates($periodsBounds);
+
+        return $periods;
+    }
+
+    public function getPersonPeriodsTimesheetTotals( Person $declarer ){
+        return $this->getTimesheetRepository()->getTimesheetTotalByPeriodPerson($declarer->getId());
+    }
+
+    public function getPersonRecallDeclaration( Person $declarer ){
+        // Récupéation des périodes avec un validation identifiée
+
+        $periods = array_flip($this->getPeriodsPerson($declarer));
+        $periodValidations = $this->getValidationPeriodRepository()->getValidationPeriodsPerson($declarer->getId());
+
+        /** @var ValidationPeriod $periodValidation */
+        foreach ($periodValidations as $periodValidation) {
+            $state = "NO";
+            $period = $periodValidation->getPeriod();
+            $periodState = $periodValidation->getStatus();
+            if( !array_key_exists($period, $periods) ){
+                throw new OscarException("Une ValidationPeriod existe alors qu'aucune periode n'est éligible à validation");
+            } else {
+                if( !is_array($periods[$period]) ){
+                    $periods[$period] = [];
+                }
+                $periods[$period][] = $periodState;
+
+            }
+        }
+
+        $durationsPeriod = $this->getPersonPeriodsTimesheetTotals($declarer);
+
+        $out = [];
+        foreach ($periods as $period=>$states ){
+            $periodInfos = [];
+
+            $periodInfos['period'] = $period;
+            $periodInfos['duration'] = array_key_exists($period, $durationsPeriod) ? $durationsPeriod[$period] : 0.0;
+            $duration = 0.0;
+
+            if( is_int($states) ){
+                $state = "NO VALIDATION";
+            } else {
+                $state = "validated";
+                $hasConlict = false;
+                $countValid = 0;
+                foreach ($states as $state) {
+                    if( $state == ValidationPeriod::STATUS_CONFLICT ){
+                        $hasConlict = true;
+                    }
+                    if( $state == ValidationPeriod::STATUS_VALID ){
+                        $countValid += 1;
+                    }
+                    if( $state != ValidationPeriod::STATUS_VALID ){
+                        $state = "En cours de validation";
+                    }
+                }
+                $state =  "$state ($countValid / ". count($states). ") " . ($hasConlict ? " Conflit à gérer" : "") . ".";
+            }
+            $periodInfos['state'] = $state;
+            $out[] = $periodInfos;
+        }
+        return $out;
+    }
+
+
+
 
     public function getPersonPeriods(Person $person, $period)
     {
