@@ -37,13 +37,15 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
 
     const OPT_FORCE         = "force";
     const OPT_DECLARER      = "declarer";
+    const OPT_PERIOD        = "period";
 
     protected function configure()
     {
         $this
             ->setDescription("Système de relance des déclarants")
             ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
-            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_OPTIONAL, "Identifiant du déclarant");
+            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_OPTIONAL, "Identifiant du déclarant")
+            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période");
         ;
     }
 
@@ -51,55 +53,75 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
-
-        /** @var PersonService $personService */
-        $personService = $this->getServicemanager()->get(PersonService::class);
-
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServicemanager()->get(TimesheetService::class);
-
         /// OPTIONS and PARAMETERS
-        $force = $input->getOption(self::OPT_FORCE);
         $declarerId = $input->getOption(self::OPT_DECLARER);
-
-        $io = new SymfonyStyle($input, $output);
+        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
 
         // Récupération du déclarant
         if( $declarerId ){
-            try {
-                $declarer = $personService->getPerson($declarerId);
-
-                $io->title("Système de relance pour $declarer");
-                $periods = $timesheetService->getPersonRecallDeclaration($declarer);
-
-                $io->table(["Période", "Durée", "état"], $periods);
-
-            } catch (\Exception $e) {
-                $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
-                exit(0);
-            }
+            if( !$declarerPeriod )
+                $this->declarer($input,$output, $declarerId);
+            else
+                $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
         } else {
-            $io->title("Lite des déclarants");
-
-            try {
-                $declarants = $timesheetService->getDeclarers();
-                $out = [];
-                /** @var Person $declarer */
-                foreach ($declarants['persons'] as $personId=>$datas) {
-                    $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
-                }
-                $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
-                $io->table($headers, $out);
-
-                $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
-            } catch (\Exception $e) {
-                $io->error($e->getMessage());
-            }
+            $this->declarersList($input,$output);
         }
+    }
 
+    /**
+     * @return TimesheetService
+     */
+    protected function getTimesheetService(){
+        return $this->getServicemanager()->get(TimesheetService::class);
+    }
 
+    /**
+     * @return PersonService
+     */
+    protected function getPersonService(){
+        return $this->getServicemanager()->get(PersonService::class);
+    }
 
+    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
+        // TODO Faire un rendu text des déclarations mensuelles des déclarants
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
+        echo "Non-disponible";
+    }
+
+    public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
+
+        $io = new SymfonyStyle($input, $output);
+
+        try {
+            $declarer = $this->getPersonService()->getPerson($declarerId);
+
+            $io->title("Système de relance pour $declarer");
+            $periods = $this->getTimesheetService()->getPersonRecallDeclaration($declarer);
+
+            $io->table(["Période", "Durée", "état"], $periods);
+
+        } catch (\Exception $e) {
+            $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
+            exit(0);
+        }
+    }
+
+    public function declarersList( InputInterface $input, OutputInterface $output ){
+        $io = new SymfonyStyle($input, $output);
+        $io->title("Lite des déclarants");
+        try {
+            $declarants = $this->getTimesheetService()->getDeclarers();
+            $out = [];
+            /** @var Person $declarer */
+            foreach ($declarants['persons'] as $personId=>$datas) {
+                $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
+            }
+            $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
+            $io->table($headers, $out);
+
+            $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
+        }
     }
 }
