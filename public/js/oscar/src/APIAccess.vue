@@ -87,7 +87,7 @@
             </div>
         </transition>
         <article v-for="a, id in datas" class="card" :class="a.active ? 'active': 'disabled'">
-            <h3 class="card-title">
+            <h2 class="card-title">
                 <strong>{{ id }}</strong>
                 <span>
                     <span v-for="a in a.apis" class="label label-primary">{{ a }}</span>
@@ -100,8 +100,20 @@
                         <i class="icon-pencil-1"></i>
                         Modifier</a>
                 </small>
-            </h3>
-            <pre class="card-content">Code : <strong>{{ a.pass }}</strong></pre>
+            </h2>
+            <hr>
+            <h3>Authentifications : </h3>
+            <span class="text-light">Identifiant : </span> <strong>{{ id }}</strong><br>
+            <span class="text-light">Mot de passe : </span> <strong>{{ a.pass }}</strong><br>
+            <hr>
+            <h3>URLs</h3>
+            <span v-if="a.apis.indexOf('persons') > -1"><span class="text-light">Liste des personnes : </span><code>{{ baseUrlAPIPersons }}</code></span><br>
+            <span v-if="a.apis.indexOf('persons') > -1"><span class="text-light">Personne seule :</span> <code>{{ baseUrlAPIPersons }}/<em>IDPERSON</em></code></span><br>
+            <span v-if="a.apis.indexOf('organizations') > -1"><span class="text-light">Liste des organisations : </span><code>{{ baseUrlAPIOrganizations }}</code></span><br>
+            <span v-if="a.apis.indexOf('organizations') > -1"><span class="text-light">Orgnisation seule :</span> <code>{{ baseUrlAPIOrganizations }}/<em>IDORGANIZATION</em></code></span><br>
+            <span v-if="a.apis.indexOf('roles') > -1"><span class="text-light">Rôles (affectations) :</span> <code>A venir</code></span><br>
+            <span v-if="a.apis.indexOf('activities') > -1"><span class="text-light">Activités de recherche :</span> <code>A venir</code></span><br>
+
         </article>
         <hr>
         <button type="button" class="btn btn-primary" @click.prevent="handlerNew">
@@ -111,7 +123,8 @@
     </section>
 </template>
 <script>
-    // node node_modules/.bin/poi build --format umd --moduleName  APIAccess --filename.css APIAccess.css --filename.js APIAccess.js --dist public/js/oscar/dist public/js/oscar/src/APIAccess.vue
+    // node node_modules/.bin/poi watch --format umd --moduleName  APIAccess --filename.js APIAccess.js --dist public/js/oscar/dist public/js/oscar/src/APIAccess.vue
+
 
 
     function makeid(length) {
@@ -128,7 +141,9 @@
     export default {
         props: {
             apis: { required: true },
-            formats: { required: true }
+            formats: { required: true },
+            baseUrlAPIPersons: { required: true },
+            baseUrlAPIOrganizations: { required: true }
         },
 
         data(){
