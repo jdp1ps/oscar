@@ -949,7 +949,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             "a ajouté le rôle " . $role->getRoleId()
                         );
 
-                        return $this->ajaxResponse($role->asArray());
+                        return $this->ajaxResponse($this->getJsonRole($role));
                     }
                 }
 

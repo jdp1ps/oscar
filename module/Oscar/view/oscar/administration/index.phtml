@@ -8,7 +8,7 @@
         <h1><i class="icon-group"></i>Rôles</h1>
         <div id="roles"></div>
         <script>
-            require(['vue', 'vue-resource', 'privileges', 'roles'], function(Vue, VueResource, Privilege, Roles){
+            require(['vue', 'vue-resource', 'privileges', 'rolesadminui', 'bootbox'], function(Vue, VueResource, Privilege, RolesAdminUI, Bootbox){
                 Vue.use(VueResource);
 
                 var privileges = new Privilege.default({
@@ -18,17 +18,15 @@
                     el: '#privileges'
                 });
 
-                var roles = new Roles.default({
-                    http: {
-                      root: '<?= $this->url('administration/roles') ?>'
-                    },
-                    data (){
-                        return {
-                            common: privileges.$data,
-                            form: null
-                        }
-                    },
-                    el: '#roles'
+                var rolesView = new Vue({
+                    el: "#roles",
+                    render: function(h){
+                        return h(RolesAdminUI.default, { props: {
+                            Bootbox: Bootbox,
+                            privilegesDatas: privileges.$data,
+                            url: '<?= $this->url('administration/roles') ?>'
+                            }});
+                    }
                 });
             })
         </script>
