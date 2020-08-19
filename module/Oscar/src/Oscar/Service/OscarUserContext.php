@@ -596,13 +596,20 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
 
         try {
+
             if ($this->getUserContext()->getLdapUser()) {
+                // PATCH : Ensam (Matthieu MARC), 2020-08
+                $attribute = $this->getOscarConfigurationService()->getServiceLocator()->get('Config')['unicaen-auth']['ldap_username'];
+                if (isset($attribute)){
+                    $pseudo = $this->getUserContext()->getLdapUser()->getData($attribute);
+                }
+
                 // PATCH Limoges
                 // au cas ou le supannAliasLogin n'est pas fournis...
-                $pseudo = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
                 if( !$pseudo ){
                     $pseudo = $this->getUserContext()->getLdapUser()->getUid();
                 }
+
                 return $this->getPersonService()->getPersonByLdapLogin($pseudo);
             } elseif ($this->getUserContext()->getDbUser()) {
                 return $this->getPersonService()->getPersonByLdapLogin($this->getUserContext()->getDbUser()->getUsername());
