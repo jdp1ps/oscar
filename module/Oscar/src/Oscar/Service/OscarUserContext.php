@@ -78,7 +78,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @return UserContext
      */
-    public function getUserContext(): UserContext
+    public function getUserContext()
     {
         return $this->userContext;
     }
@@ -93,7 +93,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @param UserContext $userContext
      */
-    public function setUserContext(UserContext $userContext): void
+    public function setUserContext(UserContext $userContext)
     {
         $this->userContext = $userContext;
     }
@@ -109,7 +109,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getUserContext()->getDbUser();
     }
 
-    public function getAuthentificationMethod() :string
+    public function getAuthentificationMethod()
     {
         if ( $this->getUserContext()->getLdapUser() ){
             return self::AUTHENTIFICATION_METHOD_LDAP;
@@ -125,7 +125,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
     }
 
-    public function getRolesWithPrivileges( $privilegeCode, int $roleLevel = 0 ){
+    public function getRolesWithPrivileges( $privilegeCode, $roleLevel = 0 ){
 
         $roles_privileges = [];
         if( $roles_privileges == null || !array_key_exists($privilegeCode, $roles_privileges) ){
@@ -151,7 +151,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @return string Retourne une chaîne (utilisée dans les logs pour donner des informations sur l'utilisateur actif).
      */
-    public function getCurrentUserLog() :string
+    public function getCurrentUserLog()
     {
         $person         = 'UNPERSON';
         $identitifiant  = "NOUID";
