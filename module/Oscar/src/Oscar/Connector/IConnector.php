@@ -33,4 +33,16 @@ interface IConnector
      * @return mixed
      */
     function getRemoteFieldname( $oscarFieldName );
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    function getParameter( $key );
+
+    /**
+     * @param $key
+     * @return boolean
+     */
+    function hasParameter( $key );
 }

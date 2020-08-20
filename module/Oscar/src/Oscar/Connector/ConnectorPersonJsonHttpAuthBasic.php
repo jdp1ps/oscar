@@ -152,9 +152,7 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
                     $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                     continue;
                 }
-
 //                $repport->addnotice($action . " - " . $personData->uid);
-
 
                 if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
@@ -180,12 +178,9 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
                 }
             }
 
-
             if( $this->getOptionPurge() ){
 
                 $idsToDelete = [];
-
-
 
                 foreach ($exist as $uid){
                     try {
@@ -214,7 +209,6 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
                         $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
                     }
                 }
-
 
                 foreach ($idsToDelete as $idPerson) {
                     try {

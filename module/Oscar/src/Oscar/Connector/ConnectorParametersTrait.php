@@ -52,4 +52,19 @@ trait ConnectorParametersTrait
         }
         return $config;
     }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function hasParameter( $key ){
+        $paths = explode('.', $key);
+        $config = $this->config;
+        foreach ($paths as $path) {
+            if( !isset($config[$path]) ){
+                return false;
+            }
+        }
+        return true;
+    }
 }

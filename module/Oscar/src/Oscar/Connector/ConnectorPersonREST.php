@@ -13,6 +13,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Monolog\Logger;
 use mysql_xdevapi\Exception;
+use Oscar\Connector\Access\ConnectorAccessCurlHttp;
+use Oscar\Connector\Access\IConnectorAccess;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
@@ -97,6 +99,38 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     }
 
     /**
+     * @return IConnectorAccess
+     * @throws \Oscar\Exception\OscarException
+     */
+    public function getAccessStrategy($url){
+        try {
+
+            // Récupération de la stratégie de connection (si précisée)
+            $accessStrategy = $this->getParameter('access_strategy');
+            $accessStrategyOptions = [];
+            if( $this->hasParameter('access_strategy_options') ){
+                $accessStrategyOptions = $this->getParameter('access_strategy_options');
+            }
+            if( array_key_exists('url', $accessStrategyOptions) ){
+                throw new ConnectorException(("Le paramètre 'url' est réservé"));
+            }
+            $accessStrategyOptions['url'] = $url;
+        } catch (\Exception $e) {
+
+            // Stratégie par défaut
+            $accessStrategy = ConnectorAccessCurlHttp::class;
+            $accessStrategyOptions = [
+                'url' => $url
+            ];
+        }
+
+        /** @var IConnectorAccess $access */
+        $access = new $accessStrategy($this, $accessStrategyOptions);
+
+        return $access;
+    }
+
+    /**
      * @param PersonRepository $personRepository
      * @param bool $force
      * @return ConnectorRepport
@@ -106,43 +140,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         $exist = [];
         $exist = $personRepository->getUidsConnector($this->getName());
-
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-
-        $url = $this->getParameter('url_persons');
-
-        $repport->addnotice("REQUEST : " . $url);
-
-        $nbrPersonsConnector        = 0;
-        $nbrPersonsOscar            = count($exist);
         $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
-        $nbrPersonsDeleted          = 0;
-        $nbrPersonsUseAndDeletable  = 0;
+        $access = $this->getAccessStrategy($this->getParameter('url_persons'));
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-        $return = curl_exec($curl);
-
-        if( false === $return ){
-            // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-            $this->getServiceLocator()
-                ->get('Logger')
-                ->error(sprintf(
-                    "Accès connector '%s' impossible : %s",
-                    $this->getName(),
-                    curl_error($curl)
-                ));
-            throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
-        }
-        curl_close($curl);
-
-        /////////////////////////////////////
-        ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-            $json = PhpPolyfill::jsonDecode($return);
+            $json = $access->getDatas();
             $personsDatas = null;
 
             if( is_object($json) && property_exists($json, 'persons') ){
@@ -216,8 +220,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
                 $idsToDelete = [];
 
-
-
                 foreach ($exist as $uid){
                     try {
                         /** @var Person $personOscarToDelete */
@@ -271,26 +273,24 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
         if ($person->getConnectorID($this->getName())) {
 
-            $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));
+            $personIdRemote = $person->getConnectorID($this->getName());
+
+            $url = sprintf($this->getParameter('url_person'), $personIdRemote);
             $this->getLogger()->info("connector request : " . $url);
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-            $return = curl_exec($curl);
-            curl_close($curl);
 
-            if( false === $return ){
-                $message = sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName());
-                $this->getLogger()->error($message . " - " . curl_error($curl));
-                throw new ConnectorException($message);
-            }
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            $personData = json_decode($return);
+            $access = $this->getAccessStrategy($url);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            /////////////////////////////////////
+            ////// Patch 2.7 "Lewis" GIT#286 ////
+            $personData = $access->getDatas($personIdRemote);
             if( $personData === null ){
                 // @todo Trouver un moyen de faire remonter une erreur plus "causante"
                 $message = sprintf("Aucune données retournée par le connecteur%s.", $this->getName());
-                $this->getLogger()->error($message . " - " . print_r($return, true));
+                $this->getLogger()->error($message . " - " . print_r($personData, true));
                 throw new ConnectorException($message);
             }
 
