@@ -20,6 +20,7 @@ class ConnectorAccessFile implements IConnectorAccess
     /** @var string */
     private $filepath;
 
+    // Paramètres attendus dans le fichier YAML
     private const FILE_PATH_PARAMETER_NAME = 'file_data';
 
     /**

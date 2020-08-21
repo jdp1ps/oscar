@@ -1,0 +1,175 @@
+<?php
+namespace Oscar\Connector;
+
+use Monolog\Logger;
+use Oscar\Connector\Access\ConnectorAccessCurlHttp;
+use Oscar\Connector\Access\IConnectorAccess;
+use Oscar\Exception\ConnectorException;
+use Oscar\Exception\OscarException;
+use Symfony\Component\Yaml\Yaml;
+use Zend\ServiceManager\ServiceManager;
+
+abstract class AbstractConnector
+{
+    /** @var ServiceManager */
+    private $serviceManager;
+
+    /** @var array */
+    private $options;
+
+    /** @var array Configuration du connecteur (issue du YAML) */
+    private $config;
+
+    /** @var string Emplacement de la configuration */
+    private $configFilepath;
+
+    /** @var string  */
+    private $connectorName;
+
+    /**
+     * @return string
+     */
+    final function getName() {
+        return $this->connectorName;
+    }
+
+    /**
+     * @return string
+     */
+    abstract function getRemoteID();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return ServiceManager
+     */
+    protected function getServicemanager(){
+        return $this->serviceManager;
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServiceLocator()->get('Logger');
+    }
+
+    /**
+     * @param string $optionName
+     * @param mixed $optionValue
+     */
+    public function setOption(string $optionName, $optionValue) :void {
+        $this->options[$optionName] = $optionValue;
+    }
+
+    public function getOption($optionName, $defaultValue=null){
+        if( array_key_exists($optionName, $this->options) ){
+            return $this->options[$optionName];
+        }
+        return $defaultValue;
+    }
+
+    public function getOptionPurge(){
+        return $this->getOption('purge', false);
+    }
+
+    public function setOptionPurge( $boolean ){
+        return $this->setOption('purge', $boolean);
+    }
+
+    /**
+     * @return IConnectorAccess
+     * @throws \Oscar\Exception\OsarException
+     */
+    protected function getAccessStrategy($url){
+        try {
+
+            // Récupération de la stratégie de connection (si précisée)
+            $accessStrategy = $this->getParameter('access_strategy');
+            $accessStrategyOptions = [];
+            if( $this->hasParameter('access_strategy_options') ){
+                $accessStrategyOptions = $this->getParameter('access_strategy_options');
+            }
+            if( array_key_exists('url', $accessStrategyOptions) ){
+                throw new ConnectorException(("Le paramètre 'url' est réservé"));
+            }
+            $accessStrategyOptions['url'] = $url;
+        } catch (\Exception $e) {
+
+            // Stratégie par défaut
+            $accessStrategy = ConnectorAccessCurlHttp::class;
+            $accessStrategyOptions = [
+                'url' => $url
+            ];
+        }
+
+        /** @var IConnectorAccess $access */
+        $access = new $accessStrategy($this, $accessStrategyOptions);
+
+        return $access;
+    }
+
+    /**
+     * Initialisation du connecteur.
+     *
+     * @param ServiceManager $sm
+     * @param $configFilePath
+     */
+    public function init(ServiceManager $sm, $configFilePath, $connectorName)
+    {
+        $this->serviceManager = $sm;
+        $this->loadParameters($configFilePath);
+        $this->connectorName = $connectorName;
+    }
+
+    /**
+     * Chargement des paramètres des connecteurs depuis le fichier YAML.
+     *
+     * @param $filepath
+     * @throws ConnectorException
+     */
+    private function loadParameters( string $filepath ){
+        if( !file_exists($filepath) ){
+            throw new ConnectorException(sprintf("Impossible de charger le fichier de configuration '%s'", $filepath));
+        }
+        $this->configFilepath = $filepath;
+        $this->config = Yaml::parse(file_get_contents($filepath));
+    }
+
+    /**
+     * Récupération d'un paramètre issu du fichier YAML.
+     *
+     * @param string $key
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getParameter( string  $key ){
+        $paths = explode('.', $key);
+        $config = $this->config;
+        foreach ($paths as $path) {
+
+            if( !isset($config[$path]) ){
+                throw new OscarException(sprintf("La clef '%s' absente dans le fichier de configuration '%s'.", $key, $this->configFilepath));
+            }
+            $config = $config[$path];
+        }
+        return $config;
+    }
+
+    /**
+     * Test la présence d'un paramètre.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasParameter( string $key ) :bool {
+        $paths = explode('.', $key);
+        $config = $this->config;
+        foreach ($paths as $path) {
+            if( !isset($config[$path]) ){
+                return false;
+            }
+        }
+        return true;
+    }
+}

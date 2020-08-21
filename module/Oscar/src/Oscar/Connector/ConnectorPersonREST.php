@@ -7,28 +7,14 @@
 
 namespace Oscar\Connector;
 
-
-use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Monolog\Logger;
-use mysql_xdevapi\Exception;
-use Oscar\Connector\Access\ConnectorAccessCurlHttp;
-use Oscar\Connector\Access\IConnectorAccess;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
-use Oscar\Entity\Role;
 use Oscar\Exception\ConnectorException;
-use Oscar\Utils\PhpPolyfill;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\ServiceManager;
 
-class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterface
+class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
 {
-    use ServiceLocatorAwareTrait, ConnectorParametersTrait;
 
     private $editable = false;
     private $options;
@@ -42,11 +28,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     public function isEditable(){
         return $this->editable;
-    }
-
-    function getName()
-    {
-        return "rest";
     }
 
     function getRemoteID()
@@ -63,19 +44,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         // TODO: Implement getPersonData() method.
     }
-
-    public function getConfigData()
-    {
-        return null;
-    }
-
-    public function init(ServiceManager $sm, $configFilePath)
-    {
-        $this->setServiceLocator($sm);
-        $this->loadParameters($configFilePath);
-        $this->options = [];
-    }
-
 
     public function execute( $force = false)
     {
@@ -96,38 +64,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
             $this->personHydrator->setPurge($this->getOptionPurge());
         }
         return $this->personHydrator;
-    }
-
-    /**
-     * @return IConnectorAccess
-     * @throws \Oscar\Exception\OscarException
-     */
-    public function getAccessStrategy($url){
-        try {
-
-            // Récupération de la stratégie de connection (si précisée)
-            $accessStrategy = $this->getParameter('access_strategy');
-            $accessStrategyOptions = [];
-            if( $this->hasParameter('access_strategy_options') ){
-                $accessStrategyOptions = $this->getParameter('access_strategy_options');
-            }
-            if( array_key_exists('url', $accessStrategyOptions) ){
-                throw new ConnectorException(("Le paramètre 'url' est réservé"));
-            }
-            $accessStrategyOptions['url'] = $url;
-        } catch (\Exception $e) {
-
-            // Stratégie par défaut
-            $accessStrategy = ConnectorAccessCurlHttp::class;
-            $accessStrategyOptions = [
-                'url' => $url
-            ];
-        }
-
-        /** @var IConnectorAccess $access */
-        $access = new $accessStrategy($this, $accessStrategyOptions);
-
-        return $access;
     }
 
     /**
@@ -215,7 +151,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 }
             }
 
-
             if( $this->getOptionPurge() ){
 
                 $idsToDelete = [];
@@ -248,7 +183,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                     }
                 }
 
-
                 foreach ($idsToDelete as $idPerson) {
                     try {
                         $personRepository->removePersonById($idPerson);
@@ -257,7 +191,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                         $repport->adderror("Immpossible de suprimer la person $idPerson : " . $e->getMessage());
                     }
                 }
-
             }
         } catch (\Exception $e ){
             throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
@@ -270,29 +203,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     function syncPerson(Person $person)
     {
-
         if ($person->getConnectorID($this->getName())) {
 
             $personIdRemote = $person->getConnectorID($this->getName());
-
             $url = sprintf($this->getParameter('url_person'), $personIdRemote);
             $this->getLogger()->info("connector request : " . $url);
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
             $access = $this->getAccessStrategy($url);
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            /////////////////////////////////////
-            ////// Patch 2.7 "Lewis" GIT#286 ////
             $personData = $access->getDatas($personIdRemote);
-            if( $personData === null ){
-                // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-                $message = sprintf("Aucune données retournée par le connecteur%s.", $this->getName());
-                $this->getLogger()->error($message . " - " . print_r($personData, true));
-                throw new ConnectorException($message);
-            }
 
             // Fix : Nouveau format
             if( property_exists($personData, 'person') ){
@@ -304,41 +221,5 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         } else {
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
-
-    }
-
-    public function setOption($optionName, $optionValue){
-        $this->options[$optionName] = $optionValue;
-    }
-
-    public function getOption($optionName, $defaultValue=null){
-        if( array_key_exists($optionName, $this->options) ){
-            return $this->options[$optionName];
-        }
-        return $defaultValue;
-    }
-
-    public function getOptionPurge(){
-        return $this->getOption('purge', false);
-    }
-
-    public function setOptionPurge( $boolean ){
-        return $this->setOption('purge', $boolean);
-    }
-
-
-    /**
-     * @return Logger
-     */
-    protected function getLogger(){
-        return $this->getServiceLocator()->get('Logger');
-    }
-
-    /**
-     * @return \UnicaenApp\Mapper\Ldap\People
-     */
-    protected function getServiceLdap()
-    {
-        return $this->getServiceLocator()->get('ldap_people_service')->getMapper();
     }
 }

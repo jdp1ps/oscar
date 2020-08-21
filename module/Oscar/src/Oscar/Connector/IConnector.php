@@ -8,6 +8,8 @@
 namespace Oscar\Connector;
 
 
+use phpDocumentor\Reflection\Types\Mixed_;
+
 interface IConnector
 {
     /**
@@ -25,7 +27,6 @@ interface IConnector
      */
     function getRemoteID();
 
-
     /**
      * Retourne le nom du champ distant à partir du nom oscar.
      *
@@ -38,11 +39,11 @@ interface IConnector
      * @param $key
      * @return mixed
      */
-    function getParameter( $key );
+    function getParameter( string $key );
 
     /**
      * @param $key
-     * @return boolean
+     * @return bool
      */
-    function hasParameter( $key );
+    function hasParameter( string $key ) :bool ;
 }
