@@ -34,7 +34,7 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
             $this->url = $options['url'];
     }
 
-    public function getDatas()
+    public function getDatas( $id = null )
     {
         $url = $this->url;
 

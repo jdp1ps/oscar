@@ -44,7 +44,7 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
         $this
             ->setDescription("Système de relance des déclarants")
             ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
-            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_OPTIONAL, "Identifiant du déclarant")
+            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_REQUIRED, "Identifiant du déclarant")
             ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période");
         ;
     }
@@ -57,15 +57,15 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
         $declarerId = $input->getOption(self::OPT_DECLARER);
         $declarerPeriod = $input->getOption(self::OPT_PERIOD);
 
-        // Récupération du déclarant
-        if( $declarerId ){
-            if( !$declarerPeriod )
-                $this->declarer($input,$output, $declarerId);
-            else
-                $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
-        } else {
-            $this->declarersList($input,$output);
+        if( !$declarerPeriod ){
+            $today = date('Y-m-d');
+            $time = strtotime($today);
+            $final = date("Y-m-d", strtotime("-1 month", $time));
+            $declarerPeriod = DateTimeUtils::getPeriodStrFromDateStr($final);
         }
+
+        $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
+
     }
 
     /**
@@ -82,10 +82,10 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
         return $this->getServicemanager()->get(PersonService::class);
     }
 
+    //public function declarerRecall
+
     public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
-        // TODO Faire un rendu text des déclarations mensuelles des déclarants
-        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
-        echo "Non-disponible";
+        $this->getTimesheetService()->getPersonRecallDeclarationPeriod($declarerId, $period);
     }
 
     public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
@@ -107,21 +107,6 @@ class OscarTimesheetRecallCommand extends OscarCommandAbstract
     }
 
     public function declarersList( InputInterface $input, OutputInterface $output ){
-        $io = new SymfonyStyle($input, $output);
-        $io->title("Lite des déclarants");
-        try {
-            $declarants = $this->getTimesheetService()->getDeclarers();
-            $out = [];
-            /** @var Person $declarer */
-            foreach ($declarants['persons'] as $personId=>$datas) {
-                $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
-            }
-            $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
-            $io->table($headers, $out);
 
-            $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
-        } catch (\Exception $e) {
-            $io->error($e->getMessage());
-        }
     }
 }
