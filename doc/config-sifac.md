@@ -146,3 +146,13 @@ where
 ```
 
 Il est possible qu'il faille modifier la clause `MANDT='430'` qui correspond à SIFAC formation.
+
+### Utilitaire en ligne de commande
+
+La commande Oscar **php bin/oscar.php** propose différentes commandes permettant de gérer / tester les données lièes au dépenses. Vous pouvez tester la synchronisation SIFAC depuis l'interface, mais également en utilisant la console en lançant la synchronisation des dépenses d'une activité de recherche avec la commande : 
+
+```bash
+php bin/oscar.php spent:sync <PFI>
+```
+
+> Vous pouvez voir la liste des commandes liées aux dépenses dans la [Documentation des commandes](../commands/liste_des_commandes.md))

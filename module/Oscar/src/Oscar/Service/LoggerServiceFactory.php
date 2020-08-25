@@ -24,10 +24,14 @@ class LoggerServiceFactory implements FactoryInterface
         $logLevel = $container->get(OscarConfigurationService::class)->getConfiguration('log_level');
 
         if( !file_exists($logPath) ){
-            if (!touch($logPath)) {
-                throw new OscarException("Le fichier de log n'existait pas et ne peut être créer");
+            $handler = fopen($logPath, 'w');
+            if( !$handler ){
+              throw new OscarException("Impossible de créer le fichier de LOG !");
             }
+            fwrite($handler, "");
+            fclose($handler);
         }
+
         if( !is_writable($logPath) ){
             throw new OscarException("Le fichier de log n'est pas accessible en écriture");
         }

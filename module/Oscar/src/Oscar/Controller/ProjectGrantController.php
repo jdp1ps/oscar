@@ -20,6 +20,7 @@ use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
+use Oscar\Entity\EstimatedSpentLine;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Notification;
 use Oscar\Entity\Organization;
@@ -30,6 +31,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\SpentLine;
+use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
@@ -38,6 +40,9 @@ use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
+use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
+use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
+use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -63,8 +68,10 @@ use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Log\LogLevel;
 use Zend\Http\PhpEnvironment\Request;
+use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Controlleur pour les Activités de recherche. Le nom du controlleur est (il
@@ -968,6 +975,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $handler = fopen($filePath, 'w');
 
+
+        $delimiter = ";";
+        $enclosure = "\"";
         fputcsv($handler, $formatter->csvHeaders());
 
         /** @var ActivityPayment $payment */
@@ -1363,8 +1373,127 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
     }
 
+    public function estimatedSpentExportAction() {
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        // Format
+        $format = $this->params()->fromQuery('format', 'pdf');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+
+        // Services
+        $spentService = $this->getSpentService();
+
+        // Datas visualization
+        $lines = $spentService->getLinesByMasse();
+        $masses = $spentService->getMasses();
+        $years = $spentService->getYearsListActivity($entity);
+        $values = $out = $spentService->getPrevisionnalSpentsActivity($entity, true);
+
+        $totaux = [
+            "years" => [],
+            "lines" => [],
+            'total' => 0.0
+        ];
+
+        foreach ($years as $year) {
+            $totaux['years'][$year] = 0.0;
+        }
+
+        foreach ($masses as $masse=>$label) {
+            $code = $masse;
+            $totaux['lines'][$code] = [
+                'total' => 0.0
+            ];
+            foreach ($years as $year) {
+                $totaux['lines'][$code][$year] = 0.0;
+            }
+        }
+
+        //var_dump($totaux); die();
+
+        foreach ($lines as $line) {
+            $masse = $line['annexe'];
+            //echo $masse."\n";
+
+            $code = $line['code'];
+
+            $totaux['lines'][$code] = [
+                'total' => 0.0
+            ];
+
+            foreach ($years as $year) {
+                $totaux['lines'][$code][$year] = 0.0;
+                if( array_key_exists($code, $values) && array_key_exists($year, $values[$code]) ){
+                    //echo "$code>$year>$masse : " . $values[$code][$year]." <br>";
+                    $value = $values[$code][$year];
+                    $totaux['lines'][$code][$year] += $value;
+                    $totaux['lines'][$code]['total'] += $value;
+                    $totaux['lines']['total'] += $value;
+                    $totaux['years'][$year] += $value;
+                    $totaux['total'] += $value;
+
+                    $totaux['lines'][$masse]['total'] += $value;
+                    $totaux['lines'][$masse][$year] += $value;
+                    $totaux['years'][$year] += $value;
+                }
+            }
+        }
+
+        if( $format == 'pdf' ) {
+            $formatter =  new EstimatedSpentActivityPDFFormater(
+                $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+                $this->getViewRenderer(),
+                [
+                    'lines' => $lines,
+                    'masses' => $masses,
+                    'years' => $years,
+                    'totaux' => $totaux,
+                    'values' => $values,
+                    'activity' => $entity
+                ]
+            );
+            $formatter->format(['download' => true]);
+            die();
+        }
+        else if ($format == "html"){
+            //
+            $formatter =  new EstimatedSpentActivityHTMLFormater(
+                $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+                $this->getViewRenderer(),
+                [
+                    'lines' => $lines,
+                    'masses' => $masses,
+                    'years' => $years,
+                    'totaux' => $totaux,
+                    'values' => $values,
+                    'activity' => $entity
+                ]
+            );
+            die($formatter->format());
+        }
+
+        else {
+            throw new OscarException("Format non-pris en charge");
+        }
+    }
+
     /**
-     * Fiche pour une activité de recherche.
+     * On pourrait déplacer dans la factory idoine...
+     * @return Renderer
+     */
+    public function getViewRenderer(): PhpRenderer
+    {
+        return $this->getServiceContainer()->get('ViewRenderer');
+    }
+
+    /**
+     * Détail des dépenses pour une activité de recherche
      */
     public function estimatedSpentAction()
     {
@@ -1375,37 +1504,148 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
         // Check access
-       // $this->getOscarUserContext()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $entity);
 
+        // PFI
+        $pfi = $entity->getCodeEOTP();
 
+        // Method
+        $method = $this->getHttpXMethod();
+
+        // Services
         $spentService = $this->getSpentService();
 
+        // Datas visualization
         $lines = $spentService->getLinesByMasse();
         $masses = $spentService->getMasses();
-        /*
-        echo "<pre>"; var_dump($lines);
-        die();
-        */
         $types = $spentService->getTypesTree();
         $years = $spentService->getYearsListActivity($entity);
 
-        $values = [];
+        if( $method == 'GET' ){
+            // Get Value
+            $values = $out = $spentService->getPrevisionnalSpentsActivity($entity, true);
 
-        foreach( $this->getSpentService()->getAllArray() as $spent ){
-            $values[$spent['id']] = [];
-            foreach ($years as $year) {
-                $values[$spent['id']][$year] = 0.0;
+            foreach( $masses as $masseCode=>$masse ){
+
+                if (!array_key_exists($masseCode, $values))
+                    $values[$masseCode] = [];
+
+                foreach ($years as $year) {
+                    if (!array_key_exists($year, $values[$masseCode]))
+                        $values[$masseCode][$year] = 0.0;
+                }
+            }
+
+            /** @var SpentTypeGroup $spent */
+            foreach( $this->getSpentService()->getAllArray() as $spent ){
+                if( !$spent['annexe'] ) continue;
+                $compte = (string)$spent['code'];
+                if (!array_key_exists($compte, $values))
+                    $values[$compte] = [];
+
+                foreach ($years as $year) {
+                    if (!array_key_exists($year, $values[$compte]))
+                        $values[$compte][$year] = 0.0;
+                }
             }
         }
 
+        elseif ($method == 'POST') {
+            $masses         = $_POST['masses'];
+            $previsionnals  = $_POST['previsionnel'];
+
+            // Récupération du prévisionnel existant
+            $out = $spentService->getPrevisionnalSpentsActivity($entity);
+
+            foreach ($previsionnals as $compte=>$compteDatas) {
+                foreach ($compteDatas as $year=>$amount) {
+                    $this->getLoggerService()->notice("$compte ($year) : $amount");
+                    $amount = (float)$amount;
+
+                    if ($amount > 0) {
+                        if( !array_key_exists($compte, $out) ){
+                            $out[$compte] = [];
+                        }
+                        if( !array_key_exists($year, $out[$compte]) ){
+                            $out[$compte][$year] = new EstimatedSpentLine();
+                            $this->getEntityManager()->persist($out[$compte][$year]);
+                        }
+                        $out[$compte][$year]->setAmount($amount);
+                        $out[$compte][$year]->setYear($year);
+                        $out[$compte][$year]->setActivity($entity);
+                        $out[$compte][$year]->setAccount($compte);
+
+                    } else {
+                        if( array_key_exists($compte, $out) && array_key_exists($year, $out[$compte]) ){
+                            $this->getEntityManager()->remove($out[$compte][$year]);
+                        }
+                    }
+                }
+            }
+            try {
+                $this->getEntityManager()->flush();
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError("Impossible d'enregistrer le budget prévisionnel : " . $e->getMessage());
+            }
+            return $this->getResponseOk();
+        }
 
         return [
+            'activity' => $entity,
             'lines' => $lines,
             'masses' => $masses,
             'years' => $years,
             'types' => $types,
             'values' => $values,
         ];
+    }
+
+    /**
+     * Retourne les données de synthèse des dépenses d'une activité de recherche.
+     *
+     * @return \Zend\Http\Response|JsonModel
+     * @throws \Exception
+     */
+    public function spentSynthesisActivityAction(){
+        // Identifiant de l'activité
+        $id = $this->params()->fromRoute('id');
+
+        /** @var Activity $entity */
+        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        // Check access
+        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+
+
+        $pfi = $entity->getCodeEOTP();
+
+        if( !$pfi ){
+            return $this->getResponseInternalError("Cette activité n'a pas de PFI");
+        }
+
+        $out = $this->baseJsonResponse();
+        $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
+        $out['warning'] = null; // Affiche les avertissements
+
+        if( $this->getOscarConfigurationService()->getAutoUpdateSpent() ){
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity) ){
+                $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
+            } else {
+                try {
+                    $this->spentService->syncSpentsByEOTP($pfi);
+                } catch (\Exception $e) {
+                    $out['error'] = $e->getMessage();
+                }
+            }
+        }
+
+        // Construction des données de dépense
+        $out['masses'] = $this->getOscarConfigurationService()->getMasses();
+        $out['dateUpdated'] = $entity->getDateTotalSpent();
+        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI($pfi);
+
+        return $this->jsonOutput($out);
+
     }
 
     /**
@@ -1528,6 +1768,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         }
         return [
+            'masses'    => $this->getOscarConfigurationService()->getMasses(),
             'activity'  => $activity,
             'spents'    => $spents,
             'msg'       => $msg,

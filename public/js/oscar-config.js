@@ -38,7 +38,6 @@ requirejs.config({
         "OscarDepenses": "OscarDepenses",
         "privileges": "components/build/privileges",
         "organizationrole": "oscar/dist/OrganizationRole",
-        "roles": "components/build/roles",
         "ical": "vendor/ical.js/build/ical.min",
         "timesheet": "components/build/timesheet",
         "in-the-box" : "vendor/in-the-box/build/InTheBox",
@@ -96,7 +95,10 @@ requirejs.config({
         "EntityWithRole": "oscar/dist/EntityWithRole",
         "APIAccess": "oscar/dist/APIAccess",
         "SpentLinePFI": "oscar/dist/SpentLinePFI",
-        "gestionprivileges": "oscar/dist/GestionPrivileges"
+        "gestionprivileges": "oscar/dist/GestionPrivileges",
+        "documentsactivity": "oscar/dist/DocumentsActivity",
+        "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
+        "rolesadminui": "oscar/dist/RolesAdminUI"
     },
     shim: {
         "bootstrap": {

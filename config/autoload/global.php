@@ -236,6 +236,9 @@ return array(
         // Emplacement du template pour les feuilles de temps des synthèse des activités
         'timesheet_activity_synthesis_template' => realpath(__DIR__.'/../../data/templates/timesheet_activity_synthesis.default.html.php'),
 
+        // Amplacement du template de rendu des dépenses prévisionnelles
+        'estimated_spent_activity_template' => realpath(__DIR__.'/../../data/templates/estimated_spent_activity_.default.html.php'),
+
         // Permet de télécharger les feuilles de temps avant validation
         'timesheet_preview' => false,
 

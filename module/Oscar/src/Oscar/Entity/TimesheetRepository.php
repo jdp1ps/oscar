@@ -44,6 +44,37 @@ class TimesheetRepository extends EntityRepository {
         return $qb->setParameter('person', $personId)->getQuery()->getSingleScalarResult();
     }
 
+    public function getPeriodsPerson( $personId ){
+        $result = $this->getEntityManager()->getConnection()->fetchArray(
+            "
+                SELECT a.dateStart, a.dateEnd FROM workpackageperson wpp
+	                INNER JOIN workpackage wp ON wp.id = wpp.workpackage_id 
+	                INNER JOIN activity a ON a.id = wp.activity_id
+
+                WHERE
+                    a.dateStart IS NOT NULL AND a.dateEnd IS NOT NULL
+                    AND wpp.person_id = $personId;"
+        );
+        return $result;
+    }
+
+    public function getTimesheetTotalByPeriodPerson( $personId ){
+
+        $timesheets = $this->findBy(['person' => $personId]);
+        $result = [];
+
+        /** @var TimeSheet $timesheet */
+        foreach ($timesheets as $timesheet) {
+            $period = $timesheet->getPeriodCode();
+            if( !array_key_exists($period, $result) ){
+                $result[$period] = 0.0;
+            }
+            $result[$period] += $timesheet->getDuration();
+        }
+
+        return $result;
+    }
+
 
     /**
      * Retourne la liste des déclarations qui ont un lot de travail.
@@ -57,9 +88,7 @@ class TimesheetRepository extends EntityRepository {
     }
 
     public function getDatasDeclarerSynthesis($personIds){
-        $rsm = new ResultSetMapping();
         $result = $this->getEntityManager()->getConnection()->fetchAll("SELECT p.id as person_id, CONCAT(p.firstname, ' ', p.lastname) as displayname, to_char(t.datefrom, 'YYYY-MM') as period, t.activity_id, COALESCE(pr.acronym, t.label) as context, CASE WHEN t.activity_id > 0 THEN 'wp' ELSE 'other' END as type, SUM(EXTRACT(EPOCH from dateto - datefrom) / 3600) as duration FROM timesheet t INNER JOIN person p ON p.id = t.person_id LEFT JOIN activity a ON t.activity_id = a.id LEFT JOIN project pr ON pr.id = a.project_id WHERE p.id IN(".implode(',', $personIds).") GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period");
-
         return $result;
     }
 

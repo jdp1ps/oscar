@@ -166,7 +166,7 @@ $this->headScript();
             <?php endforeach; ?></div>
 
 
-        <div id="contenu-principal" class="">
+        <div id="contenu-principal" class="" style="padding-bottom: 50px">
             <?php if (($menuSecondaire = $this->navigation()->menuSecondaire('navigation')->render())): ?>
                 <div class="row">
                     <div id="sidebar" class="col-xs-6 col-md-2" role="navigation">
@@ -181,7 +181,6 @@ $this->headScript();
             <?php endif; ?>
         </div>
 
-        <hr />
         <footer class="site-footer bg-primary">
             <div class="container">
                 <div class="col-md-6">

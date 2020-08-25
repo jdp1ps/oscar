@@ -39,6 +39,7 @@
                     el: "#spentlines",
                     render(h){
                         return h(SpentLinePFI.default, { props: {
+                                masses: <?= json_encode($masses) ?>,
                                 url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
                             }});
                     }

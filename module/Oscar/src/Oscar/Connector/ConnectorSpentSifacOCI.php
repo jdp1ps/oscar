@@ -47,6 +47,9 @@ class ConnectorSpentSifacOCI
 
         $exists = $this->spentService->getSpentsSyncIdByPFI($pfi);
 
+        // Limite de 5 secondes pour cette requête
+        //oci_set_call_timeout(3000, $c);
+
         if( $c ){
             $stid = oci_parse($c, sprintf($this->sifacAccess['spent_query'], $pfi));
             if( !$stid ){
@@ -80,6 +83,7 @@ class ConnectorSpentSifacOCI
         if( !function_exists('oci_connect') ){
             throw new \Exception("Le module OCI pour les connections PHP > ORACLE est necessaire.");
         }
+
         $c = oci_connect($this->sifacAccess['username'],$this->sifacAccess['password'], sprintf("%s:%s/%s", $this->sifacAccess['hostname'], $this->sifacAccess['port'], $this->sifacAccess['SID']));
         return $c;
     }

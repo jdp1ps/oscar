@@ -354,7 +354,7 @@ class Privilege implements ResourceInterface
             'code' => $this->getCode(),
             'libelle' => $this->getLibelle(),
             'categorie' => $this->getCategorie()->toArray(),
-            'description' => "lorem ipsum",
+            'description' => "",
             'roles' => $this->getRoleIds(),
             'root' => $this->getRoot(),
             'spot' => $this->getSpot()

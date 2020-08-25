@@ -8,7 +8,7 @@ Cette mise à niveau permet de bénéficier des dernières mises à jour de séc
 
 ## Nettoyage du dépôt GIT
 
-L'historique du dépôt GIT a été modifié afin d'en supprimer des archives volumineuses et inutiles depuis plusieurs version (< Creed). **Vous devriez donc au moment du *fetch* constater que vous avez sur votre copie locale plusieurs milliers de *commits* en attente**. C'est normal. L'utilisation d'un *reset* à la place d'un *pull* réglera le problème.
+L'historique du dépôt GIT a été modifié afin d'en supprimer des archives volumineuses et inutiles depuis plusieurs versions (< Creed). **Vous devriez donc au moment du *fetch* constater que vous avez sur votre copie locale plusieurs milliers de *commits* en attente**. C'est normal. L'utilisation d'un *reset* à la place d'un *pull* réglera le problème.
 
 ## Nouveautés
 
@@ -20,7 +20,7 @@ L'historique du dépôt GIT a été modifié afin d'en supprimer des archives vo
 
  - **Nouveau projet / nouvelle activité** : Le privilège permettant de créer des activités/projets était initialement réservé au niveau application (et donc effectif uniquement pour les rôles déterminés au sein de l'application). Ce privilège a maintenant été étendu aux rôles liès aux organisations afin de permettre une meilleure décentralisation de l'ajout de projet/activité. Pour les droits obtenus via l'organisation, une zone de saisie supplémentaire sera visible dans les formulaires pour y renseigner le rôle de l'organisation de rattachement (la liste des rôles sera limitée aux rôles donnant un accès NB: c'est cette affectation qui par la suite donnera accès à l'activié/projet créé).
  
- - **[Oscar API](../config-api.md)** : Première version de l'API Oscar. Cette API permet à d'autre  application du SI d'accéder à Oscar en lecture 
+ - **[Oscar API](../config-api.md)** : Première version de l'API Oscar. Cette API permet à d'autres applications du SI d'accéder à Oscar en lecture 
  
  - **Gearman** Utilisation d'un serveur de gestion des tâches (**Gearman**) afin d'optimiser certaines opérations : Génération des notifications, planification de la reconstruction/optimisation des indices de recherche. [Installer et configurer Gearman](../config-gearman.md)
  
@@ -62,7 +62,7 @@ Suivez la procédure : [installation et configuration de Gearman](../config-gear
 
 ### Mise à jour du modèle
 
-Puis on mets à jour le modèle : 
+Puis on met à jour le modèle : 
 
 ```bash
 php vendor/bin/doctrine-module orm:schema-tool:update --force
@@ -74,26 +74,71 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 php bin/oscar.php check:privileges
 ``` 
 
-### SIFAC (Experimental)
+**ATTENTION** Le privilège **création d'une activité** a évolué, il faut penser à le réactiver aux rôles idoines.
 
+### Création de Projet/Activité
+
+La fonctionnalité permettant de créer des Activitès/Projet a évolué. Initialement, ces fonctionnalités étaient réservées à des rôles APPLICATIF.
+
+Désormais, vous pourrez attribuer ces privilèges à des rôles ORGANISATIONNELS pour permettre aux personnes disposant de ce rôle de créer des activités/projets pour leurs structures. 
+
+Au moment de la création d'une activité/projet, l'utilisateur devra affecter un rôle à une de ces structures dans l'activité créé. A noter que l'accès de la personne à cette activité est calculé selon son rôle dans l'organisation renseignée.
+
+Par exemple, Nadine a le rôle **Directeur** dans la structure **OSCORP**,
+Le rôle **Directeur** est autorisé à voir/modifier/créer une activité de recherche
+Le rôle de structure **Laboratoire** est un rôle **principale**
+
+Depuis Oscar, Nadine pourra créer une nouvelle activité. Dans la fiche création, elle pourra affecter sa structure (OSCOP) avec un des rôles de structure (principal) configurés dans Oscar, parmis ces rôles figurera le rôle **Laboratoire**.
+
+Si la personne ne choisi pas de rôle pour sa structure, l'activité n'est pas créée (un message d'erreur indique qu'il faut choisir un rôle à la structure).
+
+Ce changement permet à Oscar de mieux prendre en charge des fonctionnements plus décentralisés de certains établissements.
+
+### Commandes de synchronisations modifiées
+
+**ATTENTION**, les commandes sont en cours de migrations. Vous pouvez dresser la liste des commandes avec la ligne de commande : 
+
+```bash
+php bin/oscar.php
+```
+
+Parmis les commandes modifiées, les commandes de synchronisation des PERSONNES et des ORGANISATIONS ont changé.
+
+
+Pour les personnes : 
+
+```bash
+# Anciennement php public/index.php oscar persons:sync rest
+php bin/oscar.php persons:sync rest
+```
+
+Pour les organisations : 
+
+```bash
+# Anciennement php public/index.php oscar organizations:sync rest
+php bin/oscar.php organizations:sync rest
+```
+
+### SIFAC (Experimental)
 La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
 
 Vous pouvez commencer à tester cette fonctionnalité [Configurer l'accès à SIFAC](../config-sifac.md) 
 
-
-
+### Docker  (déploiment rapide)
+Dans la perspective de démo / test rapide (Version préprod par exemple). Oscar est disponible en version DOCKER. **Ce système sera amélioré pour permettre le déploiment en production**.
  
+## Correctifs
+ - Augmentation des résultats des recherches pour les organisations
+ - Augmentation des résultats des recherches pour les personnes
+ 
+## Commandes
+ - Ajout de la commande `php bin/oscar.php person:roles <ID|login>` qui permet de voir la liste des rôles endossés par une personne sur les différentes parties de l'application (Rôles applicatif/organisation/projet/activité)
+ - Ajout des commandes liées aux dépenses (Plus de détails sur les commandes dans la [Documentation des commandes](../commands/liste_des_commandes.md))
+
 ## En cours
 
- - *Dockerisation* Des travaux sont en cours afin de rendre possible d'utiliser **docker** pour le déploiement de Oscar. Docker permet de simplifier grandement (et d'automatiser) le déploiement des applications et de garantir leurs compatibilités sous différents systèmes..
- 
  - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
  
  - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancée
  
  - **Plan comptable** Écran de gestion du plan comptable à utiliser dans l'écran du budget
- 
-## Correctifs
-
- - Augmentation des résultats des recherches pour les organisations
- - Augmentation des résultats des recherches pour les personnes

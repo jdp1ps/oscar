@@ -1,38 +1,15 @@
 <?php
-/**
- * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
- * @date: 16-09-30 14:58
- * @copyright Certic (c) 2016
- */
-
 namespace Oscar\Connector;
 
-
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
-use Oscar\Entity\PersonRepository;
-use Oscar\Exception\ConnectorException;
 use Oscar\Factory\JsonToOrganization;
-use Oscar\Utils\PhpPolyfill;
-use UnicaenApp\Mapper\Ldap\People;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\ServiceManager;
 
-class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
+class ConnectorOrganizationREST extends AbstractConnector implements IConnector
 {
-    use ServiceLocatorAwareTrait, ConnectorParametersTrait;
-
     private $editable = false;
-
-    // Nom du connecteur,
-    // En BDD, ce nom sert de clef pour stoquer
-    // dans le champs 'connectors' la valeur donnée
-    // par la source comme UID.
-    private $name = 'rest';
 
     public function setEditable($editable){
         $this->editable = $editable;
@@ -40,11 +17,6 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
 
     public function isEditable(){
         return $this->editable;
-    }
-
-    function getName()
-    {
-        return $this->name;
     }
 
     function getRemoteID()
@@ -67,19 +39,16 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
         return null;
     }
 
-    public function init(ServiceManager $sm, $configFilePath, $connectorName='rest')
-    {
-        $this->name = $connectorName;
-        $this->setServiceLocator($sm);
-        $this->loadParameters($configFilePath);
-    }
-
     /**
      * @return OrganizationRepository
      */
     public function getRepository()
     {
         return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Organization::class);
+    }
+
+    protected function getServiceLocator(){
+        return $this->getServicemanager();
     }
 
 
@@ -111,77 +80,62 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
         $repport = new ConnectorRepport();
 
         $url = $this->getParameter('url_organizations');
-
         $repport->addnotice("URL : $url");
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-        $return = curl_exec($curl);
-        curl_close($curl);
+        /////////////////////////////////////
+        ////// Patch 2.7 "Lewis" GIT#286 ////
+        try {
+            $access = $this->getAccessStrategy($url);
+            $json = $access->getDatas();
 
-        if( false === $return ){
-            throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
-        }
+            $jsonDatas = null;
 
-        if( $return ){
-
-            /////////////////////////////////////
-            ////// Patch 2.7 "Lewis" GIT#286 ////
-            try {
-                $json = PhpPolyfill::jsonDecode($return);
-
-                $jsonDatas = null;
-
-                if( is_object($json) && property_exists($json, 'organizations') ){
-                    $jsonDatas = $json->organizations;
-                } else {
-                    $jsonDatas = $json;
-                }
-
-                if( !is_array($jsonDatas) ){
-                    throw new \Exception("L'API n'a pas retourné un tableau de donnée");
-                }
-                ////////////////////////////////////
-
-                foreach( $jsonDatas as $data ){
-                    try {
-                        /** @var Person $personOscar */
-                        $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
-                        $action = "update";
-                    } catch( NoResultException $e ){
-                        $organization = $repository->newPersistantObject();
-                        $action = "add";
-                    }
-                    if( !property_exists($data, 'dateupdated') ){
-                        $dateupdated = date('Y-m-d H:i:s');
-                    } else {
-                        $dateupdated = $data->dateupdated;
-                    }
-                    if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
-
-                        $organization = $this->hydrateWithDatas($organization, $data);
-                        if( property_exists($data, 'type') )
-                            $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
-
-                        $repository->flush($organization);
-                        if( $action == 'add' ){
-                            $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
-                        } else {
-                            $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
-                        }
-
-                    } else {
-                        $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
-                    }
-                }
-            } catch (\Exception $e ){
-                $repport->adderror($e->getMessage());
+            if( is_object($json) && property_exists($json, 'organizations') ){
+                $jsonDatas = $json->organizations;
+            } else {
+                $jsonDatas = $json;
             }
-        } else {
-            $repport->adderror("Le service REST n'a retourné aucun résultat.");
+
+            if( !is_array($jsonDatas) ){
+                throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+            }
+            ////////////////////////////////////
+
+            foreach( $jsonDatas as $data ){
+                try {
+                    /** @var Person $personOscar */
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
+                    $action = "update";
+                } catch( NoResultException $e ){
+                    $organization = $repository->newPersistantObject();
+                    $action = "add";
+                }
+                if( !property_exists($data, 'dateupdated') ){
+                    $dateupdated = date('Y-m-d H:i:s');
+                } else {
+                    $dateupdated = $data->dateupdated;
+                }
+                if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
+
+                    $organization = $this->hydrateWithDatas($organization, $data);
+                    if( property_exists($data, 'type') )
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+
+                    $repository->flush($organization);
+                    if( $action == 'add' ){
+                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                    } else {
+                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                    }
+
+                } else {
+                    $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                }
+            }
+        } catch (\Exception $e ){
+            $repport->adderror($e->getMessage());
         }
+
 
         $repport->addnotice("FIN du traitement...");
         return $repport;
@@ -195,24 +149,19 @@ class ConnectorOrganizationREST implements ServiceLocatorAwareInterface
     {
         if ($organization->getConnectorID($this->getName())) {
 
-            $url = sprintf($this->getParameter('url_organization'), $organization->getConnectorID($this->getName()));
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-            $return = curl_exec($curl);
-            curl_close($curl);
+            $organizationIdRemote = $organization->getConnectorID($this->getName());
+
+            $url = sprintf($this->getParameter('url_organization'), $organizationIdRemote);
 
             try {
-                $organizationData = PhpPolyfill::jsonDecode($return);
+                $access = $this->getAccessStrategy($url);
+                $organizationData = $access->getDatas($organizationIdRemote);
                 return $this->hydrateWithDatas($organization, $organizationData);
             } catch (\Exception $e) {
                 throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
             }
-
         } else {
             throw new \Exception('Impossible de synchroniser la structure ' . $organization);
         }
-
     }
 }

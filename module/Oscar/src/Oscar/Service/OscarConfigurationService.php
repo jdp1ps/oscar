@@ -179,6 +179,22 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false );
     }
 
+    /**
+     * Retourne l'emplacement où sont stoqués les documents publiques.
+     * @return string
+     */
+    public function getDocumentPublicPath(){
+        static $publicdoclocation;
+        if( $publicdoclocation == null ){
+            $conf = $this->getConfiguration('paths.document_admin_oscar');
+            if( !file_exists($conf) || !is_writable($conf) ){
+                throw new OscarException("L'emplacement des documents publiques n'est pas un dossier accessible en écriture");
+            }
+            $publicdoclocation = $conf.'/';
+        }
+        return $publicdoclocation;
+    }
+
 
     public function getExportSeparator(){
         return $this->getEditableConfKey('export_format', '|');
@@ -186,6 +202,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getExportComputedFields(){
         return $this->getConfiguration('export.computedFields', []);
+    }
+
+    public function getEstimatedSpentActivityTemplate(){
+        return $this->getConfiguration('estimated_spent_activity_template');
     }
 
     public function getGearmanHost(){
@@ -220,5 +240,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function setActivityRequestLimit( int $value ){
         $this->saveEditableConfKey(self::activity_request_limit, $value);
+    }
+
+    public function getMasses(){
+        return $this->getConfiguration('spenttypeannexes');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getAutoUpdateSpent(){
+        return $this->getOptionalConfiguration("autorefreshspents", false);
     }
 }

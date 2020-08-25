@@ -82,6 +82,7 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
             }
         } catch (\Exception $e) {
             $io->error($e->getMessage());
+            exit(0);
         }
 
         $io->section("Reconstruction de l'index de recherche : ");

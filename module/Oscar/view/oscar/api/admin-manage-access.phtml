@@ -1,5 +1,11 @@
 <div class="container">
     <h1>Accès à l'API</h1>
+    <style>
+        .card .text-light {
+            display: inline-block;
+            width: 180px;
+        }
+    </style>
     <div id="app"></div>
     <script>
         require(['vue', 'vue-resource', 'APIAccess'], function(Vue, VueResource, APIAccess){
@@ -16,6 +22,8 @@
                         props: {
                             url: '<?= $this->url('api/manage-acces') ?>',
                             apis: <?= json_encode($apis) ?>,
+                            baseUrlAPIPersons: '<?=  $this->serverUrl() . $this->url('api/persons') ?>',
+                            baseUrlAPIOrganizations: '<?= $this->serverUrl() . $this->url('api/organizations') ?>',
                             formats: <?= json_encode($formats) ?>
                         }
                     });

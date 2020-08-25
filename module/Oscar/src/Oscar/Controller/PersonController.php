@@ -51,15 +51,17 @@ use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
+use Oscar\Traits\UseUserParametersService;
+use Oscar\Traits\UseUserParametersServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService, UseProjectService, UseProjectGrantService, UseNotificationService
+class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService, UseProjectService, UseProjectGrantService, UseNotificationService, UseUserParametersService
 {
-    use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait;
+    use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseUserParametersServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -136,7 +138,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
         }
         catch (ForeignKeyConstraintViolationException $e) {
-            $this->getLogger()->error($e->getMessage());
+            $this->getLoggerService()->error($e->getMessage());
             throw new OscarException("Impossible de supprimer $person, elle est utilisée.");
         }
         catch (\Exception $e) {
@@ -363,22 +365,15 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $allow = true;
             $justXHR = false;
         } else {
-
-            // CAS PARTICULIER
-            // ===============
-            // Si la personne est un responsable d'organisation,
-            // on doit l'autoriser à accéder au service pour l'autocompéteur
-            // des personnes.
-
-            foreach ($this->getCurrentPerson()->getOrganizations() as $organization) {
-                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $organization->getOrganization()) ){
-                    $allow = true;
-                }
-            }
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]);
         }
 
         if( !$allow ){
-            throw new UnAuthorizedException();
+            $this->getLoggerService()->info("Accès non authorisé à la recherche des personnes pour " . $this->getCurrentPerson());
+            if( $justXHR )
+                return $this->getResponseUnauthorized();
+            else
+                throw new UnAuthorizedException();
         }
 
         // Donnèes GET
@@ -747,15 +742,15 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                             $model = $this->params()->fromPost('model');
 
                             if( $model == 'default' ){
-                                $this->getLogger()->info("Remise par défaut des horaires de $person");
+                                $this->getLoggerService()->info("Remise par défaut des horaires de $person");
 
                                 $custom = $person->getCustomSettingsObj();
-                                $this->getLogger()->info(print_r($custom, true));
+                                $this->getLoggerService()->info(print_r($custom, true));
                                 unset($custom['days']);
                                 unset($custom['scheduleModele']);
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
-                                $this->getLogger()->info(print_r($custom, true));
+                                $this->getLoggerService()->info(print_r($custom, true));
                             }
                             elseif ($daysLength != null) {
                                 $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
@@ -770,7 +765,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                                 $custom['scheduleModele'] = $model;
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
-                                $this->getLogger()->info(print_r($custom, true));
+                                $this->getLoggerService()->info(print_r($custom, true));
 
                             }
 
@@ -995,7 +990,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 foreach( $persons as $person){
                     // $person->mergeTo($newPerson);
 
-                    $this->getLogger()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
+                    $this->getLoggerService()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
                     // Notification
                     $conn->executeUpdate(
                         'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',

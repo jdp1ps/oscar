@@ -11,7 +11,7 @@ namespace Oscar\Utils;
 use Oscar\Exception\OscarException;
 use PHPUnit\Framework\TestCase;
 
-class ValidationInputTest extends TestCase
+class ValidatorInputTest extends TestCase
 {
     public function testFrequency(){
 

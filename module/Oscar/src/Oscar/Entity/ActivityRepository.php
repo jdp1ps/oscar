@@ -41,19 +41,18 @@ class ActivityRepository extends EntityRepository
 
     public function getActivitiesPersonDate(int $personId, \DateTime $date){
 
-        // TODO Revoir la méthode pour la date de fin
-
         $qb = $this->createQueryBuilder('a')
             ->innerJoin('a.persons', 'ap')
             ->leftJoin('a.project', 'p')
-            ->innerJoin('p.members', 'pp')
+            ->leftJoin('p.members', 'pp')
             ->where('(ap.person = :personId  OR pp.person = :personId) AND (a.dateStart < :date AND a.dateEnd > :date)')
             ->setParameters([
-                'personId' => $personId,
+                'personId' => "$personId",
                 'date' => $date
             ])
             ;
         $result  = $qb->getQuery()->getResult();
+
         return $result;
     }
 

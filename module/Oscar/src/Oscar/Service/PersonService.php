@@ -68,7 +68,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * @return PersonRepository
      */
-    public function getRepository(){
+    public function getRepository()
+    {
         return $this->getEntityManager()->getRepository(Person::class);
     }
 
@@ -94,7 +95,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function getSearchEngineStrategy()
     {
         static $searchStrategy;
-        if( $searchStrategy === null ){
+        if ($searchStrategy === null) {
             $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.person.search_engine');
             $class = new \ReflectionClass($opt['class']);
             $searchStrategy = $class->newInstanceArgs($opt['params']);
@@ -112,7 +113,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * Supprimer la personne de l'index de recherche.
      * @param $id
      */
-    public function searchDelete( $id )
+    public function searchDelete($id)
     {
         $this->getSearchEngineStrategy()->remove($id);
     }
@@ -121,12 +122,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * Mise à jour de la personne dans l'index.
      * @param Person $person
      */
-    public function searchUpdate( Person $person )
+    public function searchUpdate(Person $person)
     {
         $this->getSearchEngineStrategy()->update($person);
     }
 
-    public function jobSearchUpdate( Person $person )
+    public function jobSearchUpdate(Person $person)
     {
         $client = new \GearmanClient();
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
@@ -149,7 +150,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * Reconstruction de l'index de recherche
      * @return mixed
      */
-    public function searchIndexRebuild(){
+    public function searchIndexRebuild()
+    {
         $this->searchIndex_reset();
         $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
         return $this->getSearchEngineStrategy()->rebuildIndex($persons);
@@ -160,7 +162,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $what
      * @return Person[]
      */
-    public function search($what){
+    public function search($what)
+    {
         $ids = $this->getSearchEngineStrategy()->search($what);
 
         $query = $this->getRepository()->createQueryBuilder('p')
@@ -184,7 +187,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param array $ids
      * @return Person[]
      */
-    public function getPersonsByIds( array $ids ){
+    public function getPersonsByIds(array $ids)
+    {
         return $this->getPersonRepository()->getPersonsByIds($ids);
     }
 
@@ -195,9 +199,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @return Referent|null
      * @throws OscarException
      */
-    public function getReferentById( $referentId, $throw = true ){
+    public function getReferentById($referentId, $throw = true)
+    {
         $referent = $this->getEntityManager()->getRepository(Referent::class)->find($referentId);
-        if( $throw === true && !$referent ){
+        if ($throw === true && !$referent) {
             throw new OscarException("Impossible de charger le référent");
         }
         return $referent;
@@ -210,8 +215,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param Person $person
      * @return Person[]
      */
-    public function getManagers( Person $person ){
-        if( !$person ) return [];
+    public function getManagers(Person $person)
+    {
+        if (!$person) return [];
 
         $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
             ->innerJoin(Referent::class, 'r', 'WITH', 'r.referent = p')
@@ -225,7 +231,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $personId ID du subordonné
      * @return Referent[]
      */
-    public function getReferentsPerson( $personId ){
+    public function getReferentsPerson($personId)
+    {
         $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
             ->where('r.person = :personId')
             ->setParameter('personId', $personId);
@@ -237,8 +244,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param Person $person
      * @return Person[]
      */
-    public function getSubordinates( Person $person ){
-        if( !$person ) return [];
+    public function getSubordinates(Person $person)
+    {
+        if (!$person) return [];
 
         $qb = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
             ->innerJoin(Referent::class, 'r', 'WITH', 'r.person = p')
@@ -252,7 +260,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $personId ID du référents
      * @return Referent[]
      */
-    public function getSubordinatesPerson( $personId ){
+    public function getSubordinatesPerson($personId)
+    {
         $query = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
             ->where('r.referent = :personId')
             ->setParameter('personId', $personId);
@@ -275,7 +284,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function addReferent( $referent_id, $person_id ){
+    public function addReferent($referent_id, $person_id)
+    {
         $referent = $this->getPersonById($referent_id, true);
         $person = $this->getPersonById($person_id, true);
 
@@ -286,7 +296,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 'referent' => $referent,
                 'person' => $person
             ])->getQuery()->getResult();
-        if( count($verif) > 0 ){
+        if (count($verif) > 0) {
             throw new OscarException("$referent est déjà identifié comme référent pour $person");
         }
 
@@ -299,7 +309,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return true;
     }
 
-    public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false){
+    public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false)
+    {
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
 
@@ -307,12 +318,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($declarer, true);
 
         /** @var ValidationPeriod $validationPeriod */
-        foreach ($validationPeriods as $validationPeriod){
+        foreach ($validationPeriods as $validationPeriod) {
             $this->getLoggerService()->notice(sprintf("$referent est maintenant validateur administratif pour $validationPeriod"));
             $validationPeriod->addValidatorAdm($referent);
         }
 
-        if( $flush == true && count($validationPeriods) > 0 )
+        if ($flush == true && count($validationPeriods) > 0)
             $this->getEntityManager()->flush();
     }
 
@@ -325,12 +336,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function  refererentReplaceBy( Person $personNewReferent, Person $fromPerson ){
+    public function refererentReplaceBy(Person $personNewReferent, Person $fromPerson)
+    {
         // Liste des Referent existant
         $referents = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
             ->select('r')
             ->where('r.referent = :personReferent')
-            ->setParameters(['personReferent' => $fromPerson ])
+            ->setParameters(['personReferent' => $fromPerson])
             ->getQuery()
             ->getResult();
 
@@ -347,7 +359,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
 
         /** @var ValidationPeriod $validationPeriod */
-        foreach ($validationPeriods as $validationPeriod){
+        foreach ($validationPeriods as $validationPeriod) {
             $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod"));
             $validationPeriod->removeValidatorAdm($fromPerson);
             $validationPeriod->addValidatorAdm($personNewReferent);
@@ -376,13 +388,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
             /** @var ValidationPeriod $validationPeriod */
-            foreach ($validationPeriods as $validationPeriod){
+            foreach ($validationPeriods as $validationPeriod) {
                 $this->getLoggerService()->notice(sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod"));
                 $validationPeriod->addValidatorAdm($personNewReferent);
             }
             $this->getEntityManager()->flush();
-        }
-        catch ( \Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException("Impossible d'ajouter le référent '$personNewReferent' à partir de '$fromPerson' : " . $e->getMessage());
         }
     }
@@ -403,13 +414,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function removeReferentById( $referent_id ){
+    public function removeReferentById($referent_id)
+    {
         try {
             $referent = $this->getReferentById($referent_id);
             $this->getEntityManager()->remove($referent);
             $this->getEntityManager()->flush();
             return true;
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException(sprintf(_('Impossible de supprimer le référent(%s) : %s', $referent_id, $e->getMessage())));
         }
     }
@@ -427,7 +439,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param Person $person
      * @return Organization[]
      */
-    public function getOrganizationsPersonWithPrincipalRole(Person $person){
+    public function getOrganizationsPersonWithPrincipalRole(Person $person)
+    {
         return $this->getOrganizationService()->getOrganizationsWithPersonRolled($person, null, true);
     }
 
@@ -443,21 +456,22 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      *
      * @param string $dateRef
      */
-    public function mailPersonsWithUnreadNotification( $dateRef = "" ){
+    public function mailPersonsWithUnreadNotification($dateRef = "")
+    {
         $date = new \DateTime($dateRef);
 
         $rel = [
-          'Mon' => 'Lun',
-          'Tue' => 'Mar',
-          'Wed' => 'Mer',
-          'Thu' => 'Jeu',
-          'Fri' => 'Ven',
-          'Sat' => 'Sam',
-          'Sun' => 'Dim',
+            'Mon' => 'Lun',
+            'Tue' => 'Mar',
+            'Wed' => 'Mer',
+            'Thu' => 'Jeu',
+            'Fri' => 'Ven',
+            'Sat' => 'Sam',
+            'Sun' => 'Dim',
         ];
 
         // Fromat du cron
-        $cron = $rel[$date->format('D')].$date->format('G');
+        $cron = $rel[$date->format('D')] . $date->format('G');
 
         $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
 
@@ -471,17 +485,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]);
             $settings = $auth->getSettings();
 
-            if( !$settings ){
+            if (!$settings) {
                 $settings = [];
             }
 
-            if( !array_key_exists('frequency', $settings) ){
+            if (!array_key_exists('frequency', $settings)) {
                 $settings['frequency'] = [];
             }
 
             $settings['frequency'] = array_merge($settings['frequency'], $this->getOscarConfigurationService()->getConfiguration('notifications.fixed'));
 
-            if( in_array($cron, $settings['frequency']) ){
+            if (in_array($cron, $settings['frequency'])) {
                 $this->mailNotificationsPerson($person);
             } else {
                 $this->getLoggerService()->info(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
@@ -489,25 +503,27 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
     }
 
-    public function mailNotificationsPerson( $person, $debug = true ){
+    public function mailNotificationsPerson($person, $debug = true)
+    {
         /** @var ConfigurationParser $configOscar */
         $configOscar = $this->getOscarConfigurationService();
 
         $conf = $this->getOscarConfigurationService()->getConfigArray();
         $appName = $conf['unicaen-app']['app_infos']['nom'];
 
-        if( $debug ){
-            $log = function($msg){
+        if ($debug) {
+            $log = function ($msg) {
                 $this->getLoggerService()->debug($msg);
             };
         } else {
-            $log = function(){};
+            $log = function () {
+            };
         }
 
         $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
         $notifications = $datas['notifications'];
 
-        if( count($notifications) ==  0 ){
+        if (count($notifications) == 0) {
             $log(sprintf(" - Pas de notifications non-lues pour %s", $person));
             return;
         }
@@ -530,11 +546,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $since = $moment->from('now')->getRelative();
 
             $message = $n['message'];
-            if( preg_match($reg, $n['message'], $matches) ){
-                $link = $configOscar->getConfiguration("urlAbsolute").$url('contract/show',array('id' => $matches[2]));
-                $message = preg_replace($reg, '$1 <a href="'.$link.'">$3</a> $4', $n['message']);
+            if (preg_match($reg, $n['message'], $matches)) {
+                $link = $configOscar->getConfiguration("urlAbsolute") . $url('contract/show', array('id' => $matches[2]));
+                $message = preg_replace($reg, '$1 <a href="' . $link . '">$3</a> $4', $n['message']);
             }
-            $content .= "<li><strong>".$formatted." (".$since.") : </strong> " .$message."</li>\n";
+            $content .= "<li><strong>" . $formatted . " (" . $since . ") : </strong> " . $message . "</li>\n";
         }
 
         //  TODO vérifier que ça fonctionne
@@ -543,10 +559,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $to = $person->getEmail();
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente", ['body' => $content]);
-        $mail->setTo([$to => (string) $person]);
+        $mail->setTo([$to => (string)$person]);
         $mailer->send($mail);
     }
-
 
 
     /**
@@ -556,7 +571,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $privilegeFullCode
      * @param $activity
      */
-    public function getAllPersonsWithPrivilegeInActivity( $privilegeFullCode, Activity $activity, $includeApp=false )
+    public function getAllPersonsWithPrivilegeInActivity($privilegeFullCode, Activity $activity, $includeApp = false)
     {
         // Résultat
         $persons = [];
@@ -571,8 +586,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $privilege = $privilegeRepository->getPrivilegeByCode($privilegeFullCode);
 
 
-
-
             foreach ($privilege->getRole() as $role) {
                 $rolesIds[] = $role->getRoleId();
                 if ($role->getLdapFilter()) {
@@ -581,7 +594,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 }
             }
 
-            if( $includeApp ) {
+            if ($includeApp) {
 
                 // Selection des personnes qui ont le filtre LDAP (Niveau applicatif)
                 if ($ldapFilters) {
@@ -624,18 +637,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // Selection des personnes associées via le Projet/Activité
 
-            foreach ($activity->getPersonsDeep() as $p ){
-                if( in_array($p->getRole(), $rolesIds) ){
+            foreach ($activity->getPersonsDeep() as $p) {
+                if (in_array($p->getRole(), $rolesIds)) {
                     $persons[$p->getPerson()->getId()] = $p->getPerson();
                 }
             }
 
             // Selection des personnes via l'oganisation assocociée au Projet/Activité
             /** @var Organization $organization */
-            foreach ($activity->getOrganizationsDeep() as $organization ){
+            foreach ($activity->getOrganizationsDeep() as $organization) {
 
                 /** @var OrganizationPerson $personOrganization */
-                if( $organization->isPrincipal() ) {
+                if ($organization->isPrincipal()) {
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
                         if (in_array($personOrganization->getRole(), $rolesIds)) {
                             $persons[$personOrganization->getPerson()->getId()] = $personOrganization->getPerson();
@@ -647,12 +660,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             return $persons;
 
 
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
         }
     }
-
-
 
 
     private $_cachePersonLdapLogin;
@@ -661,20 +672,20 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $login
      * @return Person
      */
-    public function getPersonByLdapLogin( $login )
+    public function getPersonByLdapLogin($login)
     {
-        if( $this->_cachePersonLdapLogin === null ){
+        if ($this->_cachePersonLdapLogin === null) {
             $this->_cachePersonLdapLogin = [];
         }
 
-        if( !isset($this->_cachePersonLdapLogin[$login]) ){
+        if (!isset($this->_cachePersonLdapLogin[$login])) {
             $query = $this->getBaseQuery()
                 ->setParameter('login', $login);
 
             $normalize = $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false);
 
-            if( $normalize == true ){
-                
+            if ($normalize == true) {
+
                 $query->where('LOWER(p.ladapLogin) = :login')
                     ->setParameter('login', strtolower($login));
             } else {
@@ -691,7 +702,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $email
      * @return Person
      */
-    public function getPersonByEmail( $email )
+    public function getPersonByEmail($email)
     {
         return $this->getBaseQuery()
             ->where('p.email = :email')
@@ -704,7 +715,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @return array
      * @throws \Exception
      */
-    public function getRolesByAuthentification(){
+    public function getRolesByAuthentification()
+    {
         try {
             $rsm = new Query\ResultSetMapping();
             $rsm->addScalarResult('login', 'login');
@@ -722,7 +734,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $out = [];
 
             foreach ($native->getResult() as $row) {
-                if( !array_key_exists($row['login'], $out) ){
+                if (!array_key_exists($row['login'], $out)) {
                     $out[$row['login']] = [];
                 }
                 $out[$row['login']][] = $row['roleid'];
@@ -730,12 +742,59 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             return $out;
 
-        } catch(\Exception $e ){
+        } catch (\Exception $e) {
             throw $e;
         }
     }
 
-    public function getPersonAuthentification( Person $person ){
+    /**
+     * Retourne la liste des différents rôles endossés par le personne dans les activités/Projet de recherche.
+     *
+     * @param Person $person
+     * @return Role[]
+     */
+    public function getRolesPersonInActivities(Person $person)
+    {
+        /** @var RoleRepository $roleRepository */
+        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
+        return $roleRepository->getDistinctRolesPersonInActivities($person);
+    }
+
+    /**
+     * Retourne la liste des différents rôles endossés par le personne dans les activités/Projets de recherche.
+     *
+     * @param Person $person
+     * @return Role[]
+     */
+    public function getRolesPersonInOrganizations(Person $person)
+    {
+        /** @var RoleRepository $roleRepository */
+        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
+        return $roleRepository->getDistinctRolesPersonInOrganizations($person);
+    }
+
+    /**
+     * Retourne la liste des rôles de la personne dans l'application.
+     *
+     * @param Person $person
+     * @return mixed
+     * @see getRolesPersonInApplication
+     */
+    public function getRolesPersonInApplication(Person $person)
+    {
+        return $this->getRolesApplication($person);
+    }
+
+    /**
+     * Retourne l'Authentification associée à la personne. Cela se base sur le champ 'ladaplogin' de l'objet personne.
+     * qui correspond au champ 'username' dans Authentification. Si la personne ne s'est jamais connectée, il est possible
+     * qu'il n'y ai pas d'objet Authentification pour la personne.
+     *
+     * @param Person $person
+     * @return Authentification
+     */
+    public function getPersonAuthentification(Person $person)
+    {
         /** @var AuthentificationRepository $repo */
         $repo = $this->getEntityManager()->getRepository(Authentification::class);
 
@@ -745,9 +804,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * Retourne la liste des roles de la person définit manuellement sur l'authentification ou obtenu via les
      * groupes LDAP
+     *
      * @return Role[]
      */
-    public function getRolesApplication(Person $person){
+    public function getRolesApplication(Person $person)
+    {
 
         /** @var Role[] $inRoles */
         $inRoles = [];
@@ -760,21 +821,22 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $inRoles[$role->getRoleId()] = $role;
         }
 
-        if( $person->getLdapMemberOf() ){
+        if ($person->getLdapMemberOf()) {
 
             // Récupération des rôles avec des filtres LDAP
             $roles = $this->getEntityManager()->getRepository(Role::class)->getRolesLdapFilter();
+
             /** @var Role $role */
             foreach ($roles as $role) {
 
                 // Le rôle est déjà présent "en dur"
-                if( array_key_exists($role->getRoleId(), $inRoles) ) continue;
+                if (array_key_exists($role->getRoleId(), $inRoles)) continue;
 
                 // Test des rôles via le filtreLDAP
                 $roleLdapFilter = $role->getLdapFilter();
 
                 foreach ($person->getLdapMemberOf() as $memberOf) {
-                    if( strpos($roleLdapFilter, $memberOf) >= 0 ){
+                    if (strpos($roleLdapFilter, $memberOf)) {
                         $inRoles[$role->getRoleId()] = $role;
                         continue 2;
                     }
@@ -789,15 +851,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param Person $person
      * @return string[]
      */
-    public function getRolesApplicationArray(Person $person){
+    public function getRolesApplicationArray(Person $person)
+    {
         return array_keys($this->getRolesApplication($person));
     }
 
-    public function getRolesAuthentification(Authentification $authentification){
+    public function getRolesAuthentification(Authentification $authentification)
+    {
         return $authentification->getRoles();
     }
 
-    public function getCoWorkerIds( $idPerson ){
+    public function getCoWorkerIds($idPerson)
+    {
         /** @var OrganizationRepository $organizationRepository */
         $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
 
@@ -807,7 +872,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         // Organisations où la person est "principale"
         $orgaIds = $organizationRepository->getOrganizationsIdsForPerson($idPerson, true);
 
-        if( count($orgaIds) == 0 ){
+        if (count($orgaIds) == 0) {
             return [];
         }
 
@@ -816,7 +881,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         // Inclue les personnes impliquées dans des activités ?
         $listPersonIncludeActivityMember = $this->getOscarConfigurationService()->getConfiguration('listPersonnel');
-        if( $listPersonIncludeActivityMember == 3 ) {
+        if ($listPersonIncludeActivityMember == 3) {
             $engaged = $personRepository->getPersonIdsForOrganizationsActivities($orgaIds);
 
             $coWorkersIds = array_unique(array_merge($coWorkersIds, $engaged));
@@ -825,7 +890,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $coWorkersIds;
     }
 
-    public function getSubordinateIds( $idPerson ){
+    public function getSubordinateIds($idPerson)
+    {
 
         // Récupération des subordonnés
         $nm1 = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
@@ -845,7 +911,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * Retourne la liste des IDS des personnes qui ont autorisé la délégation du remplissage des feuilles de temps.
      * @param $idPerson
      */
-    public function getTimesheetDelegationIds( $idPerson ){
+    public function getTimesheetDelegationIds($idPerson)
+    {
         /** @var Person $person */
         $person = $this->getPersonRepository()->find($idPerson);
         $ids = [];
@@ -870,7 +937,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * @return PersonRepository
      */
-    protected function getPersonRepository(){
+    protected function getPersonRepository()
+    {
         return $this->getEntityManager()->getRepository(Person::class);
     }
 
@@ -879,10 +947,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $currentPage = 1,
         $filters = [],
         $resultByPage = 50
-    ) {
+    )
+    {
         $query = $this->getBaseQuery();
 
-        if( $search ){
+        if ($search) {
             /** @var ProjectGrantService $activityService */
             $activityService = $this->getProjectGrantService();
 
@@ -897,7 +966,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 ->setParameter('ids', $idsPersons);
         }
 
-        if( array_key_exists('ids', $filters) ){
+        if (array_key_exists('ids', $filters)) {
             $query->andWhere('p.id IN(:filterIds)')
                 ->setParameter('filterIds', $filters['ids']);
         }
@@ -912,7 +981,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      *
      * @return array
      */
-    public function getDeclarersIds(){
+    public function getDeclarersIds()
+    {
         $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
             ->from(Person::class, 'p')
             ->innerJoin('p.workPackages', 'wp')
@@ -928,7 +998,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * Retourne la liste des identifiants des personnes référentes (N+1 - Ils assurent la validation administrative d'une
      * ou plusieurs personnes).
      */
-    public function getNp1Ids(){
+    public function getNp1Ids()
+    {
         $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
             ->from(Referent::class, 'r')
             ->innerJoin('r.referent', 'p')
@@ -940,8 +1011,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     /**
      * @param string|null $search
-     * @param int         $currentPage
-     * @param int         $resultByPage
+     * @param int $currentPage
+     * @param int $resultByPage
      *
      * @return UnicaenDoctrinePaginator
      */
@@ -950,7 +1021,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $currentPage = 1,
         $filters = [],
         $resultByPage = 50
-    ) {
+    )
+    {
 
         $query = $this->getBaseQuery();
 
@@ -960,66 +1032,61 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
          $query->leftJoin('p.organizations', 'o')
             ->leftJoin('p.activities', 'a');
         */
-        if( $filters['declarers'] == 'on' ){
+        if ($filters['declarers'] == 'on') {
             $ids = $this->getDeclarersIds();
-            if( array_key_exists('ids', $filters) ){
+            if (array_key_exists('ids', $filters)) {
                 $filters['ids'] = array_intersect($filters['ids'], $ids);
-            }
-            else {
+            } else {
                 $filters['ids'] = $ids;
             }
         }
 
         // FIltrer les IDS des personnes nommées N+1 explicitement (Objet 'Referent')
-        if( $filters['np1'] == 'on' ){
+        if ($filters['np1'] == 'on') {
             $ids = $this->getNp1Ids();
-            if( array_key_exists('ids', $filters) ){
+            if (array_key_exists('ids', $filters)) {
                 $filters['ids'] = array_intersect($filters['ids'], $ids);
-            }
-            else {
+            } else {
                 $filters['ids'] = $ids;
             }
         }
 
-        if( $filters['leader'] ){
+        if ($filters['leader']) {
             $query = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
                 ->innerJoin('p.organizations', 'o')
                 ->innerJoin('o.roleObj', 'r')
                 ->innerJoin('p.activities', 'a')
-                ->where('r.principal = true')
-            ;
+                ->where('r.principal = true');
         }
 
-        if( array_key_exists('order_by', $filters) ){
-            $query->addOrderBy('p.'.$filters['order_by'], 'ASC');
+        if (array_key_exists('order_by', $filters)) {
+            $query->addOrderBy('p.' . $filters['order_by'], 'ASC');
         }
 
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
-        if( preg_match('/(([a-z]*):(.*))/', $search, $matches) ){
+        if (preg_match('/(([a-z]*):(.*))/', $search, $matches)) {
             $connector = $matches[2];
             $connectorValue = $matches[3];
             try {
                 $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery($connector, $connectorValue);
-            }catch( \Exception $e ){
+            } catch (\Exception $e) {
                 $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
                 throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
             }
-        }
-
-        // RECHERCHE sur le nom/prenom/email
+        } // RECHERCHE sur le nom/prenom/email
         else {
             if ($search != "") {
 
                 try {
                     $ids = $this->getSearchEngineStrategy()->search($search);
 
-                    if( array_key_exists('ids', $filters) ){
+                    if (array_key_exists('ids', $filters)) {
                         $filters['ids'] = array_intersect($filters['ids'], $ids);
                     } else {
                         $filters['ids'] = $ids;
                     }
-                } catch( \Exception $e ){
+                } catch (\Exception $e) {
                     $this->getLoggerService()->error(sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage()));
                     // Ancienne méthode
                     $searchR = str_replace('*', '%', $search);
@@ -1046,8 +1113,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // Rôles attribuès en dur
             /** @var SELECT * FROM person p
-            INNER JOIN authentification a
-            ON p.ladaplogin = a.username $fixed */
+             * INNER JOIN authentification a
+             * ON p.ladaplogin = a.username $fixed */
             try {
                 $rsm = new Query\ResultSetMapping();
                 $rsm->addScalarResult('person_id', 'person_id');;
@@ -1070,7 +1137,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $ids[] = $row['person_id'];
                 }
 
-            } catch(\Exception $e ){
+            } catch (\Exception $e) {
                 $this->getLoggerService()->error("Impossible de charger les personnes via les rôles des authentifications : " . $e->getMessage());
                 throw new OscarException("Erreur de chargement des rôles via l'authentification");
             }
@@ -1079,12 +1146,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $filterLdap = [];
 
             // Création de la cause pour la selection des personnes niveau Application
-            foreach($roles->getQuery()->getResult() as $role ){
-                if( $role->getLdapFilter() )
+            foreach ($roles->getQuery()->getResult() as $role) {
+                if ($role->getLdapFilter())
                     $filterLdap[] = "ldapmemberof LIKE '%" . preg_replace('/\(memberOf=(.*)\)/', '$1', $role->getLdapFilter()) . "%'";
             }
 
-            if( $filterLdap ) {
+            if ($filterLdap) {
 
 
                 // Récupération des IDPERSON avec les filtres LDAP
@@ -1131,7 +1198,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $filters['filter_roles'])->getResult() as $row) {
                     $ids[] = $row['person_id'];
                 };
-            } catch(\Exception $e ){
+            } catch (\Exception $e) {
                 $msg = "Impossible de charger les personnes via leur implication dans les organisations/activités";
                 $this->getLoggerService()->error("$msg : " . $e->getMessage());
                 throw new OscarException($msg);
@@ -1144,18 +1211,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
 
 
-
-        if( array_key_exists('ids', $filters) ){
+        if (array_key_exists('ids', $filters)) {
             $query->andWhere('p.id IN(:filterIds)')
                 ->setParameter('filterIds', $filters['ids']);
 
-            if( $search && count($filters['ids']) > 0 ){
+            if ($search && count($filters['ids']) > 0) {
                 // On ne trie que les 30 premiers
                 $limit = 30;
                 $case = '(CASE ';
                 $i = 0;
                 foreach ($filters['ids'] as $id) {
-                    if( $i++ < $limit )
+                    if ($i++ < $limit)
                         $case .= sprintf('WHEN p.id = \'%s\' THEN %s ', $id, $i++);
                 }
                 $case .= " ELSE $id END) AS HIDDEN ORD";
@@ -1209,13 +1275,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function jobIndexPerson(Person $person){
+    public function jobIndexPerson(Person $person)
+    {
         $client = new \GearmanClient();
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
     }
 
-    public function jobNotificationActivityPerson(Activity $activity, Person $person){
+    public function jobNotificationActivityPerson(Activity $activity, Person $person)
+    {
         $client = new \GearmanClient();
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('notificationActivityPerson', json_encode([
@@ -1232,7 +1300,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      *
      * @return Role[]
      */
-    public function getAvailableRolesPersonActivity(){
+    public function getAvailableRolesPersonActivity()
+    {
         /** @var RoleRepository $roleRepository */
         $roleRepository = $this->getEntityManager()->getRepository(Role::class);
         $roles = $roleRepository->getRolesAtActivityArray();
@@ -1245,9 +1314,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @return null|Person
      * @throws OscarException
      */
-    public function getPersonById($id, $throw = false){
+    public function getPersonById($id, $throw = false)
+    {
         $person = $this->getEntityManager()->getRepository(Person::class)->find($id);
-        if( $throw === true && $person == null ){
+        if ($throw === true && $person == null) {
             throw new OscarException(sprintf(_("La personne avec l'identifiant %s n'est pas présente dans la base de données."), $id));
         }
         return $person;
@@ -1259,33 +1329,35 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @return null|Role
      * @throws OscarException
      */
-    public function getRolePersonById($id, $throw = false){
+    public function getRolePersonById($id, $throw = false)
+    {
         $role = $this->getEntityManager()->getRepository(Role::class)->find($id);
-        if( $throw === true && $role == null ){
+        if ($throw === true && $role == null) {
             throw new OscarException(sprintf(_("Le rôle avec l'identifiant %s n'est pas présente dans la base de données."), $id));
         }
         return $role;
     }
 
 
-    public function getPersonsPrincipalInActivityIncludeOrganization( Activity $activity ){
+    public function getPersonsPrincipalInActivityIncludeOrganization(Activity $activity)
+    {
         $persons = [];
 
         /** @var ActivityPerson $activityperson */
-        foreach( $activity->getPersonsDeep() as $activityperson ){
-            if( $activityperson->isPrincipal() && !$activityperson->isOutOfDate() ){
-                if( !in_array($activityperson->getPerson(), $persons))
+        foreach ($activity->getPersonsDeep() as $activityperson) {
+            if ($activityperson->isPrincipal() && !$activityperson->isOutOfDate()) {
+                if (!in_array($activityperson->getPerson(), $persons))
                     $persons[] = $activityperson->getPerson();
             }
         }
 
         /** @var ActivityOrganization $activityOrganization */
-        foreach( $activity->getOrganizationsDeep() as $activityOrganization ){
-            if( $activityOrganization->isPrincipal() && !$activityOrganization->isOutOfDate() ){
+        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            if ($activityOrganization->isPrincipal() && !$activityOrganization->isOutOfDate()) {
 
                 /** @var OrganizationPerson $organizationPerson */
-                foreach( $activityOrganization->getOrganization()->getPersons() as $organizationPerson ){
-                    if( $organizationPerson->isPrincipal() && !$organizationPerson->isOutOfDate() && !in_array($organizationPerson->getPerson(), $persons) ){
+                foreach ($activityOrganization->getOrganization()->getPersons() as $organizationPerson) {
+                    if ($organizationPerson->isPrincipal() && !$organizationPerson->isOutOfDate() && !in_array($organizationPerson->getPerson(), $persons)) {
                         $persons[] = $organizationPerson->getPerson();
                     }
                 }
@@ -1298,6 +1370,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
 
     ////////////////////////////////////////////////////////////////////////////
+
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
@@ -1323,8 +1396,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Organization
-    public function personOrganizationAdd( Organization $organization, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
-        if( !$organization->hasPerson($person, $role) ){
+    public function personOrganizationAdd(Organization $organization, Person $person, Role $role, $dateStart = null, $dateEnd = null)
+    {
+        if (!$organization->hasPerson($person, $role)) {
             $message = sprintf("a ajouté %s(%s) dans l'organisation %s", $person->log(), $role->getRoleId(), $organization->log());
             $this->getLoggerService()->info($message);
             $op = new OrganizationPerson();
@@ -1340,21 +1414,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $this->getEntityManager()->refresh($organization);
             $this->getEntityManager()->refresh($person);
 
-            if( $role->isPrincipal() ){
+            if ($role->isPrincipal()) {
                 $this->getLoggerService()->info("Role principal");
                 /** @var ActivityOrganization $oa */
-                foreach ($organization->getActivities() as $oa){
+                foreach ($organization->getActivities() as $oa) {
                     $this->getLoggerService()->info("Activité : " . $oa->getActivity());
-                    if( $oa->isPrincipal() ){
+                    if ($oa->isPrincipal()) {
                         $this->getLoggerService()->info("Activités, rôle principal");
                         $this->getEntityManager()->refresh($oa->getActivity());
                         $this->jobNotificationActivityPerson($oa->getActivity(), $person);
                     }
                 }
-                foreach ($organization->getProjects() as $op){
+                foreach ($organization->getProjects() as $op) {
                     $this->getLoggerService()->info("Projet : " . $op->getProject());
-                    if( $op->isPrincipal() ){
-                        foreach ($op->getProject()->getActivities() as $a){
+                    if ($op->isPrincipal()) {
+                        foreach ($op->getProject()->getActivities() as $a) {
                             $this->getLoggerService()->info("Project > Activités, rôle principal");
                             $this->getEntityManager()->refresh($a);
                             $this->jobNotificationActivityPerson($a, $person);
@@ -1367,15 +1441,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
 
-
-    public function personOrganizationRemove( OrganizationPerson $organizationPerson ){
-        if( $organizationPerson->isPrincipal() ){
+    public function personOrganizationRemove(OrganizationPerson $organizationPerson)
+    {
+        if ($organizationPerson->isPrincipal()) {
             /** @var OrganizationService $os */
             $os = $this->getOrganizationService();
 
 
-
-            foreach ( $os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity ){
+            foreach ($os->getOrganizationActivititiesPrincipalActive($organizationPerson->getOrganization()) as $activity) {
                 // $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $organizationPerson->getPerson());
                 $this->getNotificationService()->jobNotificationsPersonActivity($activity, $organizationPerson->getPerson());
             }
@@ -1393,7 +1466,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param bool $pincipal TRUE : Tiens compte uniquement des rôles 'principaux'
      * @return array
      */
-    public function getPersonOrganizations( Person $person, $date = false, $pincipal = false ){
+    public function getPersonOrganizations(Person $person, $date = false, $pincipal = false)
+    {
 
         $qb = $this->getEntityManager()->getRepository(Organization::class)
             ->createQueryBuilder('o')
@@ -1401,14 +1475,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ->where('op.person = :person')
             ->setParameter('person', $person);
 
-        if( $date !== false ){
+        if ($date !== false) {
             $date = $date === true ? new \DateTime() : $date;
             $qb->andWhere('op.dateStart IS NULL OR op.dateStart <= :date');
             $qb->andWhere('op.dateEnd >= :date OR op.dateEnd IS NULL');
             $qb->setParameter('date', $date);
         }
 
-        if( $pincipal === true ){
+        if ($pincipal === true) {
             $qb->innerJoin('op.roleObj', 'r')
                 ->andWhere('r.principal = true');
         }
@@ -1423,11 +1497,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// PERSON <> ACTIVITY
-    public function personActivityAdd( Activity $activity, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
-        if( !$activity->hasPerson($person, $role, $dateStart, $dateEnd) ){
+    public function personActivityAdd(Activity $activity, Person $person, Role $role, $dateStart = null, $dateEnd = null)
+    {
+        if (!$activity->hasPerson($person, $role, $dateStart, $dateEnd)) {
 
 
             $personActivity = new ActivityPerson();
@@ -1448,7 +1522,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             );
 
             // Si le rôle est principal, on actualise les notifications de la personne
-            if( $role->isPrincipal() ){
+            if ($role->isPrincipal()) {
                 $this->getEntityManager()->refresh($activity);
                 $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
             }
@@ -1462,7 +1536,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
-    public function personActivityRemove( ActivityPerson $activityPerson )
+    public function personActivityRemove(ActivityPerson $activityPerson)
     {
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
@@ -1477,7 +1551,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         );
 
         // Si le rôle est principal, on actualise les notifications de la personne
-        if( $updateNotification ){
+        if ($updateNotification) {
             $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
             //$this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
         }
@@ -1485,7 +1559,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->jobSearchUpdate($person);
     }
 
-    public function personActivityChangeRole( ActivityPerson $activityPerson, Role $newRole )
+    public function personActivityChangeRole(ActivityPerson $activityPerson, Role $newRole)
     {
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
@@ -1499,7 +1573,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans l'activité %s", $person, $activity));
 
         // Si le rôle est principal, on actualise les notifications de la personne
-        if( $updateNotification ){
+        if ($updateNotification) {
             $this->getEntityManager()->refresh($activity);
             $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
             $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
@@ -1519,8 +1593,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function personProjectAdd( Project $project, Person $person, Role $role, $dateStart=null, $dateEnd=null ){
-        if( !$project->hasPerson($person, $role, $dateStart, $dateEnd) ){
+    public function personProjectAdd(Project $project, Person $person, Role $role, $dateStart = null, $dateEnd = null)
+    {
+        if (!$project->hasPerson($person, $role, $dateStart, $dateEnd)) {
 
             $personProject = new ProjectMember();
             $this->getEntityManager()->persist($personProject);
@@ -1535,7 +1610,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $this->getLoggerService()->info(sprintf("La personne %s a été ajouté au projet %s", $person, $project));
 
             // Si le rôle est principal, on actualise les notifications de la personne
-            if( $role->isPrincipal() ){
+            if ($role->isPrincipal()) {
                 foreach ($project->getActivities() as $activity) {
                     $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
                 }
@@ -1544,7 +1619,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
     }
 
-    public function personProjectRemove( ProjectMember $projectPerson ){
+    public function personProjectRemove(ProjectMember $projectPerson)
+    {
         $person = $projectPerson->getPerson();
         $project = $projectPerson->getProject();
 
@@ -1560,16 +1636,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         );
 
         // Si le rôle est principal, on actualise les notifications de la personne
-        if( $updateNotification ){
+        if ($updateNotification) {
             $this->getEntityManager()->refresh($project);
             $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
         }
     }
 
     // PROJECT
-    public function personProjectChangeRole( ProjectMember $personProject, Role $newRole, $dateStart=null, $dateEnd=null ){
+    public function personProjectChangeRole(ProjectMember $personProject, Role $newRole, $dateStart = null, $dateEnd = null)
+    {
 
-        if( $newRole == $personProject->getRoleObj() ) return;
+        if ($newRole == $personProject->getRoleObj()) return;
 
         $person = $personProject->getPerson();
         $project = $personProject->getProject();
@@ -1584,7 +1661,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans le projet %s", $person, $project));
 
         // Si le rôle est principal, on actualise les notifications de la personne
-        if( $updateNotification ){
+        if ($updateNotification) {
             $this->getEntityManager()->refresh($project);
             $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
             $this->getNotificationService()->generateNotificationsForProject($project, $person);
@@ -1597,7 +1674,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * @return OrganizationService
      */
-    public function getOrganizationService(){
+    public function getOrganizationService()
+    {
         return $this->getServiceContainer()->get(OrganizationService::class);
     }
 }

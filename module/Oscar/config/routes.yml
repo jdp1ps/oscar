@@ -862,12 +862,26 @@ contract:
                 defaults:
                     action: estimatedSpent
 
+        estimated-spent-export:
+            type: segment
+            options:
+                route: /depenses-previsionnelles-export/:id
+                defaults:
+                    action: estimatedSpentExport
+
         list-spent:
             type: segment
             options:
                 route: /depenses/:id
                 defaults:
                     action: spentList
+
+        spent-synthesis:
+            type: segment
+            options:
+                route: /synthese-depenses/:id
+                defaults:
+                    action: spentSynthesisActivity
 
         requestadmin:
             type: literal

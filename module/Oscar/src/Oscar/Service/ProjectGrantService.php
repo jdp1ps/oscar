@@ -154,7 +154,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     public function getActivityTypeById( $activityTypeId ){
-        $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
+        return $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
     }
 
 
@@ -1264,7 +1264,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
         if( $search ){
             if( !$this->specificSearch($search, $qb, 'a') ){
-                $ids = $this->getProjectGrantService()->search($search);
+                $ids = $this->search($search);
                 $qb->andWhere('a.id in (:ids)')
                     ->setParameter('ids', $ids);
             }

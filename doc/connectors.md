@@ -324,7 +324,120 @@ Son fonctionnement est détaillé ici : [Importer des activités dans Oscar](./a
 Une fois les connecteurs configurés, vous pouvez lancer la synchronisation des données depuis l'interface ou utiliser (recommandé) l'utilitaire en ligne de commande en éxecutant la commande :
 
 ```bash
-php public/index.php oscar persons:sync rest
+php bin/oscar.php persons:sync rest
 ```
 
 Cela va éxecuter la synchronisation des personnes en utilisant le connecteur REST.
+
+## NOTE DEVELOPEUR
+
+### Connecteur PERSON
+
+#### Rappel
+
+Classe : `module/Oscar/Connector/ConnectorPersonREST`
+
+La configuration du connecteur est spécifier dans le fichier de configuration `config/autoload/local.php`, elle précise la classe utilisée pour réaliser la synchronisation des personnes, ainsi que le fichier de configuration Yaml associé/  
+
+```php
+// /config/autoload/local.php
+<?php
+return array(
+ // ...
+  'oscar' => [
+    'connectors' => [
+      'person' => [
+        'rest' => [
+          // C'est ICI que l'on indique la classe chargée réaliser la synchronisation
+          'class'     => \Oscar\Connector\ConnectorPersonREST::class,
+
+          'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+          'editable'  => false
+        ]
+      ]
+    ]
+  ]
+);
+```
+
+Par défaut, le fichier YAML contient 2 URLs, l'une pour la synchronisation complète, l'autre pour la synchonisation unitaire.
+
+```yaml
+# Emplacement du service REST fournissant la liste des personnes
+url_persons: 'https://rest.service.tdl/api/persons'
+
+# Emplacement du service REST fournissant les données pour une personne
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+url_person: 'https://rest.service.tld/api/person/%s'
+```
+
+
+#### Connector Access
+
+Si besoin d'un système d'accès spécifique, il est possible de réécrire une classe d'accès qui implémente l'interface `IConnectorAccess`
+
+Exemple : 
+
+```php
+// module/Oscar/src/Oscar/Connector/Access/ConnectorAccessFile.php
+<?php
+namespace Oscar\Connector\Access;
+
+use Oscar\Connector\IConnector;
+use Oscar\Exception\ConnectorException;
+use Oscar\Utils\PhpPolyfill;
+
+/**
+ * FICHIER d'EXEMPLE
+ * Class ConnectorAccessFile
+ * @package Oscar\Connector\Access
+ */
+class ConnectorAccessFile implements IConnectorAccess
+{
+    /** @var IConnector */
+    private $connector;
+
+    /** @var string */
+    private $filepath;
+
+    private const FILE_PATH_PARAMETER_NAME = 'file_data';
+
+    /**
+     * ConnectorAccessCurlHttp constructor.
+     * @param IConnector $connector Connector qui va consommer l'accès aux données.
+     * @param string $url Nom du paramètre contenant d'URL.
+     */
+    public function __construct(IConnector $connector, $options)
+    {
+        $this->connector = $connector;
+    }
+
+    public function getDatas()
+    {
+        if( !$this->connector->hasParameter(self::FILE_PATH_PARAMETER_NAME) ){
+            throw new ConnectorException("Le paramètre '%s' est requis.", self::FILE_PATH_PARAMETER_NAME);
+        }
+
+        $file = $this->connector->getParameter(self::FILE_PATH_PARAMETER_NAME);
+        if( !file_exists($file) ){
+            throw new ConnectorException("Le fichier '%s' n'existe pas.", $file);
+        }
+
+        $datas = file_get_contents($file);
+        
+        return PhpPolyfill::jsonDecode($datas);
+    }
+}
+```
+On peut ensuite configurer l'accès dans le fichier YAML avec le paramètre `access_strategy`, et préciser l'emplacement du fichier avec le paramètre idoine `file_data` : 
+
+```yaml
+# On laisse les URLs même si elles ne sont pas utilisées
+url_persons: 'https://rest.service.tdl/api/persons'
+url_person: 'https://rest.service.tld/api/person/%s'
+
+# Accès spécifique
+access_strategy:  Oscar\Connector\Access\ConnectorAccessFile
+file_data: /path/to/persons.json
+```

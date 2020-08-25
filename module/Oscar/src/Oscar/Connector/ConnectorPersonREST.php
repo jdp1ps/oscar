@@ -7,26 +7,14 @@
 
 namespace Oscar\Connector;
 
-
-use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Monolog\Logger;
-use mysql_xdevapi\Exception;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
-use Oscar\Entity\Role;
 use Oscar\Exception\ConnectorException;
-use Oscar\Utils\PhpPolyfill;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\ServiceManager;
 
-class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterface
+class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
 {
-    use ServiceLocatorAwareTrait, ConnectorParametersTrait;
 
     private $editable = false;
     private $options;
@@ -40,11 +28,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     public function isEditable(){
         return $this->editable;
-    }
-
-    function getName()
-    {
-        return "rest";
     }
 
     function getRemoteID()
@@ -61,19 +44,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         // TODO: Implement getPersonData() method.
     }
-
-    public function getConfigData()
-    {
-        return null;
-    }
-
-    public function init(ServiceManager $sm, $configFilePath)
-    {
-        $this->setServiceLocator($sm);
-        $this->loadParameters($configFilePath);
-        $this->options = [];
-    }
-
 
     public function execute( $force = false)
     {
@@ -106,43 +76,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
     {
         $exist = [];
         $exist = $personRepository->getUidsConnector($this->getName());
-
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-
-        $url = $this->getParameter('url_persons');
-
-        $repport->addnotice("REQUEST : " . $url);
-
-        $nbrPersonsConnector        = 0;
-        $nbrPersonsOscar            = count($exist);
         $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
-        $nbrPersonsDeleted          = 0;
-        $nbrPersonsUseAndDeletable  = 0;
+        $access = $this->getAccessStrategy($this->getParameter('url_persons'));
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-        $return = curl_exec($curl);
-
-        if( false === $return ){
-            // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-            $this->getServiceLocator()
-                ->get('Logger')
-                ->error(sprintf(
-                    "Accès connector '%s' impossible : %s",
-                    $this->getName(),
-                    curl_error($curl)
-                ));
-            throw new ConnectorException(sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName()));
-        }
-        curl_close($curl);
-
-        /////////////////////////////////////
-        ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-            $json = PhpPolyfill::jsonDecode($return);
+            $json = $access->getDatas();
             $personsDatas = null;
 
             if( is_object($json) && property_exists($json, 'persons') ){
@@ -211,12 +151,9 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                 }
             }
 
-
             if( $this->getOptionPurge() ){
 
                 $idsToDelete = [];
-
-
 
                 foreach ($exist as $uid){
                     try {
@@ -246,7 +183,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                     }
                 }
 
-
                 foreach ($idsToDelete as $idPerson) {
                     try {
                         $personRepository->removePersonById($idPerson);
@@ -255,7 +191,6 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
                         $repport->adderror("Immpossible de suprimer la person $idPerson : " . $e->getMessage());
                     }
                 }
-
             }
         } catch (\Exception $e ){
             throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
@@ -268,31 +203,13 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
 
     function syncPerson(Person $person)
     {
-
         if ($person->getConnectorID($this->getName())) {
 
-            $url = sprintf($this->getParameter('url_person'), $person->getConnectorID($this->getName()));
+            $personIdRemote = $person->getConnectorID($this->getName());
+            $url = sprintf($this->getParameter('url_person'), $personIdRemote);
             $this->getLogger()->info("connector request : " . $url);
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-            $return = curl_exec($curl);
-            curl_close($curl);
-
-            if( false === $return ){
-                $message = sprintf("Le connecteur %s n'a pas fournis les données attendues", $this->getName());
-                $this->getLogger()->error($message . " - " . curl_error($curl));
-                throw new ConnectorException($message);
-            }
-
-            $personData = json_decode($return);
-            if( $personData === null ){
-                // @todo Trouver un moyen de faire remonter une erreur plus "causante"
-                $message = sprintf("Aucune données retournée par le connecteur%s.", $this->getName());
-                $this->getLogger()->error($message . " - " . print_r($return, true));
-                throw new ConnectorException($message);
-            }
+            $access = $this->getAccessStrategy($url);
+            $personData = $access->getDatas($personIdRemote);
 
             // Fix : Nouveau format
             if( property_exists($personData, 'person') ){
@@ -304,41 +221,5 @@ class ConnectorPersonREST implements IConnectorPerson, ServiceLocatorAwareInterf
         } else {
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
-
-    }
-
-    public function setOption($optionName, $optionValue){
-        $this->options[$optionName] = $optionValue;
-    }
-
-    public function getOption($optionName, $defaultValue=null){
-        if( array_key_exists($optionName, $this->options) ){
-            return $this->options[$optionName];
-        }
-        return $defaultValue;
-    }
-
-    public function getOptionPurge(){
-        return $this->getOption('purge', false);
-    }
-
-    public function setOptionPurge( $boolean ){
-        return $this->setOption('purge', $boolean);
-    }
-
-
-    /**
-     * @return Logger
-     */
-    protected function getLogger(){
-        return $this->getServiceLocator()->get('Logger');
-    }
-
-    /**
-     * @return \UnicaenApp\Mapper\Ldap\People
-     */
-    protected function getServiceLdap()
-    {
-        return $this->getServiceLocator()->get('ldap_people_service')->getMapper();
     }
 }

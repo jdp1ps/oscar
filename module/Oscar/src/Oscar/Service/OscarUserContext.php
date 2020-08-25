@@ -30,6 +30,7 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
@@ -77,11 +78,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @return UserContext
      */
-    public function getUserContext(): UserContext
+    public function getUserContext()
     {
         return $this->userContext;
     }
 
+    /**
+     * @return PersonService
+     */
     public function getPersonService(){
         return $this->getServiceContainer()->get(PersonService::class);
     }
@@ -89,7 +93,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @param UserContext $userContext
      */
-    public function setUserContext(UserContext $userContext): void
+    public function setUserContext(UserContext $userContext)
     {
         $this->userContext = $userContext;
     }
@@ -105,7 +109,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getUserContext()->getDbUser();
     }
 
-    public function getAuthentificationMethod() :string
+    public function getAuthentificationMethod()
     {
         if ( $this->getUserContext()->getLdapUser() ){
             return self::AUTHENTIFICATION_METHOD_LDAP;
@@ -121,7 +125,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
     }
 
-    public function getRolesWithPrivileges( $privilegeCode, int $roleLevel = 0 ){
+    public function getRolesWithPrivileges( $privilegeCode, $roleLevel = 0 ){
 
         $roles_privileges = [];
         if( $roles_privileges == null || !array_key_exists($privilegeCode, $roles_privileges) ){
@@ -147,7 +151,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @return string Retourne une chaîne (utilisée dans les logs pour donner des informations sur l'utilisateur actif).
      */
-    public function getCurrentUserLog() :string
+    public function getCurrentUserLog()
     {
         $person         = 'UNPERSON';
         $identitifiant  = "NOUID";
@@ -592,13 +596,20 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
 
         try {
+
             if ($this->getUserContext()->getLdapUser()) {
+                // PATCH : Ensam (Matthieu MARC), 2020-08
+                $attribute = $this->getOscarConfigurationService()->getServiceLocator()->get('Config')['unicaen-auth']['ldap_username'];
+                if (isset($attribute)){
+                    $pseudo = $this->getUserContext()->getLdapUser()->getData($attribute);
+                }
+
                 // PATCH Limoges
                 // au cas ou le supannAliasLogin n'est pas fournis...
-                $pseudo = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
                 if( !$pseudo ){
                     $pseudo = $this->getUserContext()->getLdapUser()->getUid();
                 }
+
                 return $this->getPersonService()->getPersonByLdapLogin($pseudo);
             } elseif ($this->getUserContext()->getDbUser()) {
                 return $this->getPersonService()->getPersonByLdapLogin($this->getUserContext()->getDbUser()->getUsername());
@@ -1073,21 +1084,55 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
     }
 
-    public function getPrivilegesPerson( Person $person ){
 
+    /**
+     * @param $roles Role[]
+     * @param $privilege string
+     */
+    public function hasPrivilegeInRoles($roles, $privilege) {
+        foreach ($roles as $role) {
+            if( $role->hasPrivilege($privilege) ){
+                return true;
+            }
+        }
+        return false;
     }
 
-////    public function getPrivilegesOrganization( Organization $organization ){
-//        if (!$this->getCurrentPerson()) {
-//            return [];
-//        } else {
-//            $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
-//            var_dump($roles);
-//            die();
-//        }
-//    }
+    /**
+     * Retourne TRUE si la personne dispose du privilège dans un des rôles obtenus via une activité/projet et/ou une
+     * organisation.
+     *
+     * @param $privilege Code du privilège à tester
+     * @return bool
+     */
+    public function hasPrivilegeInAnyRoles($privilege){
+        $rolesInActivities = $this->getPersonService()->getRolesPersonInActivities($this->getCurrentPerson());
+        if( $this->hasPrivilegeInRoles($rolesInActivities, $privilege) ){
+            return true;
+        }
 
+        $rolesInOrganisation = $this->getPersonService()->getRolesPersonInOrganizations($this->getCurrentPerson());
+        if( $this->hasPrivilegeInRoles($rolesInOrganisation, $privilege) ){
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * Retourne TRUE si le personnes dispose d'UN des privilèges dans un de ces rôles parmi
+     * les activités/Projets/Organisations.
+     *
+     * @param $privileges
+     * @return bool
+     */
+    public function hasOneOfPrivilegesInAnyRoles( $privileges ){
+        foreach ($privileges as $privilege) {
+            if( $this->hasPrivilegeInAnyRoles($privilege) ){
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Retourne un booléen indiquant si l'utilisateur courant dispose du privilége
@@ -1106,11 +1151,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 return true;
             }
 
+
             // Puis si besoin, les rôles hérités de l'application
             if ($ressource) {
+                // $this->getLoggerService()->info("hasPrivilege $privilege dans $ressource non global");
                 $privileges = $this->getPrivileges($ressource);
                 return in_array($privilege, $privileges);
             }
+            // $this->getLoggerService()->info("hasPrivilege $privilege PAS DE RESSOURCE");
         } catch (\Exception $e) {
 
         }

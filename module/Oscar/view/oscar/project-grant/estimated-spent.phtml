@@ -1,40 +1,126 @@
 <div class="container-fluid">
-    <h1>Dépenses prévisionnelles</h1>
+    <h1>
+        Dépenses prévisionnelles <br>
+        <small>pour <strong><?= $activity ?></strong></small>
 
-
-
+    </h1>
     <div id="app" style="display: none">
+        <transition name="fade">
+            <div class="error overlay" v-if="error">
+                <div class="overlay-content">
+                    <h3>
+                        <i class="icon-warning-empty"></i> Impossible d'enregistrer les données
+                    </h3>
+                    <pre>
+                        Le serveur a répondu :
+                        {{ error }}
+                    </pre>
+                    <a href="#" @click="error = null" class="btn btn-sm btn-default btn-xs">
+                        <i class="icon-cancel-circled"></i>
+                        Fermer</a>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div class="pending overlay" v-if="loadingMsg">
+                <div class="overlay-content">
+                    <i class="icon-spinner animate-spin"></i>
+                    {{ loadingMsg }}
+                </div>
+            </div>
+        </transition>
+
         <section class="previsionnel" v-if="values">
-            <header class="line" >
-                <span class="cell cell-code">
-                        <code class="code">code</code>
-                    </span>
-                <strong class="cell">Intitulé</strong>
-                <span class="year cell" v-for="year in years">
-                        {{ year }}
-                    </span>
-                <span class="total cell"> TOTAL</span>
-            </header>
-            <section class="masse" v-for="masse, keyMasse in masses">
-                <h1>{{ masse }}</h1>
-
-                <article v-for="line in lines" v-if="line.annexe == keyMasse" class="line" >
+            <form action="" method="post" @submit.prevent="handlerSave">
+                <header class="line" >
                     <span class="cell cell-code">
-                        <code class="code">{{ line.code }}</code>
-                    </span>
-                    <strong class="cell">{{ line.label }}</strong>
-<!--                    <span>{{ values[line.id] }}</span>-->
+                            <code class="code">code</code>
+                        </span>
+                    <strong class="cell">Intitulé</strong>
                     <span class="year cell" v-for="year in years">
-                        <input type="text" @change="handlerChange($event, line.id, year)"
-                               :name="'previsionnel[' +line.code +'][' +year +']'"
-                                :value="values[line.id] ? values[line.id][year] : 'unknow'"
-                               class="form-control"
-                               placeholder="0.0" style="display: inline-block"/>
-                    </span>
-                    <span class="total cell"> {{ totaux[line.id] }}</span>
-                </article>
+                            {{ year }}
+                        </span>
+                    <span class="total cell"> TOTAL</span>
+                </header>
 
-            </section>
+                <section class="masse" v-for="masse in byMasse">
+                    <article class="line masse">
+                        <span class="cell cell-code">
+                            <code>&nbsp;</code>
+                        </span>
+                        <strong class="cell cell-label">
+                            <h2>{{ masse.label }}</h2>
+                        </strong>
+                        <span class="year cell cell-input" v-for="year in years">
+                            <input type="text" :name="'previsionnel['+masse.code+']['+year+']'"
+                                   @change="handlerChangeMasse($event, masse.code, year)"
+                                   class="form-control total"
+                                   :value="values[masse.code][year]"
+                                   :placeholder="'Total pour ' + year.label" style="display: inline-block"/>
+                        </span>
+                        <span class="total cell">
+                            <strong style="font-size: 1.4em;">
+                                <span v-if="masse.hasLimit == true">
+                                    <span v-if="masse.total == masse.totalLimit">
+                                        {{ masse.totalLimit | money }}
+                                    </span>
+                                    <span v-else-if="masse.total < masse.totalLimit">
+                                        {{ masse.totalLimit | money }}
+                                    </span>
+                                    <span v-else title="La sommes des dépenses renseignées ne correspond pas au total fixé pour cette masse" style="color: #990000">
+                                        {{ masse.total | money }}
+                                    </span>
+                                </span>
+                                <span v-else>
+                                    {{ masse.total | money }}
+                                </span>
+                                €
+                            </strong>
+                        </span>
+                    </article>
+
+                    <article v-if="masse.hasLimit && masse.totalLimit > 0 && masse.total < masse.totalLimit" class="line">
+                        <span class="cell cell-code">
+                            <code>~</code>
+                        </span>
+                        <span class="cell cell-label">
+                            <span>Budget non-assigné</span>
+                        </span>
+                        <span class="year cell cell-input" v-for="year in compte.years">
+                            &nbsp;
+                        </span>
+                        <span class="total cell">
+                            <strong>{{ masse.totalLimit - masse.total | money }}</strong> €
+                        </span>
+
+                    </article>
+
+                    <article class="line" v-for="compte in masse.comptes" :class="'marge-' + compte.code.length">
+                        <span class="cell cell-code">
+                            <code>{{ compte.code }}</code>
+                        </span>
+                        <span class="cell cell-label">
+                            <span>{{ compte.label }}</span>
+                        </span>
+                        <span class="year cell cell-input" v-for="year in compte.years">
+                            <input type="text" :name="'previsionnel['+compte.code+']['+year.label+']'"
+                                   @change="handlerChange($event, compte.code, year.label)"
+                                   class="form-control total"
+                                   :value="year.value"
+                                   :placeholder="'Total pour ' + year.label" style="display: inline-block"/>
+                        </span>
+                        <span class="total cell">
+                            <em>{{ total(compte.code) | money  }}</em> €
+                        </span>
+                    </article>
+                </section>
+
+                <nav>
+                    <button class="btn btn-primary"><i class="icon-floppy"></i>Enregistrer</button>
+                    <a class="btn btn-default" href="<?= $this->url('contract/estimated-spent-export', ['id'=>$activity->getId()]) ?>"><i class="icon-file-pdf"></i>Exporter</a>
+                </nav>
+            </form>
         </section>
     </div>
     <style>
@@ -51,6 +137,26 @@
             border-right: solid thin #e0e0e0;
             margin: .2em 0;
             padding: 0 .2em;
+            margin-top: auto;
+        }
+
+        .cell code {
+            font-size: .8em;
+        }
+
+        .cell input.form-control {
+            text-align: right;
+            padding: 2px 4px;
+            height: auto;
+            border-radius: 0;
+        }
+
+        .line .cell.cell-input {
+            margin-top: auto
+        }
+
+        input.total span {
+            font-weight: 600;
         }
 
         header .cell {
@@ -65,17 +171,33 @@
             background: #efefef;
         }
 
+
+
         .line .cell-code { flex: 0 0 4em; }
         .line .cell.year { flex: 0 0 7em;}
         .line .cell.total { flex: 0 0 10em; text-align: right }
 
+        .marge-2 .cell-label span{ padding-left: 1em }
+        .marge-3 .cell-label span{ padding-left: 1.4em; font-size: .9em; font-weight: 400 }
+        .marge-4 .cell-label span{ padding-left: 1.8em; font-size: .8em; font-weight: 200 }
+        .marge-5 .cell-label span{ padding-left: 2.2em; font-size: .7em; font-weight: 100 }
+
+        .marge-2 .cell-code span{ padding-left: 0em }
+        .marge-3 .cell-code span{ padding-left: 1.4em; font-size: .9em; font-weight: 400 }
+        .marge-4 .cell-code span{ padding-left: 1.8em; font-size: .8em; font-weight: 200 }
+        .marge-5 .cell-code span{ padding-left: 2.2em; font-size: .7em; font-weight: 100 }
+
         .cell-code code { font-weight: 100}
     </style>
     <script>
-        require(["vue"], function(Vue){
+        require(["vue", 'vue-resource', 'VueFilters'], function(Vue, VueResource, VueFilters){
+            Vue.use(VueResource);
+            Vue.filter('money', VueFilters.default.money);
            new Vue({
                el: "#app",
                data: {
+                   loadingMsg: "",
+                   error: "",
                    masses: <?= json_encode($masses) ?>,
                    lines: <?= json_encode($lines) ?>,
                    years: <?= json_encode($years) ?>,
@@ -83,48 +205,114 @@
                    totaux: {}
                },
 
+               computed: {
+                   byMasse(){
+                       let out = [];
+                       for( let masse in this.masses ){
+                           let group = {
+                               label: this.masses[masse],
+                               code : masse,
+                               comptes: [],
+                               total: 0.0,
+                               totalLimit: 0.0,
+                               hasLimit: false
+                           };
+
+                           // Total fixé (ou pas) pour la masse
+                           let valuesMasse = this.values[masse];
+
+                           for( let year in this.years ){
+                               let y = this.years[year];    // Année
+                               let value = valuesMasse && valuesMasse[y] ? valuesMasse[y] : 0; // Valeur pour cette année
+                               group.totalLimit += value;
+                               if( value > 0 )
+                                   group.hasLimit = true;
+                           }
+
+                           for( compte in this.lines ){
+
+                               let line = this.lines[compte]; // Données du compte
+                               let code = line.code; // CODE du compte
+                               let values = this.values[code]; // Valeurs pour le compte
+
+                               // On filtre les comptes selon la MASSE
+                               if( line.annexe == masse ){
+                                   let compteObj = {
+                                       code: line.code,
+                                       label: line.label,
+                                       years: []
+                                   };
+
+                                   for( let year in this.years ){
+                                       let y = this.years[year];    // Année
+                                       let value = values && values[y] ? values[y] : 0; // Valeur pour cette année
+                                       compteObj.years.push({
+                                           label: y,
+                                           value: value
+                                       });
+                                       group.total += value;
+                                   }
+                                   group.comptes.push(compteObj);
+                               }
+                           }
+                           out.push(group);
+                       }
+                       return out;
+                   }
+               },
+
                methods: {
+                   handlerSave(event){
+                       this.loadingMsg = "Enregistrement...";
+                       let formData = new FormData(event.target);
+                       this.$http.post('', formData).then(
+                           ok => {
+                               console.log(ok);
+                           },
+                           ko => {
+                               this.error = ko.body;
+                           }
+                       ).then( foo => {
+                           this.loadingMsg = "";
+                       });
+                   },
+
                    handlerChange(evt, code, year){
                        var value = parseFloat(evt.target.value)?parseFloat(evt.target.value):0;
                        if( !this.values.hasOwnProperty(code) ){
                            this.values[code] = {};
                        }
                        this.values[code][year] = value;
-
-                       var total = 0.0;
-                       Object.keys(this.values[code]).forEach( k => {
-                           console.log(code, k);
-                           total += this.values[code][k];
-                       });
-                       this.totaux[code] = total;
-
-
-
-                       console.log(this.values, this.totaux);
-
                    },
 
-                   value(code, year){
-                       var total = 0.0;
-
-                       try {
-                           total = this.values[code][year];
-                       } catch (e) {
-                           total = '';
+                   /**
+                    * Mise à jour du total pour la masse
+                    *
+                    * @param evt
+                    * @param masseCode
+                    * @param year
+                    */
+                   handlerChangeMasse(evt, masseCode, year){
+                       var value = parseFloat(evt.target.value)?parseFloat(evt.target.value):0;
+                       if( !this.values.hasOwnProperty(masseCode) ){
+                           this.values[masseCode] = {};
                        }
+                       this.values[masseCode][year] = value;
+                   },
 
+                   total(code) {
+                       let total = 0.0;
+                       if( this.values[code] ){
+                           for( let i in this.values[code] ){
+                               total += parseFloat(this.values[code][i]);
+                           }
+                       }
                        return total;
                    }
-               },
 
-               created: function(){
-
-                   console.log("Created", this.lines);
-                   this.lines.forEach(line => {
-                      this.totaux[line.code] = 0.0;
-                   });
                }
            });
+
            document.querySelector('#app').style.display = 'block';
         });
     </script>

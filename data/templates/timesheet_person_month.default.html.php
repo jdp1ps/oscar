@@ -1,6 +1,8 @@
-<style>
-    <?php include __DIR__.'/common.css'; ?>
-</style>
+<html>
+    <title>Feuille de temps</title>
+    <style>
+        <?php include __DIR__.'/common.css'; ?>
+    </style>
 <?php
 
 $duration = function($value) {
@@ -19,7 +21,7 @@ $durationRounded = function( $duration ) {
     return sprintf('%s:%s', $heures, $minutes);
 };
 ?>
-
+<body>
 <table>
     <thead>
     <tr>
@@ -88,7 +90,7 @@ $durationRounded = function( $duration ) {
     <?php endif; ?>
 
     <tr>
-        <td colspan="<?= $width ?>">&nbsp;
+        <td colspan="<?= $width ?>" >&nbsp;
             <?php if($format == 'html'): ?>
             <a href="/feuille-de-temps/excel?action=export2&period=<?= $period ?>&personid=<?= $person_id ?>&out=pdf">Télécharger</a>
             <?php endif; ?>
@@ -97,18 +99,18 @@ $durationRounded = function( $duration ) {
     </thead>
 </table>
 
-<table>
+<table style="table-layout:fixed;">
     <!-- LISTE DES JOURS -->
     <thead>
     <tr class="dateHeading">
-        <th><?= $periodLabel ?></th>
+        <th class="valueLabel"><?= $periodLabel ?></th>
         <?php foreach($daysInfos as $i=>$day): ?>
-            <th class="<?= $day['locked'] ? 'lock' : '' ?>">
-                <small><?= $day['label']?></small>
+            <th width="2.5%">
+                <?= $day['label']?><br>
                 <?= $i ?>
             </th>
         <?php endforeach; ?>
-        <th>TOTAL</th>
+        <th class="value valueLabel">TOTAL</th>
     </tr>
     </thead>
     <tbody>
@@ -121,7 +123,7 @@ $durationRounded = function( $duration ) {
         </tr>
         <?php foreach ($dataActivity['subgroup'] as $labelActivity=>$dataGroup):?>
             <tr class="subgroup">
-                <th class="research"> - <strong><?= $dataActivity['acronym'] ?></strong> <?= $dataGroup['label'] ?></th>
+                <th class="research"><?= $dataGroup['label'] ?></th>
                 <?php foreach ($daysInfos as $i=>$day):
                     $dayKey = $i<10?"0$i":"$i";
                     $value = 0.0;
@@ -161,13 +163,13 @@ $durationRounded = function( $duration ) {
                     ?>
                     <td class="<?= $class ?> research"><?= $duration($value) ?></td>
                 <?php endforeach; ?>
-                <td class="soustotal research"><?= $durationRounded($dataGroup['total']) ?></td>
+                <td class="soustotal research"><?= $durationRounded($dataOtherGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
     <?php endforeach; ?>
 
     <tr class="subgroup">
-        <th class="research">TOTAL RECHERCHE</th>
+        <th class="research">RECHERCHE</th>
         <?php foreach ($daysInfos as $i=>$day):
             $dayKey = $i<10?"0$i":"$i";
             $value = 0.0;
@@ -264,13 +266,13 @@ $durationRounded = function( $duration ) {
     <?php endforeach; ?>
 
     <tr class="group">
-        <th class="" style="border-bottom: solid black 2px">Total pour la période</th>
+        <th class="valueLabel" style="border-bottom: solid black 2px">Total pour la période</th>
         <?php foreach ($daysInfos as $i=>$day):
             $value = $day['duration'];
             $class = 'empty';
             if( $value ){
                 $value = number_format($value, 2);
-                $class = "value";
+                $class = "valueLabel";
             }
             if( $day['locked'] ){
                 $class = 'lock empty';
@@ -279,7 +281,7 @@ $durationRounded = function( $duration ) {
             ?>
             <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $durationRounded($value) ?></td>
         <?php endforeach; ?>
-        <td class="total" style="border-bottom: solid black 2px"><?= $durationRounded($total) ?></td>
+        <td class="valueLabel total" style="border-bottom: solid black 2px"><?= $durationRounded($total) ?></td>
     </tr>
 
     </tbody>
@@ -293,7 +295,7 @@ $durationRounded = function( $duration ) {
         <td>&nbsp;</td>
         <td colspan="6" class="valueLabel">Commentaire : </td>
         <td>&nbsp;</td>
-        <td colspan="<?= $width-7 ?>" class="value" style="white-space: pre-wrap"><?= $commentaires ?></td>
+        <td colspan="<?= $width-7 ?>" class="" style=""><?= $commentaires ?></td>
         <td>&nbsp;</td>
     </tr>
 
@@ -332,3 +334,5 @@ $durationRounded = function( $duration ) {
 <?php if( isset($outputFormat) && $outputFormat == 'html' ): ?>
     <a href="?action=export2&out=pdf&period=<?= $period ?>&personid=<?= $_REQUEST['personid'] ?>">Télécharger le PDF</a>
 <?php endif; ?>
+</body>
+</html>

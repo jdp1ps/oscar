@@ -76,8 +76,6 @@
         </div>
 
         <h1>
-
-        </span>
             <span> <i class="icon-cube"></i> <?= $entity->getLabel() ?></span>
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
             <div class="budget">
@@ -160,54 +158,7 @@
                         Membres
                     </h2>
                     <section id="organizations" class="has-btn"></section>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
-                        <section id="involved"></section>
-                        <script>
-                            require(['vue'], function(Vue){
-                                new Vue({
-                                    el: '#involved',
-                                    template: `<div>
-                                <h4 @click="displayed = !displayed" style="cursor: pointer">
-                                    <i class="icon-right-dir" v-show="displayed === false"></i>
-                                    <i class="icon-sort-down" v-show="displayed === true"></i>
-                                    Personnes pouvant voir cette activité
-                                </h4>
-                                <p class="text-muted"><small>Personnes disposant d'un droit d'accès (à minima en lecture) dans cette activité</small></p>
-                                <section v-show="displayed">
-                                    <div class="input-group">
-                                      <span class="input-group-addon">
-                                          <i class="icon-filter"></i>
-                                      </span>
-                                      <input type="search" v-model="filter" class="form-control" placeholder="Filtrer..." />
-                                    </div>
 
-                                    <span v-for="p in filteredPersons" class="cartouche xs">
-                                        {{ p.displayname }}
-                                        <span class="addon" v-if="p.affectation">{{ p.affectation }}</span>
-                                    </span>
-                                </section>
-                                </div>`,
-                                    data: {
-                                        displayed: false,
-                                        filter: "",
-                                        persons: <?= $involvedPerson ?>
-                                    },
-                                    computed: {
-                                        filteredPersons(){
-                                            var ret;
-                                            if( !this.filter ) ret = this.persons;
-                                            else {
-                                                var criteria = this.filter;
-                                                ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
-                                            }
-                                            return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
-
-                                        }
-                                    }
-                                })
-                            })
-                        </script>
-                    <?php endif; ?>
                 </section>
                 <script>
                     require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
@@ -229,6 +180,55 @@
 
                         })
                     });
+                </script>
+            <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
+                <section id="involved"></section>
+                <script>
+                    require(['vue'], function(Vue){
+                        new Vue({
+                            el: '#involved',
+                            template: `<div>
+                                <h4 @click="displayed = !displayed" style="cursor: pointer">
+                                    <i class="icon-right-dir" v-show="displayed === false"></i>
+                                    <i class="icon-sort-down" v-show="displayed === true"></i>
+                                    Personnes pouvant voir cette activité
+                                </h4>
+                                <p class="text-muted"><small>Personnes disposant d'un droit d'accès (à minima en lecture) dans cette activité</small></p>
+                                <section v-show="displayed">
+                                    <div class="input-group">
+                                      <span class="input-group-addon">
+                                          <i class="icon-filter"></i>
+                                      </span>
+                                      <input type="search" v-model="filter" class="form-control" placeholder="Filtrer..." />
+                                    </div>
+
+                                    <span v-for="p in filteredPersons" class="cartouche xs">
+                                        {{ p.displayname }}
+                                        <span class="addon" v-if="p.affectation">{{ p.affectation }}</span>
+                                    </span>
+                                </section>
+                                </div>`,
+                            data: {
+                                displayed: false,
+                                filter: "",
+                                persons: <?= $involvedPerson ?>
+                            },
+                            computed: {
+                                filteredPersons(){
+                                    var ret;
+                                    if( !this.filter ) ret = this.persons;
+                                    else {
+                                        var criteria = this.filter;
+                                        ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
+                                    }
+                                    return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
+
+                                }
+                            }
+                        })
+                    })
                 </script>
             <?php endif; ?>
 
@@ -269,6 +269,8 @@
 
             if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity) ): ?>
                 <section id="documents" class="has-btn">
+
+
                     <h2><i class="icon-book"></i> Documents</h2>
 
                     <?php if( $manage ): ?>
@@ -288,52 +290,40 @@
                         <?php endforeach; ?>
                     </nav>
 
-
-                    <script id="documents-list-template" type="text/x-template">
-                        <div>
-                            <div class="oscar-sorter">
-                                <i class=" icon-sort"></i>
-                                Tier les résultats par :
-                                <a @click.prevent="order('dateUpload')" href="#" :class="cssSort('dateUpload')" class="oscar-sorter-item">
-                                    Date d'upload
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                                <a @click.prevent="order('fileName')" href="#" :class="cssSort('fileName')" class="oscar-sorter-item">
-                                    Nom du fichier
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                                <a @click.prevent="order('categoryText')" href="#" :class="cssSort('categoryText')" class="oscar-sorter-item">
-                                    Type de document
-                                    <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-                                    <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-                                </a>
-                            </div>
-                            <document v-for="document in sortedDocument" :document="document" :documentTypes="documentTypes"></document>
-                        </div>
-                    </script>
-
-                    <section id="documents-list" class="lc pending">
-                        <div class="lc-mask">
-                            <div class="lc-alert">
-                                Error message
-                            </div>
-                            <div class="lc-loader">
-                                <span class="text">Chargement</span>
-                            </div>
-                            <div class="lc-content"></div>
-                        </div>
-                    </section>
-
+                    <div id="docv2"></div>
                     <script>
-                        require(['Documents'], function(OscarDocument) {
-                            OscarDocument({
-                                urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
-                                el: '#documents-list',
-                                documentTypes: <?= $documentTypes ?>,
-                                template: "#documents-list-template",
-                                url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>'
+                        requirejs(['vue', 'vue-resource', 'moment', 'documentsactivity'], function(Vue, VueResource, moment, DocumentsActivity){
+                            Vue.use(VueResource);
+
+                            Vue.filter('dateFull', function(date) {
+                                var m = moment(date);
+                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+
+                            Vue.filter('dateFullSort', function(date) {
+                                var m = moment(date);
+                                return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+
+                            Vue.filter('filesize', function(octets) {
+                                var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
+                                if (octets == 0) return '0 Octet';
+                                var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
+                                return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                            });
+
+                            new Vue({
+                                el: "#docv2",
+                                render(h) {
+                                    return h(DocumentsActivity.default, {
+                                        props: {
+                                            url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
+                                            urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
+                                            documentTypes: <?= $documentTypes ?>,
+                                            moment: moment
+                                        }
+                                    });
+                                }
                             });
                         });
                     </script>
@@ -341,22 +331,17 @@
             <?php endif; ?>
         </div>
         <div class="col-md-4">
-
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
+            <?php
+            // -------------------------------------------------------------------------------------------------- JALONS
+            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
             <div id="milestones"></div>
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
-                <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
-                    <i class="icon-bell"></i>
-                    Voir les notifications planifiées
-                </a>
-            <?php endif; ?>
             <script>
                 require(['ActivityModel', 'vue','vue-resource', 'mm','milestones'], function(
-                        ActivityModel,
-                        Vue,
-                        VueResource,
-                        moment,
-                        milestone)
+                    ActivityModel,
+                    Vue,
+                    VueResource,
+                    moment,
+                    milestone)
                 {
                     Vue.use(VueResource);
 
@@ -365,7 +350,7 @@
 
                     Vue.filter('moment', function(value){
                         var m = moment(value.date);
-                       return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
+                        return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
                     });
 
                     var milestonesVue = new Vue({
@@ -384,18 +369,19 @@
             </script>
             <?php endif; ?>
 
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
+                <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
+                    <i class="icon-bell"></i>
+                    Voir les notifications planifiées
+                </a>
+            <?php endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
+
+            <?php
+            // ---------------------------------------------------------------------------------------------- VERSEMENTS
+            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
 
                 <div id="payments"></div>
-
-                <div>
-                    
-                    <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
-                    <h3>Note financière</h3>
-                    <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
-                </div>
-
                 <script>
                     require(['ActivityModel', 'vue','vue-resource', 'mm','payments', 'VueFilters'], function(ActivityModel, Vue, VueResource, moment, payments, VueFilters){
                         Vue.use(VueResource);
@@ -406,9 +392,6 @@
                         });
 
                         Vue.filter('money', VueFilters.default.money);
-                        // Vue.filter('money', function(value){
-                        //     return VueFilters.default.money(value);
-                        // });
 
                         new Vue({ data: ActivityModel });
 
@@ -429,38 +412,78 @@
                         }).$mount('#payments')
                     });
                 </script>
+
+                <div>
+                    <?php if( $entity->getAssietteSubventionnable() != null ): ?>
+                        <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
+                    <?php endif; ?>
+
+                    <?php if( $entity->getNoteFinanciere() != null ): ?>
+                        <h3>Note financière</h3>
+                        <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
+            <?php
+            // ------------------------------------------------------------------------------------------------ DÉPENSES
+            if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
             <section>
-            <h2><i class="icon-book"></i> Dépenses</h2>
-            <?php if( $entity->getTotalSpent() ): ?>
-            <h1>
-                <strong><?= $entity->getTotalSpent() ?></strong> €<br>
-            </h1>
-                <small>Update : <strong><?= $this->moment($entity->getDateTotalSpent())->full() ?></strong></small>
-            <?php endif; ?>
-            <nav>
-                <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir les dépenses</a>
-                <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
-                    <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
-                        <input type="hidden" name="action" value="update" />
-                        <button type="submit" class="btn btn-primary">
-                            <i class="icon-file-excel"></i>
-                            Mettre à jour les données depuis SIFAC
-                        </button>
-                    </form>
-                <?php endif; ?>
-                <!-- <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Aperçu)</a> -->
-            </nav>
+                <h2><i class="icon-book"></i> Dépenses</h2>
+
+                <?php if( !$this->entity->getCodeEOTP() ): ?>
+                <div class="alert alert-warning">
+                    L'activité doit avoir un PFI pour le suivi des dépenses
+                </div>
+                <?php else: ?>
+                <div id="depenses">DÉPENSES</div>
+                    <script>
+                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
+                            Vue.use(VueResource);
+                            Vue.filter('money', VueFilters.default.money);
+                            Vue.filter('dateFull', function(date) {
+                                var m = moment(date);
+                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+                            new Vue({
+                                el: "#depenses",
+                                render:function(h){
+                                    return h(ActivitySpendSynthesis.default, {"props":
+                                        {
+                                            "manageDepense": '<?= $this->grant(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ? $this->url('depense/manage') : "null" ?>',
+                                            "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
+                                        }
+                                    });
+                                }
+                            })
+                        })
+                    </script>
+                <nav>
+                    <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
+                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
+                        <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
+                            <input type="hidden" name="action" value="update" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="icon-file-excel"></i>
+                                Mettre à jour les données depuis SIFAC
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </nav>
             </section>
             <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW) ): ?>
+                <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Beta)</a>
+            <?php endif; ?>
+        <?php endif; ?>
         </div>
     </div>
     <hr>
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
+    <section>
         <?php if( count($entity->getWorkPackages()) == 0 ) : ?>
-
+            <p>Pas de lot de travail</p>
         <?php else: ?>
             <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
         <?php if( !$entity->getProject() ): ?>
@@ -516,20 +539,10 @@
         </div>
 
         <h3>Synthèse de déclarations</h3>
-
-        <!--
-        <a href="<?= $this->url('timesheet/activity', ['id' => $entity->getId()]) ?>"
-           class="btn btn-primary btn-large">
-            <i class="icon-calendar"></i>
-            Synthèse générale
-        </a>-->
-
-            <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
+        <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
             <i class="icon-calendar"></i>
             Synthèse pour cette activité
         </a>
-
-
 
         <h3>Déclarants</h3>
         <?php
@@ -550,25 +563,9 @@
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
-            <?php /* TODO Gestion des référents depuis la fiche activité ****
- if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
-            <div id="referents"></div>
-            <script>
-                require(['vue', 'vue-resource', 'ReferentUI'], function(Vue, VueResource, ReferentUI){
-                    new Vue({
-                        el: '#referents',
-                        render(h){ return h(ReferentUI.default, { props: {
-                                persons: <?= json_encode($declarers) ?>
-                            }}) }
-                    })
-                });
-            </script>
-        <?php endif; /*****/ ?>
     <?php endif; ?>
-
+    </section>
 <?php endif; ?>
-
-
 
 <?php
 $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);

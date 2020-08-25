@@ -15,15 +15,42 @@ class CSVDownloader
     public function downloadCSVToExcel($csvPath){
         $xlsPath = $csvPath.'.xls';
 
-        $reader = \PHPExcel_IOFactory::createReader('CSV');
-        $csvDatas = $reader->load($csvPath);
+        $doc = new \PHPExcel();
 
-        $writer = \PHPExcel_IOFactory::createWriter($csvDatas, 'Excel5');
+        /** @var \PHPExcel_Worksheet $sheet */
+        $sheet = $doc->getActiveSheet();
+
+
+        $handler = fopen($csvPath, 'r');
+        $row = 1;
+        if (($handle = fopen($csvPath, "r")) !== FALSE) {
+            $cell = 1;
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+
+                $num = count($data);
+                for ($c=0; $c < $num; $c++) {
+                    $value = $data[$c];
+                    if(preg_match('/[0-9]*,[0-9]*/', $value)){
+                       $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_NUMERIC);
+                    }
+
+                    elseif (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $value)) {
+                       $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                    }
+
+                    else {
+                        $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                    }
+                }
+                $row++;
+            }
+            fclose($handle);
+        }
+        $writer = \PHPExcel_IOFactory::createWriter($doc, 'Excel5');
         $writer->save($xlsPath);
-
         $this->download($xlsPath, 'xls', 'application/vnd.ms-excel');
 
-        @unlink($csvPath);
+
         @unlink($xlsPath);
 
         return $xlsPath;
@@ -31,6 +58,7 @@ class CSVDownloader
 
     public function downloadCSV( $csvPath ){
         $this->download($csvPath, 'csv', 'text/csv');
+        @unlink($csvPath);
     }
 
     private function download($path, $extension, $mime){

@@ -187,6 +187,11 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         }
     }
 
+    /**
+     * Données des dépenses pour une activité.
+     *
+     * @return \Zend\Http\Response|JsonModel
+     */
     public function activityApiAction(){
 
         try {
