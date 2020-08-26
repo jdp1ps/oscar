@@ -47,6 +47,10 @@ abstract class AbstractConnector
         return $this->serviceManager;
     }
 
+    protected function getServicemanager(){
+        return $this->serviceManager;
+    }
+
     /**
      * @return Logger
      */
