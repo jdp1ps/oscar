@@ -11,7 +11,9 @@ require(['vue', 'vue-resource', 'mm', 'DeclarersList'], function(Vue, VueResourc
     new Vue({
         el: '#declarers',
         render(h){
-            return h(DeclarersList.default, { props: {} });
+            return h(DeclarersList.default, { props: {
+                    urlRecallDeclarer: '<?= $this->url('timesheet/recall-declarer') ?>'
+                } });
         }
     })
 

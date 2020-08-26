@@ -43,7 +43,7 @@ abstract class AbstractConnector
     /**
      * @return ServiceManager
      */
-    protected function getServicemanager(){
+    protected function getServiceLocator(){
         return $this->serviceManager;
     }
 

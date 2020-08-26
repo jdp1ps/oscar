@@ -200,7 +200,7 @@ return array(
                     'roles' => ['user']
                 ],
                 ['controller' => 'Timesheet',
-                    'action' => ['declarers'],
+                    'action' => ['declarers', 'recallDeclarer'],
                     'roles' => ['Administrateur']
                 ],
 

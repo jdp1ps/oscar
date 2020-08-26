@@ -7,7 +7,7 @@
             new Vue({
                 el: '#declarers',
                 render(h){
-                    return h(Declarers.default);
+                    return h(Declarers.default, { props: {urlRecallDeclarer: '<?= $this->url('timesheet/recall-declarer') ?>'}});
                 }
             })
         })

@@ -1472,6 +1472,14 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function recallDeclarerAction()
+    {
+        $declarerId = $this->params()->fromQuery('personid', null);
+        $periodStr  = $this->params()->fromQuery('period', null);
+
+        return $this->getResponseInternalError("Système de relance de $declarerId pour la période $periodStr a venir");
+    }
+
     /**
      * Affiche les déclarations par structure
      */
