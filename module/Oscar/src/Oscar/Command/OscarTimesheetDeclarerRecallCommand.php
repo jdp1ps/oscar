@@ -31,7 +31,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Zend\Validator\Date;
 
-class OscarTimesheetRecallCommand extends OscarCommandAbstract
+class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'timesheets:declarers-recall';
 

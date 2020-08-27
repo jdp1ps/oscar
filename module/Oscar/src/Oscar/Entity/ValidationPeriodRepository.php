@@ -12,6 +12,7 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Exception\OscarException;
+use Oscar\Utils\DateTimeUtils;
 
 class ValidationPeriodRepository extends EntityRepository
 {
@@ -174,6 +175,31 @@ class ValidationPeriodRepository extends EntityRepository
             ->setParameters(['person' => $personId])
            ->getQuery()
            ->getResult();
+    }
+
+    /**
+     * Retourne la liste des validations disponible pour la personne et la période donnée.
+     *
+     * @param $personId
+     * @param $periodStr
+     * @return int|mixed|string
+     */
+    public function getValidationPeriodForPersonAtPeriod($personId, $periodStr){
+        // Récupération des données de la périodes
+        $periodDatas = DateTimeUtils::periodBounds($periodStr);
+        $year   = $periodDatas['year'];
+        $month  = $periodDatas['month'];
+
+
+        return $this->createQueryBuilder('vp')
+            ->where('vp.declarer = :person AND vp.year = :year AND vp.month = :month')
+            ->setParameters([
+                'person' => $personId,
+                'year' => $year,
+                'month' => $month,
+            ])
+            ->getQuery()
+            ->getResult();
     }
 
     /**

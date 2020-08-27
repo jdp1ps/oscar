@@ -34,18 +34,18 @@ use Zend\Validator\Date;
 class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'timesheets:declarer';
-    const ARG_DECLARANT = "declarant";
-    const ARG_PERIOD = "periode";
 
-    const OPT_FORMAT = "format";
+    const OPT_FORCE         = "force";
+    const OPT_DECLARER      = "declarer";
+    const OPT_PERIOD        = "period";
 
     protected function configure()
     {
         $this
-            ->setDescription("Affiche l'état des déclarations pour un déclarant")
-            ->addArgument(self::ARG_DECLARANT, InputArgument::OPTIONAL, "Identifiant du déclarant", null)
-            ->addArgument(self::ARG_PERIOD, InputArgument::OPTIONAL, "Période sous la forme ANNEE-MOIS")
-            ->addOption(self::OPT_FORMAT, 'f', InputOption::VALUE_OPTIONAL, "Affichage de l'état au format JSON", null)
+            ->setDescription("Système de relance des déclarants")
+            ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
+            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_OPTIONAL, "Identifiant du déclarant")
+            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période");
         ;
     }
 
@@ -53,109 +53,75 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
+        /// OPTIONS and PARAMETERS
+        $declarerId = $input->getOption(self::OPT_DECLARER);
+        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
 
-        /** @var PersonService $personService */
-        $personService = $this->getServicemanager()->get(PersonService::class);
+        // Récupération du déclarant
+        if( $declarerId ){
+            if( !$declarerPeriod )
+                $this->declarer($input,$output, $declarerId);
+            else
+                $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
+        } else {
+            $this->declarersList($input,$output);
+        }
+    }
 
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServicemanager()->get(TimesheetService::class);
+    /**
+     * @return TimesheetService
+     */
+    protected function getTimesheetService(){
+        return $this->getServicemanager()->get(TimesheetService::class);
+    }
+
+    /**
+     * @return PersonService
+     */
+    protected function getPersonService(){
+        return $this->getServicemanager()->get(PersonService::class);
+    }
+
+    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
+        // TODO Faire un rendu text des déclarations mensuelles des déclarants
+        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
+        echo "Non-disponible";
+    }
+
+    public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
 
         $io = new SymfonyStyle($input, $output);
 
-        // détails
-        $declarantId = $input->getArgument(self::ARG_DECLARANT);
+        try {
+            $declarer = $this->getPersonService()->getPerson($declarerId);
 
-        if( $declarantId ){
-            $person = $personService->getPerson($declarantId);
-            $period = $input->getArgument(self::ARG_PERIOD);
-            if( $period ){
-                $periodInfos = DateTimeUtils::extractPeriodDatasFromString($period);
-                try {
-                    if ($timesheetService->personIsDeclarantPeriod($declarantId, $period) ){
-                        $state = $timesheetService->personDeclarationState($declarantId, $period);
-                        $format = $input->getOption(self::OPT_FORMAT);
-                        if( $format == 'json' ){
-                            $io->write(json_encode($state, JSON_PRETTY_PRINT));
-                        } else {
-                            $io->success("Déclaration de $person pour la période ". $periodInfos['periodLabel'] ." : " . $state["state"]);
-                        }
-                    } else {
-                        $io->warning(sprintf("%s n'est pas déclarant pour cette période.", $person));
-                    }
-                } catch (\Exception $e) {
-                    $io->error($e->getMessage());
-                    exit(1);
-                }
-            } else {
-                $headers = ['Projet', 'Lot', 'Début', 'Fin', 'Intitulé'];
-                $lines = [];
-                $start = null;
-                $end = null;
+            $io->title("Système de relance pour $declarer");
+            $periods = $this->getTimesheetService()->getPersonRecallDeclaration($declarer);
 
-                $io->section("Lots identifiés");
+            $io->table(["Période", "Durée", "état"], $periods);
 
-                /** @var WorkPackagePerson $workPackagePerson */
-                foreach ($person->getWorkPackages() as $workPackagePerson) {
-                    $workPackage = $workPackagePerson->getWorkPackage();
-                    $lines[] = [
-                        $workPackage->getActivity()->getAcronym(),
-                        $workPackage->getCode(),
-                        $workPackage->getActivity()->getDateStart()->format('D j F Y'),
-                        $workPackage->getActivity()->getDateEnd()->format('D j F Y'),
-                        $workPackage->getLabel(),
-                    ];
+        } catch (\Exception $e) {
+            $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
+            exit(0);
+        }
+    }
 
-                    $s = $workPackage->getActivity()->getDateStart()->getTimestamp();
-                    $e = $workPackage->getActivity()->getDateEnd()->getTimestamp();
-
-                    if($start == null || $start > $s)$start = $s;
-                    if( $end == null || $end < $e ) $end = $e;
-                }
-                $io->table($headers, $lines);
-
-                $debut = (new \DateTime())->setTimestamp($start);
-                $fin = (new \DateTime())->setTimestamp($end);
-
-                $periodsOpen = DateTimeUtils::allperiodsBetweenTwo($debut, $fin);
-
-                $io->section("Périodes");
-                $io->writeln("Du ".$debut->format('c'). " au " . $fin->format('c'));
-                $headers = ["Période", "Conflict", "Total", "Nbr Lot", 'Jours'];
-                $rows = [];
-                foreach ($periodsOpen as $period) {
-                    $periodDatas = $timesheetService->getTimesheetDatasPersonPeriod($person, $period);
-//                if( $period == "2017-01" )
-//                    var_dump($periodDatas);
-
-                    $rows[] = [
-                        $period,
-                        $periodDatas['hasConflict']?'Oui':'Non',
-                        number_format($periodDatas['total'], 2),
-                        count($periodDatas['workpackages']),
-                        $periodDatas['dayNbr'],
-                    ];
-                }
-                $io->table($headers, $rows);
+    public function declarersList( InputInterface $input, OutputInterface $output ){
+        $io = new SymfonyStyle($input, $output);
+        $io->title("Lite des déclarants");
+        try {
+            $declarants = $this->getTimesheetService()->getDeclarers();
+            $out = [];
+            /** @var Person $declarer */
+            foreach ($declarants['persons'] as $personId=>$datas) {
+                $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
             }
+            $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
+            $io->table($headers, $out);
 
-        } else {
-            $io->title("Lite des déclarants");
-            try {
-                $declarants = $timesheetService->getDeclarers();
-                $out = [];
-                /** @var Person $declarer */
-                foreach ($declarants['persons'] as $personId=>$datas) {
-                    $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
-                }
-                $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
-                $io->table($headers, $out);
-
-                $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
-            } catch (\Exception $e) {
-                $io->error($e->getMessage());
-            }
+            $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
         }
     }
 }

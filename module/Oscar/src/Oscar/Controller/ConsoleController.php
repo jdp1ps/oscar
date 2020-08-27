@@ -12,6 +12,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\SchemaValidator;
+use Oscar\Command\OscarPersonsSearchRebuildCommand;
 use Oscar\Connector\ConnectorActivityCSVWithConf;
 use Oscar\Connector\ConnectorActivityJSON;
 use Oscar\Connector\ConnectorAuthentificationJSON;
@@ -70,6 +71,9 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\ActivityCSVToObject;
 use Oscar\Utils\PhpPolyfill;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Yaml\Yaml;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\Console\ColorInterface;
@@ -92,6 +96,9 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
         UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseActivityLogServiceTrait, UseServiceContainerTrait;
 
 
+    public function getConsoleApplication(){
+        return new Application();
+    }
     /// GENERIC
     public function executeAction(){
 
@@ -1923,28 +1930,12 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
 
     public function buildSearchPersonAction()
     {
-        try {
-            $repport = $this->getPersonService()->searchIndexRebuild();
-            $output = new ConnectorRepportToPlainText();
-            $output->format($repport);
-
-        } catch (\Exception $e) {
-            die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
-                $e->getTraceAsString()));
-        }
+        throw new OscarException("Commande dépréciée, utilisez 'php bin/oscar.php persons:search-rebuild'");
     }
 
     public function buildSearchOrganizationAction()
     {
-        try {
-            $repport = $this->getOrganizationService()->searchIndexRebuild();
-            $output = new ConnectorRepportToPlainText();
-            $output->format($repport);
-
-        } catch (\Exception $e) {
-            die(sprintf("ERROR '%s' : \n %s\nDONE\n", $e->getMessage(),
-                $e->getTraceAsString()));
-        }
+        throw new OscarException("Commande dépréciée, utilisez 'php bin/oscar.php organizations:search-rebuild'");
     }
 
 

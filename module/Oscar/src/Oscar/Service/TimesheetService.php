@@ -7,6 +7,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
@@ -19,6 +20,7 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\TimesheetsMonthFormatter;
@@ -2439,6 +2441,62 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $out[] = $periodInfos;
         }
         return $out;
+    }
+
+    public function getPersonPeriodsStr( $declarerId ){
+        $person = $this->getPersonService()->getPerson($declarerId);
+        $periods = [];
+
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getActivities() as $activityPerson) {
+            $activity = $activityPerson->getActivity();
+            $periodsActivities = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart(), $activity->getDateEnd());
+            $periods = array_unique(array_merge($periods, $periodsActivities));
+        }
+        asort($periods);
+        return $periods;
+    }
+
+    public function getPersonRecallDeclarationPeriod( $declarerId, $period ){
+        echo "Délaration pour $declarerId à $period \n";
+
+        $declarer = $this->getPersonService()->getPersonById($declarerId, true);
+
+        // Déterminer si la personne est déclarante sur la période
+        $periods = $this->getPersonPeriodsStr($declarer->getId());
+        if( !in_array($period, $periods) ){
+            $this->getLoggerService()->info("Pas de déclaration pour la période $period");
+            throw new ConnectorException("$declarer n'est pas déclarant sur un projet pour la période $period");
+            return;
+        }
+
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodForPersonAtPeriod($declarerId, $period);
+
+        if( count($validations) ){
+            $hasConflict = false;
+
+            /** @var ValidationPeriod $validation */
+            foreach ($validations as $validation) {
+                if( $validation->hasConflict() ){
+                    $hasConflict = true;
+                }
+                echo "$validation -- ". $validation->getStatus()  ."\n";
+            }
+
+            if( $hasConflict ){
+                echo " - MAIL conflict";
+            }
+        } else {
+            echo "Envoyer votre déclaration de temps pour la période $period\n";
+        }
+
+        /**
+        $datas = $this->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
+        if( count($datas['periodsValidations']) < 1 ){
+            die("Vous n'avez pas envoyez votre déclaration pour la période $period");
+        }
+        die(json_encode($datas['periodsValidations'], JSON_PRETTY_PRINT));
+         * **/
     }
 
 

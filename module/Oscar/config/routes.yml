@@ -229,6 +229,14 @@ timesheet:
                 route: /declarers
                 defaults:
                     action: declarers
+
+        recall-declarer:
+            type: segment
+            options:
+                route: /recall-declarer
+                defaults:
+                    action: recallDeclarer
+
         organization:
             type: segment
             options:

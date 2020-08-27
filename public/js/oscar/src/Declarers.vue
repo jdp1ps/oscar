@@ -132,7 +132,7 @@
                             <i class="icon-calendar"></i>
                             <small>Saisie : </small><strong>{{ (100 / d.details.waitingTotal * d.details.total) | percent }} %</strong>
                             <span class="addon">
-                                {{ d.details.total | round1 }} / {{ d.details.waitingTotal }}
+                                {{ d.details.total | round1 }} / {{ d.details.waitingTotal | round1 }}
                             </span>
                         </strong><br>
                         <strong class="cartouche xs secondary1" :class="d.details.state">
@@ -141,7 +141,7 @@
                         </strong>
                     </span>
                     <nav class="actions" style="width: 175px;">
-                        <button class="btn btn-primary btn-xs" v-if="d.details.state == 'PERIOD_NODECLARATION'">
+                        <button class="btn btn-primary btn-xs" v-if="d.details.state == 'PERIOD_NODECLARATION'" @click="recall(d.id, period)">
                             <i class="icon-mail">Relancer le déclarant</i>
                         </button><br>
                         <a class="btn btn-default btn-xs" v-if="d.url_person" :href="d.url_person">
@@ -158,6 +158,9 @@
     //  nodejs node_modules/.bin/poi watch --format umd --moduleName  Declarers --filename.js Declarers.js --dist public/js/oscar/dist public/js/oscar/src/Declarers.vue
 
     export default {
+        props: {
+            urlRecallDeclarer: { required: true }
+        },
         data(){
             return {
                 declarers: null,
@@ -206,6 +209,10 @@
         },
 
         methods: {
+            recall(personId, period){
+              console.log(personId, period.periodCode, this.urlurlRecallDeclarer);
+            },
+
             details(declarer){
                 this.$http.get(declarer.url_details).then(
                     ok => {
@@ -213,6 +220,8 @@
                     }
                 );
             },
+
+
             organize(personDatas) {
                 let datas = {
                     activities: {},
