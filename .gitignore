@@ -34,6 +34,7 @@ doc/*.html
 # Connecteurs
 /config/connectors/*.yml
 !/config/connector/*.yml.dist
+/config/connectors/*.pem
 socket/config.json
 
 # Documentation

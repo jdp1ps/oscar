@@ -9,10 +9,13 @@ Il propose des utilitaires en ligne de commande pour **importer des données** d
 
 Les connectors permettent de *brancher* Oscar sur des sources de données et d'automatiser la maintenance de ces données.
 
-Les connectors dans version 2.0 de Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
+Les connectors dans version 2.0 d'Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
+
+Oscar possède la possibilité de se connecter via une connexion ssl en relation avec un certificat .p12 avec mdp, il faudra cependant le préparer en le scindant en deux fichiers (certificat et clef)
+
+Une note pour scinder ce type de certificat sous environnement linux via openssl est expliqué plus bas dans ce chapitre dans la section dédiée aux développeurs.
 
 Il est possible de développer ces propres services si les informations sont réparties de façon plus spécifique dans le SI.
-
 
 
 ## Connector PERSONS
@@ -69,6 +72,27 @@ url_persons: 'https://rest.service.tdl/api/persons'
 # le service REST.
 url_person: 'https://rest.service.tld/api/person/%s'
 ```
+
+Dans le cadre d'une connexion vers une api avec certificat il faudra compléter les éléments suivants avec vos informations
+
+Ajouter et, ou compléter la clef acces_strategy avec le path vers la class dédié à la connexion avec certificat
+
+Compléter les path(s) vers vos fichiers :certificat et clef de certificat, ainsi que le mot de pass pour ces éléments
+
+```yml
+# Emplacement du service REST fournissant la liste des personnes
+# ...
+# ...
+# Accès spécifique
+access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
+# Clef certificat .pem
+file_certificat_ssl_key: config/connectors/key.pem
+# Client certificat .pem
+file_certificat_cert: config/connectors/client.pem
+# Pass certificat .pem
+file_certificat_pass: VOTREPASSCERTIFICAT
+```
+
 
 Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour la liste un tableau d'objet, pour l'accès unitaire un objet simple sous la forme :
 
@@ -372,6 +396,32 @@ url_persons: 'https://rest.service.tdl/api/persons'
 url_person: 'https://rest.service.tld/api/person/%s'
 ```
 
+#### Connection avec certificat
+
+Cette connexion a été développée en suivant la procédure ci-dessous section Connector Acces
+
+Pour rappel vous devez disposer des deux fichiers correspondant au traitement d'un certificat généré .p12 et scinder via un outil tel que openssl (commande ci-dessous sous environnement linux).
+
+````
+openssl pkcs12 -in nomDeVotreCertificat.p12 -out client.pem -clcerts -nokeys 
+openssl pkcs12 -in nomDeVotreCertificat.p12 -out key.pem -nocerts
+````
+
+Le mot de pass de votre certificat vous sera demandé, ce mot de pass correspond à celui que vous devez remplir dans le fichier de config (voir début de page de documentation)
+
+Il est possible de tester votre connecteur avec certificat en utilisant la commande dédiée :
+
+Pour soumettre à une api en rest en utilisant un paramètre UID pour exemple.
+
+``
+php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxx/person votreUIDpourexemple
+``
+
+Le paramètre UID est en option, pour exemple vous pouvez récupérer une collection selon api
+
+ ``
+ php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxxx/persons
+``
 
 #### Connector Access
 
