@@ -28,7 +28,8 @@
     "zendframework/zend-mvc-console": "^1.2",
     "symfony/console": "^4.3",
     "ext-gettext": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "^7.0"
   },
   "require-dev": {
     "zendframework/zend-developer-tools": "^1.2",
