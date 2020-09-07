@@ -1928,14 +1928,24 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
         }
     }
 
+    protected function deprecatedCommand($newCommande){
+
+        if( $newCommande == false )
+            $msg = "Pas de commande de remplacement";
+        else
+            $msg = $newCommande;
+
+        throw new OscarException("Cette commande est dépréciée, utilisez :  '$msg'");
+    }
+
     public function buildSearchPersonAction()
     {
-        throw new OscarException("Commande dépréciée, utilisez 'php bin/oscar.php persons:search-rebuild'");
+        $this->deprecatedCommand('php bin/oscar.php persons:search-rebuild');
     }
 
     public function buildSearchOrganizationAction()
     {
-        throw new OscarException("Commande dépréciée, utilisez 'php bin/oscar.php organizations:search-rebuild'");
+        $this->deprecatedCommand('php bin/oscar.php organizations:search-rebuild');
     }
 
 
@@ -1951,34 +1961,7 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
      */
     public function organizationSyncAction()
     {
-        $force = $this->getRequest()->getParam('force');
-        $connectorName = $this->getRequest()->getParam('connectorkey');
-
-        /** @var ConnectorService $connectorService */
-        $connectorService = $this->getServiceLocator()->get('ConnectorService');
-
-        $connector = $connectorService->getConnector('organization.' . $connectorName);
-        echo "Execution de 'organization.$connectorName' (" . ($force ? 'FORCE' : 'NORMAL') . ") : \n";
-        try {
-            /** @var ConnectorRepport $repport */
-            $repport = $connector->execute($force);
-            echo "Completed \n";
-        } catch (\Exception $e) {
-            die('ERR: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-        }
-
-        foreach ($repport->getRepportStates() as $type => $out) {
-            $short = substr($type, 0, 3);
-            echo "Opération " . strtoupper($type) . " : \n";
-            if ($type == "notices") {
-                echo " - " . count($out) . " notice(s) - Rien à faire\n";
-            } else {
-                foreach ($out as $line) {
-                    echo $short . "\t" . date('Y-m-d H:i:s',
-                            $line['time']) . "\t" . $line['message'] . "\n";
-                }
-            }
-        }
+        $this->deprecatedCommand('php bin/oscar.php organizations:sync [CONNECTOR]');
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1992,37 +1975,7 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
      */
     public function personsSearchConnectorAction()
     {
-        $connectorName = $this->getRequest()->getParam('connector');
-        $value = $this->getRequest()->getParam('value');
-
-        $this->getConsole()->clear();
-        $this->getConsole()->writeLine(sprintf("Recherche de pour %s = '%s' : ",
-            $connectorName, $value), ColorInterface::GRAY);
-
-        /** @var PersonRepository $personRepository */
-        $personRepository = $this->getEntityManager()->getRepository(Person::class);
-
-        try {
-            $persons = $personRepository->getPersonsByConnectorID($connectorName,
-                $value);
-            if (count($persons) == 0) {
-                $this->getConsole()->writeLine(sprintf("Aucun résultat pour %s = '%s'",
-                    $connectorName, $value), ColorInterface::YELLOW);
-            }
-
-            foreach ($persons as $person) {
-                $this->getConsole()->write(sprintf(" [%s] ", $person->getId()),
-                    ColorInterface::CYAN);
-                $this->getConsole()->write(sprintf("%s", $person),
-                    ColorInterface::NORMAL);
-                $this->getConsole()->writeLine(sprintf(" (%s)",
-                    $person->getEmail()), ColorInterface::GRAY);
-            }
-        } catch (\Exception $ex) {
-
-            echo "############################ " . $ex->getMessage() . "\n"
-                . $ex->getTraceAsString();
-        }
+        $this->deprecatedCommand('php bin/oscar.php persons:search bouvry');
     }
 
     public function personSyncAction()
