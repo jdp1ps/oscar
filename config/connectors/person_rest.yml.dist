@@ -5,11 +5,12 @@
 # le service REST.
 #url_person: 'https://rest.service.tld/api/person/%s'
 
+### ACCèS avec CERTIFICAT
 # Accès spécifique
-access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
+# access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
 # Clef certificat .pem
-file_certificat_ssl_key: config/connectors/key.pem
+# file_certificat_ssl_key: config/connectors/key.pem
 # Client certificat .pem
-file_certificat_cert: config/connectors/client.pem
+# file_certificat_cert: config/connectors/client.pem
 # Pass certificat .pem
-file_certificat_pass: VOTREPASSCERTIFICAT
+# file_certificat_pass: VOTREPASSCERTIFICAT

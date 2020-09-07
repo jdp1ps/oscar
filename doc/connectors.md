@@ -353,6 +353,57 @@ php bin/oscar.php persons:sync rest
 
 Cela va éxecuter la synchronisation des personnes en utilisant le connecteur REST.
 
+## Connection avec certificat
+
+Configuration des connecteurs OSCAR (Persons/Organizations) avec Certificat SSL
+
+Pour rappel vous devez disposer des deux fichiers correspondant au traitement d'un certificat généré .p12 et scinder via un outil tel que openssl (commande ci-dessous sous environnement linux).
+
+```bash
+openssl pkcs12 -in nomDeVotreCertificat.p12 -out client.pem -clcerts -nokeys 
+openssl pkcs12 -in nomDeVotreCertificat.p12 -out key.pem -nocerts
+```
+
+Le mot de passe de votre certificat vous sera demandé, ce mot de passe correspond à celui que vous devez remplir dans le fichier de config (voir début de page de documentation)
+
+Il est possible de tester votre connecteur avec certificat en utilisant la commande dédiée :
+
+Pour soumettre à une api en rest en utilisant un paramètre UID pour exemple.
+
+```bash
+php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxx/person votreUIDpourexemple
+```
+Le paramètre UID est en option, pour exemple vous pouvez récupérer une collection selon api
+
+```bash
+php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxxx/persons
+```
+
+Puis dans le fichier `person_rest.yml` ou `organizations_rest.yml`, compléter la configuration en indiquant l'emplacement des certificats : 
+
+```yaml
+# Emplacement du service REST fournissant la liste des personnes
+url_persons: 'https://api.domain.ext/person/'
+
+# Emplacement du service REST fournissant les données pour une personne
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+url_person: 'https://api.domain.ext/person/%s'
+
+# Accès SSL (Certificat)
+access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
+
+# Clef certificat .pem
+file_certificat_ssl_key: config/connectors/key.pem
+
+# Client certificat .pem
+file_certificat_cert: config/connectors/client.pem
+
+# Pass certificat .pem
+file_certificat_pass: VOTREPASSCERTIFICAT
+```
+
+
 ## NOTE DEVELOPEUR
 
 ### Connecteur PERSON
@@ -395,33 +446,6 @@ url_persons: 'https://rest.service.tdl/api/persons'
 # le service REST.
 url_person: 'https://rest.service.tld/api/person/%s'
 ```
-
-#### Connection avec certificat
-
-Cette connexion a été développée en suivant la procédure ci-dessous section Connector Acces
-
-Pour rappel vous devez disposer des deux fichiers correspondant au traitement d'un certificat généré .p12 et scinder via un outil tel que openssl (commande ci-dessous sous environnement linux).
-
-````
-openssl pkcs12 -in nomDeVotreCertificat.p12 -out client.pem -clcerts -nokeys 
-openssl pkcs12 -in nomDeVotreCertificat.p12 -out key.pem -nocerts
-````
-
-Le mot de pass de votre certificat vous sera demandé, ce mot de pass correspond à celui que vous devez remplir dans le fichier de config (voir début de page de documentation)
-
-Il est possible de tester votre connecteur avec certificat en utilisant la commande dédiée :
-
-Pour soumettre à une api en rest en utilisant un paramètre UID pour exemple.
-
-``
-php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxx/person votreUIDpourexemple
-``
-
-Le paramètre UID est en option, pour exemple vous pouvez récupérer une collection selon api
-
- ``
- php bin/oscar.php dev:commandtestsslsyncpersons rest https://referentiel-xx-xx.domaine.fr/api_oscarxxxxx/persons
-``
 
 #### Connector Access
 

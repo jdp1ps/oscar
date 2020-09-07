@@ -55,6 +55,9 @@ Puis lancer l'installation des librairies PHP
 composer install
 ```
 
+### Connecteurs SSL
+
+Pour l'information ici : [Connecteur SSL](../connectors.md#connection-avec-certificat)
 
 ### Gearman
 
