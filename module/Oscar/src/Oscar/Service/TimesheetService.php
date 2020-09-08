@@ -61,8 +61,8 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *  - Membres de projet/organisation.
  */
 class TimesheetService implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService,
-                                    UseOrganizationService, UseEntityManager, UseLoggerService,
-                                    UseActivityService, UseNotificationService, UseActivityLogService
+    UseOrganizationService, UseEntityManager, UseLoggerService,
+    UseActivityService, UseNotificationService, UseActivityLogService
 {
 
     use UseOscarUserContextServiceTrait,
@@ -141,7 +141,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function changePersonSchedulePeriod($person, $days, $period){
+    public function changePersonSchedulePeriod($person, $days, $period)
+    {
         try {
             $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
             $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('d')
@@ -158,7 +159,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             foreach ($declarations as $declaration) {
                 $schedule = $declaration->getSchedule();
                 $scheduleJson = json_decode($schedule, JSON_OBJECT_AS_ARRAY);
-                if( !$scheduleJson ){
+                if (!$scheduleJson) {
                     $scheduleJson = [];
                 }
                 $scheduleJson['days'] = $days;
@@ -166,7 +167,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
 
             $this->getEntityManager()->flush($declarations);
-        } catch( \Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
         }
     }
@@ -176,7 +177,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Person $person
      * @return array
      */
-    public function getDeclarantInfos(Person $person){
+    public function getDeclarantInfos(Person $person)
+    {
         $datas = $person->toJson();
         $datas['referents'] = [];
         $referents = $this->getPersonService()->getReferentsPerson($person->getId());
@@ -185,7 +187,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         foreach ($referents as $referent) {
             $referentDisplayName = $referent->getReferent()->getDisplayName();
             $referentId = $referent->getReferent()->getId();
-            if( !array_key_exists($referentId, $datas['referents'])){
+            if (!array_key_exists($referentId, $datas['referents'])) {
                 $datas['referents'][$referentId] = [
                     'id' => $referentId,
                     'displayname' => $referentDisplayName
@@ -202,7 +204,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param $personId
      * @return int
      */
-    public function getPersonTimesheetsCount( $personId ){
+    public function getPersonTimesheetsCount($personId)
+    {
         return $this->getTimesheetRepository()->countTimesheetsForPerson($personId);
     }
 
@@ -212,9 +215,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param $personId
      * @return bool
      */
-    public function getPersonHasTimesheets( $personId )
+    public function getPersonHasTimesheets($personId)
     {
-        return  $this->getPersonTimesheetsCount($personId) > 0;
+        return $this->getPersonTimesheetsCount($personId) > 0;
     }
 
 
@@ -248,7 +251,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ];
             }
 
-            if( !array_key_exists($personId, $output['declarants']) ){
+            if (!array_key_exists($personId, $output['declarants'])) {
                 $output['declarants'][$personId] = $this->getDeclarantInfos($declaration->getDeclarer());
             }
 
@@ -263,16 +266,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $label = $this->getOthersWPByCode($object)['label'];
             }
 
-            if( $declaration->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE ){
-                if( count($declaration->getValidatorsPrj()) == 0 ){
-                    $periods[$dataKey]['warnings'][] = _('Aucun validateur projet pour cette déclaration ')  . $label;
+            if ($declaration->getObjectGroup() == ValidationPeriod::GROUP_WORKPACKAGE) {
+                if (count($declaration->getValidatorsPrj()) == 0) {
+                    $periods[$dataKey]['warnings'][] = _('Aucun validateur projet pour cette déclaration ') . $label;
                 }
-                if( count($declaration->getValidatorsSci()) == 0 ){
-                    $periods[$dataKey]['warnings'][] = _('Aucun validateur scientifique pour la déclaration ') . $label ;
+                if (count($declaration->getValidatorsSci()) == 0) {
+                    $periods[$dataKey]['warnings'][] = _('Aucun validateur scientifique pour la déclaration ') . $label;
                 }
             }
-            if( count($declaration->getValidatorsAdm()) == 0 ){
-                $periods[$dataKey]['warnings'][] = _('Aucun validateur administratif pour cette déclaration ')  . $label;
+            if (count($declaration->getValidatorsAdm()) == 0) {
+                $periods[$dataKey]['warnings'][] = _('Aucun validateur administratif pour cette déclaration ') . $label;
             }
 
             $declarationDatas = $declaration->toJson();
@@ -370,7 +373,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->rejectPeriodPrj($validationPeriod, $validationPeriod->getDeclarer(), $validator, $message);
     }
 
-    public function rejectPeriodPrj( ValidationPeriod $period, Person $declarant, Person $validator, $message = "" ){
+    public function rejectPeriodPrj(ValidationPeriod $period, Person $declarant, Person $validator, $message = "")
+    {
         $year = $period->getYear();
         $month = $period->getMonth();
 
@@ -382,7 +386,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $msg = $date->format('Y-m-d H:i:s') . " : Rejet PROJET par $person\n";
 
         /** @var ValidationPeriod $validationPeriod */
-        foreach ($validationPeriods as $validationPeriod){
+        foreach ($validationPeriods as $validationPeriod) {
             $log = $validationPeriod->getLog();
             $log .= $msg;
             $validationPeriod->setLog($log);
@@ -458,7 +462,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @throws OscarException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function reSendValidation(ValidationPeriod $validationPeriod, $comment="")
+    public function reSendValidation(ValidationPeriod $validationPeriod, $comment = "")
     {
         if ($validationPeriod->getStatus() !== ValidationPeriod::STATUS_CONFLICT) {
             throw new OscarException("Erreur d'état");
@@ -496,21 +500,22 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 //        }
 //    }
 
-    public function saveComment( Person $person, $objectKey, $year, $month, $content ){
+    public function saveComment(Person $person, $objectKey, $year, $month, $content)
+    {
         /** @var ValidationPeriod $validation */
         $validation = $this->getPeriodValidation($person, $month, $year);
 
         $id = intval($objectKey);
         $code = $objectKey;
         $mode = 'wp';
-        if( !$id ){
+        if (!$id) {
             $mode = 'hl';
         }
 
         $comment = $this->getCommentPeriodObject($mode == 'wp' ? $id : $code, $person, $year, $month);
 
 
-        if( $comment ){
+        if ($comment) {
             $comment->setComment($content);
         } else {
             $comment = new TimesheetCommentPeriod();
@@ -526,7 +531,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $this->getEntityManager()->flush($comment);
     }
 
-    public function saveCommentFromPost( Person $person, $datasPosted ){
+    public function saveCommentFromPost(Person $person, $datasPosted)
+    {
         $period = DateTimeUtils::extractPeriodDatasFromString($datasPosted['period']);
         $type = $datasPosted['type'];
         $id = (int)$datasPosted['id'];
@@ -536,7 +542,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $year = $period['year'];
 
         $mode = 'hl';
-        if( $id ){
+        if ($id) {
             $mode = 'wp';
         }
 
@@ -547,16 +553,17 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $this->saveComment($person, $mode == 'wp' ? $id : $code, $year, $month, $content);
 
-}
+    }
 
-    public function reSendPeriod( $from, $to, Person $declarer, $comments ){
+    public function reSendPeriod($from, $to, Person $declarer, $comments)
+    {
 
         $year = (int)$from->format('Y');
         $month = (int)$from->format('m');
 
         // Suppression des anciennes déclarations
         $validations = $this->getValidationPeriods($year, $month, $declarer);
-        foreach ($validations as $v){
+        foreach ($validations as $v) {
             $this->getEntityManager()->remove($v);
         }
         $this->getEntityManager()->flush();
@@ -583,20 +590,22 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $out;
     }
 
-    public function getValidationsPeriodPerson( Person $person ){
+    public function getValidationsPeriodPerson(Person $person)
+    {
         $out = [];
         $validationsPeriods = $this->getValidationPeriodRepository()->getValidationsPeriodPerson($person->getId());
         return $validationsPeriods;
     }
 
     /** Retourne la liste des périodes en conflits */
-    public function getPeriodsConflictPerson( Person $person ){
+    public function getPeriodsConflictPerson(Person $person)
+    {
         $periods = $this->getValidationPeriodRepository()->getValidationPeriodPersonWithConflict($person->getId());
         $out = [];
         /** @var ValidationPeriod $validationPeriod */
-        foreach( $periods as $validationPeriod ){
-            $key = $validationPeriod->getYear().'-'.$validationPeriod->getMonth();
-            if( !array_key_exists($key, $out) ){
+        foreach ($periods as $validationPeriod) {
+            $key = $validationPeriod->getYear() . '-' . $validationPeriod->getMonth();
+            if (!array_key_exists($key, $out)) {
                 $out[$key] = [
                     'firstDay' => new \DateTime(sprintf('%s-%s-01', $validationPeriod->getYear(), $validationPeriod->getMonth())),
                     'year' => $validationPeriod->getYear(),
@@ -828,9 +837,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function getStatusMessage( $status ){
+    public function getStatusMessage($status)
+    {
         static $statusMessages;
-        if( $statusMessages === null ){
+        if ($statusMessages === null) {
             $statusMessages = [
                 ValidationPeriod::STATUS_VALID => "Validée",
                 ValidationPeriod::STATUS_CONFLICT => "Conflict",
@@ -839,13 +849,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ValidationPeriod::STATUS_STEP3 => "Validation administrative",
             ];
         }
-        if( array_key_exists($status, $statusMessages) ){
+        if (array_key_exists($status, $statusMessages)) {
             return $statusMessages[$status];
         } else {
             return "Unknow Status";
         }
     }
-
 
 
     public function getValidationsForValidator2(Person $validator, $declarer = null, $period = null)
@@ -875,18 +884,18 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         /** @var ValidationPeriod $period */
         foreach ($periods as $period) {
             $periodIds[] = $period->getId();
-            $key = $period->getPeriod().'-'.$period->getDeclarer()->getId();
+            $key = $period->getPeriod() . '-' . $period->getDeclarer()->getId();
             $validateCurrentState = false;
             $validators = [];
-            foreach ( $period->getCurrentValidators() as $v ){
-                if( $v->getId() == $validator->getId() ){
+            foreach ($period->getCurrentValidators() as $v) {
+                if ($v->getId() == $validator->getId()) {
                     $validateCurrentState = true;
                 }
                 $validators[] = (string)$v;
             }
             $periodBounds = DateTimeUtils::periodBounds($period->getPeriod());
 
-            if( !array_key_exists($key, $group) ){
+            if (!array_key_exists($key, $group)) {
                 $daysDetails = $this->getDaysPeriodInfosPerson($period->getDeclarer(), $period->getYear(), $period->getMonth());
                 $periodLength = 0.0;
 
@@ -914,7 +923,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ];
             }
 
-            if( $validateCurrentState == true ){
+            if ($validateCurrentState == true) {
                 $group[$key]['validableStep'] = true;
             }
 
@@ -935,7 +944,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
             // Déclarations sur des activités
-            if( $period->getObject() == 'activity' ){
+            if ($period->getObject() == 'activity') {
                 /** @var Activity $activity */
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
                 $activityDatas = [
@@ -959,8 +968,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $periodDatas = array_merge($periodDatas, $activityDatas);
 
                 $group[$key]['declarations_activities'][$activity->getId()] = $periodDatas;
-            }
-            // Déclarations Hors-Lot
+            } // Déclarations Hors-Lot
             else {
                 $otherInfos = $this->getOthersWPByCode($period->getObject());
                 $periodDatas['label'] = $otherInfos['label'];
@@ -970,7 +978,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
         }
 
-        foreach ($group as $periodPerson=>$periodPersonDatas ){
+        foreach ($group as $periodPerson => $periodPersonDatas) {
             $period = $periodPersonDatas['period'];
             $personId = $periodPersonDatas['person_id'];
             $declarer = $this->getEntityManager()->getRepository(Person::class)->find($personId);
@@ -981,11 +989,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             foreach ($timesheets as $timesheet) {
                 $dayStr = $timesheet->getDateFrom()->format('j');
                 $activity = $timesheet->getActivity();
-                if( $activity ){
+                if ($activity) {
                     $main = $activity->getId();
                     $sub = $timesheet->getWorkpackage()->getCode();
 
-                    if( array_key_exists($main, $periodPersonDatas['declarations_activities']) ){
+                    if (array_key_exists($main, $periodPersonDatas['declarations_activities'])) {
                         $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['timesheets'][$dayStr] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['total'] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_activities'][$main]['total'] += $timesheet->getDuration();
@@ -999,7 +1007,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $main = 'others';
                     $sub = $timesheet->getLabel();
 
-                    if( array_key_exists($sub, $periodPersonDatas['declarations_others']) ){
+                    if (array_key_exists($sub, $periodPersonDatas['declarations_others'])) {
                         $periodPersonDatas['declarations_others'][$sub]['timesheets'][$dayStr] += $timesheet->getDuration();
                         $periodPersonDatas['declarations_others'][$sub]['total'] += $timesheet->getDuration();
                     } else {
@@ -1011,7 +1019,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $periodPersonDatas['total'] += $timesheet->getDuration();
                 $periodPersonDatas['details'][$dayStr]['duration'] += $timesheet->getDuration();
             }
-                $output[] = $periodPersonDatas;
+            $output[] = $periodPersonDatas;
         }
 
         return $output;
@@ -1341,17 +1349,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             if ($person->getCustomSettingsKey('days_request')) {
                 $configApp['days_request'] = $person->getCustomSettingsKey('days_request');
             }
-        }
-        elseif ($personModele && array_key_exists($personModele, $scheduleConfig) ){
+        } elseif ($personModele && array_key_exists($personModele, $scheduleConfig)) {
             $configApp['from'] = 'presets';
             $configApp['days'] = $scheduleConfig[$personModele]['days'];
             $configApp['model'] = $personModele;
-        }
-
-        elseif ($person->getScheduleKey()) {
+        } elseif ($person->getScheduleKey()) {
             $this->getLoggerService()->info(print_r($person->getCustomSettingsObj(), true));
 
-            if( array_key_exists($person->getScheduleKey(), $scheduleConfig) ){
+            if (array_key_exists($person->getScheduleKey(), $scheduleConfig)) {
                 $configApp['from'] = 'sync';
                 $configApp['days'] = $scheduleConfig[$person->getScheduleKey()]['days'];
             }
@@ -1360,24 +1365,26 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $configApp;
     }
 
-    public function getDatasDeclarersSynthesis( $personIds ){
+    public function getDatasDeclarersSynthesis($personIds)
+    {
         return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds);
     }
 
-    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd){
+    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd)
+    {
         $datas = [];
 
         $this->getLoggerService()->debug("Validations entre $yearStart et $yearEnd");
 
-        $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $yearStart,$yearEnd);
+        $validations = $this->getValidationPeriodRepository()->getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd);
 
         $this->getLoggerService()->debug("Validations : " . count($validations));
 
 
-        foreach ($validations as $validation){
+        foreach ($validations as $validation) {
             $declarerId = $validation['declarer_id'];
             $id = $validation['id'];
-            $period = sprintf('%s-%s', $validation['year'], $validation['month'] < 10 ? '0'.$validation['month']:$validation['month']);
+            $period = sprintf('%s-%s', $validation['year'], $validation['month'] < 10 ? '0' . $validation['month'] : $validation['month']);
             $object = $validation['object'];
             $objectgroup = $validation['objectgroup'];
             $object_id = $validation['object_id'];
@@ -1386,21 +1393,21 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $this->getLoggerService()->debug("Validation $objectgroup > $object > $object_id : $period");
 
 
-            if(!array_key_exists($period, $datas)){
+            if (!array_key_exists($period, $datas)) {
                 $datas[$period] = [];
             }
 
-            if(!array_key_exists($declarerId, $datas[$period])){
+            if (!array_key_exists($declarerId, $datas[$period])) {
                 $datas[$period][$declarerId] = [
                     'activity' => [],
                     'other' => [],
                 ];
             }
 
-            if( $objectgroup == "workpackage" ){
+            if ($objectgroup == "workpackage") {
                 $datas[$period][$declarerId]['activity'][$validation['object_id']] = $validation;
             }
-            if( $objectgroup == "other" ){
+            if ($objectgroup == "other") {
                 $datas[$period][$declarerId]['other'][$validation['object']] = $validation;
             }
         }
@@ -1428,7 +1435,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return array
      * @throws \Exception
      */
-    public function getSynthesisActivityPeriod($idActivity, $period){
+    public function getSynthesisActivityPeriod($idActivity, $period)
+    {
         $output = [
             'activity' => null,
             'persons' => [],
@@ -1457,7 +1465,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'groups' => [],
 
             // Total
-            'total'     => 0.0,
+            'total' => 0.0,
 
             // Total (hors ABS)
             'totalWork' => 0.0,
@@ -1490,7 +1498,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $lots = [];
 
         /** @var $lot WorkPackage */
-        foreach( $activity->getWorkPackages() as $lot){
+        foreach ($activity->getWorkPackages() as $lot) {
             $lots[$lot->getId()] = $lot->toArray();
             $lotsStr[] = $lot->getCode();
             $totaux['wps'][$lot->getCode()] = 0.0;
@@ -1508,28 +1516,28 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $comments = [];
 
         /** @var ValidationPeriod $validation */
-        foreach ($validations as $validation){
+        foreach ($validations as $validation) {
             $declarerKey = (string)$validation->getDeclarer();
             $key = $validation->getObjectId();
-            if( $key < 1) {
+            if ($key < 1) {
                 $key = $validation->getObject();
             }
 
-            if( !array_key_exists($declarerKey, $comments) ){
+            if (!array_key_exists($declarerKey, $comments)) {
                 $comments[(string)$validation->getDeclarer()] = [];
             }
 
             $comments[$declarerKey][$key] = [
-                'comment'   => $validation->getComment(),
-                'status'    => $validation->getStatus()
+                'comment' => $validation->getComment(),
+                'status' => $validation->getStatus()
             ];
         }
 
         // Parse préabable pour obtenir la liste des autres projets dans lesquel les déclarants sont identifiés
-        foreach ($datas as $d){
-            if( $d['activity_id'] && $d['activity_id'] != $idActivity ){
+        foreach ($datas as $d) {
+            if ($d['activity_id'] && $d['activity_id'] != $idActivity) {
                 $acronym = $d['acronym'];
-                if( !in_array($acronym, $ceStr) ){
+                if (!in_array($acronym, $ceStr)) {
                     $ceStr[] = $acronym;
                     $totaux['ce'][$acronym] = 0.0;
                 }
@@ -1537,14 +1545,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
 
-
-        foreach ($others as $key=>$other) {
+        foreach ($others as $key => $other) {
 
             $totaux['others'][$key] = 0.0;
 
             $group = $other['group'];
 
-            if( !array_key_exists($group, $othersGroups) ){
+            if (!array_key_exists($group, $othersGroups)) {
                 $othersGroups[$group] = [];
                 $totaux['groups'][$group] = 0.0;
             }
@@ -1573,21 +1580,21 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'totalWork' => 0.0
             ];
 
-            foreach ($lotsStr as $l){
+            foreach ($lotsStr as $l) {
                 $strData[(string)$person]['main'][$l] = 0.0;
             }
 
-            foreach ($ceStr as $p){
+            foreach ($ceStr as $p) {
                 $strData[(string)$person]['ce'][$p] = 0.0;
             }
 
-            foreach ($others as $key=>$other) {
+            foreach ($others as $key => $other) {
                 $group = $other['group'];
 
                 $strData[(string)$person]['others'][$key] = 0.0;
                 $strData[(string)$person]['totaux'][$group] = 0.0;
 
-                if( !array_key_exists($group, $strData[(string)$person]['othersGroups']) ){
+                if (!array_key_exists($group, $strData[(string)$person]['othersGroups'])) {
                     $strData[(string)$person]['othersGroups'][$group] = [
                         'total' => 0.0,
                         'others' => []
@@ -1597,7 +1604,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
         }
 
-        foreach ($datas as $d){
+        foreach ($datas as $d) {
             $group = 'research';
             $person = $d['person'];
             $key = $d['itemkey'];
@@ -1605,7 +1612,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $activityId = $d['activity_id'];
 
             // Hors-lot
-            if( !$activityId ){
+            if (!$activityId) {
                 $group = $others[$key]['group'];
 
                 $strData[$person]['others'][$key] += $duration;
@@ -1613,14 +1620,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $strData[$person]['othersGroups'][$group]['total'] += $duration;
                 $strData[$person]['totaux'][$group] += $duration;
 
-                if( $group == 'research' ){
+                if ($group == 'research') {
                     $strData[$person]['otherresearch'] += $duration;
                     $strData[$person]['totalResearch'] += $duration;
                     $totaux['totalResearch'] += $duration;
                 }
 
                 // sous total travaillé
-                if( $group != 'abs' ){
+                if ($group != 'abs') {
                     $totaux['totalWork'] += $duration;
                     $strData[$person]['totaux']['totalWork'] += $duration;
                 }
@@ -1629,8 +1636,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             } else {
                 // Projet
-                if($activityId == $idActivity){
-                    if( !array_key_exists($key, $strData[$person]['main']) ){
+                if ($activityId == $idActivity) {
+                    if (!array_key_exists($key, $strData[$person]['main'])) {
                         $strData[$person]['main'][$key] = 0.0;
                     }
                     $strData[$person]['totalMain'] += $duration;
@@ -1666,7 +1673,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $output;
     }
 
-    public function getActivitiesWithDeclarant( Person $person ){
+    public function getActivitiesWithDeclarant(Person $person)
+    {
         return $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
             ->innerJoin('a.workPackages', 'wp')
             ->innerJoin('wp.persons', 'wpp')
@@ -1679,12 +1687,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
     private $_cache_getPeriodDuration = [];
 
-    public function getPeriodDuration( $person, $year, $month){
+    public function getPeriodDuration($person, $year, $month)
+    {
         $key = sprintf('%s_%s-%s', $person->getId(), $year, $month);
-        if( !array_key_exists($key, $this->_cache_getPeriodDuration) ){
+        if (!array_key_exists($key, $this->_cache_getPeriodDuration)) {
             $periodInfos = $this->getDaysPeriodInfosPerson($person, $year, $month);
             $totalPeriod = 0.0;
-            foreach ($periodInfos as $key=>$day) {
+            foreach ($periodInfos as $key => $day) {
                 $totalPeriod += $day['dayLength'];
             }
             $this->_cache_getPeriodDuration = $totalPeriod;
@@ -1692,18 +1701,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->_cache_getPeriodDuration = $totalPeriod;
     }
 
-    public function getResumeActivity( Activity $activity ){
+    public function getResumeActivity(Activity $activity)
+    {
 
-        $workPackages   = [];
-        $periods        = [];
-        $persons        = [];
-        $total          = 0.0;
+        $workPackages = [];
+        $periods = [];
+        $persons = [];
+        $total = 0.0;
 
         /** @var WorkPackage $workPackage */
         foreach ($activity->getWorkPackages() as $workPackage) {
             $workPackages[$workPackage->getId()] = [
-                'id'    => $workPackage->getId(),
-                'code'  => $workPackage->getCode(),
+                'id' => $workPackage->getId(),
+                'code' => $workPackage->getCode(),
                 'label' => $workPackage->getLabel(),
                 'total' => 0.0
             ];
@@ -1732,9 +1742,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         foreach ($activity->getDeclarers() as $person) {
             $declarersIds[] = $person->getId();
             $persons[$person->getId()] = [
-                'id'            => $person->getId(),
-                'displayname'   => (string)$person,
-                'total'         => 0.0
+                'id' => $person->getId(),
+                'displayname' => (string)$person,
+                'total' => 0.0
             ];
         }
 
@@ -1779,12 +1789,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         /** @var TimeSheet $timesheet */
         foreach ($timessheets as $timesheet) {
-            $personId   = $timesheet->getPerson()->getId();
-            $period     = $timesheet->getDateFrom()->format('Y-m');
-            $wpCode     = $timesheet->getWorkpackage()->getCode();
-            $wpId       = $timesheet->getWorkpackage()->getId();
-            $duration   = $timesheet->getDuration();
-            $day        = $timesheet->getDateFrom()->format('j');
+            $personId = $timesheet->getPerson()->getId();
+            $period = $timesheet->getDateFrom()->format('Y-m');
+            $wpCode = $timesheet->getWorkpackage()->getCode();
+            $wpId = $timesheet->getWorkpackage()->getId();
+            $duration = $timesheet->getDuration();
+            $day = $timesheet->getDateFrom()->format('j');
 
             $total += $duration;
             $workPackages[$wpId]['total'] += $duration;
@@ -1793,11 +1803,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $periods[$period]['persons'][$personId]['total'] += $duration;
             $periods[$period]['persons'][$personId]['workpackages'][$wpId] += $duration;
 
-            if( !array_key_exists($wpId, $periods[$period]['persons'][$personId]['details']) ){
+            if (!array_key_exists($wpId, $periods[$period]['persons'][$personId]['details'])) {
                 $periods[$period]['persons'][$personId]['details'][$wpId] = [];
             }
 
-            if( !array_key_exists($day, $periods[$period]['persons'][$personId]['details'][$wpId]) ){
+            if (!array_key_exists($day, $periods[$period]['persons'][$personId]['details'][$wpId])) {
                 $periods[$period]['persons'][$personId]['details'][$wpId][$day] = 0.0;
             }
 
@@ -1805,14 +1815,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         $datas = [
-            'test'          => count($timessheets),
-            'total'         => $total,
-            'activity_id'   => $activity->getId(),
-            'acronym'       => $activity->getAcronym(),
-            'label'         => $activity->getLabel(),
+            'test' => count($timessheets),
+            'total' => $total,
+            'activity_id' => $activity->getId(),
+            'acronym' => $activity->getAcronym(),
+            'label' => $activity->getLabel(),
             'workspackages' => $workPackages,
-            'persons'       => $persons,
-            'periods'       => $periods,
+            'persons' => $persons,
+            'periods' => $periods,
         ];
 
         return $datas;
@@ -1824,7 +1834,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Person $person
      * @return array
      */
-    public function getResumePerson( Person $person ){
+    public function getResumePerson(Person $person)
+    {
         $declarantInActivities = $this->getActivitiesWithDeclarant($person);
 
         $now = new \DateTime();
@@ -1878,33 +1889,33 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ];
             }
 
-            if( $activity->getDateStart() && $activity->getDateEnd() ){
+            if ($activity->getDateStart() && $activity->getDateEnd()) {
                 $periods = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart()->format('Y-m'), $activity->getDateEnd()->format('Y-m'));
                 foreach ($periods as $period) {
-                    if( !array_key_exists($period, $periodsDetails) ){
+                    if (!array_key_exists($period, $periodsDetails)) {
                         $split = explode('-', $period);
                         $year = $split[0];
                         $month = $split[1];
                         $periodsDetails[$period] = [
-                            'period'            => $period,
-                            'person_id'         => $person->getId(),
-                            'person'            => (string)$person,
-                            'month'             => $month,
-                            'year'              => $year,
-                            'periodDuration'    => $this->getPeriodDuration($person, $year, $month),
+                            'period' => $period,
+                            'person_id' => $person->getId(),
+                            'person' => (string)$person,
+                            'month' => $month,
+                            'year' => $year,
+                            'periodDuration' => $this->getPeriodDuration($person, $year, $month),
                             //'periodValidation'  => $this->getPeriodValidation
-                            'past'              => $period < $periodNow,
-                            'current'           => $period == $periodNow,
-                            'futur'             => $period > $periodNow,
-                            'activities_id'     => [],
-                            'workpackages_id'   => [],
-                            'unexpected'        => false,
-                            'total'             => 0.0,
-                            'total_activities'  => 0.0,
+                            'past' => $period < $periodNow,
+                            'current' => $period == $periodNow,
+                            'futur' => $period > $periodNow,
+                            'activities_id' => [],
+                            'workpackages_id' => [],
+                            'unexpected' => false,
+                            'total' => 0.0,
+                            'total_activities' => 0.0,
                             'total_activities_details' => [],
-                            'total_horslots'    => 0.0,
-                            'validation_state'  => 'none',
-                            'validations_id'    => []
+                            'total_horslots' => 0.0,
+                            'validation_state' => 'none',
+                            'validations_id' => []
                         ];
                     }
                     $periodsDetails[$period]['activities_id'][] = $activity->getId();
@@ -1913,10 +1924,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 }
             }
 
-            if( $activity->getDateStart() ) {
+            if ($activity->getDateStart()) {
                 $minPeriod = min($minPeriod, $activity->getDateStart()->getTimestamp());
             }
-            if( $activity->getDateEnd() ) {
+            if ($activity->getDateEnd()) {
                 $maxPeriod = max($maxPeriod, $activity->getDateEnd()->getTimestamp());
             }
 
@@ -1928,27 +1939,27 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
             $period = $timesheet->getPeriodCode();
-            if( !array_key_exists($period, $periodsDetails) ){
+            if (!array_key_exists($period, $periodsDetails)) {
                 $year = $timesheet->getDateFrom()->format('Y');
                 $month = $timesheet->getDateFrom()->format('m');
                 $periodsDetails[$period] = [
                     'period' => $period,
-                    'month'             => $month,
-                    'year'              => $year,
-                    'periodDuration'    => $this->getPeriodDuration($person, $year, $month),
-                    'activities_id'     => [],
-                    'workpackages_id'   => [],
-                    'unexpected'        => true,
-                    'total'             => 0.0,
-                    'total_activities'  => 0.0,
-                    'total_horslots'    => 0.0,
-                    'validations_id'    => []
+                    'month' => $month,
+                    'year' => $year,
+                    'periodDuration' => $this->getPeriodDuration($person, $year, $month),
+                    'activities_id' => [],
+                    'workpackages_id' => [],
+                    'unexpected' => true,
+                    'total' => 0.0,
+                    'total_activities' => 0.0,
+                    'total_horslots' => 0.0,
+                    'validations_id' => []
                 ];
             }
             $total = $timesheet->getDuration();
 
             $periodsDetails[$period]['total'] += $total;
-            if( $timesheet->getActivity() ){
+            if ($timesheet->getActivity()) {
                 $periodsDetails[$period]['total_activities'] += $total;
                 $periodsDetails[$period]['total_activities_details'][$timesheet->getActivity()->getId()] += $total;
             } else {
@@ -1964,7 +1975,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ValidationPeriod::STATUS_STEP3,
             ValidationPeriod::STATUS_VALID,
             'none',
-            ];
+        ];
 
         $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findBy(['declarer' => $person]);
         /** @var ValidationPeriod $declaration */
@@ -1973,18 +1984,17 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $currentStatusIndex = array_search($periodsDetails[$period]['validation_state'], $validations_states);
             $declarationStatusIndex = array_search($declaration->getStatus(), $validations_states);
 
-            if( $declarationStatusIndex < $currentStatusIndex ){
+            if ($declarationStatusIndex < $currentStatusIndex) {
                 $periodsDetails[$period]['validation_state'] = $declaration->getStatus();
                 $periodsDetails[$period]['validators'] = [];
-                if( $declaration->requireValidation() ){
-                    foreach ( $declaration->getCurrentValidators() as $validator ){
+                if ($declaration->requireValidation()) {
+                    foreach ($declaration->getCurrentValidators() as $validator) {
                         $periodsDetails[$period]['validators'][] = (string)$validator;
                     }
                 }
-            }
-            else if( $declarationStatusIndex == $currentStatusIndex ){
-                if( $declaration->requireValidation() ) {
-                    foreach ( $declaration->getCurrentValidators() as $validator ){
+            } else if ($declarationStatusIndex == $currentStatusIndex) {
+                if ($declaration->requireValidation()) {
+                    foreach ($declaration->getCurrentValidators() as $validator) {
                         $validatorStr = (string)$validator;
 
                         if (!in_array($validatorStr, $periodsDetails[$period]['validators'])) {
@@ -2022,6 +2032,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $amplitudeMax = $this->getOscarConfigurationService()->getConfiguration('declarationAmplitudeMax');
         $amplitudeMin = $this->getOscarConfigurationService()->getConfiguration('declarationAmplitudeMin');
+        $totalWaited = 0.0;
 
         $daysDetails = $this->getDayLengthPerson($person);
 
@@ -2036,27 +2047,28 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ])
             ->getResult();
 
-        if( count($declarations) ){
+        if (count($declarations)) {
             $daysDetails = json_decode($declarations[0]->getSchedule(), JSON_OBJECT_AS_ARRAY);
         }
 
         for ($i = $decaleDay; $i < $nbr + $decaleDay; $i++) {
             $day = $i - $decaleDay + 1;
             $dayIndex = ($i % 7);
-            $dayOfWeek = $dayIndex +1;
+            $dayOfWeek = $dayIndex + 1;
 
             $duration = array_key_exists($dayOfWeek, $daysDetails['days']) ? $daysDetails['days'][$dayOfWeek] : 0;
             $maxlength = $duration * $amplitudeMax; //$daysDetails['max'];
-            $minlength =$duration * $amplitudeMin; // $daysDetails['min'];
+            $minlength = $duration * $amplitudeMin; // $daysDetails['min'];
 
             $amplitudemax = $duration * $amplitudeMax;
             $amplidudemin = $duration * $amplitudeMin;
+            $totalWaited += $duration;
 
 
             $close = false;
             $infos = "";
             $dayKey = $day; // < 10 ? '0' . $day : "" . $day;
-            $lockedKey = "$year-".intval($month)."-$day";
+            $lockedKey = "$year-" . intval($month) . "-$day";
 
             // Jour fermé (provisoire)
             $locked = false;
@@ -2327,7 +2339,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->getQuery()->getResult();
 
         /** @var ValidationPeriod $declaration */
-        foreach ($declarations as $declaration){
+        foreach ($declarations as $declaration) {
             /** @var TimeSheet $ts */
             foreach ($declaration->getTimesheets() as $ts) {
                 $ts->setValidationPeriod(null);
@@ -2374,7 +2386,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * Retourne la liste des périodes où la personnes est idéntifiée comme déclarant.
      * @param Person $declarer
      */
-    public function getPeriodsPerson( Person $declarer ){
+    public function getPeriodsPerson(Person $declarer)
+    {
 
         $periodsBounds = $this->getTimesheetRepository()->getPeriodsPerson($declarer->getId());
         $periods = DateTimeUtils::allPeriodsFromDates($periodsBounds);
@@ -2382,11 +2395,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $periods;
     }
 
-    public function getPersonPeriodsTimesheetTotals( Person $declarer ){
+    public function getPersonPeriodsTimesheetTotals(Person $declarer)
+    {
         return $this->getTimesheetRepository()->getTimesheetTotalByPeriodPerson($declarer->getId());
     }
 
-    public function getPersonRecallDeclaration( Person $declarer ){
+    public function getPersonRecallDeclaration(Person $declarer)
+    {
         // Récupéation des périodes avec un validation identifiée
 
         $periods = array_flip($this->getPeriodsPerson($declarer));
@@ -2397,10 +2412,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $state = "NO";
             $period = $periodValidation->getPeriod();
             $periodState = $periodValidation->getStatus();
-            if( !array_key_exists($period, $periods) ){
+            if (!array_key_exists($period, $periods)) {
                 throw new OscarException("Une ValidationPeriod existe alors qu'aucune periode n'est éligible à validation");
             } else {
-                if( !is_array($periods[$period]) ){
+                if (!is_array($periods[$period])) {
                     $periods[$period] = [];
                 }
                 $periods[$period][] = $periodState;
@@ -2411,31 +2426,31 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $durationsPeriod = $this->getPersonPeriodsTimesheetTotals($declarer);
 
         $out = [];
-        foreach ($periods as $period=>$states ){
+        foreach ($periods as $period => $states) {
             $periodInfos = [];
 
             $periodInfos['period'] = $period;
             $periodInfos['duration'] = array_key_exists($period, $durationsPeriod) ? $durationsPeriod[$period] : 0.0;
             $duration = 0.0;
 
-            if( is_int($states) ){
+            if (is_int($states)) {
                 $state = "NO VALIDATION";
             } else {
                 $state = "validated";
                 $hasConlict = false;
                 $countValid = 0;
                 foreach ($states as $state) {
-                    if( $state == ValidationPeriod::STATUS_CONFLICT ){
+                    if ($state == ValidationPeriod::STATUS_CONFLICT) {
                         $hasConlict = true;
                     }
-                    if( $state == ValidationPeriod::STATUS_VALID ){
+                    if ($state == ValidationPeriod::STATUS_VALID) {
                         $countValid += 1;
                     }
-                    if( $state != ValidationPeriod::STATUS_VALID ){
+                    if ($state != ValidationPeriod::STATUS_VALID) {
                         $state = "En cours de validation";
                     }
                 }
-                $state =  "$state ($countValid / ". count($states). ") " . ($hasConlict ? " Conflit à gérer" : "") . ".";
+                $state = "$state ($countValid / " . count($states) . ") " . ($hasConlict ? " Conflit à gérer" : "") . ".";
             }
             $periodInfos['state'] = $state;
             $out[] = $periodInfos;
@@ -2443,7 +2458,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $out;
     }
 
-    public function getPersonPeriodsStr( $declarerId ){
+    public function getPersonPeriodsStr($declarerId)
+    {
         $person = $this->getPersonService()->getPerson($declarerId);
         $periods = [];
 
@@ -2457,14 +2473,33 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $periods;
     }
 
-    public function getPersonRecallDeclarationPeriod( $declarerId, $period ){
-        echo "Délaration pour $declarerId à $period \n";
+    public function getPersonRecallDeclarationPeriod($declarerId, $period)
+    {
+        $sendMail = false;
+        $message = "";
+        $total = 0.0; // Temps total saisi
+        $max = 0.0; // Temps maximum attendu
+        $min = 0.0; // Temps minimum attendu
+        $needed = 0.0; // Temps attendu (précis)
+        $joursPeriod = 0; // Nb de jours
 
         $declarer = $this->getPersonService()->getPersonById($declarerId, true);
+        $datas = $this->getPersonTimesheetsDatas($declarer, $period);
+
+        $joursPeriod = $datas['totalDays'];
+
+        foreach ($datas['daysInfos'] as $day) {
+            $needed += $day['dayLength'];
+            $total += $day['duration'];
+            $max += $day['amplitudemax'];
+            $min += $day['amplitudemin'];
+        }
+
+        $message = "Délaration pour $declarer à $period";
 
         // Déterminer si la personne est déclarante sur la période
         $periods = $this->getPersonPeriodsStr($declarer->getId());
-        if( !in_array($period, $periods) ){
+        if (!in_array($period, $periods)) {
             $this->getLoggerService()->info("Pas de déclaration pour la période $period");
             throw new ConnectorException("$declarer n'est pas déclarant sur un projet pour la période $period");
             return;
@@ -2472,35 +2507,39 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $validations = $this->getValidationPeriodRepository()->getValidationPeriodForPersonAtPeriod($declarerId, $period);
 
-        if( count($validations) ){
+        if (count($validations)) {
             $hasConflict = false;
-
             /** @var ValidationPeriod $validation */
             foreach ($validations as $validation) {
-                if( $validation->hasConflict() ){
+                if ($validation->hasConflict()) {
                     $hasConflict = true;
                 }
-                echo "$validation -- ". $validation->getStatus()  ."\n";
             }
-
-            if( $hasConflict ){
-                echo " - MAIL conflict";
+            if ($hasConflict) {
+                $message = " - MAIL conflict";
+                $sendMail = true;
+            } else {
+                $message = "La déclaration a bien été envoyée";
             }
         } else {
-            echo "Envoyer votre déclaration de temps pour la période $period\n";
+            if( $total < $min ){
+                $message = "Complétez votre déclaration de temps pour la période $period";
+            } else {
+                $message = "Pensez à envoyer votre déclaration de temps pour la période $period";
+            }
+            $sendMail = true;
         }
 
-        /**
-        $datas = $this->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
-        if( count($datas['periodsValidations']) < 1 ){
-            die("Vous n'avez pas envoyez votre déclaration pour la période $period");
-        }
-        die(json_encode($datas['periodsValidations'], JSON_PRETTY_PRINT));
-         * **/
+        return [
+            'person' => "$declarer",
+            'message' => "$message",
+            'needSend' => $sendMail,
+            'max' => $max,
+            'min' => $min,
+            'total' => $total,
+            'needed' => $needed
+        ];
     }
-
-
-
 
     public function getPersonPeriods(Person $person, $period)
     {
@@ -2525,6 +2564,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'days' => $this->getDaysPeriodInfosPerson($person, $periodDatas['year'], $periodDatas['month'])
             ]
         ];
+
         $periods = $periodQuery->getQuery()->getResult();
 
         /** @var ValidationPeriod $period */
@@ -2672,7 +2712,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         /** @var ValidationPeriod $periodValidation */
         foreach ($periodValidations as $periodValidation) {
-            if( $periodValidation->hasConflict() ){
+            if ($periodValidation->hasConflict()) {
                 $hasConflict = true;
                 $editable = true;
                 $periodSendable = true;
@@ -2835,7 +2875,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $dayInt = (int)$t->getDateFrom()->format('d');
             $icsUid = $t->getIcsFileUid();
 
-            if( $icsUid != null && !array_key_exists($icsUid, $icsUidList) ){
+            if ($icsUid != null && !array_key_exists($icsUid, $icsUidList)) {
                 $icsUidList[$icsUid] = $t->getIcsFileName();
             }
 
@@ -2885,7 +2925,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
 
 
-            if ( !$t->getValidationPeriod() == null ) {
+            if (!$t->getValidationPeriod() == null) {
                 $output['hasUnsend'] = true;
             }
 
@@ -2954,9 +2994,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function getCommentPeriod($activityOrKey, $person, $year, $month){
+    public function getCommentPeriod($activityOrKey, $person, $year, $month)
+    {
         $obj = $this->getCommentPeriodObject($activityOrKey, $person, $year, $month);
-        if( $obj ){
+        if ($obj) {
             return $obj->getComment();
         } else {
             return "";
@@ -2971,19 +3012,20 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return TimesheetCommentPeriod|null
      * @throws OscarException
      */
-    public function getCommentPeriodObject($activityOrKey, $person, $year, $month){
+    public function getCommentPeriodObject($activityOrKey, $person, $year, $month)
+    {
 
         $query = $this->getEntityManager()->getRepository(TimesheetCommentPeriod::class)->createQueryBuilder('c')
             ->where('c.year = :year AND c.month = :month AND c.declarer = :declarer');
 
         $parameters = [
             'year' => $year,
-            'month'=> $month,
-            'declarer'=> $person,
+            'month' => $month,
+            'declarer' => $person,
         ];
 
 
-        if( is_string($activityOrKey) ){
+        if (is_string($activityOrKey)) {
             $query->andWhere('c.object = :code');
             $parameters['code'] = $activityOrKey;
         } else {
@@ -2991,10 +3033,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $parameters['id'] = $activityOrKey;
         }
         $obj = $query->setParameters($parameters)->getQuery()->getResult();
-        if( !$obj ){
+        if (!$obj) {
             return null;
         } else {
-            if( count($obj) > 1 ){
+            if (count($obj) > 1) {
                 throw new OscarException("Plusieurs commentaires enregistrés pour le même objet, contacter l'administrateur pour u'il corrige le problème");
             } else {
                 return $obj[0];
@@ -3087,7 +3129,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         foreach ($query->getQuery()->getResult() as $timesheet) {
 
             // Récupération des commentaires
-            if( $timesheet->getValidationPeriod() ) {
+            if ($timesheet->getValidationPeriod()) {
                 $validationId = $timesheet->getValidationPeriod()->getId();
                 if (!in_array($validationId, $validationsDone)) {
                     $validationsDone[] = $validationId;
@@ -3095,11 +3137,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 }
             }
 
-            if( $timesheet->getActivity() ){
-                if( !in_array($timesheet->getActivity()->getCodeEOTP(), $pfi) ) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
-                if( !in_array($timesheet->getActivity()->getAcronym(), $acronyms) ) $acronyms[] = $timesheet->getActivity()->getAcronym();
-                if( !in_array($timesheet->getActivity()->getOscarNum(), $num) ) $num[] = $timesheet->getActivity()->getOscarNum();
-                if( !in_array($timesheet->getActivity(), $activities) ){
+            if ($timesheet->getActivity()) {
+                if (!in_array($timesheet->getActivity()->getCodeEOTP(), $pfi)) $pfi[] = $timesheet->getActivity()->getCodeEOTP();
+                if (!in_array($timesheet->getActivity()->getAcronym(), $acronyms)) $acronyms[] = $timesheet->getActivity()->getAcronym();
+                if (!in_array($timesheet->getActivity()->getOscarNum(), $num)) $num[] = $timesheet->getActivity()->getOscarNum();
+                if (!in_array($timesheet->getActivity(), $activities)) {
                     $activities[] = $timesheet->getActivity();
                 }
             }
@@ -3171,8 +3213,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $declarations[$path][$group]['subgroup'][$subGroup]['days']["$day"] = 0.0;
             }
 
-            if( $groupFamily != 'abs' ){
-                if( !array_key_exists($day, $active['days']) ){
+            if ($groupFamily != 'abs') {
+                if (!array_key_exists($day, $active['days'])) {
                     $active['days'][$day] = 0.0;
                 }
                 $active['total'] += $timesheet->getDuration();
@@ -3183,13 +3225,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             $totalGroup[$groupFamily]['total'] += $timesheet->getDuration();
 
-            if(!array_key_exists($day, $totalGroup[$groupFamily]['days'])) $totalGroup[$groupFamily]['days'][$day] = 0.0;
+            if (!array_key_exists($day, $totalGroup[$groupFamily]['days'])) $totalGroup[$groupFamily]['days'][$day] = 0.0;
             $totalGroup[$groupFamily]['days']["$day"] += $timesheet->getDuration();
 
             $declarations[$path][$group]['subgroup'][$subGroup]['total'] += $timesheet->getDuration();
 
 
-            if(!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
+            if (!array_key_exists($day, $declarations[$path][$group]['subgroup'][$subGroup]['days'])) $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] = 0.0;
             $declarations[$path][$group]['subgroup'][$subGroup]['days'][$day] += $timesheet->getDuration();
 
 //            $declarations[$path][$group]['subgroup'][$subGroup]['days']['total'] += $timesheet->getDuration();
@@ -3200,16 +3242,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         /** @var Activity $activity */
-        foreach ($activities as $activity){
+        foreach ($activities as $activity) {
             /** @var ActivityOrganization $activityOrganization */
             foreach ($activity->getOrganizations() as $activityOrganization) {
-                if($activityOrganization->isPrincipal()){
+                if ($activityOrganization->isPrincipal()) {
                     $role = (string)$activityOrganization->getRole();
                     $organization = (string)$activityOrganization->getOrganization();
-                    if( !array_key_exists($role, $organizationsPrimary) ){
+                    if (!array_key_exists($role, $organizationsPrimary)) {
                         $organizationsPrimary[$role] = [];
                     }
-                    if( !in_array($organization, $organizationsPrimary[$role]) ){
+                    if (!in_array($organization, $organizationsPrimary[$role])) {
                         $organizationsPrimary[$role][] = $organization;
                     }
                 }
@@ -3241,7 +3283,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $output;
     }
 
-    public function getDatasActivityDates(Activity $activity, $periodDebut, $periodFin){
+    public function getDatasActivityDates(Activity $activity, $periodDebut, $periodFin)
+    {
         $datas = [
             'activity_id' => $activity->getId(),
             'activity_label' => (string)$activity,
@@ -3255,7 +3298,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $personsIds[] = $person->getId();
         }
 
-        if( count($personsIds) == 0 ){
+        if (count($personsIds) == 0) {
             throw new OscarException(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
         }
 
@@ -3317,7 +3360,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return ValidationPeriod[]
      * @throws OscarException
      */
-    public function getValidationsPeriodPersons($personIds, $period){
+    public function getValidationsPeriodPersons($personIds, $period)
+    {
 
         // extraction de la période
         $periodDatas = DateTimeUtils::extractPeriodDatasFromString($period);
@@ -3338,16 +3382,17 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $validations;
     }
 
-    public function getValidationHorsLotToValidateByPerson( Person $person ){
+    public function getValidationHorsLotToValidateByPerson(Person $person)
+    {
         /** @var ValidationPeriodRepository $validationPeriodRepository */
         $validationPeriodRepository = $this->getEntityManager()->getRepository(ValidationPeriod::class);
 
         $validations = $validationPeriodRepository->getValidationPeriodsOutWPToValidate($person->getId());
 
-        if( count($validations) == 0 )
+        if (count($validations) == 0)
             throw new OscarException("Aucune déclarations Hors-Lot en attente pour $person");
 
-       return $validations;
+        return $validations;
     }
 
     /**
@@ -3357,7 +3402,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return ValidationPeriod[]
      * @throws OscarException
      */
-    public function getValidationHorsLotByReferent(Person $referent, $filter=null)
+    public function getValidationHorsLotByReferent(Person $referent, $filter = null)
     {
         $validations = [];
         if ($referent) {
@@ -3368,29 +3413,25 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'group' => ValidationPeriod::GROUP_OTHER,
                 ];
 
-                $validationsQuery = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
-                    ->where('vp.declarer IN(:persons)')
-                    ->andWhere('vp.objectGroup = :group');
+            $validationsQuery = $this->getEntityManager()->getRepository(ValidationPeriod::class)->createQueryBuilder('vp')
+                ->where('vp.declarer IN(:persons)')
+                ->andWhere('vp.objectGroup = :group');
 
-                if( $filter == "tovalid" ){
-                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
-                    $validationsQuery->andWhere('vp.status != :step');
-                }
-
-                elseif ($filter == 'valid' ) {
-                    $parameters['step'] = ValidationPeriod::STATUS_VALID;
-                    $validationsQuery->andWhere('vp.status = :step');
-                }
-
-                elseif ($filter == null ){
+            if ($filter == "tovalid") {
+                $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                $validationsQuery->andWhere('vp.status != :step');
+            } elseif ($filter == 'valid') {
+                $parameters['step'] = ValidationPeriod::STATUS_VALID;
+                $validationsQuery->andWhere('vp.status = :step');
+            } elseif ($filter == null) {
 
 
-                } else {
-                    throw new OscarException("Mauvaise utilisation de la méthode : getValidationHorsLotByReferent");
-                }
+            } else {
+                throw new OscarException("Mauvaise utilisation de la méthode : getValidationHorsLotByReferent");
+            }
 
-                $validationsQuery->setParameters($parameters);
-                $validations = $validationsQuery->getQuery()->getResult();
+            $validationsQuery->setParameters($parameters);
+            $validations = $validationsQuery->getQuery()->getResult();
         }
         return $validations;
     }
@@ -3509,7 +3550,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         throw new OscarException("PAS FAIT");
     }
 
-    public function getDeclarersAtPeriod($periodCodeStr){
+    public function getDeclarersAtPeriod($periodCodeStr)
+    {
         /** @var ProjectGrantRepository $activityRepository */
         $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
 
@@ -3521,16 +3563,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             foreach ($activitiesAtPeriod as $activity) {
                 foreach ($activity->getDeclarers() as $declarer) {
                     $declarer_id = $declarer->getId();
-                    if( !array_key_exists($declarer_id, $declarers) ){
+                    if (!array_key_exists($declarer_id, $declarers)) {
                         $declarers[$declarer_id] = $declarer->toArray();
                         $declarers[$declarer_id]['projects'] = [];
                     }
-                    if( !in_array($activity->getAcronym(), $declarers[$declarer_id]['projects']) ){
+                    if (!in_array($activity->getAcronym(), $declarers[$declarer_id]['projects'])) {
                         $declarers[$declarer_id]['projects'][] = $activity->getAcronym();
                     }
                 }
             }
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             throw new OscarException("Impossible de charger les déclarants pour cette période : " . $e->getMessage());
         }
         return $declarers;
@@ -3624,8 +3666,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     protected function getQueryTimesheetsPersonPeriod($currentPerson, \DateTime $from, \DateTime $to)
     {
-        $from->setTime(0,0,0);
-        $to->setTime(23,59,59);
+        $from->setTime(0, 0, 0);
+        $to->setTime(23, 59, 59);
         $query = $this->getEntityManager()->createQueryBuilder('t')
             ->select('t')
             ->from(TimeSheet::class, 't')
@@ -3757,7 +3799,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $query->getResult();
     }
 
-    public function sendPeriod($from, $to, $sender, $comments=null)
+    public function sendPeriod($from, $to, $sender, $comments = null)
     {
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
@@ -3771,7 +3813,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $annee = (integer)$from->format('Y');
 
 
-
         // Déclarations de la période
         $declarations = $this->getValidationPeriods($annee, $mois, $sender);
 
@@ -3782,23 +3823,21 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $error = true;
             /** @var ValidationPeriod $declaration */
             foreach ($declarations as $declaration) {
-                if($declaration->hasConflict()){
+                if ($declaration->hasConflict()) {
                     $error = false;
                 }
             }
 
             // Si on n'a pas de conflit => ERREUR
-            if( $error ) {
+            if ($error) {
                 throw new OscarException("Vous avez déjà envoyé des déclarations pour cette période");
-            }
-
-            // Sinon on supprime les anciennes validations
+            } // Sinon on supprime les anciennes validations
             else {
                 $this->getLoggerService()->debug("Suppression des anciennes déclarations");
                 /** @var ValidationPeriod $v */
-                foreach ($declarations as $v){
+                foreach ($declarations as $v) {
                     /** @var TimeSheet $t */
-                    foreach ($v->getTimesheets() as $t){
+                    foreach ($v->getTimesheets() as $t) {
                         $t->setValidationPeriod(null);
                     }
                     $this->getEntityManager()->remove($v);
@@ -3834,11 +3873,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             if (!array_key_exists($key, $declarations)) {
                 $comment = "";
                 $objectCommentKey = $objectId;
-                if( $objectCommentKey == -1 ) $objectCommentKey = $object;
+                if ($objectCommentKey == -1) $objectCommentKey = $object;
 
 
-                if( $comments && array_key_exists($objectCommentKey, $comments) ){
-                    $this->getLoggerService()->debug('Comment KEY : '. $objectCommentKey);
+                if ($comments && array_key_exists($objectCommentKey, $comments)) {
+                    $this->getLoggerService()->debug('Comment KEY : ' . $objectCommentKey);
                     $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
 
                 }
@@ -3876,7 +3915,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function isValidator( Person $person ){
+    public function isValidator(Person $person)
+    {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('vp')
             ->leftJoin('vp.validatorsPrj', 'vprj')
@@ -3917,7 +3957,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $validations;
     }
 
-    public function getInvalidLabels(){
+    public function getInvalidLabels()
+    {
         $output = [];
 
         $horsLots = [];
@@ -3934,7 +3975,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'othersWP' => $horsLots
             ]);
 
-        foreach( $query->getArrayResult() as $d ){
+        foreach ($query->getArrayResult() as $d) {
             $output[] = $d['label'];
 
         }
@@ -3942,7 +3983,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $output;
     }
 
-    public function maintenanceConvertHorsLots( $correspondances ){
+    public function maintenanceConvertHorsLots($correspondances)
+    {
 
         $labels = array_keys($correspondances);
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)->createQueryBuilder('t')
@@ -3952,7 +3994,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'othersWP' => $labels
             ]);
         /** @var TimeSheet $timesheet */
-        foreach ($query->getResult() as $timesheet){
+        foreach ($query->getResult() as $timesheet) {
             $oldLabel = $timesheet->getLabel();
             $newLabel = $correspondances[$oldLabel];
 
@@ -3967,7 +4009,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     {
         if ($period->isValidator($validateur)) {
 
-            if($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY){
+            if ($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY) {
                 $obj = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId())->log();
             } else {
                 $obj = $period->getLabel();
@@ -4009,7 +4051,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     public function reject(ValidationPeriod $period, Person $validateur, $message = "")
     {
 
-        if($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY){
+        if ($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY) {
             $obj = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId())->log();
         } else {
             $obj = $period->getLabel();
@@ -4020,7 +4062,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $validationPeriods = $this->getValidationPeriods($period->getYear(), $period->getMonth(), $period->getDeclarer());
 
             /** @var ValidationPeriod $validationPeriod */
-            foreach($validationPeriods as $validationPeriod){
+            foreach ($validationPeriods as $validationPeriod) {
                 $validationPeriod->reject($validateur, $message);
             }
 
@@ -4083,7 +4125,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return ValidationPeriod
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup, $comment="")
+    protected function createDeclaration($sender, $year, $month, $object, $objectId, $objectGroup, $comment = "")
     {
 
         $declaration = new ValidationPeriod();
@@ -4736,7 +4778,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param $idDeclarant
      * @param $periodStr
      */
-    public function personIsDeclarantPeriod($idDeclarant, $periodStr) {
+    public function personIsDeclarantPeriod($idDeclarant, $periodStr)
+    {
         try {
             /** @var Person $person */
             $person = $this->getPersonService()->getPerson($idDeclarant);
@@ -4748,7 +4791,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         /** @var WorkPackagePerson $personWorkPackage */
         foreach ($person->getWorkPackages() as $personWorkPackage) {
-            if( DateTimeUtils::periodInside($periodStr, $personWorkPackage->getWorkPackage()->getDateStart(), $personWorkPackage->getWorkPackage()->getDateEnd())) {
+            if (DateTimeUtils::periodInside($periodStr, $personWorkPackage->getWorkPackage()->getDateStart(), $personWorkPackage->getWorkPackage()->getDateEnd())) {
                 return true;
             }
         }
@@ -4757,29 +4800,30 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function personDeclarationState($declarantId, $periodStr) {
+    public function personDeclarationState($declarantId, $periodStr)
+    {
         $person = $this->getPersonService()->getPerson($declarantId);
         $datas = $this->getTimesheetDatasPersonPeriod($person, $periodStr);
 
         $output = [
             'datas' => $datas,
-            'person'        => (string)$person,
-            'person_id'     => $person->getId(),
-            'period'        => $periodStr,
-            'state'         => 'UNDEFINED',
-            'hasConflict'   => $datas['hasConflict'],
-            'periodFutur'   => $datas['periodFutur'],
-            'periodFinished'   => $datas['periodFinished'],
-            'periodCurrent'   => $datas['periodCurrent'],
-            'submitable'   => $datas['submitable'],
-            'editable'   => $datas['editable'],
-            'dayNbr'   => $datas['dayNbr'],
-            'total'   => $datas['total'],
-            'periodsValidations'   => count($datas['periodsValidations']),
+            'person' => (string)$person,
+            'person_id' => $person->getId(),
+            'period' => $periodStr,
+            'state' => 'UNDEFINED',
+            'hasConflict' => $datas['hasConflict'],
+            'periodFutur' => $datas['periodFutur'],
+            'periodFinished' => $datas['periodFinished'],
+            'periodCurrent' => $datas['periodCurrent'],
+            'submitable' => $datas['submitable'],
+            'editable' => $datas['editable'],
+            'dayNbr' => $datas['dayNbr'],
+            'total' => $datas['total'],
+            'periodsValidations' => count($datas['periodsValidations']),
         ];
 
         $waitingTotal = 0.0;
-        foreach ($datas['days'] as $day ){
+        foreach ($datas['days'] as $day) {
             $waitingTotal += $day['dayLength'];
         }
         $output['waitingTotal'] = $waitingTotal;
@@ -4787,47 +4831,47 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $validations = [];
         foreach ($datas['periodsValidations'] as $validation) {
             $validationStatus = $validation['status'];
-            if( !in_array($validationStatus, $validations) )
+            if (!in_array($validationStatus, $validations))
                 $validations[] = $validationStatus;
         }
         $output['validations'] = $validations;
 
-        if( count($datas['workpackages']) == 0 ){
+        if (count($datas['workpackages']) == 0) {
             throw new OscarException("$person n'est pas identifiée sur des lots de travail pour la période $periodStr");
         }
 
-        if( $datas['periodFutur'] == true ){
-            $output['state'] =  "PERIOD_FUTUR";
-            $output['stateText'] =  "Période à venir";
+        if ($datas['periodFutur'] == true) {
+            $output['state'] = "PERIOD_FUTUR";
+            $output['stateText'] = "Période à venir";
             return $output;
         }
 
-        if( $datas['periodFinished'] == true ){
+        if ($datas['periodFinished'] == true) {
 
-            if( $datas['hasConflict'] == true ){
-                $output['state'] =  "PERIOD_CONFLICT";
-                $output['stateText'] =  "Conflit en cours de résolution";
+            if ($datas['hasConflict'] == true) {
+                $output['state'] = "PERIOD_CONFLICT";
+                $output['stateText'] = "Conflit en cours de résolution";
                 return $output;
             }
 
-            if( count($datas['periodsValidations']) == 0 ){
-                $output['state'] =  "PERIOD_NODECLARATION";
-                $output['stateText'] =  "Aucune déclaration envoyée";
+            if (count($datas['periodsValidations']) == 0) {
+                $output['state'] = "PERIOD_NODECLARATION";
+                $output['stateText'] = "Aucune déclaration envoyée";
                 return $output;
             } else {
-                if( count($output['validations']) == 1 && $output['validations'][0] == 'valid' ){
-                    $output['state'] =  "PERIOD_VALID";
-                    $output['stateText'] =  "Validée";
+                if (count($output['validations']) == 1 && $output['validations'][0] == 'valid') {
+                    $output['state'] = "PERIOD_VALID";
+                    $output['stateText'] = "Validée";
                 } else {
-                    $output['state'] =  "PERIOD_DECLARATION_TODO";
-                    $output['stateText'] =  "En attente de validation";
+                    $output['state'] = "PERIOD_DECLARATION_TODO";
+                    $output['stateText'] = "En attente de validation";
                 }
                 return $output;
             }
 
         } else {
-            $output['state'] =  "PERIOD_UNFINISHED";
-            $output['stateText'] =  "La période n'est pas terminée";
+            $output['state'] = "PERIOD_UNFINISHED";
+            $output['stateText'] = "La période n'est pas terminée";
             return $output;
         }
 

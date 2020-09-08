@@ -17,7 +17,9 @@ use Oscar\Entity\Role;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Service\ConnectorService;
+use Oscar\Service\MailingService;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\OscarMailerService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
@@ -29,6 +31,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use UnicaenApp\Service\Mailer\MailerService;
 use Zend\Validator\Date;
 
 class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
@@ -39,13 +42,16 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     const OPT_DECLARER      = "declarer";
     const OPT_PERIOD        = "period";
 
+    const ARG_ALL        = "all";
+
     protected function configure()
     {
         $this
             ->setDescription("Système de relance des déclarants")
             ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
             ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_REQUIRED, "Identifiant du déclarant")
-            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période");
+            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période")
+            ->addArgument(self::ARG_ALL, InputArgument::OPTIONAL, "Déclencher pour tous les déclarants", false);
         ;
     }
 
@@ -53,10 +59,21 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
+        $io = new SymfonyStyle($input, $output);
+
+        // Argument ALL
+        $all = $input->getArgument(self::ARG_ALL);
+
         /// OPTIONS and PARAMETERS
         $declarerId = $input->getOption(self::OPT_DECLARER);
-        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
 
+        if( $all == false && $declarerId == null ){
+            $io->writeln("Utiliser l'option --declarant=ID");
+            $this->declarersList($input, $output);
+            return;
+        }
+
+        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
         if( !$declarerPeriod ){
             $today = date('Y-m-d');
             $time = strtotime($today);
@@ -64,8 +81,55 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $declarerPeriod = DateTimeUtils::getPeriodStrFromDateStr($final);
         }
 
-        $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
+        $do = false;
 
+        if( $all == true ){
+            $declarants = $this->getTimesheetService()->getDeclarers();
+            $out = [];
+            /** @var Person $declarer */
+            foreach ($declarants['persons'] as $personId=>$datas) {
+                try {
+                    $result = $this->recallDeclarer($personId, $declarerPeriod, $io);
+                } catch (\Exception $e) {
+                    $io->warning($e->getMessage());
+                }
+            }
+        } else {
+            $result = $this->recallDeclarer($declarerId, $declarerPeriod, $io);
+        }
+    }
+
+    protected function recallDeclarer($declarerId, $declarerPeriod, SymfonyStyle $io)
+    {
+        /** @var Person $declarer */
+        $declarer = $this->getPersonService()->getPersonById($declarerId);
+        $result = $this->declarerPeriod($declarerId, $declarerPeriod);
+        $io->title($result['person']);
+        $io->writeln(sprintf("Message : <options=bold>%s</>", $result['message']));
+        $io->writeln(sprintf("Mail ? <options=bold>%s</>", $result['needSend'] ? 'Oui' : 'Non'));
+        $io->writeln(sprintf("Déclaration (heures) : <options=bold>%s/%s</>", $result['total'], $result['needed']));
+        $io->writeln(sprintf("Max : <options=bold>%s</>", $result['max']));
+        $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
+
+        if( $result['needSend'] ){
+            $message = $this->getMailer()->newMessage("[OSCAR] Déclaration de temps $declarerPeriod", "CONTENU : " . $result['message']);
+            $message->setTo($declarer->getEmail());
+            $message->setBody("Message : " . $result['message']);
+            $this->getMailer()->send($message);
+            echo "MAIL !!!! \n";
+        }
+    }
+
+    /**
+     * @return MailingService
+     */
+    protected function getMailer()
+    {
+        static $mailer;
+        if( $mailer === null ){
+            $mailer = $this->getServicemanager()->get(MailingService::class);
+        }
+        return $mailer;
     }
 
     /**
@@ -84,8 +148,8 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
 
     //public function declarerRecall
 
-    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
-        $this->getTimesheetService()->getPersonRecallDeclarationPeriod($declarerId, $period);
+    public function declarerPeriod( $declarerId, $period ){
+        return $this->getTimesheetService()->getPersonRecallDeclarationPeriod($declarerId, $period);
     }
 
     public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
@@ -107,6 +171,21 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     }
 
     public function declarersList( InputInterface $input, OutputInterface $output ){
+        $io = new SymfonyStyle($input, $output);
+        $io->title("Lite des déclarants");
+        try {
+            $declarants = $this->getTimesheetService()->getDeclarers();
+            $out = [];
+            /** @var Person $declarer */
+            foreach ($declarants['persons'] as $personId=>$datas) {
+                $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
+            }
+            $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
+            $io->table($headers, $out);
 
+            $io->comment("Entrez la commande '".self::getName()." --". self::OPT_DECLARER . "=<ID>' pour afficher les détails");
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
+        }
     }
 }
