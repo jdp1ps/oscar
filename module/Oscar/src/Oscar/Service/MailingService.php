@@ -77,9 +77,7 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.port'),
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.security')))
                         ->setUsername($this->getOscarConfigurationService()->getConfiguration('mailer.transport.username'))
-                        ->setPassword($this->getOscarConfigurationService()->getConfiguration('mailer.transport.password'))
-                    ;
-
+                        ->setPassword($this->getOscarConfigurationService()->getConfiguration('mailer.transport.password'));
                     break;
 
                 case 'sendmail':
@@ -88,7 +86,6 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
 
                 case 'file':
                     return new SwiftTransportFileOutput($this->getOscarConfigurationService()->getConfiguration('mailer.transport.path', '/tmp'));
-
 
                 default:
                     throw new OscarException("Le système de mailing n'est pas configuré.");
@@ -107,8 +104,8 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
     public function newMessage( $subject = "", $content = []){
         $msg = new \Swift_Message();
         $msg->setFrom($this->getOscarConfigurationService()->getConfiguration('mailer.from'))
-            ->setSubject($this->getOscarConfigurationService()->getConfiguration('mailer.subjectPrefix') . $subject)
-        ;
+            ->setSubject($this->getOscarConfigurationService()->getConfiguration('mailer.subjectPrefix') . $subject);
+
         if( $content && is_array($content) && array_key_exists('body', $content) ){
             $body = $content['body'];
             $title = array_key_exists('title', $content) ? $content['title'] : $subject;
