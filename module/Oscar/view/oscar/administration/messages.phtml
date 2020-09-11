@@ -1,26 +1,50 @@
 <div class="container">
-    <h1>Messages de relance</h1>
-    <div class="row">
-        <div class="col-md-4">
-            <form action="" method="post">
-                <h3><i class="icon-calendar"></i> Déclarants, Première relance</h3>
-                <input type="hidden" name="messageName" value="declarersRelance1" />
-                <textarea name="messageValue" id="" cols="30" rows="10" class="form-control"><?= $declarersRelance1 ?></textarea>
-                <button type="submit" class="btn btn-primary">
-                    Enregistrer
-                </button>
-            </form>
+    <form action="" method="post">
+        <h1>Messages de relance</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <h3><i class="icon-calendar"></i> Déclarants, première relance</h3>
+                <p>
+                    Envoyée à <strong>J+</strong>
+                    <input type="number" name="declarersRelanceJour1" value="<?= $declarersRelanceJour1 ?>"/>
+                </p>
+                <textarea name="declarersRelance1" id="" cols="30" rows="10"
+                          class="form-control"><?= $declarersRelance1 ?></textarea>
+            </div>
+            <div class="col-md-4">
+                <h3><i class="icon-calendar"></i> Déclarant, deuxième relance</h3>
+                <p>
+                    Envoyée à <strong>J+</strong>
+                    <input type="number" name="declarersRelanceJour2" value="<?= $declarersRelanceJour2 ?>"/>
+                </p>
+                <textarea name="declarersRelance2" id="" cols="30" rows="10"
+                          class="form-control"><?= $declarersRelance2 ?></textarea>
+            </div>
         </div>
-        <div class="col-md-4">
-            <form action="" method="post">
-                <h3><i class="icon-calendar"></i> Déclarant, Deuxième relance</h3>
-                <input type="hidden" name="messageName" value="declarersRelance2" />
-                <textarea name="messageValue" id="" cols="30" rows="10" class="form-control"><?= $declarersRelance2 ?></textarea>
-                <button type="submit" class="btn btn-primary">
-                    Enregistrer
-                </button>
-            </form>
-        </div>
-    </div>
 
+        <div class="row">
+            <div class="col-md-4">
+                <h3><i class="icon-calendar"></i> Validateur scientifique, première relance</h3>
+                <p>
+                    Envoyée à <strong>J+</strong>
+                    <input type="number" name="validatorsRelanceJour1" value="<?= $validatorsRelanceJour1 ?>"/>
+                </p>
+                <textarea name="validatorsRelance1" id="" cols="30" rows="10"
+                          class="form-control"><?= $validatorsRelance1 ?></textarea>
+            </div>
+            <div class="col-md-4">
+                <h3><i class="icon-calendar"></i> Validateur scientifique, Deuxième relance</h3>
+                <p>
+                    Envoyée à <strong>J+</strong>
+                    <input type="number" name="validatorsRelanceJour2" value="<?= $validatorsRelanceJour2 ?>"/>
+                </p>
+                <textarea name="validatorsRelance2" id="" cols="30" rows="10"
+                          class="form-control"><?= $validatorsRelance2 ?></textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Enregistrer
+        </button>
+    </form>
 </div>

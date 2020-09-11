@@ -22,22 +22,25 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     use ServiceLocatorAwareTrait;
 
-    const allow_numerotation_custom     = 'allow_numerotation_custom';
-    const organization_leader_role      = 'organization_leader_role';
-    const spents_account_filter         = 'spents_account_filter';
-    const activity_request_limit        = 'activity_request_limit';
+    const allow_numerotation_custom = 'allow_numerotation_custom';
+    const organization_leader_role = 'organization_leader_role';
+    const spents_account_filter = 'spents_account_filter';
+    const activity_request_limit = 'activity_request_limit';
 
     const theme = 'theme';
 
-    protected function getConfig(){
+    protected function getConfig()
+    {
         return $this->getServiceLocator()->get('Config')['oscar'];
     }
 
-    public function getConfigArray(){
+    public function getConfigArray()
+    {
         return $this->getServiceLocator()->get('Config');
     }
 
-    public function getVersion(){
+    public function getVersion()
+    {
         return OscarVersion::getBuild();
     }
 
@@ -46,12 +49,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return array|object
      * @throws OscarException
      */
-    public function getConfiguration($key){
+    public function getConfiguration($key)
+    {
         $config = $this->getConfig();
-        if( $key ){
+        if ($key) {
             $paths = explode('.', $key);
             foreach ($paths as $path) {
-                if( !isset($config[$path]) ){
+                if (!isset($config[$path])) {
                     throw new OscarException("Clef '$path' absente dans la configuration");
                 }
                 $config = $config[$path];
@@ -65,12 +69,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @param null $defaultValue
      * @return array|null|object
      */
-    public function getOptionalConfiguration($key, $defaultValue = null){
+    public function getOptionalConfiguration($key, $defaultValue = null)
+    {
         $config = $this->getConfig();
-        if( $key ){
+        if ($key) {
             $paths = explode('.', $key);
             foreach ($paths as $path) {
-                if( !isset($config[$path]) ){
+                if (!isset($config[$path])) {
                     return $defaultValue;
                 }
                 $config = $config[$path];
@@ -85,28 +90,30 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     /**
      * @return string[]
      */
-    public function getNumerotationKeys(){
+    public function getNumerotationKeys()
+    {
         return $this->getEditableConfKey('numerotation', []);
     }
 
-    protected function getYamlConfigPath(){
-        $dir = realpath(__DIR__.'/../../../../../config/autoload/');
-        $file = $dir.'/oscar-editable.yml';
+    protected function getYamlConfigPath()
+    {
+        $dir = realpath(__DIR__ . '/../../../../../config/autoload/');
+        $file = $dir . '/oscar-editable.yml';
 
-        if( !file_exists($file) ){
-            if( !is_writeable($dir) ){
+        if (!file_exists($file)) {
+            if (!is_writeable($dir)) {
                 throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
             }
-        }
-        else if (!is_writeable($file)) {
+        } else if (!is_writeable($file)) {
             throw new OscarException("Impossible d'écrire le fichier $file");
         }
         return $file;
     }
 
-    protected function getEditableConfRoot(){
+    protected function getEditableConfRoot()
+    {
         $path = $this->getYamlConfigPath();
-        if( file_exists($path) ){
+        if (file_exists($path)) {
             $parser = new Parser();
             return $parser->parse(file_get_contents($path));
         } else {
@@ -114,158 +121,258 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         }
     }
 
-    public function saveEditableConfKey($key, $value){
+    public function saveEditableConfKey($key, $value)
+    {
         $conf = $this->getEditableConfRoot();
         $conf[$key] = $value;
         $writer = new Dumper();
         file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
     }
 
-    public function getEditableConfKey($key, $default = null){
+    public function getEditableConfKey($key, $default = null)
+    {
         $conf = $this->getEditableConfRoot();
-        if( array_key_exists($key, $conf) ){
+        if (array_key_exists($key, $conf)) {
             return $conf[$key];
         } else {
             return $default;
         }
     }
 
-    public function getOrganizationLeaderRole(){
+    public function getOrganizationLeaderRole()
+    {
         return $this->getEditableConfKey(self::organization_leader_role, []);
     }
 
-    public function setOrganizationLeaderRole($value){
+    public function setOrganizationLeaderRole($value)
+    {
         $this->saveEditableConfKey(self::organization_leader_role, $value);
     }
 
-    public function getNumerotationEditable(){
+    public function getNumerotationEditable()
+    {
         return $this->getEditableConfKey(self::allow_numerotation_custom, false);
     }
 
-    public function setNumerotationEditable( $boolean ){
+    public function setNumerotationEditable($boolean)
+    {
         $this->saveEditableConfKey(self::allow_numerotation_custom, $boolean);
     }
 
-    public function getValidationPFI(){
+    public function getValidationPFI()
+    {
         return $this->getConfiguration('validation.pfi');
     }
 
-    public function getTheme(){
+    public function getTheme()
+    {
         $global = $this->getConfiguration('theme');
         return $this->getEditableConfKey('theme', $global);
     }
 
-    public function getDeclarersRelance1(){
+    // --- PARAMETRES de RELANCE
+
+    // DECLARANT
+    // RELANCE 1
+    public function getDeclarersRelance1()
+    {
         return $this->getEditableConfKey('declarersRelance1', '');
     }
 
-    public function setDeclarersRelance1( $value ){
+    public function setDeclarersRelance1($value)
+    {
         return $this->saveEditableConfKey('declarersRelance1', $value);
     }
 
-    public function getDeclarersRelance2(){
+    public function getDeclarersRelanceJour1()
+    {
+        return $this->getEditableConfKey('declarersRelanceJour1', 1);
+    }
+
+    public function setDeclarersRelanceJour1($value)
+    {
+        return $this->saveEditableConfKey('declarersRelanceJour1', $value);
+    }
+
+    // RELANCE 2
+    public function getDeclarersRelance2()
+    {
         return $this->getEditableConfKey('declarersRelance2', '');
     }
 
-    public function setDeclarersRelance2( $value ){
+    public function setDeclarersRelance2($value)
+    {
         return $this->saveEditableConfKey('declarersRelance2', $value);
     }
 
-    public function setTheme( $theme ){
-        if( in_array($theme, $this->getConfiguration('themes')) ){
+    public function getDeclarersRelanceJour2()
+    {
+        return $this->getEditableConfKey('declarersRelanceJour2', 5);
+    }
+
+    public function setDeclarersRelanceJour2($value)
+    {
+        return $this->saveEditableConfKey('declarersRelanceJour2', $value);
+    }
+
+    // VALIDATORS
+    // RELANCE 1
+    public function getvalidatorsRelance1()
+    {
+        return $this->getEditableConfKey('validatorsRelance1', '');
+    }
+
+    public function setvalidatorsRelance1($value)
+    {
+        return $this->saveEditableConfKey('validatorsRelance1', $value);
+    }
+
+    public function getvalidatorsRelanceJour1()
+    {
+        return $this->getEditableConfKey('validatorsRelanceJour1', 1);
+    }
+
+    public function setvalidatorsRelanceJour1($value)
+    {
+        return $this->saveEditableConfKey('validatorsRelanceJour1', $value);
+    }
+
+    // RELANCE 2
+    public function getvalidatorsRelance2()
+    {
+        return $this->getEditableConfKey('validatorsRelance2', '');
+    }
+
+    public function setvalidatorsRelance2($value)
+    {
+        return $this->saveEditableConfKey('validatorsRelance2', $value);
+    }
+
+    public function getvalidatorsRelanceJour2()
+    {
+        return $this->getEditableConfKey('validatorsRelanceJour2', 5);
+    }
+
+    public function setvalidatorsRelanceJour2($value)
+    {
+        return $this->saveEditableConfKey('validatorsRelanceJour2', $value);
+    }
+
+
+    public function setTheme($theme)
+    {
+        if (in_array($theme, $this->getConfiguration('themes'))) {
             $this->saveEditableConfKey('theme', $theme);
         } else {
             throw new OscarException("Le thème '$theme' n'existe pas");
         }
     }
 
-    public function getTimesheetExcel(){
+    public function getTimesheetExcel()
+    {
         return $this->getEditableConfKey('timesheet_excel', false);
     }
 
-    public function setTimesheetExcel( $bool ){
-        $this->saveEditableConfKey('timesheet_excel', (boolean)$bool ? true : false );
+    public function setTimesheetExcel($bool)
+    {
+        $this->saveEditableConfKey('timesheet_excel', (boolean)$bool ? true : false);
     }
 
-    public function getTimesheetPreview(){
+    public function getTimesheetPreview()
+    {
         return $this->getEditableConfKey('timesheet_preview', false);
     }
 
-    public function setTimesheetPreview( $bool ){
-        $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false );
+    public function setTimesheetPreview($bool)
+    {
+        $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false);
     }
 
     /**
      * Retourne l'emplacement où sont stoqués les documents publiques.
      * @return string
      */
-    public function getDocumentPublicPath(){
+    public function getDocumentPublicPath()
+    {
         static $publicdoclocation;
-        if( $publicdoclocation == null ){
+        if ($publicdoclocation == null) {
             $conf = $this->getConfiguration('paths.document_admin_oscar');
-            if( !file_exists($conf) || !is_writable($conf) ){
+            if (!file_exists($conf) || !is_writable($conf)) {
                 throw new OscarException("L'emplacement des documents publiques n'est pas un dossier accessible en écriture");
             }
-            $publicdoclocation = $conf.'/';
+            $publicdoclocation = $conf . '/';
         }
         return $publicdoclocation;
     }
 
 
-    public function getExportSeparator(){
+    public function getExportSeparator()
+    {
         return $this->getEditableConfKey('export_format', '|');
     }
 
-    public function getExportComputedFields(){
+    public function getExportComputedFields()
+    {
         return $this->getConfiguration('export.computedFields', []);
     }
 
-    public function getEstimatedSpentActivityTemplate(){
+    public function getEstimatedSpentActivityTemplate()
+    {
         return $this->getConfiguration('estimated_spent_activity_template');
     }
 
-    public function getGearmanHost(){
+    public function getGearmanHost()
+    {
         return $this->getConfiguration('gearman-job-server-host');
     }
 
-    public function setExportSeparator( $string ){
+    public function setExportSeparator($string)
+    {
         $this->saveEditableConfKey('export_format', $string);
     }
 
-    public function getExportDateFormat(){
+    public function getExportDateFormat()
+    {
         return $this->getEditableConfKey('export_dateformat', 'y-m-d');
     }
 
-    public function setExportDateFormat( $string ){
+    public function setExportDateFormat($string)
+    {
         $this->saveEditableConfKey('export_dateformat', $string);
     }
 
-    public function getSpentAccountFilter(){
+    public function getSpentAccountFilter()
+    {
         return $this->getEditableConfKey(self::spents_account_filter, []);
     }
 
-    public function setSpentAccountFilter( $stringArray ){
+    public function setSpentAccountFilter($stringArray)
+    {
         $extract = new DataStringArray();
         $data = $extract->extract($stringArray);
         $this->saveEditableConfKey(self::spents_account_filter, $data);
     }
 
-    public function getActivityRequestLimit(){
+    public function getActivityRequestLimit()
+    {
         return $this->getEditableConfKey(self::activity_request_limit, 5);
     }
 
-    public function setActivityRequestLimit( int $value ){
+    public function setActivityRequestLimit(int $value)
+    {
         $this->saveEditableConfKey(self::activity_request_limit, $value);
     }
 
-    public function getMasses(){
+    public function getMasses()
+    {
         return $this->getConfiguration('spenttypeannexes');
     }
 
     /**
      * @return bool
      */
-    public function getAutoUpdateSpent(){
+    public function getAutoUpdateSpent()
+    {
         return $this->getOptionalConfiguration("autorefreshspents", false);
     }
 }

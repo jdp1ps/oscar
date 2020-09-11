@@ -1134,7 +1134,14 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $method = $this->getHttpXMethod();
         $messages = [
             'declarersRelance1' => $this->getOscarConfigurationService()->getDeclarersRelance1(),
-            'declarersRelance2' => $this->getOscarConfigurationService()->getDeclarersRelance2()
+            'declarersRelanceJour1' => $this->getOscarConfigurationService()->getDeclarersRelanceJour1(),
+            'declarersRelance2' => $this->getOscarConfigurationService()->getDeclarersRelance2(),
+            'declarersRelanceJour2' => $this->getOscarConfigurationService()->getDeclarersRelanceJour2(),
+            /**  **/
+            'validatorsRelance1' => $this->getOscarConfigurationService()->getValidatorsRelance1(),
+            'validatorsRelanceJour1' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour1(),
+            'validatorsRelance2' => $this->getOscarConfigurationService()->getValidatorsRelance2(),
+            'validatorsRelanceJour2' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
         ];
 
         switch ($method) {
@@ -1142,18 +1149,24 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 return $messages;
 
             case 'POST' :
-                switch ($this->params()->fromPost('messageName') ){
-                    case 'declarersRelance1' :
-                        $value = $this->params()->fromPost('messageValue');
-                        $this->getOscarConfigurationService()->setDeclarersRelance1($value);
-                        break;
-                    case 'declarersRelance2' :
-                        $value = $this->params()->fromPost('messageValue');
-                        $this->getOscarConfigurationService()->setDeclarersRelance2($value);
-                        break;
-                    default:
-                        return $this->getResponseBadRequest();
-                }
+                $declarersRelance1 = $this->params()->fromPost('declarersRelance1');
+                $declarersRelanceJour1 = (int) $this->params()->fromPost('declarersRelanceJour1');
+                $declarersRelance2 = $this->params()->fromPost('declarersRelance2');
+                $declarersRelanceJour2 = (int) $this->params()->fromPost('declarersRelanceJour2');
+                $validatorsRelance1 = $this->params()->fromPost('validatorsRelance1');
+                $validatorsRelanceJour1 = (int) $this->params()->fromPost('validatorsRelanceJour1');
+                $validatorsRelance2 = $this->params()->fromPost('validatorsRelance2');
+                $validatorsRelanceJour2 = (int) $this->params()->fromPost('validatorsRelanceJour2');
+
+                $this->getOscarConfigurationService()->setDeclarersRelance1($declarersRelance1);
+                $this->getOscarConfigurationService()->setDeclarersRelanceJour1($declarersRelanceJour1);
+                $this->getOscarConfigurationService()->setDeclarersRelance2($declarersRelance2);
+                $this->getOscarConfigurationService()->setDeclarersRelanceJour2($declarersRelanceJour2);
+                $this->getOscarConfigurationService()->setValidatorsRelance1($validatorsRelance1);
+                $this->getOscarConfigurationService()->setValidatorsRelanceJour1($validatorsRelanceJour1);
+                $this->getOscarConfigurationService()->setValidatorsRelance2($validatorsRelance2);
+                $this->getOscarConfigurationService()->setValidatorsRelanceJour2($validatorsRelanceJour2);
+
                 return $this->redirect()->toRoute('administration/messages');
                 break;
         }
