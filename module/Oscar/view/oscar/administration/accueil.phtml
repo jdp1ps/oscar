@@ -26,11 +26,32 @@
                     <i class="icon-cog"></i>
                     Options
                 </strong>
-                <a href="<?= $this->url('administration/parameters') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/parameters') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+
             </h3>
             <p>Options générales de l'application</p>
         </article>
+        <?php /****
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cog"></i>
+                    Messages
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
 
+            </h3>
+            <p>Messages et formules</p>
+        </article>
+        /****/ ?>
         <article class="card">
             <h3 class="card-title">
                 <strong>

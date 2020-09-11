@@ -759,5 +759,13 @@
     "code": "NOTIFICATION_PERSON",
     "libelle": "Peut notifier manuellement une personne",
     "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
+  },
+
+  "MAINTENANCE-PARAMETERS_MANAGE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "PARAMETERS_MANAGE",
+    "libelle": "Peut gérer les paramètres",
+    "fullcode": "MAINTENANCE-PARAMETERS_MANAGE"
   }
 }

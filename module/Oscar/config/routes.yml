@@ -1776,3 +1776,12 @@ administration:
                          route: /api[/[:typedocumentid]]
                          defaults:
                            action: typeDocumentApi
+
+        # Types d'organisation
+        messages:
+            type: segment
+            options:
+                route: /messages
+                defaults:
+                    action: messages
+            may_terminate: true

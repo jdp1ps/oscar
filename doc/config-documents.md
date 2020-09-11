@@ -57,3 +57,7 @@ Puis pensez à recharger Apache :
 ```bash
 service apache2 restart
 ```
+
+## Documents générés
+
+Oscar permet de générer des documents automatiquement à partir de gabarits (.doc), plus d'information dans la document [Générer des documents](generated-documents.md). 

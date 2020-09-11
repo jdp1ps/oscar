@@ -1127,4 +1127,38 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $this->getResponseBadRequest("Accès à l'API improbable...");
     }
 
+    public function messagesAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
+
+        $method = $this->getHttpXMethod();
+        $messages = [
+            'declarersRelance1' => $this->getOscarConfigurationService()->getDeclarersRelance1(),
+            'declarersRelance2' => $this->getOscarConfigurationService()->getDeclarersRelance2()
+        ];
+
+        switch ($method) {
+            case 'GET' :
+                return $messages;
+
+            case 'POST' :
+                switch ($this->params()->fromPost('messageName') ){
+                    case 'declarersRelance1' :
+                        $value = $this->params()->fromPost('messageValue');
+                        $this->getOscarConfigurationService()->setDeclarersRelance1($value);
+                        break;
+                    case 'declarersRelance2' :
+                        $value = $this->params()->fromPost('messageValue');
+                        $this->getOscarConfigurationService()->setDeclarersRelance2($value);
+                        break;
+                    default:
+                        return $this->getResponseBadRequest();
+                }
+                return $this->redirect()->toRoute('administration/messages');
+                break;
+        }
+
+        return $this->getResponseBadRequest("Accès à l'API improbable...");
+    }
+
 }

@@ -155,6 +155,22 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getEditableConfKey('theme', $global);
     }
 
+    public function getDeclarersRelance1(){
+        return $this->getEditableConfKey('declarersRelance1', '');
+    }
+
+    public function setDeclarersRelance1( $value ){
+        return $this->saveEditableConfKey('declarersRelance1', $value);
+    }
+
+    public function getDeclarersRelance2(){
+        return $this->getEditableConfKey('declarersRelance2', '');
+    }
+
+    public function setDeclarersRelance2( $value ){
+        return $this->saveEditableConfKey('declarersRelance2', $value);
+    }
+
     public function setTheme( $theme ){
         if( in_array($theme, $this->getConfiguration('themes')) ){
             $this->saveEditableConfKey('theme', $theme);

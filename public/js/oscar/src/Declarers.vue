@@ -89,7 +89,9 @@
         <transition name="fade">
             <div class="overlay" v-if="loading">
                 <div class="overlay-content">
-                    <p>Chargement de la période</p>
+                    <p>
+                        <i class="icon-spinner animate-spin"></i>
+                        Chargement de la période</p>
                 </div>
             </div>
         </transition>
@@ -210,7 +212,7 @@
 
         methods: {
             recall(personId, period){
-              console.log(personId, period.periodCode, this.urlurlRecallDeclarer);
+              console.log(personId, period.periodCode, this.urlRecallDeclarer);
             },
 
             details(declarer){
