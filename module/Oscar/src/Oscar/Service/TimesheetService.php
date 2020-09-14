@@ -2475,6 +2475,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
     public function getPersonRecallDeclarationPeriod($declarerId, $period)
     {
+
+        /****
+         * if( $result['needSend'] ){
+         * $message = $this->getMailer()->newMessage("[OSCAR] Déclaration de temps $declarerPeriod", "CONTENU : " . $result['message']);
+         * $message->setTo($declarer->getEmail());
+         * $message->setBody("Message : " . $result['message']);
+         * $this->getMailer()->send($message);
+         * echo "MAIL !!!! \n";
+         * }
+         */
         $sendMail = false;
         $message = "";
         $total = 0.0; // Temps total saisi
@@ -2506,11 +2516,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         $validations = $this->getValidationPeriodRepository()->getValidationPeriodForPersonAtPeriod($declarerId, $period);
+        $statusPack = [];
 
         if (count($validations)) {
             $hasConflict = false;
             /** @var ValidationPeriod $validation */
             foreach ($validations as $validation) {
+                $statusPack[] = $validation->getStatus();
                 if ($validation->hasConflict()) {
                     $hasConflict = true;
                 }
@@ -2522,7 +2534,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $message = "La déclaration a bien été envoyée";
             }
         } else {
-            if( $total < $min ){
+            if ($total < $min) {
                 $message = "Complétez votre déclaration de temps pour la période $period";
             } else {
                 $message = "Pensez à envoyer votre déclaration de temps pour la période $period";
@@ -2533,13 +2545,37 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return [
             'person' => "$declarer",
             'message' => "$message",
+            'mailRequired' => $sendMail,
             'needSend' => $sendMail,
             'max' => $max,
             'min' => $min,
             'total' => $total,
-            'needed' => $needed
+            'needed' => $needed,
+            'status' => implode(", ", $statusPack)
         ];
     }
+
+    public function recallProcess($declarerId, $period)
+    {
+        $result = $this->getPersonRecallDeclarationPeriod($declarerId, $period);
+        $result['mailSend'] = false;
+
+        // Vérification du dernier envois
+        $recalls = ;
+
+
+        if ($result['needSend']) {
+            $declarer = $this->getPersonService()->getPersonById($declarerId);
+            $message = $this->getPersonService()->getMailingService()->newMessage("[OSCAR] Déclaration de temps $declarer", "CONTENU : " . $result['message']);
+            $message->setTo($declarer->getEmail());
+            $message->setBody("Message : " . $result['message']);
+            $this->getPersonService()->getMailingService()->send($message);
+            $result['mailSend'] = true;
+
+        }
+        return $result;
+    }
+
 
     public function getPersonPeriods(Person $person, $period)
     {

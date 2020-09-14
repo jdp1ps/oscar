@@ -555,12 +555,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
-        $mailer = $this->getServiceContainer()->get(MailingService::class);
+        $mailer = $this->getMailingService();
         $to = $person->getEmail();
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente", ['body' => $content]);
         $mail->setTo([$to => (string)$person]);
         $mailer->send($mail);
+    }
+
+    /**
+     * @return MailingService
+     */
+    public function getMailingService(){
+        return $this->getServiceContainer()->get(MailingService::class);
     }
 
 

@@ -73,6 +73,12 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             return;
         }
 
+        if( $all != 'all' ){
+            $personId = $this->getPersonService()->getPersonByLdapLogin($all)->getId();
+            $declarerId = $personId;
+            $all = false;
+        }
+
         $declarerPeriod = $input->getOption(self::OPT_PERIOD);
         if( !$declarerPeriod ){
             $today = date('Y-m-d');
@@ -103,6 +109,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     {
         /** @var Person $declarer */
         $declarer = $this->getPersonService()->getPersonById($declarerId);
+
         $result = $this->declarerPeriod($declarerId, $declarerPeriod);
         $io->title($result['person']);
         $io->writeln(sprintf("Message : <options=bold>%s</>", $result['message']));
@@ -110,14 +117,10 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
         $io->writeln(sprintf("Déclaration (heures) : <options=bold>%s/%s</>", $result['total'], $result['needed']));
         $io->writeln(sprintf("Max : <options=bold>%s</>", $result['max']));
         $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
+        $io->writeln(sprintf("Mail requis : <options=bold>%s</>", $result['mailRequired'] ? "Oui" : "Non"));
+        $io->writeln(sprintf("Mail envoyé : <options=bold>%s</>", $result['mailSend'] ? "Oui" : "Non"));
+        $io->writeln(sprintf("Status : <options=bold>%s</>", $result['status']));
 
-        if( $result['needSend'] ){
-            $message = $this->getMailer()->newMessage("[OSCAR] Déclaration de temps $declarerPeriod", "CONTENU : " . $result['message']);
-            $message->setTo($declarer->getEmail());
-            $message->setBody("Message : " . $result['message']);
-            $this->getMailer()->send($message);
-            echo "MAIL !!!! \n";
-        }
     }
 
     /**
@@ -149,7 +152,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     //public function declarerRecall
 
     public function declarerPeriod( $declarerId, $period ){
-        return $this->getTimesheetService()->getPersonRecallDeclarationPeriod($declarerId, $period);
+        return $this->getTimesheetService()->recallProcess($declarerId, $period);
     }
 
     public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
