@@ -209,7 +209,7 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
 
                 // Champs calculés
                 foreach ($computed as $computedField) {
-                    $computedValues[$computedField['label']] = $computedField['handler']($entity);
+                    $computedValues[$computedField['label']] = $computedField['handler']($entity, $this->getProjectGrantService());
                 }
 
 

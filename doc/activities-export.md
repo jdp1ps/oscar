@@ -15,10 +15,31 @@ Les colonnes calculées permettent de configurer des colonnes supplémentaires. 
 
 Cette configuration permet d'ajouter une colonne *Multilaboratoire* qui affichera le code du seul labo ou "Multilaboratoire" si l'activité a plusieurs laboratoires impliqués et ajoute une colonne avenant qui indique si l'activité est un avenant (en se basant sur la présente textuelle du terme avenant dans l'intitulé) : 
 
-```php
-// config/autoload/local.php
 
+
+
+```php
 <?php
+// config/autoload/local.php
+return array(
+    'oscar' => [
+        // ...
+        'export' => [
+            // ------------------------------------------------------------
+            //
+            // CHAMPS ICI
+            //
+            // ------------------------------------------------------------
+        ]
+    ]
+);
+```
+
+#### Champ calculé : Codes labo solo ou "Multi"
+
+```php
+<?php
+// config/autoload/local.php
 return array(
     'oscar' => [
         // ...
@@ -31,13 +52,32 @@ return array(
                         $labos = [];
                         /** @var \Oscar\Entity\ActivityOrganization $activityOrganization */
                         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
-                            if( $activityOrganization->getRole() == "Laboratoire" && !$activityOrganization->isOutOfDate() && !$activityOrganization->getOrganization()->isClose() ){
+                            if( $activityOrganization->getRole() == "Laboratoire" 
+                                        && !$activityOrganization->isOutOfDate() 
+                                        && !$activityOrganization->getOrganization()->isClose() ){
                                 $labos[] = (string)$activityOrganization->getOrganization()->getCode() ?? 'N.D';
                             }
                         }
                         return count($labos) > 1 ? "Multilaboratoire" : implode(', ', $labos);
                     }
                 ],
+            ]
+        ]
+    ]
+);
+```
+
+#### Champ calculé : Nom labo solo ou "Multi"
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    'oscar' => [
+        // ...
+        'export' => [
+            // ...
+            'computedFields' => [
                 'laboratoriesNames' => [
                     'label' => 'Laboratoire actif (nom)',
                     'handler' => function( \Oscar\Entity\Activity $activity ){
@@ -51,16 +91,29 @@ return array(
                         return count($labos) > 1 ? "Multilaboratoire" : implode(', ', $labos);
                     }
                 ],
-                'avenant' => [
-                    'label' => 'Avenant',
-                    'handler' => function( \Oscar\Entity\Activity $activity ){
-                        return strpos(strtolower($activity->getLabel()), 'avenant') >= 0 ? "O" : "N";
-                    }
-                ]
             ]
         ]
     ]
 );
 ```
 
+#### Champ calculé : Avenant
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    'oscar' => [
+        // ...
+        'export' => [
+            'avenant' => [
+                'label' => 'Avenant',
+                'handler' => function( \Oscar\Entity\Activity $activity ){
+                    return strpos(strtolower($activity->getLabel()), 'avenant') >= 0 ? "O" : "N";
+                }
+            ],
+        ]
+    ]
+);
+```
 

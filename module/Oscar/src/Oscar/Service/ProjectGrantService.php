@@ -113,6 +113,21 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public function getActivityFull( Activity $activity )
+    {
+        return $this->getActivityTypeService()->getActivityTypeChain($activity->getActivityType());
+    }
+
+    /**
+     * Retourne la chemin Complet du type d'activité
+     *
+     * @param Activity $activity
+     * @return string
+     */
+    public function getActivityFullText( Activity $activity )
+    {
+        return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
+    }
 
 
     public function getTypeDocument( $typeDocumentId, $throw=false ){
