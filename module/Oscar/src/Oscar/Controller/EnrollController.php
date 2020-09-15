@@ -820,14 +820,22 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     public function activityOrganizationEditAction()
     {
         try {
-            // Récupération des données
-            $organizationActivity = $this->getPostedActivityOrganization();
+            /** @var ActivityOrganization $activityOrganization */
+            $organizationActivity = $this->getEntityManager()->getRepository(ActivityOrganization::class)->find(
+                $this->params()->fromRoute('idenroll')
+            );
 
-            // Accès
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $organizationActivity->getActivity());
+            if( !$organizationActivity ){
+                throw new OscarException("Affectation introuvable");
+            }
+
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $organizationActivity->getActivity()) ){
+                throw new OscarException("Droits insufisants");
+            }
 
             $this->getProjectGrantService()->organizationActivityEdit($organizationActivity, $this->getPostedOrganizationRole(), $this->getDateStartPosted(), $this->getDateEndPosted());
-            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
+
+            return $this->redirect()->toRoute( 'contract/show', ['id'=>$organizationActivity->getActivity()->getId()]);
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de modifier l'affectation de cette organisation dans l'activité : " . $e->getMessage());
         }
@@ -875,13 +883,13 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
      * @throws OscarException
      */
     public function getPostedOrganizationRole(){
-        $role = $this->params()->fromRoute('role');
+        $role = $this->params()->fromPost('role', null);
         try {
             if( !$role )
                 throw new \Exception("Vous devez choisir un rôle.");
             return $this->getEntityManager()->getRepository(OrganizationRole::class)->find($role);
         } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Impossible de charger le rôle '%s' : %s.", $role, $e->getMessage())));
+            throw new OscarException(sprintf(_("Impossible de charger le rôle (%s).", $e->getMessage())));
         }
     }
 
@@ -910,7 +918,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $this->getPostedDateTime('dateStart');
     }
 
-    public function detDateEndPosted(){
+    public function getDateEndPosted(){
         return $this->getPostedDateTime('dateEnd');
     }
 
