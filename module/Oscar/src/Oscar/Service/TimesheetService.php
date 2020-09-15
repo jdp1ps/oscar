@@ -13,6 +13,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\RecallDeclaration;
+use Oscar\Entity\RecallDeclarationRepository;
 use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetCommentPeriod;
@@ -2556,30 +2557,93 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
     }
 
-    public function recallProcess($declarerId, $period)
+    public function getRecalls()
     {
+        return $this->getRecallDeclarationRepository()->findAll();
+    }
+
+    public function getRecallDeclarationRepository(): RecallDeclarationRepository
+    {
+        return $this->getEntityManager()->getRepository(RecallDeclaration::class);
+    }
+
+    public function recallProcess($declarerId, $period, $processDate = null)
+    {
+        // Récupération de la date de rappel référente
+        if( $processDate == null ){
+            $processDate = new \DateTime();
+        }
+        elseif (is_string($processDate)) {
+            $processDate = new \DateTime($processDate);
+        }
+        elseif ( is_object($processDate) && get_class($processDate) == \DateTime::class ) {
+            // ok
+        }
+        else {
+            throw new OscarException("Format de date inattendu !");
+        }
+
+
+        $declarer = $this->getPersonService()->getPersonById($declarerId);
         $result = $this->getPersonRecallDeclarationPeriod($declarerId, $period);
         $result['mailSend'] = false;
 
-        // Vérification du dernier envois
-
         /** @var RecallDeclarationRepository $recallDeclarationRepository */
-        $recallDeclarationRepository = $this->getEntityManager()->getRepository(RecallDeclaration::class);
+        $recallDeclarationRepository = $this->getRecallDeclarationRepository();
 
+        $periodInfos = DateTimeUtils::extractPeriodDatasFromString($period);
+        $periodMonth = $periodInfos['month'];
+        $periodYear = $periodInfos['year'];
+
+        $recalls = $recallDeclarationRepository->getRecallDeclarationsPersonPeriod($declarerId, $periodYear, $periodMonth);
+        if( count($recalls) == 0 ){
+            $result['needSend'] = true;
+            $recallSend = new RecallDeclaration();
+            $this->getEntityManager()->persist($recallSend);
+            $recallSend->setStartProcess($processDate);
+        }
+        elseif (count($recalls) == 1 ){
+            /** @var RecallDeclaration $recallSend */
+            $recallSend = $recalls[0];
+
+            $lastSend = $recallSend->getLastSend();
+
+            /** @var \DateInterval $interval */
+            $interval = $lastSend->diff($processDate);
+
+            echo "JOURS : " . $interval->days . "\n";
+
+
+            die("TEST : Calcule de l'écart entre le dernier envoi et la date de processing");
+        } else {
+            throw new OscarException("Doublon présent pour le système de contrôle des rappels pour $declarer");
+        }
 
 
         if ($result['needSend']) {
-            $declarer = $this->getPersonService()->getPersonById($declarerId);
             $message = $this->getPersonService()->getMailingService()->newMessage("[OSCAR] Déclaration de temps $declarer", "CONTENU : " . $result['message']);
             $message->setTo($declarer->getEmail());
             $message->setBody("Message : " . $result['message']);
-            $this->getPersonService()->getMailingService()->send($message);
-            $result['mailSend'] = true;
 
+            try {
+                $this->getPersonService()->getMailingService()->send($message);
+                $result['mailSend'] = true;
+
+                // Enregistrement du rappel
+                $recallSend->setContext('declarer')
+                    ->addHistory(sprintf("[%s] Envois d'un rappel", $processDate->format('Y-m-d')))
+                    ->setLastSend(new \DateTime())
+                    ->setPeriodMonth($periodMonth)
+                    ->setPeriodYear($periodYear)
+                    ->setPerson($declarer);
+
+                $this->getEntityManager()->flush($recallSend);
+            } catch (\Exception $e) {
+                throw new OscarException("Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period");
+            }
         }
         return $result;
     }
-
 
     public function getPersonPeriods(Person $person, $period)
     {

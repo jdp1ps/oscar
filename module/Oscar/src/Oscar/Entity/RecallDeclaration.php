@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Cette classe référence les rôles GLOBAUX sur l'application.
  *
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="RecallDeclarationRepository")
  */
 class RecallDeclaration
 {
@@ -141,6 +142,7 @@ class RecallDeclaration
         return $this;
     }
 
+
     /**
      * @return \DateTime
      */
@@ -184,12 +186,21 @@ class RecallDeclaration
     }
 
     /**
-     * @param string $history
+     * @param string $historyLine
+     * @return $this
      */
-    public function setHistory(string $history): self
+    public function addHistory( string $historyLine ) :self
     {
-        $this->history = $history;
+        if( $this->history == null ){
+            $this->history = "";
+        }
+        $this->history .= $historyLine."\n";
         return $this;
+    }
+
+    public function __toString()
+    {
+        return sprintf('[%s] Envoyé le %s à %s pour la période %s-%s', $this->getId(), $this->getLastSend()->format('Y-m-d H:i:s'), $this->getPerson(), $this->getPeriodYear(), $this->getPeriodMonth());
     }
 
 

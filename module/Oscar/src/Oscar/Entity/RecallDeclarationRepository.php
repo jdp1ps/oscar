@@ -10,12 +10,20 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use phpDocumentor\Reflection\Types\Integer;
+
 
 class RecallDeclarationRepository extends EntityRepository
 {
     public function getRecallDeclarationsPersonPeriod( int $personId, int $periodYear, int $periodMonth )
     {
-        
+        return $this->createQueryBuilder('r')
+            ->where('r.person = :person AND r.periodYear = :periodYear AND r.periodMonth = :periodMonth')
+            ->setParameters([
+                'person' => $personId,
+                'periodYear' => $periodYear,
+                'periodMonth' => $periodMonth,
+            ])
+            ->getQuery()
+            ->getResult();
     }
 }
