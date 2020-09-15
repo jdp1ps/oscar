@@ -12,6 +12,7 @@ use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectGrantRepository;
+use Oscar\Entity\RecallDeclaration;
 use Oscar\Entity\Referent;
 use Oscar\Entity\TimeSheet;
 use Oscar\Entity\TimesheetCommentPeriod;
@@ -2561,7 +2562,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $result['mailSend'] = false;
 
         // Vérification du dernier envois
-        $recalls = ;
+
+        /** @var RecallDeclarationRepository $recallDeclarationRepository */
+        $recallDeclarationRepository = $this->getEntityManager()->getRepository(RecallDeclaration::class);
+
 
 
         if ($result['needSend']) {
