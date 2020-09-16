@@ -81,7 +81,7 @@ php bin/oscar.php check:privileges
 
 ### Création de Projet/Activité
 
-La fonctionnalité permettant de créer des Activitès/Projet a évolué. Initialement, ces fonctionnalités étaient réservées à des rôles APPLICATIF.
+La fonctionnalité permettant de créer des Activités/Projet a évolué. Initialement, ces fonctionnalités étaient réservées à des rôles APPLICATIF.
 
 Désormais, vous pourrez attribuer ces privilèges à des rôles ORGANISATIONNELS pour permettre aux personnes disposant de ce rôle de créer des activités/projets pour leurs structures. 
 
@@ -91,9 +91,9 @@ Par exemple, Nadine a le rôle **Directeur** dans la structure **OSCORP**,
 Le rôle **Directeur** est autorisé à voir/modifier/créer une activité de recherche
 Le rôle de structure **Laboratoire** est un rôle **principale**
 
-Depuis Oscar, Nadine pourra créer une nouvelle activité. Dans la fiche création, elle pourra affecter sa structure (OSCOP) avec un des rôles de structure (principal) configurés dans Oscar, parmis ces rôles figurera le rôle **Laboratoire**.
+Depuis Oscar, Nadine pourra créer une nouvelle activité. Dans la fiche création, elle pourra affecter sa structure (OSCOP) avec un des rôles de structure (principal) configurés dans Oscar, parmi ces rôles figurera le rôle **Laboratoire**.
 
-Si la personne ne choisi pas de rôle pour sa structure, l'activité n'est pas créée (un message d'erreur indique qu'il faut choisir un rôle à la structure).
+Si la personne ne choisit pas de rôle pour sa structure, l'activité n'est pas créée (un message d'erreur indique qu'il faut choisir un rôle à la structure).
 
 Ce changement permet à Oscar de mieux prendre en charge des fonctionnements plus décentralisés de certains établissements.
 
@@ -105,7 +105,7 @@ Ce changement permet à Oscar de mieux prendre en charge des fonctionnements plu
 php bin/oscar.php
 ```
 
-Parmis les commandes modifiées, les commandes de synchronisation des PERSONNES et des ORGANISATIONS ont changé.
+Parmi les commandes modifiées, les commandes de synchronisation des PERSONNES et des ORGANISATIONS ont changé.
 
 
 Pour les personnes : 
@@ -123,7 +123,7 @@ php bin/oscar.php organizations:sync rest
 ```
 
 ### SIFAC (Experimental)
-La version **Macclane** propose en *experimental* la configuration SIFAC pour chargé depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
+La version **Macclane** propose en *experimental* la configuration SIFAC pour charger depuis une source SIFAC(Oracle) les informations sur les dépenses des activités de recherche basée sur le journal des pièces.
 
 Vous pouvez commencer à tester cette fonctionnalité [Configurer l'accès à SIFAC](../config-sifac.md) 
 
