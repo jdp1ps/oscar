@@ -1212,7 +1212,7 @@ class Activity implements ResourceInterface
         $today = new \DateTime();
         /** @var ActivityPerson $member */
         foreach ($this->getPersons() as $member) {
-		if(!$member->getPerson()){continue;}
+            if(!$member->getPerson()){continue;}
             if ($member->getPerson()->getId() === $person->getId()) {
                 // Date de début non-nulle et suppérieur à ajourd'hui
                 if( $member->getDateStart() !== null && $member->getDateStart() > $today ){
@@ -1947,8 +1947,11 @@ class Activity implements ResourceInterface
             'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
             'versement effectué' => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
+            'écart de paiement' => number_format($this->getEcartPaiement(), 2, ',', ''),
+            'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
+            'incidence financière' => $this->getIncidenceFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
@@ -1973,8 +1976,11 @@ class Activity implements ResourceInterface
             'Date de signature',
             'versement effectué',
             'versement prévu',
+            'écart de paiement',
+            'justificatif écart de paiement',
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
+            'incidence financière',
             'Disciplines'
         );
     }
@@ -2000,6 +2006,52 @@ class Activity implements ResourceInterface
 
         return $this->totalPaymentReceived;
     }
+
+    private $totalEcartPaiement;
+    public function getEcartPaiement()
+    {
+        if ($this->totalEcartPaiement === null) {
+            $this->totalEcartPaiement = 0.0;
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_ECART) {
+                    $this->totalEcartPaiement += $payment->getAmount();
+                }
+            }
+        }
+
+        return $this->totalPaymentReceived;
+    }
+
+    private $justificatifEcartPaiement;
+    public function getJustificatifEcartPaiement()
+    {
+        if ($this->justificatifEcartPaiement === null) {
+            $this->justificatifEcartPaiement = '';
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_ECART) {
+                    $this->justificatifEcartPaiement .= $payment->getComment()." ";
+                }
+            }
+        }
+
+        return $this->justificatifEcartPaiement;
+    }
+
+    public function getIncidenceFinanciere()
+    {
+        return $this->getFinancialImpact();
+    }
+
+
+    /**
+    'écart de paiement' => $this->getEcartPaiement(),
+    'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
+    'Frais de gestion' => $this->getFraisDeGestion(),
+    'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
+    'incidence financière' => $this->getIncidenceFinanciere(),
+     */
 
     private $totalPaymentProvided;
 
