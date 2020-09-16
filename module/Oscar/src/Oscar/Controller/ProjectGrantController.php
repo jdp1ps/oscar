@@ -1008,6 +1008,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Format
         $format = $this->params()->fromPost('format', 'csv');
 
+        $delimiter = "\t";
+
         // Récupération des IDS
         if ($request->isPost()) {
             $paramID = $this->params()->fromPost('ids', '');
@@ -1017,15 +1019,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $datas = new ExportDatas($this->getProjectGrantService(), $this->getOscarUserContextService());
         $dt = $datas->output($paramID, $fields, $perimeter);
-
         $csv = uniqid('oscar_export_activities_') . '.csv';
         $csvPath = sprintf('/tmp/%s', $csv);
         $handler = fopen($csvPath, 'w');
 
-        fputcsv($handler, $dt['headers']);
+        fputcsv($handler, $dt['headers'], $delimiter);
 
         foreach ($dt['datas'] as $data) {
-            fputcsv($handler, $data);
+            fputcsv($handler, $data, $delimiter);
         }
 
         $downloader = new CSVDownloader();

@@ -1945,8 +1945,8 @@ class Activity implements ResourceInterface
             'Début' => $this->getDateStart() ? $this->getDateStart()->format($dateFormat) : '',
             'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
             'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
-            'versement effectué' =>number_format($this->getTotalPaymentReceived(), 2, ',', ' '),
-            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ' '),
+            'versement effectué' => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
+            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
