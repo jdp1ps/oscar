@@ -8,27 +8,13 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Monolog\Logger;
 use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Authentification;
-use Oscar\Entity\LogActivityRepository;
 use Oscar\Entity\Person;
-use Oscar\Traits\UseEntityManager;
-use Oscar\Traits\UseEntityManagerTrait;
-use Oscar\Traits\UseLoggerService;
-use Oscar\Traits\UseLoggerServiceTrait;
-use Oscar\Traits\UseOscarUserContextService;
-use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenAuth\Service\UserContext;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use ZfcUser\Mapper\UserInterface;
 
 class ActivityLogService implements UseServiceContainer {
 
@@ -39,8 +25,6 @@ class ActivityLogService implements UseServiceContainer {
     // (PHP-DI) mais le manque de documentation sur le sujet
     // méritera d'y consacrer du temps (quand on en aura à perdre)
     use UseServiceContainerTrait;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return OscarUserContext
@@ -82,10 +66,7 @@ class ActivityLogService implements UseServiceContainer {
         return $this->getOscarUserContextService()->getUserContext()->getDbUser();
     }
 
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     protected function addActivity($message, $type, $level, $userId, $context, $contextId, $data)
     {
         $activity = new LogActivity();
@@ -111,29 +92,12 @@ class ActivityLogService implements UseServiceContainer {
         $this->addActivity($message, LogActivity::TYPE_INFO, $level, $userid, $context, $contextId, $data);
     }
 
-
-    private $_currentPerson;
-
     /**
      * @return Person
      */
     public function getCurrentPerson()
     {
-        if ($this->_currentPerson === null) {
-            if ($this->getLdapUser()) {
-                $this->_currentPerson = "ldapuser";
-                $login = $this->getLdapUser()->getSupannAliasLogin();
-            }
-            elseif ( $this->getDbUser() ){
-                $login = $this->getDbUser()->getUsername();
-            }
-            if ($login) {
-                $this->_currentPerson = $this->getEntityManager()->getRepository(Person::class)->findOneBy([
-                    'ladapLogin' => $login
-                ]);
-            }
-        }
-        return $this->_currentPerson;
+        return $this->getOscarUserContextService()->getCurrentPerson();
     }
 
     public function getAuthentificationActivities( $authentificationId, $limit=20 ){
@@ -180,7 +144,6 @@ class ActivityLogService implements UseServiceContainer {
         $result = $this->getEntityManager()->createQuery("SELECT a.id FROM Oscar\Entity\Activity a WHERE a.project = $projectId")->getScalarResult();
         $ids = array_map('current', $result);
 
-
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('a')
             ->from(LogActivity::class, 'a')
@@ -196,7 +159,6 @@ class ActivityLogService implements UseServiceContainer {
 
     public function activityActivities($idActivity)
     {
-
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('a')
             ->from(LogActivity::class, 'a')
