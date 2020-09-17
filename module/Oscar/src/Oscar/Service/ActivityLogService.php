@@ -60,29 +60,15 @@ class ActivityLogService  implements ServiceLocatorAwareInterface, EntityManager
         $this->addActivity($message, LogActivity::TYPE_INFO, $level, $userid, $context, $contextId, $data);
     }
 
-
-    private $_currentPerson;
-
     /**
      * @return Person
      */
     public function getCurrentPerson()
     {
-        if ($this->_currentPerson === null) {
-            if ($this->getUserContext()->getLdapUser()) {
-                $this->_currentPerson = "ldapuser";
-                $login = $this->getUserContext()->getLdapUser()->getSupannAliasLogin();
-            }
-            elseif ( $this->getUserContext()->getDbUser() ){
-                $login = $this->getUserContext()->getDbUser()->getUsername();
-            }
-            if ($login) {
-                $this->_currentPerson = $this->getEntityManager()->getRepository(Person::class)->findOneBy([
-                    'ladapLogin' => $login
-                ]);
-            }
-        }
-        return $this->_currentPerson;
+        /** @var OscarUserContext $oscarUserContext */
+        $oscarUserContext = $this->getServiceLocator()->get('OscarUserContext');
+
+        return $oscarUserContext->getCurrentPerson();
     }
 
     public function addUserInfo($message, $context = 'Application', $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
