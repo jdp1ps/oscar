@@ -41,6 +41,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
     const OPT_FORCE         = "force";
     const OPT_DECLARER      = "declarer";
     const OPT_PERIOD        = "period";
+    const OPT_PROCESSDATE        = "processdate";
 
     const ARG_ALL        = "all";
 
@@ -51,6 +52,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
             ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_REQUIRED, "Identifiant du déclarant")
             ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période")
+            ->addOption(self::OPT_PROCESSDATE, 'c', InputOption::VALUE_OPTIONAL, "Date de relance (par défaut date actuelle)")
             ->addArgument(self::ARG_ALL, InputArgument::OPTIONAL, "Déclencher pour tous les déclarants", false);
         ;
     }
@@ -66,6 +68,13 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
 
         /// OPTIONS and PARAMETERS
         $declarerId = $input->getOption(self::OPT_DECLARER);
+        $processDate = $input->getOption(self::OPT_PROCESSDATE);
+
+        if( $processDate ){
+            $processDate = new \DateTime($processDate);
+        } else {
+            $processDate = new \DateTime();
+        }
 
         if( $all == false && $declarerId == null ){
             $io->writeln("Utiliser l'option --declarant=ID");
@@ -95,31 +104,36 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             /** @var Person $declarer */
             foreach ($declarants['persons'] as $personId=>$datas) {
                 try {
-                    $result = $this->recallDeclarer($personId, $declarerPeriod, $io);
+                    $result = $this->recallDeclarer($personId, $declarerPeriod, $io, $processDate);
                 } catch (\Exception $e) {
                     $io->warning($e->getMessage());
                 }
             }
         } else {
-            $result = $this->recallDeclarer($declarerId, $declarerPeriod, $io);
+            $result = $this->recallDeclarer($declarerId, $declarerPeriod, $io, $processDate);
         }
     }
 
-    protected function recallDeclarer($declarerId, $declarerPeriod, SymfonyStyle $io)
+    protected function recallDeclarer($declarerId, $declarerPeriod, SymfonyStyle $io, $processDate = null)
     {
         /** @var Person $declarer */
         $declarer = $this->getPersonService()->getPersonById($declarerId);
 
-        $result = $this->declarerPeriod($declarerId, $declarerPeriod);
-        $io->title($result['person']);
-        $io->writeln(sprintf("Message : <options=bold>%s</>", $result['message']));
-        $io->writeln(sprintf("Mail ? <options=bold>%s</>", $result['needSend'] ? 'Oui' : 'Non'));
-        $io->writeln(sprintf("Déclaration (heures) : <options=bold>%s/%s</>", $result['total'], $result['needed']));
-        $io->writeln(sprintf("Max : <options=bold>%s</>", $result['max']));
-        $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
-        $io->writeln(sprintf("Mail requis : <options=bold>%s</>", $result['mailRequired'] ? "Oui" : "Non"));
-        $io->writeln(sprintf("Mail envoyé : <options=bold>%s</>", $result['mailSend'] ? "Oui" : "Non"));
-        $io->writeln(sprintf("Status : <options=bold>%s</>", $result['status']));
+        $result = $this->declarerPeriod($declarerId, $declarerPeriod, $processDate);
+        if( $result ) {
+            $io->title($result['person']);
+            $io->writeln(sprintf("Message : <options=bold>%s</>", $result['message']));
+            $io->writeln(sprintf("Mail ? <options=bold>%s</>", $result['needSend'] ? 'Oui' : 'Non'));
+            $io->writeln(sprintf("Déclaration (heures) : <options=bold>%s/%s</>", $result['total'], $result['needed']));
+            $io->writeln(sprintf("Max : <options=bold>%s</>", $result['max']));
+            $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
+            $io->writeln(sprintf("Mail requis : <options=bold>%s</>", $result['mailRequired'] ? "Oui" : "Non"));
+            $io->writeln(sprintf("Mail envoyé : <options=bold>%s</>", $result['mailSend'] ? "Oui" : "Non"));
+            $io->writeln(sprintf("Status : <options=bold>%s</>", $result['status']));
+        }
+        else {
+
+        }
 
     }
 
@@ -128,11 +142,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
      */
     protected function getMailer()
     {
-        static $mailer;
-        if( $mailer === null ){
-            $mailer = $this->getServicemanager()->get(MailingService::class);
-        }
-        return $mailer;
+        return $this->getServicemanager()->get(MailingService::class);
     }
 
     /**
@@ -151,8 +161,11 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
 
     //public function declarerRecall
 
-    public function declarerPeriod( $declarerId, $period ){
-        return $this->getTimesheetService()->recallProcess($declarerId, $period);
+    public function declarerPeriod( $declarerId, $period, $processDate = null ){
+        if( $processDate == null ){
+            $processDate = new \DateTime();
+        }
+        return $this->getTimesheetService()->recallProcess($declarerId, $period, $processDate);
     }
 
     public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
@@ -181,9 +194,9 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $out = [];
             /** @var Person $declarer */
             foreach ($declarants['persons'] as $personId=>$datas) {
-                $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
+                $out[] = [$personId, $datas['displayname'], $datas['login'], $datas['affectation'], count($datas['declarations'])];
             }
-            $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
+            $headers = ['ID', 'login', 'Déclarant', 'Affectation', 'Déclaration(s)'];
             $io->table($headers, $out);
 
             $io->comment("Entrez la commande '".self::getName()." --". self::OPT_DECLARER . "=<ID>' pour afficher les détails");

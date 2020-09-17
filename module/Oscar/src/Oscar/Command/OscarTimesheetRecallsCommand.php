@@ -49,13 +49,28 @@ class OscarTimesheetRecallsCommand extends OscarCommandAbstract
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->addOutputStyle($output);
+        $io = new SymfonyStyle($input, $output);
 
         $recalls = $this->getTimesheetService()->getRecalls();
 
+        $headers = ["ID", "Date", "Depuis", "Déclarants", "Période"];
+        $rows = [];
+
+        $moment = new Moment();
+
         /** @var RecallDeclaration $recall */
         foreach ($recalls as $recall) {
-            echo "$recall\n";
+            $moment = new Moment($recall->getLastSend()->getTimestamp());
+            $row = [
+                $recall->getId(),
+                $recall->getLastSend()->format('Y-m-d H:i:s'),
+                $moment->fromNow()->getRelative(),
+                $recall->getPerson()->__toString(),
+                sprintf("%s %s", $recall->getPeriodMonth(), $recall->getPeriodYear())
+            ];
+            $rows[] = $row;
         }
+        $io->table($headers, $rows);
         /// OPTIONS and PARAMETERS
 
     }

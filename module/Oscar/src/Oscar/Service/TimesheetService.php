@@ -2583,7 +2583,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             throw new OscarException("Format de date inattendu !");
         }
 
-
         $declarer = $this->getPersonService()->getPersonById($declarerId);
         $result = $this->getPersonRecallDeclarationPeriod($declarerId, $period);
         $result['mailSend'] = false;
@@ -2595,35 +2594,68 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $periodMonth = $periodInfos['month'];
         $periodYear = $periodInfos['year'];
 
+        // Configuration de la relance
+        $declarerFirstDay = $this->getOscarConfigurationService()->getDeclarersRelanceJour1();
+        $declarerSecondDay = $this->getOscarConfigurationService()->getDeclarersRelanceJour2();
+        $declarerFirstMsg = $this->getOscarConfigurationService()->getDeclarersRelance1();
+        $declarerSecondMsg = $this->getOscarConfigurationService()->getDeclarersRelance2();
+
         $recalls = $recallDeclarationRepository->getRecallDeclarationsPersonPeriod($declarerId, $periodYear, $periodMonth);
+
+        // Premier rappel
         if( count($recalls) == 0 ){
-            $result['needSend'] = true;
-            $recallSend = new RecallDeclaration();
-            $this->getEntityManager()->persist($recallSend);
-            $recallSend->setStartProcess($processDate);
+            // On test si le jour d'envois est valide (Valeur de J1)
+            $processDay = (int)$processDate->format('d');
+
+            if( $declarerFirstDay <= $processDay ){
+                $result['needSend'] = true;
+                $recallSend = new RecallDeclaration();
+                $this->getEntityManager()->persist($recallSend);
+                $recallSend->setStartProcess($processDate);
+            } else {
+                return null;
+            }
         }
         elseif (count($recalls) == 1 ){
             /** @var RecallDeclaration $recallSend */
             $recallSend = $recalls[0];
 
+            // Date d'envois
             $lastSend = $recallSend->getLastSend();
+            $daySend = (int) $lastSend->format('d');
+            echo "Dernier envoi jour : " . $daySend . "\n";
+
+            $nextSendDay = $declarerSecondDay + $daySend;
+            echo "Prochain envoi : $nextSendDay\n";
+
 
             /** @var \DateInterval $interval */
             $interval = $lastSend->diff($processDate);
+            $effectifDaysSinceLastSend = $interval->days;
+            echo "JOURS écoulés depuis le dernier envois : " . $effectifDaysSinceLastSend . "\n";
 
-            echo "JOURS : " . $interval->days . "\n";
-
-
-            die("TEST : Calcule de l'écart entre le dernier envoi et la date de processing");
+            if( $effectifDaysSinceLastSend >= $declarerSecondDay ){
+                echo "Envoi de la relance";
+                $result['needSend'] = true;
+            } else {
+                return null;
+            }
         } else {
             throw new OscarException("Doublon présent pour le système de contrôle des rappels pour $declarer");
         }
 
 
         if ($result['needSend']) {
-            $message = $this->getPersonService()->getMailingService()->newMessage("[OSCAR] Déclaration de temps $declarer", "CONTENU : " . $result['message']);
+            $body = $declarerSecondMsg;
+
+            // Replace
+            $find       = [ "{PERSON}",     "{PERIOD}"];
+            $replace    = [ "$declarer",    $periodInfos['periodLabel'] ];
+            $body       = str_ireplace($find, $replace, $body);
+
+            $message = $this->getPersonService()->getMailingService()->newMessage("[OSCAR] Déclaration de temps $declarer pour " . $periodInfos['periodLabel']);
             $message->setTo($declarer->getEmail());
-            $message->setBody("Message : " . $result['message']);
+            $message->setBody($body);
 
             try {
                 $this->getPersonService()->getMailingService()->send($message);
@@ -2632,7 +2664,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 // Enregistrement du rappel
                 $recallSend->setContext('declarer')
                     ->addHistory(sprintf("[%s] Envois d'un rappel", $processDate->format('Y-m-d')))
-                    ->setLastSend(new \DateTime())
+                    ->setLastSend($processDate)
                     ->setPeriodMonth($periodMonth)
                     ->setPeriodYear($periodYear)
                     ->setPerson($declarer);
