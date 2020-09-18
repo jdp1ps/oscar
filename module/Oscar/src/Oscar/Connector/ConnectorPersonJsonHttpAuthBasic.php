@@ -21,6 +21,8 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
 {
     private $personHydrator;
 
+    public function setEditable($foo){}
+
     function execute($force = true)
     {
         $dataAccessStrategy         = new HttpAuthBasicStrategy($this);
@@ -227,6 +229,29 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
         $personRepository->flush(null);
 
         return $repport;
+    }
+
+    function syncPerson(Person $person)
+    {
+        if ($person->getConnectorID($this->getName())) {
+
+            $personIdRemote = $person->getConnectorID($this->getName());
+            $url = sprintf($this->getParameter('url_person'), $personIdRemote);
+
+            //$dataAccessStrategy         = new HttpAuthBasicStrategy($this);
+            $access =  new HttpAuthBasicStrategy($this);
+            $personData = $access->getData($url);
+
+            // Fix : Nouveau format
+            if( property_exists($personData, 'person') ){
+                $personData = $personData->person;
+            }
+
+            return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
+
+        } else {
+            throw new \Exception('Impossible de synchroniser la personne ' . $person);
+        }
     }
 
 
