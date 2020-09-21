@@ -85,7 +85,7 @@ La fonctionnalité permettant de créer des Activités/Projet a évolué. Initia
 
 Désormais, vous pourrez attribuer ces privilèges à des rôles ORGANISATIONNELS pour permettre aux personnes disposant de ce rôle de créer des activités/projets pour leurs structures. 
 
-Au moment de la création d'une activité/projet, l'utilisateur devra affecter un rôle à une de ces structures dans l'activité créé. A noter que l'accès de la personne à cette activité est calculé selon son rôle dans l'organisation renseignée.
+Au moment de la création d'une activité/projet, l'utilisateur devra affecter un rôle à une de ces structures dans l'activité créée. A noter que l'accès de la personne à cette activité est calculé selon son rôle dans l'organisation renseignée.
 
 Par exemple, Nadine a le rôle **Directeur** dans la structure **OSCORP**,
 Le rôle **Directeur** est autorisé à voir/modifier/créer une activité de recherche
@@ -140,7 +140,7 @@ Dans la perspective de démo / test rapide (Version préprod par exemple). Oscar
 
 ## En cours
 
- - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brute
+ - **Dépense** (expérimental) Les écrans et la connexion SIFAC sont toujours en cours, les accès aux écrans de synchronisation des dépenses basé sur le journal des pièces sont disponibles (Avec les privilèges associés). Propose pour le moment des données brutes
  
  - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancée
  
