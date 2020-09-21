@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
+use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
@@ -40,27 +41,14 @@ class ConnectorOrganizationJsonHttpAuthBasic extends AbstractConnectorOscar
         $dataExtractionStrategy     = new DataExtractionStringToJsonStrategy();
         $report                     = new ConnectorRepport();
 
-        try {
-            $url = $this->getParameter('url_organizations');
-        } catch (\Exception $e) {
-            $report->adderror("Erreur de configuration : " . $e->getMessage());
-            return $report;
-        }
-
-
-        $msg = sprintf(_("Chargement des données depuis '%s'"), $url);
-
         // Récupération des données
         try {
-            $datas = $dataAccessStrategy->getData($url);
-            $report->addnotice("$msg : OK ( ". strlen($datas) ." chars extract)");
+            $datas = $dataAccessStrategy->getDataAll();
         } catch (\Exception $e) {
-            $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
             throw new \Exception("Impossible de charger des données depuis $url  : " . $e->getMessage());
         }
 
         // Conversion
-        $msg = sprintf(_("Conversion des données"), $url);
         try {
             $json = $dataExtractionStrategy->extract($datas);
             // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
@@ -70,8 +58,8 @@ class ConnectorOrganizationJsonHttpAuthBasic extends AbstractConnectorOscar
                 $organizationsDatas = $json;
             }
         } catch (\Exception $e) {
-            $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de convertir les données depuis $url (".strlen($datas)." : ". substr($datas, 0, 100) .") : " . $e->getMessage());
+            $report->adderror("Data get all error : " . $e->getMessage());
+            throw new \Exception("Impossible de convertir les données : " . $e->getMessage());
         }
 
         if( !is_array($organizationsDatas) ){
@@ -158,26 +146,34 @@ class ConnectorOrganizationJsonHttpAuthBasic extends AbstractConnectorOscar
     function syncOrganization(Organization $organization)
     {
         if ($organization->getConnectorID($this->getName())) {
-
-            $url = sprintf($this->getParameter('url_organization'), $organization->getConnectorID($this->getName()));
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-            $return = curl_exec($curl);
-            curl_close($curl);
-
             try {
-                $organizationData = PhpPolyfill::jsonDecode($return);
+                $json = $this->getDataAccess()->getDataSingle($organization->getConnectorID($this->getName()));
+                if( is_object($json) && property_exists($json, 'organization') ){
+                    $organizationData = $json->organization;
+                } else {
+                    $organizationData = $json;
+                }
                 return $this->hydrateWithDatas($organization, $organizationData);
             } catch (\Exception $e) {
                 throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
             }
-
         } else {
             throw new \Exception('Impossible de synchroniser la structure ' . $organization);
         }
-
     }
 
+    public function getDataAccess(): IDataAccessStrategy
+    {
+        return new HttpAuthBasicStrategy($this);
+    }
+
+    public function getPathAll(): string
+    {
+        return $this->getParameter('url_organizations');
+    }
+
+    public function getPathSingle($remoteId): string
+    {
+        return sprintf($this->getParameter('url_organization'), $remoteId);
+    }
 }

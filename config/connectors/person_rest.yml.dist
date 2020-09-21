@@ -1,9 +1,10 @@
 # Emplacement du service REST fournissant la liste des personnes
-#url_persons: 'https://rest.service.tdl/api/persons'
+url_persons: 'https://oscar.unicaen.fr/api/persons'
+
 # Emplacement du service REST fournissant les données pour une personne
 # Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
 # le service REST.
-#url_person: 'https://rest.service.tld/api/person/%s'
+url_person: 'https://oscar.unicaen.fr/api/persons/%s'
 
 ### ACCèS avec CERTIFICAT
 # Accès spécifique

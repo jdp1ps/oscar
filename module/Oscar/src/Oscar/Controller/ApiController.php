@@ -148,8 +148,6 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
     }
 
-
-
     protected function getStrategy($api){
         $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
         $granted = $this->checkApiAcces('persons');

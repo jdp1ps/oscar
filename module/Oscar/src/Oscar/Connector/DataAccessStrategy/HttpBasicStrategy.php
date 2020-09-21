@@ -11,12 +11,8 @@ namespace Oscar\Connector\DataAccessStrategy;
 
 use Oscar\Connector\IConnectorOscar;
 
-class HttpAuthBasicStrategy implements IDataAccessStrategy
+class HttpBasicStrategy implements IDataAccessStrategy
 {
-    const OPTION_USERNAME = 'username';
-    const OPTION_PASSWORD = 'password';
-    const OPTION_URL = 'url';
-
     /** @var IConnectorOscar */
     private $connector;
 
@@ -39,12 +35,9 @@ class HttpAuthBasicStrategy implements IDataAccessStrategy
 
         $additionalHeaders = '';
         $payloadName = '';
-        $username = $this->getConnector()->getParameter(self::OPTION_USERNAME);
-        $password = $this->getConnector()->getParameter(self::OPTION_PASSWORD);
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $additionalHeaders));
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payloadName);
@@ -57,7 +50,7 @@ class HttpAuthBasicStrategy implements IDataAccessStrategy
                 $error .= "Retour vide. ";
             }
 
-            $error .= "CODE $httpcode. ";
+            $error .= "CODE $httpcode. : " . print_r($return, true);
 
             if( $httpcode == 401 ){
                 $error = "Accès à l'API non-autorisé. ";

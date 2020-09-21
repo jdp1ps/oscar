@@ -12,10 +12,12 @@ namespace Oscar\Command;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaValidator;
 use Moment\Moment;
+use Oscar\Connector\AbstractConnectorOscar;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Entity\Role;
+use Oscar\Exception\OscarException;
 use Oscar\OscarVersion;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
@@ -44,6 +46,98 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         ;
     }
 
+    /**
+     * @return OscarConfigurationService
+     */
+    protected function getOscarConfiguration()
+    {
+       return $this->getServicemanager()->get(OscarConfigurationService::class);
+    }
+
+    protected function checkConnectorPerson(InputInterface $input, OutputInterface $output)
+    {
+        $io = new SymfonyStyle($input, $output);
+        $io->title("Configuration du connecteur PERSON");
+
+        /** @var OscarConfigurationService $config */
+        $config = $this->getOscarConfiguration();
+
+        $connectors = $config->getConfiguration('connectors.person');
+
+        foreach ($connectors as $key=>$params) {
+            $io->text(sprintf("Configuration : <bold>%s</bold>", $key));
+
+            // Class
+            $io->text(sprintf("class: <bold>%s</bold>", $params['class']));
+
+            // Options du connecteur
+            $fileYml = $params['params'];
+
+            /** @var AbstractConnectorOscar $class */
+            $class = new $params['class'];
+
+            if ($this->checkPath($io, $fileYml, "Fichier de configuration du connector", 'r') ){
+                $class->init($this->getServicemanager(), $fileYml, $key);
+                $parser = new Parser();
+                $paramsPhp = $parser->parse(file_get_contents($fileYml));
+                foreach ($paramsPhp as $paramKey => $paramValue) {
+                    $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                }
+
+                $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
+
+                if( $class->checkAccess() ){
+                    $io->write(" <green>OK</green>");
+                } else {
+                    $io->write(" <error>ERROR !</error>");
+                }
+                $io->newLine();
+            }
+        }
+    }
+
+    protected function checkConnectorOrganization(InputInterface $input, OutputInterface $output)
+    {
+        $io = new SymfonyStyle($input, $output);
+        $io->title("Configuration du connecteur ORGANIZATION");
+
+        /** @var OscarConfigurationService $config */
+        $config = $this->getOscarConfiguration();
+
+        $connectors = $config->getConfiguration('connectors.organization');
+
+        foreach ($connectors as $key=>$params) {
+            $io->text(sprintf("Configuration : <bold>%s</bold>", $key));
+
+            // Class
+            $io->text(sprintf("class: <bold>%s</bold>", $params['class']));
+
+            // Options du connecteur
+            $fileYml = $params['params'];
+
+            /** @var AbstractConnectorOscar $class */
+            $class = new $params['class'];
+
+            if ($this->checkPath($io, $fileYml, "Fichier de configuration du connector", 'r') ){
+                $class->init($this->getServicemanager(), $fileYml, $key);
+                $parser = new Parser();
+                $paramsPhp = $parser->parse(file_get_contents($fileYml));
+                foreach ($paramsPhp as $paramKey => $paramValue) {
+                    $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                }
+
+                $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organization']));
+
+                if( $class->checkAccess() ){
+                    $io->write(" <green>OK</green>");
+                } else {
+                    $io->write(" <error>ERROR !</error>");
+                }
+                $io->newLine();
+            }
+        }
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->addOutputStyle($output);
@@ -53,7 +147,11 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
+
+
         $io->title("Vérification de la configuration");
+
+
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
@@ -260,65 +358,13 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// CONNECTORS
         try {
-            $connectorsOrganisation = $config->getConfiguration('oscar.connectors.organization');
-            foreach ($connectorsOrganisation as $conn=>$params) {
-                $connecteurName = sprintf(" * CONNECTEUR ORGANISATION '%s'", $conn);
-
-                $io->section(" ### Connecteur ORGANIZATION $conn : ");
-                $class = $config->getConfiguration("oscar.connectors.organization.$conn.class");
-                $params = $config->getConfiguration("oscar.connectors.organization.$conn.params");
-
-                if ($this->checkPath($io, $params, "Fichier de configuration", 'r') ){
-                    $parser = new Parser();
-                    $paramsPhp = $parser->parse(file_get_contents($params));
-                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organizations']));
-                    $curl = curl_init();
-                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_organizations']);
-                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                    $infos = curl_exec($curl);
-                    if( ($error = curl_error($curl)) ){
-                        $io->write(" <error>ERROR : " . $error ."</error>");
-                    } else {
-                        $io->write(" <green>OK</green>");
-                    }
-                    curl_close($curl);
-                }
-            }
-
+            $this->checkConnectorOrganization($input,$output);
         } catch ( OscarException $e ){
-            $io->warning(sprintf(" ~ CONNECTOR > ORGANIZATION : Pas de connecteur organisation : %s", $e->getMessage()));
+            $io->warning(sprintf(" ~ CONNECTOR > ORGANIZATIONS : Pas de connecteur person : %s", $e->getMessage()));
         }
 
         try {
-            $connectors = $config->getConfiguration('oscar.connectors.person');
-            foreach ($connectors as $conn=>$params) {
-                $connecteurName = sprintf(" * CONNECTEUR PERSON '%s'", $conn);
-
-                $io->section(" ### Connecteur PERSON $conn : ");
-
-
-                $class = $config->getConfiguration("oscar.connectors.person.$conn.class");
-                $params = $config->getConfiguration("oscar.connectors.person.$conn.params");
-
-                if ($this->checkPath($io, $params, "Fichier de configuration", 'r') ){
-                    $parser = new Parser();
-                    $paramsPhp = $parser->parse(file_get_contents($params));
-
-                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
-
-                    $curl = curl_init();
-                    curl_setopt($curl, CURLOPT_URL, $paramsPhp['url_persons']);
-                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                    $infos = curl_exec($curl);
-                    if( ($error = curl_error($curl)) ){
-                        $io->write(" <error>ERROR : " . $error ."</error>");
-                    } else {
-                        $io->write(" <green>OK</green>");
-                    }
-                    curl_close($curl);
-                }
-            }
-
+            $this->checkConnectorPerson($input,$output);
         } catch ( OscarException $e ){
             $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }

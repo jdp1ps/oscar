@@ -13,6 +13,29 @@ use Oscar\Connector\IConnectorOscar;
 
 interface IDataAccessStrategy
 {
+    /**
+     * @param string $url
+     * @return mixed
+     * @deprecated
+     */
     public function getData( string $url );
+
+    /**
+     * Retourne les informations pour l'objet $remoteId.
+     *
+     * @param $remoteId
+     * @param null $params
+     * @return mixed
+     */
+    public function getDataSingle( $remoteId, $params=null );
+
+    /**
+     * Retourne toutes les informations.
+     *
+     * @param null $params
+     * @return mixed
+     */
+    public function getDataAll( $params=null );
+
     public function getConnector() :IConnectorOscar;
 }
