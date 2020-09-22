@@ -11,6 +11,11 @@ namespace Oscar\Connector\DataAccessStrategy;
 
 use Oscar\Connector\IConnectorOscar;
 
+/**
+ * Interface IDataAccessStrategy
+ * @package Oscar\Connector\DataAccessStrategy
+ * @deprecated
+ */
 interface IDataAccessStrategy
 {
     /**

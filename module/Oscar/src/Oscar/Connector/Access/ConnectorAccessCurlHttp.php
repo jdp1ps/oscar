@@ -19,25 +19,18 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
     /** @var IConnector */
     private $connector;
 
-    /** @var string URL */
-    private $url;
-
     /**
      * ConnectorAccessCurlHttp constructor.
      * @param IConnector $connector Connector qui va consommer l'accès aux données.
      * @param string $url Nom du paramètre contenant d'URL.
      */
-    public function __construct(IConnector $connector, $options)
+    public function __construct(IConnector $connector)
     {
         $this->connector = $connector;
-        if( array_key_exists('url', $options) )
-            $this->url = $options['url'];
     }
 
-    public function getDatas( $id = null )
+    public function getDatas( $url )
     {
-        $url = $this->url;
-
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -50,5 +43,20 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
         }
 
         return PhpPolyfill::jsonDecode($return);
+    }
+
+    public function getConnector(): IConnector
+    {
+        return $this->connector;
+    }
+
+    public function getDataSingle($remoteId, $params = null)
+    {
+        return $this->getDatas($this->getConnector()->getPathSingle($remoteId));
+    }
+
+    public function getDataAll($params = null)
+    {
+        return $this->getDatas($this->getConnector()->getPathAll());
     }
 }

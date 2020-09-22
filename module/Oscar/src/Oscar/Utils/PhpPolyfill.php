@@ -50,7 +50,7 @@ class PhpPolyfill
         if ($error === JSON_ERROR_NONE) {
             return $json;
         } else {
-            throw new \Exception("Can't encode data to JSON : " . self::jsonErrorMsg($error));
+            throw new \Exception("Can't encode data to JSON : " . self::jsonErrorMsg($error) . '('.  substr($value, 0, 100).')');
         }
     }
 

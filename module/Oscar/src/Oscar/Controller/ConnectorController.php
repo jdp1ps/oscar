@@ -8,6 +8,9 @@
 namespace Oscar\Controller;
 
 
+use Oscar\Connector\ConnectorOrganizationREST;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
@@ -69,7 +72,39 @@ class ConnectorController extends AbstractOscarController implements UseOscarUse
 
     public function organizationAction()
     {
-        return $this->getResponseNotImplemented('Synchronisation des organizations non implantée');
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
+        /** @var Request $request */
+        $request = $this->getRequest();
+
+        $connectorName = $request->getQuery('c');
+        $organizationId = $request->getQuery('v');
+
+        $connectorsAvailabled = array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.organization'));
+
+        if( ! in_array($connectorName, $connectorsAvailabled) ){
+            return $this->getResponseBadRequest('Connecteur indisponible');
+        } else {
+            $personService = $this->getPersonService();
+
+            // Je sais c'est moche
+            /** @var OrganizationRepository $organizationRepository */
+            $organizationRepository = $personService->getEntityManager()->getRepository(Organization::class);
+
+            $organization = $organizationRepository->getObjectByConnectorID($connectorName, $organizationId);
+
+            if( $organization ){
+
+                $class = $this->getOscarConfigurationService()->getConfiguration('connectors.organization')[$connectorName]['class'];
+
+                /** @var ConnectorOrganizationREST $connector */
+                $connector = $this->getServiceContainer()->get(ConnectorService::class)->getConnector('organization.' . $connectorName);
+                $connector->syncOrganization($organization);
+                $this->getEntityManager()->flush();
+                return $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+            } else {
+                throw new OscarException("Plusieurs organizations partagent le connecteur ID '$organizationId'");
+            }
+        }
     }
 
     public function organizationsAction()

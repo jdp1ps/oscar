@@ -11,6 +11,11 @@ namespace Oscar\Connector\DataAccessStrategy;
 
 use Oscar\Connector\IConnectorOscar;
 
+/**
+ * Class HttpBasicStrategy
+ * @package Oscar\Connector\DataAccessStrategy
+ * @deprecated
+ */
 class HttpBasicStrategy implements IDataAccessStrategy
 {
     /** @var IConnectorOscar */

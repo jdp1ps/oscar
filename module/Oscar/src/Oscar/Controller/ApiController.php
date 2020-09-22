@@ -269,7 +269,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
                 "datecreated"     => date('c'),
                 'time'            => (microtime(true) - $start),
                 "uid"             => $uid,
-                "person"          => $organizationToJsonFormatter->format($organization)
+                "organization"          => $organizationToJsonFormatter->format($organization)
             ];
 
             return $this->jsonOutput($datas);

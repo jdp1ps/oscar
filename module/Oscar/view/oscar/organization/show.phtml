@@ -67,7 +67,7 @@
                                     <?= $connector ?> : <strong><?= $organization->getConnectorID($connector) ?></strong>
 
                                     <?php if( $organization->getConnectorID($connector)): ?>
-                                    <a href="<?= $this->url('organization/synchronize', ['id' => $organization->getId(), 'connector' => $connector]) ?>"
+                                    <a href="<?= $this->url('connector/organization') ?>?c=<?= $connector ?>&v=<?= $organization->getConnectorID($connector) ?>"
                                             class="btn btn-primary btn-xs">
                                         <i class="icon-cw-outline"></i>
                                         Synchroniser

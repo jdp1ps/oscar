@@ -756,18 +756,6 @@ organization:
                 route: /scission
                 defaults:
                     action: scission
-        sync:
-            type: segment
-            options:
-                route: /sync
-                defaults:
-                    action: sync
-        synchronize:
-            type: segment
-            options:
-                route: /synchronize/:id/connector/:connector
-                defaults:
-                    action: synchronizeConnector
         ldap:
             type: segment
             options:

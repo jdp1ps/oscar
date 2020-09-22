@@ -10,7 +10,7 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Factory\JsonToOrganization;
 
-class ConnectorOrganizationREST extends AbstractConnectorOscar
+class ConnectorOrganizationREST extends AbstractConnector
 {
     private $editable = false;
 
@@ -89,7 +89,7 @@ class ConnectorOrganizationREST extends AbstractConnectorOscar
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-            $json = $this->getDataAccess()->getDataAll();
+            $json = $this->getAccessStrategy()->getDataAll();
             $jsonDatas = null;
 
             if( is_object($json) && property_exists($json, 'organizations') ){
@@ -152,8 +152,13 @@ class ConnectorOrganizationREST extends AbstractConnectorOscar
         if ($organization->getConnectorID($this->getName())) {
             $organizationIdRemote = $organization->getConnectorID($this->getName());
             try {
-                $access = $this->getDataAccess()->getDataSingle($organizationIdRemote);
-                $organizationData = $access->getDatas($organizationIdRemote);
+                $organizationData = $this->getAccessStrategy()->getDataSingle($organizationIdRemote);
+                if( property_exists($organizationData, 'person') ){
+                    $organizationData = $organizationData->person;
+                }
+                if( property_exists($organizationData, 'organization') ){
+                    $organizationData = $organizationData->organization;
+                }
                 return $this->hydrateWithDatas($organization, $organizationData);
             } catch (\Exception $e) {
                 throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
@@ -161,11 +166,6 @@ class ConnectorOrganizationREST extends AbstractConnectorOscar
         } else {
             throw new \Exception('Impossible de synchroniser la structure ' . $organization);
         }
-    }
-
-    public function getDataAccess(): IDataAccessStrategy
-    {
-        return new HttpBasicStrategy($this);
     }
 
     public function getPathAll(): string

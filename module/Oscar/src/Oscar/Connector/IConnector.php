@@ -9,6 +9,7 @@ namespace Oscar\Connector;
 
 
 use phpDocumentor\Reflection\Types\Mixed_;
+use Zend\ServiceManager\ServiceManager;
 
 interface IConnector
 {
@@ -46,4 +47,31 @@ interface IConnector
      * @return bool
      */
     function hasParameter( string $key ) :bool ;
+
+    /**
+     * @param ServiceManager $sm Le ServiceManager de Zend
+     * @param string $configPath L'emplacement du fichier de configuration YAML
+     * @param string $shortName Le nom du connecteur dans la clef de configuration
+     */
+    public function init( ServiceManager $sm, string $configPath, string $shortName) :void ;
+
+    /**
+     * @param $optionName
+     * @param null $defaultValue
+     * @return mixed
+     */
+    public function getOption($optionName, $defaultValue=null);
+
+    /**
+     * Retourne le "chemin" vers les données complètes
+     * @return string
+     */
+    public function getPathAll() :string;
+
+    /**
+     * Retourne le "chemin" vers la données correspondant à l'identifiant $remoteId
+     * @param $remoteId
+     * @return string
+     */
+    public function getPathSingle( $remoteId ) :string;
 }
