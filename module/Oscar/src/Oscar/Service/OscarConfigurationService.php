@@ -29,6 +29,15 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     const theme = 'theme';
 
+    public function getApiFormats($default=[]){
+        try {
+            $format = $this->getConfiguration('api.formats');
+        } catch (\Exception $e) {
+            $format = [];
+        }
+        return $format;
+    }
+
     protected function getConfig()
     {
         return $this->getServiceLocator()->get('Config')['oscar'];

@@ -42,6 +42,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
             'activities' => "Activités",
         ];
 
+        $formats = $this->getOscarConfigurationService()->getApiFormats([]);
 
         if( $this->isAjax() ){
             $datas = $this->getOscarConfigurationService()->getEditableConfKey('apiaccess', []);
@@ -82,7 +83,7 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
 
         return [
             'apis' => $apis,
-            'formats' => $this->getOscarConfigurationService()->getConfiguration('api.formats')
+            'formats' => $formats
         ];
     }
 
@@ -148,12 +149,24 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         }
     }
 
+
+
     protected function getStrategy($api){
-        $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
+        $config = $this->getOscarConfigurationService()->getApiFormats();
         $granted = $this->checkApiAcces('persons');
 
-        if( array_key_exists('strategies', $granted) && array_key_exists($api, $granted['strategies']) && $granted['strategies'][$api] != 'Normal'){
-            $class = $config[$granted['strategies']['persons']];
+
+        if( array_key_exists('strategies', $granted) && array_key_exists($api, $granted['strategies']) && ($granted['strategies'][$api] != 'Normal' && $granted['strategies'][$api] != '')){
+
+            $strategy = $granted['strategies']['persons'];
+
+            if( !array_key_exists('persons', $config) ){
+                throw new OscarException("Stratégie de mis en forme mal configurée !");
+            }
+            if( !array_key_exists($strategy, $config['persons']) ){
+                throw new OscarException("Stratégie '$strategy' inconnue !");
+            }
+            $class = $config['persons'][$strategy];
         } else {
             $class = PersonToJsonConnectorFormatter::class;
         }
@@ -197,9 +210,14 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
         try {
             $start = microtime(true);
             $granted = $this->checkApiAcces('persons');
-            $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
 
-            if( array_key_exists('strategies', $granted) && array_key_exists('persons', $granted['strategies']) && $granted['strategies']['persons'] != 'Normal'){
+            try {
+                $config = $this->getOscarConfigurationService()->getConfiguration('api.formats.persons');
+            } catch (\Exception $e) {
+                $config = [];
+            }
+
+            if( array_key_exists('strategies', $granted) && array_key_exists('persons', $granted['strategies']) && $granted['strategies']['persons'] != '' ){
                 $class = $config[$granted['strategies']['persons']];
                 $personToJsonFormatter = new $class;
             } else {
