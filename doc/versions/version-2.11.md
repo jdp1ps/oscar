@@ -39,10 +39,7 @@ Puis récupérer les sources
 git fetch
 
 # Réinitialiser la copie local à partir de la source distante
-git reset --hard origin/creed
-
-# Basculez sur la branche "Macclane"
-git checkout maccclane
+git reset --hard origin/master
 ```
 
 
