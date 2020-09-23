@@ -87,12 +87,7 @@ return array(
         // ...
         'api' => [
            // Personnalisation des formats disponibles dans l'API (persons)
-           'formats' => [
-               'persons' => [
-                   'ADAJ' => \Oscar\Formatter\FormatPersonToJSONExample::class,
-                   'Basic' => \Oscar\Formatter\PersonToJsonConnectorBasicFormatter::class
-               ]
-           ]
+           'formats' => []
        ],
     ]
 );

@@ -40,4 +40,17 @@ interface IConnectorOscar
      * @return mixed
      */
     public function getName();
+
+    /**
+     * Retourne le "chemin" vers les données complètes
+     * @return string
+     */
+    public function getPathAll() :string;
+
+    /**
+     * Retourne le "chemin" vers la données correspondant à l'identifiant $remoteId
+     * @param $remoteId
+     * @return string
+     */
+    public function getPathSingle( $remoteId ) :string;
 }

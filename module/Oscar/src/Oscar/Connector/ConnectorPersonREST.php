@@ -9,12 +9,23 @@ namespace Oscar\Connector;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
+use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
 
-class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
+class ConnectorPersonREST extends AbstractConnector
 {
+    public function getPathAll(): string
+    {
+        return $this->getParameter('url_persons');
+    }
+
+    public function getPathSingle($remoteId): string
+    {
+        return sprintf($this->getParameter('url_person'), $remoteId);
+    }
 
     private $editable = false;
     private $options;
@@ -79,10 +90,10 @@ class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
         $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
-        $access = $this->getAccessStrategy($this->getParameter('url_persons'));
+        $access = $this->getAccessStrategy();
 
         try {
-            $json = $access->getDatas();
+            $json = $access->getDataAll();
             $personsDatas = null;
 
             if( is_object($json) && property_exists($json, 'persons') ){
@@ -204,12 +215,8 @@ class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
     function syncPerson(Person $person)
     {
         if ($person->getConnectorID($this->getName())) {
-
             $personIdRemote = $person->getConnectorID($this->getName());
-            $url = sprintf($this->getParameter('url_person'), $personIdRemote);
-            $this->getLogger()->info("connector request : " . $url);
-            $access = $this->getAccessStrategy($url);
-            $personData = $access->getDatas($personIdRemote);
+            $personData = $this->getAccessStrategy()->getDataSingle($personIdRemote);
 
             // Fix : Nouveau format
             if( property_exists($personData, 'person') ){
@@ -222,4 +229,6 @@ class ConnectorPersonREST extends AbstractConnector implements IConnectorPerson
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
     }
+
+
 }

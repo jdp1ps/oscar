@@ -20,9 +20,6 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
     /** @var IConnector */
     private $connector;
 
-    /** @var string URL */
-    private $url;
-
     /**
      * @var string FILE_CERTIFICAT_SSL_KEY
      * Constante contenant le path vers le fichier de la clef ssh au sein du fichier de configuration config/connectors/
@@ -51,10 +48,9 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
             $this->url = $options['url'];
     }
 
-    public function getDatas( $id = null )
+    public function getDatas( $url )
     {
         try {
-            $url = $this->url;
 
             //Vérif params et vérif présence fichier clef ssh
             if( !$this->connector->hasParameter(self::FILE_CERTIFICAT_SSL_KEY) ){
@@ -118,6 +114,7 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
             }
             //Retourne le contenu sous forme de json du corps de la requête
             return PhpPolyfill::jsonDecode($responseApiBody);
+
         }catch (\Exception $e){
             $message = "Error dans la connection à l'api distante, erreur lors de l'éxécution du script :". $_SERVER['SCRIPT_FILENAME']
                 . "\n Nom du script : ".$_SERVER['SCRIPT_NAME']
@@ -125,5 +122,20 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
             $message.=$e->getMessage();
             throw new OscarException($message, $e->getCode());
         }
+    }
+
+    public function getConnector(): IConnector
+    {
+        return $this->getConnector();
+    }
+
+    public function getDataSingle($remoteId, $params = null)
+    {
+        return $this->getDatas($this->getConnector()->getPathSingle($remoteId));
+    }
+
+    public function getDataAll($params = null)
+    {
+        return $this->getDatas($this->getConnector()->getPathAll());
     }
 }

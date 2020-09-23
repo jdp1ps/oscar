@@ -95,7 +95,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
 
-
         return $this->oscarRest(
             function(){
                 return [
@@ -156,9 +155,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     public function parametersAction()
     {
-
         // Récupération des rôles en fonction d'un privilège :
-
         $roles = $this->getOscarUserContextService()->getRolesWithPrivileges(Privileges::ACTIVITY_EDIT);
         $rolesOrganisationPrincipal = $this->getOscarUserContextService()->getRolesOrganisationLeader();
         $config = $this->getOscarConfigurationService()->getOrganizationLeaderRole();
@@ -251,9 +248,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     public function numerotationAction()
     {
-
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
-
 
         $invalidActivityNumbers = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
 

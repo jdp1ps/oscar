@@ -2,12 +2,15 @@
 namespace Oscar\Connector;
 
 use Doctrine\ORM\NoResultException;
+use Oscar\Connector\Access\ConnectorAccessCurlHttp;
+use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
+use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Factory\JsonToOrganization;
 
-class ConnectorOrganizationREST extends AbstractConnector implements IConnector
+class ConnectorOrganizationREST extends AbstractConnector
 {
     private $editable = false;
 
@@ -69,6 +72,7 @@ class ConnectorOrganizationREST extends AbstractConnector implements IConnector
         return $factory;
     }
 
+
     /**
      * @param OrganizationRepository $repository
      * @param bool $force
@@ -85,9 +89,7 @@ class ConnectorOrganizationREST extends AbstractConnector implements IConnector
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-            $access = $this->getAccessStrategy($url);
-            $json = $access->getDatas();
-
+            $json = $this->getAccessStrategy()->getDataAll();
             $jsonDatas = null;
 
             if( is_object($json) && property_exists($json, 'organizations') ){
@@ -148,14 +150,15 @@ class ConnectorOrganizationREST extends AbstractConnector implements IConnector
     function syncOrganization(Organization $organization)
     {
         if ($organization->getConnectorID($this->getName())) {
-
             $organizationIdRemote = $organization->getConnectorID($this->getName());
-
-            $url = sprintf($this->getParameter('url_organization'), $organizationIdRemote);
-
             try {
-                $access = $this->getAccessStrategy($url);
-                $organizationData = $access->getDatas($organizationIdRemote);
+                $organizationData = $this->getAccessStrategy()->getDataSingle($organizationIdRemote);
+                if( property_exists($organizationData, 'person') ){
+                    $organizationData = $organizationData->person;
+                }
+                if( property_exists($organizationData, 'organization') ){
+                    $organizationData = $organizationData->organization;
+                }
                 return $this->hydrateWithDatas($organization, $organizationData);
             } catch (\Exception $e) {
                 throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
@@ -163,5 +166,15 @@ class ConnectorOrganizationREST extends AbstractConnector implements IConnector
         } else {
             throw new \Exception('Impossible de synchroniser la structure ' . $organization);
         }
+    }
+
+    public function getPathAll(): string
+    {
+        return $this->getParameter('url_organizations');
+    }
+
+    public function getPathSingle($remoteId): string
+    {
+        return sprintf($this->getParameter('url_organization'), $remoteId);
     }
 }

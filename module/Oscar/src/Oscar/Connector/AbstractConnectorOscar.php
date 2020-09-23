@@ -9,6 +9,7 @@
 namespace Oscar\Connector;
 
 
+use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Zend\Config\Reader\Yaml;
@@ -135,10 +136,24 @@ abstract class AbstractConnectorOscar implements IConnectorOscar
         foreach ($paths as $path) {
 
             if (!isset($config[$path])) {
-                throw new OscarException(sprintf("La clef '%s' absente dans le fichier de configuration '%s'.", $key, $this->configFilepath));
+                throw new OscarException(sprintf("La clef '%s' absente dans le fichier de configuration '%s'.", $key, $this->configPath));
             }
             $config = $config[$path];
         }
         return $config;
+    }
+
+    abstract public function getDataAccess() :IDataAccessStrategy;
+
+    public function checkAccess()
+    {
+        if( $this->configPath == null ){
+            throw new \Exception("Pas initialisé !");
+        }
+        $datas = $this->getDataAccess()->getDataAll();
+        if( $datas ){
+            return true;
+        }
+        return false;
     }
 }

@@ -1,47 +1,39 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bouvry
- * Date: 09/01/20
- * Time: 11:38
- */
-
-namespace Oscar\Connector\DataAccessStrategy;
 
 
-use Oscar\Connector\IConnectorOscar;
+namespace Oscar\Connector\Access;
+
+use Oscar\Connector\ConnectorRepport;
+use Oscar\Connector\IConnector;
+use Oscar\Exception\ConnectorException;
+use Oscar\Utils\PhpPolyfill;
 
 /**
- * Class HttpAuthBasicStrategy
- * @package Oscar\Connector\DataAccessStrategy
- * @deprecated
+ * Utilisation de CURL pour accéder aux données en HTTP.
+ *
+ * Class ConnectorAccessCurlHttp
+ * @package Oscar\Connector\Access
  */
-class HttpAuthBasicStrategy implements IDataAccessStrategy
+class ConnectorAccessCurlHttpBasicAuth implements IConnectorAccess
 {
     const OPTION_USERNAME = 'username';
     const OPTION_PASSWORD = 'password';
-    const OPTION_URL = 'url';
 
-    /** @var IConnectorOscar */
+    /** @var IConnector */
     private $connector;
 
     /**
-     * HttpAuthBasicStrategy constructor.
-     * @param IConnectorOscar $connector
+     * ConnectorAccessCurlHttp constructor.
+     * @param IConnector $connector Connector qui va consommer l'accès aux données.
+     * @param string $url Nom du paramètre contenant d'URL.
      */
-    public function __construct(IConnectorOscar $connector)
+    public function __construct(IConnector $connector)
     {
         $this->connector = $connector;
     }
 
-    public function getConnector(): IConnectorOscar
+    public function getDatas( $url )
     {
-        return $this->connector;
-    }
-
-    public function getData(string $url)
-    {
-
         $additionalHeaders = '';
         $payloadName = '';
         $username = $this->getConnector()->getParameter(self::OPTION_USERNAME);
@@ -70,16 +62,22 @@ class HttpAuthBasicStrategy implements IDataAccessStrategy
             throw new \Exception($error);
         }
         curl_close($ch);
-        return $return;
+
+        return PhpPolyfill::jsonDecode($return);
+    }
+
+    public function getConnector(): IConnector
+    {
+        return $this->connector;
     }
 
     public function getDataSingle($remoteId, $params = null)
     {
-        return $this->getData($this->getConnector()->getPathSingle($remoteId));
+        return $this->getDatas($this->getConnector()->getPathSingle($remoteId));
     }
 
     public function getDataAll($params = null)
     {
-        return $this->getData($this->getConnector()->getPathAll());
+        return $this->getDatas($this->getConnector()->getPathAll());
     }
 }

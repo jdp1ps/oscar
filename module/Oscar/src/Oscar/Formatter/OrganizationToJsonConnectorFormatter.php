@@ -15,8 +15,6 @@ class OrganizationToJsonConnectorFormatter
 {
     public function format(Organization $organization)
     {
-
-
         return array(
             'uid' => (string)$organization->getId(),
             'code' => $organization->getCode(),
@@ -43,5 +41,4 @@ class OrganizationToJsonConnectorFormatter
             'type' => $organization->getType(),
         );
     }
-
 }

@@ -9,7 +9,7 @@ use Oscar\Exception\OscarException;
 use Symfony\Component\Yaml\Yaml;
 use Zend\ServiceManager\ServiceManager;
 
-abstract class AbstractConnector
+abstract class AbstractConnector implements IConnector
 {
     /** @var ServiceManager */
     private $serviceManager;
@@ -85,30 +85,17 @@ abstract class AbstractConnector
      * @return IConnectorAccess
      * @throws \Oscar\Exception\OsarException
      */
-    protected function getAccessStrategy($url){
+    protected function getAccessStrategy(){
         try {
-
             // Récupération de la stratégie de connection (si précisée)
             $accessStrategy = $this->getParameter('access_strategy');
-            $accessStrategyOptions = [];
-            if( $this->hasParameter('access_strategy_options') ){
-                $accessStrategyOptions = $this->getParameter('access_strategy_options');
-            }
-            if( array_key_exists('url', $accessStrategyOptions) ){
-                throw new ConnectorException(("Le paramètre 'url' est réservé"));
-            }
-            $accessStrategyOptions['url'] = $url;
         } catch (\Exception $e) {
-
             // Stratégie par défaut
             $accessStrategy = ConnectorAccessCurlHttp::class;
-            $accessStrategyOptions = [
-                'url' => $url
-            ];
         }
 
         /** @var IConnectorAccess $access */
-        $access = new $accessStrategy($this, $accessStrategyOptions);
+        $access = new $accessStrategy($this);
 
         return $access;
     }
@@ -119,11 +106,11 @@ abstract class AbstractConnector
      * @param ServiceManager $sm
      * @param $configFilePath
      */
-    public function init(ServiceManager $sm, $configFilePath, $connectorName)
+    public function init( ServiceManager $sm, string $configPath, string $shortName) :void
     {
         $this->serviceManager = $sm;
-        $this->loadParameters($configFilePath);
-        $this->connectorName = $connectorName;
+        $this->loadParameters($configPath);
+        $this->connectorName = $shortName;
     }
 
     /**
@@ -175,5 +162,17 @@ abstract class AbstractConnector
             }
         }
         return true;
+    }
+
+    public function checkAccess()
+    {
+        if( $this->config == null ){
+            throw new \Exception("Pas initialisé !");
+        }
+        $datas = $this->getAccessStrategy($this->getPathAll());
+        if( $datas ){
+            return true;
+        }
+        return false;
     }
 }

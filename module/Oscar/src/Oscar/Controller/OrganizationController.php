@@ -440,10 +440,10 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         /** @var Organization $organization */
         $organization = $this->getOrganizationService()->getOrganization($idOrganization);
 
-        $config = $this->getConfiguration('oscar.connectors.organization');
+        $config = $this->getOscarConfigurationService()->getConfiguration('connectors.organization');
         if( array_key_exists($connector, $config) ){
             /** @var IConnector, IConnectorOrganization $connector */
-            $connector = $this->getServiceLocator()->get('ConnectorService')->getConnector('organization.'.$connector);
+            $connector = $this->getConnectorService()->getConnector('organization.'.$connector);
 
             try {
                 $organization = $connector->syncOrganization($organization);

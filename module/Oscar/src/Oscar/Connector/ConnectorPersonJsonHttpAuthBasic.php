@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
+use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
@@ -23,33 +24,27 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
 
     public function setEditable($foo){}
 
+    public function getDataAccess(): IDataAccessStrategy
+    {
+        return new HttpAuthBasicStrategy($this);
+    }
+
+
     function execute($force = true)
     {
-        $dataAccessStrategy         = new HttpAuthBasicStrategy($this);
+        $dataAccessStrategy         = $this->getDataAccess();
         $dataExtractionStrategy     = new DataExtractionStringToJsonStrategy();
         $report                     = new ConnectorRepport();
 
-        try {
-            $url = $this->getParameter('url_persons');
-        } catch (\Exception $e) {
-            $report->adderror("Erreur de configuration : " . $e->getMessage());
-            return $report;
-        }
-
-
-        $msg = sprintf(_("Chargement des données depuis '%s'"), $url);
-
         // Récupération des données
         try {
-            $datas = $dataAccessStrategy->getData($url);
-            $report->addnotice("$msg : OK ( ". strlen($datas) ." chars extract)");
+            $datas = $dataAccessStrategy->getDataAll();
         } catch (\Exception $e) {
-            $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de charger des données depuis $url : " . $e->getMessage());
+            throw new \Exception("Impossible de charger des données depuis : " . $e->getMessage());
         }
 
         // Conversion
-        $msg = sprintf(_("Conversion des données"), $url);
+        $msg = sprintf(_("Conversion des données"));
         try {
             $json = $dataExtractionStrategy->extract($datas);
             // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
@@ -60,14 +55,13 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
             }
         } catch (\Exception $e) {
             $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de convertir les données depuis $url : " . $e->getMessage());
+            throw new \Exception("Impossible de convertir les données obtenues : " . $e->getMessage());
         }
 
         if( !is_array($personsDatas) ){
             throw new \Exception("L'API n'a pas retourné un tableau de donnée");
         }
 
-        // ...
         $this->syncPersons($personsDatas, $this->getPersonRepository(), $report, $this->getOption('force', false));
 
         return $report;
@@ -102,27 +96,16 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
     }
 
 
-    public function syncPersons($personsDatas, PersonRepository $personRepository, ConnectorRepport &$repport, $force) {
-
-
+    public function syncPersons($personsDatas, PersonRepository $personRepository, ConnectorRepport &$repport, $force)
+    {
         if( $this->getOptionPurge() ){
             $exist = $personRepository->getUidsConnector($this->getName());
             $repport->addnotice(sprintf(_("Il y'a %s personne(s) référencées dans Oscar pour le connecteur '%s'."), count($exist), $this->getName()));
-    //        var_dump($exist);
         }
 
         $repport->addnotice(count($personsDatas). " résultat(s) reçus vont être traité.");
 
-
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-
-
-        $nbrPersonsConnector        = 0;
-        //$nbrPersonsOscar            = count($exist);
-        $nbrPersonsDeleted          = 0;
-        $nbrPersonsUseAndDeletable  = 0;
-        $do = false;
-
         /////////////////////////////////////
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
@@ -154,7 +137,6 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
                     $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                     continue;
                 }
-//                $repport->addnotice($action . " - " . $personData->uid);
 
                 if( $personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
@@ -233,26 +215,25 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
 
     function syncPerson(Person $person)
     {
-        if ($person->getConnectorID($this->getName())) {
-
-            $personIdRemote = $person->getConnectorID($this->getName());
-            $url = sprintf($this->getParameter('url_person'), $personIdRemote);
-
-            //$dataAccessStrategy         = new HttpAuthBasicStrategy($this);
-            $access =  new HttpAuthBasicStrategy($this);
-            $personData = $access->getData($url);
-
-            // Fix : Nouveau format
+        if ( ($remoteId = $person->getConnectorID($this->getName())) ) {
+            $personData = $this->getDataAccess()->getDataSingle($remoteId);
             if( property_exists($personData, 'person') ){
                 $personData = $personData->person;
             }
-
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
-
         } else {
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
     }
 
 
+    public function getPathAll(): string
+    {
+        return $this->getParameter('url_persons');
+    }
+
+    public function getPathSingle($remoteId): string
+    {
+        return sprintf($this->getParameter('url_person'), $remoteId);
+    }
 }

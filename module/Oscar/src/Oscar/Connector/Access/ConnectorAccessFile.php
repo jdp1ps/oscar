@@ -45,8 +45,27 @@ class ConnectorAccessFile implements IConnectorAccess
 
         $datas = file_get_contents($file);
 
-        die($datas);
-
         return PhpPolyfill::jsonDecode($datas);
+    }
+
+    public function getConnector(): IConnector
+    {
+        return $this->getConnector();
+    }
+
+    public function getDataSingle($remoteId, $params = null)
+    {
+        $all = $this->getDatas();
+        foreach ($all as $key=>$datas) {
+            if( $datas['id'] == $remoteId ){
+                return $datas;
+            }
+        }
+        throw new \Exception("No data for $remoteId");
+    }
+
+    public function getDataAll($params = null)
+    {
+        return $this->getDatas();
     }
 }
