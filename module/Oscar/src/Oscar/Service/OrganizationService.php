@@ -282,7 +282,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getOrganizationsSearchPaged($search, $page, $filter=[])
     {
-        $qb = $this->getSearchNativeQuery($search, $filter);
+        // $qb = $this->getSearchNativeQuery($search, $filter);
+        $qb = $this->getSearchQuery($search, $filter);
+
         return new UnicaenDoctrinePaginator($qb, $page);
     }
 
@@ -383,6 +385,66 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $qb;
     }
 
+    public function getSearchQuery($search, $filter)
+    {
+        $ids = $this->search($search, true);
+        $qb = $this->getBaseQuery()->where('o.id IN(:ids)')->setParameter('ids', $ids);
+        $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
+
+        // -------------------------------------------------------------------------------------------------------------
+        // FILTRE sur les types d'organisations
+        if (isset($filter['type']) && $filter['type']){
+
+            // On purge les types vides (option "Tous")
+            $cleanTypes = [];
+
+            foreach ($filter['type'] as $typeValue) {
+                if( $typeValue ){
+                    $cleanTypes[] = $typeValue;
+                }
+            }
+
+            if( count($cleanTypes) > 0 ){
+                $types = $this->getEntityManager()->getRepository(OrganizationType::class)->createQueryBuilder('t')
+                    ->where('t.id IN (:types)')
+                    ->setParameter('types', $cleanTypes)
+                    ->getQuery()
+                    ->getResult();
+
+                $qb->leftJoin('o.typeObj', 't')
+                    ->andWhere('t.id IN(:type)')
+                    ->setParameter('type', $types);
+            }
+        }
+
+        if (isset($filter['active']) && $filter['active']){
+            if( $filter['active'] == 'ON' ){
+                $qb->andWhere('o.dateEnd IS NULL OR o.dateEnd > :now')->setParameter('now', new \DateTime());
+            }
+            else if( $filter['active'] == 'OFF' ){
+                $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+            }
+        }
+
+        if (isset($filter['roles']) && count($filter['roles'])) {
+            $ids = [];
+            $roles = $this->getEntityManager()->getRepository(ProjectPartner::class)->createQueryBuilder('r')
+                ->where('r.role IN (:roles)')
+                ->setParameter('roles', $filter['roles'])->getQuery()->getResult();
+            /** @var ProjectPartner $role */
+            foreach( $roles as $role ){
+                if( !in_array($role->getOrganization()->getId(), $ids) ){
+                    $ids[] = $role->getOrganization()->getId();
+                }
+            }
+
+            $qb->andWhere('o.id IN (:ids)')
+                ->setParameter('ids', $ids);
+        }
+
+        return $qb;
+    }
+
     /**
      * @param $id
      *
@@ -415,10 +477,12 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $query->getResult();
     }
 
-    public function search( $search ){
+    public function search( $search, $justIds = false ){
         $strategy = $this->getSearchEngineStrategy();
         if( $strategy ){
             $ids = $strategy->search($search);
+            if( $justIds == true )
+                return $ids;
             return $this->getOrganizationsByIds($ids);
         } else {
             return $this->getSearchNativeQuery($search, [])->getQuery()->getResult();
@@ -433,9 +497,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder->select('o')
-            ->from(Organization::class, 'o')
-            ->orderBy('o.shortName')
-            ->addOrderBy('o.fullName');
+            ->from(Organization::class, 'o');
         return $queryBuilder;
     }
 

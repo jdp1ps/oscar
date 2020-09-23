@@ -95,7 +95,9 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $allow = true;
             $justXHR = false;
         } else {
-            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([Privileges::ACTIVITY_ORGANIZATION_MANAGE, Privileges::PROJECT_ORGANIZATION_MANAGE]);
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([
+                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                Privileges::PROJECT_ORGANIZATION_MANAGE]);
         }
 
         if( !$allow ){
@@ -430,24 +432,6 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         return $view;
     }
 
-    public function syncAction()
-    {
-        try {
-            foreach( $this->getConfiguration('oscar.connectors.organization') as $key=>$getConnector ){
-                $connector = $getConnector();
-
-                if( $connector instanceof ServiceLocatorAwareInterface ){
-                    $connector->setServiceLocator($this->getServiceLocator());
-                }
-
-                return [ 'repport' => $connector->syncOrganizations($this->getEntityManager()->getRepository(Organization::class), false ) ];
-            }
-        } catch( \Exception $ex ){
-            die($ex->getMessage() . "\n" . $ex->getTraceAsString());
-        }
-
-    }
-
     public function synchronizeConnectorAction(){
         $idOrganization = $this->params()->fromRoute('id');
         $connector = $this->params()->fromRoute('connector');
@@ -769,8 +753,6 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     }
 
-
-
     /**
      * Édition des informations de base.
      */
@@ -778,7 +760,6 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
     {
         $id = $this->params()->fromRoute('id', 0);
         $em = $this->getEntityManager();
-
         $result = $em->createQueryBuilder()
             ->select('p')
             ->from(Organization::class, 'p')
