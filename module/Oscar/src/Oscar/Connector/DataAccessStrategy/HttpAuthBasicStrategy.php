@@ -36,6 +36,7 @@ class HttpAuthBasicStrategy implements IDataAccessStrategy
 
     public function getData(string $url)
     {
+        die($url);
         $additionalHeaders = '';
         $payloadName = '';
         $username = $this->getConnector()->getParameter(self::OPTION_USERNAME);
