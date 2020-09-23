@@ -20,6 +20,7 @@ use Oscar\Entity\OrganizationTypeRepository;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
+use Oscar\Strategy\Search\OrganizationSearchStrategy;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -257,6 +258,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $this->getSearchEngineStrategy()->update($organization);
     }
 
+    /**
+     * @return OrganizationSearchStrategy
+     */
     public function getSearchEngineStrategy()
     {
         static $searchStrategy;

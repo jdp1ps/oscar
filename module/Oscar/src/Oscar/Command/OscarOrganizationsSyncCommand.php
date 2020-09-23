@@ -76,5 +76,21 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }
+
+        $io->section("Reconstruction de l'index de recherche : ");
+        if( !$input->getOption('no-rebuild') ){
+            /** @var OrganizationService $organizationService */
+            $organizationService = $this->getServicemanager()->get(OrganizationService::class);
+
+            try {
+                $organizations = $organizationService->getOrganizations();
+                $organizationService->getSearchEngineStrategy()->rebuildIndex($organizations);
+                $io->success(sprintf('Index de recherche mis à jour avec %s organisations indexées', count($organizations)));
+            } catch ( \Exception $e ){
+                $io->error($e->getMessage());
+            }
+        } else {
+            $io->warning("Pas de reconstruction d'index");
+        }
     }
 }

@@ -47,7 +47,7 @@ class OscarOrganizationsSearchRebuildCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Recherche dans les organisations");
+        $io->section("Reconstruction de l'index de recherche des organisations : ");
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
