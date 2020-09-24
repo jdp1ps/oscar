@@ -392,24 +392,4 @@ class ApiController extends AbstractOscarController implements UseOscarUserConte
     {
         return $this->getProject($projectId)['partners'];
     }
-
-    /**
-     * @return ViewModel
-     */
-    public function searchStaffAction()
-    {
-        $sl = $this->getServiceLocator();
-        $search = $this->getRequest()->getQuery()->get('q');
-
-        if (strlen($search) >= 4) {
-            $t = $sl->get('PersonnelService');
-            /* @var \Application\Service\PersonnelService */
-            $result = $t->searchStaff($search);
-            return new JsonModel($result);
-        } else {
-            $response = new Response();
-            $response->setStatusCode(400);
-            return $response;
-        }
-    }
 }

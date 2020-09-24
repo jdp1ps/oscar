@@ -1510,7 +1510,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         // Données des déclarants pour la période
         $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesis($personIds, $period);
 
-
         $validations = $this->getValidationsPeriodPersons($personIds, $period);
 
         $comments = [];
@@ -1543,7 +1542,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 }
             }
         }
-
 
         foreach ($others as $key => $other) {
 
@@ -1682,7 +1680,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->getQuery()
             ->setParameter('person', $person)
             ->getResult();
-
     }
 
     private $_cache_getPeriodDuration = [];
@@ -1736,7 +1733,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $key = $validation->getDeclarer()->getId() . '-' . $validation->getPeriod();
             $validationsState[$key] = $validation->getStatus();
         }
-
 
         /** @var Person $person */
         foreach ($activity->getDeclarers() as $person) {
@@ -2122,6 +2118,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $days;
     }
 
+
+
     public function verificationPeriod(Person $person, $year, $month)
     {
         $datas = $this->getTimesheetDatasPersonPeriod($person, sprintf('%s-%s', $year, $month));
@@ -2177,13 +2175,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
         }
 
-        /*
-        foreach ($weeksMinCount as $week=>$weekDuration) {
-            if( $weekDuration > $limitWeekMax ){
-                $errors[] = sprintf("- Les heures déclarées en semaine %s dépassent la durée autorisée", $week);
-            }
-        }*/
-
         if ($month > $limitMonthMax) {
             $errors[] = "- Les heures déclarées pour ce mois dépassent la durée autorisée";
         }
@@ -2195,7 +2186,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         if (count($errors) > 0) {
             throw new OscarException(sprintf("Il y'a %s erreur(s) dans votre déclaration : \n %s", count($errors), implode("\n", $errors)));
         }
-
 
         return true;
     }
