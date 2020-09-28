@@ -391,8 +391,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getSearchQuery($search, $filter)
     {
-        $ids = $this->search($search, true);
-        $qb = $this->getBaseQuery()->where('o.id IN(:ids)')->setParameter('ids', $ids);
+        $qb = $this->getBaseQuery();
+
+        if( $search != "" ){
+            $ids = $this->search($search, true);
+            $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
+        }
+        
         $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
 
         // -------------------------------------------------------------------------------------------------------------
