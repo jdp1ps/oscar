@@ -397,7 +397,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $ids = $this->search($search, true);
             $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
         }
-        
+
         $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
 
         // -------------------------------------------------------------------------------------------------------------
