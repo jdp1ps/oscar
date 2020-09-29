@@ -95,18 +95,6 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             'type'=>'Text'
         ]);
 
-        // DateStart
-        $this->add([
-            'name'   => 'dateEnd',
-            'options' => [
-                'label' => 'Date de fermeture'
-            ],
-            'attributes' => [
-                'class' => 'input-date'
-            ],
-            'type'=>'Date'
-        ]);
-
         ////////////////////////////////////////////////////////////////////////
         // Connectors (Ajout dynamique des champs pour les valeurs des connectors)
         foreach( $this->connectors as $connector ){
@@ -127,13 +115,34 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         $this->add([
             'name'   => 'dateStart',
             'options' => [
-                'label' => 'Date de début'
+                'label' => 'Début du contrat',
+                'format' => 'Y-m-d'
             ],
             'attributes' => [
-                'class' => 'input-date'
+                'class' => 'input-date form-control'
             ],
-            'type'=>'Date'
+            'type'=>'DateTime'
         ]);
+        //$dateStart->setValue('FICK');
+        //$this->get('dateStart')->setValue('FUCK');
+
+
+
+
+//
+        // DateEnd
+        $this->add([
+            'name'   => 'dateEnd',
+            'options' => [
+                'label' => 'Date de fermeture',
+                'format' => 'Y-m-d'
+            ],
+            'attributes' => [
+                'class' => 'input-date form-control'
+            ],
+            'type'=>'DateTime'
+        ]);
+
 
 
         $eotp = new Element\Text('code');
@@ -230,7 +239,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
     public function getInputFilterSpecification()
     {
         return [
-            'dateStart'=> [
+           'dateStart'=> [
                 'required' => false,
             ],
 

@@ -35,12 +35,19 @@
     <?php endif; ?>
     <?= $this->formHidden($form->get('secure')) ?>
 
-    <ul class="errors">
-        <?php foreach ($form->getMessages() as $msg): ?>
-            <li><?= $msg ?></li>
+<?php if( $form->getMessages() ): ?>
+    <ul class="alert alert-danger">
+        <?php foreach ($form->getMessages() as $champ=>$msgs): ?>
+            <li><strong><?= $champ ?></strong>
+                <ul>
+                <?php foreach ($msgs as $msg): ?>
+                    <li><?= $msg ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </li>
         <?php endforeach; ?>
     </ul>
-
+<?php endif; ?>
     <div id="completer">
         <div class="form-group">
             <div class="input-group input-group-lg">
@@ -82,21 +89,23 @@
         </div>
     </div>
 
+    <?php /****/ ?>
     <div class="form-group">
         <div class="input-group input-group-sm">
             <span class="input-group-addon">Date de début (ouverture)</span>
-            <?= $this->formInput($form->get('dateStart')) ?>
-        </div>
+            <?= $this->formElement($form->get('dateStart')) ?>
         <?= $this->formElementErrors($form->get('dateStart')); ?>
     </div>
+
 
     <div class="form-group">
         <div class="input-group input-group-sm">
             <span class="input-group-addon">Date de fin (fermeture)</span>
-            <?= $this->formInput($form->get('dateEnd')) ?>
+            <?= $this->formElement($form->get('dateEnd')) ?>
         </div>
         <?= $this->formElementErrors($form->get('dateEnd')); ?>
     </div>
+
 
     <h3>Adresse</h3>
 

@@ -50,7 +50,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     public function deleteAction(){
 
-        $this->getOscarUserContext()->check(Privileges::ORGANIZATION_DELETE);
+        $this->getOscarConfigurationService()->check(Privileges::ORGANIZATION_DELETE);
 
         $id = $this->params()->fromRoute('id');
         $organization = $this->getOrganizationService()->getOrganization($id);
@@ -776,7 +776,10 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $form->init();
         $form->bind($entity);
 
+
+
         if ($this->getRequest()->isPost()) {
+
             $form->setData($this->getRequest()->getPost());
             if( $form->isValid() ){
                 $this->getEntityManager()->flush($entity);
@@ -798,6 +801,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             }
             $form->setData($datas);
         }
+
 
         $view = new ViewModel(array(
             'id' => $id,
