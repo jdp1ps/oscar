@@ -49,10 +49,13 @@ class DateTimeUtils {
         $dateFin = $dateRef->format('Y-m-'. $nbr);
 
         $fmt = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN);
+        $fmt2 = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN, 'MMM YYYY');
 
         $startLabel = datefmt_format($fmt, $dateRef->getTimestamp());
         $endLabel = datefmt_format($fmt, (new \DateTime($dateFin))->getTimestamp());
-        $periodLabel = $dateRef->format('M Y');
+
+
+        $periodLabel = ucfirst(datefmt_format($fmt2, $dateRef->getTimestamp()));
 
         $datas = [
             'totalDays' => $nbr,

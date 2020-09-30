@@ -8,6 +8,7 @@
 
 namespace Oscar\Formatter;
 
+use Oscar\Formatter\Utils\SpreadsheetStyleUtils;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
@@ -183,7 +184,6 @@ class TimesheetActivityPeriodFormatter
 
         // TODO orientation paysage avec DOMPdf
         $writer = IOFactory::createWriter($this->spreadsheet, 'Dompdf');
-            // new Mpdf($this->spreadsheet);
         $writer->save('php://output');
         die();
     }
@@ -194,77 +194,11 @@ class TimesheetActivityPeriodFormatter
 
         $filename = $datas['activity']['numOscar'].'_'.$datas['period']['year'].'-'.$datas['period']['month'];
         ///////// LA classe à Dalas
-        $entete = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => 'FF537992',
-                ],
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startColor' => [
-                    'argb' => 'ffdde6eb',
-                ],
-                'endColor' => [
-                    'argb' => 'ffdcedf9',
-                ],
-            ],
-        ];
-        $this->addStyle("entete", $entete);
 
-        $labelTitle = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => "FF555555",
-                ],
-                'size' => 10
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffdde6eb" ]],
-        ];
-        $this->addStyle("labelTitle", $labelTitle);
-
-        $labelValue = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => "FF000000",
-                ],
-                'size' => 10
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffffffff" ]],
-        ];
-        $this->addStyle("labelValue", $labelValue);
-
-        $total = [
-            'font' => [
-                'bold' => true,
-                'color' => [
-                    'argb' => 'FF537992',
-                ],
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ]
-        ];
-
-        $this->addStyle("total", $total);
-
+        $this->addStyle("entete", SpreadsheetStyleUtils::getInstance()->getEntete());
+        $this->addStyle("labelTitle", SpreadsheetStyleUtils::getInstance()->getLabelTitle());
+        $this->addStyle("labelValue", SpreadsheetStyleUtils::getInstance()->getLabelValue());
+        $this->addStyle("total", SpreadsheetStyleUtils::getInstance()->getTotal());
 
         $colorResearch      = '71bdae'; $colorResearchBG    = 'ebf8f5';
         $colorEducation     = 'c2e0ae'; $colorEducationBG   = 'ecf6e5';
