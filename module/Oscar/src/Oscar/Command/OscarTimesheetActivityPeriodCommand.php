@@ -32,11 +32,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Zend\Validator\Date;
 
-class OscarTimesheetPersonPeriodInfosCommand extends OscarCommandAbstract
+class OscarTimesheetActivityPeriodCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'timesheets:person-period-infos';
+    protected static $defaultName = 'timesheets:activity-period-infos';
 
-    const ARG_DECLARER      = "declarer";
+    const ARG_ACTIVITY      = "activity";
     const ARG_PERIOD        = "period";
     const ARG_FORMAT        = "format";
 
@@ -44,7 +44,7 @@ class OscarTimesheetPersonPeriodInfosCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Fourni des informations sur les informations de temps pour un déclarant à la période donnée")
-            ->addArgument(self::ARG_DECLARER, InputArgument::REQUIRED, "login du déclarant")
+            ->addArgument(self::ARG_ACTIVITY, InputArgument::REQUIRED, "login du déclarant")
             ->addArgument(self::ARG_PERIOD, InputArgument::REQUIRED, "periode sous la forme YYYY-MM")
             ->addArgument(self::ARG_FORMAT, InputArgument::REQUIRED, "format (pdf, xml, json, csv)")
         ;
@@ -55,14 +55,14 @@ class OscarTimesheetPersonPeriodInfosCommand extends OscarCommandAbstract
         $io = new SymfonyStyle($input, $output);
 
         /// OPTIONS and PARAMETERS
-        $declarerLogin = $input->getArgument(self::ARG_DECLARER);
+        $activityId = $input->getArgument(self::ARG_ACTIVITY);
         $periodStr = $input->getArgument(self::ARG_PERIOD);
         $format = $input->getArgument(self::ARG_FORMAT);
 
+
         $serialize = false;
 
-        $person = $this->getPersonService()->getPersonByLdapLogin($declarerLogin);
-        $datas = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
+        $datas = $this->getTimesheetService()->getSynthesisActivityPeriod($activityId, $periodStr);
 
         if( $format == "xls" ) {
             $formatter = new TimesheetActivityPeriodFormatter();
@@ -70,12 +70,7 @@ class OscarTimesheetPersonPeriodInfosCommand extends OscarCommandAbstract
         }
 
         return;
-        $totalDays = $datas['totalDays'];
 
-        if( $serialize ){
-            $serialized = serialize($datas);
-            die($serialized);
-        }
 /****
         echo '
 <?xml version="1.0"?>
