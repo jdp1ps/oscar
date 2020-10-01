@@ -168,7 +168,7 @@ class DateTimeUtils {
             $month = intval($matches[0][2]);
             $year = intval($matches[0][1]);
 
-            $fmt = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN, 'MMMM Y');
+            $fmt = datefmt_create('fr_FR', \IntlDateFormatter::FULL, \IntlDateFormatter::NONE, 'Europe/Paris', \IntlDateFormatter::GREGORIAN, 'MMMM yyyy');
 
 
             $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
