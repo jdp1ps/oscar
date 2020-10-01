@@ -41,10 +41,17 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setCode($data['code']);
         $object->setSiret($data['siret']);
         $object->setFullName($data['fullName']);
-        $object->setDateStart($data['dateStart']);
-        $object->setDateEnd($data['dateEnd']);
 
-            // ADDRESS
+        $object->setDateStart(
+            !$data['dateStart'] ? null : new \DateTime($data['dateStart'])
+        );
+        $object->setDateEnd(
+            !$data['dateEnd'] ? null : new \DateTime($data['dateEnd'])
+        );
+
+
+
+        // ADDRESS
         $object->setStreet1($data['street1']);
         $object->setStreet2($data['street2']);
         $object->setStreet3($data['street3']);
@@ -70,6 +77,7 @@ class OrganizationFormHydrator implements HydratorInterface
      */
     public function extract($object)
     {
+
         $datas = [
             'id'        => $object->getId(),
             'shortName' => $object->getShortName(),
@@ -77,8 +85,8 @@ class OrganizationFormHydrator implements HydratorInterface
             'typeObj'   => $object->getTypeObj() ? $object->getTypeObj()->getId() : null,
             'siret'     => $object->getSiret(),
             'fullname'  => $object->getFullName(),
-            'dateStart' => $object->getDateStart(),
-            'dateStart' => $object->getDateEnd(),
+            'dateStart' => $object->getDateStart()  ? $object->getDateStart()->format('Y-m-d')  : '',
+            'dateEnd'   => $object->getDateEnd()    ? $object->getDateEnd()->format('Y-m-d')    : '',
             'fullName'  => $object->getFullName(),
             // ADDRESS
             'street1'  => $object->getStreet1(),
