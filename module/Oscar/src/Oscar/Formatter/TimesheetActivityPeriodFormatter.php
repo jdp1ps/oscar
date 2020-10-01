@@ -11,19 +11,20 @@ namespace Oscar\Formatter;
 use Oscar\Formatter\Utils\SpreadsheetStyleUtils;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
 
 
 class TimesheetActivityPeriodFormatter
 {
     private $currentLineIndex;
     private $currentColIndex;
-    private $letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    private $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
     private $spreadsheet;
     private $jumpCol = 0;
     private $styles;
+    private $activeSheet;
 
     private $width = 0;
     private $height = 0;
@@ -35,9 +36,28 @@ class TimesheetActivityPeriodFormatter
         $this->currentLineIndex = 1;
         $this->spreadsheet = new Spreadsheet();
         $this->styles = [];
+
+        // Styles
+        $this->addStyle("entete", SpreadsheetStyleUtils::getInstance()->getEntete());
+        $this->addStyle("labelTitle", SpreadsheetStyleUtils::getInstance()->getLabelTitle());
+        $this->addStyle("labelValue", SpreadsheetStyleUtils::getInstance()->getLabelValue());
+        $this->addStyle("total", SpreadsheetStyleUtils::getInstance()->getTotal());
+        $this->addStyle("headResearch", SpreadsheetStyleUtils::getInstance()->headResearch());
+        $this->addStyle("headAbs", SpreadsheetStyleUtils::getInstance()->headAbs());
+        $this->addStyle("headEducation", SpreadsheetStyleUtils::getInstance()->headEducation());
+        $this->addStyle("headOther", SpreadsheetStyleUtils::getInstance()->headOther());
+        $this->addStyle("withValue", SpreadsheetStyleUtils::getInstance()->withValue());
+        $this->addStyle("cellTotalBottom", SpreadsheetStyleUtils::getInstance()->cellTotalBottom());
+        $this->addStyle("noValue", SpreadsheetStyleUtils::getInstance()->noValue());
+        $this->addStyle("comment", SpreadsheetStyleUtils::getInstance()->comment());
+        $this->addStyle("personComment", SpreadsheetStyleUtils::getInstance()->personComment());
+        $this->addStyle("person", SpreadsheetStyleUtils::getInstance()->person());
+        $this->addStyle("totalColumn", SpreadsheetStyleUtils::getInstance()->totalColumn());
+
     }
 
-    public function addStyle($name, $options){
+    public function addStyle($name, $options)
+    {
         $this->styles[$name] = $options;
     }
 
@@ -45,15 +65,17 @@ class TimesheetActivityPeriodFormatter
      * Déplace le curseur d'écriture à la colonne suivante
      * @return $this
      */
-    public function nextCol(){
-        $this->currentColIndex += $this->jumpCol+1;
+    public function nextCol()
+    {
+        $this->currentColIndex += $this->jumpCol + 1;
         $this->jumpCol = 0;
-        $this->width = max($this->width, $this->currentColIndex+1);
+        $this->width = max($this->width, $this->currentColIndex + 1);
         return $this;
     }
 
-    public function autoSizeColumns(){
-        for($i=0; $i<$this->width; $i++){
+    public function autoSizeColumns()
+    {
+        for ($i = 0; $i < $this->width; $i++) {
             $col = $this->getColStr($i);
             $this->getActiveSheet()->getColumnDimension($col)->setAutoSize(true);
         }
@@ -62,7 +84,8 @@ class TimesheetActivityPeriodFormatter
     /**
      * @return $this
      */
-    public function nextLine(){
+    public function nextLine()
+    {
         $this->currentLineIndex++;
         $this->currentColIndex = 0;
         return $this;
@@ -72,19 +95,22 @@ class TimesheetActivityPeriodFormatter
      * @param $letter
      * @return $this
      */
-    public function setCol($letter){
+    public function setCol($letter)
+    {
         $this->currentColIndex = array_search($letter, $this->letters);
         return $this;
     }
 
-    public function getCurrentLine(){
+    public function getCurrentLine()
+    {
         return $this->currentLineIndex;
     }
 
     /**
      * @return string
      */
-    public function getCurrentCol(){
+    public function getCurrentCol()
+    {
         return $this->getColStr($this->currentColIndex);
     }
 
@@ -92,11 +118,12 @@ class TimesheetActivityPeriodFormatter
      * @param $index
      * @return string
      */
-    private function getColStr($index){
+    private function getColStr($index)
+    {
         $out = "";
         $a = floor($index / count($this->letters));
-        if( $a > 0 ){
-            $out .= $this->letters[$a-1];
+        if ($a > 0) {
+            $out .= $this->letters[$a - 1];
         }
         $b = $index % count($this->letters);
         $out .= $this->letters[$b];
@@ -107,23 +134,31 @@ class TimesheetActivityPeriodFormatter
      * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function getActiveSheet(){
-        return $this->spreadsheet->getActiveSheet();
+    public function getActiveSheet()
+    {
+        if( $this->activeSheet == null )
+            $this->activeSheet = $this->spreadsheet->getActiveSheet();
+
+        return $this->activeSheet;
     }
+
+
 
 
     /**
      * @return string
      */
-    public function getCurrentCellPosition(){
-        return $this->getCurrentCol()."".$this->currentLineIndex;
+    public function getCurrentCellPosition()
+    {
+        return $this->getCurrentCol() . "" . $this->currentLineIndex;
     }
 
     /**
      * @return \PhpOffice\PhpSpreadsheet\Style\Style
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function getCurrentStyle(){
+    public function getCurrentStyle()
+    {
         return $this->getActiveSheet()->getStyle($this->getCurrentCellPosition());
     }
 
@@ -135,11 +170,12 @@ class TimesheetActivityPeriodFormatter
      * @return $this
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function drawCell($content, $colspan=0, $nextCol=true, $style=null) {
+    public function drawCell($content, $colspan = 0, $nextCol = true, $style = null)
+    {
 
         // Styles
-        if( $style != null ){
-            if( !array_key_exists($style, $this->styles) ){
+        if ($style != null) {
+            if (!array_key_exists($style, $this->styles)) {
                 throw new Exception("Style '$style' non référencé'");
             }
 
@@ -148,7 +184,7 @@ class TimesheetActivityPeriodFormatter
 
         $this->getActiveSheet()->setCellValue($this->getCurrentCellPosition(), $content);
 
-        if( $colspan > 0 ){
+        if ($colspan > 0) {
             $colA = $this->getCurrentCol();
             $colB = $this->getColStr($this->currentColIndex + $colspan);
             $line = $this->getCurrentLine();
@@ -157,7 +193,7 @@ class TimesheetActivityPeriodFormatter
             $this->jumpCol = $colspan;
         }
 
-        if( $nextCol ){
+        if ($nextCol) {
             $this->nextCol();
         }
         return $this;
@@ -167,9 +203,10 @@ class TimesheetActivityPeriodFormatter
      * @param $path
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    public function generate($filename){
+    public function generate($filename)
+    {
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$filename.'"');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
 
         $writer = new Xlsx($this->spreadsheet);
@@ -177,9 +214,10 @@ class TimesheetActivityPeriodFormatter
         die();
     }
 
-    public function generatePdf($filename){
+    public function generatePdf($filename)
+    {
         //header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="'.$filename.'"');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
 
         // TODO orientation paysage avec DOMPdf
@@ -188,153 +226,33 @@ class TimesheetActivityPeriodFormatter
         die();
     }
 
+    public function newWorksheetPeriod($datas)
+    {
+        $this->currentColIndex = 0;
+        $this->currentLineIndex = 1;
+
+        $workSheetName = $datas['period']['periodLabel'];
+        $workSheet = new Worksheet($this->spreadsheet, $workSheetName);
+        $this->activeSheet = $workSheet;
+        $this->spreadsheet->addSheet($workSheet, 0);
 
 
-    public function output($datas, $outputFormat='excel'){
+        $colorResearchBG = 'ebf8f5';
+        $colorEducationBG = 'ecf6e5';
+        $colorAbsBG = 'faefea';
+        $colorOtherBG = 'f8faea';
 
-        $filename = $datas['activity']['numOscar'].'_'.$datas['period']['year'].'-'.$datas['period']['month'];
-        ///////// LA classe à Dalas
-
-        $this->addStyle("entete", SpreadsheetStyleUtils::getInstance()->getEntete());
-        $this->addStyle("labelTitle", SpreadsheetStyleUtils::getInstance()->getLabelTitle());
-        $this->addStyle("labelValue", SpreadsheetStyleUtils::getInstance()->getLabelValue());
-        $this->addStyle("total", SpreadsheetStyleUtils::getInstance()->getTotal());
-
-        $colorResearch      = '71bdae'; $colorResearchBG    = 'ebf8f5';
-        $colorEducation     = 'c2e0ae'; $colorEducationBG   = 'ecf6e5';
-        $colorAbs           = 'f8aa4a'; $colorAbsBG         = 'faefea';
-        $colorOther         = 'd1d6a5'; $colorOtherBG       = 'f8faea';
-
-        $baseFontSize = 10;
-
-        $headResearch = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff$colorResearch" ]],];
-        $this->addStyle("headResearch", $headResearch);
-
-        $headAbs = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff$colorAbs" ]],];
-        $this->addStyle("headAbs", $headAbs);
-
-        $headEducation = [ 'font' => [ 'bold' => true,'size' => $baseFontSize],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff$colorEducation"  ]],];
-        $this->addStyle("headEducation", $headEducation);
-
-        $headOther = [ 'font' => [ 'bold' => true,'size' => $baseFontSize],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ff$colorOther" ]],];
-        $this->addStyle("headOther", $headOther);
-
-        $withValue = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize-1 ],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-        ];
-        $this->addStyle("withValue", $withValue);
-
-        $cellTotalBottom = [ 'font' => [ 'bold' => true, 'size' => $baseFontSize+1 ],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ff000000'] ]
-            ],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,],
-        ];
-        $this->addStyle("cellTotalBottom", $cellTotalBottom);
-
-        $noValue = [ 'font' => [ 'bold' => false, 'size' => $baseFontSize-1, 'color' => [ 'argb' => 'ff808080' ]],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,]];
-        $this->addStyle("noValue", $noValue);
-
-
-        $comment = [ 'font' => [ 'bold' => false, 'size' => $baseFontSize-1, 'color' => [ 'argb' => 'ff333333' ]],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP,]];
-        $this->addStyle("comment", $comment);
-
-        $personComment = [ 'font' => [ 'bold' => false, 'size' => $baseFontSize-1, 'color' => [ 'argb' => 'ff555555' ]],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP,]];
-        $this->addStyle("personComment", $personComment);
-
-        $person = [
-            'font' => [
-                'bold' => true,
-                'size' => $baseFontSize,
-                'color' => [
-                    'argb' => 'FF333333',
-                ],
-            ],
-            'borders' => [
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'color' => ['argb' => 'fffefefe' ]
-            ],
-
-        ];
-        $this->addStyle("person", $person);
-
-
-        $totalColumn = [
-            'font' => [
-                'bold' => true,
-                'size' => $baseFontSize,
-            ],
-            'borders' => [
-                'left' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ff000000'] ],
-                'top' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'right' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-                'bottom' => [ 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'ffd7dbce'] ],
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'fill' => [ 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => "ffffffff" ]],
-        ];
-        $this->addStyle("totalColumn", $totalColumn);
-
-
-        $wpWidth            = count($datas['wps']);
-        $ceWidth            = count($datas['ces']);
-        $educationWidth     = count($datas['othersGroups']['education']);
-        $absWidth           = count($datas['othersGroups']['abs']);
-        $otherWidth         = count($datas['othersGroups']['other']);
-        $researchWidth      = count($datas['othersGroups']['research']);
+        $wpWidth = count($datas['wps']);
+        $ceWidth = count($datas['ces']);
+        $educationWidth = count($datas['othersGroups']['education']);
+        $absWidth = count($datas['othersGroups']['abs']);
+        $otherWidth = count($datas['othersGroups']['other']);
+        $researchWidth = count($datas['othersGroups']['research']);
 
         $fullWidth = $wpWidth + $ceWidth + $educationWidth + $absWidth + $otherWidth + $researchWidth + 3;
 
 
-        $sizing = floor(($fullWidth -4) / 4);
+        $sizing = floor(($fullWidth - 4) / 4);
 
 
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(40);
@@ -431,7 +349,7 @@ class TimesheetActivityPeriodFormatter
 
         $this->nextLine();
 
-        foreach ($datas['foo'] as $person=>$line) {
+        foreach ($datas['foo'] as $person => $line) {
 
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(20);
 
@@ -530,21 +448,21 @@ class TimesheetActivityPeriodFormatter
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(4);
         $this->nextLine();
 
-        $widthPerson = floor(($fullWidth - 2)/4);
-        $widthComment = floor(($fullWidth - 2)/4)*2;
+        $widthPerson = floor(($fullWidth - 2) / 4);
+        $widthComment = floor(($fullWidth - 2) / 4) * 2;
 
-        foreach ($datas['foo'] as $person=>$line) {
+        foreach ($datas['foo'] as $person => $line) {
 
             $comment = "";
 
-            if( array_key_exists($person, $datas['comments']) ){
-                foreach ($datas['comments'][$person] as $key=>$content) {
-                    $comment .= $content['comment']."\n";
+            if (array_key_exists($person, $datas['comments'])) {
+                foreach ($datas['comments'][$person] as $key => $content) {
+                    $comment .= $content['comment'] . "\n";
                 }
             }
 
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(60);
-            $this->drawCell("", 0, true );
+            $this->drawCell("", 0, true);
             $this->drawCell($person, $widthPerson, true, 'personComment');
             $this->drawCell($comment, $widthComment, true, 'comment');
 
@@ -562,11 +480,34 @@ class TimesheetActivityPeriodFormatter
             ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE)
             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
 
-        if( $outputFormat == 'excel' ) {
-            $this->generate($filename.'.xlsx');
+        return $workSheet;
+    }
+
+
+    public function output($datas, $outputFormat = 'excel')
+    {
+
+        if( array_key_exists('periods', $datas) ){
+            foreach ($datas['periods'] as $datasPeriod) {
+                $this->newWorksheetPeriod($datasPeriod);
+            }
+            $filename = "repport-full";
+            $this->spreadsheet->setIndexByName('Worksheet', 0);
         } else {
-            $this->generatePdf($filename.'.pdf');
+            $workSheet = $this->newWorksheetPeriod($datas);
+            $filename = $datas['activity']['numOscar'] . '_' . $datas['period']['year'] . '-' . $datas['period']['month'];
         }
+
+
+        if ($outputFormat == 'excel') {
+            $this->generate($filename . '.xlsx');
+        } else {
+            $this->generatePdf($filename . '.pdf');
+        }
+        ///////// LA classe à Dalas
+
+
+
     }
 
 }
