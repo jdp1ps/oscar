@@ -158,7 +158,7 @@ class SpreadsheetStyleUtils
                 'font' => [
                     'bold' => false,
                     'color' => [
-                        'argb' => $this->colorWhite,
+                        'argb' => $this->colorBlack,
                     ],
                     'size' => 10
                 ],

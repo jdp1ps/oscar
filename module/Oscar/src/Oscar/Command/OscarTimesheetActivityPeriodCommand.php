@@ -10,6 +10,7 @@ namespace Oscar\Command;
 
 
 use Moment\Moment;
+use Oscar\Entity\Activity;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
@@ -62,7 +63,16 @@ class OscarTimesheetActivityPeriodCommand extends OscarCommandAbstract
 
         $serialize = false;
 
-        $periodsStrs = ['2017-03', '2017-02', '2017-01'];
+        $periodsStrs = [];
+        if($periodStr == 'all') {
+            /** @var Activity $activity */
+            $activity = $this->getTimesheetService()->getEntityManager()->getRepository(Activity::class)->find($activityId);
+
+            $periodsStrs = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart(), $activity->getDateEnd());
+
+        }
+
+
 
         $datas = [
             'periods' => []

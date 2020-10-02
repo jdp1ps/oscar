@@ -11,6 +11,7 @@ namespace Oscar\Formatter;
 use Oscar\Formatter\Utils\SpreadsheetStyleUtils;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -25,6 +26,9 @@ class TimesheetActivityPeriodFormatter
     private $jumpCol = 0;
     private $styles;
     private $activeSheet;
+    private $synthesis;
+    private $SynthesisFormula;
+    private $allCes;
 
     private $width = 0;
     private $height = 0;
@@ -36,6 +40,9 @@ class TimesheetActivityPeriodFormatter
         $this->currentLineIndex = 1;
         $this->spreadsheet = new Spreadsheet();
         $this->styles = [];
+        $this->synthesis = [];
+        $this->SynthesisFormula = [];
+        $this->allCes = [];
 
         // Styles
         $this->addStyle("entete", SpreadsheetStyleUtils::getInstance()->getEntete());
@@ -176,7 +183,7 @@ class TimesheetActivityPeriodFormatter
         // Styles
         if ($style != null) {
             if (!array_key_exists($style, $this->styles)) {
-                throw new Exception("Style '$style' non référencé'");
+                throw new \Exception("Style '$style' non référencé'");
             }
 
             $this->getActiveSheet()->getStyle($this->getCurrentCellPosition())->applyFromArray($this->styles[$style]);
@@ -226,6 +233,17 @@ class TimesheetActivityPeriodFormatter
         die();
     }
 
+    public function stylisation($theme){
+        $color = "ffefefef";
+        switch ($theme) {
+            case 'research' : $color = 'ffebf8f5'; break;
+            case 'education' : $color = 'ffecf6e5'; break;
+            case 'abs' : $color = 'fffaefea'; break;
+            case 'other' : $color = 'fff8faea'; break;
+        }
+        $this->getCurrentStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB("$color");
+    }
+
     public function newWorksheetPeriod($datas)
     {
         $this->currentColIndex = 0;
@@ -249,14 +267,14 @@ class TimesheetActivityPeriodFormatter
         $otherWidth = count($datas['othersGroups']['other']);
         $researchWidth = count($datas['othersGroups']['research']);
 
-        $fullWidth = $wpWidth + $ceWidth + $educationWidth + $absWidth + $otherWidth + $researchWidth + 3;
+        $fullWidth = $wpWidth + $ceWidth + $educationWidth + $absWidth + $otherWidth + $researchWidth + 5;
 
 
         $sizing = floor(($fullWidth - 4) / 4);
 
 
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(40);
-        $this->drawCell("FEUILLE de TEMPS", $fullWidth, true, 'entete');
+        $this->drawCell("FEUILLE de TEMPS " . $datas['period']['periodLabel'], $fullWidth, true, 'entete');
         $this->nextLine();
         $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(30);
         $this->drawCell($datas['activity']['label'], $fullWidth, true, 'entete');
@@ -315,6 +333,7 @@ class TimesheetActivityPeriodFormatter
         $this->drawCell(" ", 0, true);
 
 // LOTS
+
         foreach ($datas['wps'] as $wp) {
             $this->drawCell($wp['code'], 0, true, 'headResearch');
         }
@@ -323,6 +342,7 @@ class TimesheetActivityPeriodFormatter
         foreach ($datas['ces'] as $ce) {
             $this->drawCell($ce, 0, true, 'headResearch');
         }
+
         foreach ($datas['othersGroups']['research'] as $r) {
             $this->drawCell($r['label'], 0, true, 'headResearch');
         }
@@ -351,43 +371,94 @@ class TimesheetActivityPeriodFormatter
 
         foreach ($datas['foo'] as $person => $line) {
 
+            if( !array_key_exists($person, $this->synthesis) ){
+                $this->synthesis[$person] = [];
+                $this->synthesis[$person]['wps'] = [];
+                foreach ($datas['wps'] as $wp) {
+                    $code = $wp['code'];
+                    $this->synthesis[$person]['wps'][$code] = [];
+                }
+                $this->synthesis[$person]['totalMain'] = [];
+
+                $this->synthesis[$person]['ces'] = [];
+                foreach ($datas['ces'] as $ce) {
+                    if( !in_array($ce, $this->allCes) ){
+                        $this->allCes[] = $ce;
+                    }
+                    $this->synthesis[$person]['ces'][$ce] = [];
+                }
+                $this->synthesis[$person]['totalCes'] = [];
+                $this->synthesis[$person]['totalResearch'] = [];
+
+                $this->synthesis[$person]['othersGroups'] = [
+                    'research' => [],
+                    'education' => [],
+                    'abs' => [],
+                    'other' => [],
+                ];
+                foreach ($datas['othersGroups'] as $group=>$dataGroup ) {
+                    $this->synthesis[$person]['othersGroups'][$group] = [];
+                    foreach ($dataGroup as $subGroup=>$subGroupData) {
+                        $this->synthesis[$person]['othersGroups'][$group][$subGroup] = [];
+                    }
+                }
+            }
+
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(20);
 
             // Recherche
             $this->drawCell($person, 0, true, 'person');
 
+
             foreach ($datas['wps'] as $wp) {
                 $code = $wp['code'];
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
+                $this->stylisation('research');
+                //$this->synthesis[$person]['wps'][$code][] = sprintf("$'%s'.%s", $workSheetName, $this->getCurrentCellPosition());
+                $this->synthesis[$person]['wps'][$code][] = $line['main'][$code];
                 $this->drawCell(number_format($line['main'][$code], 2), 0, true, $line['main'][$code] ? 'withValue' : 'noValue');
             }
 
+            //$this->synthesis[$person]['totalMain'][] = sprintf("$'%s'.%s", $workSheetName, $this->getCurrentCellPosition());
+            $this->synthesis[$person]['totalMain'][] = $line['totalMain'];
+            $this->synthesis[$person]['totalResearch'][] = $line['totalMain'];
             $this->drawCell($line['totalMain'], 0, true, 'totalColumn');
 
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // CONTRACTS EUROPEENS
             foreach ($datas['ces'] as $ce) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
+                $this->stylisation('research');
+                //$this->synthesis[$person]['ces'][$ce][] = sprintf("$'%s'.%s", $workSheetName, $this->getCurrentCellPosition());
+                $this->synthesis[$person]['ces'][$ce][] = $line['ce'][$ce];
+                $this->synthesis[$person]['totalCes'][] = $line['ce'][$ce];
+                $this->synthesis[$person]['totalResearch'][] = $line['ce'][$ce];
                 $this->drawCell($line['ce'][$ce], 0, true, $line['ce'][$ce] ? 'withValue' : 'noValue');
             }
 
             foreach ($datas['othersGroups']['research'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
+                $this->stylisation('research');
+                $this->synthesis[$person]['othersGroups']['research'][$r['code']][] = $line['others'][$r['code']];
+                $this->synthesis[$person]['totalResearch'][] = $line['others'][$r['code']];
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
-            $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorResearchBG");
+            $this->stylisation('research');
             $this->drawCell($line['totalResearch'], 0, true, 'totalColumn');
 
             foreach ($datas['othersGroups']['education'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorEducationBG");
+                $this->stylisation('education');
+                $this->synthesis[$person]['othersGroups']['education'][$r['code']][] = $line['others'][$r['code']];
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
 
             foreach ($datas['othersGroups']['abs'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorAbsBG");
+                $this->stylisation('abs');
+                $this->synthesis[$person]['othersGroups']['abs'][$r['code']][] = $line['others'][$r['code']];
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
 
             foreach ($datas['othersGroups']['other'] as $r) {
-                $this->getCurrentStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB("ff$colorOtherBG");
+                $this->stylisation('other');
+                $this->synthesis[$person]['othersGroups']['other'][$r['code']][] = $line['others'][$r['code']];
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
 
@@ -395,6 +466,8 @@ class TimesheetActivityPeriodFormatter
             $this->drawCell($line['totaux']['total'], 0, true, 'totalColumn');
             $this->drawCell(' ', 0, true, 'person');
             $this->nextLine();
+
+
         }
 
 // LIGNE TOTAL
@@ -488,11 +561,209 @@ class TimesheetActivityPeriodFormatter
     {
 
         if( array_key_exists('periods', $datas) ){
+            $datasSynthesis = [];
+
+            $synthesis = null;
+
             foreach ($datas['periods'] as $datasPeriod) {
+//                if( $synthesis == null ){
+//                    $synthesis = [];
+//                    foreach ($datas['wps'] as $wp) {
+//                        $this->drawCell($wp['code'], 0, true, 'headResearch');
+//                    }
+//                    $this->drawCell('Total', 0, true, 'headResearch');
+//
+//                    foreach ($datas['ces'] as $ce) {
+//                        $this->drawCell($ce, 0, true, 'headResearch');
+//                    }
+//                    foreach ($datas['othersGroups']['research'] as $r) {
+//                        $this->drawCell($r['label'], 0, true, 'headResearch');
+//                    }
+//
+//                    $this->drawCell('Total', 0, true, 'headResearch');
+//
+//                    foreach ($datas['othersGroups']['education'] as $r) {
+//                        $this->drawCell($r['label'], 0, true, 'headEducation');
+//                    }
+//
+//                    foreach ($datas['othersGroups']['abs'] as $r) {
+//                        $this->drawCell($r['label'], 0, true, 'headAbs');
+//                    }
+//
+//                    foreach ($datas['othersGroups']['other'] as $r) {
+//                        $this->drawCell($r['label'], 0, true, 'headOther');
+//                    }
+//
+//                    $this->drawCell('Total actif', 0, true, 'person');
+//
+//                    $colSign = $this->getCurrentCol();
+//                    $this->drawCell('TOTAL', 0, true, 'person');
+//                    foreach ($datasPeriod['foo'] as $person=>$datas) {
+//                        if( !array_key_exists($person, $datasSynthesis) ){
+//                            $datasSynthesis[$person] = [];
+//                        }
+//                    }
+//                }
+
                 $this->newWorksheetPeriod($datasPeriod);
+
             }
+
+            $datas = $datasPeriod;
+
             $filename = "repport-full";
-            $this->spreadsheet->setIndexByName('Worksheet', 0);
+            $synthese = $this->spreadsheet->getSheetByName('Worksheet');
+            $synthese->setTitle("Synthèse");
+            $this->spreadsheet->setActiveSheetIndexByName('Synthèse');
+            $this->activeSheet = $this->spreadsheet->getActiveSheet();
+
+            $this->currentColIndex = 0;
+            $this->currentLineIndex = 1;
+            $this->drawCell("SYNTHèSE pour l'ACTIVITé", 30, true, 'entete');
+            $this->nextLine();
+            $this->nextLine();
+            $this->nextCol();
+            foreach ($datas['wps'] as $wp) {
+                $this->drawCell($wp['code'], 0, true, 'headResearch');
+            }
+            $this->drawCell('Total', 0, true, 'headResearch');
+
+
+            $this->drawCell("Projets CE", 0, true, 'headResearch');
+
+            foreach ($datas['othersGroups']['research'] as $r) {
+                $this->drawCell($r['label'], 0, true, 'headResearch');
+            }
+
+            $this->drawCell('Total Recherche', 0, true, 'headResearch');
+
+            foreach ($datas['othersGroups']['education'] as $r) {
+                $this->drawCell($r['label'], 0, true, 'headEducation');
+            }
+            if( count($datas['othersGroups']['education']) > 1 ){
+                $this->drawCell("Total Enseignement", 0, true, 'headEducation');
+            }
+
+            foreach ($datas['othersGroups']['abs'] as $r) {
+                $this->drawCell($r['label'], 0, true, 'headAbs');
+            }
+            if( count($datas['othersGroups']['abs']) > 1 ){
+                $this->drawCell("Total absent", 0, true, 'headAbs');
+            }
+
+            foreach ($datas['othersGroups']['other'] as $r) {
+                $this->drawCell($r['label'], 0, true, 'headOther');
+            }
+            if( count($datas['othersGroups']['other']) > 1 ){
+                $this->drawCell("Total autre", 0, true, 'headOther');
+            }
+
+            $this->drawCell('Total actif', 0, true, 'person');
+
+            $colSign = $this->getCurrentCol();
+            $this->drawCell('TOTAL', 0, true, 'person');
+
+            $this->nextLine();
+            $this->nextLine();
+
+            foreach ($this->synthesis as $person=>$personDatas) {
+
+                // --- PROJET PRINCIPAL
+                $this->drawCell($person, 0, true, 'person');
+                $startSum = $this->getCurrentCellPosition();
+                foreach ($personDatas['wps'] as $wp => $cells) {
+                    if( count($cells) ){
+                        // $formula = sprintf("=SOMME(%s)", implode(';', $cells));
+                        $formula = array_sum($cells);
+                    } else {
+                        $formula = "0";
+                    }
+                    $this->stylisation('research');
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+                $endSum = $this->getCurrentCellPosition();
+                $formula = sprintf('=SUM(%s:%s)', $startSum, $endSum);
+                $sumResearch = [];
+                $this->drawCell($formula, 0, true, 'withValue');
+                $sumResearch[] = $this->getCurrentCellPosition();
+
+
+                // --- AUTRES PROJETS avec Feuille de temps
+                $this->stylisation('research');
+                $formula = array_sum($personDatas['totalCes']);
+                $this->drawCell($formula, 0, true, 'withValue');
+                $sumResearch[] = $this->getCurrentCellPosition();
+
+                // --- Autres recherches
+                $startSum = $this->getCurrentCellPosition();
+                foreach ($personDatas['othersGroups']['research'] as $otherResearch => $values) {
+                    $formula = array_sum($values);
+                    $this->stylisation('research');
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+                $endSum = $this->getCurrentCellPosition();
+                if( count($personDatas['othersGroups']['research']) > 1) {
+                    $this->stylisation('research');
+                    $formula = sprintf('=SUM(%s:%s)', $startSum, $endSum);
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+
+                $this->stylisation('research');
+                $formula = array_sum($personDatas['totalResearch']);
+                $this->drawCell($formula, 0, true, 'withValue');
+
+                // --- Education
+                $startSum = $this->getCurrentCellPosition();
+                foreach ($personDatas['othersGroups']['education'] as $subGroupKey => $subGroupValues) {
+                    $formula = array_sum($subGroupValues);
+                    $this->stylisation('education');
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+                $endSum = $this->getCurrentCellPosition();
+                if( count($personDatas['othersGroups']['education']) > 1) {
+                    $this->stylisation('education');
+                    $formula = sprintf('=SUM(%s:%s)', $startSum, $endSum);
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+
+                // --- ABS
+                $startSum = $this->getCurrentCellPosition();
+                foreach ($personDatas['othersGroups']['abs'] as $subGroupKey => $subGroupValues) {
+                    $formula = array_sum($subGroupValues);
+                    $this->stylisation('abs');
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+                $endSum = $this->getCurrentCellPosition();
+                if( count($personDatas['othersGroups']['abs']) > 1) {
+                    $this->stylisation('abs');
+                    $formula = sprintf('=SUM(%s:%s)', $startSum, $endSum);
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+
+                // --- ABS
+                $startSum = $this->getCurrentCellPosition();
+                foreach ($personDatas['othersGroups']['other'] as $subGroupKey => $subGroupValues) {
+                    $formula = array_sum($subGroupValues);
+                    $this->stylisation('others');
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+                $endSum = $this->getCurrentCellPosition();
+                if( count($personDatas['othersGroups']['other']) > 1) {
+                    $this->stylisation('others');
+                    $formula = sprintf('=SUM(%s:%s)', $startSum, $endSum);
+                    $this->drawCell($formula, 0, true, 'withValue');
+                }
+
+                // Total Recherche
+                //dump($personDatas); die();
+                $this->nextLine();
+            }
+
+            $this->autoSizeColumns();
+
+
+
+            $this->spreadsheet->setIndexByName('Synthèse', 0);
         } else {
             $workSheet = $this->newWorksheetPeriod($datas);
             $filename = $datas['activity']['numOscar'] . '_' . $datas['period']['year'] . '-' . $datas['period']['month'];
