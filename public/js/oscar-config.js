@@ -98,7 +98,8 @@ requirejs.config({
         "gestionprivileges": "oscar/dist/GestionPrivileges",
         "documentsactivity": "oscar/dist/DocumentsActivity",
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
-        "rolesadminui": "oscar/dist/RolesAdminUI"
+        "rolesadminui": "oscar/dist/RolesAdminUI",
+        "periodfieldsimple": "oscar/dist/PeriodFieldSimple"
     },
     shim: {
         "bootstrap": {

@@ -66,10 +66,31 @@ class ActivityDateController extends AbstractOscarController
         $this->milestoneService = $milestoneService;
     }
 
-    public function indexAction(){
+    public function indexAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_SHOW);
+
+        // Donnèes du GET
+        $search = $this->params()->fromQuery('q', '');
+        $periodStart = $this->params()->fromQuery('periodStart', "");
+        $periodEnd = $this->params()->fromQuery('periodEnd', "");
+        $typeId = $this->params()->fromQuery('typedate', '');
+
+        // Datas
+        $milestones = $this->getMilestoneService()->search($search, [
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
+            'type' => $typeId
+        ]);
+        $typesDate = $this->getMilestoneService()->getMilestoneTypeForSelect();
+
         return [
-            'milestones' => $this->getMilestoneService()->getMilestones()
+            'milestones' => $milestones,
+            'search' => $search,
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
+            'filterType' => $typeId,
+            'typesDate' => $typesDate,
         ];
     }
 
@@ -118,7 +139,7 @@ class ActivityDateController extends AbstractOscarController
                     case 'POST':
                         $action = $this->params()->fromPost('action', 'update');
 
-                        if( $action == 'create' ){
+                        if ($action == 'create') {
                             $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
                             $milestone = $this->getMilestoneService()->createFromArray([
                                 'type_id' => $_POST['type'],
@@ -179,7 +200,7 @@ class ActivityDateController extends AbstractOscarController
                         return $this->getResponseBadRequest("Protocol bullshit");
 
                 }
-            } catch (\Exception $e ){
+            } catch (\Exception $e) {
                 return $this->getResponseInternalError($e->getMessage());
             }
 
@@ -187,8 +208,7 @@ class ActivityDateController extends AbstractOscarController
 
             return $view;
 
-        }
-        catch( UnAuthorizedException $e ){
+        } catch (UnAuthorizedException $e) {
             return $this->getResponseBadRequest();
         }
     }

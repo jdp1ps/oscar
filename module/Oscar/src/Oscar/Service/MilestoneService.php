@@ -10,6 +10,7 @@ namespace Oscar\Service;
 
 
 use Doctrine\ORM\Query;
+use Interop\Container\ContainerInterface;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
@@ -17,6 +18,8 @@ use Oscar\Entity\DateType;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityService;
+use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -25,6 +28,9 @@ use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Utils\DateTimeUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use Zend\Log\Logger;
@@ -35,6 +41,27 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
 {
 
     use UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait;
+
+
+    private $serviceContainer;
+
+    public function setServiceContainer( $sc )
+    {
+        $this->serviceContainer = $sc;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getServiceContainer()
+    {
+        return $this->serviceContainer;
+    }
+
+    public function getProjectGrantService()
+    {
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
 
     public function getMilestonesByActivityId( $idActivity ){
         // Droit d'accès
@@ -85,6 +112,22 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $result;
     }
 
+    public function getMilestoneTypeForSelect(){
+        $output = [];
+        /** @var DateType $milestoneType */
+        foreach ($this->getMilestoneTypes() as $milestoneType) {
+            $facet = $milestoneType->getFacet();
+            if( !array_key_exists($facet, $output) ){
+                $output[$facet] = [];
+            }
+            $output[$facet][] = [
+                'id' => $milestoneType->getId(),
+                'label' => $milestoneType->getLabel()
+            ];
+        }
+        return $output;
+    }
+
     /**
      * @return mixed
      */
@@ -95,6 +138,47 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             ->orderBy('m.dateStart', 'DESC');
         return $qb->getQuery()->getResult();
     }
+
+
+    public function search( $search, $filters)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('m')
+            ->from(ActivityDate::class, 'm')
+            ->orderBy('m.dateStart', 'DESC');
+
+        if( $search ){
+            $activitiesIds = $this->getProjectGrantService()->search($search);
+            $qb->innerJoin('m.activity', 'a')
+                ->where('a.id IN(:ids)')
+                ->setParameter('ids', $activitiesIds);
+            //$filterIds = $this->
+        }
+
+        if( $filters ){
+            if( array_key_exists('periodStart', $filters) && $filters['periodStart']){
+                $periodStart = DateTimeUtils::periodBounds($filters['periodStart']);
+                $from = $periodStart['start'];
+                $to = $periodStart['end'];
+
+                if( array_key_exists('periodEnd', $filters) && $filters['periodEnd']){
+                    $periodEnd = DateTimeUtils::periodBounds($filters['periodEnd']);
+                    $to = $periodEnd['end'];
+                }
+
+                $qb->andWhere('m.dateStart BETWEEN :from AND :to')
+                    ->setParameter('from', $from)
+                    ->setParameter('to', $to);
+            }
+
+            if( array_key_exists('type', $filters) && $filters['type'] ){
+                $qb->andWhere('m.type = :typeid')
+                    ->setParameter('typeid', $filters['type']);
+            }
+        }
+        return $qb->getQuery()->getResult();
+    }
+
 
     public function getMiletonesByActivity( Activity $activity ){
         /** @var OscarUserContext $oscarUserContext */

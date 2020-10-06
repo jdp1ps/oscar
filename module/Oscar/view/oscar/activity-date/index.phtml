@@ -7,8 +7,77 @@
  */
 
 ?>
-<section class="container">
+<style>
+    .marged-h {
+        /*position: absolute; */
+        padding: 0 10px;
+        line-height: 30px;
+        width: 140px;
+        text-align: right;
+        position: absolute;
+        background: white;
+       /* left: -110px;*/
+        margin: 0;
+        margin-left: -150px;
+    }
+</style>
+<section class="container" style="position: relative">
     <h1><i class="icon-calendar-outlilne"></i> Jalons</h1>
+
+    <section>
+        <form action="<?= $this->url() ?>" method="get" class="form" id="search">
+            <div class="input-group input-group-lg">
+                <input placeholder="Rechercher dans l'intitulé, code PFI...&hellip;"
+                       type="search"
+                       class="form-control input-lg"
+                       name="q"
+                       value="<?= htmlentities($search) ?>"/>
+
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </span>
+            </div>
+
+            <div class="filtres">
+                <h3>Filtres</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        Périodes :<div id="periodStart"></div>
+                        <script>
+                            require(['vue', 'periodfieldsimple'], function(Vue, PeriodFieldSimple){
+                                new Vue({
+                                    render:function(h){
+                                        return h(PeriodFieldSimple.default, { props: { queryPeriodStart: "<?= $periodStart ?>", queryPeriodEnd: "<?= $periodEnd ?>" }});
+                                    }
+                                }).$mount('#periodStart')
+                            })
+                        </script>
+                    </div>
+                    <div class="col-md-6">
+                        Type :
+                        <select name="typedate" class="form-control">
+                            <option value="">Aucun filtre...</option>
+                            <?php
+                            $group = "";
+                            /** @var \Oscar\Entity\DateType $typeDate */
+                            foreach ($typesDate as $facets=>$types){
+                                echo "<optgroup label=\"$facets\">";
+                                foreach ($types as $type) {
+                                    $selected = "";
+                                    if( $type['id'] == $filterType ){
+                                        $selected = " selected=\"selected\"";
+                                    }
+                                    echo '<option value="'.$type['id'].'"'.$selected.'>'.$type['label'].'</option>';
+                                }
+                                echo "</optgroup>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
     <?php /** @var Oscar\Entity\ActivityDate $milestone */
     $annee = $mois = '';
     foreach( $milestones as $milestone ):
@@ -17,13 +86,13 @@
         if( $annee != $dateRef->format('Y') ){
             $annee = $dateRef->format('Y');
             $mois = '';
-            echo "<h2>$annee</h2>";
+            echo "<h2 class=\"marged-h\">$annee</h2>";
         }
 
         $currentMois = ucfirst($this->moment($dateRef, 'F'));
         if( $mois != $currentMois ){
             $mois = $currentMois;
-            echo "<h3>$mois</h3>";
+            echo "<hr><h3 class=\"marged-h\">$mois</h3>";
         }
         ?>
         <article class="card">
