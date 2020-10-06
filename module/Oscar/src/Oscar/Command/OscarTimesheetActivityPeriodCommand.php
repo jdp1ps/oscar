@@ -60,28 +60,25 @@ class OscarTimesheetActivityPeriodCommand extends OscarCommandAbstract
         $periodStr = $input->getArgument(self::ARG_PERIOD);
         $format = $input->getArgument(self::ARG_FORMAT);
 
-
-        $serialize = false;
-
-        $periodsStrs = [];
-        if($periodStr == 'all') {
-            /** @var Activity $activity */
-            $activity = $this->getTimesheetService()->getEntityManager()->getRepository(Activity::class)->find($activityId);
-
-            $periodsStrs = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart(), $activity->getDateEnd());
-
+        $keycache = "synthese-$activityId-$periodStr";
+        $filecache = "/tmp/$keycache.phpdata";
+        if( file_exists($filecache) ){
+            $datas = unserialize(file_get_contents($filecache));
+        } else {
+            $periodsStrs = [];
+            if($periodStr == 'all') {
+                /** @var Activity $activity */
+                $activity = $this->getTimesheetService()->getEntityManager()->getRepository(Activity::class)->find($activityId);
+                $periodsStrs = DateTimeUtils::allperiodsBetweenTwo($activity->getDateStart(), $activity->getDateEnd());
+            }
+            $datas = [
+                'periods' => []
+            ];
+            foreach ($periodsStrs as $periodStr) {
+                $datas['periods'][$periodStr] = $this->getTimesheetService()->getSynthesisActivityPeriod($activityId, $periodStr);
+            }
+            file_put_contents($filecache, serialize($datas));
         }
-
-
-
-        $datas = [
-            'periods' => []
-        ];
-        foreach ($periodsStrs as $periodStr) {
-            $datas['periods'][$periodStr] = $this->getTimesheetService()->getSynthesisActivityPeriod($activityId, $periodStr);
-        }
-
-
 
         ksort($datas['periods']);
 

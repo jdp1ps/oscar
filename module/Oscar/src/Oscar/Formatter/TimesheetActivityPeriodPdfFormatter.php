@@ -9,6 +9,7 @@
 namespace Oscar\Formatter;
 
 use Dompdf\Dompdf;
+use Oscar\Formatter\File\IHtmlToPdfFormatter;
 
 /**
  * Effectue la mise en forme PDF des données.
@@ -18,14 +19,27 @@ use Dompdf\Dompdf;
  */
 class TimesheetActivityPeriodPdfFormatter extends TimesheetActivityPeriodHtmlFormatter
 {
-    public function render( array $datas ){
-        $html = parent::render($datas);
+    public function render( array $datas, $method ){
+
+        /** @var IHtmlToPdfFormatter $transformer */
+        $transformer = new $method;
+
+        /** @var string $html Contenu HTML du document */
+        $html = parent::render($datas, null);
+
+        /** @var string $filename Nom du fichier */
         $filename = $datas['activity']['numOscar'].'-'.$datas['period']['year'].'-'.$datas['period']['month'];
+
+        $transformer->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)
+            ->convert($html, $filename, true);
+        /*
+
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
         $dompdf->stream($filename);
+        */
         return;
     }
 }

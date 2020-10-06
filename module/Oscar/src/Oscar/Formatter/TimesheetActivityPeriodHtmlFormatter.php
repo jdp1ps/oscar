@@ -8,6 +8,7 @@
 
 namespace Oscar\Formatter;
 
+use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Zend\View\Model\ViewModel;
 use Zend\View\Renderer\RendererInterface;
 use Zend\View\Resolver\AggregateResolver;
@@ -39,7 +40,7 @@ class TimesheetActivityPeriodHtmlFormatter
         $this->renderer = $renderer;
     }
 
-    public function render( array $datas ){
+    public function render( array $datas, $method=null ){
         $view = new ViewModel($datas);
         $view->setTemplate('timesheet_activity_synthesis');
         $view->setTerminal(true);

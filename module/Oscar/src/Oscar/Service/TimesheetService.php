@@ -1437,6 +1437,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getSynthesisActivityPeriod($idActivity, $period)
     {
+
         $output = [
             'activity' => null,
             'persons' => [],

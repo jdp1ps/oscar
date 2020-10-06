@@ -21,7 +21,12 @@ class TimesheetActivityPeriodPdfFormatterFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $renderer = $container->get('ViewRenderer');
-        $templatePath = $container->get(OscarConfigurationService::class)->getConfiguration('timesheet_activity_synthesis_template');
+
+        /** @var OscarConfigurationService $configOscar */
+        $configOscar = $container->get(OscarConfigurationService::class);
+
+        $templatePath = $configOscar->getConfiguration('timesheet_activity_synthesis_template');
+
         return new \Oscar\Formatter\TimesheetActivityPeriodPdfFormatter($templatePath, $renderer);
     }
 

@@ -598,11 +598,13 @@ class TimesheetController extends AbstractOscarController
         }
         elseif ($format == "pdf") {
             $output['format'] = 'pdf';
+
             $formatter = new TimesheetActivityPeriodPdfFormatter(
                 $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
                 $this->getViewRenderer()
             );
-            $formatter->render($output);
+
+            $formatter->render($output, $this->getOscarConfigurationService()->getHtmlToPdfMethod());
             die();
         }
         elseif ($format == "json") {

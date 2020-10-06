@@ -93,6 +93,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $config;
     }
 
+    public function getHtmlToPdfMethod()
+    {
+        return $this->getConfiguration('htmltopdfrenderer');
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
