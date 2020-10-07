@@ -16,7 +16,7 @@ class HtmlToPdfWkhtmltopdfFormatter implements IHtmlToPdfFormatter
         $html_tmp = '/tmp' . DIRECTORY_SEPARATOR . uniqid('htmltmp_') . '.html';
         $pdf_tmp = '/tmp' . DIRECTORY_SEPARATOR . uniqid('pdftmp_') . '.pdf';
         file_put_contents($html_tmp, $html);
-        $cmd = 'wkhtmltopdf -O ' . $this->orientation . ' ' . $html_tmp . ' ' . $pdf_tmp;
+        $cmd = 'export QT_QPA_PLATFORM=offscreen && wkhtmltopdf -O ' . $this->orientation . ' ' . $html_tmp . ' ' . $pdf_tmp;
         $result = shell_exec($cmd);
         header("Content-type:application/pdf");
         header("Content-Disposition:attachment;filename=$filename.pdf");
