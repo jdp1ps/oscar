@@ -18,7 +18,10 @@ return array(
         'theme' => 'oscar',
         'themes' => ['oscar', 'adaj', 'debug'],
 
-        'htmltopdfrenderer' => \Oscar\Formatter\File\HtmlToPdfDomPDFFormatter::class,
+        'htmltopdfrenderer' => [
+            'class' => \Oscar\Formatter\File\HtmlToPdfDomPDFFormatter::class,
+            'arguments' => []
+        ],
 
         // Pour les opérations automatique, permet d'obtenir depuis la base de donnée la devise à utiliser
         // dans les activités de recherche si rien n'est spécifié. (valeur de la colonne 'label').

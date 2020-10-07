@@ -11,6 +11,16 @@ class HtmlToPdfDomPDFFormatter implements IHtmlToPdfFormatter
     private $orientation = 'portrait';
 
     /**
+     * HtmlToPdfDomPDFFormatter constructor.
+     * @param string $orientation
+     */
+    public function __construct()
+    {
+
+    }
+
+
+    /**
      * @param $html
      * @param null $filename
      * @param bool $tobrowser

@@ -10,6 +10,7 @@ namespace Oscar\Service;
 
 
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Import\Data\DataStringArray;
 use Oscar\OscarVersion;
 use Symfony\Component\Yaml\Dumper;
@@ -93,9 +94,18 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $config;
     }
 
+    /**
+     * @return IHtmlToPdfFormatter
+     * @throws OscarException
+     * @throws \ReflectionException
+     */
     public function getHtmlToPdfMethod()
     {
-        return $this->getConfiguration('htmltopdfrenderer');
+        $config = $this->getConfiguration('htmltopdfrenderer');
+        $class = $config['class'];
+        $arguments = $config['arguments'];
+        $instance = new \ReflectionClass($class);
+        return $instance->newInstanceArgs($arguments);
     }
 
 

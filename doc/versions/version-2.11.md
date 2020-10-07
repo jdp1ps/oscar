@@ -142,3 +142,7 @@ Dans la perspective de démo / test rapide (Version préprod par exemple). Oscar
  - **Écran de budget** (UI uniquement) Sera à préciser quand la partie dépense sera plus avancée
  
  - **Plan comptable** Écran de gestion du plan comptable à utiliser dans l'écran du budget
+ 
+## Changement depuis la release MACCLANE
+
+ - Ajout d'un mécanisme pour configurer la sortie de certains documents PDF [Méthode de génération des PDF](../config-docpdf.md)

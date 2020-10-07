@@ -31,6 +31,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 ### Utilitaires et utilisation avancée
  - [Administrer Oscar en ligne de commande](oscar-commands.md)
  - [Oscar API](config-api.md) Configurer Oscar pour permettre son accès via une API Rest
+ - [Modifier la méthode de génération des PDF](../config-docpdf.md) Permet un gain de performance pour la génération des *certains* documents
 
 ## Fonctionnalités optionnelles
 
