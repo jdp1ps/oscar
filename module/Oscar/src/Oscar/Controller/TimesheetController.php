@@ -577,12 +577,29 @@ class TimesheetController extends AbstractOscarController
         $activity_id = $this->params()->fromQuery('activity_id', null);
         $format = $this->params()->fromQuery('format', '');
         $period = $this->params()->fromQuery('period', null);
+        $year = $this->params()->fromQuery('year', null);
         $error = null;
 
         // Contrôle d'accès
         $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
-
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+        // On détermine la 'plage'
+        if( $year ){
+
+            if( $format == 'excel') {
+                $datas = $this->getTimesheetService()->getSynthesisActivityYear($year, $activity_id);
+                $formatter = new TimesheetActivityPeriodFormatter();
+                $formatter->output($datas);
+                die();
+            }
+            if( $format == 'pdf') {
+                $datas = $this->getTimesheetService()->getHtmlTimesheetYear($year, $activity_id);
+                die();
+            }
+            throw new OscarException("Seul le format EXCEL pour la synthèse est disponible");
+        }
+
 
         $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
 
@@ -645,7 +662,7 @@ class TimesheetController extends AbstractOscarController
         $format         = $this->params()->fromQuery('format', '');
         $period         = $this->params()->fromQuery('period', null);
         $error          = null;
-        $validations = null;
+        $validations    = null;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités

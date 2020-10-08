@@ -23,6 +23,9 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\File\IHtmlToPdfFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
@@ -54,6 +57,7 @@ use Zend\Form\Element\Time;
 use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * Gestion des Personnes :
@@ -77,6 +81,25 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /** @var PhpRenderer */
+    private $viewRenderer;
+
+    /**
+     * @return PhpRenderer
+     */
+    public function getViewRenderer(): PhpRenderer
+    {
+        return $this->viewRenderer;
+    }
+
+    /**
+     * @param PhpRenderer $viewRenderer
+     */
+    public function setViewRenderer(PhpRenderer $viewRenderer): self
+    {
+        $this->viewRenderer = $viewRenderer;
+        return $this;
+    }
 
     /**
      * TimesheetService constructor.
@@ -1426,7 +1449,72 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $total;
     }
 
+    public function getHtmlTimesheetYear( $year, $activity_id )
+    {
+        /** @var string[]  $periods */
+        $periods = DateTimeUtils::allperiodsBetweenTwo("$year-01", "$year-12");
 
+        /** @var Activity $activity */
+        $activity = $this->getActivityService()->getActivityById($activity_id);
+
+        $persons = [];
+
+        $datas = [
+            'periods' => []
+        ];
+
+        $pages = [];
+        $template = "";
+
+        $formatter = new TimesheetPersonPeriodHtmlFormatter(
+            $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+            $this->getViewRenderer()
+        );
+
+        $templateOpen = null; $templateClose = null;
+
+        foreach ($periods as $period) {
+            foreach ($activity->getDeclarers() as $person) {
+                $data = $this->getPersonTimesheetsDatas($person, $period);
+                if( $data['total'] == 0 ){
+                    continue;
+                }
+                $page = $formatter->render($data);
+                $re = '/([ \t\S\n\r.\n]*<body>)([ \t\S\n\r.\n]*)(<\/body>[ \t\S\n\r.\n]*)/mi';
+                if( preg_match($re, $page, $matches)){
+                    $open = $matches[1];
+                    $content = $matches[2];
+                    $close = $matches[3];
+                } else {
+                    die("ERROR");
+                }
+                if( !$templateOpen ){
+                    $templateOpen = $open;
+                    $templateClose = $close;
+                }
+                $pages[] = $content;
+            }
+        }
+
+        $html = $templateOpen;
+        foreach ($pages as $page) {
+            $html .= $page;
+        }
+        $html .= $close;
+
+        $this->getOscarConfigurationService()->getHtmlToPdfMethod()->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)->convert($html, 'test.pdf');
+        die();
+        $formatter->render($datas);
+    }
+
+    public function getSynthesisActivityYear( $year, $activity_id )
+    {
+        $periodsStrs = DateTimeUtils::allperiodsBetweenTwo("$year-01", "$year-12");
+        foreach ($periodsStrs as $periodStr) {
+            $datas['periods'][$periodStr] = $this->getSynthesisActivityPeriod($activity_id, $periodStr);
+        }
+        return $datas;
+    }
     /**
      * Production/structuration des données de synthèse MENSUELLE avec une activité de référence.
      *

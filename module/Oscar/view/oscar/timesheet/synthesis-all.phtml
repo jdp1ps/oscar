@@ -1,6 +1,8 @@
 <div id="app">
     <section class="container">
-        <h1>Déclaration pour <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em>
+        <h1>
+            <small>Déclaration pour</small> <br>
+            <strong>[<?= $activity->getAcronym() ?>]</strong> <em><?= $activity->getLabel() ?></em>
         </h1>
         <div class="overlay" v-if="infosPerson">
             <div class="overlay-content" style="flex-basis: 90%; max-height: 90%">
@@ -74,7 +76,21 @@
         </div>
 
         <section v-for="y in packed" class="period">
-            <h1 class="row">{{ y.label }} <strong class="total">{{ y.total | formatDuration }}</strong></h1>
+            <h1 class="row">
+                {{ y.label }}
+                <strong class="total">{{ y.total | formatDuration }}</strong>
+            </h1>
+            <div class="card">
+                <strong>Documents : </strong>
+                <a class="btn btn-xs btn-info" :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=excel&year=' + y.label">
+                    <i class="icon-file-excel"></i>
+                    Synthèse annuelle {{ y.label }} (Excel)
+                </a>
+                <a class="btn btn-xs btn-info" :href="'/feuille-de-temps/synthesisactivity?activity_id=<?= $activity->getId() ?>&format=pdf&year=' + y.label">
+                    <i class="icon-file-pdf"></i>
+                    Feuilles de temps individuelles {{ y.label }} (Un fichier PDF)
+                </a>
+            </div>
             <section v-for="p in y.periods" class="period">
                 <h2 class="row">
                 <span>

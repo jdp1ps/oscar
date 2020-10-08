@@ -370,6 +370,7 @@ class TimesheetActivityPeriodFormatter
         $this->nextLine();
 
         foreach ($datas['foo'] as $person => $line) {
+            //var_dump($line); die();
 
             if( !array_key_exists($person, $this->synthesis) ){
                 $this->synthesis[$person] = [];
@@ -378,7 +379,6 @@ class TimesheetActivityPeriodFormatter
                     $code = $wp['code'];
                     $this->synthesis[$person]['wps'][$code] = [];
                 }
-                $this->synthesis[$person]['totalMain'] = [];
 
                 $this->synthesis[$person]['ces'] = [];
                 foreach ($datas['ces'] as $ce) {
@@ -387,8 +387,6 @@ class TimesheetActivityPeriodFormatter
                     }
                     $this->synthesis[$person]['ces'][$ce] = [];
                 }
-                $this->synthesis[$person]['totalCes'] = [];
-                $this->synthesis[$person]['totalResearch'] = [];
 
                 $this->synthesis[$person]['othersGroups'] = [
                     'research' => [],
@@ -396,12 +394,22 @@ class TimesheetActivityPeriodFormatter
                     'abs' => [],
                     'other' => [],
                 ];
+
                 foreach ($datas['othersGroups'] as $group=>$dataGroup ) {
                     $this->synthesis[$person]['othersGroups'][$group] = [];
                     foreach ($dataGroup as $subGroup=>$subGroupData) {
                         $this->synthesis[$person]['othersGroups'][$group][$subGroup] = [];
                     }
                 }
+
+                $this->synthesis[$person]['totalMain'] = [];
+                $this->synthesis[$person]['totalCes'] = [];
+                $this->synthesis[$person]['totalResearch'] = [];
+                $this->synthesis[$person]['totalAbs'] = [];
+                $this->synthesis[$person]['totalEducation'] = [];
+                $this->synthesis[$person]['totalOther'] = [];
+                $this->synthesis[$person]['total'] = [];
+                $this->synthesis[$person]['totalWork'] = [];
             }
 
             $this->getActiveSheet()->getRowDimension($this->getCurrentLine())->setRowHeight(20);
@@ -418,7 +426,6 @@ class TimesheetActivityPeriodFormatter
                 $this->drawCell(number_format($line['main'][$code], 2), 0, true, $line['main'][$code] ? 'withValue' : 'noValue');
             }
 
-            //$this->synthesis[$person]['totalMain'][] = sprintf("$'%s'.%s", $workSheetName, $this->getCurrentCellPosition());
             $this->synthesis[$person]['totalMain'][] = $line['totalMain'];
             $this->synthesis[$person]['totalResearch'][] = $line['totalMain'];
             $this->drawCell($line['totalMain'], 0, true, 'totalColumn');
@@ -461,6 +468,9 @@ class TimesheetActivityPeriodFormatter
                 $this->synthesis[$person]['othersGroups']['other'][$r['code']][] = $line['others'][$r['code']];
                 $this->drawCell($line['others'][$r['code']], 0, true, $line['others'][$r['code']] ? 'withValue' : 'noValue');
             }
+
+            $this->synthesis[$person]['total'][] = $line['totaux']['total'];
+            $this->synthesis[$person]['totalWork'][] = $line['totaux']['totalWork'];
 
             $this->drawCell($line['totaux']['totalWork'], 0, true, 'totalColumn');
             $this->drawCell($line['totaux']['total'], 0, true, 'totalColumn');
@@ -566,47 +576,7 @@ class TimesheetActivityPeriodFormatter
             $synthesis = null;
 
             foreach ($datas['periods'] as $datasPeriod) {
-//                if( $synthesis == null ){
-//                    $synthesis = [];
-//                    foreach ($datas['wps'] as $wp) {
-//                        $this->drawCell($wp['code'], 0, true, 'headResearch');
-//                    }
-//                    $this->drawCell('Total', 0, true, 'headResearch');
-//
-//                    foreach ($datas['ces'] as $ce) {
-//                        $this->drawCell($ce, 0, true, 'headResearch');
-//                    }
-//                    foreach ($datas['othersGroups']['research'] as $r) {
-//                        $this->drawCell($r['label'], 0, true, 'headResearch');
-//                    }
-//
-//                    $this->drawCell('Total', 0, true, 'headResearch');
-//
-//                    foreach ($datas['othersGroups']['education'] as $r) {
-//                        $this->drawCell($r['label'], 0, true, 'headEducation');
-//                    }
-//
-//                    foreach ($datas['othersGroups']['abs'] as $r) {
-//                        $this->drawCell($r['label'], 0, true, 'headAbs');
-//                    }
-//
-//                    foreach ($datas['othersGroups']['other'] as $r) {
-//                        $this->drawCell($r['label'], 0, true, 'headOther');
-//                    }
-//
-//                    $this->drawCell('Total actif', 0, true, 'person');
-//
-//                    $colSign = $this->getCurrentCol();
-//                    $this->drawCell('TOTAL', 0, true, 'person');
-//                    foreach ($datasPeriod['foo'] as $person=>$datas) {
-//                        if( !array_key_exists($person, $datasSynthesis) ){
-//                            $datasSynthesis[$person] = [];
-//                        }
-//                    }
-//                }
-
                 $this->newWorksheetPeriod($datasPeriod);
-
             }
 
             $datas = $datasPeriod;
@@ -687,7 +657,6 @@ class TimesheetActivityPeriodFormatter
                 $this->drawCell($formula, 0, true, 'withValue');
                 $sumResearch[] = $this->getCurrentCellPosition();
 
-
                 // --- AUTRES PROJETS avec Feuille de temps
                 $this->stylisation('research');
                 $formula = array_sum($personDatas['totalCes']);
@@ -754,14 +723,20 @@ class TimesheetActivityPeriodFormatter
                     $this->drawCell($formula, 0, true, 'withValue');
                 }
 
-                // Total Recherche
-                //dump($personDatas); die();
+                $formula = array_sum($personDatas['totalWork']);
+                $this->drawCell($formula, 0, true, $formula > 0 ? 'withValue': 'noValue');
+
+                $formula = array_sum($personDatas['total']);
+                $this->drawCell($formula, 0, true, $formula > 0 ? 'withValue': 'noValue');
+
+
+
+                // TOTAUX
+
                 $this->nextLine();
             }
 
             $this->autoSizeColumns();
-
-
 
             $this->spreadsheet->setIndexByName('Synthèse', 0);
         } else {
@@ -776,9 +751,6 @@ class TimesheetActivityPeriodFormatter
             $this->generatePdf($filename . '.pdf');
         }
         ///////// LA classe à Dalas
-
-
-
     }
 
 }

@@ -143,3 +143,11 @@ tr {
 
 .subgroup > th { font-weight: bold; text-align: left }
 .subgroup th { font-weight: normal }
+
+.wrapper-page {
+    page-break-after: always;
+}
+
+.wrapper-page:last-child {
+    page-break-after: avoid;
+}
