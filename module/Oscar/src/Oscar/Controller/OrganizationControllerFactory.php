@@ -19,6 +19,7 @@ use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
+use Oscar\Service\SessionService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -36,6 +37,7 @@ class OrganizationControllerFactory implements FactoryInterface
         $c->setProjectService($container->get(ProjectService::class));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));
+        $c->setSessionService($container->get(SessionService::class));
         return $c;
     }
 }

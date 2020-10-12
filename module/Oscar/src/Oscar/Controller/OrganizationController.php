@@ -27,6 +27,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OrganizationService;
+use Oscar\Service\SessionService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseOrganizationService;
@@ -47,10 +48,34 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
     use UseOrganizationServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseActivityLogServiceTrait;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /** @var SessionService */
+    private $sessionService;
+
+    /**
+     * @return SessionService
+     */
+    public function getSessionService(): SessionService
+    {
+        return $this->sessionService;
+    }
+
+    /**
+     * @param SessionService $sessionService
+     */
+    public function setSessionService(SessionService $sessionService): self
+    {
+        $this->sessionService = $sessionService;
+        return $this;
+    }
+
+
+
+
+
 
     public function deleteAction(){
 
-        $this->getOscarConfigurationService()->check(Privileges::ORGANIZATION_DELETE);
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_DELETE);
 
         $id = $this->params()->fromRoute('id');
         $organization = $this->getOrganizationService()->getOrganization($id);
@@ -69,7 +94,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             }
 
         } else {
-            $token = $this->getSessionService()->createToken('organization-delete');
+            $token = $this->getSessionService()->createToken();
         }
 
         return [

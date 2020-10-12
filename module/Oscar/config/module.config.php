@@ -801,6 +801,7 @@ return array(
             \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
+            \Oscar\Service\SessionService::class => \Oscar\Service\SessionServiceFactory::class,
             \Oscar\Service\SpentService::class => \Oscar\Service\SpentServiceFactory::class,
             \Oscar\Service\TypeDocumentService::class => \Oscar\Service\TypeDocumentServiceFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
