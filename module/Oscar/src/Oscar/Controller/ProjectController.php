@@ -330,7 +330,7 @@ class ProjectController extends AbstractOscarController
     public function currentUserProjectsAction()
     {
         return [
-
+            'person' => $this->getCurrentPerson()
         ];
     }
 

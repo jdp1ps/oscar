@@ -1,4 +1,10 @@
 <div class="container">
+
+    <?php if( !$person ): ?>
+        <div class="alert alert-warning">
+            Vous n'êtes pas identifié dans Oscar. Contactez l'administrateur si le problème persiste.
+        </div>
+    <?php else: ?>
     <link rel="stylesheet" href="/js/oscar/dist/personautocompleter.css" />
     <div class="container">
         <div id="app"></div>
@@ -31,90 +37,5 @@
             }).$mount('#app');
         });
     </script>
-    <?php /*
-    <h1><i class="icon-cubes"></i> Mes projets</h1>
-    <?php if (count($projects)): ?>
-    <?php
-    $byRole = [];
-        $contentProject = [];
-    foreach( $projects as $project){
-        foreach ($project->getPersons() as $member) {
-            if ($member->getPerson()->getEmail() === $email) {
-                $role = $member->getRole();
-                if (!isset($byRole[$role])) {
-                    $byRole[$role] = [];
-                }
-                if (!isset($byRole[$role][$project->getId()])) {
-                    $byRole[$role][$project->getId()] = $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $project]);
-                }
-            }
-        }
-
-        foreach ($project->getActivities() as $a) {
-            foreach ($a->getPersons() as $member) {
-               if( !$member->getPerson() ){
-                  continue;
-               }
-                if ($member->getPerson()->getEmail() === $email) {
-                    $role = $member->getRole();
-                    if (!isset($byRole[$role])) {
-                        $byRole[$role] = [];
-                    }
-                    if (!isset($byRole[$role][$project->getId()])) {
-                        $byRole[$role][$project->getId()] = $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $project]);
-                    }
-                }
-            }
-        }
-    }
-    foreach( $byRole as $role=>$content){
-        echo "<h3 class='subsection-title'>En tant que <q>$role</q></h3>";
-        echo implode('', $content);
-    }
-    ?>
-    <?php else: ?>
-        <div class="card card-warning">
-            <p>Vous n'êtes associé à aucun projet</p>
-        </div>
     <?php endif; ?>
-
-    <?php /*
-    <h1 class="oscar-title">
-        <i class="icon-cube"></i>
-        <div>
-            Activités
-            <div class="baseline">
-                Sans projet
-            </div>
-        </div>
-    </h1>
-    <p class="help-block">Les activités présentent ici sont celle qui ne sont
-        affectées à aucun projet.</p>
-
-    <?php
-    $year = null;
-    /** @var \Oscar\Entity\Activity $contract
-    foreach ($activities as $activity):
-        $projectYear = $activity->getDateCreated()->format('Y');
-        if ($year != $projectYear) {
-            if ($year !== null && $nbrContratYear > 1) {
-                ?>
-                <article class="layout-row">
-                <div>
-                    TOTAL pour <?= $year ?>
-                </div>
-                <div class="total montant">
-                    <?= number_format($totalYear, 2, ',', ' ') ?>
-                </div>
-                </article><?php
-            }
-            echo '<div class="list-separator"><h3 class="list-separator-label">' . $projectYear . '</h3></div>';
-            $year = $projectYear;
-        }
-
-        echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity, 'hideProject' => false, 'deepMembers' => false])
-        ?>
-
-
-    <?php endforeach;*/ ?>
 </div>
