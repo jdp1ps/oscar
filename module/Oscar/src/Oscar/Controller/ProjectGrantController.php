@@ -50,6 +50,7 @@ use Oscar\Service\ActivityTypeService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
+use Oscar\Service\TimesheetSerspentSynthesisActivityvice;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
 use Oscar\Traits\UseActivityLogService;
@@ -1617,6 +1618,28 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Check access
         $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
 
+        //
+        $masses = $this->getOscarConfigurationService()->getMasses();
+
+        // Method
+        $method = $this->getHttpXMethod();
+
+        if( $method == 'POST' ){
+
+            // Vérifiaction des droits d'accès
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+
+            // Récupération des affectations
+            $postedAffectations = $this->params()->fromPost('affectation');
+
+            try {
+                $this->getSpentService()->updateAffectation($postedAffectations);
+
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError($e->getMessage());
+            }
+            return $this->getResponseOk("Affectation des comptes terminée");
+        }
 
         $pfi = $entity->getCodeEOTP();
 
@@ -1641,9 +1664,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         // Construction des données de dépense
-        $out['masses'] = $this->getOscarConfigurationService()->getMasses();
+        $out['masses'] = $masses;
         $out['dateUpdated'] = $entity->getDateTotalSpent();
-        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI($pfi);
+        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI($pfi, $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE));
 
         return $this->jsonOutput($out);
 

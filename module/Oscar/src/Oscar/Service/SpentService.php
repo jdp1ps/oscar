@@ -579,12 +579,30 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $cachePlanComptableCG;
     }
 
-    protected function getParent($plan, $codeEnfant){
+    /**
+     * Retourne le premier parent avec une annexe renseignée.
+     *
+     * @param $plan
+     * @param $codeEnfant
+     * @return array
+     */
+    protected function getParentWithAnnexe($plan, $codeEnfant){
+        $indexInPlan = '00'.StringUtils::feedString($codeEnfant);
+        $parentCode = '';
+        $parentlabel = '';
+        $parentmasse = '';
+
+        // Si on est au dernier niveau
         if( strlen($codeEnfant) <= 1 ){
+            if( array_key_exists($indexInPlan, $plan) ){
+                $parentCode = $plan[$indexInPlan]->getCode();
+                $parentlabel = $plan[$indexInPlan]->getLabel();
+                $parentmasse = $plan[$indexInPlan]->getAnnexe();
+            }
             return [
-                'parentCode' => '',
-                'parentLabel' => '',
-                'parentMasse' => ''
+                'parentCode' => $parentCode,
+                'parentLabel' => $parentlabel,
+                'parentMasse' => $parentmasse
             ];
         }
 
@@ -595,6 +613,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $parent = $plan[$indexParent];
             $labelParent = $parent->getLabel();
             $masseParent = $parent->getAnnexe();
+
             if( $masseParent ){
                 return [
                     'parentCode' => $codeParent,
@@ -603,38 +622,58 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 ];
             }
         }
-        return $this->getParent($plan, $codeParent);
+        return $this->getParentWithAnnexe($plan, $codeParent);
     }
 
+    /**
+     * Retourne les informations pour un compte à partir de son code : 00XXXXXXXXXX
+     * Pour déterminer l'annexe budgétaire, le code cherche dans le compte, puis
+     * remonte dans les parents jusqu'à trouver une annexe.
+     *
+     * @param $code
+     * @return array|mixed|string[]
+     */
     public function getCompte($code)
     {
+        $dump = function($foo){};
+        $echo = function($foo){};
+        $end = function(){};
+
+        if( false ){
+            $dump = function($foo){ var_dump($foo); };
+            $echo = function($foo){ echo "$foo"; };
+            $end = function(){ die('FIN'); };
+        }
 
         static $cacheCompte;
-
 
         if ($cacheCompte == null) {
             $cacheCompte = [];
         }
 
-        if (!array_key_exists($code, $cacheCompte)) {
 
+        if (!array_key_exists($code, $cacheCompte)) {
+            $echo("Construction du compte $code");
             $plan = $this->getPlanComptable();
             $find = null;
             $reduce = strval($code);
-
             $out = [];
-
             for ($i = strlen($reduce) - 1; $find == null && $i > 0; $i--) {
+                if( $reduce[$i] == '0' ) continue;
+
                 if (array_key_exists($reduce, $plan)) {
-                    $parent = $this->getParent($plan, $plan[$reduce]->getCode());
+
+                    $parent = $this->getParentWithAnnexe($plan, $plan[$reduce]->getCode());
+                    $dump($plan[$reduce]);
                     $out['label'] = $plan[$reduce]->getLabel();
                     $out['code'] = $plan[$reduce]->getCode();
                     $out['annexe'] = $plan[$reduce]->getAnnexe();
                     $out['masse_inherit'] = $parent['parentMasse'];
                     $out['compte_inherit'] = $parent['parentCode'];
                     $find = $out;
+                } else {
+                    $reduce[$i] = '0';
                 }
-                $reduce[$i] = '0';
             }
 
             if ($find == null) {
@@ -653,11 +692,21 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
     public function getSpentsByPFI($pfi)
     {
-        $qb = $this->getEntityManager()->getRepository(SpentLine::class)->createQueryBuilder('s');
+        $qb = $this->getEntityManager()
+            ->getRepository(SpentLine::class)
+            ->createQueryBuilder('s');
 
-        // TODO Trouver un moyen moins "random" d'exclure les recettes
-        $qb->where('s.pfi = :pfi AND s.montant < 0');
-        $qb->orderBy('s.datePaiement', 'ASC');
+        // Nouvelle requête "Native"
+        $queryPG = "SELECT s.id FROM spentline s LEFT JOIN spenttypegroup st ON '00' || rpad(st.code, 8, '0') = s.comptegeneral WHERE s.pfi = '$pfi'";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $stmt = $conn->executeQuery($queryPG);
+        $stmt->execute();
+        $ids = array_map('current', $stmt->fetchAll()); // Fetch
+
+        $qb->where('s.id IN(:ids)')
+            ->orderBy('s.datePaiement', 'ASC')
+            ->setParameter('ids', $ids);
 
         $filtreCompte = $this->getOscarConfigurationService()->getSpentAccountFilter();
 
@@ -666,7 +715,44 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 ->setParameter('filtreCompte', $filtreCompte);
         }
 
-        return $qb->getQuery()->setParameter('pfi', $pfi)->getResult();
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Enregistre les affectations des comptes
+     *
+     * @param $affectations
+     * @throws OscarException
+     */
+    public function updateAffectation( $affectations )
+    {
+        $dump = [];
+        $masses = $this->getOscarConfigurationService()->getMasses();
+
+        foreach ($affectations as $codeCompteFull => $compteAffectation) {
+            $infos = $this->getCompte($codeCompteFull);
+            if( $infos['code'] ){
+                /** @var SpentTypeGroup $spentType */
+                $spentType = $this->getSpentTypeRepository()->findOneByCode($infos['code']);
+            } else {
+                throw new OscarException("Le compte $codeCompteFull n'existe pas dans le plan comptable.");
+            }
+
+            if( $compteAffectation == '1' ){
+                // Recette / Ignorer
+                $spentType->setAnnexe($compteAffectation);
+            }
+            elseif ( $compteAffectation == '0' ){
+                $spentType->setBlind(true);
+            }
+            elseif ( $compteAffectation == '' ){
+            }
+            else {
+                $spentType->setAnnexe($compteAffectation);
+            }
+            $this->getEntityManager()->flush($spentType);
+        }
+        return true;
     }
 
     /**
@@ -681,7 +767,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      *
      * @param $pfi
      */
-    public function getSynthesisDatasPFI($pfi)
+    public function getSynthesisDatasPFI($pfi, $curationNB = false)
     {
 
         // Récupération des dépenses
@@ -696,10 +782,20 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $out['N.B'] = 0.0;
         $out['entries'] = count($spents);
         $out['total'] = 0.0;
-        $out['details'] = [];
-        $out['totals'] = [];
-        $out['totals']['N.B'] = 0.0;
-        $out['details']['N.B'] = [];
+        $out['details'] = [
+            'N.B' => []
+        ];
+        $out['totals'] = [
+            'N.B' => 0.0
+        ];
+        $out['recettes'] = [
+            'total'     => 0.0,
+            'details'   => []
+        ];
+
+        if( $curationNB ){
+            $out['curations'] = [];
+        }
 
         foreach ($masses as $key => $label) {
             $out[$key] = 0.0;
@@ -711,19 +807,46 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
             $compte = $spent->getCompteGeneral();
-
-            //
             $compteInfos = $this->getCompte($compte);
+
             $annexe = $compteInfos['annexe'];
-            if( !$annexe ){
+
+            if( $annexe == '' || $annexe == null ){
                 $annexe = $compteInfos['masse_inherit'];
             }
 
+            if( $annexe == '0' ){
+                continue;
+            }
+
+            if( $annexe == '1' ){
+                $montant = floatval($spent->getMontant());
+                $out['recettes']['total'] += $montant;
+                $out['recettes']['details'][] = $spent->toArray();
+                continue;
+            }
+
             if ($annexe == '') {
+                if( $curationNB ){
+                    $exist = $compte == $compteInfos['code'];
+                    if( !array_key_exists($compte, $out['curations']) ){
+                        $out['curations'][$compte] = [
+                            'compte' => $compte,
+                            'compteInfos' => $compteInfos,
+                            'label' => $compteInfos['label'],
+                            'montant' => 0.0,
+                            'totalEntries' => 0,
+                            'exist' => $exist ? 'true' : 'false'
+                        ];
+                    }
+                    $out['curations'][$compte]['montant'] += $spent->getMontant();
+                    $out['curations'][$compte]['totalEntries']++;
+                }
                 $annexe = 'N.B';
                 if (!in_array($compte, $out['details'][$annexe]))
                     $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
             }
+
             $out[$annexe] += floatval($spent->getMontant());
             $out['total'] += floatval($spent->getMontant());
             $out['totals'][$annexe] += floatval($spent->getMontant());

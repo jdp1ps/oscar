@@ -70,4 +70,12 @@ class SpentTypeGroupRepository extends EntityRepository{
 
         return $brancheDeplacee->getResult();;
     }
+
+    public function findOneByCode( $code ){
+        return $this->createQueryBuilder('st')
+            ->where('st.code = :code')
+            ->setParameter('code', $code)
+            ->getQuery()
+            ->getSingleResult();
+    }
 }
