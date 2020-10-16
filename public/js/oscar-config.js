@@ -171,7 +171,7 @@ requirejs.config({
             deps: ["moment", "EventDT", "vue", "ICalAnalyser", "Datepicker", "bootbox"]
         },
         "Datepicker": {
-            deps: ["moment-tz"]
+            deps: ["moment"]
         },
         "ICalAnalyser": {
             deps: ["ical", "moment-timezone"]
@@ -201,7 +201,7 @@ define("datepicker", ["jquery", "bootstrap", "bt-datepicker"], function ($) {
     };
 });
 
-define("mm", ["moment-tz"], function (moment) {
+define("mm", ["moment"], function (moment) {
     moment.locale("fr");
     return moment;
 });

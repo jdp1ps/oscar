@@ -16,15 +16,6 @@
         </transition>
 
         <transition name="fade">
-            <div class="pending overlay" v-if="pendingMsg">
-                <div class="overlay-content">
-                    <i class="icon-spinner animate-spin"></i>
-                    {{ pendingMsg }}
-                </div>
-            </div>
-        </transition>
-
-        <transition name="fade">
 
             <div class="overlay" v-if="formData">
                 <div class="overlay-content">
@@ -177,6 +168,13 @@
                         </button>
                     </nav>
                 </div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div class="alert alert-info" v-if="pendingMsg">
+                <i class="icon-spinner animate-spin"></i>
+                {{ pendingMsg }}
             </div>
         </transition>
 
