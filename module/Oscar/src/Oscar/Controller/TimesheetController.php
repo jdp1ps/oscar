@@ -19,6 +19,7 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
@@ -1047,8 +1048,6 @@ class TimesheetController extends AbstractOscarController
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
         }
 
-
-
         if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
 
             if( $activity == null ){
@@ -1110,12 +1109,27 @@ class TimesheetController extends AbstractOscarController
             $datas['format'] = $out;
 
             if( $out == 'pdf' ){
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPersonPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
+                $pdfRendrer->convert($html, $datas['filename']);
+                die("OK");
+                /*
+                die("ICI");
                 $formatter = new TimesheetPersonPeriodPdfFormatter(
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
                     $this->getViewRenderer()
                 );
                 $formatter->render($datas);
                 die();
+                */
             }
             elseif ($out == 'html') {
                 $formatter = new TimesheetPersonPeriodHtmlFormatter(

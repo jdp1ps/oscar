@@ -140,6 +140,10 @@ $durationRounded = function( $duration ) {
                 <td class="soustotal research"><?= $durationRounded($dataGroup['total']) ?></td>
             </tr>
         <?php endforeach; ?>
+        <tr class="group">
+            <th class="research" colspan="<?= $width-1 ?>" style="text-align: right; border-bottom: solid thin black">Total <?= $dataActivity['acronym'] ?> : </th>
+            <td class="research soustotal" style="text-align: right; border-bottom: solid thin black"><?= $duration($dataActivity['total']) ?></td>
+        </tr>
     <?php endforeach; ?>
 
     <?php foreach ($declarations['others'] as $otherKey=>$dataOther):?>
@@ -215,8 +219,6 @@ $durationRounded = function( $duration ) {
         <?php endforeach; ?>
     <?php endforeach; ?>
 
-
-
             <tr class="group">
                 <th class="label" style="border-bottom: solid black 2px">Activité effective</th>
                 <?php foreach ($daysInfos as $i=>$day):
@@ -264,7 +266,7 @@ $durationRounded = function( $duration ) {
     <?php endforeach; ?>
 
     <tr class="group">
-        <th class="valueLabel" style="border-bottom: solid black 2px">Total pour la période</th>
+        <th class="valueLabel" style="border-bottom: solid black 2px; font-size: 10px">Total pour la période</th>
         <?php foreach ($daysInfos as $i=>$day):
             $value = $day['duration'];
             $class = 'empty';
@@ -277,9 +279,9 @@ $durationRounded = function( $duration ) {
                 $value = $value == '0' ? '.' : $value;
             }
             ?>
-            <td class="<?= $class ?>" style="border-bottom: solid black 2px"><?= $durationRounded($value) ?></td>
+            <td class="<?= $class ?>" style="border-bottom: solid black 2px; font-size: 10px"><?= $durationRounded($value) ?></td>
         <?php endforeach; ?>
-        <td class="valueLabel total" style="border-bottom: solid black 2px"><?= $durationRounded($total) ?></td>
+        <td class="valueLabel total" style="border-bottom: solid black 2px; font-size: 10px"><?= $durationRounded($total) ?></td>
     </tr>
 
     </tbody>
