@@ -1463,7 +1463,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'periods' => []
         ];
 
-        $pages = [];
+        $pages = "";
         $template = "";
 
         $formatter = new TimesheetPersonPeriodHtmlFormatter(
@@ -1472,13 +1472,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         );
 
         $templateOpen = null; $templateClose = null;
+        $toc = "<ul>";
 
         foreach ($periods as $period) {
+
             foreach ($activity->getDeclarers() as $person) {
                 $data = $this->getPersonTimesheetsDatas($person, $period);
                 if( $data['total'] == 0 ){
                     continue;
                 }
+                $toc .= "<li>$period - $person</li>";
                 $page = $formatter->render($data);
                 $re = '/([ \t\S\n\r.\n]*<body>)([ \t\S\n\r.\n]*)(<\/body>[ \t\S\n\r.\n]*)/mi';
                 if( preg_match($re, $page, $matches)){
@@ -1486,25 +1489,25 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $content = $matches[2];
                     $close = $matches[3];
                 } else {
-                    die("ERROR");
+                    throw new OscarException("Problème survenu lors de la génération de la période $period pour $person");
                 }
+
                 if( !$templateOpen ){
                     $templateOpen = $open;
                     $templateClose = $close;
                 }
-                $pages[] = $content;
+                $pages .= $content;
             }
         }
+        $toc .= '</ul>';
 
         $html = $templateOpen;
-        foreach ($pages as $page) {
-            $html .= $page;
-        }
+        // $html .= $toc;
+        $html .= $pages;
         $html .= $close;
 
         $this->getOscarConfigurationService()->getHtmlToPdfMethod()->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)->convert($html, 'test.pdf');
         die();
-        $formatter->render($datas);
     }
 
     public function getSynthesisActivityYear( $year, $activity_id )
