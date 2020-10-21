@@ -187,6 +187,33 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         }
     }
 
+    public function compteAffectationAction(){
+        $method = $this->getHttpXMethod();
+
+        if( $method == 'POST' ){
+
+            // Vérifiaction des droits d'accès
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+
+            // Récupération des affectations
+            $postedAffectations = $this->params()->fromPost('affectation');
+
+            if( !$postedAffectations ){
+                return $this->getResponseBadRequest("Erreur de transmission : " . print_r($_POST, true));
+            }
+
+            try {
+                $this->getSpentService()->updateAffectation($postedAffectations);
+
+            } catch (\Exception $e) {
+                return $this->getResponseInternalError($e->getMessage());
+            }
+            return $this->getResponseOk("Affectation des comptes terminée");
+        }
+
+        return $this->getResponseBadRequest();
+    }
+
     /**
      * Données des dépenses pour une activité.
      *
@@ -207,7 +234,9 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             if( !$activity->getCodeEOTP() ){
                 throw new OscarException(sprintf(_("Cette activité n'a pas de PFI")));
             }
-            $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
+            //$spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
+            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP());
+
             $format = $this->params()->fromQuery('format', 'json');
             switch($format){
                 case 'json' :

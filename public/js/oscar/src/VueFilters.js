@@ -1,8 +1,5 @@
 // nodejs node_modules/.bin/poi watch --format umd --moduleName  VueFilters --filename.js VueFilters.js --dist public/js/oscar/dist public/js/oscar/src/VueFilters.js
 
-
-
-
 export default {
     slugify(text){
         return text.toString().toLowerCase()

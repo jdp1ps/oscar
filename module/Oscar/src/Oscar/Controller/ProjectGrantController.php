@@ -50,7 +50,6 @@ use Oscar\Service\ActivityTypeService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
-use Oscar\Service\TimesheetSerspentSynthesisActivityvice;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
 use Oscar\Traits\UseActivityLogService;
@@ -1771,15 +1770,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
-    public function spentListAction(){
-
-
+    public function spentListAction()
+    {
         $action = $this->params()->fromPost('action', null);
         $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
         $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $activity);
         $msg = "";
         $error = "";
+
         $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
+
 
         if( $action && $action == 'update' ) {
             $this->getOscarUserContextService()->check(Privileges::DEPENSE_SYNC, $activity);

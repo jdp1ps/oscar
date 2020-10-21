@@ -781,6 +781,12 @@ spent:
 
     may_terminate: false
     child_routes:
+        compte-affectation:
+            type: segment
+            options:
+                route: /api/affectation
+                defaults:
+                    action: compteAffectation
         activity-api:
             type: segment
             options:

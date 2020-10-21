@@ -125,7 +125,7 @@ return array(
                 // DEPENSES
                 // --- VERSEMENTS
                 [ 'controller' =>   'Depense',
-                    'action' => ['activity', 'manageSpendTypeGroup', 'activityApi'],
+                    'action' => ['activity', 'manageSpendTypeGroup', 'activityApi', 'compteAffectation'],
                     'roles' => ['user'],
                 ],
 

@@ -667,6 +667,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                     $dump($plan[$reduce]);
                     $out['label'] = $plan[$reduce]->getLabel();
                     $out['code'] = $plan[$reduce]->getCode();
+                    $out['codeFull'] = $code;
                     $out['annexe'] = $plan[$reduce]->getAnnexe();
                     $out['masse_inherit'] = $parent['parentMasse'];
                     $out['compte_inherit'] = $parent['parentCode'];
@@ -978,25 +979,144 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return array_column($qb->getQuery()->getArrayResult(), 'syncId');
     }
 
+    public function getSpentsDatas($pfi){
+        $array = [];
+
+        $spents = $this->getSpentsByPFI($pfi);
+        $comptes = [];
+
+
+        /** @var SpentLine $spent */
+        foreach ( $spents as $spent) {
+            $compte = $this->getCompte($spent->getCompteGeneral());
+            $comptes[$spent->getCompteGeneral()] = $compte;
+            $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
+            $type = $this->getTypeByCode($spent->getCompteGeneral());
+            $spentArray = $spent->toArray();
+            $spentArray['masse'] = $masse;
+            $spentArray['compte'] = $compte['code'] . ' : ' . $compte['label'];
+            $spentArray['type'] = $type;
+
+            $array[] = $spentArray;
+        }
+        return [
+            'comptes' => $comptes,
+            'spents' => $array,
+            'masses' => $this->getOscarConfigurationService()->getMasses(),
+            'synthesis' => $this->getSpentDatasSynthesisBySpents($spents)
+        ];
+    }
+
+    /**
+     * Retourne la synthèse des dépenses/recettes à partir de la liste des entrées du journal des pièces (SpentLine).
+     *
+     * @param $spents
+     * @return array[]
+     */
+    public function getSpentDatasSynthesisBySpents($spents){
+        $synthesis = [
+            '1' => [
+                'label' => "Recettes",
+                'total' => 0.0,
+                'nbr' => 0
+            ],
+            '0' => [
+                'label' => "Ignorés",
+                'total' => 0.0,
+                'nbr' => 0
+            ],
+            'N.B' => [
+                'label' => "Hors-Masse",
+                'total' => 0.0,
+                'nbr' => 0
+            ]
+        ];
+
+
+        foreach ($this->getOscarConfigurationService()->getMasses() as $masseKey => $masseLabel) {
+            $synthesis[$masseKey] = [
+                'label' => $masseLabel,
+                'total' => 0.0,
+                'nbr' => 0
+            ];
+        }
+
+        /** @var SpentLine $spent */
+        foreach ($spents as $spent) {
+            $compte = $this->getCompte($spent->getCompteGeneral());
+            $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
+            if( !array_key_exists($masse, $synthesis) ){
+                $masse = 'N.B';
+            }
+            $synthesis[$masse]['total'] += $spent->getMontant();
+            $synthesis[$masse]['nbr']++;
+
+        }
+
+        return $synthesis;
+    }
+
+    public function getSpentDatasSynthesisByPfi($pfi){
+        $spents = $this->getSpentsByPFI($pfi);
+        return $this->getSpentDatasSynthesisBySpents($spents);
+    }
+
     public function getGroupedSpentsDatas($pfi)
     {
         $re = '/^(0*)([0-9]*)$/m';
         $spents = $this->getSpentsByPFI($pfi);
         $out = [];
         $grouped = [];
+        $byMasses = [
+            'N.B' => []
+        ];
+
+        // Tableau contenant les masses
+        $massesKey = array_keys($this->getOscarConfigurationService()->getMasses());
+        $massesKey[] = 'N.B';
+        $massesKey[] = '0';
+        $massesKey[] = '1';
+
+        // Rangement des dépenses par masse
+        foreach ($this->getOscarConfigurationService()->getMasses() as $masseKey=>$masseLabel) {
+            $byMasses[$masseKey] = [
+                'label' => $masseLabel,
+                'key' => $masseKey,
+                'spents' => []
+            ];
+        }
+
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
 
             $numPiece = $spent->getNumPiece();
             $compteBudg = $spent->getCompteBudgetaire();
             $compte = $this->getCompte($spent->getCompteGeneral());
-
-
-            $masse = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
-
-
+            $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
             $type = $this->getTypeByCode($spent->getCompteGeneral());
 
+            if( !in_array($masseGroup, $massesKey) ){
+                $masseGroup = 'N.B';
+            }
+
+            if (!array_key_exists($numPiece, $byMasses[$masseGroup]['spents'])) {
+                $byMasses[$masseGroup]['spents'][] = [
+                    'ids' => [],
+                    'numpiece' => $numPiece,
+                    'syncIds' => [],
+                    'text' => [],
+                    'types' => [],
+                    'montant' => 0.0,
+                    'compteBudgetaire' => [],
+                    'compteGenerale' => [],
+                    'masse' => [],
+                    'datecomptable' => $spent->getDateComptable(),
+                    'datepaiement' => $spent->getDatePaiement(),
+                    'annee' => $spent->getDateAnneeExercice(),
+                    'refPiece' => $spent->getPieceRef(),
+                    'details' => []
+                ];
+            }
 
             if (!array_key_exists($numPiece, $grouped)) {
                 $grouped[$numPiece] = [
@@ -1050,6 +1170,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $details['codeStr'] = $type;
             $grouped[$numPiece]['details'][] = $details;
         }
+
+        $grouped['byMasses'] = $byMasses;
 
         return $grouped;
     }

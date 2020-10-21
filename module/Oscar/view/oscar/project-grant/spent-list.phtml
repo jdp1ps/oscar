@@ -1,4 +1,12 @@
-
+<style>
+    tabel {
+        border-collapse: collapse;
+    }
+    tr.total {
+        border-top: solid 2px #999;
+        background: #0b97c4;
+    }
+</style>
 <section class="container-fluid">
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
     <nav>
@@ -33,14 +41,19 @@
     <?php if( count($spents) ): ?>
         <div id="spentlines"></div>
         <script>
-            require(['vue', 'vue-resource', 'SpentLinePFI'], function(Vue, VueResource, SpentLinePFI){
+            require(['vue', 'vue-resource', 'SpentLinePFI', 'VueFilters'], function(Vue, VueResource, SpentLinePFI, VueFilters){
+
                 Vue.use(VueResource);
+                Vue.http.options.emulateJSON = true;
+                Vue.http.options.emulateHTTP = true;
+                Vue.filter('money', VueFilters.default.money);
                 new Vue({
                     el: "#spentlines",
                     render(h){
                         return h(SpentLinePFI.default, { props: {
                                 masses: <?= json_encode($masses) ?>,
-                                url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
+                                url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>",
+                                urlSpentAffectation: "<?= $this->url('spent/compte-affectation') ?>"
                             }});
                     }
 
