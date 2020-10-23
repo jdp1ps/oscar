@@ -8,6 +8,7 @@
     }
 </style>
 <section class="container-fluid">
+    <!--
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
     <nav>
         <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
@@ -38,6 +39,7 @@
         </a>
         <?php endif; ?>
     </nav>
+    -->
     <?php if( count($spents) ): ?>
         <div id="spentlines"></div>
         <script>
@@ -51,8 +53,16 @@
                     el: "#spentlines",
                     render(h){
                         return h(SpentLinePFI.default, { props: {
+                                informations: <?= json_encode($activity->toArray()) ?>,
                                 masses: <?= json_encode($masses) ?>,
                                 url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>",
+                                urlActivity: "<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>",
+                                urlSync: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC) ?
+                                    '"'.$this->url('contract/list-spent', ['id' => $activity->getId()]).'"' :
+                                    'null' ?>,
+                                urlDownload: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DOWNLOAD, $activity) ?
+                                    '"' . $this->url('spent/activity-api', ['id' => $activity->getId()]) .'?format=excel&mode=details"' :
+                                    'null' ?>,
                                 urlSpentAffectation: "<?= $this->url('spent/compte-affectation') ?>"
                             }});
                     }

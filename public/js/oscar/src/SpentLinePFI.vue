@@ -1,8 +1,6 @@
 <template>
     <section class="spentlines">
 
-
-
         <transition name="fade">
             <div class="error overlay" v-if="error">
                 <div class="overlay-content">
@@ -82,16 +80,72 @@
 
             <div class="row">
                 <div class="col-md-3">
-                    <!--<pre v-if="spentlines">{{ spentlines.synthesis }}</pre>-->
-                    <h2><i class="icon-calculator"></i>Dépenses</h2>
+                    <h3>
+                        <i class="icon-help-circled"></i>
+                        Informations
+                    </h3>
+                    <div class="card">
+                        <table class="table table-condensed card synthesis" v-if="spentlines">
+                            <tbody>
+                                <tr>
+                                    <th><small>PFI</small></th>
+                                    <td style="text-align: right">
+                                        {{ informations.PFI }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><small>N°OSCAR</small></th>
+                                    <td style="text-align: right">
+                                        {{ informations.numOscar }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><small>Montant</small></th>
+                                    <td style="text-align: right">
+                                        {{ informations.amount | money }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><small>Projet</small></th>
+                                    <td style="text-align: right">
+                                        <strong>{{ informations.projectacronym }}</strong><br>
+                                        <small>{{ informations.project }}</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><small>Activité</small></th>
+                                    <td style="text-align: right">
+                                        <small>{{ informations.label }}</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <a :href="urlActivity" v-if="urlActivity" class="btn btn-default btn-xs"><i class="icon-cube"></i> Revenir à l'activité</a>
+                        <form :action="urlSync" method="post" class="form-inline" v-if="urlSync">
+                            <input type="hidden" name="action" value="update" />
+                            <button type="submit" class="btn btn-primary btn-xs">
+                                <i class="icon-signal"></i>
+                                Mettre à jour les données depuis SIFAC
+                            </button>
+                        </form>
+                        <a :href="urlDownload" class="btn btn-default btn-xs" v-if="urlDownload">
+                            <i class="icon-download"></i>
+                            Télécharger les données (Excel)</a>
+                    </div>
+
+
+                    <h3><i class="icon-calculator"></i>Dépenses</h3>
                     <table class="table table-condensed card synthesis" v-if="spentlines">
                         <tbody>
                         <tr v-for="dt,key in spentlines.masses">
-                            <th><small>{{ dt }}</small></th>
+                            <th>
+                                <small>{{ dt }}</small>
+                                <a class="label label-info xs" :href="'#repport-' + key">{{ spentlines.synthesis[key].nbr}}</a>
+                            </th>
                             <td style="text-align: right">{{ spentlines.synthesis[key].total | money}}</td>
                         </tr>
                         <tr v-if="spentlines.synthesis['N.B'].total != 0">
-                            <th><small><i class="icon-attention"></i> Hors-masse</small></th>
+                            <th><small><i class="icon-attention"></i> Hors-masse</small><span class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</span></th>
                             <td style="text-align: right">{{ spentlines.synthesis['N.B'].total | money}}</td>
                         </tr>
                         </tbody>
@@ -103,11 +157,11 @@
                         </tfoot>
                     </table>
 
-                    <h2><i class="icon-calculator"></i>Recettes</h2>
+                    <h3><i class="icon-calculator"></i>Recettes</h3>
                     <table class="table table-condensed card synthesis" v-if="spentlines">
                         <tbody>
                         <tr>
-                            <th>Recette</th>
+                            <th>Recette <a class="label label-info xs" href="#repport-1">{{ spentlines.synthesis['1'].nbr}}</a></th>
                             <td style="text-align: right">{{ spentlines.synthesis['1'].total | money}}</td>
                         </tr>
                         </tbody>
@@ -121,7 +175,10 @@
                     <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
                         <tbody>
                         <tr>
-                            <th>Ignorées <div class="label label-info">{{ spentlines.synthesis['0'].nbr}}</div></th>
+                            <th>
+                                Ignorées
+                                <a class="label label-info"  href="#repport-0">{{ spentlines.synthesis['0'].nbr}}</a>
+                            </th>
                             <td style="text-align: right">{{ spentlines.synthesis['0'].total | money}}</td>
                         </tr>
                         </tbody>
@@ -129,153 +186,45 @@
 
 
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-9" style="height: 80vh; overflow-y: scroll">
 
                     <div v-if="spentlines != null">
-
                         <div v-for="m, k in masses">
-                            <h2>{{ m }}</h2>
-                            <table class="list table table-condensed table-bordered table-condensed card">
-                                <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Ligne(s)</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                    <th style="width: 8%">Montant</th>
-                                    <th style="width: 8%">Compte Budgetaire</th>
-                                    <th style="width: 8%">Compte</th>
-                                    <th style="width: 8%">Date Comptable</th>
-                                    <th style="width: 8%">Année</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="l in byMasse.datas[k]">
-                                        <td>{{ l.numpiece }}</td>
-                                        <td>
-                                            <button @click="details = l" class="btn btn-default">{{ l.details.length }}
-                                            </button>
-                                        </td>
-                                        <td>{{ l.types ? l.types.join(',') : '' }}</td>
-                                        <td>{{ l.text.join(', ') }}</td>
-                                        <td style="text-align: right">{{ l.montant | money }}</td>
-                                        <td>{{ l.compteBudgetaires.join(', ') }}</td>
-                                        <td>
-                                            <span v-for="c in l.comptes" class="cartouche default" style="white-space: nowrap" @click="handlerEditCompte(c)">
-                                                {{ c }}
-                                                <i class="icon-edit"></i>
-                                            </span>
-                                        </td>
-                                        <td>{{ l.dateComptable }}</td>
-                                        <td>{{ l.annee }}</td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr style="font-weight: bold; font-size: 1.2em">
-                                        <td colspan="4" style="text-align: right">Total :</td>
-                                        <td style="text-align: right">{{ byMasse.totaux[k] | money }}</td>
-                                        <td colspan="2">&nbsp;</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                            <h3 :id="'repport-' + k">{{ m }}</h3>
+                            <spent-line-p-f-i-grouped
+                                :lines="byMasse.datas[k]" :total="spentlines.synthesis[k].total"
+                                @editcompte="handlerEditCompte"
+                                @detailsline="handlerDetailsLine"
+                            />
                         </div>
 
                         <div v-if="Object.keys(byMasse.datas['N.B']).length > 0">
-                            <h2>Hors-masse</h2>
-                            <pre>{{ byMasse.datas['N.B'] }}</pre>
+                            <h3 :id="'repport-nb'">Hors-masse</h3>
                             <div class="alert alert-warning">
                                 <i class="icon-attention"></i> Les comptes des entrées suivantes ne sont pas qualifié.
                             </div>
-                            <table class="list table table-condensed table-bordered table-condensed card">
-                                <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Ligne(s)</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                    <th style="width: 8%">Montant</th>
-                                    <th style="width: 8%">Compte Budgetaire</th>
-                                    <th style="width: 8%">Compte</th>
-                                    <th style="width: 8%">Date Comptable</th>
-                                    <th style="width: 8%">Année</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="l in byMasse.datas['N.B']">
-                                    <td>{{ l.numpiece }}</td>
-                                    <td>
-                                        <button @click="details = l" class="btn btn-default">{{ l.details.length }}
-                                        </button>
-                                    </td>
-                                    <td>{{ l.types ? l.types.join(',') : '' }}</td>
-                                    <td>{{ l.text.join(', ') }}</td>
-                                    <td style="text-align: right">{{ l.montant | money }}</td>
-                                    <td>{{ l.compteBudgetaires.join(', ') }}</td>
-                                    <td>
-                                            <span v-for="c in l.comptes" class="cartouche default" style="white-space: nowrap" @click="handlerEditCompte(c)">
-                                                {{ c }}
-                                                <i class="icon-edit"></i>
-                                            </span>
-                                    </td>
-                                    <td>{{ l.dateComptable }}</td>
-                                    <td>{{ l.annee }}</td>
-                                </tr>
-                                </tbody>
-                                <tfoot>
-                                <tr style="font-weight: bold; font-size: 1.2em">
-                                    <td colspan="4" style="text-align: right">Total :</td>
-                                    <td style="text-align: right">{{ byMasse.totaux['N.B'] | money }}</td>
-                                    <td colspan="2">&nbsp;</td>
-                                </tr>
-                                </tfoot>
-                            </table>
+                            <spent-line-p-f-i-grouped
+                                    :lines="byMasse.datas['N.B']" :total="spentlines.synthesis['N.B'].total"
+                                    @editcompte="handlerEditCompte"
+                                    @detailsline="handlerDetailsLine"
+                            />
                         </div>
 
                         <div v-if="Object.keys(byMasse.datas['recettes']).length > 0">
-                            <h2>Recettes</h2>
-                            <table class="list table table-condensed table-bordered table-condensed card">
-                                <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Ligne(s)</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                    <th style="width: 8%">Montant</th>
-                                    <th style="width: 8%">Compte Budgetaire</th>
-                                    <th style="width: 8%">Compte</th>
-                                    <th style="width: 8%">Date Comptable</th>
-                                    <th style="width: 8%">Année</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="l in byMasse.datas['recettes']">
-                                    <td>{{ l.numpiece }}</td>
-                                    <td>
-                                        <button @click="details = l" class="btn btn-default">{{ l.details.length }}
-                                        </button>
-                                    </td>
-                                    <td>{{ l.types ? l.types.join(',') : '' }}</td>
-                                    <td>{{ l.text.join(', ') }}</td>
-                                    <td style="text-align: right">{{ l.montant | money }}</td>
-                                    <td>{{ l.compteBudgetaires.join(', ') }}</td>
-                                    <td>
-                                            <span v-for="c in l.comptes" class="cartouche default" style="white-space: nowrap" @click="handlerEditCompte(c)">
-                                                {{ c }}
-                                                <i class="icon-edit"></i>
-                                            </span>
-                                    </td>
-                                    <td>{{ l.dateComptable }}</td>
-                                    <td>{{ l.annee }}</td>
-                                </tr>
-                                </tbody>
-                                <tfoot>
-                                <tr style="font-weight: bold; font-size: 1.2em">
-                                    <td colspan="4" style="text-align: right">Total :</td>
-                                    <td style="text-align: right">{{ byMasse.totaux['N.B'] | money }}</td>
-                                    <td colspan="2">&nbsp;</td>
-                                </tr>
-                                </tfoot>
-                            </table>
+                            <h3 :id="'repport-1'">Recettes</h3>
+                            <spent-line-p-f-i-grouped
+                                    :lines="byMasse.datas['recettes']" :total="spentlines.synthesis['1'].total"
+                                    @editcompte="handlerEditCompte"
+                                    @detailsline="handlerDetailsLine"
+                            />
+                        </div>
+                        <div v-if="Object.keys(byMasse.datas['ignorés']).length > 0">
+                            <h3 :id="'repport-0'">Ignorés</h3>
+                            <spent-line-p-f-i-grouped
+                                    :lines="byMasse.datas['ignorés']" :total="spentlines.synthesis['0'].total"
+                                    @editcompte="handlerEditCompte"
+                                    @detailsline="handlerDetailsLine"
+                            />
                         </div>
                     </div>
                 </div>
@@ -287,9 +236,23 @@
 <script>
     // nodejs node_modules/.bin/poi watch --format umd --moduleName  SpentLinePFI --filename.js SpentLinePFI.js --dist public/js/oscar/dist public/js/oscar/src/SpentLinePFI.vue
 
+    import SpentLinePFIGrouped from "./SpentLinePFIGrouped";
 
     export default {
-        props: ['moment', 'url', 'masses', 'urlSpentAffectation'],
+        props: [
+            'moment',
+            'url',
+            'masses',
+            'urlSpentAffectation',
+            'informations',
+            'urlActivity',
+            'urlSync',
+            'urlDownload'
+        ],
+
+        components: {
+            SpentLinePFIGrouped
+        },
 
         data() {
             return {
@@ -356,8 +319,8 @@
                                 'compteBudgetaires': [],
                                 'comptes': [],
                                 'masse': [],
-                                'datecomptable': line.datecomptable,
-                                'datepaiement': line.datepaiement,
+                                'dateComptable': line.dateComptable,
+                                'datePaiement': line.datePaiement,
                                 'annee': line.dateAnneeExercice,
                                 'refPiece': line.refPiece,
                                 details: []
@@ -409,16 +372,20 @@
                 this.editCompte = JSON.parse(JSON.stringify(this.spentlines.comptes[compte]));
             },
 
+            handlerDetailsLine(line){
+                this.details = line;
+            },
+
             handlerAffectationCompte(compte){
                 //$codeCompteFull => $compteAffectation
                 let affectations = {};
                 affectations[compte.codeFull] = compte.annexe;
+                this.editCompte = null;
+                this.pendingMsg = "Modification de la masse pour " + compte.codeFull;
 
-                console.log(affectations);
 
                 this.$http.post(this.urlSpentAffectation, {'affectation': affectations }).then(
                     success => {
-                        console.log("SUCCESS", success);
                         this.editCompte = null;
                         this.fetch();
                     },
@@ -428,10 +395,10 @@
                         } else {
                             this.error = error.data
                         }
+                        this.pendingMsg = "";
                     }
-                ).then(n => { this.pendingMsg = ""; });
+                );
             },
-
 
             ////////////////////////////////////////////////////////////////
             //
