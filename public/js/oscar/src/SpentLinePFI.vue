@@ -79,7 +79,7 @@
         <div class="container-fluid">
 
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <h3>
                         <i class="icon-help-circled"></i>
                         Informations
@@ -157,36 +157,38 @@
                         </tfoot>
                     </table>
 
-                    <h3><i class="icon-calculator"></i>Recettes</h3>
-                    <table class="table table-condensed card synthesis" v-if="spentlines">
-                        <tbody>
-                        <tr>
-                            <th>Recette <a class="label label-info xs" href="#repport-1">{{ spentlines.synthesis['1'].nbr}}</a></th>
-                            <td style="text-align: right">{{ spentlines.synthesis['1'].total | money}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div v-if="manageRecettes">
+                        <h3><i class="icon-calculator"></i>Recettes</h3>
+                        <table class="table table-condensed card synthesis" v-if="spentlines">
+                            <tbody>
+                            <tr>
+                                <th>Recette <a class="label label-info xs" href="#repport-1">{{ spentlines.synthesis['1'].nbr}}</a></th>
+                                <td style="text-align: right">{{ spentlines.synthesis['1'].total | money}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <a href="#" @click.prevent="displayIgnored = !displayIgnored">
-                        <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
-                        <span v-else><i class="icon-eye"></i> Montrer</span>
-                        les données ignorées
-                    </a>
-                    <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
-                        <tbody>
-                        <tr>
-                            <th>
-                                Ignorées
-                                <a class="label label-info"  href="#repport-0">{{ spentlines.synthesis['0'].nbr}}</a>
-                            </th>
-                            <td style="text-align: right">{{ spentlines.synthesis['0'].total | money}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-
+                    <div v-if="manageIgnored">
+                        <a href="#" @click.prevent="displayIgnored = !displayIgnored">
+                            <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
+                            <span v-else><i class="icon-eye"></i> Montrer</span>
+                            les données ignorées
+                        </a>
+                        <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
+                            <tbody>
+                            <tr>
+                                <th>
+                                    Ignorées
+                                    <a class="label label-info"  href="#repport-0">{{ spentlines.synthesis['0'].nbr}}</a>
+                                </th>
+                                <td style="text-align: right">{{ spentlines.synthesis['0'].total | money}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="col-md-9" style="height: 80vh; overflow-y: scroll">
+                <div class="col-md-10" style="height: 80vh; overflow-y: scroll">
 
                     <div v-if="spentlines != null">
                         <div v-for="m, k in masses">
@@ -210,7 +212,7 @@
                             />
                         </div>
 
-                        <div v-if="Object.keys(byMasse.datas['recettes']).length > 0">
+                        <div v-if="manageRecettes && Object.keys(byMasse.datas['recettes']).length > 0">
                             <h3 :id="'repport-1'">Recettes</h3>
                             <spent-line-p-f-i-grouped
                                     :lines="byMasse.datas['recettes']" :total="spentlines.synthesis['1'].total"
@@ -218,7 +220,7 @@
                                     @detailsline="handlerDetailsLine"
                             />
                         </div>
-                        <div v-if="Object.keys(byMasse.datas['ignorés']).length > 0">
+                        <div v-if="manageIgnored && Object.keys(byMasse.datas['ignorés']).length > 0">
                             <h3 :id="'repport-0'">Ignorés</h3>
                             <spent-line-p-f-i-grouped
                                     :lines="byMasse.datas['ignorés']" :total="spentlines.synthesis['0'].total"
@@ -247,7 +249,9 @@
             'informations',
             'urlActivity',
             'urlSync',
-            'urlDownload'
+            'urlDownload',
+            'manageRecettes',
+            'manageIgnored'
         ],
 
         components: {

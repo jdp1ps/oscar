@@ -624,6 +624,22 @@
     "fullcode": "DEPENSE-DOWNLOAD"
   },
 
+  "DEPENSE-RECETTES": {
+    "category_id": 9,
+    "spot": 7,
+    "code": "RECETTES",
+    "libelle": "Peut voir les recettes",
+    "fullcode": "DEPENSE-RECETTES"
+  },
+
+  "DEPENSE-IGNORED": {
+    "category_id": 9,
+    "spot": 7,
+    "code": "IGNORED",
+    "libelle": "Peut voir les données ignorées",
+    "fullcode": "DEPENSE-IGNORED"
+  },
+
   "MAINTENANCE-SPENDTYPEGROUP_MANAGE": {
     "category_id": 6,
     "spot": 7,

@@ -3,8 +3,8 @@
         border-collapse: collapse;
     }
     tr.total {
-        border-top: solid 2px #999;
-        background: #0b97c4;
+        border-top: solid 2px #a4bbbb;
+        background: rgb(236, 243, 245);
     }
 </style>
 <section class="container-fluid">
@@ -55,6 +55,8 @@
                         return h(SpentLinePFI.default, { props: {
                                 informations: <?= json_encode($activity->toArray()) ?>,
                                 masses: <?= json_encode($masses) ?>,
+                                manageRecettes: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_RECETTES, $activity) ? 'true' : 'false' ?>,
+                                manageIgnored: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_IGNORED, $activity) ? 'true' : 'false' ?>,
                                 url: "<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>",
                                 urlActivity: "<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>",
                                 urlSync: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC) ?

@@ -44,7 +44,7 @@ class SpentActivityExcelFormater implements IFormatter
         $filename = sprintf('/tmp/spent-%s.csv', uniqid());
         $writer = fopen($filename, 'w');
         fputcsv($writer, $headers);
-        foreach ($this->datas as $line) {
+        foreach ($this->datas['spents'] as $line) {
             $wroteLine = [
                 $pfi,
                 $project,
@@ -61,10 +61,11 @@ class SpentActivityExcelFormater implements IFormatter
                 $this->activity->getId(),
                 implode(',', $line['syncIds']),
             ];
+            var_dump($wroteLine);
             fputcsv($writer, $wroteLine);
         }
         fclose($writer);
-
+        die();
         //
         if( array_key_exists('download', $options) && $options['download'] === true ){
             $downloader = new CSVDownloader();

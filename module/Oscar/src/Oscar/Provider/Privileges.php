@@ -131,6 +131,8 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DEPENSE_SHOW = 'DEPENSE-SHOW';
     const DEPENSE_SYNC = 'DEPENSE-SYNC';
     const DEPENSE_DOWNLOAD = 'DEPENSE-DOWNLOAD';
+    const DEPENSE_RECETTES = 'DEPENSE-RECETTES';
+    const DEPENSE_IGNORED = 'DEPENSE-IGNORED';
 
     public static function getResourceId($privilege)
     {

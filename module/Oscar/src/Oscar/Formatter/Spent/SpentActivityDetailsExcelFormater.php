@@ -38,39 +38,41 @@ class SpentActivityDetailsExcelFormater implements IFormatter
         $activityNumOscar = $this->activity->getOscarNum();
         $project = $this->activity->getAcronym();
 
-        // Génération des clefs
-        $headers = ['PFI', 'PROJECT', 'ACTIVITY', 'ACTIVITYNUM','MONTANT','TEXTE','TYPE','COMPTE', 'DATE COMPTABLE', 'DATE PAIEMENT', 'ANNEE', 'NUM PIECE', 'OSCARID', 'SYNCID'];
-
+        $headers = ['id',
+            'syncid',
+            'pfi',
+            'numSifac',
+            'numPiece',
+            'montant',
+            'compteBudgetaire',
+            'centreProfit',
+            'compteGeneral',
+            'centreFinancier',
+            'texteFacture',
+            'designation',
+            'dateAnneeExercice',
+            'datePaiement',
+            'datePiece',
+            'dateComptable',
+            'masse',
+            'compte',
+            'type'];
         $filename = sprintf('/tmp/spent-%s.csv', uniqid());
         $writer = fopen($filename, 'w');
         fputcsv($writer, $headers);
-        foreach ($this->datas as $stack) {
-            foreach ($stack['details'] as $line) {
-                $wroteLine = [
-                    $pfi,
-                    $project,
-                    (string)$this->activity,
-                    $activityNumOscar,
-                    $line['montant'],
-                    $line['textFacture'] ? $line['textFacture'] : $line['designation'],
-                    $line['codeStr'],
-                    $line['compteBudgetaire'],
-                    $line['dateComptable'],
-                    $line['datePaiement'],
-                    $line['dateAnneeExercice'],
-                    $line['numPiece'],
-                    $this->activity->getId(),
-                    implode(',', $line['syncIds']),
-                ];
-                fputcsv($writer, $wroteLine);
-            }
+        foreach ($this->datas['spents'] as $line) {
+            $line['montant'] = number_format($line['montant'], 2, ',', ' ');
+
+
+                fputcsv($writer, $line);
         }
         fclose($writer);
+          //
 
-        //
+
         if( array_key_exists('download', $options) && $options['download'] === true ){
             $downloader = new CSVDownloader();
-            $downloader->downloadCSVToExcel($filename);
+            $downloader->downloadCSV($filename);
         }
 
     }
