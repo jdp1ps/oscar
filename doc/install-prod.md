@@ -180,14 +180,16 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 
 #### Installation de composer
 
+> Novembre 2020 : Les dépendances Oscar **ne gère PAS composer 2**, il faut donc utiliser uniquement composer 1.
+
 Commencez par installer [Composer](https://getcomposer.org/) :
 
 ```bash
-# Récupération de la dernière version de composer
-wget https://getcomposer.org/composer.phar
+# Récupération de la dernière version 1 de composer
+wget https://getcomposer.org/composer-1.phar
 
 # On le place dans /bin
-mv composer.phar /bin/composer
+mv composer-1.phar /bin/composer
 
 #On donne les droit d'accès
 chmod +x /bin/composer
