@@ -183,11 +183,11 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 Commencez par installer [Composer](https://getcomposer.org/) :
 
 ```bash
-# Récupération de la dernière version de composer
-wget https://getcomposer.org/composer.phar
+# Récupération de la dernière version 1 de composer
+wget https://getcomposer.org/composer-1.phar
 
 # On le place dans /bin
-mv composer.phar /bin/composer
+mv composer-1.phar /bin/composer
 
 #On donne les droit d'accès
 chmod +x /bin/composer
