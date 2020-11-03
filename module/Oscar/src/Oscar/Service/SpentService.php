@@ -1049,7 +1049,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
             $compte = $this->getCompte($spent->getCompteGeneral());
-            $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
+            $masse = $masseGroup = $compte['annexe'] != '' ? $compte['annexe'] : $compte['masse_inherit'];
             if( !array_key_exists($masse, $synthesis) ){
                 $masse = 'N.B';
             }

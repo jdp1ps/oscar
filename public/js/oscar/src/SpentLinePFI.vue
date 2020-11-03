@@ -145,7 +145,7 @@
                             <td style="text-align: right">{{ spentlines.synthesis[key].total | money}}</td>
                         </tr>
                         <tr v-if="spentlines.synthesis['N.B'].total != 0">
-                            <th><small><i class="icon-attention"></i> Hors-masse</small><span class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</span></th>
+                            <th><small><i class="icon-attention"></i> Hors-masse</small><a href="repport-nb" class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</a></th>
                             <td style="text-align: right">{{ spentlines.synthesis['N.B'].total | money}}</td>
                         </tr>
                         </tbody>
@@ -169,7 +169,7 @@
                         </table>
                     </div>
 
-                    <div v-if="manageIgnored">
+                    <div v-if="manageIgnored && spentlines.synthesis['0'].total != 0">
                         <a href="#" @click.prevent="displayIgnored = !displayIgnored">
                             <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
                             <span v-else><i class="icon-eye"></i> Montrer</span>
@@ -228,9 +228,6 @@
                                     @detailsline="handlerDetailsLine"
                             />
                         </div>
-                        <pre>
-                            {{ byMasse.datas }}
-                        </pre>
                     </div>
                 </div>
             </div>
@@ -395,12 +392,10 @@
 
                 this.$http.post(this.urlSpentAffectation, {'affectation': affectations }).then(
                     success => {
-                        console.log("OK", success);
                         this.editCompte = null;
                         this.fetch();
                     },
                     error => {
-                        console.log("ERROR", error);
                         if( error.status == 403 ){
                             this.error = "Vous n'avez pas l'autorisation d'accès à ces informations.";
                         } else {
