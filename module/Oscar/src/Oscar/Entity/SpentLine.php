@@ -518,6 +518,12 @@ class SpentLine
         $this->dateServiceFait = $dateServiceFait;
     }
 
+    public function __toString()
+    {
+        return sprintf("%s : %s (cpt: %s)", $this->getId(), $this->getMontant(), $this->getCompteGeneral());
+    }
+
+
     public function getDetailsHeaders(){
         return [
                 "ID(oscar)",

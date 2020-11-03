@@ -228,6 +228,9 @@
                                     @detailsline="handlerDetailsLine"
                             />
                         </div>
+                        <pre>
+                            {{ byMasse.datas }}
+                        </pre>
                     </div>
                 </div>
             </div>
@@ -304,10 +307,12 @@
                     for (let s in this.spentlines.spents) {
                         let line = this.spentlines.spents[s];
                         let masse = line.masse;
+
                         if( masse == '1' ) masse = 'recettes';
                         if( masse == '0' ) masse = 'ignorés';
                         let numPiece = line.numPiece;
-                        console.log(numPiece, line);
+
+
 
                         if( !out.datas.hasOwnProperty(masse) ){
                             console.log(masse, "non trouvée");
@@ -386,14 +391,16 @@
                 affectations[compte.codeFull] = compte.annexe;
                 this.editCompte = null;
                 this.pendingMsg = "Modification de la masse pour " + compte.codeFull;
-
+                console.log(this.pendingMsg);
 
                 this.$http.post(this.urlSpentAffectation, {'affectation': affectations }).then(
                     success => {
+                        console.log("OK", success);
                         this.editCompte = null;
                         this.fetch();
                     },
                     error => {
+                        console.log("ERROR", error);
                         if( error.status == 403 ){
                             this.error = "Vous n'avez pas l'autorisation d'accès à ces informations.";
                         } else {

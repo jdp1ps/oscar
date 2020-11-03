@@ -75,6 +75,9 @@ class SpentTypeGroup implements ITrackable
      */
     public function getAnnexe()
     {
+        if( $this->getBlind() ){
+            return "0";
+        }
         return $this->annexe;
     }
 

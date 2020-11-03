@@ -736,19 +736,25 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 /** @var SpentTypeGroup $spentType */
                 $spentType = $this->getSpentTypeRepository()->findOneByCode($infos['code']);
             } else {
+                $this->getLoggerService()->error("Le compte $codeCompteFull n'existe pas dans le plan comptable.");
                 throw new OscarException("Le compte $codeCompteFull n'existe pas dans le plan comptable.");
             }
 
             if( $compteAffectation == '1' ){
                 // Recette / Ignorer
+                $spentType->setBlind(false);
                 $spentType->setAnnexe($compteAffectation);
             }
             elseif ( $compteAffectation == '0' ){
+                $spentType->setAnnexe('0');
                 $spentType->setBlind(true);
             }
             elseif ( $compteAffectation == '' ){
+                $this->getLoggerService()->error("Erreur d'affectation pour $codeCompteFull (valeur nulle).");
+                throw new OscarException("Erreur d'affectation (valeur nulle)");
             }
             else {
+                $spentType->setBlind(false);
                 $spentType->setAnnexe($compteAffectation);
             }
             $this->getEntityManager()->flush($spentType);
@@ -990,13 +996,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         foreach ( $spents as $spent) {
             $compte = $this->getCompte($spent->getCompteGeneral());
             $comptes[$spent->getCompteGeneral()] = $compte;
-            $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
+            $masse = $masseGroup = $compte['annexe'] != '' ? $compte['annexe'] : $compte['masse_inherit'];
             $type = $this->getTypeByCode($spent->getCompteGeneral());
             $spentArray = $spent->toArray();
             $spentArray['masse'] = $masse;
             $spentArray['compte'] = $compte['code'] . ' : ' . $compte['label'];
             $spentArray['type'] = $type;
-
             $array[] = $spentArray;
         }
         return [
