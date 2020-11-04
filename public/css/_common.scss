@@ -584,7 +584,7 @@
 }
 
 html body {
-  background-image: url($bg-image) !important;;
+  background-image: url($bg-image);
   background-size: cover;
   background-attachment: fixed;
   background-position: bottom center;
@@ -2103,7 +2103,7 @@ $colorSelected: #0088cc;
     position: absolute;
     background: white;
     z-index: 2;
-    box-shadow: 0 .5em .3em rgba(0,0,0,.3em);
+    box-shadow: 0 .5em .3em rgba(0,0,0,.3);
   }
    .item {
     transition: all .25s;

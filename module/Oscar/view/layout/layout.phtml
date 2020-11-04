@@ -28,7 +28,7 @@ $this->headScript();
         <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/animation.css' ?>">
 
         <link rel="stylesheet" href="<?= $this->basePath() . '/css/'. $this->options()->theme() .'.css' ?>">
-        <?php if( file_exists(__DIR__.'/../../../public/css/custom/custom.css')): ?>
+        <?php if( file_exists(__DIR__.'/../../../../public/custom/custom.css')): ?>
         <link rel="stylesheet" href="<?= $this->basePath() . '/custom/custom.css' ?>">
         <?php endif; ?>
         <?php /* echo $this->headLink(array(
