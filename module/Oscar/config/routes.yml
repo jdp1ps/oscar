@@ -1104,18 +1104,6 @@ contractdocument:
                 route: /atomiser/:id
                 defaults:
                     action: delete
-################################################################################
-# GESTION de l'ACTIVITÉ
-activity:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /activity
-        defaults:
-            controller: LogActivity
-            action: index
-
-
 
 ################################################################################
 ### Relation : Organization<>Activité de recherche

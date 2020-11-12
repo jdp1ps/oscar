@@ -12,6 +12,11 @@ use Oscar\Utils\UnicaenDoctrinePaginator;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
+/**
+ * Class ActivityLogController
+ * @package Oscar\Controller
+ * @deprecated
+ */
 class ActivityLogController extends AbstractOscarController
 {
     /**

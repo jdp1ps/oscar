@@ -306,14 +306,6 @@ return array(
                 ],
 
                 ////////////////////////////////////////////////////////////////
-                // LOGS
-                ////////////////////////////////////////////////////////////////
-                [ 'controller' =>   'LogActivity',
-                    'action' => ['index'],
-                    'roles' => ['Administrateur'],
-                ],
-
-                ////////////////////////////////////////////////////////////////
                 // DROITS
                 ////////////////////////////////////////////////////////////////
                 [
@@ -822,9 +814,6 @@ return array(
 
     // On doit déclaré ici les Controlleurs 'invoquables'
     'controllers' => array(
-        'invokables' => array(
-            'LogActivity' => \Oscar\Controller\ActivityLogController::class,
-        ),
         'factories' => [
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
