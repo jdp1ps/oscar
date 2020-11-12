@@ -1919,8 +1919,8 @@ class Activity implements ResourceInterface
         $datas['versementPrevuMontant'] = $versementsPrevus;
         $datas['versementPrevuDate'] = $versementsPrevusDate;
 
-        $datas['versement-effectue-montant'] = $versementsPrevus;
-        $datas['versement-effectue-date'] = $versementsPrevusDate;
+        $datas['versement-effectue-montant'] = $versementsEffectues;
+        $datas['versement-effectue-date'] = $versementsEffectuesDate;
 
 
         return $datas;
@@ -2020,7 +2020,7 @@ class Activity implements ResourceInterface
             }
         }
 
-        return $this->totalPaymentReceived;
+        return $this->totalEcartPaiement;
     }
 
     private $justificatifEcartPaiement;
