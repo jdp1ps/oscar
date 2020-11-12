@@ -941,7 +941,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $paramID = $this->params()->fromQuery('ids', '');
         }
 
-
         if (!$paramID) {
             return $this->getResponseBadRequest();
         }
@@ -963,9 +962,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $organizations);
 
         $formatter = new ActivityPaymentFormatter();
-        $formatter->setRolesOrganizations($this->getOscarConfigurationService()->getConfiguration('export.payments.organizations'));
-        $formatter->setRolesPerson($this->getOscarConfigurationService()->getConfiguration('export.payments.persons'));
-        $formatter->setSeparator($this->getOscarConfigurationService()->getConfiguration('export.payments.separator'));
+
+        $options = $this->getOscarConfigurationService()->getPayementsConfig();
+
+        $formatter->setRolesOrganizations($options['organizations']);
+        $formatter->setRolesPerson($options['persons']);
+        $formatter->setSeparator($options['separator']);
 
         $csv = [];
 
@@ -976,13 +978,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $handler = fopen($filePath, 'w');
 
 
-        $delimiter = ";";
+        $delimiter = "\t";
         $enclosure = "\"";
-        fputcsv($handler, $formatter->csvHeaders());
+        fputcsv($handler, $formatter->csvHeaders(), $delimiter);
 
         /** @var ActivityPayment $payment */
         foreach ($payments as $payment) {
-            fputcsv($handler, $formatter->format($payment));
+            fputcsv($handler, $formatter->format($payment), $delimiter);
         }
 
         fclose($handler);

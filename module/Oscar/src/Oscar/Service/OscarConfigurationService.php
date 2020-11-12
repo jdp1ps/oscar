@@ -74,6 +74,15 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $config;
     }
 
+    public function getPayementsConfig(){
+        return $this->getOptionalConfiguration('payements', [
+            'separator' => '$$',
+            'persons' => '',
+            'organizations' => ''
+        ]);
+    }
+
+
     /**
      * @param $key
      * @param null $defaultValue

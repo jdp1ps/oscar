@@ -78,20 +78,20 @@ class ActivityPaymentFormatter extends AbstractCSVFormatter implements IFormatte
 
     public function csvHeaders(){
         $headers = [
-            'ID du versement',
+            "ID du versement",
             "PFI de l'activité",
             "Montant de l'activité",
             "N°Oscar d'activité",
-            'Intitulé de l\'Activité',
+            "Intitulé de l'Activité",
             "Début de l'activité",
             "Fin de l'activité",
-            'N° de pièce du versement',
-            'Montant du versement',
-            'Devise du versement',
-            'Commentaire du versement',
-            'État du versement',
-            'Date prévue du versement',
-            'Date réalisé du versement'
+            "N° de pièce du versement",
+            "Montant du versement",
+            "Devise du versement",
+            "Commentaire du versement",
+            "État du versement",
+            "Date prévue du versement",
+            "Date réalisé du versement"
         ];
 
         // Entêtes des organisation
@@ -179,6 +179,6 @@ class ActivityPaymentFormatter extends AbstractCSVFormatter implements IFormatte
             }
         }
 
-        return $datasReturned;
+        return array_values($datasReturned);
     }
 }
