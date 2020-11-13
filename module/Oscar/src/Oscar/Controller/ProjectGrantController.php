@@ -1776,7 +1776,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $action = $this->params()->fromPost('action', null);
         $activity = $this->getActivityService()->getActivityById($this->params()->fromRoute('id'));
-        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $activity);
+        $this->getOscarUserContextService()->check(Privileges::DEPENSE_DETAILS, $activity);
         $msg = "";
         $error = "";
 

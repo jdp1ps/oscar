@@ -228,7 +228,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }
 
-        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $activity);
+        $this->getOscarUserContextService()->check(Privileges::DEPENSE_DETAILS, $activity);
 
         try {
             if( !$activity->getCodeEOTP() ){

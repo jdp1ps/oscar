@@ -129,6 +129,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const PERSON_SHOW_INM = 'PERSON-SYNC_LDA';
 
     const DEPENSE_SHOW = 'DEPENSE-SHOW';
+    const DEPENSE_DETAILS = 'DEPENSE-DETAILS';
     const DEPENSE_SYNC = 'DEPENSE-SYNC';
     const DEPENSE_DOWNLOAD = 'DEPENSE-DOWNLOAD';
     const DEPENSE_RECETTES = 'DEPENSE-RECETTES';

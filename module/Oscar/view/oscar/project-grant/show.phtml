@@ -459,15 +459,8 @@
                         })
                     </script>
                 <nav>
+                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DETAILS, $entity)): ?>
                     <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
-                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SYNC, $entity)): ?>
-                        <form action="<?= $this->url('contract/list-spent', ['id' => $entity->getId()]) ?>" method="post" class="form-inline">
-                            <input type="hidden" name="action" value="update" />
-                            <button type="submit" class="btn btn-primary">
-                                <i class="icon-file-excel"></i>
-                                Mettre à jour les données depuis SIFAC
-                            </button>
-                        </form>
                     <?php endif; ?>
                 </nav>
             </section>
