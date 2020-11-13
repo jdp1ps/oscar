@@ -608,6 +608,14 @@
     "fullcode": "DEPENSE-SHOW"
   },
 
+  "DEPENSE-DETAILS": {
+    "category_id": 9,
+    "spot": 7,
+    "code": "DETAILS",
+    "libelle": "Voir le détail des d\u00e9penses",
+    "fullcode": "DEPENSE-DETAILS"
+  },
+
   "DEPENSE-SYNC": {
     "category_id": 9,
     "spot": 7,
