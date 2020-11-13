@@ -145,7 +145,7 @@
                             <td style="text-align: right">{{ spentlines.synthesis[key].total | money}}</td>
                         </tr>
                         <tr v-if="spentlines.synthesis['N.B'].total != 0">
-                            <th><small><i class="icon-attention"></i> Hors-masse</small><a href="repport-nb" class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</a></th>
+                            <th><small><i class="icon-attention"></i> Hors-masse</small><a href="#repport-nb" class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</a></th>
                             <td style="text-align: right">{{ spentlines.synthesis['N.B'].total | money}}</td>
                         </tr>
                         </tbody>
