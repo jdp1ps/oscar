@@ -9,6 +9,7 @@
 namespace Oscar\Command;
 
 
+use Doctrine\ORM\NoResultException;
 use Moment\Moment;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
@@ -67,7 +68,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
         $all = $input->getArgument(self::ARG_ALL);
 
         /// OPTIONS and PARAMETERS
-        $declarerId = $input->getOption(self::OPT_DECLARER);
+        $declarerLogin = $input->getOption(self::OPT_DECLARER);
         $processDate = $input->getOption(self::OPT_PROCESSDATE);
 
         if( $processDate ){
@@ -76,14 +77,27 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $processDate = new \DateTime();
         }
 
-        if( $all == false && $declarerId == null ){
+        $io->writeln("Date effective de la relance : <bold>". $processDate->format('D d M Y') ."</bold>");
+        //die();
+
+        if( $all == false && $declarerLogin == null ){
             $io->writeln("Utiliser l'option --declarant=ID");
             $this->declarersList($input, $output);
             return;
         }
 
         if( $all != 'all' ){
-            $personId = $this->getPersonService()->getPersonByLdapLogin($all)->getId();
+            try {
+                $person = $this->getPersonService()->getPersonByLdapLogin($declarerLogin);
+                if( !$person ){
+                    throw new \Exception("Nop !");
+                }
+                $personId = $person->getId();
+
+            } catch (NoResultException $e){
+                $io->error("Impossible de charger la personne à partir de son identifiant de connexion : $declarerLogin");
+                return;
+            }
             $declarerId = $personId;
             $all = false;
         }
@@ -96,6 +110,9 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $declarerPeriod = DateTimeUtils::getPeriodStrFromDateStr($final);
         }
 
+        $io->writeln("Pour la période : <bold>". $declarerPeriod ."</bold>.");
+
+
         $do = false;
 
         if( $all == true ){
@@ -103,6 +120,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $out = [];
             /** @var Person $declarer */
             foreach ($declarants['persons'] as $personId=>$datas) {
+                //$io->text("Traitement pour " . $declarants)
                 try {
                     $result = $this->recallDeclarer($personId, $declarerPeriod, $io, $processDate);
                 } catch (\Exception $e) {
@@ -110,8 +128,14 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
                 }
             }
         } else {
-            $result = $this->recallDeclarer($declarerId, $declarerPeriod, $io, $processDate);
+            try {
+                $result = $this->recallDeclarer($personId, $declarerPeriod, $io, $processDate);
+            } catch (\Exception $e) {
+                $io->warning($e->getMessage());
+            }
         }
+        $io->comment("Opération terminée");
+        return;
     }
 
     protected function recallDeclarer($declarerId, $declarerPeriod, SymfonyStyle $io, $processDate = null)
@@ -129,12 +153,14 @@ class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
             $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
             $io->writeln(sprintf("Mail requis : <options=bold>%s</>", $result['mailRequired'] ? "Oui" : "Non"));
             $io->writeln(sprintf("Mail envoyé : <options=bold>%s</>", $result['mailSend'] ? "Oui" : "Non"));
+            $io->writeln(sprintf("Dernier envoi : <options=bold>%s</>", $result['lastSend']));
+            $io->writeln(sprintf("Prochain envoi : <options=bold>%s</>", $result['nextSend']));
             $io->writeln(sprintf("Status : <options=bold>%s</>", $result['status']));
         }
         else {
-
+            $io->warning("Pas de données pour $declarer à la période $declarerPeriod");
         }
-
+        return;
     }
 
     /**

@@ -2596,7 +2596,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         if (!in_array($period, $periods)) {
             $this->getLoggerService()->info("Pas de déclaration pour la période $period");
             throw new ConnectorException("$declarer n'est pas déclarant sur un projet pour la période $period");
-            return;
         }
 
         $validations = $this->getValidationPeriodRepository()->getValidationPeriodForPersonAtPeriod($declarerId, $period);
@@ -2666,8 +2665,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         $declarer = $this->getPersonService()->getPersonById($declarerId);
+
         $result = $this->getPersonRecallDeclarationPeriod($declarerId, $period);
+
         $result['mailSend'] = false;
+        $result['lastSend'] = "-";
+        $result['nextSend'] = "-";
 
         /** @var RecallDeclarationRepository $recallDeclarationRepository */
         $recallDeclarationRepository = $this->getRecallDeclarationRepository();
@@ -2681,11 +2684,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $declarerSecondDay = $this->getOscarConfigurationService()->getDeclarersRelanceJour2();
         $declarerFirstMsg = $this->getOscarConfigurationService()->getDeclarersRelance1();
         $declarerSecondMsg = $this->getOscarConfigurationService()->getDeclarersRelance2();
+        $message = $declarerFirstMsg;
 
         $recalls = $recallDeclarationRepository->getRecallDeclarationsPersonPeriod($declarerId, $periodYear, $periodMonth);
+        $result['nbrRelance'] = count($recalls);
 
         // Premier rappel
         if( count($recalls) == 0 ){
+
             // On test si le jour d'envois est valide (Valeur de J1)
             $processDay = (int)$processDate->format('d');
 
@@ -2695,9 +2701,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $this->getEntityManager()->persist($recallSend);
                 $recallSend->setStartProcess($processDate);
             } else {
-                return null;
+                $result['needSend'] = false;
+                $result['message'] = "Le jour de relance n'est pas encore atteind";
             }
         }
+
+        // Au-delà du premier rappel
         elseif (count($recalls) == 1 ){
             /** @var RecallDeclaration $recallSend */
             $recallSend = $recalls[0];
@@ -2705,22 +2714,22 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             // Date d'envois
             $lastSend = $recallSend->getLastSend();
             $daySend = (int) $lastSend->format('d');
-            echo "Dernier envoi jour : " . $daySend . "\n";
-
             $nextSendDay = $declarerSecondDay + $daySend;
-            echo "Prochain envoi : $nextSendDay\n";
+            $message = $declarerSecondMsg;
 
+            $result['lastSend'] = "Jour $daySend";
+            $result['nextSend'] = "Jour $nextSendDay";
 
             /** @var \DateInterval $interval */
             $interval = $lastSend->diff($processDate);
             $effectifDaysSinceLastSend = $interval->days;
-            echo "JOURS écoulés depuis le dernier envois : " . $effectifDaysSinceLastSend . "\n";
+            $result['daysSinceLastSend'] = "Jour $effectifDaysSinceLastSend";
 
             if( $effectifDaysSinceLastSend >= $declarerSecondDay ){
-                echo "Envoi de la relance";
                 $result['needSend'] = true;
             } else {
-                return null;
+                $result['needSend'] = false;
+                $result['message'] = "En attente avant la prochaine relance";
             }
         } else {
             throw new OscarException("Doublon présent pour le système de contrôle des rappels pour $declarer");
@@ -2728,7 +2737,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
 
         if ($result['needSend']) {
-            $body = $declarerSecondMsg;
+            $body = $message;
 
             // Replace
             $find       = [ "{PERSON}",     "{PERIOD}"];
