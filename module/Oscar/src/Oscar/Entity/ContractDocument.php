@@ -194,7 +194,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'fileName' => $this->getFileName(),
             'fileSize' => $this->getFileSize(),
             'typeMime' => $this->getFileTypeMime(),
-            'dateUpload' => $this->getDateUpdoad()->format('Y-m-d'),
+            'dateUpload' => $this->getDateUpdoad()->format('Y-m-d H:i:s'),
             'dateDeposit' => $this->getDateDeposit() ? $this->getDateDeposit()->format('Y-m-d') : null,
             'dateSend' => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
             'extension' => $this->getExtension(),
