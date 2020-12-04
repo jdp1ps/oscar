@@ -71,7 +71,7 @@ cd /etc/systemd/system
 ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
 
 # On active le service
-systemctl status oscarworker.service
+systemctl enable oscarworker.service
 # Ancienne syntaxe avec SYSTEM : service enable oscarworker
 
 
