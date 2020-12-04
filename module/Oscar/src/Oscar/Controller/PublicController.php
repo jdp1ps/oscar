@@ -172,9 +172,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
      */
     public function indexAction()
     {
-        $this->getLoggerService()->debug("indexAction");
         $person = null;
-
         $validations = [];
         $isValidator = false;
         $person = $this->getOscarUserContextService()->getCurrentPerson();

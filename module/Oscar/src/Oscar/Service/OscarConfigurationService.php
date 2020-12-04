@@ -9,6 +9,7 @@
 namespace Oscar\Service;
 
 
+use Monolog\Logger;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Import\Data\DataStringArray;
@@ -80,6 +81,20 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             'persons' => '',
             'organizations' => ''
         ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoggerFilePath() :string {
+        return $this->getOptionalConfiguration('log_path', __DIR__.'/../../../../../logs/oscar.log');
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoggerLevel() :int {
+        return $this->getOptionalConfiguration('log_level', Logger::WARNING);
     }
 
 
