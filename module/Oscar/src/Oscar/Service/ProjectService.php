@@ -8,6 +8,7 @@
  */
 namespace Oscar\Service;
 
+use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
@@ -370,8 +371,10 @@ class ProjectService implements UseServiceContainer
             $this->getEntityManager()->remove($project);
             $this->getEntityManager()->flush($project);
             return true;
+        } catch ( ConstraintViolationException $e ) {
+            throw new OscarException("Ce projet contient encore des activités, vous devez les retirer du projet avant pour pouvoir supprimer ce projet.");
         } catch (\Exception $e) {
-            throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $p, $e->getMessage()));
+            throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $project, $e->getMessage()));
         }
     }
 
