@@ -136,6 +136,7 @@ class ConnectorOrganizationREST extends AbstractConnector
             }
         } catch (\Exception $e ){
             $repport->adderror($e->getMessage());
+            throw $e;
         }
 
 
