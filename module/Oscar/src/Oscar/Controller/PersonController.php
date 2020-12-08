@@ -283,7 +283,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
         return ['result' => $output];
     }
-    
+
     public function viewsAction()
     {
         $view = $this->params()->fromQuery('view', 'almoststart');
@@ -305,19 +305,21 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
     public function notificationPersonAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW);
         $id = $this->params()->fromRoute('id');
         $person = $this->getPersonService()->getPerson($id);
         return [
             'person' => $person,
-            'notifications' => $this->getNotificationService()->getAllNotificationsPerson($person->getId())
+            'notifications' => $this->getPersonService()->getNotificationService()->getAllNotificationsPerson($person->getId())
         ];
     }
 
     public function notificationPersonGenerateAction()
     {
         $id = $this->params()->fromRoute('id');
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE);
         $person = $this->getPersonService()->getPerson($id);
-        $this->getNotificationService()->generateNotificationsPerson($person);
+        $this->getPersonService()->getNotificationService()->generateNotificationsPerson($person);
         $this->redirect()->toRoute('person/notification', ['id' => $person->getId()]);
     }
 
