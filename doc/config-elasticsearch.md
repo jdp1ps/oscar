@@ -28,6 +28,14 @@ return array(
 
 > la clef `params` prend bien pour valeur un tableau, contenant un tableau de chaîne avec la liste des noeuds Elastic Search disponibles, dans notre cas il n'y a qu'un seul et unique noeud.
 
+Vous pouvez reconstruire manuellement l'index de recherche avec la commande : 
+
+```bash
+# Reconstruction de l'index de recherche
+php bin/oscar.php activity:search-rebuild
+```
+
+
 
 ## Recherche des personnes
 
@@ -59,7 +67,7 @@ return array(
 
 ```bash
 # Reconstruction de l'index de recherche
-php pubic/index.php oscar persons:search:build
+php bin/oscar.php persons:search-rebuild
 ```
 
 ## Recherche des organisations
@@ -92,6 +100,6 @@ return array(
 
 ```bash
 # Reconstruction de l'index de recherche
-php public/index.php oscar organizations:search:build
+php bin/oscar.php organizations:search-rebuild
 ```
 
