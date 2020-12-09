@@ -99,7 +99,8 @@ requirejs.config({
         "documentsactivity": "oscar/dist/DocumentsActivity",
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
         "rolesadminui": "oscar/dist/RolesAdminUI",
-        "periodfieldsimple": "oscar/dist/PeriodFieldSimple"
+        "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
+        "activitydocument": "oscar/dist/ActivityDocument.umd.min"
     },
     shim: {
         "bootstrap": {

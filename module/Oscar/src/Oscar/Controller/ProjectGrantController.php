@@ -1290,18 +1290,32 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function documentsJsonAction()
     {
         $id = $this->params()->fromRoute('id');
+        $ui = $this->params()->fromQuery('ui');
+
+        if( $ui || !$this->isAjax() ){
+            $view = new ViewModel([
+                'composant' => 'activitydocument',
+                'props' => []
+            ]);
+
+            $view->setTemplate('oscar/generic-vue-debug');
+
+            return $view;
+        }
+
 
         /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        $entity = $this->getActivityService()->getActivityById($id, true);
 
         // Check access
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW,
-            $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity);
         $deletable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
         $uploadable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
         $personShow = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
 
-        $out = [];
+        $out = $this->baseJsonResponse();
+        $datas = [];
+
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson([
@@ -1309,13 +1323,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $this->url()->fromRoute('contractdocument/delete',['id' => $doc->getId()])
                     : false,
                 'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
-                'urlReupload' => $this->url()->fromRoute('contractdocument/upload',
-                        ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId(),
+                'urlReupload' => $uploadable ?
+                    $this->url()->fromRoute('contractdocument/upload', ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId()
+                    : false,
                 'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show',
                     ['id' => $doc->getPerson()->getId()]) : false,
             ]);
-            $out[] = $docDt;
+            $datas[] = $docDt;
         }
+        $out['datas'] = $datas;
 
         return new JsonModel($out);
     }

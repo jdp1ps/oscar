@@ -186,8 +186,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $activity = $this->getActivityRepository()->find($id);
         if (!$activity) {
-            if (!$throw)
-                throw new OscarException("Impossible de charger l'activité");
+            if ($throw === TRUE)
+                throw new OscarException("Impossible de charger l'activité (ID = $id)");
             else
                 return null;
         }
