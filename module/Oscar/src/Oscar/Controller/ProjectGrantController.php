@@ -1303,6 +1303,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $view;
         }
 
+        //return $this->getResponseInternalError("A ERROR TEST");
+
 
         /** @var Activity $entity */
         $entity = $this->getActivityService()->getActivityById($id, true);

@@ -11532,4 +11532,31 @@ pre.alert-danger, pre.alert-info {
   font-size: 0.8em;
 }
 
+.oscar-ajax {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-content: center;
+  align-items: center;
+  border: solid black thin;
+}
+.oscar-ajax.has-error {
+  background: rgba(221, 66, 62, 0.9);
+}
+.oscar-ajax.loading {
+  border-color: #0a3783;
+}
+.oscar-ajax .error-message {
+  color: white;
+}
+
+.oscar-ajax-content {
+  text-align: center;
+}
+
 /*# sourceMappingURL=oscar.css.map */

@@ -1,5 +1,10 @@
 <template>
-    <section>
+    <section style="position: relative; background: rgba(255,0,0,.1)">
+        <ajax-oscar :oscar-remote-data="remoterState" />
+
+        <pre>{{ remoteState }}</pre>
+        <button @click="remoterState.loading = !remoterState.loading">TEST REMOTE</button>
+
         <div class="overlay" v-if="deleteData">
             <div class="overlay-content">
                 <h2>
@@ -10,9 +15,11 @@
                     <i class="icon-attention-1"></i>
                     Souhaitez-vous supprimer le fichier <strong>{{ deleteData.fileName }}</strong> ?
                 </p>
+
                 <button class="btn btn-danger" @click="deleteData = null">
                     <i class="icon-cancel-alt"></i> Annuler
                 </button>
+
                 <a class="btn btn-success" :href="deleteData.urlDelete">
                     <i class="icon-valid"></i> Confirmer
                 </a>
@@ -40,13 +47,18 @@
             </div>
         </div>
 
-        <article class="card xs" v-for="document in documentsPacked">
+        <article class="card xs" v-for="document in documentsPacked" :key="document.id">
             <div class="card-title">
                 <i class="picto icon-doc" :class="'doc' + document.extension"></i>
 
                 <template v-if="document.editmode">
                     <select @change="changeTypeDocument(document, $event)" @blur="document.editmode = false">
-                        <option :value="key" v-for="(documentType, key) in documentTypes" :selected="document.categoryText == documentType">{{ documentType }}</option>
+                        <option v-for="(documentType, key) in documentTypes"
+                                :value="key"
+                                :key="documentType.id"
+                                :selected="document.categoryText == documentType">
+                            {{ documentType }}
+                        </option>
                     </select>
                 </template>
                 <template v-else>
@@ -74,7 +86,7 @@
                     <i class="icon-angle-up" v-show="document.explode"></i>
                 </div>
                 <div v-if="document.previous.length" v-show="document.explode">
-                    <article v-for="sub in document.previous" class="subdoc text-highlight">
+                    <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
                         <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
 
                         <strong>{{ sub.fileName }}</strong>
@@ -112,10 +124,20 @@
 </template>
 <script>
 
+    import AjaxOscar from "./remote/AjaxOscar";
+    import OscarRemoteData from "./remote/OscarRemoteData";
+
+    // test
+    let oscarRemoteData = new OscarRemoteData();
+
+    function flashMessage(){
+        // TODO
+    }
+
     export default {
 
-        setup(){
-            console.log("Setup")
+        components: {
+            "ajax-oscar": AjaxOscar
         },
 
         props: {
@@ -133,7 +155,8 @@
                 loading: true,
                 sortField: 'dateUpload',
                 sortDirection: -1,
-                editable: true
+                editable: true,
+                remoterState: oscarRemoteData.state
             }
         },
 
@@ -143,13 +166,17 @@
              * @returns {Array}
              */
             documentsPacked(){
-                var out = this.documents.sort( function(a,b) {
-                    if( a[this.sortField] < b[this.sortField] )
-                        return -1 * this.sortDirection;
-                    if( a[this.sortField] > b[this.sortField] )
-                        return 1 * this.sortDirection;
-                    return 0;
-                }.bind(this));
+                let out = [];
+                if( this.documents ){
+                    let documents = this.documents;
+                    out = documents.sort(function(a, b) {
+                            if (a[this.sortField] < b[this.sortField])
+                                return -1 * this.sortDirection;
+                            if( a[this.sortField] > b[this.sortField] )
+                                return 1 * this.sortDirection;
+                            return 0;
+                        }.bind(this));
+                };
                 return out;
             }
         },
@@ -172,50 +199,75 @@
             },
 
             changeTypeDocument: function( document, event ){
-                var newType = $(event.target.selectedOptions[0]).text();
 
-                $.post(this.urlDocumentType, {
-                    documentId: document.id,
-                    type: newType
-                }).then(ok => {
-                    flashMessage('success', 'Le document a bien été modifié');
-                    document.categoryText = newType;
-                    document.editMode = false;
-                    this.$forceUpdate();
-                    //this.$forceUpdate();
-                }, error => {
-                    flashMessage('error', 'Erreur' + error.responseText);
-                    document.editMode = false;
+                /***
+                 oscarRemoteData
+                 .setPendingMessage("Chargement des documents")
+                 .setErrorMessage("Impossible de charger les documents")
+                 .performGet(this.url, this.handlerSuccess);
+                 */
+
+                var newType = event.target.selectedOptions[0].text;
+
+                oscarRemoteData
+                    .setPendingMessage("Modification du type de document")
+                    .setErrorMessage("Impossible de modifier le type de document")
+                    .performPost(this.urlDocumentType, {
+                        documentId: document.id,
+                        type: newType
+
+                    }, (response) => {
+                        // Modification du type
+                        document.categoryText = newType;
+                        document.editMode = false;
+                        document.editMode = false;
+                        this.$forceUpdate();
+
+                    }, () => {
+                        document.editMode = false;
+                        this.$forceUpdate();
+                    })
+
+                // this.$http.post(this.urlDocumentType, {
+                //     documentId: document.id,
+                //     type: newType
+                // }).then(ok => {
+                //     flashMessage('success', 'Le document a bien été modifié', ok);
+                //     document.categoryText = newType;
+                //     document.editMode = false;
+                //     this.$forceUpdate();
+                // }, error => {
+                //     flashMessage('error', 'Erreur' + error.responseText);
+                //     document.editMode = false;
+                // });
+            },
+
+            handlerSuccess(success){
+                let data = success.data.datas;
+                let documentsOrdered = [];
+                let documents = {};
+
+                data.forEach(function(doc){
+                    doc.categoryText = doc.category ? doc.category.label : "";
+                    doc.editmode = false;
+                    doc.explode = false;
+                    var filename = doc.fileName;
+                    if( ! documents[filename] ){
+                        documents[filename] = doc;
+                        documents[filename].previous = [];
+                        documentsOrdered.push(doc);
+                    } else {
+                        documents[filename].previous.push(doc);
+                    }
                 });
+                this.documents = documentsOrdered;
             },
 
             fetch(){
-                this.$http.get(this.url).then(
-                    ok => {
-                        let data = ok.data.datas;
-                        let documentsOrdered = [];
-                        let documents = {};
-
-                        data.forEach(function(doc){
-                            doc.categoryText = doc.category ? doc.category.label : "";
-                            doc.editmode = false;
-                            doc.explode = false;
-                            var filename = doc.fileName;
-                            if( ! documents[filename] ){
-                                documents[filename] = doc;
-                                documents[filename].previous = [];
-                                documentsOrdered.push(doc);
-                            } else {
-                                documents[filename].previous.push(doc);
-                            }
-                        });
-                        this.documents = documentsOrdered;
-                    },
-                    ko => {
-                        console.log("ERROR", ko);
-                    }
-                )
-
+                oscarRemoteData
+                    .setPendingMessage("Chargement des documents")
+                    .setErrorMessage("Impossible de charger les documents")
+                    .performGet(this.url, this.handlerSuccess);
             }
         },
 
