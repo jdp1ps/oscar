@@ -192,6 +192,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'version' => $this->getVersion(),
             'information' => $this->getInformation(),
             'fileName' => $this->getFileName(),
+            'basename' => preg_replace('/(.*)(\.[\w]*)/','$1', $this->getFileName()),
             'fileSize' => $this->getFileSize(),
             'typeMime' => $this->getFileTypeMime(),
             'dateUpload' => $this->getDateUpdoad()->format('Y-m-d H:i:s'),

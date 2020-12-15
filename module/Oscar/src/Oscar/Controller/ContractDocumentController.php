@@ -177,7 +177,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             /** @var ContractDocument $document */
             $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($request->getPost('documentId'));
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $document->getGrant());
-            $type = $this->getEntityManager()->getRepository(TypeDocument::class)->findOneBy(['label' => $request->getPost('type')]);
+            $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($request->getPost('type'));
             if( !$type ){
                 $this->getResponseBadRequest("Type de document invalide");
             } else {

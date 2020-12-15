@@ -195,6 +195,30 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
+     * Retourne la liste des types de documents disponibles pour qualifier les documents dans les activités de
+     * recherche.
+     *
+     * @param bool $asArray
+     * @return array|object[]
+     */
+    public function getTypesDocuments( $asArray = true )
+    {
+        $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
+        if( $asArray ){
+            $documentTypes = [];
+            /** @var TypeDocument $type */
+            foreach ($types as $type) {
+                $documentTypes[$type->getId()] = $type->getLabel();
+            }
+        } else {
+            $documentTypes = $types;
+        }
+        return $documentTypes;
+
+
+    }
+
+    /**
      * Retourne le nombre d'activités total en BDD.
      * @return mixed
      */

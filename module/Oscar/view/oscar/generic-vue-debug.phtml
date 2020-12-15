@@ -27,7 +27,7 @@
 
             new Vue({
                 render: function(h){
-                    return h(Composant, { props: { url: '<?= $_SERVER['REQUEST_URI'] ?>'} });
+                    return h(Composant, { props: <?= $props ? json_encode($props) : '{}' ?> });
                 }
             }).$mount('#app')
         }

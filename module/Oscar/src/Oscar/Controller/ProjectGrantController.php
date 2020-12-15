@@ -1295,7 +1295,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         if( $ui || !$this->isAjax() ){
             $view = new ViewModel([
                 'composant' => 'activitydocument',
-                'props' => []
+                'props' => [
+                    'url' => $_SERVER['REQUEST_URI'],
+                    'documentTypes' => $this->getActivityService()->getTypesDocuments(),
+                    'urlDocumentType' => $this->url()->fromRoute('contractdocument/document-change-type')
+                ]
             ]);
 
             $view->setTemplate('oscar/generic-vue-debug');
@@ -1726,12 +1730,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
 
-        $documentTypes = [];
-
-        /** @var TypeDocument $type */
-        foreach ($this->getEntityManager()->getRepository(TypeDocument::class)->findAll() as $type) {
-            $documentTypes[$type->getId()] = $type->getLabel();
-        }
+        $documentTypes = $this->getActivityService()->getTypesDocuments();
 
         $activity = $this->getProjectGrantService()->getGrant($id);
 

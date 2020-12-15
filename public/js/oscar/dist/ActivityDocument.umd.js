@@ -2293,19 +2293,19 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=43043150&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","background":"rgba(255,0,0,.1)"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),_c('pre',[_vm._v(_vm._s(_vm.remoteState))]),_c('button',{on:{"click":function($event){_vm.remoterState.loading = !_vm.remoterState.loading}}},[_vm._v("TEST REMOTE")]),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),(document.editmode)?[_c('select',{on:{"change":function($event){return _vm.changeTypeDocument(document, $event)},"blur":function($event){document.editmode = false}}},_vm._l((_vm.documentTypes),function(documentType,key){return _c('option',{key:documentType.id,domProps:{"value":key,"selected":document.categoryText == documentType}},[_vm._v(" "+_vm._s(documentType)+" ")])}),0)]:[_c('small',{staticClass:"text-light",on:{"dblclick":function($event){document.editmode = true}}},[_vm._v(_vm._s(document.categoryText)+" ~ ")])],_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])],2),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger le fichier ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" supprimer le fichier ")])])])])})],2)}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=3378e2f0&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),(_vm.editData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Modification du document "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.editData = null}}},[_vm._v("X")])]),_c('label',{attrs:{"for":"typedocument"}},[_vm._v("Type de document")]),_c('div',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.editData.documentype_id),expression:"editData.documentype_id"}],attrs:{"name":"type","id":"typedocument"},on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.editData, "documentype_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0])}}},_vm._l((_vm.documentTypes),function(t,id){return _c('option',{key:id,domProps:{"value":id}},[_vm._v(_vm._s(t))])}),0)]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.editData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.performEdit()}}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Enregistrer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),_c('small',{staticClass:"text-light"},[_vm._v(_vm._s(document.categoryText)+" ~ ")]),_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])]),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-upload-outline"}),_vm._v(" Télécharger ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")]),_c('a',{staticClass:"btn btn-xs btn-default",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.handlerEdit(document)}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" Modifier ")])])])])})],2)}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=43043150&
+// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=3378e2f0&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=223cde0c&scoped=true&
-var AjaxOscarvue_type_template_id_223cde0c_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("CLOSE")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('i',[_vm._v(_vm._s(_vm.oscarRemoteData.error))])]):_vm._e()])])}
-var AjaxOscarvue_type_template_id_223cde0c_scoped_true_staticRenderFns = []
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
+var AjaxOscarvue_type_template_id_3372c719_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"1em","right":"1em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('i',[_vm._v(_vm._s(_vm.oscarRemoteData.error))])]):_vm._e()])])}
+var AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=223cde0c&scoped=true&
+// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=script&lang=js&
 //
@@ -2448,11 +2448,11 @@ function normalizeComponent (
 
 var component = normalizeComponent(
   remote_AjaxOscarvue_type_script_lang_js_,
-  AjaxOscarvue_type_template_id_223cde0c_scoped_true_render,
-  AjaxOscarvue_type_template_id_223cde0c_scoped_true_staticRenderFns,
+  AjaxOscarvue_type_template_id_3372c719_scoped_true_render,
+  AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns,
   false,
   null,
-  "223cde0c",
+  "3372c719",
   null
   
 )
@@ -2520,6 +2520,7 @@ class OscarRemoteData_OscarRemoteData {
     }
 
     performPost(url, datas, handlerResponse = null, handlerError = null){
+        console.log("performPost", url, datas );
         this.state.loading = true;
         this.getAxiosInstance().post(url, datas)
             .then( response => {
@@ -2677,7 +2678,38 @@ class OscarRemoteData_OscarRemoteData {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
+/******************************************************************************************************************/
+/* ! DEVELOPPEUR
+Depuis la racine OSCAR :
+
+cd front
+
+Pour compiler en temps réél :
+node node_module/.bin/gulp activityDocumentWatch
+
+Pour compiler :
+node node_module/.bin/gulp activityDocument
+
+ */
 
 
 
@@ -2706,6 +2738,7 @@ function flashMessage(){
             formData: null,
             error: null,
             deleteData: null,
+            editData: null,
             documents: [],
             loading: true,
             sortField: 'dateUpload',
@@ -2753,48 +2786,28 @@ function flashMessage(){
             return compare == this.sortField ? "active" : "";
         },
 
-        changeTypeDocument: function( document, event ){
+        handlerEdit(document){
+            console.log(document);
+            this.editData = {
+                'documentype_id': document.category.id,
+                'basename': document.basename,
+                'document': document
+            };
+        },
 
-            /***
-             oscarRemoteData
-             .setPendingMessage("Chargement des documents")
-             .setErrorMessage("Impossible de charger les documents")
-             .performGet(this.url, this.handlerSuccess);
-             */
-
-            var newType = event.target.selectedOptions[0].text;
-
+        performEdit(){
+            let documentId = this.editData.document.id;
+            let newType = this.editData.documentype_id;
+            this.editData = null;
+            let formData = new FormData();
+            formData.append('documentId', documentId);
+            formData.append('type', newType);
             oscarRemoteData
                 .setPendingMessage("Modification du type de document")
                 .setErrorMessage("Impossible de modifier le type de document")
-                .performPost(this.urlDocumentType, {
-                    documentId: document.id,
-                    type: newType
-
-                }, (response) => {
-                    // Modification du type
-                    document.categoryText = newType;
-                    document.editMode = false;
-                    document.editMode = false;
-                    this.$forceUpdate();
-
-                }, () => {
-                    document.editMode = false;
-                    this.$forceUpdate();
-                })
-
-            // this.$http.post(this.urlDocumentType, {
-            //     documentId: document.id,
-            //     type: newType
-            // }).then(ok => {
-            //     flashMessage('success', 'Le document a bien été modifié', ok);
-            //     document.categoryText = newType;
-            //     document.editMode = false;
-            //     this.$forceUpdate();
-            // }, error => {
-            //     flashMessage('error', 'Erreur' + error.responseText);
-            //     document.editMode = false;
-            // });
+                .performPost(this.urlDocumentType, formData, (response) => {
+                    this.fetch();
+                });
         },
 
         handlerSuccess(success){
@@ -2804,8 +2817,7 @@ function flashMessage(){
 
             data.forEach(function(doc){
                 doc.categoryText = doc.category ? doc.category.label : "";
-                doc.editmode = false;
-                doc.explode = false;
+                doc.explode = true;
                 var filename = doc.fileName;
                 if( ! documents[filename] ){
                     documents[filename] = doc;

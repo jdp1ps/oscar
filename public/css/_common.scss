@@ -5349,12 +5349,12 @@ pre.alert-danger, pre.alert-info {
   display: flex;
   align-content: center;
   align-items: center;
-  border: solid black thin;
+
   &.has-error {
     background: rgba($colorRed, .9);
   }
   &.loading {
-    border-color: #0a3783;
+
   }
   .error-message {
     color: white;
@@ -5362,4 +5362,5 @@ pre.alert-danger, pre.alert-info {
 }
 .oscar-ajax-content {
   text-align: center;
+  width: 100%;
 }

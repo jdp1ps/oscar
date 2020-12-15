@@ -1,10 +1,6 @@
 <template>
-    <section style="position: relative; background: rgba(255,0,0,.1)">
+    <section style="position: relative; min-height: 100px">
         <ajax-oscar :oscar-remote-data="remoterState" />
-
-        <pre>{{ remoteState }}</pre>
-        <button @click="remoterState.loading = !remoterState.loading">TEST REMOTE</button>
-
         <div class="overlay" v-if="deleteData">
             <div class="overlay-content">
                 <h2>
@@ -25,6 +21,39 @@
                 </a>
             </div>
         </div>
+
+        <div class="overlay" v-if="editData">
+            <div class="overlay-content">
+                <h2>
+                    Modification du document
+                    <span class="overlay-closer" @click="editData = null">X</span>
+                </h2>
+
+                <label for="typedocument">Type de document</label>
+                <div>
+                    <select name="type" id="typedocument" v-model="editData.documentype_id">
+                        <option :value="id" v-for="t, id in documentTypes" :key="id">{{ t }}</option>
+                    </select>
+                </div>
+
+                <!--
+                <label for="filename">Nom du fichier</label>
+                <p class="help">
+                    Il s'agit du nom du fichier par défaut lors du téléchargement. Le nom d'archivage ne sera pas modifié.
+                </p>
+                <input type="text" id="filename" class="form-control" v-model="editData.basename" />
+                -->
+
+                <button class="btn btn-danger" @click="editData = null">
+                    <i class="icon-cancel-alt"></i> Annuler
+                </button>
+
+                <a class="btn btn-success" href="#" @click.prevent="performEdit()">
+                    <i class="icon-valid"></i> Enregistrer
+                </a>
+            </div>
+        </div>
+
         <div>
             <div class="oscar-sorter">
                 <i class=" icon-sort"></i>
@@ -50,22 +79,7 @@
         <article class="card xs" v-for="document in documentsPacked" :key="document.id">
             <div class="card-title">
                 <i class="picto icon-doc" :class="'doc' + document.extension"></i>
-
-                <template v-if="document.editmode">
-                    <select @change="changeTypeDocument(document, $event)" @blur="document.editmode = false">
-                        <option v-for="(documentType, key) in documentTypes"
-                                :value="key"
-                                :key="documentType.id"
-                                :selected="document.categoryText == documentType">
-                            {{ documentType }}
-                        </option>
-                    </select>
-                </template>
-                <template v-else>
-                    <small class="text-light" @dblclick="document.editmode = true">{{ document.categoryText }} ~ </small>
-                </template>
-
-
+                <small class="text-light">{{ document.categoryText }} ~ </small>
                 <strong>{{document.fileName}}</strong>
                 <small class="text-light" :title="document.fileSize + ' octet(s)'">&nbsp;({{document.fileSize | filesize}})</small>
             </div>
@@ -104,8 +118,8 @@
                 </div>
                 <nav class="text-right show-over">
                     <a class="btn btn-default btn-xs" :href="document.urlDownload" v-if="document.urlDownload">
-                        <i class="icon-download-outline"></i>
-                        Télécharger le fichier
+                        <i class="icon-upload-outline"></i>
+                        Télécharger
                     </a>
 
                     <a class="btn btn-default btn-xs" :href="document.urlReupload" v-if="document.urlReupload">
@@ -115,7 +129,11 @@
 
                     <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(document)">
                         <i class="icon-trash"></i>
-                        supprimer le fichier
+                        Supprimer
+                    </a>
+                    <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(document)">
+                        <i class="icon-pencil"></i>
+                        Modifier
                     </a>
                 </nav>
             </div>
@@ -123,6 +141,19 @@
     </section>
 </template>
 <script>
+    /******************************************************************************************************************/
+    /* ! DEVELOPPEUR
+    Depuis la racine OSCAR :
+
+    cd front
+
+    Pour compiler en temps réél :
+    node node_module/.bin/gulp activityDocumentWatch
+
+    Pour compiler :
+    node node_module/.bin/gulp activityDocument
+
+     */
 
     import AjaxOscar from "./remote/AjaxOscar";
     import OscarRemoteData from "./remote/OscarRemoteData";
@@ -151,6 +182,7 @@
                 formData: null,
                 error: null,
                 deleteData: null,
+                editData: null,
                 documents: [],
                 loading: true,
                 sortField: 'dateUpload',
@@ -198,48 +230,28 @@
                 return compare == this.sortField ? "active" : "";
             },
 
-            changeTypeDocument: function( document, event ){
+            handlerEdit(document){
+                console.log(document);
+                this.editData = {
+                    'documentype_id': document.category.id,
+                    'basename': document.basename,
+                    'document': document
+                };
+            },
 
-                /***
-                 oscarRemoteData
-                 .setPendingMessage("Chargement des documents")
-                 .setErrorMessage("Impossible de charger les documents")
-                 .performGet(this.url, this.handlerSuccess);
-                 */
-
-                var newType = event.target.selectedOptions[0].text;
-
+            performEdit(){
+                let documentId = this.editData.document.id;
+                let newType = this.editData.documentype_id;
+                this.editData = null;
+                let formData = new FormData();
+                formData.append('documentId', documentId);
+                formData.append('type', newType);
                 oscarRemoteData
                     .setPendingMessage("Modification du type de document")
                     .setErrorMessage("Impossible de modifier le type de document")
-                    .performPost(this.urlDocumentType, {
-                        documentId: document.id,
-                        type: newType
-
-                    }, (response) => {
-                        // Modification du type
-                        document.categoryText = newType;
-                        document.editMode = false;
-                        document.editMode = false;
-                        this.$forceUpdate();
-
-                    }, () => {
-                        document.editMode = false;
-                        this.$forceUpdate();
-                    })
-
-                // this.$http.post(this.urlDocumentType, {
-                //     documentId: document.id,
-                //     type: newType
-                // }).then(ok => {
-                //     flashMessage('success', 'Le document a bien été modifié', ok);
-                //     document.categoryText = newType;
-                //     document.editMode = false;
-                //     this.$forceUpdate();
-                // }, error => {
-                //     flashMessage('error', 'Erreur' + error.responseText);
-                //     document.editMode = false;
-                // });
+                    .performPost(this.urlDocumentType, formData, (response) => {
+                        this.fetch();
+                    });
             },
 
             handlerSuccess(success){
@@ -249,8 +261,7 @@
 
                 data.forEach(function(doc){
                     doc.categoryText = doc.category ? doc.category.label : "";
-                    doc.editmode = false;
-                    doc.explode = false;
+                    doc.explode = true;
                     var filename = doc.fileName;
                     if( ! documents[filename] ){
                         documents[filename] = doc;

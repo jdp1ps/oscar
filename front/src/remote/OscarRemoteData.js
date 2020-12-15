@@ -55,6 +55,7 @@ class OscarRemoteData {
     }
 
     performPost(url, datas, handlerResponse = null, handlerError = null){
+        console.log("performPost", url, datas );
         this.state.loading = true;
         this.getAxiosInstance().post(url, datas)
             .then( response => {
