@@ -216,6 +216,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getOscarConfigurationService()->setActivityRequestLimit($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
+                case OscarConfigurationService::document_use_version_in_name:
+                    $value = boolval($this->params()->fromPost('parameter_value'));
+                    $this->getOscarConfigurationService()->setDocumentUseVersionInName($value);
+                    return $this->redirect()->toRoute('administration/parameters');
 
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
@@ -234,7 +238,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 'separator' => $this->getOscarConfigurationService()->getExportSeparator(),
                 'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
             ],
-            'organization_leader_role' => $organization_leader_role
+            'organization_leader_role' => $organization_leader_role,
+            OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService()->getDocumentUseVersionInName()
         ];
     }
 
