@@ -1292,22 +1292,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $id = $this->params()->fromRoute('id');
         $ui = $this->params()->fromQuery('ui');
 
-        if( $ui || !$this->isAjax() ){
-            $view = new ViewModel([
-                'composant' => 'activitydocument',
-                'props' => [
-                    'url' => $_SERVER['REQUEST_URI'],
-                    'documentTypes' => $this->getActivityService()->getTypesDocuments(),
-                    'urlDocumentType' => $this->url()->fromRoute('contractdocument/document-change-type')
-                ]
-            ]);
-
-            $view->setTemplate('oscar/generic-vue-debug');
-
-            return $view;
-        }
-
-        //return $this->getResponseInternalError("A ERROR TEST");
+        
 
 
         /** @var Activity $entity */
