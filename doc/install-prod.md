@@ -86,7 +86,7 @@ apt-get install apache2
 
 # PHP + Modules PHP
 apt-get install php7.3
-apt-get install php-bcmath
+apt-get install php7.3-bcmath
 apt-get install php7.3-bz2
 apt-get install php7.3-cli
 apt-get install php7.3-curl
