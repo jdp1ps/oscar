@@ -2762,6 +2762,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return $view;
     }
 
+    public function pcruAction()
+    {
+        $activity = $this->getActivityFromRoute();
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        die("NOT IMPLEMENTED");
+    }
+
     public function mergeAction()
     {
         return $this->getResponseNotImplemented();

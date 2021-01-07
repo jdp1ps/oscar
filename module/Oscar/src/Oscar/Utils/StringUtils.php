@@ -46,6 +46,10 @@ class StringUtils
         return $pattern;
     }
 
+    public static function truncate( string $entry, int $size ) :string {
+        return self::truncate($entry, $size);
+    }
+
     public static function purgeZero($code){
         // Zero start
         $purge = preg_replace('/0*([[0-9]*)/', '$1', $code);

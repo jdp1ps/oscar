@@ -871,6 +871,13 @@ contract:
                 defaults:
                     action: spentList
 
+        pcru:
+            type: segment
+            options:
+                route: /pcru/:id
+                defaults:
+                    action: pcru
+
         spent-synthesis:
             type: segment
             options:
