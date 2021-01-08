@@ -357,6 +357,25 @@
         </article>
 
         <h2>
+            <i class="icon-puzzle"></i>
+            Modules
+        </h2>
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-beaker"></i>
+                    PCRU
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
+        </article>
+
+        <h2>
             <i class="icon-lock"></i>
             Privilèges et droits d'accès
         </h2>

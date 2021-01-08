@@ -251,6 +251,22 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
     }
 
+    public function pcruAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
+
+        if( $this->isAjax() ){
+            $response = $this->baseJsonResponse();
+            $response['configuration_pcru'] = [
+                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled()
+            ];
+            return $this->ajaxResponse($response);
+        }
+
+        return [
+        ];
+    }
+
     public function numerotationAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);

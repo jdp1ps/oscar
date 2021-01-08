@@ -126,6 +126,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DROIT_ROLEORGA_EDITION = 'droit-ROLEORGA_EDITION';
     const DROIT_API_ACCESS = 'droit-API_ACCESS';
 
+    //const A
 
     const PERSON_SHOW_INM = 'PERSON-SYNC_LDA';
 

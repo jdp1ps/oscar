@@ -52,6 +52,7 @@ return array(
                         'organizationRoleApi',
                         'organizationType',
                         'oscarWorkerStatus',
+                        'pcru',
                         'roleAPI',
                         'roles',
                         'rolesEdit',

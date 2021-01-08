@@ -1767,3 +1767,12 @@ administration:
                 defaults:
                     action: messages
             may_terminate: true
+
+        # Types d'organisation
+        pcru:
+            type: segment
+            options:
+                route: /pcru
+                defaults:
+                    action: pcru
+            may_terminate: true
