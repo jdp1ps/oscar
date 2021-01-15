@@ -2293,12 +2293,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/AdministrationPcru.vue?vue&type=template&id=3fbb79e4&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.configuration)?_c('div',[_c('div',{staticClass:"material-switch"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_enabled),expression:"configuration.pcru_enabled"}],attrs:{"id":"pcru_enabled","name":"parameter_value","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.configuration.pcru_enabled)?_vm._i(_vm.configuration.pcru_enabled,null)>-1:(_vm.configuration.pcru_enabled)},on:{"change":function($event){var $$a=_vm.configuration.pcru_enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.configuration, "pcru_enabled", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.configuration, "pcru_enabled", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.configuration, "pcru_enabled", $$c)}}}}),_c('label',{staticClass:"label-primary",attrs:{"for":"pcru_enabled"}},[_vm._v("Module PCRU "+_vm._s(_vm.configuration)+" ?")])])]):_vm._e()],1)}
-var staticRenderFns = []
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/AdministrationPcru.vue?vue&type=template&id=5b5b4bb4&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.configuration)?_c('div',{staticClass:"container"},[_c('form',{attrs:{"action":"","method":"post"}},[_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-3"},[_vm._v(" Module "),_c('strong',[_vm._v(_vm._s(_vm.configuration.pcru_enabled ? 'Actif' : 'Inactif'))])]),_c('div',{staticClass:"col-md-9"},[_c('div',{staticClass:"material-switch"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_enabled),expression:"configuration.pcru_enabled"}],attrs:{"id":"pcru_enabled","name":"pcru_enabled","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.configuration.pcru_enabled)?_vm._i(_vm.configuration.pcru_enabled,null)>-1:(_vm.configuration.pcru_enabled)},on:{"change":function($event){var $$a=_vm.configuration.pcru_enabled,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.configuration, "pcru_enabled", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.configuration, "pcru_enabled", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.configuration, "pcru_enabled", $$c)}}}}),_c('label',{staticClass:"label-primary",attrs:{"for":"pcru_enabled"}})])])]),_c('section',{class:_vm.configuration.pcru_enabled ? 'enabled' : 'disabled'},[_c('div',{staticClass:"row"},[_vm._m(0),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-5 col-md-push-1"},[_c('div',{staticClass:"form-group"},[_c('label',{staticClass:"sr-only",attrs:{"for":"host"}}),_c('div',{staticClass:"input-group input-lg"},[_vm._m(1),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_host),expression:"configuration.pcru_host"}],staticClass:"form-control",attrs:{"type":"text","id":"host","name":"host"},domProps:{"value":(_vm.configuration.pcru_host)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.configuration, "pcru_host", $event.target.value)}}})])])])]),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-5 col-md-push-1"},[_c('div',{staticClass:"form-group"},[_c('label',{staticClass:"sr-only",attrs:{"for":"port"}}),_c('div',{staticClass:"input-group input-lg"},[_vm._m(2),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_port),expression:"configuration.pcru_port"}],staticClass:"form-control",attrs:{"type":"text","id":"port","name":"port"},domProps:{"value":(_vm.configuration.pcru_port)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.configuration, "pcru_port", $event.target.value)}}})])])])]),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-5 col-md-push-1"},[_c('div',{staticClass:"form-group"},[_c('label',{staticClass:"sr-only",attrs:{"for":"user"}}),_c('div',{staticClass:"input-group input-lg"},[_vm._m(3),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_user),expression:"configuration.pcru_user"}],staticClass:"form-control",attrs:{"type":"text","id":"user","name":"user"},domProps:{"value":(_vm.configuration.pcru_user)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.configuration, "pcru_user", $event.target.value)}}})])])])]),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-5 col-md-push-1"},[_c('password-field',{attrs:{"value":_vm.configuration.pcru_pass,"name":'pass',"text":'Mot de passe'},on:{"change":function($event){_vm.configuration.pcru_pass = $event}}})],1)]),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-5 col-md-push-1"},[_c('div',{staticClass:"form-group"},[_c('label',{staticClass:"sr-only",attrs:{"for":"ssh"}}),_c('div',{staticClass:"input-group input-lg"},[_vm._m(4),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.configuration.pcru_ssh),expression:"configuration.pcru_ssh"}],staticClass:"form-control",attrs:{"type":"text","id":"ssh","name":"ssh"},domProps:{"value":(_vm.configuration.pcru_ssh)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.configuration, "pcru_ssh", $event.target.value)}}})])])])]),_vm._m(5)])])])]):_vm._e()],1)}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"col-md-12"},[_c('h2',[_vm._v("Accès FTP")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"input-group-addon"},[_c('i',{staticClass:"glyphicon icon-building"}),_vm._v(" "),_c('strong',[_vm._v("Hôte")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"input-group-addon"},[_c('i',{staticClass:"glyphicon icon-logout"}),_vm._v(" "),_c('strong',[_vm._v("Port")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"input-group-addon"},[_c('i',{staticClass:"glyphicon icon-user"}),_vm._v(" "),_c('strong',[_vm._v("Identifiant")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"input-group-addon"},[_c('i',{staticClass:"glyphicon icon-plug"}),_vm._v(" "),_c('strong',[_vm._v("Clef SSH")])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"row"},[_c('button',{staticClass:"btn btn-primary",attrs:{"type":"submit"}},[_c('i',{staticClass:"icon-floppy"}),_vm._v(" Enregistrer ")])])}]
 
 
-// CONCATENATED MODULE: ./src/AdministrationPcru.vue?vue&type=template&id=3fbb79e4&
+// CONCATENATED MODULE: ./src/AdministrationPcru.vue?vue&type=template&id=5b5b4bb4&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
 var AjaxOscarvue_type_template_id_3372c719_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"1em","right":"1em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('i',[_vm._v(_vm._s(_vm.oscarRemoteData.error))])]):_vm._e()])])}
@@ -2577,7 +2577,187 @@ class OscarRemoteData_OscarRemoteData {
 }
 
 /* harmony default export */ var remote_OscarRemoteData = (OscarRemoteData_OscarRemoteData);
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PasswordField.vue?vue&type=template&id=04cf050e&
+var PasswordFieldvue_type_template_id_04cf050e_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"form-group"},[_c('label',{staticClass:"sr-only",attrs:{"for":_vm.name}},[_vm._v("Mot de passe "+_vm._s(_vm.type)+" / "+_vm._s(_vm.value))]),_c('div',{staticClass:"input-group input-lg password-field"},[_c('div',{staticClass:"input-group-addon"},[_c('i',{staticClass:"glyphicon icon-lock"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.text))])]),(_vm.type == 'text')?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.value),expression:"value"}],staticClass:"form-control",staticStyle:{"font-family":"monospace"},attrs:{"name":_vm.name,"type":"text","placeholder":"Mot de passe","id":_vm.name},domProps:{"value":(_vm.value)},on:{"input":function($event){if($event.target.composing){ return; }_vm.value=$event.target.value}}}):_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.value),expression:"value"}],staticClass:"form-control",staticStyle:{"font-family":"monospace"},attrs:{"name":_vm.name,"type":"password","placeholder":"Mot de passe","id":_vm.name},domProps:{"value":(_vm.value)},on:{"input":function($event){if($event.target.composing){ return; }_vm.value=$event.target.value}}}),_c('div',{staticClass:"input-group-addon",class:{'password-displayed': _vm.type == 'text'},staticStyle:{"cursor":"pointer","background":"white"},attrs:{"title":"Afficher le mot de passe pendant 5 secondes"},on:{"click":_vm.handlerShowPassword}},[(_vm.type == 'text')?_c('i',{staticClass:"glyphicon icon-eye"}):_c('i',{staticClass:"glyphicon icon-eye-off"})])])])}
+var PasswordFieldvue_type_template_id_04cf050e_staticRenderFns = []
+
+
+// CONCATENATED MODULE: ./src/components/PasswordField.vue?vue&type=template&id=04cf050e&
+
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PasswordField.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+let tempo = null;
+const TYPE_PASSWORD = "password";
+const TYPE_TEXT = "text";
+
+/* harmony default export */ var PasswordFieldvue_type_script_lang_js_ = ({
+    props: {
+        name: { required: true },
+        value: { default: "" },
+        text: { default: "foo" }
+    },
+    data(){
+        return {
+            displayPassword: false,
+            type: TYPE_PASSWORD
+        }
+    },
+    watch: {
+        value(val){
+            console.log(val);
+            this.$emit('change', val);
+        }
+    },
+    methods: {
+        handlerShowPassword(){
+
+            if( tempo === null ){
+                this.type = TYPE_TEXT;
+                tempo = new Promise( resolve => {
+                    setTimeout( () => {
+                        this.type = TYPE_PASSWORD;
+                        tempo = null;
+                    }, 5000);
+                })
+            } else {
+                tempo = null;
+                this.type = TYPE_PASSWORD;
+            }
+
+
+
+        }
+    }
+});
+
+// CONCATENATED MODULE: ./src/components/PasswordField.vue?vue&type=script&lang=js&
+ /* harmony default export */ var components_PasswordFieldvue_type_script_lang_js_ = (PasswordFieldvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/PasswordField.vue
+
+
+
+
+
+/* normalize component */
+
+var PasswordField_component = normalizeComponent(
+  components_PasswordFieldvue_type_script_lang_js_,
+  PasswordFieldvue_type_template_id_04cf050e_render,
+  PasswordFieldvue_type_template_id_04cf050e_staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* harmony default export */ var PasswordField = (PasswordField_component.exports);
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/AdministrationPcru.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2599,12 +2779,13 @@ Depuis la racine OSCAR :
 cd front
 
 Pour compiler en temps réél :
-node node_modules/.bin/gulp administrationPcru
+node node_modules/.bin/gulp administrationPcruWatch
 
 Pour compiler :
 node node_modules/.bin/gulp administrationPcru
 
  */
+
 
 
 
@@ -2619,7 +2800,8 @@ function flashMessage(){
 /* harmony default export */ var AdministrationPcruvue_type_script_lang_js_ = ({
 
     components: {
-        "ajax-oscar": AjaxOscar
+        "ajax-oscar": AjaxOscar,
+        "password-field": PasswordField
     },
 
     props: {

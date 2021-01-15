@@ -4,11 +4,6 @@ const exec = require('child_process').exec;
 const pathModuleSrc = './src/';
 const pathModuleDest = './../public/js/oscar/dist/'
 
-function defaultTask(cb) {
-    console.log("No default task");
-    cb();
-}
-
 function compile(module){
     let moduleSrc = pathModuleSrc + module + ".vue";
     let moduleDest = pathModuleDest;
@@ -27,6 +22,9 @@ function administrationPcru(cb) {
     cb();
 }
 
+let commands = ['activityDocument', 'administrationPcru'];
+
+
 exports.activityDocument = activityDocument;
 exports.activityDocumentWatch = function(cb){
     watch(pathModuleSrc + "ActivityDocument.vue", activityDocument);
@@ -35,6 +33,16 @@ exports.activityDocumentWatch = function(cb){
 exports.administrationPcru = administrationPcru;
 exports.administrationPcruWatch = function(cb){
     watch(pathModuleSrc + "AdministrationPcru.vue", administrationPcru);
+}
+
+function defaultTask(cb) {
+    console.log("Usage : ");
+    for( let i=0; i<commands.length; i++ ){
+        console.log(commands[i], " : ");
+        console.log(" - compile > node_modules/.bin/gulp " + commands[i]);
+        console.log(" - watch   > node_modules/.bin/gulp " + commands[i] + 'Watch');
+    }
+    cb();
 }
 
 exports.default = defaultTask;

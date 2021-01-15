@@ -11556,6 +11556,11 @@ pre.alert-danger, pre.alert-info {
   width: 100%;
 }
 
+.password-displayed {
+  background-color: #30b0d5;
+  transition: background-color linear 5s;
+}
+
 body {
   background-color: #fff9e5;
   background-size: cover !important;

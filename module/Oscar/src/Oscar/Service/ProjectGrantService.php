@@ -24,6 +24,12 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\PcruPoleCompetitivite;
+use Oscar\Entity\PcruPoleCompetitiviteRepository;
+use Oscar\Entity\PcruSourceFinancement;
+use Oscar\Entity\PcruSourceFinancementRepository;
+use Oscar\Entity\PcruTypeContract;
+use Oscar\Entity\PcruTypeContractRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
@@ -201,10 +207,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      * @param bool $asArray
      * @return array|object[]
      */
-    public function getTypesDocuments( $asArray = true )
+    public function getTypesDocuments($asArray = true)
     {
         $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
-        if( $asArray ){
+        if ($asArray) {
             $documentTypes = [];
             /** @var TypeDocument $type */
             foreach ($types as $type) {
@@ -1843,5 +1849,64 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $qb->setParameter('dateRef', new \DateTime());
 
         return $qb;
+    }
+
+    public function addNewPoleCompetivite(string $label): PcruPoleCompetitivite
+    {
+        /** @var PcruPoleCompetitiviteRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruPoleCompetitivite();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter le pôle '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("Le pôle '$label' existe déjà");
+        }
+
+    }
+
+    public function addNewSourceFinancement(string $label): PcruSourceFinancement
+    {
+        /** @var PcruSourceFinancementRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruSourceFinancement();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter la source de financement '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("La source de financement '$label' existe déjà");
+        }
+
+    }
+    public function addNewTypeContract(string $label): PcruTypeContract
+    {
+        /** @var PcruTypeContractRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruTypeContract();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter le type de contrat '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("Le type de contrat '$label' existe déjà");
+        }
+
     }
 }

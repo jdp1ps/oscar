@@ -11556,4 +11556,9 @@ pre.alert-danger, pre.alert-info {
   width: 100%;
 }
 
+.password-displayed {
+  background-color: #30b0d5;
+  transition: background-color linear 5s;
+}
+
 /*# sourceMappingURL=app-beta.css.map */

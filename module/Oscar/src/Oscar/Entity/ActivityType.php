@@ -78,6 +78,8 @@ class ActivityType implements ITrackable
     protected $rgt;
 
 
+
+
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)

@@ -5364,3 +5364,8 @@ pre.alert-danger, pre.alert-info {
   text-align: center;
   width: 100%;
 }
+
+.password-displayed {
+  background-color: $colorBlue;
+  transition: background-color linear 5s;
+}

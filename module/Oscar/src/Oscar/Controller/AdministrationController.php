@@ -258,9 +258,30 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if( $this->isAjax() ){
             $response = $this->baseJsonResponse();
             $response['configuration_pcru'] = [
-                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled()
+                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+                'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_host', 'PCRU-Depot.dr14.cnrs.fr'),
+                'pcru_user' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
+                'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
+                'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
+                'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
             ];
             return $this->ajaxResponse($response);
+        }
+
+        if($this->getRequest()->isPost() ){
+            $data = [
+                'pcru_enabled' => $this->params()->fromPost('pcru_enabled') == 'on' ? true : false,
+                'pcru_host' => $this->params()->fromPost('host'),
+                'pcru_port' => $this->params()->fromPost('port'),
+                'pcru_user' => $this->params()->fromPost('user'),
+                'pcru_pass' => $this->params()->fromPost('pass'),
+                'pcru_ssh' => $this->params()->fromPost('ssh'),
+            ];
+
+            foreach ($data as $key=>$value) {
+                $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
+            }
+            return $this->redirect()->toRoute('administration/pcru');
         }
 
         return [

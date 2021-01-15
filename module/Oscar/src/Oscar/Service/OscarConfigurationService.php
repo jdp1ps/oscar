@@ -432,7 +432,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     public function getPcruEnabled(){
-        return $this->getOptionalConfiguration('pcru_enabled', false);
+        return $this->getEditableConfKey('pcru_enabled', false);
     }
 
     /**
