@@ -1,0 +1,107 @@
+<?php /****/ ?>
+<div class="container">
+    <header>
+        <h2>Informations PCRU</h2>
+        <h3><?= $activity ?></h3>
+    </header>
+
+
+    <?= $this->form()->openTag($form->prepare()); ?>
+    <?= $this->formControlGroup($form->get('id')); ?>
+
+
+    <div class="row">
+        <div class="col-md-2">
+            <?= $this->formControlGroup($form->get('acronyme')); ?>
+        </div>
+        <div class="col-md-10">
+            <?= $this->formControlGroup($form->get('objet')); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
+        </div>
+        <div class="col-md-6">
+            <?= $this->formControlGroup($form->get('sigleUnite')); ?>
+        </div>
+    </div>
+
+    <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
+    <?= $this->formControlGroup($form->get('equipe')); ?>
+    <?= $this->formControlGroup($form->get('typeContrat')); ?>
+    <?= $this->formControlGroup($form->get('contratsAssocies')); ?>
+
+    <div class="row">
+        <div class="col-md-8">
+            <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->formControlGroup($form->get('coordinateurConsortium')); ?>
+        </div>
+    </div>
+
+    <?= $this->formControlGroup($form->get('employeurResponsableScientifique')); ?>
+    <?= $this->formControlGroup($form->get('partenaires')); ?>
+    <?= $this->formControlGroup($form->get('partenairePrincipal')); ?>
+    <?= $this->formControlGroup($form->get('idPartenairePrincipal')); ?>
+    <?= $this->formControlGroup($form->get('sourceFinancement')); ?>
+    <?= $this->formControlGroup($form->get('lieuExecution')); ?>
+
+    <div class="row">
+        <div class="col-md-3">
+            <?= $this->formControlGroup($form->get('dateDerniereSignature')); ?>
+        </div>
+        <div class="col-md-3">
+            <?= $this->formControlGroup($form->get('dateDebut')); ?>
+        </div>
+        <div class="col-md-3">
+            <?= $this->formControlGroup($form->get('dateFin')); ?>
+        </div>
+        <div class="col-md-3">
+            <?= $this->formControlGroup($form->get('duree')); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->formControlGroup($form->get('montantTotal')); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
+        </div>
+    </div>
+    <?= $this->formControlGroup($form->get('commentaires')); ?>
+    <?= $this->formControlGroup($form->get('pia')); ?>
+    <?= $this->formControlGroup($form->get('reference')); ?>
+    <?= $this->formControlGroup($form->get('accordCadre')); ?>
+    <?= $this->formControlGroup($form->get('cifre')); ?>
+    <?= $this->formControlGroup($form->get('chaireIndustrielle')); ?>
+    <?= $this->formControlGroup($form->get('presencePartenaireIndustriel')); ?>
+
+
+    <div>
+        <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+            <i class="icon-cancel-circled"></i>
+            Revenir à la fiche activité
+        </a>
+        <button class="btn btn-primary">
+            <i class="icon-floppy"></i>
+            Enregistrer les informations
+        </button>
+    </div>
+    <?= $this->form()->closeTag(); ?>
+</div>

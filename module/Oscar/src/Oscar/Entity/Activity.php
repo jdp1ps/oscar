@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
+use Doctrine\ORM\Mapping\OneToOne as OneToOne;
 
 /**
  * ProjectGrant, correspond aux conventions (Contrats).
@@ -379,6 +380,12 @@ class Activity implements ResourceInterface
     private $documents;
 
     /**
+     * Informations complémentaires PCRU
+     * @OneToOne(targetEntity="ActivityPcruInfos", mappedBy="activity")
+     */
+    private $pcruInfo;
+
+    /**
      * @var String
      * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
      */
@@ -552,6 +559,23 @@ class Activity implements ResourceInterface
             return $this->numbers[$key];
         }
         return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPcruInfos()
+    {
+        return $this->pcruInfos;
+    }
+
+    /**
+     * @param mixed $pcruInfos
+     */
+    public function setPcruInfos($pcruInfos): self
+    {
+        $this->pcruInfos = $pcruInfos;
+        return $this;
     }
 
     /**

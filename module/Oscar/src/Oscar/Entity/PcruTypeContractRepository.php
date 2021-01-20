@@ -16,6 +16,11 @@ use Oscar\Import\Data\DataExtractorOrganization;
 
 class PcruTypeContractRepository extends EntityRepository
 {
-
-    
+    public function getFlatArrayLabel(): array
+    {
+        $query = $this->createQueryBuilder('ptc');
+        $query->select('ptc.label');
+        $entities = $query->getQuery()->getResult();
+        return array_map('current', $entities);
+    }
 }

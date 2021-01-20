@@ -14,6 +14,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestRepository;
@@ -36,6 +37,8 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
+use Oscar\Form\PcruInfosForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\CSVDownloader;
@@ -43,6 +46,7 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -2771,6 +2775,36 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
         die("NOT IMPLEMENTED");
+    }
+
+    public function pcruInfosAction()
+    {
+        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+        $activity = $this->getActivityFromRoute();
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        $form = new PcruInfosForm();
+        $form->setServiceContainer($this->getServiceContainer());
+        $form->setHydrator(new PcruInfosFormHydrator());
+        $form->init();
+
+        // Récupération des informations
+        if( $activity->getPcruInfos() ){
+            $pcruInfos = $activity->getPcruInfos();
+        } else {
+            $pcruInfos = ActivityPcruInfoFromActivityFactory::createNew($activity);
+        }
+
+        // Formulaire
+        $form->bind($pcruInfos);
+
+        return [
+            'form' => $form,
+            'pcruInfos' => $pcruInfos,
+            'activity' => $activity
+        ];
     }
 
     public function mergeAction()

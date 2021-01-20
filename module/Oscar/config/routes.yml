@@ -811,6 +811,7 @@ contract:
                 route: /api
                 defaults:
                     action: api
+
         gant:
             type: segment
             options:
@@ -849,6 +850,13 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+
+        pcru-infos:
+            type: segment
+            options:
+                route: /pcru-infos/:id
+                defaults:
+                    action: pcruInfos
 
         estimated-spent:
             type: segment

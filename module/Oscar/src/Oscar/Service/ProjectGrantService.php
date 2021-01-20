@@ -39,6 +39,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\AsArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
@@ -1907,6 +1908,49 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         } else {
             throw new OscarException("Le type de contrat '$label' existe déjà");
         }
+    }
 
+    /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractArray( $format = AsArrayFormatter::ARRAY_FLAT ) :array
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        if( $format == AsArrayFormatter::ARRAY_FLAT )
+            return $repository->getFlatArrayLabel();
+        else
+            throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
+    }
+
+    /**
+     * Retourne la liste des pôle de compétitivité PCRU.
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruPoleCompetitiviteArray( $format = AsArrayFormatter::ARRAY_FLAT ){
+        /** @var PcruPoleCompetitiviteRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+        if( $format == AsArrayFormatter::ARRAY_FLAT )
+            return $repository->getFlatArrayLabel();
+        else
+            throw new OscarException("Format pour la liste des pôles de compétivité PCRU non-disponible");
+    }
+
+    /**
+     * @param string $format
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getPcruSourceFinancement( $format = AsArrayFormatter::ARRAY_FLAT ){
+        /** @var PcruSourceFinancementRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+        if( $format == AsArrayFormatter::ARRAY_FLAT )
+            return $repository->getFlatArrayLabel();
+        else
+            throw new OscarException("Format pour la liste des sources de financement PCRU non-disponible");
     }
 }

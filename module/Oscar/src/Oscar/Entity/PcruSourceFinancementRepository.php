@@ -16,6 +16,11 @@ use Oscar\Import\Data\DataExtractorOrganization;
 
 class PcruSourceFinancementRepository extends EntityRepository
 {
-
-    
+    public function getFlatArrayLabel(): array
+    {
+        $query = $this->createQueryBuilder('psf');
+        $query->select('psf.label');
+        $entities = $query->getQuery()->getResult();
+        return array_map('current', $entities);
+    }
 }

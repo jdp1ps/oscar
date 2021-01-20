@@ -16,6 +16,11 @@ use Oscar\Import\Data\DataExtractorOrganization;
 
 class PcruPoleCompetitiviteRepository extends EntityRepository
 {
-
-
+    public function getFlatArrayLabel(): array
+    {
+        $query = $this->createQueryBuilder('ppc');
+        $query->select('ppc.label');
+        $entities = $query->getQuery()->getResult();
+        return array_map('current', $entities);
+    }
 }
