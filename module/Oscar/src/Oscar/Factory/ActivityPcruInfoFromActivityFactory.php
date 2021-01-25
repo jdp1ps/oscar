@@ -17,6 +17,10 @@ class ActivityPcruInfoFromActivityFactory
             ->setObjet($activity->getLabel())
             ->setAcronyme($activity->getAcronym())
             ->setMontantTotal($activity->getAmount())
+            ->setDateDebut($activity->getDateStart())
+            ->setDateFin($activity->getDateEnd())
+            ->setDateDerniereSignature($activity->getDateSigned())
+            ->setReference($activity->getOscarNum())
         ;
         return $activityPcruInfos;
     }

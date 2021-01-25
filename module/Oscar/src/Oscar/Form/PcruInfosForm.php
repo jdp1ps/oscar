@@ -147,7 +147,8 @@ en assure la gestion");
                 'label' => $label,
             ],
             'attributes' => [
-                'class' => 'form-control input-lg',
+                'class' => 'form-control input-lg disabled',
+                'readonly' => 'on',
                 'placeholder' => $label,
             ],
             'type'=>'Text'
@@ -369,10 +370,9 @@ en assure la gestion");
                 'label' => $label,
             ],
             'attributes' => [
-                'class' => 'form-control',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type'=>'Checkbox'
         ]);
 
         $label = _("Pôle de compétitivité");
@@ -399,7 +399,7 @@ en assure la gestion");
                 'class' => 'form-control',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type'=>'Textarea'
         ]);
 
         $label = _("Programme d'Investissement Avenir");
@@ -409,10 +409,9 @@ en assure la gestion");
                 'label' => $label,
             ],
             'attributes' => [
-                'class' => 'form-control',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type'=>'Checkbox'
         ]);
 
         $label = _("N° Oscar");
@@ -474,10 +473,9 @@ en assure la gestion");
                 'label' => $label,
             ],
             'attributes' => [
-                'class' => 'form-control',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type'=>'Checkbox'
         ]);
     }
 

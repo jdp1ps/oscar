@@ -1,7 +1,7 @@
 <?php /****/ ?>
 <div class="container">
     <header>
-        <h2>Informations PCRU</h2>
+        <h1>Informations PCRU</h1>
         <h3><?= $activity ?></h3>
     </header>
 
@@ -9,38 +9,118 @@
     <?= $this->form()->openTag($form->prepare()); ?>
     <?= $this->formControlGroup($form->get('id')); ?>
 
+    <section class="">
+        <h2>
+            <i class="icon-info-circled"></i>
+            Informations générales
+        </h2>
+        <fieldset disabled>
+            <div class="row">
+                <div class="col-md-2">
+                    <?= $this->formControlGroup($form->get('acronyme')); ?>
+                </div>
+                <div class="col-md-10">
+                    <?= $this->formControlGroup($form->get('objet')); ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $this->formControlGroup($form->get('dateDerniereSignature')); ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $this->formControlGroup($form->get('dateDebut')); ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $this->formControlGroup($form->get('dateFin')); ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $this->formControlGroup($form->get('duree')); ?>
+                </div>
+            </div>
+        </fieldset>
+    </section>
 
-    <div class="row">
-        <div class="col-md-2">
-            <?= $this->formControlGroup($form->get('acronyme')); ?>
+    <section>
+        <h2>
+            <i class="icon-building-filled"></i>
+            Unité/structure référente
+        </h2>
+        <div class="row">
+            <div class="col-md-6">
+                <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
+            </div>
+            <div class="col-md-6">
+                <?= $this->formControlGroup($form->get('sigleUnite')); ?>
+            </div>
         </div>
-        <div class="col-md-10">
-            <?= $this->formControlGroup($form->get('objet')); ?>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $this->formControlGroup($form->get('equipe')); ?>
+            </div>
         </div>
-    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
+                <p class="help">N° du suivi pour l'unité référente</p>
+            </div>
+        </div>
+    </section>
 
-    <div class="row">
-        <div class="col-md-6">
-            <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
+    <section>
+        <h2>
+            <i class="icon-user"></i>
+            Responsables
+        </h2>
+        <div class="row">
+            <div class="col-md-8">
+                <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('coordinateurConsortium')); ?>
+            </div>
         </div>
-        <div class="col-md-6">
-            <?= $this->formControlGroup($form->get('sigleUnite')); ?>
-        </div>
-    </div>
+    </section>
 
-    <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
-    <?= $this->formControlGroup($form->get('equipe')); ?>
+    <section>
+        <h2>
+            <i class="icon-calculator"></i>
+            Financements
+        </h2>
+
+        <div class="row">
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('montantTotal')); ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
+            </div>
+        </div>
+
+    </section>
+
+
+
+
+
+
+
+
     <?= $this->formControlGroup($form->get('typeContrat')); ?>
     <?= $this->formControlGroup($form->get('contratsAssocies')); ?>
 
-    <div class="row">
-        <div class="col-md-8">
-            <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
-        </div>
-        <div class="col-md-4">
-            <?= $this->formControlGroup($form->get('coordinateurConsortium')); ?>
-        </div>
-    </div>
+
 
     <?= $this->formControlGroup($form->get('employeurResponsableScientifique')); ?>
     <?= $this->formControlGroup($form->get('partenaires')); ?>
@@ -49,41 +129,11 @@
     <?= $this->formControlGroup($form->get('sourceFinancement')); ?>
     <?= $this->formControlGroup($form->get('lieuExecution')); ?>
 
-    <div class="row">
-        <div class="col-md-3">
-            <?= $this->formControlGroup($form->get('dateDerniereSignature')); ?>
-        </div>
-        <div class="col-md-3">
-            <?= $this->formControlGroup($form->get('dateDebut')); ?>
-        </div>
-        <div class="col-md-3">
-            <?= $this->formControlGroup($form->get('dateFin')); ?>
-        </div>
-        <div class="col-md-3">
-            <?= $this->formControlGroup($form->get('duree')); ?>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-4">
-            <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
-        </div>
-        <div class="col-md-4">
-            <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
-        </div>
-        <div class="col-md-4">
-            <?= $this->formControlGroup($form->get('montantTotal')); ?>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
-        </div>
-        <div class="col-md-4">
-            <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
-        </div>
-    </div>
+
+
+
     <?= $this->formControlGroup($form->get('commentaires')); ?>
     <?= $this->formControlGroup($form->get('pia')); ?>
     <?= $this->formControlGroup($form->get('reference')); ?>
