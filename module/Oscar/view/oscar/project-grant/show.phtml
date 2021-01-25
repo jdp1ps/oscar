@@ -440,7 +440,7 @@
                     <script>
                         require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
                             Vue.use(VueResource);
-                            Vue.filter('money', VueFilters.default.money);
+                           Vue.filter('money', VueFilters.default.money);
                             Vue.filter('dateFull', function(date) {
                                 var m = moment(date);
                                 return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
