@@ -67,13 +67,17 @@ class OscarCheckLoggerCommand extends OscarCommandAbstract
         $io->text("Envoi : <bold>$msg</bold> dans les logs");
         $logger->debug($msg);
 
+        $msg = "Niveau INFO loggué";
+        $io->text("Envoi : <bold>$msg</bold> dans les logs");
+        $logger->info($msg);
+
         $msg = "Niveau NOTICE loggué";
         $io->text("Envoi : <bold>$msg</bold> dans les logs");
         $logger->notice($msg);
 
-        $msg = "Niveau INFO loggué";
+        $msg = "Niveau WARNING loggué";
         $io->text("Envoi : <bold>$msg</bold> dans les logs");
-        $logger->info($msg);
+        $logger->warning($msg);
 
         $msg = "Niveau ALERT loggué";
         $io->text("Envoi : <bold>$msg</bold> dans les logs");

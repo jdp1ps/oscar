@@ -292,7 +292,7 @@
 
                     <div id="docv2"></div>
                     <script>
-                        requirejs(['vue', 'vue-resource', 'moment', 'documentsactivity'], function(Vue, VueResource, moment, DocumentsActivity){
+                        requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function(Vue, VueResource, moment, DocumentsActivity){
                             Vue.use(VueResource);
 
                             Vue.filter('dateFull', function(date) {
@@ -315,7 +315,7 @@
                             new Vue({
                                 el: "#docv2",
                                 render(h) {
-                                    return h(DocumentsActivity.default, {
+                                    return h(DocumentsActivity, {
                                         props: {
                                             url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
                                             urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
@@ -440,7 +440,7 @@
                     <script>
                         require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
                             Vue.use(VueResource);
-                            Vue.filter('money', VueFilters.default.money);
+                           Vue.filter('money', VueFilters.default.money);
                             Vue.filter('dateFull', function(date) {
                                 var m = moment(date);
                                 return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();

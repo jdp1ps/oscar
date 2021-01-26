@@ -225,10 +225,6 @@ return array(
                     'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
-                [ 'controller' =>   'Person',
-                    'action' => ['grant'],
-                    'privileges' => \Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION
-                ],
 
                 // Membre
                 [ 'controller' =>   'Enroll',

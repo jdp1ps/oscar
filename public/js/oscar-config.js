@@ -19,8 +19,13 @@ requirejs.config({
         "jqueryui-core": "vendor/jqueryui/ui/core",
         "jqueryui-widget": "vendor/jqueryui/ui/widget",
         "jquery-serialize": "vendor/jquery-serialize-object/dist/jquery.serialize-object.min",
+
+        /** OLD **
+        "moment": "vendor/momentjs/min/moment-with-locales.min",
+        /*********/
         "moment": "vendor/momentjs/min/moment-with-locales.min",
         "moment-tz": "vendor/moment-timezone/builds/moment-timezone-with-data.min",
+
         "moment-timezone": "vendor/moment-timezone/builds/moment-timezone-with-data",
         "underscore": "vendor/underscore/underscore-min",
         "bt-datepicker": "vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min",
@@ -31,9 +36,10 @@ requirejs.config({
         "timewalker": "vendor/timewalker/src/js/TimeViewer",
         "oscar-auto": "oscar-auto",
         "OscarUI": "oscar-ui",
-        "vue": "vendor/vue/dist/vue.min",
+        "vue": "vendor/vue",
         "vue-resource": "vendor/vue-resource/dist/vue-resource",
         "vue-router": "vendor/vue-router/dist/vue-router",
+        "vue-composition-api": "vendor/composition-api",
         "LocalDB": "LocalDB/LocalDB",
         "OscarDepenses": "OscarDepenses",
         "privileges": "components/build/privileges",
@@ -99,7 +105,8 @@ requirejs.config({
         "documentsactivity": "oscar/dist/DocumentsActivity",
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
         "rolesadminui": "oscar/dist/RolesAdminUI",
-        "periodfieldsimple": "oscar/dist/PeriodFieldSimple"
+        "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
+        "activitydocument": "oscar/dist/ActivityDocument.umd.min"
     },
     shim: {
         "bootstrap": {
@@ -177,7 +184,7 @@ requirejs.config({
             deps: ["ical", "moment-timezone"]
         },
         "moment-timezone": {
-//            exports: "tz",
+            exports: "tz",
             deps: ["moment"]
         },
         "EventDT": {
@@ -202,6 +209,7 @@ define("datepicker", ["jquery", "bootstrap", "bt-datepicker"], function ($) {
 });
 
 define("mm", ["moment"], function (moment) {
+    console.log("Moment with timezone");
     moment.locale("fr");
     return moment;
 });

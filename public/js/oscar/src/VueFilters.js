@@ -10,11 +10,28 @@ export default {
             .replace(/-+$/, '');            // Trim - from end of text
     },
     money(value){
-        let entier = Math.floor(value);
-        let decimal = Math.round((value - entier)*100);
-        let modulo = entier % 1000;
-        let out = entier.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-        if( decimal < 10 ) decimal = '0' + decimal;
-        return out+ ',' +decimal;
+        var chaine = value.toFixed(2);
+        var out = "";
+
+        var pasteDigit = false;
+        var count = 0;
+        var out = [];
+
+        for( var i=chaine.length-1; i>=0; i-- ){
+            var char = chaine[i];
+            if( char == '.' ){
+                out.push(',');
+                pasteDigit = true;
+            } else {
+                out.push(char);
+                if( pasteDigit == true && char != '-' && i > 0){
+                    count++;
+                    if( count%3 == 0 ){
+                        out.push(" ");
+                    }
+                }
+            }
+        }
+        return out.reverse().join("");
     }
 }

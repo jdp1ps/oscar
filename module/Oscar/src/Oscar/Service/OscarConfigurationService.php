@@ -9,6 +9,7 @@
 namespace Oscar\Service;
 
 
+use Monolog\Logger;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Import\Data\DataStringArray;
@@ -27,10 +28,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const organization_leader_role = 'organization_leader_role';
     const spents_account_filter = 'spents_account_filter';
     const activity_request_limit = 'activity_request_limit';
+    const document_use_version_in_name = 'document_use_version_in_name';
 
     const theme = 'theme';
 
-    public function getApiFormats($default=[]){
+    public function getApiFormats($default = [])
+    {
         try {
             $format = $this->getConfiguration('api.formats');
         } catch (\Exception $e) {
@@ -74,12 +77,29 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $config;
     }
 
-    public function getPayementsConfig(){
+    public function getPayementsConfig()
+    {
         return $this->getOptionalConfiguration('payements', [
             'separator' => '$$',
             'persons' => '',
             'organizations' => ''
         ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoggerFilePath(): string
+    {
+        return $this->getOptionalConfiguration('log_path', __DIR__ . '/../../../../../logs/oscar.log');
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoggerLevel(): int
+    {
+        return $this->getOptionalConfiguration('log_level', Logger::WARNING);
     }
 
 
@@ -372,6 +392,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function setExportDateFormat($string)
     {
         $this->saveEditableConfKey('export_dateformat', $string);
+    }
+
+    public function getDocumentUseVersionInName(): bool
+    {
+        return $this->getEditableConfKey(self::document_use_version_in_name, false);
+    }
+
+    public function setDocumentUseVersionInName(bool $bool)
+    {
+        return $this->saveEditableConfKey(self::document_use_version_in_name, $bool);
     }
 
     public function getSpentAccountFilter()

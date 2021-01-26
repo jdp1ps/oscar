@@ -56,9 +56,7 @@
                 Vue.use(VueResource);
                 Vue.http.options.emulateJSON = true;
                 Vue.http.options.emulateHTTP = true;
-                Vue.filter('money', function( d ){
-                    return d.toFixed(2);
-                });
+                Vue.filter('money', VueFilters.default.money);
                 new Vue({
                     el: "#spentlines",
                     render(h){

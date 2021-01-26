@@ -177,7 +177,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             /** @var ContractDocument $document */
             $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($request->getPost('documentId'));
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $document->getGrant());
-            $type = $this->getEntityManager()->getRepository(TypeDocument::class)->findOneBy(['label' => $request->getPost('type')]);
+            $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($request->getPost('type'));
             if( !$type ){
                 $this->getResponseBadRequest("Type de document invalide");
             } else {
@@ -333,7 +333,16 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $fileDir = $this->getDropLocation();
         $this->getActivityLogService()->addUserInfo(sprintf("a téléchargé le document '%s'", $doc), $this->getDefaultContext(), $idDoc);
 
-        header('Content-Disposition: attachment; filename="'.$doc->getFileName().'"');
+
+        $filename = $doc->getFileName();
+
+        // Utilisation du numéro de version ?
+        if( $this->getOscarConfigurationService()->getDocumentUseVersionInName() === true ){
+            $version = $doc->getVersion();
+            $filename = preg_replace('/(.*)(\.\w*)/', '$1-version-'.$version.'$2', $filename);
+        }
+
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Content-type: '. $doc->getFileTypeMime());
         readfile($fileDir.'/'.$doc->getPath());
         die();

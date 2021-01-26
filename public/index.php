@@ -58,7 +58,6 @@ if (function_exists('apache_getenv') && ($apacheEnv = apache_getenv('APPLICATION
     putenv('APPLICATION_ENV=' . apache_getenv('APPLICATION_ENV'));
 }
 
-
 // Debug bar
 define('REQUEST_MICROTIME', microtime(true));
 
@@ -70,8 +69,13 @@ elseif( !getenv('APPLICATION_ENV' )){
     putenv('APPLICATION_ENV=production');
 }
 
-if( php_sapi_name() === 'cli' ){
+if( php_sapi_name() === 'cli-server' ){
     putenv('APPLICATION_ENV=development');
+    header("Access-Control-Allow-Origin: http://localhost:8081");
+    header("Access-Control-Allow-Credentials: true");
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Accept');
+
 }
 
 

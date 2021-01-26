@@ -26,6 +26,7 @@
     "gulp-debug": "^4.0.0",
     "gulp-sass": "^4.0.2",
     "gulp-shell": "^0.6.5",
+    "mocha": "^8.2.1",
     "poi": "^9.6.13",
     "sass-loader": "^7.1.0"
   }

@@ -1290,18 +1290,23 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function documentsJsonAction()
     {
         $id = $this->params()->fromRoute('id');
+        $ui = $this->params()->fromQuery('ui');
+
+        
+
 
         /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        $entity = $this->getActivityService()->getActivityById($id, true);
 
         // Check access
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW,
-            $entity);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity);
         $deletable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
         $uploadable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
         $personShow = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
 
-        $out = [];
+        $out = $this->baseJsonResponse();
+        $datas = [];
+
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson([
@@ -1309,13 +1314,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $this->url()->fromRoute('contractdocument/delete',['id' => $doc->getId()])
                     : false,
                 'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
-                'urlReupload' => $this->url()->fromRoute('contractdocument/upload',
-                        ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId(),
+                'urlReupload' => $uploadable ?
+                    $this->url()->fromRoute('contractdocument/upload', ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId()
+                    : false,
                 'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show',
                     ['id' => $doc->getPerson()->getId()]) : false,
             ]);
-            $out[] = $docDt;
+            $datas[] = $docDt;
         }
+        $out['datas'] = $datas;
 
         return new JsonModel($out);
     }
@@ -1708,12 +1715,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
 
-        $documentTypes = [];
-
-        /** @var TypeDocument $type */
-        foreach ($this->getEntityManager()->getRepository(TypeDocument::class)->findAll() as $type) {
-            $documentTypes[$type->getId()] = $type->getLabel();
-        }
+        $documentTypes = $this->getActivityService()->getTypesDocuments();
 
         $activity = $this->getProjectGrantService()->getGrant($id);
 
@@ -1878,6 +1880,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $idEnroller = $activityPerson->getActivity()->getId();
             } else {
                 $urlDelete = $deletableA ? $this->url()->fromRoute('personproject/delete',
                     ['idenroll' => $activityPerson->getId()]) : false;
@@ -1886,6 +1889,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $idEnroller = $activityPerson->getProject()->getId();
             }
             $urlShow = false;
             if( $showable ){
@@ -1896,20 +1900,20 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'id' => $activityPerson->getId(),
                 'role' => $activityPerson->getRole(),
                 'roleLabel' => $activityPerson->getRole(),
-                'roleId' => $activityPerson->getRoleObj()->getId(),
+                'roleId' => $activityPerson->getRoleObj() ? $activityPerson->getRoleObj()->getId() : "",
                 'rolePrincipal' => $activityPerson->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
-                'enroller' => $activity->getId(),
+                'enroller' => $idEnroller,
                 'enrollerLabel' => $activity->getLabel(),
                 'editable' => $editable,
                 'deletable' => $deletable,
                 'enrolled' => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
-                'start' => $activityPerson->getDateStart(),
-                'end' => $activityPerson->getDateEnd()
+                'start' => DateTimeUtils::toStr($activityPerson->getDateStart(), 'Y-m-d'),
+                'end' => DateTimeUtils::toStr($activityPerson->getDateEnd(), 'Y-m-d'),
             ];
         }
 

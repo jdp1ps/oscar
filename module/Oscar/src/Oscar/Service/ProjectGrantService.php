@@ -186,12 +186,36 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $activity = $this->getActivityRepository()->find($id);
         if (!$activity) {
-            if (!$throw)
-                throw new OscarException("Impossible de charger l'activité");
+            if ($throw === TRUE)
+                throw new OscarException("Impossible de charger l'activité (ID = $id)");
             else
                 return null;
         }
         return $activity;
+    }
+
+    /**
+     * Retourne la liste des types de documents disponibles pour qualifier les documents dans les activités de
+     * recherche.
+     *
+     * @param bool $asArray
+     * @return array|object[]
+     */
+    public function getTypesDocuments( $asArray = true )
+    {
+        $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
+        if( $asArray ){
+            $documentTypes = [];
+            /** @var TypeDocument $type */
+            foreach ($types as $type) {
+                $documentTypes[$type->getId()] = $type->getLabel();
+            }
+        } else {
+            $documentTypes = $types;
+        }
+        return $documentTypes;
+
+
     }
 
     /**

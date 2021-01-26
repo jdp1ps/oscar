@@ -29,6 +29,9 @@ public/js/oscar/dist/index.html
 public/js/oscar/dist/client.css
 public/js/oscar/dist/client.css.map
 
+# VUE CLI
+public/js/oscar/dist/demo.html
+
 doc/*.html
 
 # Connecteurs

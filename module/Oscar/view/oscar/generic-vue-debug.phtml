@@ -1,0 +1,36 @@
+<div class="container">
+    <h2>Developpement generic area for : <?= $composant ?></h2>
+    <div id="app"></div>
+</div>
+<script>
+    require(
+        ['vue', 'moment', '<?= $composant ?>'],
+        function(Vue, moment, Composant){
+
+
+            Vue.filter('dateFull', function(date) {
+                var m = moment(date);
+                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+            });
+
+            Vue.filter('dateFullSort', function(date) {
+                var m = moment(date);
+                return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
+            });
+
+            Vue.filter('filesize', function(octets) {
+                var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
+                if (octets == 0) return '0 Octet';
+                var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
+                return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
+            });
+
+            new Vue({
+                render: function(h){
+                    return h(Composant, { props: <?= $props ? json_encode($props) : '{}' ?> });
+                }
+            }).$mount('#app')
+        }
+    )
+</script>
+<?php

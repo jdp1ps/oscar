@@ -1,5 +1,20 @@
 <template>
     <div>
+
+        <template>
+            <div class="oscar-ajax" v-show="loading || error">
+                <div class="oscar-ajax-content">
+                    <div v-if="loading" class="loading-message">
+                        <i class="icon-spinner animate-spin animate"></i> {{ loading }}
+                    </div>
+                    <div v-if="error" class="error-message">
+                        <span @click="error = false" style="font-weight: bold; position: absolute; top: 1em; right: 1em ">x</span>
+                        <i class="icon-attention-1"></i> <strong>{{ error }} </strong>
+                    </div>
+
+                </div>
+            </div>
+        </template>
         <code>{{ entityEdited }}</code>
         <div class="overlay" v-if="entityDelete">
             <div class="overlay-content">
@@ -39,7 +54,7 @@
             <div class="overlay-content" style="overflow: visible">
                 <i class="icon-cancel-outline overlay-closer" @click="entityEdited = null"></i>
 
-                <form :action="entityEdited.urlEdit" method="post" @submit.prevent="performEdit">
+                <form :action="entityEdited.urlEdit" method="post" @submit.prevent.stop="performEdit">
                     <h2>
                         <span v-if="entityEdited.enrolledLabel">
                             Modifier <strong>{{ entityEdited.enrolledLabel }}</strong>
@@ -139,11 +154,11 @@
                 </div>
 
                 <nav class="admin-bar">
-                    <button class="btn btn-default button-back" @click="entityNew = null">
+                    <button class="btn btn-default button-back" type="button" @click="entityNew = null">
                         <i class="icon-angle-left"></i>
                         Annuler
                     </button>
-                    <button class="btn btn-primary" type="submit" @click="performNew">
+                    <button class="btn btn-primary" type="button" @click="performNew">
                         <i class="icon-floppy"></i>
                         Enregistrer
                     </button>
@@ -198,7 +213,8 @@ export default {
             entityEdited: null,
             entityDelete: null,
             entityNew: null,
-            error: null
+            error: null,
+            loading: false
         };
     },
 
@@ -239,53 +255,64 @@ export default {
         },
 
         performDelete(){
-            this.$http.post(this.entityDelete.urlDelete, {}).then( ok => {
+            this.loading = "Suppression...";
+            var url = this.entityDelete.urlDelete;
+            this.entityDelete = null;
 
+            this.$http.post(url, {}).then( ok => {
             }, ko => {
                 this.error = ko.body;
             }).then( foo => {
-                this.entityDelete = null;
+                this.loading = false;
                 this.fetch();
             })
         },
 
         performEdit(){
+            this.loading = "Enregistrement des modifications";
             let data = new FormData();
-            data.append('dateStart', '');
-            data.append('dateEnd', '');
+            data.append('dateStart', this.entityEdited.start);
+            data.append('dateEnd', this.entityEdited.end);
             data.append('role', this.entityEdited.roleId);
             data.append('enrolled', this.entityEdited.enrolled);
-            this.$http.post(this.entityEdited.urlEdit, data).then( ok => {
-                console.log("OK", ok);
+            var url = this.entityEdited.urlEdit;
+            this.entityEdited = null;
+            this.$http.post(url, data).then( ok => {
+
             }, ko => {
                 this.error = "Erreur : " + ko.body;
             }).then( foo => {
-                this.entityEdited = null;
+                this.loading = false;
                 this.fetch();
-            })
-          console.log(arguments);
+            });
+            return false;
         },
 
         performNew(){
             let data = new FormData();
+            this.loading = "Création...";
+            var enroled = this.entityNew.enroled;
             data.append('dateStart', this.entityNew.start);
             data.append('dateEnd', this.entityNew.end);
             data.append('role', this.entityNew.role);
-            data.append('enroled', this.entityNew.enroled);
-            this.$http.post(this.urlNew+'/'+this.entityNew.enroled, data).then( ok => {
-                console.log("OK", ok);
+            data.append('enroled', enroled);
+            this.entityNew = null;
+
+            this.$http.post(this.urlNew+'/'+enroled, data).then( ok => {
+
             }, ko => {
                 this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
             }).then( foo => {
-                this.entityNew = null;
+                this.loading = false;
                 this.fetch();
             })
-            console.log(arguments);
         },
 
         fetch(){
+            this.loading = "Chargement...";
             this.$http.get(this.url).then(ok => {
                 this.entities = ok.body;
+                this.loading = false;
             },
             ko => {
                 this.error = "Erreur : " + ko.body;

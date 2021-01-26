@@ -52,6 +52,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         $io->title("Synchronisation des organisations");
 
         $connectorName = $input->getArgument('connectorname');
+        $noRebuild = $input->getOption('no-rebuild');
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
@@ -74,11 +75,12 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
                 }
             }
         } catch (\Exception $e) {
+            $noRebuild = true;
             $io->error($e->getMessage());
         }
 
         $io->section("Reconstruction de l'index de recherche : ");
-        if( !$input->getOption('no-rebuild') ){
+        if( !$noRebuild ){
             /** @var OrganizationService $organizationService */
             $organizationService = $this->getServicemanager()->get(OrganizationService::class);
 

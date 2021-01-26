@@ -3,6 +3,12 @@
 Ce document regroupe des informations informelles lièes au développement des fonctionnalités dans Oscar.
 
 
+## UI (via vue-cli)
+
+```bash
+npm install
+```
+
 
 ## UI
 

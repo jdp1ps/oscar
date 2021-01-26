@@ -1566,16 +1566,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->jobSearchUpdate($person);
     }
 
-    public function personActivityChangeRole(ActivityPerson $activityPerson, Role $newRole)
+    public function personActivityChangeRole(ActivityPerson $activityPerson, Role $newRole, $dateStart, $dateEnd)
     {
+
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
 
-        // TODO Faire un contrôle sur les dates
-
-
         $updateNotification = $activityPerson->isPrincipal() || $newRole->isPrincipal();
         $activityPerson->setRoleObj($newRole);
+        $activityPerson->setDateStart($dateStart)->setDateEnd($dateEnd);
         $this->getEntityManager()->flush($activityPerson);
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans l'activité %s", $person, $activity));
 
