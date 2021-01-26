@@ -646,7 +646,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     private function getProjectEntity() :Project
     {
-        $idProject = $this->params()->fromRoute('idenroller');
+        $idProject = $this->params()->fromRoute('idenroll');
+        $this->getLoggerService()->debug("Chargement du Projet");
         $project = $this->getProjectService()->getProject($idProject);
         return $project;
     }
@@ -697,7 +698,12 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function personProjectEditAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
+        /** @var ProjectMember $personProject */
+        $personProject = $this->getEntityManager()->getRepository(ProjectMember::class)->find(
+            $this->params()->fromRoute('idenroll')
+        );
+
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $personProject->getProject());
         return $this->editEnroll(ProjectMember::class);
     }
 
@@ -771,7 +777,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         try {
             $datas = $this->getEnrollDatas(ActivityPerson::class);
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
-            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role']);
+            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role'], $datas['dateStart'], $datas['dateEnd']);
+            // PATCH DATE
             $this->updateIndex('Activity', $datas['enroller']);
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
         } catch (\Exception $e) {
