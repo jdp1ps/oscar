@@ -1884,6 +1884,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $idEnroller = $activityPerson->getActivity()->getId();
             } else {
                 $urlDelete = $deletableA ? $this->url()->fromRoute('personproject/delete',
                     ['idenroll' => $activityPerson->getId()]) : false;
@@ -1892,6 +1893,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $idEnroller = $activityPerson->getProject()->getId();
             }
             $urlShow = false;
             if( $showable ){
@@ -1908,14 +1910,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'context' => $context,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
-                'enroller' => $activity->getId(),
+                'enroller' => $idEnroller,
                 'enrollerLabel' => $activity->getLabel(),
                 'editable' => $editable,
                 'deletable' => $deletable,
                 'enrolled' => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
-                'start' => $activityPerson->getDateStart(),
-                'end' => $activityPerson->getDateEnd()
+                'start' => DateTimeUtils::toStr($activityPerson->getDateStart(), 'Y-m-d'),
+                'end' => DateTimeUtils::toStr($activityPerson->getDateEnd(), 'Y-m-d'),
             ];
         }
 
