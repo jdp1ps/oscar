@@ -13,6 +13,15 @@ function compile(module){
     exec(cmd);
 }
 
+function compileComponent(componentBaseName){
+    let moduleSrc = './src/components/' + componentBaseName + ".vue";
+    let moduleDest = pathModuleDest;
+    console.log("Compile ", componentBaseName, " from ", moduleSrc, " to ", moduleDest);
+    let cmd = "node node_modules/.bin/vue-cli-service build --name "+componentBaseName+" --dest " + moduleDest + " --no-clean --formats umd,umd-min --target lib " + moduleSrc;
+    console.log(cmd);
+    exec(cmd);
+}
+
 function activityDocument(cb) {
     compile("ActivityDocument");
     cb();
@@ -21,6 +30,7 @@ function administrationPcru(cb) {
     compile("AdministrationPcru");
     cb();
 }
+
 
 let commands = ['activityDocument', 'administrationPcru'];
 
@@ -34,6 +44,21 @@ exports.administrationPcru = administrationPcru;
 exports.administrationPcruWatch = function(cb){
     watch(pathModuleSrc + "AdministrationPcru.vue", administrationPcru);
 }
+
+///////////////////////// COMPOSANTS COMPILES
+function componentPassword(cb) {
+    compileComponent('PasswordField');
+    cb();
+}
+exports.componentPassword = componentPassword;
+exports.componentPasswordWatch = function(cb){ watch('./src/components/PasswordField.vue', componentPassword); }
+
+function componentTextarea(cb) {
+    compileComponent('TextareaField');
+    cb();
+}
+exports.componentTextarea = componentTextarea;
+exports.componentTextareaWatch = function(cb){ watch('./src/components/TextareaField.vue', componentTextarea); }
 
 function defaultTask(cb) {
     console.log("Usage : ");

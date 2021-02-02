@@ -765,6 +765,15 @@ generate:
             action: generate
     may_terminate: true
 
+test:
+    type: literal
+    options:
+        route: /test
+        defaults:
+            controller: Public
+            action: test
+    may_terminate: true
+
 spent:
     type: literal
     options:

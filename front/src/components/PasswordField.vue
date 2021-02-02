@@ -4,7 +4,7 @@
         <label class="sr-only" :for="name">Mot de passe {{ type }} / {{ value }}</label>
         <div class="input-group input-lg password-field">
             <div class="input-group-addon">
-                <i class="glyphicon icon-lock"></i> <strong>{{ text }}</strong>
+                <i class="glyphicon icon-lock"></i> <strong>{{ label }}</strong>
             </div>
             <input style="font-family: monospace" :name="name" type="text" v-model="value" class="form-control" placeholder="Mot de passe" :id="name" v-if="type == 'text'" />
             <input style="font-family: monospace" :name="name" type="password" v-model="value" class="form-control" placeholder="Mot de passe" :id="name" v-else />
@@ -24,7 +24,7 @@
         props: {
             name: { required: true },
             value: { default: "" },
-            text: { default: "foo" }
+            label: { default: "" }
         },
         data(){
             return {
@@ -34,8 +34,8 @@
         },
         watch: {
             value(val){
-                console.log(val);
                 this.$emit('change', val);
+                this.$emit('input', val);
             }
         },
         methods: {

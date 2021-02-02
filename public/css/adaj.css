@@ -11561,6 +11561,18 @@ pre.alert-danger, pre.alert-info {
   transition: background-color linear 5s;
 }
 
+.vue-ui-textarea .vue-ui-content {
+  position: relative;
+}
+.vue-ui-textarea .vue-ui-content .errors {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #DD423E;
+  color: white;
+  text-shadow: 1px -1px 1px rgba(0, 0, 0, 0.8);
+}
+
 .datepicker-selector {
   position: absolute;
   width: 16em;

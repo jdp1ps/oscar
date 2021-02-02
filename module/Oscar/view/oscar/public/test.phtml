@@ -9,10 +9,17 @@
                 <form method="post">
                     <h1>Form {{ foo }}</h1>
                     Valeur : <code style="font-weight: 900">{{ passvalue }}</code>
-                    <passwordfield name="mot-de-passe" v-model="passvalue"></passwordfield>
+                    <passwordfield name="mot-de-passe"
+                                   v-model="passvalue"
+                                   label="Mot de passe"
+                                   :required="true"></passwordfield>
                     <hr>
 
-                    <textarea-field id="description" label="Description" maxlength="20" :required="true" />
+                    <textarea-field id="description"
+                                    label="Description"
+                                    name="description-envoyee"
+                                    maxlength="20"
+                                    :required="true"></textarea-field>
 
                     <button type="submit">Envoyer</button>
                 </form>
@@ -22,7 +29,11 @@
 </div>
 
 <script>
-    require(["vue", '../js/oscar/dist/PasswordField.umd', '../js/oscar/dist/TextareaField.umd' ], function(Vue, PasswordField, TextareaField){
+    require(["vue"
+        , '../js/certic-ui-components/build/PasswordField.umd'
+        , '../js/certic-ui-components/build/TextareaField.umd' ],
+
+        function(Vue, PasswordField, TextareaField){
 
         Vue.component('passwordfield', PasswordField);
         Vue.component('textarea-field', TextareaField);
