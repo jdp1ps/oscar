@@ -1,4 +1,5 @@
 <?php ?>
+<link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
 <div class="container">
     <section class="row">
         <div class="col-md-4">
@@ -21,6 +22,8 @@
                                     maxlength="20"
                                     :required="true"></textarea-field>
 
+                    <datepicker-field v-model="datestart" name="datestart" id="datestart"></datepicker-field>
+
                     <button type="submit">Envoyer</button>
                 </form>
             </section>
@@ -31,18 +34,22 @@
 <script>
     require(["vue"
         , '../js/certic-ui-components/build/PasswordField.umd'
-        , '../js/certic-ui-components/build/TextareaField.umd' ],
+        , '../js/certic-ui-components/build/TextareaField.umd'
+        , '../js/certic-ui-components/build/DatepickerField.umd'
+        ],
 
-        function(Vue, PasswordField, TextareaField){
+        function(Vue, PasswordField, TextareaField, DatepickerField){
 
         Vue.component('passwordfield', PasswordField);
         Vue.component('textarea-field', TextareaField);
+        Vue.component('datepicker-field', DatepickerField);
 
         new Vue({
             el: "#app",
             data:{
                 foo: "Bar",
-                passvalue: "mon mot de passe"
+                passvalue: "mon mot de passe",
+                datestart: ""
             }
         })
     })

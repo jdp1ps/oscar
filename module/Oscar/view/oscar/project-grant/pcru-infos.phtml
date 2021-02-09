@@ -1,13 +1,61 @@
 <?php /****/ ?>
+<link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
 <div class="container">
     <header>
         <h1>Informations PCRU</h1>
         <h3><?= $activity ?></h3>
     </header>
 
+    <div id="app" style="visibility: hidden">
+        <div class="">
 
-    <?= $this->form()->openTag($form->prepare()); ?>
-    <?= $this->formControlGroup($form->get('id')); ?>
+            <?= $this->form()->openTag($form->prepare()); ?>
+            <?= $this->formControlGroup($form->get('id')); ?>
+
+            <section class="">
+                <h2>
+                    <i class="icon-info-circled"></i>
+                    Informations générales
+                </h2>
+
+                <fieldset>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <?= $this->formControlGroup($form->get('acronyme')); ?>
+                        </div>
+                        <div class="col-md-10">
+                            <?= $this->formControlGroup($form->get('objet')); ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="dateDerniereSignature">Date de signature</label>
+                            <datepicker-field :name="'dateDerniereSignature'" />
+                        </div>
+                        <div class="col-md-3">
+                            <?= $this->formControlGroup($form->get('dateDebut')); ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $this->formControlGroup($form->get('dateFin')); ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $this->formControlGroup($form->get('duree')); ?>
+                        </div>
+                    </div>
+                </fieldset>
+
+
+
+            </section>
+
+            <label for="datestart">Date de début</label>
+            <datepicker-field :name="'datestart'" />
+        </div>
+    </div>
+<?php /*
+
+
 
     <section class="">
         <h2>
@@ -154,4 +202,34 @@
         </button>
     </div>
     <?= $this->form()->closeTag(); ?>
+****/ ?>
+
+
+    <script>
+        require(["vue"
+                , '../js/certic-ui-components/build/PasswordField.umd'
+                , '../js/certic-ui-components/build/TextareaField.umd'
+                , '../js/certic-ui-components/build/DatepickerField.umd'
+            ],
+
+            function(Vue, PasswordField, TextareaField, DatepickerField){
+
+                Vue.component('passwordfield', PasswordField);
+                Vue.component('textarea-field', TextareaField);
+                Vue.component('datepicker-field', DatepickerField);
+
+                new Vue({
+                    el: "#app",
+                    data:{
+                        foo: "Bar",
+                        passvalue: "mon mot de passe",
+                        datestart: ""
+                    }
+                })
+
+                document.querySelector('#app').style.visibility = 'visible';
+            })
+
+    </script>
+
 </div>
