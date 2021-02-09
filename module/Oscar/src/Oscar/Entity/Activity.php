@@ -378,6 +378,15 @@ class Activity implements ResourceInterface
      */
     private $documents;
 
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="EstimatedSpentLine", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
+     * 
+     */
+    private $estimatedSpentLines;
+
+
     /**
      * @var String
      * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
@@ -1055,7 +1064,25 @@ class Activity implements ResourceInterface
         $this->milestones = new ArrayCollection();
         $this->payments = new ArrayCollection();
         $this->disciplines = new ArrayCollection();
+        $this->estimatedSpentLines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getEstimatedSpentLines(): ArrayCollection
+    {
+        return $this->estimatedSpentLines;
+    }
+
+    /**
+     * @param ArrayCollection $estimatedSpentLines
+     */
+    public function setEstimatedSpentLines(ArrayCollection $estimatedSpentLines): self
+    {
+        $this->estimatedSpentLines = $estimatedSpentLines;
+        return $this;
     }
 
     /**
