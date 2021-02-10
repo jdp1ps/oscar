@@ -390,7 +390,7 @@ class Activity implements ResourceInterface
 
     /**
      * Informations complémentaires PCRU
-     * @OneToOne(targetEntity="ActivityPcruInfos", mappedBy="activity")
+     * @OneToOne(targetEntity="ActivityPcruInfos", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
      */
     private $pcruInfo;
 
