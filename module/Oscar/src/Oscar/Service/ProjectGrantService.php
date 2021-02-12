@@ -1757,7 +1757,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function organizationActivityEdit(ActivityOrganization $activityorganization, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true)
     {
         try {
-            $activityorganization->setRoleObj($roleOrganization);
+            $activityorganization->setRoleObj($roleOrganization)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd);
             $this->getEntityManager()->flush($activityorganization);
 
             try {
@@ -1785,6 +1787,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getEntityManager()->persist($organizationActivity);
             $organizationActivity->setOrganization($organization)
                 ->setActivity($activity)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd)
                 ->setRoleObj($roleOrganization);
             $this->getEntityManager()->flush($organizationActivity);
 

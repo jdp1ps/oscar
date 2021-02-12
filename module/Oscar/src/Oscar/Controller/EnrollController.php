@@ -253,8 +253,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
         $enrollerId = $this->params()->fromRoute('idenroller', null);
         $enrolledId = $this->params()->fromQuery('idenrolled', null);
-        //die("$enrolledId // $enrollerId");
-
         $roles = $this->getRoles($class);
 
         switch ($class) {
@@ -347,7 +345,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         if( $enrolledId ){
             $enrolled = $this->getEntityManager()->getRepository($enrolledClass)->find($enrolledId);
             $label = sprintf($labelTpl, " rôle au $textWhat $enrolled", $textWhere);
-            //die($enrolled);
         } else {
             $label = sprintf($labelTpl, $textWhat, $textWhere);
             $enrolled = null;
@@ -803,7 +800,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
 
-            $this->getActivityService()->organizationActivityAdd($organization, $activity, $role, null, null, true);
+            $this->getActivityService()->organizationActivityAdd($organization, $activity, $role, $this->getDateStartPosted(), $this->getDateEndPosted(), true);
 
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()] );
         } catch (\Exception $e) {
@@ -840,7 +837,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 throw new OscarException("Droits insufisants");
             }
 
-            $this->getProjectGrantService()->organizationActivityEdit($organizationActivity, $this->getPostedOrganizationRole(), $this->getDateStartPosted(), $this->getDateEndPosted());
+            $this->getProjectGrantService()->organizationActivityEdit(
+                $organizationActivity,
+                $this->getPostedOrganizationRole(),
+                $this->getDateStartPosted(),
+                $this->getDateEndPosted());
 
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$organizationActivity->getActivity()->getId()]);
         } catch (\Exception $e) {
@@ -906,18 +907,18 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
      * @throws OscarException
      */
     public function getPostedDateTime($field){
-        $strVal = $this->params()->fromRoute($field);
+        $strVal = $dateStart = $this->params()->fromPost($field, "");
+
         try {
-            if( !$strVal )
+            if( $strVal == "" || $strVal == "null" )
                 return null;
 
-            if( $datetime = \DateTime::createFromFormat('Y-m-d', $strVal) ){
-                return $datetime;
-            }
+
+            return new \DateTime($strVal);
 
             return null;
         } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Problème d'extraction de date : %s", $e->getMessage())));
+            throw new OscarException(sprintf(_("Problème d'extraction de date du champ %s = %s : %s"), $field, print_r($strVal), $e->getMessage()));
         }
     }
 
