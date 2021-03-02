@@ -21,6 +21,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
@@ -848,11 +849,16 @@ class AdministrationController extends AbstractOscarController implements UsePro
     {
         $ldapfilter = $request->getPost('ldapFilter');
 
+        $roleId = trim($request->getPost('roleId'));
+        if( !$roleId ){
+            throw new OscarException("Le rôle ne peut pas être vide");
+        }
+
         if (trim($ldapfilter) == '') {
             $ldapfilter = null;
         }
 
-        $role->setRoleId($request->getPost('roleId'))
+        $role->setRoleId($roleId)
             ->setLdapFilter($ldapfilter)
             ->setDescription($request->getPost('description'))
             ->setSpot($request->getPost('spot'))
@@ -1026,8 +1032,20 @@ class AdministrationController extends AbstractOscarController implements UsePro
             // POST : Nouveau rôle
             elseif( $this->getHttpXMethod() == 'POST' ){
                 $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
+
+                // Contrôle du Role
+                $roleId = trim($request->getPost('label'));
+                if( $roleId == "" ){
+                    return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
+                }
+
+                $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(['label' => $roleId]);
+                if( $exist ){
+                    return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
+                }
+
                 $role = new OrganizationRole();
-                $role->setLabel($request->getPost('label'))
+                $role->setLabel($roleId)
                     ->setDescription($request->getPost('description'))
                     ->setPrincipal($request->getPost('principal') == 'true');
                 $this->getEntityManager()->persist($role);
@@ -1043,6 +1061,18 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
 
             if( $this->getHttpXMethod() == 'PUT' ){
+
+                // Contrôle du Role
+                $roleId = trim($request->getPost('label'));
+                if( $roleId == "" ){
+                    return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
+                }
+
+                $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
+                if( $exist ){
+                    return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
+                }
+
                 $role->setLabel($request->getPost('label'))
                     ->setDescription($request->getPost('description'))
                     ->setPrincipal($request->getPost('principal') == 'true');
