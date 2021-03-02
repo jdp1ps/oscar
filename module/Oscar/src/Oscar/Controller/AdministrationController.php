@@ -339,6 +339,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             return $this->getResponseBadRequest("");
                         }
                         $this->getEntityManager()->remove($tva);
+                        $this->getEntityManager()->flush();
                         return $this->getResponseOk('TVA supprimée');
                     } catch (\Exception $e ){
                         return $this->getResponseInternalError($e->getMessage());

@@ -196,7 +196,7 @@
                 let tva = this.deleteData;
                 this.$http.delete('?id=' + tva.id).then(
                     ok => {
-                        //this.tvas = ok.body.tvas;
+                        this.fetch();
                     },
                     ko => {
                         this.error = ko.body;
