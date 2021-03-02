@@ -381,7 +381,7 @@ class Activity implements ResourceInterface
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="EstimatedSpentLine", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="EstimatedSpentLine", mappedBy="activity", orphanRemoval=true, cascade={"remove"}, inversedBy="estimatedSpentLines")
      * 
      */
     private $estimatedSpentLines;
