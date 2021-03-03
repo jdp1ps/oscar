@@ -12,6 +12,7 @@ namespace Oscar\Command;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaValidator;
 use Moment\Moment;
+use Monolog\Logger;
 use Oscar\Connector\AbstractConnectorOscar;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
@@ -52,6 +53,13 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
     protected function getOscarConfiguration()
     {
        return $this->getServicemanager()->get(OscarConfigurationService::class);
+    }
+
+    /**
+     * @return Logger
+     */
+    protected function getLogger(){
+        return $this->getServicemanager()->get('Logger');
     }
 
     protected function checkConnectorPerson(InputInterface $input, OutputInterface $output)
@@ -144,6 +152,8 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
         /** @var OscarUserContext $oscaruserContext */
         $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
+
+        $this->getLogger()->info("[COMMAND] check:config");
 
         $io = new SymfonyStyle($input, $output);
 
