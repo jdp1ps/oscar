@@ -96,6 +96,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
         ;
         if (isset($data['disciplines'])) {
             $object->setDisciplines($this->getDisciplines($data['disciplines']));
+        } else {
+            $object->setDisciplines([]);
         }
         return $object;
     }
