@@ -38,6 +38,7 @@ use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
+use Oscar\Formatter\ActivityToJsonFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
@@ -647,7 +648,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function jsonApiAction(){
+        // Accès global au activité
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW);
 
+        $activity = $this->getActivityFromRoute();
+        $formatter = new ActivityToJsonFormatter();
+        $json = $formatter->format($activity);
+        return $this->jsonOutput($json);
+        die("TODO : $activity");
+    }
 
     /**
      * Génération automatique de documents.
