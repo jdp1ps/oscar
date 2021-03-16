@@ -395,10 +395,11 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         if( $search != "" ){
             $ids = $this->search($search, true);
+           // var_dump($ids); die();
             $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
         }
 
-        $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
+        //$qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
 
         // -------------------------------------------------------------------------------------------------------------
         // FILTRE sur les types d'organisations

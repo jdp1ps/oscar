@@ -193,8 +193,9 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                 'size' => 10000,
                 'query' => [
                     'query_string' => [
-                        'fields' => ['code^5', 'shortname^5', 'fullname^5', 'email', 'city', 'siret', 'country', 'connectors', 'zipcode', 'persons^3', 'activities'],
+                        'fields' => [ 'code','shortname^7', 'fullname^9','email', 'city', 'siret', 'country', 'connectors', 'zipcode', 'persons'],
                         'query' => $search,
+                        'use_dis_max' => true
                     ]
                 ]
             ]
