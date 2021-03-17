@@ -421,6 +421,14 @@ class Activity implements ResourceInterface
         return $this->totalSpent;
     }
 
+    public function getPercentSpent(){
+        return 100 / $this->getAmount() * abs($this->getTotalSpent());
+    }
+
+    public function getRemainder(){
+        return $this->getAmount() - abs($this->getTotalSpent());
+    }
+
     /**
      * @param float $totalSpent
      */
@@ -1873,7 +1881,8 @@ class Activity implements ResourceInterface
             'amount' => $this->getAmount(),
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
-            'montant' => number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
+            'montant' => number_format(
+                (double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
             'annee-debut' => $this->getDateStartStr('Y'),
             'annee-fin' => $this->getDateEndStr('Y'),
             'debut' => $this->getDateStartStr('d/m/Y'),
@@ -1888,6 +1897,11 @@ class Activity implements ResourceInterface
         ];
 
         $sluger = Slugify::create();
+
+        // Dépenses
+        $datas['total-depense'] = number_format($this->getTotalSpent(),2,',', ' '); // as $spent)
+        $datas['total-depense-percent'] = number_format($this->getPercentSpent(),2, ',', ''); // as $spent)
+        $datas['total-reste'] = number_format($this->getRemainder(),2, ',', ' ');
 
 
         $persons = [];

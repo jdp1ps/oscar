@@ -173,6 +173,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'city' => $organization->getCity(),
             'country' => $organization->getCountry(),
             'zipcode' => $organization->getZipCode(),
+            'description' => $organization->getDescription(),
 //            'address1' => $organization->getStreet1(),
 //            'address2' => $organization->getStreet2(),
 //            'address3' => $organization->getStreet3(),
@@ -191,22 +192,74 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'type' => $this->getType(),
             'body' => [
                 'size' => 10000,
+
+
+                "query" => [
+                    'query_string' => [
+                        'fields' => [ 'code^3','shortname^4', 'fullname^8','description','email',
+                            'city', 'siret', 'country', 'connectors', 'zipcode', 'persons'],
+                        'query' => $search,
+
+                    ]
+//                    "bool" => [
+//                        "should" => [
+//                            [ "match" => [
+//                                "code" => [
+//                                    "query" => "$search",
+//                                    "boost" => 1
+//                                ]
+//                            ]],
+//                            [ "match" => [
+//                                "shortname" => [
+//                                    "query" => "$search",
+//                                    "boost" => 10
+//                                ]
+//                            ]],
+//                            [ "match" => [
+//                                "fullname" => [
+//                                    "query" => "$search",
+//                                    "boost" => 5
+//                                ]
+//                            ]],
+//                        ]
+//                    ]
+                ]
+
+
+                /* OFF
                 'query' => [
                     'query_string' => [
-                        'fields' => ['code^5', 'shortname^5', 'fullname^5', 'email', 'city', 'siret', 'country', 'connectors', 'zipcode', 'persons^3', 'activities'],
+                        "search_fields" => [
+                            "shortname" => [
+                                "weight" => 10
+                            ],
+                            "code" => [
+                                "weight" => 2
+                            ],
+                            "fullname" => [
+                                "weight" => 2
+                            ],
+                        ],
                         'query' => $search,
-                    ]
+                        'use_dis_max' => true
+                    ],
                 ]
+                /******/
             ]
         ];
 
         $response = $this->getClient()->search($params);
         $ids = [];
+
+        //echo "<pre>";
         if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
+        //        echo $hit['_id'] . "\t " . $hit['_score'] . "- " . $hit['_source']['fullname'] ."\n";
                 $ids[] = $hit["_id"];
             }
         }
+        //echo "</pre>";
+
         return $ids;
     }
 

@@ -828,6 +828,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
+        $this->getLoggerService()->info('[INDEX ACTIVITY] Reindex de ' . count($activities) . ' activité(s)');
         return $this->getSearchEngineStrategy()->rebuildIndex($activities);
     }
 
@@ -881,27 +882,37 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function searchDelete($id)
     {
+        $this->getLoggerService()->info("[INDEX ACTIVTY] Suppression de l'index '$id'");
         $this->getSearchEngineStrategy()->searchDelete($id);
     }
 
     public function searchUpdate(Activity $activity)
     {
+        $this->getLoggerService()->info("[INDEX ACTIVTY] Réindexation de l'activité '$activity'");
         $this->getSearchEngineStrategy()->searchUpdate($activity);
+    }
+
+    public function testGearmanError(){
+        throw new OscarException("Erreur envoyée depuis un service OSCAR.");
     }
 
     public function jobSearchUpdate(Activity $activity)
     {
         $client = new \GearmanClient();
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
+
+        $gearmanid = sprintf('activitysearchupdate-%s', $activity->getId());
+        $this->getLoggerService()->info("[INDEX ACTIVTY] Envoi à gearman : Réindexation de l'activité '$activity'");
+
+
         $client->doBackground('activitySearchUpdate', json_encode([
             'activityid' => $activity->getId()
-        ]),
-            sprintf('activitysearchupdate-%s', $activity->getId())
-        );
+        ]),$gearmanid);
     }
 
     public function searchIndex_reset()
     {
+        $this->getLoggerService()->info("[INDEX ACTIVITY] Remise à zéro de l'index");
         $this->getSearchEngineStrategy()->resetIndex();
     }
 
@@ -1764,7 +1775,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function organizationActivityEdit(ActivityOrganization $activityorganization, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true)
     {
         try {
-            $activityorganization->setRoleObj($roleOrganization);
+            $activityorganization->setRoleObj($roleOrganization)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd);
             $this->getEntityManager()->flush($activityorganization);
 
             try {
@@ -1792,6 +1805,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getEntityManager()->persist($organizationActivity);
             $organizationActivity->setOrganization($organization)
                 ->setActivity($activity)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd)
                 ->setRoleObj($roleOrganization);
             $this->getEntityManager()->flush($organizationActivity);
 

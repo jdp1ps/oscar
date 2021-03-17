@@ -41,6 +41,7 @@ use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
 use Oscar\Form\PcruInfosForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
+use Oscar\Formatter\ActivityToJsonFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
@@ -651,7 +652,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function jsonApiAction(){
+        // Accès global au activité
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW);
 
+        $activity = $this->getActivityFromRoute();
+        $formatter = new ActivityToJsonFormatter();
+        $json = $formatter->format($activity);
+        return $this->jsonOutput($json);
+        die("TODO : $activity");
+    }
 
     /**
      * Génération automatique de documents.
@@ -2119,6 +2129,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'ads' => 'Date de signature',
                 'adp' => 'Date d\'ouverture du PFI dans SIFAC',
                 'pp' => 'Activités sans projet',
+                'ds' => 'Ayant pour discipline',
 
                 // Ajout d'un filtre sur les jalons
                 'aj' => 'Ayant le jalon'
@@ -2467,7 +2478,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $qb->andWhere('c.status NOT IN (:withoutstatus)');
                             break;
 
-                        // Filtre sur le type de l'activité
+
+
                         case 'at' :
                             if (!isset($parameters['withtype'])) {
                                 $parameters['withtype'] = [];
@@ -2513,6 +2525,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
                             break;
                         case 'add' :
+                        case 'ds' :
+                            $qb->andWhere('dis.id = :discipline');
+                            $parameters['discipline'] = $value1;
+                            break;
                         case 'adf' :
                         case 'adm' :
                         case 'adc' :
@@ -2662,6 +2678,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'sortDirection' => $sortDirection,
                 'sortIgnoreNull' => $sortIgnoreNull,
                 'types' => $this->getActivityTypeService()->getActivityTypes(true),
+                'disciplines' => $this->getActivityService()->getDisciplines(),
             ]);
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');
             return $view;

@@ -106,8 +106,9 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Activity',
                     'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations', 'makeProject',
-                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'changeProject',
+                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'changeProject', 'jsonApi',
                         'notifications', 'generateNotifications', 'generatedDocument', 'pcru', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent','estimatedSpentExport', 'spentList', 'newInStructure', 'spentSynthesisActivity', 'pcruInfos', "pcru"],
+
                     'roles' => ['user'],
                 ],
                 [ 'controller' =>   'Activity',

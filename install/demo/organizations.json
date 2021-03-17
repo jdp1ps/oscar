@@ -138,5 +138,34 @@
     "shortname": "USB",
     "longname": "Université des sciences de Berlin",
     "type": "Établissement publique"
+  },
+  {
+    "uid" : "KWCODE",
+    "code" : "UNISCIENCE",
+    "shortname" : "KWCODE",
+    "longname" : "KWCODE Mot clef dans le code",
+    "type": "Établissement publique"
+  },
+  {
+    "uid" : "KWSNAME",
+    "code" : "UNIPHY",
+    "shortname" : "UNISCIENCE",
+    "longname" : "KWSNAME Mot clef dans le shortname",
+    "type": "Établissement publique"
+  },
+  {
+    "uid" : "KWLNAME",
+    "code" : "UNIBIO",
+    "shortname" : "UNIBIO",
+    "longname" : "UNISCIENCE Mot clef dans le longname",
+    "type": "Établissement publique"
+  },
+  {
+    "uid" : "KWDESC",
+    "code" : "UNIDESC",
+    "shortname" : "UNIDESC",
+    "longname" : "Mot clef dans la description",
+    "description" : "Vient de UNISCIENCE",
+    "type": "Établissement publique"
   }
 ]

@@ -244,6 +244,11 @@ class NotificationService implements UseServiceContainer
 
     public function generateMilestonesNotificationsForActivity(Activity $activity, $person = null)
     {
+        $msg = "Génération des notifications pour l'activité $activity";
+        if ($person ){
+            $msg .= " pour $person";
+        }
+        $this->getLoggerService()->info("[NOTIF] $msg");
         /** @var ActivityDate $milestone */
         foreach ($activity->getMilestones() as $milestone) {
             $this->generateMilestoneNotifications($milestone, $person);
@@ -398,7 +403,7 @@ class NotificationService implements UseServiceContainer
         $context = "milestone-" . $milestone->getId();
         $notifications = $this->getEntityManager()->getRepository(Notification::class)
             ->findBy(['context' => $context]);
-        $this->getLoggerService()->info(sprintf('Purge milestone : %s jalon(s) vont être supprimé(s)', count($notifications)));
+        $this->getLoggerService()->info(sprintf('[NOTIFICATION] Purge du jalon :  %s notification(s) vont être supprimé(s)', count($notifications)));
         foreach ($notifications as $notification) {
             $this->getEntityManager()->remove($notification);
         }
@@ -506,6 +511,8 @@ class NotificationService implements UseServiceContainer
         $client = new \GearmanClient();
         $client->addServer($this->getOrganizationService()->getOscarConfigurationService()->getGearmanHost());
 
+        $this->getLoggerService()->info("[NOTIFICATIONS] Envoi à Gearman des notifications à générer pour $person dans l'activité $activity");
+
         $client->doBackground('notificationActivityPerson', json_encode([
             'activityid' => $activity->getId(),
             'personid' => $person->getId(),
@@ -541,6 +548,8 @@ class NotificationService implements UseServiceContainer
 
     public function purgeNotificationPayment(ActivityPayment $payment)
     {
+        $this->getLoggerService()->info("[NOTIFICATIONS] Purge pour le payment $payment");
+
         $context = "payment:" . $payment->getId();
         $notifications = $this->getEntityManager()
             ->getRepository(Notification::class)

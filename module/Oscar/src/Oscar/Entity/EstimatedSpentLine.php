@@ -29,7 +29,7 @@ class EstimatedSpentLine
 
     /**
      * @var Activity
-     * @ORM\ManyToOne(targetEntity="Activity")
+     * @ORM\ManyToOne(targetEntity="Activity", inversedBy="estimatedSpentLines")
      */
     private $activity;
 

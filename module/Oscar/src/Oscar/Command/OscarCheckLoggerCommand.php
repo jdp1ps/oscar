@@ -91,7 +91,7 @@ class OscarCheckLoggerCommand extends OscarCommandAbstract
         $io->text("Envoi : <bold>$msg</bold> dans les logs");
         $logger->critical($msg);
 
-        $logFile = realpath($oscarConfig->getConfiguration('log_path'));
+        $logFile = realpath($oscarConfig->getLoggerFilePath());
         $io->note("Vérifier le fichier '$logFile' : tail -f $logFile");
     }
 }
