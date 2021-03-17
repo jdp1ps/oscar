@@ -395,11 +395,32 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         if( $search != "" ){
             $ids = $this->search($search, true);
-           // var_dump($ids); die();
+
+            $sortSize = 25;
+
+            // ORDER BY de LREM
+            // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
+            if( count($ids) > 1 ){
+                $selectHidden = "(CASE ";
+                $i = 0;
+                foreach ($ids as $id) {
+                    $selectHidden .= " WHEN o.id = $id THEN $i ";
+                    $i++;
+                    if( $i > $sortSize ){
+                        break;
+                    }
+                }
+                $selectHidden .= " ELSE $i END) AS HIDDEN ORD";
+                $qb->addSelect($selectHidden);
+                $qb->orderBy('ORD', 'ASC');
+            }
+
             $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
+        } else {
+            $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
         }
 
-        //$qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
+        //
 
         // -------------------------------------------------------------------------------------------------------------
         // FILTRE sur les types d'organisations
@@ -493,6 +514,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $ids = $strategy->search($search);
             if( $justIds == true )
                 return $ids;
+
             return $this->getOrganizationsByIds($ids);
         } else {
             return $this->getSearchNativeQuery($search, [])->getQuery()->getResult();
