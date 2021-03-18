@@ -512,6 +512,28 @@ class Activity implements ResourceInterface
         return $this;
     }
 
+    private $pcruMissings;
+
+    public function isPcruFriendly()
+    {
+        return count($this->getPcruMissings()) == 0;
+    }
+
+    public function getPcruMissings()
+    {
+        if( $this->pcruMissings === null ){
+            $missings = [];
+            if( !$this->getProject() ){
+                $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
+            } elseif (!$this->getAcronym()) {
+                $missings[] = _("Le projet de l'activité doit avoir un acronyme");
+            }
+
+            $this->pcruMissings = $missings;
+        }
+
+        return $this->pcruMissings;
+    }
 
 
     /**
