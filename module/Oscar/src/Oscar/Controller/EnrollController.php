@@ -142,7 +142,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     {
 
         $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
-
+        $enrolled = null;
 
         $labelTpl = "Modification du rôle de <em>%s</em> dans <strong>%s</strong>";
         $label = sprintf($labelTpl, $enroll->getEnrolled(), $enroll->getEnroller());
@@ -246,13 +246,19 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $view;
     }
 
-    private function saveEnroll($class)
+    private function saveEnroll($class, $exist = null)
     {
 
-        $labelTpl = "Ajout d'un <em>%s</em> dans <strong>%s</strong>";
+        $labelTpl = ($exist ? "Modification " : "Ajout") . " d'un <em>%s</em> dans <strong>%s</strong>";
 
         $enrollerId = $this->params()->fromRoute('idenroller', null);
-        $enrolledId = $this->params()->fromQuery('idenrolled', null);
+        $enrolledId = $this->params()->fromQuery('idenroled', null);
+        if( !$enrolledId ){
+            $enrolledId = $this->params()->fromPost('enrolled', null);
+        }
+        if( !$enrolledId ){
+            $enrolledId = $this->params()->fromPost('enroled', null);
+        }
         $roles = $this->getRoles($class);
 
         switch ($class) {
@@ -286,7 +292,12 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 break;
 
             case ActivityPerson::class :
-                $enroller = $this->getActivityEntity();
+                if($exist){
+                    $enroller = $exist->getActivity();
+                    $enrolled = $exist->getPerson();
+                } else {
+                    $enroller = $this->getActivityEntity();
+                }
                 $urlEnrollerShow = 'contract/show';
                 $urlSearch = 'person/search';
                 $setEnrolled = 'setPerson';
@@ -347,10 +358,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $label = sprintf($labelTpl, " rôle au $textWhat $enrolled", $textWhere);
         } else {
             $label = sprintf($labelTpl, $textWhat, $textWhere);
-            $enrolled = null;
         }
-
-
 
         $form = new RoleForm($roles, [
             'label' => $labelEnrolled,
@@ -368,11 +376,13 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
         if ($this->getRequest()->isPost()) {
 
-            $enrolledId = intval($this->params()->fromPost('enroled'));
+           // $enrolledId = intval($this->params()->fromPost('enroled'));
             $enrolled = $this->getEntityManager()->getRepository($enrolledClass)->find($enrolledId);
+
 
             if( !$enrolled ){
                 $this->flashMessenger()->addErrorMessage("Modification annulée, personne/organisation manquante");
+                return $this->getResponseInternalError("Personne introuvable");
             }
             else {
                 $roleIndex = intval($this->params()->fromPost('role'));
@@ -396,42 +406,56 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                     $dateEnd = null;
                 }
 
-                switch ($class) {
-                    case ProjectMember::class :
-                        $this->getPersonService()->personProjectAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
-                        $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
-                        return;
-                        break;
 
-                    case ActivityPerson::class :
-                        $this->getPersonService()->personActivityAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
-                        $this->redirect()->toRoute('contract/show', ['id' => $enroller->getId()]);
-                        return;
-                        break;
+                if( !$exist ){
+                    switch ($class) {
+                        case ProjectMember::class :
+                            $this->getPersonService()->personProjectAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
+                            $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
+                            return;
+                            break;
 
-                    case OrganizationPerson::class :
-                        $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
-                        $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
-                        return;
-                        break;
+                        case ActivityPerson::class :
+                            $this->getPersonService()->personActivityAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
+                            $this->redirect()->toRoute('contract/show', ['id' => $enroller->getId()]);
+                            return;
+                            break;
 
-                    default:
+                        case OrganizationPerson::class :
+                            $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
+                            $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
+                            return;
+                            break;
 
+                        default:
+
+                    }
+
+                    $enrole = new $class();
+                    $this->getEntityManager()->persist($enrole);
+                    $enrole->setRole($role)
+                        ->$setEnrolled($enrolled)
+                        ->$setEnroller($enroller)
+                        ->setRoleObj($roleObj)
+                        ->setDateStart($dateStart)
+                        ->setDateEnd($dateEnd);
+                    $enroller->touch();
+
+                    $this->getEntityManager()->flush($enrole);
+                } else {
+
+                    $exist->setRoleObj($roleObj)
+                        ->setDateStart($dateStart)
+                        ->setDateEnd($dateEnd);
+                    $this->getEntityManager()->flush();
+
+                    $enrole = $exist;
                 }
 
 
 
-                $enrole = new $class();
-                $this->getEntityManager()->persist($enrole);
-                $enrole->setRole($role)
-                    ->$setEnrolled($enrolled)
-                    ->$setEnroller($enroller)
-                    ->setRoleObj($roleObj)
-                    ->setDateStart($dateStart)
-                    ->setDateEnd($dateEnd);
-                $enroller->touch();
 
-                $this->getEntityManager()->flush($enrole);
+
 
 
 
@@ -511,9 +535,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             case ActivityPerson::class :
                 $datas['enroller']              = $enroll->getActivity();
                 $datas['enrolled']              = $enroll->getPerson();
-                $datas['role']                  = $this->params()->fromPost('role', null) ?
-                    $this->getEntityManager()->getRepository(Role::class)->find($this->params()->fromPost('role')) :
-                    null;
+                $datas['role']                  = $enroll->getRoleObj();
                 $datas['url_show_enroller']     = 'contract/show';
                 $datas['url_show_enrolled']     = 'person/show';
                 $datas['context']               = 'Activity';
@@ -643,7 +665,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     private function getProjectEntity() :Project
     {
-        $idProject = $this->params()->fromRoute('idenroll');
+        $idProject = $this->params()->fromRoute('idenroller');
         $this->getLoggerService()->debug("Chargement du Projet");
         $project = $this->getProjectService()->getProject($idProject);
         return $project;
@@ -676,6 +698,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     public function personProjectNewAction()
     {
         $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
+
         return $this->saveEnroll(ProjectMember::class);
     }
 
@@ -722,7 +745,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function organizationProjectEditAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
+        $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($this->params()->fromRoute('idenroll'));
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
         return $this->editEnroll(ProjectPartner::class);
     }
 
@@ -771,16 +795,19 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function personActivityEditAction()
     {
-        try {
-            $datas = $this->getEnrollDatas(ActivityPerson::class);
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
-            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role'], $datas['dateStart'], $datas['dateEnd']);
-            // PATCH DATE
-            $this->updateIndex('Activity', $datas['enroller']);
-            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
-        } catch (\Exception $e) {
-            return $this->getResponseInternalError("Impossible de modifier l'affectation de cette personne dans l'activité : " . $e->getMessage());
-        }
+//        try {
+//            $datas = $this->getEnrollDatas(ActivityPerson::class);
+//            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
+//            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role'], $datas['dateStart'], $datas['dateEnd']);
+//            // PATCH DATE
+//            $this->updateIndex('Activity', $datas['enroller']);
+//            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
+//        } catch (\Exception $e) {
+//            return $this->getResponseInternalError("Impossible de modifier l'affectation de cette personne dans l'activité : " . $e->getMessage());
+//        }
+        $datas = $this->getEnrollDatas(ActivityPerson::class);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
+        return $this->saveEnroll(ActivityPerson::class, $datas['enroll']);
     }
 
     ////////////////////////////////////////////////////////////////////////////
