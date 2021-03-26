@@ -37,6 +37,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
  - [Demande d'activité](activity-request.md)
  - [Personnaliser l'export des activités](activities-export.md)
+ - [Activier le mode ADAJ](adaj.md)
 
 ## Note de version
   - **VERSION 2.11 "MacClane"** ([Note de version](versions/version-2.11.md))
