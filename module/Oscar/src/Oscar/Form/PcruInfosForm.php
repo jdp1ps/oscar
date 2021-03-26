@@ -154,17 +154,17 @@ en assure la gestion");
             'type'=>'Text'
         ]);
 
-        $label = _("Le sigle de l’unité du contrat");
+        $label = _("Contrats associés");
         $this->add([
             'name'   => 'contratsAssocies',
             'options' => [
                 'label' => $label,
             ],
             'attributes' => [
-                'class' => 'form-control',
+                'class' => 'form-control select2',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type'=>'Select'
         ]);
 
         $label = _("Responsable scientifique");

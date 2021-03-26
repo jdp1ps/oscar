@@ -91,6 +91,13 @@ api:
                 defaults:
                     action: person
 
+        activity:
+            type: segment
+            options:
+                route: /activity
+                defaults:
+                    action: activity
+
 ################################################################################
 # NOTIFICATIONS
 notification:

@@ -16,6 +16,7 @@ use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\ProjectGrantService;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -26,6 +27,7 @@ class ApiControllerFactory extends AbstractOscarFactory
     {
         $c = new ApiController();
         $this->init($c, $container);
+        $c->setActivityService($container->get(ProjectGrantService::class));
         return $c;
     }
 }

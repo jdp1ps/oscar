@@ -24,6 +24,7 @@ use UnicaenAuth\Authentication\Adapter\Ldap;
 use UnicaenAuth\Event\UserAuthenticatedEvent;
 use UnicaenAuth\Provider\Identity\ChainEvent;
 use UnicaenAuth\Service\UserContext;
+use Zend\Authentication\Result;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\EventManager\Event;
 use Zend\Http\PhpEnvironment\Request;
@@ -92,7 +93,9 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
         $eventManager = $manager->getEventManager();
         $sharedEventManager = $eventManager->getSharedManager();
 
+
         //$sharedEventManager->attach('*', UserAuthenticatedEvent::PRE_PERSIST, [$this, 'onStar'], 200);
+        $sharedEventManager->attach('*', '*', [$this, 'onDispatch'], 100);
 
         // ERREURS
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_DISPATCH_ERROR, [$this, 'onError'], 100);
@@ -100,6 +103,31 @@ class Module implements ConsoleBannerProviderInterface, ConsoleUsageProviderInte
 
         // Route
         $sharedEventManager->attach(__NAMESPACE__, MvcEvent::EVENT_ROUTE, [$this, 'onRoute'], 100);
+    }
+
+    public function onDispatch( Event $event )
+    {
+        static $handler;
+
+        if( $handler === null ){
+            $myfile = fopen("/tmp/oscar-debug.log", "a") or die("Unable to open file!");
+        }
+
+        if( $event->getName() == 'authentication.ldap.error'){
+            fwrite($myfile, sprintf("%s\t%s\n", date('Y-m-d H:i:s'), "LDAP authentification fail for : " . $event->getParam('identity', 'undefined user')) );
+
+            /** @var Result $result */
+            $result = $event->getParam('result', []);
+            if( $result ){
+                foreach ($result->getMessages() as $m) {
+                    fwrite($myfile, sprintf("%s\t%s\n", date('Y-m-d H:i:s'), $m ));
+
+                }
+            }
+        } else {
+
+            fwrite($myfile, sprintf("%s\t[def]%s\n", date('Y-m-d H:i:s'), $event->getName()) );
+        }
     }
 
     protected function logError( $msg, $person="utilisateurX" ){

@@ -680,6 +680,7 @@ class Activity implements ResourceInterface
 
     /**
      * @return mixed
+     * @deprecated
      */
     public function getOscarId()
     {
