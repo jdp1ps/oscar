@@ -1757,6 +1757,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             'generatedDocuments' => $this->getOscarConfigurationService()->getConfiguration('generated-documents.activity'),
+
+            'pcruEnabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+
             'entity' => $activity,
 
             'currencies' => $currencies,
@@ -1764,7 +1767,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'validatorsPrj' => $timesheetService->getValidatorsPrj($activity),
             'validatorsSci' => $timesheetService->getValidatorsSci($activity),
             'validatorsAdm' => $timesheetService->getValidatorsAdm($activity),
-
 
             'declarations' => $declarations,
 
@@ -1777,10 +1779,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'rolesOrganizations' => $rolesOrganizations,
             'rolesPersons' => $rolesPersons,
 
-            // Notifications précalculées
-            'notifications' => $this->getEntityManager()->getRepository(Notification::class)
-                ->findBy(['object' => Notification::OBJECT_ACTIVITY, 'objectId' => $activity->getId()]),
-
+//            // Notifications précalculées
+//            'notifications' => $this->getEntityManager()->getRepository(Notification::class)
+//                ->findBy(['object' => Notification::OBJECT_ACTIVITY, 'objectId' => $activity->getId()]),
 
             'documentTypes' => json_encode($documentTypes),
             'activityTypeChain' => $activityTypeChain,

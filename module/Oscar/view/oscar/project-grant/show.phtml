@@ -335,7 +335,7 @@
 
             <?php
             // -------------------------------------------------------------------------------------------------- PCRU
-            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity) ):?>
+            if( $pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity) ):?>
                 <div id="pcru-infos">
                     <h2><i class="icon-beaker"></i>PCRU</h2>
                     <?php if(!$entity->isPcruFriendly()): ?>
