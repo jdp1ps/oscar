@@ -65,9 +65,10 @@ class OscarPcruGenerateDataActivityCommand extends OscarCommandAbstract
                 $pcruInfoFactory = new ActivityPcruInfoFromActivityFactory($configuration, $activityService->getEntityManager());
                 $pcruInfos = $pcruInfoFactory->createNew($activity);
                 $table = new Table($io);
-                $table->setHeaders(['Champ', 'Valeur PCRU']);
+                $table->setHeaders(["Colonne", 'Champ', 'Valeur PCRU']);
+                $num = 1;
                 foreach( $pcruInfos->toArray() as $key=>$value ){
-                    $table->addRow(["$key", "$value"]);
+                    $table->addRow([$num++, "$key", "$value"]);
                 }
                 $table->render();
             }

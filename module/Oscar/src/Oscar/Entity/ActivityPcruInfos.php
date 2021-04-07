@@ -5,6 +5,7 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToOne as OneToOne;
+use Oscar\Utils\DateTimeUtils;
 
 /**
  * Class ActivityPcruInfos
@@ -232,11 +233,32 @@ class ActivityPcruInfos
         $out['NumContratTutelleGestionnaire'] = $this->getNumContratTutelleGestionnaire();
         $out['Equipe'] = $this->getEquipe();
         $out['TypeContrat'] = $this->getTypeContrat() ? $this->getTypeContrat()->getLabel() : "ND";
+        $out['Acronyme'] = $this->getAcronyme();
         $out['ContratsAssocies'] = $this->getContratsAssocies();
         $out['ResponsableScientifique'] = $this->getResponsableScientifique();
         $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
         $out['CoordinateurConsortium'] = $this->isCordinateurConsortium() ? 'True' : 'False';
         $out['Partenaires'] = $this->getPartenaires();
+        $out['PartenairePrincipal'] = ""; // TODO
+        $out['IdPartenairePrincipal'] = $this->getIdPartenairePrincipal();
+        $out['SourceFinancement'] = $this->getSourceFinancement() ? $this->getSourceFinancement()->getLabel() : "";
+        $out['LieuExecution'] = $this->getLieuExecution();
+        $out['DateDerniereSignature'] = DateTimeUtils::toStr($this->getDateDerniereSignature(), 'd-m-Y');
+        $out['Duree'] = $this->getDuree();
+        $out['DateDebut'] = DateTimeUtils::toStr($this->getDateDebut(), 'd-m-Y');
+        $out['DateFin'] = DateTimeUtils::toStr($this->getDateFin(), 'd-m-Y');
+        $out['MontantPercuUnite'] = $this->getMontantPercuUnite();
+        $out['CoutTotalEtude'] = $this->getCoutTotalEtude();
+        $out['MontantTotal'] = $this->getMontantTotal();
+        $out['ValidePoleCompetivite'] = $this->isValidePoleCompetivite() ? "True" : "False";
+        $out['PoleCompetivite'] = $this->getPoleCompetivite();
+        $out['Commentaires'] = $this->getCommentaires();
+        $out['Pia'] = $this->isPia() ? "True" : "False";
+        $out['Reference'] = $this->getReference();
+        $out['AccordCadre'] = $this->isAccordCadre() ? "True" : "False";
+        $out['Cifre'] = $this->getCifre();
+        $out['ChaireIndustrielle'] = $this->getChaireIndustrielle();
+        $out['PresencePartenaireIndustriel'] = $this->getPresencePartenaireIndustriel();
         return $out;
     }
 

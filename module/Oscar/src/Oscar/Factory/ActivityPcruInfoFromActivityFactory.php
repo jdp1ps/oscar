@@ -6,7 +6,9 @@ namespace Oscar\Factory;
 
 use Doctrine\ORM\EntityManager;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Service\OscarConfigurationService;
 
 class ActivityPcruInfoFromActivityFactory
@@ -37,14 +39,24 @@ class ActivityPcruInfoFromActivityFactory
         $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
         $codeUniteLabintel = "";
         $sigleUnit = "";
+        /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
-            echo "-" . $unite->getOrganization() . "\n";
+           $codeUniteLabintel = $unite->getOrganization()->getLabintel();
+           $sigleUnit = $unite->getOrganization()->getShortName();
         }
 
-        die("DEV");
-
+        // Recherche automatique du responsable scientifique
+        $roleRSToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_respscien_role', 'Responsable scientifique');
+        $responsable = "";
+        /** @var ActivityPerson $personActivity */
+        foreach ($activity->getPersonsWithRole($roleRSToFind) as $personActivity) {
+            $responsable = $personActivity->getPerson()->getFirstname() . " " . strtoupper($personActivity->getPerson()->getLastname());
+        }
 
         $activityPcruInfos->setActivity($activity)
+            ->setSigleUnite($sigleUnit)
+            ->setResponsableScientifique($responsable)
+            ->setCodeUniteLabintel($codeUniteLabintel)
             ->setObjet($activity->getLabel())
             ->setAcronyme($activity->getAcronym())
             ->setMontantTotal($activity->getAmount())
