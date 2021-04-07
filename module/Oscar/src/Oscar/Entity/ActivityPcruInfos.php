@@ -224,6 +224,22 @@ class ActivityPcruInfos
      */
     private $PresencePartenaireIndustriel = "Indéfini";
 
+    public function toArray() :array {
+        $out = [];
+        $out['Objet'] = $this->getObjet();
+        $out['CodeUniteLabintel'] = $this->getCodeUniteLabintel();
+        $out['SigleUnite'] = $this->getSigleUnite();
+        $out['NumContratTutelleGestionnaire'] = $this->getNumContratTutelleGestionnaire();
+        $out['Equipe'] = $this->getEquipe();
+        $out['TypeContrat'] = $this->getTypeContrat() ? $this->getTypeContrat()->getLabel() : "ND";
+        $out['ContratsAssocies'] = $this->getContratsAssocies();
+        $out['ResponsableScientifique'] = $this->getResponsableScientifique();
+        $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
+        $out['CoordinateurConsortium'] = $this->isCordinateurConsortium() ? 'True' : 'False';
+        $out['Partenaires'] = $this->getPartenaires();
+        return $out;
+    }
+
     /**
      * @return mixed
      */

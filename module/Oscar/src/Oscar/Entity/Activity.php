@@ -603,17 +603,17 @@ class Activity implements ResourceInterface
     /**
      * @return mixed
      */
-    public function getPcruInfos()
+    public function getPcruInfo()
     {
-        return $this->pcruInfos;
+        return $this->pcruInfo;
     }
 
     /**
-     * @param mixed $pcruInfos
+     * @param mixed $pcruInfo
      */
-    public function setPcruInfos($pcruInfos): self
+    public function setPcruInfo($pcruInfo): self
     {
-        $this->pcruInfos = $pcruInfos;
+        $this->pcruInfo = $pcruInfo;
         return $this;
     }
 

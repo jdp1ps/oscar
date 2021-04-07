@@ -791,6 +791,7 @@ return array(
             \Oscar\Service\OrganizationService::class => \Oscar\Service\OrganizationServiceFactory::class,
             \Oscar\Service\OscarConfigurationService::class => \Oscar\Service\OscarConfigurationServiceFactory::class,
             \Oscar\Service\OscarUserContext::class => \Oscar\Service\OscarUserContextFactory::class,
+            \Oscar\Service\PCRUService::class => \Oscar\Service\PCRUServiceFactory::class,
             \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
             \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,

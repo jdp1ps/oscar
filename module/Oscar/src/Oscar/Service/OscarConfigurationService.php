@@ -431,8 +431,24 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('spenttypeannexes');
     }
 
-    public function getPcruEnabled(){
+    public function getPcruEnabled()
+    {
         return $this->getEditableConfKey('pcru_enabled', false);
+    }
+
+    public function getPcruFtpInfos()
+    {
+        if (!$this->getPcruEnabled()) {
+            throw new OscarException("Le module PCRU n'est pas activé");
+        }
+        return [
+            'host' => $this->getEditableConfKey('pcru_host'),
+            'port' => $this->getEditableConfKey('pcru_port'),
+            'user' => $this->getEditableConfKey('pcru_user'),
+            'pass' => $this->getEditableConfKey('pcru_pass'),
+            'ssh' => $this->getEditableConfKey('pcru_ssh'),
+            'timeout' => $this->getEditableConfKey('pcru_timeout', 15),
+        ];
     }
 
     /**

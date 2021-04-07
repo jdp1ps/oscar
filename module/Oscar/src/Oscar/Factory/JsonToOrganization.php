@@ -48,6 +48,7 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
 
         $object
             ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData,'dateupdate', null)))
+            ->setLabintel($this->getFieldValue($jsonData, 'labintel', null))
             ->setShortName($this->getFieldValue($jsonData, 'shortname'))
             ->setCode($this->getFieldValue($jsonData, 'code'))
             ->setFullName($this->getFieldValue($jsonData, 'longname'))
