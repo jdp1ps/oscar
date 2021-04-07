@@ -2811,10 +2811,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $form->init();
 
         // Récupération des informations
-        if( $activity->getPcruInfos() ){
-            $pcruInfos = $activity->getPcruInfos();
+        if( $activity->getPcruInfo() ){
+            $pcruInfos = $activity->getPcruInfo();
         } else {
-            $pcruInfos = ActivityPcruInfoFromActivityFactory::createNew($activity);
+            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+            $pcruInfos = $factory->createNew($activity);
         }
 
         // Formulaire
