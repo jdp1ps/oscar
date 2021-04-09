@@ -24,26 +24,30 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     private $_cacheSelectebleRolesOrganisation;
 
 
-    public function removePersonById(int $personId){
+    public function removePersonById(int $personId)
+    {
         $sql = "DELETE FROM person WHERE id = :id";
-        $params = array('id'=>$personId);
+        $params = array('id' => $personId);
         $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
         return $stmt->execute($params);
     }
 
 
-    public function removePerson(Person $person){
+    public function removePerson(Person $person)
+    {
         $this->getEntityManager()->remove($person);
     }
 
-    public function removePersons( array $ids ){
+    public function removePersons(array $ids)
+    {
         return $this->createQueryBuilder('p')->delete()->where('p.id IN(:ids)')
             ->setParameter('ids', $ids)
             ->getQuery()
             ->execute();
     }
 
-    public function getPersonsByIds( array $ids ){
+    public function getPersonsByIds(array $ids)
+    {
         $qb = $this->getBaseQuery()
             ->where('p.id IN (:ids)')
             ->setParameter('ids', $ids);
@@ -58,7 +62,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param $connector
      * @return array
      */
-    public function getUidsConnector($connector){
+    public function getUidsConnector($connector)
+    {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $search = sprintf('s:%s:"%s";', strlen($connector), $connector);
 
@@ -68,13 +73,14 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->setParameter('search', "%$search%");
 
         $uids = [];
-        foreach ($qb->getQuery()->getArrayResult() as $a){
+        foreach ($qb->getQuery()->getArrayResult() as $a) {
             $uids[] = $a['connectors'][$connector];
         }
         return $uids;
     }
 
-    public function getPersonsIdsForActivitiesids( $activitiesIds ){
+    public function getPersonsIdsForActivitiesids($activitiesIds)
+    {
         $queryActivity = $this->createQueryBuilder('p')
             ->select('DISTINCT p.id')
             ->innerJoin('p.activities', 'ap')
@@ -102,7 +108,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param $organisationIds
      * @return array
      */
-    public function getPersonIdsInOrganizations( $organisationIds ){
+    public function getPersonIdsInOrganizations($organisationIds)
+    {
         $result = $this->createQueryBuilder('p')
             ->select('p.id')
             ->innerJoin('p.organizations', 'op')
@@ -113,7 +120,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return array_map('current', $result);
     }
 
-    public function getPersonIdsForOrganizationsActivities( $organizationIds ){
+    public function getPersonIdsForOrganizationsActivities($organizationIds)
+    {
         $activityMembers = $this->getEntityManager()->getRepository(Person::class)->createQueryBuilder('p')
             ->select('DISTINCT p.id')
             ->innerJoin('p.activities', 'ap')
@@ -141,18 +149,19 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return array_unique(array_merge($idsFromActivities, $idsFromProjects));
     }
 
-    public function getSubordinates( $idReferent ){
+    public function getSubordinates($idReferent)
+    {
         $ids = $this->getSubordinatesIds($idReferent);
         return $this->createQueryBuilder('p')
             ->where('p.id IN(:ids)')
             ->setParameter('ids', $ids)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
 
     }
 
-    public function getSubordinatesIds( $referentId ){
+    public function getSubordinatesIds($referentId)
+    {
         $result = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
             ->select('p.id')
             ->innerJoin('r.person', 'p')
@@ -169,11 +178,14 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      *
      * @return mixed
      */
-    public function getPersonsWithUnreadNotificationsAndAuthentification(){
+    public function getPersonsWithUnreadNotificationsAndAuthentification($normalize = false)
+    {
         $qb = $this->createQueryBuilder('p');
         $persons = $qb
             ->select('p')
-            ->innerJoin(Authentification::class, 'a', Join::WITH, $qb->expr()->eq('p.ladapLogin', 'a.username'))
+            ->innerJoin(Authentification::class, 'a', Join::WITH, $qb->expr()->eq(
+                $normalize ? 'lower(p.ladapLogin)' : 'p.ladapLogin',
+                $normalize ? 'lower(a.username)' : 'a.username'))
             ->innerJoin(NotificationPerson::class, 'n', Join::WITH, $qb->expr()->eq('p.id', 'n.person'))
             ->where('n.read IS NULL')
             ->getQuery()
@@ -343,7 +355,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
             ->setParameter('search', "%$search%");
-        
+
         return $qb;
     }
 
