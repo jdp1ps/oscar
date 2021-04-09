@@ -476,7 +476,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
 
         // Liste des personnes ayant des notifications non-lues
-        $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification();
+        $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification(
+            $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false)
+        );
+
         $this->getLoggerService()->info(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
         /** @var Person $person */
