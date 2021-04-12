@@ -125,8 +125,6 @@ class Activity implements ResourceInterface
     }
 
 
-
-
     /**
      * @ORM\Column(type="string", nullable=true)
      */
@@ -158,6 +156,29 @@ class Activity implements ResourceInterface
      * @ORM\ManyToOne(targetEntity="ActivityType")
      */
     private $activityType;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @var PcruPoleCompetitivite
+     * @ORM\ManyToOne(targetEntity="PcruPoleCompetitivite")
+     */
+    private $pcruPoleCompetitivite;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @ORM\Column(type="boolean", options={"default" : false})
+     */
+    private $pcruValidPoleCompetitivite;
+
+    /**
+     * Source de financement
+     *
+     * @var PcruSourceFinancement
+     * @ORM\ManyToOne(targetEntity="PcruSourceFinancement")
+     */
+    private $pcruSourceFinancement;
 
 
     /**
@@ -408,6 +429,26 @@ class Activity implements ResourceInterface
      */
     protected $numbers = [];
 
+    /**
+     * @return mixed
+     */
+    public function isPcruValidPoleCompetitivite()
+    {
+        return $this->pcruValidPoleCompetitivite;
+    }
+
+    /**
+     * @param mixed $pcruValidPoleCompetitivite
+     */
+    public function setPcruValidPoleCompetitivite($pcruValidPoleCompetitivite): self
+    {
+        $this->pcruValidPoleCompetitivite = $pcruValidPoleCompetitivite;
+        return $this;
+    }
+
+
+
+
     public function isActive()
     {
         return $this->getStatus() == self::STATUS_ACTIVE;
@@ -427,6 +468,40 @@ class Activity implements ResourceInterface
 
     public function getRemainder(){
         return $this->getAmount() - abs($this->getTotalSpent());
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitivite()
+    {
+        return $this->pcruPoleCompetitivite;
+    }
+
+    /**
+     * @param PcruPoleCompetitivite $pcruPoleCompetitivite
+     */
+    public function setPcruPoleCompetitivite($pcruPoleCompetitivite): self
+    {
+        $this->pcruPoleCompetitivite = $pcruPoleCompetitivite;
+        return $this;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancement()
+    {
+        return $this->pcruSourceFinancement;
+    }
+
+    /**
+     * @param PcruSourceFinancement $pcruSourceFinancement
+     */
+    public function setPcruSourceFinancement($pcruSourceFinancement): self
+    {
+        $this->pcruSourceFinancement = $pcruSourceFinancement;
+        return $this;
     }
 
     /**

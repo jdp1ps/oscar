@@ -4,6 +4,14 @@ const exec = require('child_process').exec;
 const pathModuleSrc = './src/';
 const pathModuleDest = './../public/js/oscar/dist/'
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Fonctions génériques
+
+/**
+ * Compilation d'un module
+ * @param module
+ */
 function compile(module){
     let moduleSrc = pathModuleSrc + module + ".vue";
     let moduleDest = pathModuleDest;
@@ -13,6 +21,10 @@ function compile(module){
     exec(cmd);
 }
 
+/**
+ * Compilation d'un composant
+ * @param module
+ */
 function compileComponent(componentBaseName){
     let moduleSrc = './src/components/' + componentBaseName + ".vue";
     let moduleDest = pathModuleDest;
@@ -22,29 +34,49 @@ function compileComponent(componentBaseName){
     exec(cmd);
 }
 
-function activityDocument(cb) {
-    compile("ActivityDocument");
-    cb();
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// COMMANDES GULP
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// 2. MODULES
+//
+// 2.1 UI de configuration PCRU (FTP)
 function administrationPcru(cb) {
     compile("AdministrationPcru");
     cb();
 }
-
-
-let commands = ['activityDocument', 'administrationPcru'];
-
-
-exports.activityDocument = activityDocument;
-exports.activityDocumentWatch = function(cb){
-    watch(pathModuleSrc + "ActivityDocument.vue", activityDocument);
-}
-
 exports.administrationPcru = administrationPcru;
 exports.administrationPcruWatch = function(cb){
     watch(pathModuleSrc + "AdministrationPcru.vue", administrationPcru);
 }
 
+//// 2.2 UI de configuration des pôles de compétitivité PCRU
+function administrationPcruPC(cb) {
+    compile("AdministrationPcruPoleCompetitivite");
+    cb();
+}
+exports.administrationPCPcru = administrationPcruPC;
+exports.administrationPCPcruWatch = function(cb){
+    watch(pathModuleSrc + "AdministrationPcruPoleCompetitivite.vue", administrationPcruPC);
+}
+
+//// 2.3 Documents des activités
+function activityDocument(cb) {
+    compile("ActivityDocument");
+    cb();
+}
+exports.activityDocument = activityDocument;
+exports.activityDocumentWatch = function(cb){
+    watch(pathModuleSrc + "ActivityDocument.vue", activityDocument);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
 function componentPassword(cb) {
     compileComponent('PasswordField');
@@ -59,6 +91,8 @@ function componentTextarea(cb) {
 }
 exports.componentTextarea = componentTextarea;
 exports.componentTextareaWatch = function(cb){ watch('./src/components/TextareaField.vue', componentTextarea); }
+
+let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC'];
 
 function defaultTask(cb) {
     console.log("Usage : ");

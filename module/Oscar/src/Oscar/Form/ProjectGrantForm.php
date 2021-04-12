@@ -9,6 +9,7 @@ namespace Oscar\Form;
 use Oscar\Entity\Activity;
 use Oscar\Entity\TimeSheet;
 use Oscar\Form\Element\KeyValue;
+use Oscar\Formatter\AsArrayFormatter;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\ProjectGrantService;
@@ -328,6 +329,44 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'options' => [
                 'label' => 'Type de convention',
                 'value_options' => $this->getProjectGrantService()->getTypes()
+            ],
+            'attributes' => [
+                'class' => 'form-control'
+            ],
+            'type'=>'Select'
+        ]);
+
+        // Type
+        $this->add([
+            'name'   => 'pcruPoleCompetitivite',
+            'options' => [
+                'label' => 'Pôle de compétitivité (PCRU)',
+                'value_options' => $this->getProjectGrantService()->getPcruPoleCompetitiviteSelect()
+            ],
+            'attributes' => [
+                'class' => 'form-control'
+            ],
+            'type'=>'Select'
+        ]);
+
+        // Type
+        $this->add([
+            'name'   => 'pcruValidPoleCompetitivite',
+            'options' => [
+                'label' => 'Validé par le pôle de compétitivité (PCRU)',
+            ],
+            'attributes' => [
+                'class' => 'checkbox'
+            ],
+            'type'=>'Checkbox'
+        ]);
+
+        // Type
+        $this->add([
+            'name'   => 'pcruSourceFinancement',
+            'options' => [
+                'label' => 'Source de financement (PCRU)',
+                'value_options' => $this->getProjectGrantService()->getPcruSourceFinancementSelect()
             ],
             'attributes' => [
                 'class' => 'form-control'

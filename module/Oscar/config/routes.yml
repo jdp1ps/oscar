@@ -63,6 +63,14 @@ api:
                 defaults:
                     action: help
 
+        # Référenciel PCRU
+        referenciel-pcru-polecompetitivite:
+            type: segment
+            options:
+                route: /referenciel/pcru/pole-competitivite
+                defaults:
+                    action: referencielPcruPoleCompetitivite
+
         organizations:
             type: segment
             options:
@@ -1807,4 +1815,13 @@ administration:
                 route: /pcru
                 defaults:
                     action: pcru
+            may_terminate: true
+
+        # Types d'organisation
+        poles-competitivite:
+            type: segment
+            options:
+                route: /poles-competitivite
+                defaults:
+                    action: polesCompetitivite
             may_terminate: true

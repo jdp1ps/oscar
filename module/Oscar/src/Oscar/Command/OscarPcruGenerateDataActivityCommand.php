@@ -26,7 +26,7 @@ class OscarPcruGenerateDataActivityCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Génération des données PCRU à partir d'une activités.")
-            ->addOption('oscarid', 'u', InputOption::VALUE_OPTIONAL, 'N° Oscar', '')
+            ->addArgument('oscarid', InputOption::VALUE_REQUIRED, 'N° Oscar')
         ;
     }
 
@@ -48,7 +48,7 @@ class OscarPcruGenerateDataActivityCommand extends OscarCommandAbstract
 
 
         // Récupération des données
-        $numeroOscar = $input->getOption('oscarid');
+        $numeroOscar = $input->getArgument('oscarid');
 
         $io->write("Récupération de l'activité '$numeroOscar' : ");
         try {

@@ -62,6 +62,7 @@ return array(
                         'typeDocumentApi',
                         'numerotation',
                         'parameters',
+                        'polesCompetitivite',
                         'privileges2',
                         'planComptableLoaded',
                         'userLogs',
@@ -208,7 +209,17 @@ return array(
                 ],
 
                 ['controller' => 'Api',
-                    'action' => ['help','persons','person','organization','organizations','roles','adminManageAccess', 'activity'],
+                    'action' => [
+                        'activity',
+                        'help',
+                        'organization',
+                        'organizations',
+                        'person',
+                        'persons',
+                        'referencielPcruPoleCompetitivite',
+                        'roles',
+                        'adminManageAccess',
+                    ],
                     'roles' => []
                 ],
 

@@ -1242,4 +1242,14 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $this->getResponseBadRequest("Accès à l'API improbable...");
     }
 
+
+    /**
+     * Administration des pôles de compétitivité.
+     *
+     * @return array
+     */
+    public function polesCompetitiviteAction()
+    {
+        return [];
+    }
 }

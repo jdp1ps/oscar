@@ -1867,6 +1867,39 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         return $qb;
     }
 
+    public function getPcruPoleCompetitiviteByLabel($label)
+    {
+        /** @var PcruPoleCompetitiviteRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+
+        return $poleRepository->findOneBy([ 'label' => $label ]);
+    }
+
+    public function getPcruSourceFinancementByLabel($label)
+    {
+        /** @var PcruSourceFinancementRepository $poleRepository */
+        $sourceFinancnementRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+
+        return $sourceFinancnementRepository->findOneBy([ 'label' => $label ]);
+    }
+
+    public function getPcruSourceFinancementSelect()
+    {
+        /** @var PcruSourceFinancement $poleRepository */
+        $sourceFinancementRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+
+        $out = [
+            '' => 'Aucune'
+        ];
+
+        /** @var PcruSourceFinancement $sourceFinancement */
+        foreach ($sourceFinancementRepository->findAll() as $sourceFinancement) {
+            $out[$sourceFinancement->getLabel()] = $sourceFinancement->getLabel();
+        }
+
+        return $out;
+    }
+
     public function addNewPoleCompetivite(string $label): PcruPoleCompetitivite
     {
         /** @var PcruPoleCompetitiviteRepository $poleRepository */
@@ -1940,17 +1973,40 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
     }
 
+
+    /**
+     * Retourne les données pour le selecteur de pôle de compétitivité.
+     * @return string[]
+     */
+    public function getPcruPoleCompetitiviteSelect(){
+        $out = [
+            '' => 'Aucun',
+        ];
+        /** @var PcruPoleCompetitivite $pole */
+        foreach ($this->getEntityManager()->getRepository(PcruPoleCompetitivite::class)->getFlatArrayLabel() as $pole) {
+            $out[$pole] = $pole;
+        }
+        return $out;
+    }
     /**
      * Retourne la liste des pôle de compétitivité PCRU.
      * @param string $format
      * @return array
      * @throws OscarException
      */
-    public function getPcruPoleCompetitiviteArray( $format = AsArrayFormatter::ARRAY_FLAT ){
+    public function getPcruPoleCompetitiviteArray( $format = AsArrayFormatter::ARRAY_FLAT, $withEmptyAtFirst = false ){
         /** @var PcruPoleCompetitiviteRepository $repository */
         $repository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
-        if( $format == AsArrayFormatter::ARRAY_FLAT )
-            return $repository->getFlatArrayLabel();
+
+        if( $format == AsArrayFormatter::ARRAY_FLAT ) {
+            if ($withEmptyAtFirst == true) {
+                $array = ["Aucun"];
+            } else {
+                $array = [];
+            }
+            $array = array_merge($array, $repository->getFlatArrayLabel());
+            return $array;
+        }
         else
             throw new OscarException("Format pour la liste des pôles de compétivité PCRU non-disponible");
     }
