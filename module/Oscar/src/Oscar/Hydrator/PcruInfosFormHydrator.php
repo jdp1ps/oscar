@@ -16,6 +16,9 @@ class PcruInfosFormHydrator implements HydratorInterface, UseServiceContainer
     public function extract($object)
     {
         $hydrator = new ActivityPcruInfosToFormArray();
+        $datas = $hydrator->toArray($object);
+        var_dump($datas);
+        die();
         return $hydrator->toArray($object);
     }
 

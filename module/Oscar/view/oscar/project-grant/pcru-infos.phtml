@@ -6,6 +6,44 @@
         <h3><?= $activity ?></h3>
     </header>
 
+    <table class="table table-bordered card xs">
+        <thead>
+            <tr>
+                <th title="Numéro de colonne de le fichier d'export">N°</th>
+                <th>Champ PCRU</th>
+                <th>Géré</th>
+                <th>Valeur envoyée</th>
+                <th>Informations</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <?php $i = 1; foreach( $headers as $header=>$description): ?>
+            <tr>
+                <th><?= $i++ ?></th>
+                <th><?= $header ?></th>
+                <?php if(strpos($description, 'off') === 0) : ?>
+                    <td><i class="icon-cancel-circled-outline text-danger"></i></td>
+                <?php else: ?>
+                    <td><i class="icon-ok-circled text-success"></i></td>
+                <?php endif; ?>
+                <td><code><?= $datas[$header] ?></code></td>
+                <?php if(strpos($description, 'off') === 0) : ?>
+                    <td><p>Ce champ n'est pas géré dans Oscar</p></td>
+                <?php else: ?>
+                    <td><small><?= $description ?></small></td>
+                <?php endif; ?>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+
+    </table>
+
+    <nav>
+        <button class="btn btn-info">Télécharger le fichier CSV (PCRU)</button>
+    </nav>
+
+    <?php /******************************* ANCIENNE VERSION
     <div id="app" style="visibility: hidden">
         <div class="">
 
@@ -178,155 +216,6 @@
 <?php /*
 
 
-
-    <section class="">
-        <h2>
-            <i class="icon-info-circled"></i>
-            Informations générales
-        </h2>
-        <fieldset disabled>
-            <div class="row">
-                <div class="col-md-2">
-                    <?= $this->formControlGroup($form->get('acronyme')); ?>
-                </div>
-                <div class="col-md-10">
-                    <?= $this->formControlGroup($form->get('objet')); ?>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <?= $this->formControlGroup($form->get('dateDerniereSignature')); ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $this->formControlGroup($form->get('dateDebut')); ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $this->formControlGroup($form->get('dateFin')); ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $this->formControlGroup($form->get('duree')); ?>
-                </div>
-            </div>
-        </fieldset>
-    </section>
-
-    <section>
-        <h2>
-            <i class="icon-building-filled"></i>
-            Unité/structure référente
-        </h2>
-        <div class="row">
-            <div class="col-md-6">
-                <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
-            </div>
-            <div class="col-md-6">
-                <?= $this->formControlGroup($form->get('sigleUnite')); ?>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <?= $this->formControlGroup($form->get('equipe')); ?>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
-                <p class="help">N° du suivi pour l'unité référente</p>
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <h2>
-            <i class="icon-user"></i>
-            Responsables
-        </h2>
-        <div class="row">
-            <div class="col-md-8">
-                <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('coordinateurConsortium')); ?>
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <h2>
-            <i class="icon-calculator"></i>
-            Financements
-        </h2>
-
-        <div class="row">
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('montantTotal')); ?>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-8">
-                <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
-            </div>
-        </div>
-
-    </section>
-
-
-
-
-
-
-
-
-    <?= $this->formControlGroup($form->get('typeContrat')); ?>
-    <?= $this->formControlGroup($form->get('contratsAssocies')); ?>
-
-
-
-    <?= $this->formControlGroup($form->get('employeurResponsableScientifique')); ?>
-    <?= $this->formControlGroup($form->get('partenaires')); ?>
-    <?= $this->formControlGroup($form->get('partenairePrincipal')); ?>
-    <?= $this->formControlGroup($form->get('idPartenairePrincipal')); ?>
-    <?= $this->formControlGroup($form->get('sourceFinancement')); ?>
-    <?= $this->formControlGroup($form->get('lieuExecution')); ?>
-
-
-
-
-
-
-    <?= $this->formControlGroup($form->get('commentaires')); ?>
-    <?= $this->formControlGroup($form->get('pia')); ?>
-    <?= $this->formControlGroup($form->get('reference')); ?>
-    <?= $this->formControlGroup($form->get('accordCadre')); ?>
-    <?= $this->formControlGroup($form->get('cifre')); ?>
-    <?= $this->formControlGroup($form->get('chaireIndustrielle')); ?>
-    <?= $this->formControlGroup($form->get('presencePartenaireIndustriel')); ?>
-
-
-    <div>
-        <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
-            <i class="icon-cancel-circled"></i>
-            Revenir à la fiche activité
-        </a>
-        <button class="btn btn-primary">
-            <i class="icon-floppy"></i>
-            Enregistrer les informations
-        </button>
-    </div>
-    <?= $this->form()->closeTag(); ?>
-****/ ?>
-
-
     <script>
         require(["vue"
                 , '../js/certic-ui-components/build/PasswordField.umd'
@@ -445,3 +334,4 @@
     </script>
 
 </div>
+***/ ?>

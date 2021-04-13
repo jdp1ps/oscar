@@ -6,6 +6,7 @@ namespace Oscar\Service;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPcruInfos;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
 use Oscar\Traits\UseEntityManager;
@@ -21,6 +22,58 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     private $pcruDepotStrategy;
 
+    public function generateFileContentForActivity( $numOscar, $withHeader = false )
+    {
+        // Récupération de l'activité
+        /** @var ActivityRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+
+        $activity = $activityRepository->getActivityByNumOscar($numOscar, true);
+
+        $infos = $this->getDataFactory()->createNew($activity);
+
+        $buffer = tmpfile();
+        $tmpfile_path = stream_get_meta_data($buffer)['uri'];
+
+        if( $withHeader == true)
+            fputcsv($buffer, array_keys($this->getDataFactory()->getHeaders()), ';');
+
+        fputcsv($buffer, $infos->toArray(), ";");
+
+        $content = file_get_contents($tmpfile_path);
+
+        fclose($buffer);
+
+        return $content;
+    }
+
+    /**
+     * @return ActivityPcruInfoFromActivityFactory
+     */
+    protected function getDataFactory() {
+        static $factory;
+        if( $factory === null ){
+            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        }
+        return $factory;
+    }
+
+
+    public function getDatasFromActivity( Activity $activity, $format = 'array' )
+    {
+        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        $pcruInfos = $factory->createNew($activity);
+        if( $format == 'array' ){
+            return $pcruInfos->toArray();
+        }
+        elseif ( $format == 'object' ){
+            return $pcruInfos;
+        }
+        else {
+            throw new OscarException("Impossible de générer les données PCRU pour l'activité '$activity'");
+        }
+
+    }
 
     protected function getPCRUDepotStrategy()
     {

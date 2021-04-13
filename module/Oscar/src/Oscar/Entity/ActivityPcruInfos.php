@@ -239,7 +239,7 @@ class ActivityPcruInfos
         $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
         $out['CoordinateurConsortium'] = $this->isCordinateurConsortium() ? 'True' : 'False';
         $out['Partenaires'] = $this->getPartenaires();
-        $out['PartenairePrincipal'] = ""; // TODO
+        $out['PartenairePrincipal'] = "Part inconnu"; // TODO
         $out['IdPartenairePrincipal'] = $this->getIdPartenairePrincipal();
         $out['SourceFinancement'] = $this->getSourceFinancement() ? $this->getSourceFinancement()->getLabel() : "";
         $out['LieuExecution'] = $this->getLieuExecution();

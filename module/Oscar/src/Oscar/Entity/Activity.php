@@ -479,6 +479,22 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitiviteStr()
+    {
+        return $this->getPcruPoleCompetitivite() ?: "";
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function isPcruPolePoleCompetitiviteStr()
+    {
+        return $this->isPcruValidPoleCompetitivite();
+    }
+
+    /**
      * @param PcruPoleCompetitivite $pcruPoleCompetitivite
      */
     public function setPcruPoleCompetitivite($pcruPoleCompetitivite): self
@@ -493,6 +509,14 @@ class Activity implements ResourceInterface
     public function getPcruSourceFinancement()
     {
         return $this->pcruSourceFinancement;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancementStr()
+    {
+        return $this->getPcruSourceFinancement() ?: "";
     }
 
     /**

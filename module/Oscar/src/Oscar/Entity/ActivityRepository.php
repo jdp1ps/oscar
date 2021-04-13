@@ -9,6 +9,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
 
 /**
@@ -92,5 +93,20 @@ class ActivityRepository extends EntityRepository
             ]);
         $activities = $query->getQuery()->getResult();
         return $activities;
+    }
+
+    public function getActivityByNumOscar($numOscar, $throw = false)
+    {
+        try {
+            $activity = $this->findOneBy(['oscarNum' => $numOscar]);
+            return $activity;
+        } catch (\Exception $exception) {
+            $error = "Impossible de charger l'activité $numOscar : " . $exception->getMessage();
+            if( $throw ){
+                throw new OscarException($error);
+            } else {
+                return null;
+            }
+        }
     }
 }

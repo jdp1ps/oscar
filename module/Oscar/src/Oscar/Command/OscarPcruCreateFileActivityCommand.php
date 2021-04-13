@@ -23,7 +23,7 @@ class OscarPcruCreateFileActivityCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Envoi des données PCRU.")
-            ->addOption('oscarid', 'u', InputOption::VALUE_OPTIONAL, 'N° Oscar', '')
+            ->addArgument('oscarid', InputOption::VALUE_REQUIRED, 'N° Oscar')
         ;
     }
 
@@ -41,7 +41,8 @@ class OscarPcruCreateFileActivityCommand extends OscarCommandAbstract
         $io = new SymfonyStyle($input, $output);
 
         // Récupération des données
-        $numeroOscar = $input->getOption('oscarid');
+        $numeroOscar = $input->getArgument('oscarid');
+
         if( !$numeroOscar ){
             $io->error("Vous devez renseigner un IDOSCAR");
 
@@ -55,13 +56,12 @@ class OscarPcruCreateFileActivityCommand extends OscarCommandAbstract
 
         }
 
-        die($numeroOscar);
+        /** @var PCRUService $pcruService */
+        $pcruService = $this->getServicemanager()->get(PCRUService::class);
 
+        $fileContent = $pcruService->generateFileContentForActivity($numeroOscar, true);
 
-        if( !$configuration->getPcruEnabled() ){
-            $io->error("Le module PCRU n'est pas actif");
-        } else {
-            var_dump($pcruService->upload());
-        }
+        echo $fileContent;
+
     }
 }

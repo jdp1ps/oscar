@@ -39,6 +39,7 @@ class ActivityPcruInfoFromActivityFactory
         $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
         $codeUniteLabintel = "";
         $sigleUnit = "";
+
         /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
            $codeUniteLabintel = $unite->getOrganization()->getLabintel();
@@ -48,6 +49,7 @@ class ActivityPcruInfoFromActivityFactory
         // Recherche automatique du responsable scientifique
         $roleRSToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_respscien_role', 'Responsable scientifique');
         $responsable = "";
+
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsWithRole($roleRSToFind) as $personActivity) {
             $responsable = $personActivity->getPerson()->getFirstname() . " " . strtoupper($personActivity->getPerson()->getLastname());
@@ -55,6 +57,10 @@ class ActivityPcruInfoFromActivityFactory
 
         $activityPcruInfos->setActivity($activity)
             ->setSigleUnite($sigleUnit)
+            ->setPoleCompetivite($activity->getPcruPoleCompetitiviteStr())
+            ->setNumContratTutelleGestionnaire($activity->getOscarNum())
+            ->setValidePoleCompetivite($activity->isPcruPolePoleCompetitiviteStr())
+            ->setSourceFinancement($activity->getPcruSourceFinancementStr())
             ->setResponsableScientifique($responsable)
             ->setCodeUniteLabintel($codeUniteLabintel)
             ->setObjet($activity->getLabel())
@@ -65,5 +71,42 @@ class ActivityPcruInfoFromActivityFactory
             ->setDateDerniereSignature($activity->getDateSigned())
             ->setReference($activity->getOscarNum());
         return $activityPcruInfos;
+    }
+
+    public function getHeaders(){
+        return [
+            'Objet' => "Intitulé de l'activité",
+            'CodeUniteLabintel' => 'Code LABINTEL (extrait depuis la fiche organisation du laboratoire)',
+            'SigleUnite' =>'Extrait depuis la fiche organisation du laboratoire (nom court)',
+            'NumContratTutelleGestionnaire' => 'N°Oscar',
+            'Equipe' => 'off',
+            'TypeContrat' => '',
+            'Acronyme' => "Acronyme du projet de l'activité",
+            'ContratsAssocies' => 'off',
+            'ResponsableScientifique' => 'Nom de la personne ayant le rôle "Responsable scientifique"',
+            'EmployeurResponsableScientifique' => 'off',
+            'CoordinateurConsortium' => 'off',
+            'Partenaires' => 'off',
+            'PartenairePrincipal' => 'off',
+            'IdPartenairePrincipal' => 'off',
+            'SourceFinancement' => 'Extrait de la fiche activité',
+            'LieuExecution' => 'off',
+            'DateDerniereSignature' => 'Extrait de la fiche activité',
+            'Duree' => 'off',
+            'DateDebut' => 'Extrait de la fiche activité',
+            'DateFin' => 'Extrait de la fiche activité',
+            'MontantPercuUnite' => 'off',
+            'CoutTotalEtude' => 'off',
+            'MontantTotal' => 'Extrait de la fiche activité',
+            'ValidePoleCompetivite' => 'Extrait de la fiche activité',
+            'PoleCompetivite' => 'Extrait de la fiche activité',
+            'Commentaires' => 'off',
+            'Pia' => 'off',
+            'Reference' => '',
+            'AccordCadre' => 'off',
+            'Cifre' => 'off',
+            'ChaireIndustrielle' => 'off',
+            'PresencePartenaireIndustriel' => 'off',
+        ];
     }
 }
