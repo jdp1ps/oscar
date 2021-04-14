@@ -1817,11 +1817,20 @@ administration:
                     action: pcru
             may_terminate: true
 
-        # Types d'organisation
+        # PCRU / CNRS - Pôles de compétivité
         poles-competitivite:
             type: segment
             options:
                 route: /poles-competitivite
                 defaults:
                     action: polesCompetitivite
+            may_terminate: tr
+
+        # PCRU / CNRS - Sources de financement
+        sources-financement:
+            type: segment
+            options:
+                route: /sources-financement
+                defaults:
+                    action: sourcesFinancement
             may_terminate: true

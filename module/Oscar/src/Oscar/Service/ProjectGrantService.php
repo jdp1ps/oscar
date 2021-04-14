@@ -1973,6 +1973,22 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
     }
 
+    /**
+     * Retourne la liste des pôles de compétitivité PCRU certified chargé en BDD.
+     * @return PcruPoleCompetitivite[]
+     */
+    public function getPcruPoleCompetitivite(){
+        return $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class)->findAll();
+    }
+
+    /**
+     * Retourne la liste des sources de financement PCRU certified chargé en BDD.
+     * @return PcruSourceFinancement[]
+     */
+    public function getPcruSourcesFinancement(){
+        return $this->getEntityManager()->getRepository(PcruSourceFinancement::class)->findAll();
+    }
+
 
     /**
      * Retourne les données pour le selecteur de pôle de compétitivité.

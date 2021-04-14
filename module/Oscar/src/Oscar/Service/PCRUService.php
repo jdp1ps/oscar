@@ -7,6 +7,8 @@ namespace Oscar\Service;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityRepository;
+use Oscar\Entity\PcruPoleCompetitivite;
+use Oscar\Entity\PcruSourceFinancement;
 use Oscar\Exception\OscarException;
 use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
 use Oscar\Traits\UseEntityManager;
@@ -178,7 +180,74 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $pcruInfos;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    ///
+    /// MISE à JOUR des REFERENCIELS
+    ///
+    ///////////////////////////////////////////////////////////////////////////////
+    public function updatePoleCompetitivite()
+    {
+        // Récupération du référenciel
+        $fichier = $this->getOscarConfigurationService()->getConfiguration('pcru.polecompetitivite');
+        if( !file_exists($fichier) ){
+            throw new OscarException(
+                "Le référenciel des pôles de compétitivité n'est pas disponible (fichier '$fichier' inaccessible ).");
+        }
+        $polesCnrs = json_decode(file_get_contents($fichier));
 
+        // Récupération des Pôles présents en BDD
+        $poles = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class)->findAll();
+        $exist = [];
+        /** @var PcruPoleCompetitivite $p */
+        foreach ($poles as $p) {
+            $exist[] = $p->getLabel();
+        }
+
+        // Comparaison
+        foreach ($polesCnrs as $poleSource) {
+            if( !in_array($poleSource, $exist) ){
+                // Création du pôle manquant
+                $poleC = new PcruPoleCompetitivite();
+                $this->getEntityManager()->persist($poleC);
+                $poleC->setLabel($poleSource);
+                $this->getEntityManager()->flush($poleC);
+            }
+        }
+
+        return true;
+    }
+
+    public function updateSourcesFinancement()
+    {
+        // Récupération du référenciel
+        $fichier = $this->getOscarConfigurationService()->getConfiguration('pcru.sourcefinancement');
+        if( !file_exists($fichier) ){
+            throw new OscarException(
+                "Le référenciel des sources de financement n'est pas disponible (fichier '$fichier' inaccessible ).");
+        }
+        $sources = json_decode(file_get_contents($fichier));
+
+        // Récupération des Pôles présents en BDD
+        $sourcesFinancement = $this->getEntityManager()->getRepository(PcruSourceFinancement::class)->findAll();
+        $exist = [];
+        /** @var PcruSourceFinancement $s */
+        foreach ($sourcesFinancement as $s) {
+            $exist[] = $s->getLabel();
+        }
+
+        // Comparaison
+        foreach ($sources as $source) {
+            if( !in_array($source, $exist) ){
+                // Création du pôle manquant
+                $sourceF = new PcruSourceFinancement();
+                $this->getEntityManager()->persist($sourceF);
+                $sourceF->setLabel($source);
+                $this->getEntityManager()->flush($sourceF);
+            }
+        }
+
+        return true;
+    }
 
 }
 

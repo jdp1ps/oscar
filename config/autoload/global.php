@@ -18,6 +18,13 @@ return array(
         'theme' => 'oscar',
         'themes' => ['oscar', 'adaj', 'debug'],
 
+        // Référenciel PCRU
+        'pcru' => [
+            'polecompetitivite' => __DIR__ .'/../../install/pcru-pole-competitivite.json',
+            'sourcefinancement' => __DIR__ .'/../../install/pcru-sources-financement.json',
+            'contracttype' => __DIR__ .'/../../install/pcru-contracts-types.json',
+        ],
+
         'htmltopdfrenderer' => [
             'class' => \Oscar\Formatter\File\HtmlToPdfDomPDFFormatter::class,
             'arguments' => []

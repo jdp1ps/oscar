@@ -33,6 +33,8 @@ use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UsePcruService;
+use Oscar\Traits\UsePcruServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectServiceTrait;
@@ -49,9 +51,9 @@ use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService, UsePcruService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePcruServiceTrait;
 
     private $serviceLocator;
 
@@ -1250,6 +1252,28 @@ class AdministrationController extends AbstractOscarController implements UsePro
      */
     public function polesCompetitiviteAction()
     {
-        return [];
+        if( $this->params()->fromQuery('action') == 'update' ){
+            $this->getPcruService()->updatePoleCompetitivite();
+            return $this->redirect()->toRoute('administration/poles-competitivite');
+        }
+        return [
+            'poles' => $this->getProjectGrantService()->getPcruPoleCompetitivite()
+        ];
+    }
+
+    /**
+     * Administration des pôles de compétitivité.
+     *
+     * @return array
+     */
+    public function sourcesFinancementAction()
+    {
+        if( $this->params()->fromQuery('action') == 'update' ){
+            $this->getPcruService()->updateSourcesFinancement();
+            return $this->redirect()->toRoute('administration/sources-financement');
+        }
+        return [
+            'datas' => $this->getProjectGrantService()->getPcruSourceFinancement()
+        ];
     }
 }

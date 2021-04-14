@@ -1,29 +1,29 @@
 <div class="container">
     <h1>
         <i class="icon-tags"></i>
-        Référenciel des <strong>Pôles de compétitivité</strong>
+        Référenciel des <strong>Sources de financement</strong>
         <a href="<?= $this->url('administration/accueil') ?>" class="btn btn-default">
             <i class="icon-rewind-outline">Revenir à l'accueil</i>
         </a>
     </h1>
 
     <div class="alert alert-info">
-        Le référenciel établissant la liste des pôles de compétitivité est fourni par le CNRS,
+        Le référenciel établissant la liste des sources de financement est fourni par le CNRS,
         il ne peut pas être modifié directement depuis l'interface. Il peut cependant être synchronisé
         depuis la liste officielle disponible dans le dosser d'installation Oscar :
-        <code>install/pcru-pole-competitivite.json</code>
+        <code>install/pcru-sources-financement.json</code>
     </div>
 
     <div id="pc"></div>
 
-    <?php if( count($poles) == 0 ): ?>
+    <?php if( count($datas) == 0 ): ?>
         <div class="alert alert-warning">
             Aucun pôle trouvé
         </div>
     <?php else: ?>
-        <?php foreach ($poles as $pole): ?>
+        <?php foreach ($datas as $s): ?>
         <article class="card xs">
-            <h4><?= $pole ?></h4>
+            <h4><?= $s ?></h4>
         </article>
         <?php endforeach; ?>
     <?php endif; ?>

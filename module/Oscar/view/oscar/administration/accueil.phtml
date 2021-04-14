@@ -219,7 +219,22 @@
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>
             </h3>
-            <p>Gestion des types de dépense.</p>
+            <p>Liste des pôles de compétitivité CNRS disponibles (PCRU).</p>
+        </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-tags"></i>
+                    Référenciel des sources de financement
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Liste des sources de financement CNRS disponibles (PCRU).</p>
         </article>
     </section>
 

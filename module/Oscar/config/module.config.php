@@ -65,6 +65,7 @@ return array(
                         'polesCompetitivite',
                         'privileges2',
                         'planComptableLoaded',
+                        'sourcesFinancement',
                         'userLogs',
                         'users',
                         'userRoles',
