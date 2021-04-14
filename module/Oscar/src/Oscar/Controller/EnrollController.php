@@ -422,6 +422,12 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                             break;
 
                         case OrganizationPerson::class :
+
+                            // PATCH 2021-04-14 : à nettoyer
+                            if( $enroller == null ){
+                                $enroller = $this->getOrganizationService()->getOrganization(
+                                    $this->params()->fromRoute('idenroller'));
+                            }
                             $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
                             $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
                             return;
