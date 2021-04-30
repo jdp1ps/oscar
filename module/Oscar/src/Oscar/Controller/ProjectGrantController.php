@@ -630,8 +630,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
                             }
                         }
-
-
                 }
             } catch (OscarException $e) {
                 return $this->getResponseInternalError($e->getMessage());
@@ -2808,6 +2806,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
         $pcruInfos = $factory->createNew($activity);
         $headers = $factory->getHeaders();
+        $datas = $pcruInfos->toArray();
+        $validation = $pcruInfos->validation();
 
 //        $form = new PcruInfosForm();
 //        $form->setServiceContainer($this->getServiceContainer());
@@ -2827,8 +2827,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             //'form' => $form,
+            'validations' => $validation,
             'headers' => $headers,
-            'datas' => $pcruInfos->toArray(),
+            'datas' => $datas,
             'activity' => $activity
         ];
     }

@@ -82,6 +82,13 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         ]);
         $this->add($labintel);
 
+        $rnsr = new Element\Text('rnsr');
+        $rnsr->setAttributes([
+            'class'       => 'form-control',
+            'placeholder'   => 'N°RNSR'
+        ]);
+        $this->add($rnsr);
+
         $fullName = new Element\Text('fullName');
         $fullName->setAttributes([
             'class'       => 'form-control',

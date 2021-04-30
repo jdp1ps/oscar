@@ -12,6 +12,7 @@
                 <th title="Numéro de colonne de le fichier d'export">N°</th>
                 <th>Champ PCRU</th>
                 <th>Géré</th>
+                <th>Valide</th>
                 <th>Valeur envoyée</th>
                 <th>Informations</th>
             </tr>
@@ -23,10 +24,27 @@
                 <th><?= $i++ ?></th>
                 <th><?= $header ?></th>
                 <?php if(strpos($description, 'off') === 0) : ?>
-                    <td><i class="icon-cancel-circled-outline text-danger"></i></td>
+                    <td><i class="icon-cancel-circled-outline"></i></td>
                 <?php else: ?>
-                    <td><i class="icon-ok-circled text-success"></i></td>
+                    <td><i class="icon-ok-circled"></i></td>
                 <?php endif; ?>
+
+                <td>
+                    <?php
+                    switch( $validations[$header] ){
+                        case 'valid':
+                            echo '<i class="icon-ok-circled text-success"></i>';
+                            break;
+                        case 'disabled':
+                            echo '<i class="icon-eye-off" style="color: #4c4c4c"></i>';
+                            break;
+                        case 'error':
+                            echo '<i class="icon-minus-circled text-danger"></i>';
+                            break;
+                    }
+                    ?>
+                    <?= $validations[$header] ?></td>
+
                 <td><code><?= $datas[$header] ?></code></td>
                 <?php if(strpos($description, 'off') === 0) : ?>
                     <td><p>Ce champ n'est pas géré dans Oscar</p></td>

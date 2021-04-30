@@ -9,6 +9,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Exception\OscarException;
 use Oscar\Service\OscarConfigurationService;
 
 class ActivityPcruInfoFromActivityFactory
@@ -40,10 +41,20 @@ class ActivityPcruInfoFromActivityFactory
         $codeUniteLabintel = "";
         $sigleUnit = "";
 
+        $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
+        if( count($structures) == 0 ){
+            throw new OscarException("Aucune structure $roleStructureToFind pour cette activité.");
+        }
+
+
         /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
            $codeUniteLabintel = $unite->getOrganization()->getLabintel();
            $sigleUnit = $unite->getOrganization()->getShortName();
+        }
+
+        if( $codeUniteLabintel == "" ){
+            throw new OscarException("Le $roleStructureToFind n'a pas de code LABINTEL");
         }
 
         // Recherche automatique du responsable scientifique

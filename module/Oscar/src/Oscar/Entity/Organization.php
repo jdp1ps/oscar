@@ -309,6 +309,12 @@ class Organization implements ResourceInterface, IConnectedObject
     protected $labintel;
 
     /**
+     * N°RNSR
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $rnsr;
+
+    /**
      * @var string
      * @ORM\Column(type="object", nullable=true)
      */
@@ -342,6 +348,23 @@ class Organization implements ResourceInterface, IConnectedObject
     public function setTypeObj($typeObj)
     {
         $this->typeObj = $typeObj;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRnsr()
+    {
+        return $this->rnsr;
+    }
+
+    /**
+     * @param mixed $rnsr
+     */
+    public function setRnsr($rnsr): self
+    {
+        $this->rnsr = $rnsr;
+        return $this;
     }
 
     /**

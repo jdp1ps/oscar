@@ -66,20 +66,32 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <div class="input-group input-group-sm">
-            <span class="input-group-addon">Code interne</span>
-            <?= $this->formInput($form->get('code')) ?>
-            <?= $this->formElementErrors($form->get('code')); ?>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">Code interne</span>
+                <?= $this->formInput($form->get('code')) ?>
+                <?= $this->formElementErrors($form->get('code')); ?>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Labintel (CNRS)</span>
+                    <?= $this->formInput($form->get('labintel')) ?>
+                    <?= $this->formElementErrors($form->get('labintel')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">N°RNSR</span>
+                <?= $this->formInput($form->get('rnsr')) ?>
+                <?= $this->formElementErrors($form->get('rnsr')); ?>
+            </div>
         </div>
     </div>
-
     <div class="form-group">
-        <div class="input-group input-group-sm">
-            <span class="input-group-addon">Labintel (CNRS)</span>
-            <?= $this->formInput($form->get('labintel')) ?>
-            <?= $this->formElementErrors($form->get('labintel')); ?>
-        </div>
     </div>
 
     <div class="form-group">

@@ -14,6 +14,12 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ActivityPcruInfos
 {
+
+    const VALIDATION_VALID = 'valid';
+    const VALIDATION_DISABLED = 'disabled';
+    const VALIDATION_ERROR = 'error';
+    const VALIDATION_EMPTY = 'empty';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -259,6 +265,120 @@ class ActivityPcruInfos
         $out['Cifre'] = $this->getCifre();
         $out['ChaireIndustrielle'] = $this->getChaireIndustrielle();
         $out['PresencePartenaireIndustriel'] = $this->getPresencePartenaireIndustriel();
+        return $out;
+    }
+
+    public function validation()
+    {
+        $datas = $this->toArray();
+
+        $out = [];
+        $out['Objet'] = self::VALIDATION_ERROR;                             // Requis
+        $out['CodeUniteLabintel'] = self::VALIDATION_ERROR;                 // Requis
+        $out['SigleUnite'] = self::VALIDATION_EMPTY;
+        $out['NumContratTutelleGestionnaire'] = self::VALIDATION_ERROR;     // Requis
+        $out['Equipe'] = self::VALIDATION_EMPTY;
+        $out['TypeContrat'] = self::VALIDATION_ERROR;
+        $out['Acronyme'] = self::VALIDATION_EMPTY;
+        $out['ContratsAssocies'] = self::VALIDATION_EMPTY;
+        $out['ResponsableScientifique'] = self::VALIDATION_ERROR;           // Requis
+        $out['EmployeurResponsableScientifique'] = self::VALIDATION_EMPTY;
+        $out['CoordinateurConsortium'] = self::VALIDATION_EMPTY;
+        $out['Partenaires'] = self::VALIDATION_EMPTY;
+        $out['PartenairePrincipal'] = self::VALIDATION_ERROR;               // Requis
+        $out['IdPartenairePrincipal'] = self::VALIDATION_EMPTY;
+        $out['SourceFinancement'] = self::VALIDATION_ERROR;                 // Requis
+        $out['LieuExecution'] = self::VALIDATION_ERROR;                     // Requis
+        $out['DateDerniereSignature'] = self::VALIDATION_ERROR;             // Requis
+        $out['Duree'] = self::VALIDATION_EMPTY;
+        $out['DateDebut'] = self::VALIDATION_ERROR;                         // Requis
+        $out['DateFin'] = self::VALIDATION_ERROR;                           // Requis
+        $out['MontantPercuUnite'] = self::VALIDATION_ERROR;                 // Requis
+        $out['CoutTotalEtude'] = self::VALIDATION_EMPTY;
+        $out['MontantTotal'] = self::VALIDATION_EMPTY;
+        $out['ValidePoleCompetivite'] = self::VALIDATION_EMPTY;
+        $out['PoleCompetivite'] = self::VALIDATION_EMPTY;
+        $out['Commentaires'] = self::VALIDATION_EMPTY;
+        $out['Pia'] = self::VALIDATION_EMPTY;
+        $out['Reference'] = self::VALIDATION_EMPTY;
+        $out['AccordCadre'] = self::VALIDATION_EMPTY;
+        $out['Cifre'] = self::VALIDATION_EMPTY;
+        $out['ChaireIndustrielle'] = self::VALIDATION_EMPTY;
+        $out['PresencePartenaireIndustriel'] = self::VALIDATION_EMPTY;
+
+        $disabledFields = [
+            'Equipe','ContratsAssocies', 'EmployeurResponsableScientifique',
+            'CoordinateurConsortium','Partenaires', 'PartenairePrincipal',
+            'IdPartenairePrincipal','LieuExecution', 'Duree',
+            'MontantPercuUnite','CoutTotalEtude', 'Commentaires',
+            'Pia','AccordCadre', 'Cifre',
+            'ChaireIndustrielle','PresencePartenaireIndustriel'
+            ];
+
+        foreach ($disabledFields as $unusedField) {
+            $out[$unusedField] = self::VALIDATION_DISABLED;
+        }
+
+        if( $datas['Objet'] )
+            $out['Objet'] = self::VALIDATION_VALID;
+
+        if( $datas['CodeUniteLabintel'] )
+            $out['CodeUniteLabintel'] = self::VALIDATION_VALID;
+
+        if( $datas['SigleUnite'] )
+            $out['SigleUnite'] = self::VALIDATION_VALID;
+
+        if( $datas['NumContratTutelleGestionnaire'] )
+            $out['NumContratTutelleGestionnaire'] = self::VALIDATION_VALID;
+
+        if( $datas['NumContratTutelleGestionnaire'] )
+            $out['NumContratTutelleGestionnaire'] = self::VALIDATION_VALID;
+
+        if( $datas['TypeContrat'] )
+            $out['TypeContrat'] = self::VALIDATION_VALID;
+
+        if( $datas['Acronyme'] )
+            $out['Acronyme'] = self::VALIDATION_VALID;
+
+        if( $datas['ResponsableScientifique'] )
+            $out['ResponsableScientifique'] = self::VALIDATION_VALID;
+
+        if( $datas['EmployeurResponsableScientifique'] )
+            $out['EmployeurResponsableScientifique'] = self::VALIDATION_VALID;
+
+        if( $datas['PartenairePrincipal'] )
+            $out['PartenairePrincipal'] = self::VALIDATION_VALID;
+
+        if( $datas['SourceFinancement'] )
+            $out['SourceFinancement'] = self::VALIDATION_VALID;
+
+        if( $datas['LieuExecution'] )
+            $out['LieuExecution'] = self::VALIDATION_VALID;
+
+        if( $datas['DateDerniereSignature'] )
+            $out['DateDerniereSignature'] = self::VALIDATION_VALID;
+
+        if( $datas['DateDebut'] )
+            $out['DateDebut'] = self::VALIDATION_VALID;
+
+        if( $datas['DateFin'] )
+            $out['DateFin'] = self::VALIDATION_VALID;
+
+        if( $datas['MontantTotal'] )
+            $out['MontantTotal'] = self::VALIDATION_VALID;
+
+
+        if( $datas['ValidePoleCompetivite'] == true ){
+            $out['ValidePoleCompetivite'] = self::VALIDATION_VALID;
+            if( $out['PoleCompetivite'] ){
+                $out['PoleCompetivite'] = self::VALIDATION_VALID;
+            }
+        }
+
+        if( $datas['Reference'] )
+            $out['Reference'] = self::VALIDATION_VALID;
+
+
         return $out;
     }
 
