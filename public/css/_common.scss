@@ -5519,3 +5519,35 @@ pre.alert-danger, pre.alert-info {
 .datepicker-selector .week .week-day:nth-child(odd) {
   background: rgba(0, 0, 0, 0.05);
 }
+
+.list-selector {
+  display: block;
+
+  div {
+    display: block;
+
+    article {
+      cursor: pointer;
+      display: block;
+      align-items: center;
+      justify-items: center;
+      &:nth-child(even) {
+        background: rgba(#0a3783,.05);
+      }
+      &:hover {
+        background: rgba(#9CEFE8,.8);
+      }
+
+      strong {
+        flex: 5;
+      }
+
+      small {
+        margin-left: auto;
+        flex: 0;
+      }
+    }
+  }
+
+
+}

@@ -88,6 +88,26 @@
                 <span class="input-group-addon">N°RNSR</span>
                 <?= $this->formInput($form->get('rnsr')) ?>
                 <?= $this->formElementErrors($form->get('rnsr')); ?>
+                <div id="rnsrfield"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'rnsrfield'], function(Vue, VueResource, RNSRField){
+                        /**
+                         * Système de recherche des RSNS, pas très classe, mais fonctionnel
+                         */
+                        var v = new Vue({
+                            components: { 'rsnsfield': RNSRField },
+                            template: '<rsnsfield @select="selectrsns" :code="\'GREYC\'" />',
+                            methods: {
+                                selectrsns(foo){
+                                    this.$emit('change', foo);
+                                }
+                            }
+                        }).$mount("#rnsrfield");
+                        v.$on('change', function(foo){
+                            document.querySelector('[name="rnsr"]').value = foo;
+                        })
+                    })
+                </script>
             </div>
         </div>
     </div>

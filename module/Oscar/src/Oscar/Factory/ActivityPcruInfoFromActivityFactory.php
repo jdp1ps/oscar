@@ -47,14 +47,18 @@ class ActivityPcruInfoFromActivityFactory
         }
 
 
+        $organizationsParsed = [];
         /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
-           $codeUniteLabintel = $unite->getOrganization()->getLabintel();
-           $sigleUnit = $unite->getOrganization()->getShortName();
+            $organizationsParsed[] = (string)$unite->getOrganization();
+            if( $unite->getOrganization()->getLabintel() ){
+                $codeUniteLabintel = $unite->getOrganization()->getLabintel();
+                $sigleUnit = $unite->getOrganization()->getShortName();
+            }
         }
 
         if( $codeUniteLabintel == "" ){
-            throw new OscarException("Le $roleStructureToFind n'a pas de code LABINTEL");
+            throw new OscarException("Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL");
         }
 
         // Recherche automatique du responsable scientifique

@@ -92,7 +92,14 @@ function componentTextarea(cb) {
 exports.componentTextarea = componentTextarea;
 exports.componentTextareaWatch = function(cb){ watch('./src/components/TextareaField.vue', componentTextarea); }
 
-let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC'];
+function componentRNSRField(cb) {
+    compileComponent('RNSRField');
+    cb();
+}
+exports.componentRNSRField = componentRNSRField;
+exports.componentRNSRFieldWatch = function(cb){ watch('./src/components/RNSRField.vue', componentRNSRField); }
+
+let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC', 'componentRNSRField'];
 
 function defaultTask(cb) {
     console.log("Usage : ");
