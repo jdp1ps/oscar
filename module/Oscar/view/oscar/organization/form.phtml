@@ -96,7 +96,7 @@
                          */
                         var v = new Vue({
                             components: { 'rsnsfield': RNSRField },
-                            template: '<rsnsfield @select="selectrsns" :code="\'GREYC\'" />',
+                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization->getShortname(); ?>\'" />',
                             methods: {
                                 selectrsns(foo){
                                     this.$emit('change', foo);
