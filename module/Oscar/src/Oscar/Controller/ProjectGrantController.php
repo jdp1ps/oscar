@@ -2809,22 +2809,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $datas = $pcruInfos->toArray();
         $validation = $pcruInfos->validation();
 
-//        $form = new PcruInfosForm();
-//        $form->setServiceContainer($this->getServiceContainer());
-//        $form->setHydrator(new PcruInfosFormHydrator());
-//        $form->init();
-//
-//        // Récupération des informations
-//        if( $activity->getPcruInfo() ){
-//            $pcruInfos = $activity->getPcruInfo();
-//        } else {
-//            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
-//            $pcruInfos = $factory->createNew($activity);
-//        }
-//
-//        // Formulaire
-//        $form->bind($pcruInfos);
-
         return [
             //'form' => $form,
             'validations' => $validation,

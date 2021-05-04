@@ -62,7 +62,7 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         // Recherche automatique du responsable scientifique
-        $roleRSToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_respscien_role', 'Responsable scientifique');
+        $roleRSToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_respscien_role', 'Responsable Scientifique');
         $responsable = "";
 
         /** @var ActivityPerson $personActivity */

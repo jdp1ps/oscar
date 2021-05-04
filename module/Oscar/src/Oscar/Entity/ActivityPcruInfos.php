@@ -370,6 +370,7 @@ class ActivityPcruInfos
 
         if( $datas['ValidePoleCompetivite'] == true ){
             $out['ValidePoleCompetivite'] = self::VALIDATION_VALID;
+            $out['PoleCompetivite'] = self::VALIDATION_ERROR;
             if( $out['PoleCompetivite'] ){
                 $out['PoleCompetivite'] = self::VALIDATION_VALID;
             }
