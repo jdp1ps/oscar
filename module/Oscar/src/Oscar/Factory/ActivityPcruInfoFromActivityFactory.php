@@ -9,6 +9,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ContractDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Service\OscarConfigurationService;
 
@@ -36,11 +37,16 @@ class ActivityPcruInfoFromActivityFactory
     {
         $activityPcruInfos = new ActivityPcruInfos();
 
-        // Recherche automatique de l'Unité (Laboratoire)
+        // --- Recherche automatique de l'Unité (Laboratoire)
+
+        // Intitulé du rôle "Laboratoire" pour PCRU
         $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
+
+        // Donnèes trouvées
         $codeUniteLabintel = "";
         $sigleUnit = "";
 
+        // Récupération des laboratoires
         $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
         if( count($structures) == 0 ){
             throw new OscarException("Aucune structure $roleStructureToFind pour cette activité.");
@@ -62,7 +68,8 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         // Recherche automatique du responsable scientifique
-        $roleRSToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_respscien_role', 'Responsable Scientifique');
+        $roleRSToFind = $this->oscarConfigurationService
+            ->getOptionalConfiguration('pcru_respscien_role', 'Responsable Scientifique');
         $responsable = "";
 
         /** @var ActivityPerson $personActivity */
@@ -70,7 +77,23 @@ class ActivityPcruInfoFromActivityFactory
             $responsable = $personActivity->getPerson()->getFirstname() . " " . strtoupper($personActivity->getPerson()->getLastname());
         }
 
+        // Document signé
+        $typeDocumentSigne = "Contrat Version Définitive Signée";
+        $documentSigned = null;
+
+        /** @var ContractDocument $document */
+        foreach ($activity->getDocuments() as $document){
+            if( $document->getTypeDocument()->getLabel() == $typeDocumentSigne ){
+                // Test sur les versions
+                if(  $documentSigned != null ){
+                    throw new OscarException("Il y'a plusieurs $typeDocumentSigne sur cette activité");
+                }
+                $documentSigned = $document->getPath();
+            }
+        }
+
         $activityPcruInfos->setActivity($activity)
+            ->setDocumentPath($documentSigned)
             ->setSigleUnite($sigleUnit)
             ->setPoleCompetivite($activity->getPcruPoleCompetitiviteStr())
             ->setNumContratTutelleGestionnaire($activity->getOscarNum())
@@ -85,6 +108,7 @@ class ActivityPcruInfoFromActivityFactory
             ->setDateFin($activity->getDateEnd())
             ->setDateDerniereSignature($activity->getDateSigned())
             ->setReference($activity->getOscarNum());
+
         return $activityPcruInfos;
     }
 

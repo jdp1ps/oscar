@@ -2800,21 +2800,30 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
             throw new OscarException("Le module PCR n'est pas activé");
         }
+
+        /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
+
+        // Droit d'accès
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
 
         $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
         $pcruInfos = $factory->createNew($activity);
         $headers = $factory->getHeaders();
         $datas = $pcruInfos->toArray();
         $validation = $pcruInfos->validation();
+        $documentPath = $this->getOscarConfigurationService()->getDocumentDropLocation().'/'.$pcruInfos->getDocumentPath();
+
+//        $valid = $pcruInfos->isValidToSend();
 
         return [
             //'form' => $form,
             'validations' => $validation,
             'headers' => $headers,
             'datas' => $datas,
-            'activity' => $activity
+            'activity' => $activity,
+            'documentPath' => $documentPath
         ];
     }
 

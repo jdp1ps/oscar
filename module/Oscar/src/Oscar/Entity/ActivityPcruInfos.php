@@ -231,6 +231,13 @@ class ActivityPcruInfos
      */
     private $PresencePartenaireIndustriel = "Indéfini";
 
+    /**
+     * @var integer Identifiant du document "Contrat Signé"
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $documentId = null;
+
+
     public function toArray() :array {
         $out = [];
         $out['Objet'] = $this->getObjet();
@@ -305,6 +312,7 @@ class ActivityPcruInfos
         $out['Cifre'] = self::VALIDATION_EMPTY;
         $out['ChaireIndustrielle'] = self::VALIDATION_EMPTY;
         $out['PresencePartenaireIndustriel'] = self::VALIDATION_EMPTY;
+        $out['contract_signed'] = self::VALIDATION_ERROR;
 
         $disabledFields = [
             'Equipe','ContratsAssocies', 'EmployeurResponsableScientifique',
@@ -378,6 +386,10 @@ class ActivityPcruInfos
 
         if( $datas['Reference'] )
             $out['Reference'] = self::VALIDATION_VALID;
+
+        if( $this->getDocumentPath() ){
+            $out['document_signed'] = self::VALIDATION_VALID;
+        }
 
 
         return $out;
@@ -944,11 +956,45 @@ class ActivityPcruInfos
     }
 
     /**
+     * @return int
+     */
+    public function getDocumentId(): ?int
+    {
+        return $this->documentId;
+    }
+
+    /**
+     * @param int $documentId
+     */
+    public function setDocumentId(?int $documentId): self
+    {
+        $this->documentId = $documentId;
+        return $this;
+    }
+
+    /**
      * @param string $PresencePartenaireIndustriel
      */
     public function setPresencePartenaireIndustriel(string $PresencePartenaireIndustriel): self
     {
         $this->PresencePartenaireIndustriel = $PresencePartenaireIndustriel;
         return $this;
+    }
+
+    public function getSignedFileName()
+    {
+        return $this->getNumContratTutelleGestionnaire()."pdf";
+    }
+
+    private $documentPath = null;
+
+    public function setDocumentPath($path){
+        $this->documentPath = $path;
+        return $this;
+    }
+
+    public function getDocumentPath()
+    {
+        return $this->documentPath;
     }
 }
