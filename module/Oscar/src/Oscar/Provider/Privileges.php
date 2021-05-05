@@ -17,6 +17,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const ACTIVITY_EXPORT = 'ACTIVITY-EXPORT';
     const ACTIVITY_ORGANIZATION_MANAGE = 'ACTIVITY-ORGANIZATION_MANAGE';
     const ACTIVITY_EDIT = 'ACTIVITY-EDIT';
+    const ACTIVITY_PCRU = 'ACTIVITY-PCRU';
     const ACTIVITY_INDEX = 'ACTIVITY-INDEX';
     const ACTIVITY_REQUEST = 'ACTIVITY-REQUEST';
     const ACTIVITY_REQUEST_MANAGE = 'ACTIVITY-REQUEST_MANAGE';
@@ -125,6 +126,7 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DROIT_ROLEORGA_EDITION = 'droit-ROLEORGA_EDITION';
     const DROIT_API_ACCESS = 'droit-API_ACCESS';
 
+    //const A
 
     const PERSON_SHOW_INM = 'PERSON-SYNC_LDA';
 

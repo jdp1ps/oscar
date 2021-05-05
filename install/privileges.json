@@ -103,6 +103,14 @@
     "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
     "fullcode": "ACTIVITY-EDIT"
   },
+  "ACTIVITY-PCRU": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "PCRU",
+    "libelle": "Permet d'afficher les informations PCRU de l'activité de recherche",
+    "fullcode": "ACTIVITY-PCRU"
+  },
 
   "ACTIVITY-PERSON_SHOW": {
     "category_id": 2,

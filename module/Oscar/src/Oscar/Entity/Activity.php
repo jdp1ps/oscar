@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
+use Doctrine\ORM\Mapping\OneToOne as OneToOne;
 
 /**
  * ProjectGrant, correspond aux conventions (Contrats).
@@ -124,8 +125,6 @@ class Activity implements ResourceInterface
     }
 
 
-
-
     /**
      * @ORM\Column(type="string", nullable=true)
      */
@@ -157,6 +156,29 @@ class Activity implements ResourceInterface
      * @ORM\ManyToOne(targetEntity="ActivityType")
      */
     private $activityType;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @var PcruPoleCompetitivite
+     * @ORM\ManyToOne(targetEntity="PcruPoleCompetitivite")
+     */
+    private $pcruPoleCompetitivite;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @ORM\Column(type="boolean", options={"default" : false})
+     */
+    private $pcruValidPoleCompetitivite;
+
+    /**
+     * Source de financement
+     *
+     * @var PcruSourceFinancement
+     * @ORM\ManyToOne(targetEntity="PcruSourceFinancement")
+     */
+    private $pcruSourceFinancement;
 
 
     /**
@@ -388,6 +410,12 @@ class Activity implements ResourceInterface
 
 
     /**
+     * Informations complémentaires PCRU
+     * @OneToOne(targetEntity="ActivityPcruInfos", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
+     */
+    private $pcruInfo;
+
+    /**
      * @var String
      * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
      */
@@ -400,6 +428,26 @@ class Activity implements ResourceInterface
      * @ORM\Column(type="object", nullable=true)
      */
     protected $numbers = [];
+
+    /**
+     * @return mixed
+     */
+    public function isPcruValidPoleCompetitivite()
+    {
+        return $this->pcruValidPoleCompetitivite;
+    }
+
+    /**
+     * @param mixed $pcruValidPoleCompetitivite
+     */
+    public function setPcruValidPoleCompetitivite($pcruValidPoleCompetitivite): self
+    {
+        $this->pcruValidPoleCompetitivite = $pcruValidPoleCompetitivite;
+        return $this;
+    }
+
+
+
 
     public function isActive()
     {
@@ -420,6 +468,64 @@ class Activity implements ResourceInterface
 
     public function getRemainder(){
         return $this->getAmount() - abs($this->getTotalSpent());
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitivite()
+    {
+        return $this->pcruPoleCompetitivite;
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitiviteStr()
+    {
+        return $this->getPcruPoleCompetitivite() ?: "";
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function isPcruPolePoleCompetitiviteStr()
+    {
+        return $this->isPcruValidPoleCompetitivite();
+    }
+
+    /**
+     * @param PcruPoleCompetitivite $pcruPoleCompetitivite
+     */
+    public function setPcruPoleCompetitivite($pcruPoleCompetitivite): self
+    {
+        $this->pcruPoleCompetitivite = $pcruPoleCompetitivite;
+        return $this;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancement()
+    {
+        return $this->pcruSourceFinancement;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancementStr()
+    {
+        return $this->getPcruSourceFinancement() ?: "";
+    }
+
+    /**
+     * @param PcruSourceFinancement $pcruSourceFinancement
+     */
+    public function setPcruSourceFinancement($pcruSourceFinancement): self
+    {
+        $this->pcruSourceFinancement = $pcruSourceFinancement;
+        return $this;
     }
 
     /**
@@ -505,6 +611,28 @@ class Activity implements ResourceInterface
         return $this;
     }
 
+    private $pcruMissings;
+
+    public function isPcruFriendly()
+    {
+        return count($this->getPcruMissings()) == 0;
+    }
+
+    public function getPcruMissings()
+    {
+        if( $this->pcruMissings === null ){
+            $missings = [];
+            if( !$this->getProject() ){
+                $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
+            } elseif (!$this->getAcronym()) {
+                $missings[] = _("Le projet de l'activité doit avoir un acronyme");
+            }
+
+            $this->pcruMissings = $missings;
+        }
+
+        return $this->pcruMissings;
+    }
 
 
     /**
@@ -572,6 +700,23 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @return mixed
+     */
+    public function getPcruInfo()
+    {
+        return $this->pcruInfo;
+    }
+
+    /**
+     * @param mixed $pcruInfo
+     */
+    public function setPcruInfo($pcruInfo): self
+    {
+        $this->pcruInfo = $pcruInfo;
+        return $this;
+    }
+
+    /**
      * @return String
      */
     public function getTimesheetFormat()
@@ -634,6 +779,7 @@ class Activity implements ResourceInterface
 
     /**
      * @return mixed
+     * @deprecated
      */
     public function getOscarId()
     {

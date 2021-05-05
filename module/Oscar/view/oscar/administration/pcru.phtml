@@ -1,0 +1,38 @@
+<div class="container">
+    <h1><i class="icon-beaker"></i> PCRU</h1>
+    <div id="app"></div>
+
+    <script>
+        require(['vue', 'administrationpcru'], function(Vue, AdministrationPcru){
+            new Vue({
+                el: "#app",
+                render(h){
+                    return h(AdministrationPcru, {props:{url: ''}});
+                }
+            })
+        })
+    </script>
+
+    <h1>
+        <i class="icon-tag"></i>
+        Référenciel des <strong>Pôles de compétitivité</strong>
+    </h1>
+
+    <div class="alert alert-info">
+        Le référenciel établissant la liste des pôles de compétitivité est fournit par le CNRS,
+        en le modifiant, vous prenez le risque de voir vos soumissions de contrat à PCRU rejeté.
+    </div>
+
+    <div id="pc"></div>
+
+    <script>
+        require(['vue', 'administrationpcrupc'], function(Vue, AdministrationPcruPC){
+            new Vue({
+                el: "#pc",
+                render(h){
+                    return h(AdministrationPcruPC, {props:{url: '<?= $this->url('api/referenciel-pcru-polecompetitivite') ?>'}});
+                }
+            })
+        })
+    </script>
+</div>

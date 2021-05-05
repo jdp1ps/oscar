@@ -264,7 +264,8 @@ De la même façon, 2 URL peuvent être utilisées pour synchroniser les donnée
     "url" : "",
     "email" : "",
     "siret" : "",
-    "type": "Type d'organisation tel que configuré dans Oscar"
+    "type": "Type d'organisation tel que configuré dans Oscar",
+    "labintel": ""
 }
 ```
 

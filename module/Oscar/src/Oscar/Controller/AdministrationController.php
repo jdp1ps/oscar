@@ -33,6 +33,8 @@ use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UsePcruService;
+use Oscar\Traits\UsePcruServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectServiceTrait;
@@ -49,9 +51,9 @@ use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService, UsePcruService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePcruServiceTrait;
 
     private $serviceLocator;
 
@@ -250,6 +252,43 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     protected function saveEditableConfKey($key, $value){
         $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
+    }
+
+    public function pcruAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
+
+        if( $this->isAjax() ){
+            $response = $this->baseJsonResponse();
+            $response['configuration_pcru'] = [
+                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+                'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_host', 'PCRU-Depot.dr14.cnrs.fr'),
+                'pcru_user' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
+                'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
+                'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
+                'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
+            ];
+            return $this->ajaxResponse($response);
+        }
+
+        if($this->getRequest()->isPost() ){
+            $data = [
+                'pcru_enabled' => $this->params()->fromPost('pcru_enabled') == 'on' ? true : false,
+                'pcru_host' => $this->params()->fromPost('host'),
+                'pcru_port' => $this->params()->fromPost('port'),
+                'pcru_user' => $this->params()->fromPost('user'),
+                'pcru_pass' => $this->params()->fromPost('pass'),
+                'pcru_ssh' => $this->params()->fromPost('ssh'),
+            ];
+
+            foreach ($data as $key=>$value) {
+                $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
+            }
+            return $this->redirect()->toRoute('administration/pcru');
+        }
+
+        return [
+        ];
     }
 
     public function numerotationAction()
@@ -1205,4 +1244,36 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $this->getResponseBadRequest("Accès à l'API improbable...");
     }
 
+
+    /**
+     * Administration des pôles de compétitivité.
+     *
+     * @return array
+     */
+    public function polesCompetitiviteAction()
+    {
+        if( $this->params()->fromQuery('action') == 'update' ){
+            $this->getPcruService()->updatePoleCompetitivite();
+            return $this->redirect()->toRoute('administration/poles-competitivite');
+        }
+        return [
+            'poles' => $this->getProjectGrantService()->getPcruPoleCompetitivite()
+        ];
+    }
+
+    /**
+     * Administration des pôles de compétitivité.
+     *
+     * @return array
+     */
+    public function sourcesFinancementAction()
+    {
+        if( $this->params()->fromQuery('action') == 'update' ){
+            $this->getPcruService()->updateSourcesFinancement();
+            return $this->redirect()->toRoute('administration/sources-financement');
+        }
+        return [
+            'datas' => $this->getProjectGrantService()->getPcruSourceFinancement()
+        ];
+    }
 }

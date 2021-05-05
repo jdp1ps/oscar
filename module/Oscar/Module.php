@@ -26,6 +26,7 @@ use UnicaenAuth\Event\UserAuthenticatedEvent;
 use UnicaenAuth\Provider\Identity\ChainEvent;
 use UnicaenAuth\Service\User;
 use UnicaenAuth\Service\UserContext;
+use Zend\Authentication\Result;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\EventManager\Event;
 use Zend\Http\PhpEnvironment\Request;
@@ -41,20 +42,6 @@ use ZfcUser\Authentication\Adapter\AdapterChainEvent;
 
 class Module
 {
-
-
-    public function onBootstrap(MvcEvent $e)
-    {
-
-    }
-
-    // FIX : ZendFramework 3
-    public function init(ModuleManager $manager)
-    {
-
-    }
-
-
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';

@@ -24,6 +24,12 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\PcruPoleCompetitivite;
+use Oscar\Entity\PcruPoleCompetitiviteRepository;
+use Oscar\Entity\PcruSourceFinancement;
+use Oscar\Entity\PcruSourceFinancementRepository;
+use Oscar\Entity\PcruTypeContract;
+use Oscar\Entity\PcruTypeContractRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectGrantRepository;
@@ -33,6 +39,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\AsArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
@@ -201,10 +208,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      * @param bool $asArray
      * @return array|object[]
      */
-    public function getTypesDocuments( $asArray = true )
+    public function getTypesDocuments($asArray = true)
     {
         $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
-        if( $asArray ){
+        if ($asArray) {
             $documentTypes = [];
             /** @var TypeDocument $type */
             foreach ($types as $type) {
@@ -1858,5 +1865,179 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $qb->setParameter('dateRef', new \DateTime());
 
         return $qb;
+    }
+
+    public function getPcruPoleCompetitiviteByLabel($label)
+    {
+        /** @var PcruPoleCompetitiviteRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+
+        return $poleRepository->findOneBy([ 'label' => $label ]);
+    }
+
+    public function getPcruSourceFinancementByLabel($label)
+    {
+        /** @var PcruSourceFinancementRepository $poleRepository */
+        $sourceFinancnementRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+
+        return $sourceFinancnementRepository->findOneBy([ 'label' => $label ]);
+    }
+
+    public function getPcruSourceFinancementSelect()
+    {
+        /** @var PcruSourceFinancement $poleRepository */
+        $sourceFinancementRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+
+        $out = [
+            '' => 'Aucune'
+        ];
+
+        /** @var PcruSourceFinancement $sourceFinancement */
+        foreach ($sourceFinancementRepository->findAll() as $sourceFinancement) {
+            $out[$sourceFinancement->getLabel()] = $sourceFinancement->getLabel();
+        }
+
+        return $out;
+    }
+
+    public function addNewPoleCompetivite(string $label): PcruPoleCompetitivite
+    {
+        /** @var PcruPoleCompetitiviteRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruPoleCompetitivite();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter le pôle '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("Le pôle '$label' existe déjà");
+        }
+
+    }
+
+    public function addNewSourceFinancement(string $label): PcruSourceFinancement
+    {
+        /** @var PcruSourceFinancementRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruSourceFinancement();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter la source de financement '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("La source de financement '$label' existe déjà");
+        }
+
+    }
+    public function addNewTypeContract(string $label): PcruTypeContract
+    {
+        /** @var PcruTypeContractRepository $poleRepository */
+        $poleRepository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        if( !$poleRepository->findOneBy(['label' => $label]) ){
+            try {
+                $pole = new PcruTypeContract();
+                $this->getEntityManager()->persist($pole);
+                $pole->setLabel($label);
+                $this->getEntityManager()->flush($pole);
+                return $pole;
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible d'ajouter le type de contrat '$label', " . $e->getMessage());
+            }
+        } else {
+            throw new OscarException("Le type de contrat '$label' existe déjà");
+        }
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractArray( $format = AsArrayFormatter::ARRAY_FLAT ) :array
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        if( $format == AsArrayFormatter::ARRAY_FLAT )
+            return $repository->getFlatArrayLabel();
+        else
+            throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
+    }
+
+    /**
+     * Retourne la liste des pôles de compétitivité PCRU certified chargé en BDD.
+     * @return PcruPoleCompetitivite[]
+     */
+    public function getPcruPoleCompetitivite(){
+        return $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class)->findAll();
+    }
+
+    /**
+     * Retourne la liste des sources de financement PCRU certified chargé en BDD.
+     * @return PcruSourceFinancement[]
+     */
+    public function getPcruSourcesFinancement(){
+        return $this->getEntityManager()->getRepository(PcruSourceFinancement::class)->findAll();
+    }
+
+
+    /**
+     * Retourne les données pour le selecteur de pôle de compétitivité.
+     * @return string[]
+     */
+    public function getPcruPoleCompetitiviteSelect(){
+        $out = [
+            '' => 'Aucun',
+        ];
+        /** @var PcruPoleCompetitivite $pole */
+        foreach ($this->getEntityManager()->getRepository(PcruPoleCompetitivite::class)->getFlatArrayLabel() as $pole) {
+            $out[$pole] = $pole;
+        }
+        return $out;
+    }
+    /**
+     * Retourne la liste des pôle de compétitivité PCRU.
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruPoleCompetitiviteArray( $format = AsArrayFormatter::ARRAY_FLAT, $withEmptyAtFirst = false ){
+        /** @var PcruPoleCompetitiviteRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruPoleCompetitivite::class);
+
+        if( $format == AsArrayFormatter::ARRAY_FLAT ) {
+            if ($withEmptyAtFirst == true) {
+                $array = ["Aucun"];
+            } else {
+                $array = [];
+            }
+            $array = array_merge($array, $repository->getFlatArrayLabel());
+            return $array;
+        }
+        else
+            throw new OscarException("Format pour la liste des pôles de compétivité PCRU non-disponible");
+    }
+
+    /**
+     * @param string $format
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getPcruSourceFinancement( $format = AsArrayFormatter::ARRAY_FLAT ){
+        /** @var PcruSourceFinancementRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+        if( $format == AsArrayFormatter::ARRAY_FLAT )
+            return $repository->getFlatArrayLabel();
+        else
+            throw new OscarException("Format pour la liste des sources de financement PCRU non-disponible");
     }
 }

@@ -1,0 +1,37 @@
+<div class="container">
+    <h1>
+        <i class="icon-tags"></i>
+        Référenciel des <strong>Pôles de compétitivité</strong>
+        <a href="<?= $this->url('administration/accueil') ?>" class="btn btn-default">
+            <i class="icon-rewind-outline">Revenir à l'accueil</i>
+        </a>
+    </h1>
+
+    <div class="alert alert-info">
+        Le référenciel établissant la liste des pôles de compétitivité est fourni par le CNRS,
+        il ne peut pas être modifié directement depuis l'interface. Il peut cependant être synchronisé
+        depuis la liste officielle disponible dans le dosser d'installation Oscar :
+        <code>install/pcru-pole-competitivite.json</code>
+    </div>
+
+    <div id="pc"></div>
+
+    <?php if( count($poles) == 0 ): ?>
+        <div class="alert alert-warning">
+            Aucun pôle trouvé
+        </div>
+    <?php else: ?>
+        <?php foreach ($poles as $pole): ?>
+        <article class="card xs">
+            <h4><?= $pole ?></h4>
+        </article>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <hr>
+    <nav>
+        <a class="btn btn-info" href="?action=update">
+            <i class="icon-cw-outline"></i>
+            Actualiser depuis le référenciel CNRS
+        </a>
+    </nav>
+</div>

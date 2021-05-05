@@ -332,6 +332,33 @@
             <?php endif; ?>
         </div>
         <div class="col-md-4">
+
+            <?php
+            // -------------------------------------------------------------------------------------------------- PCRU
+            if( $pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity) ):?>
+                <div id="pcru-infos">
+                    <h2><i class="icon-beaker"></i>PCRU</h2>
+                    <?php if(!$entity->isPcruFriendly()): ?>
+                    <div class="alert alert-danger">
+                        Cette activité n'est pas éligible à PCRU :
+                        <ul>
+                            <?php foreach ($entity->getPcruMissings() as $item): ?>
+                            <li><?= $item ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php else: ?>
+                        <a href="<?= $this->url('contract/pcru-infos', ['id' => $entity->getId()]) ?>" class="btn btn-primary btn-xs">
+                            Accès aux informations PCRU
+                        </a>
+                        <ul>
+                            <?php foreach ($entity->getPcruMissings() as $item): ?>
+                                <li><?= $item ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
             <?php
             // -------------------------------------------------------------------------------------------------- JALONS
             if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>

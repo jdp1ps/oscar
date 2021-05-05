@@ -14,6 +14,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestRepository;
@@ -36,6 +37,8 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
+use Oscar\Form\PcruInfosForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\ActivityToJsonFormatter;
@@ -44,6 +47,7 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -626,8 +630,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 throw new OscarException("Impossible d'enregistrer le demande : " . $e->getMessage());
                             }
                         }
-
-
                 }
             } catch (OscarException $e) {
                 return $this->getResponseInternalError($e->getMessage());
@@ -1753,6 +1755,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             'generatedDocuments' => $this->getOscarConfigurationService()->getConfiguration('generated-documents.activity'),
+
+            'pcruEnabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+
             'entity' => $activity,
 
             'currencies' => $currencies,
@@ -1760,7 +1765,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'validatorsPrj' => $timesheetService->getValidatorsPrj($activity),
             'validatorsSci' => $timesheetService->getValidatorsSci($activity),
             'validatorsAdm' => $timesheetService->getValidatorsAdm($activity),
-
 
             'declarations' => $declarations,
 
@@ -1773,10 +1777,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'rolesOrganizations' => $rolesOrganizations,
             'rolesPersons' => $rolesPersons,
 
-            // Notifications précalculées
-            'notifications' => $this->getEntityManager()->getRepository(Notification::class)
-                ->findBy(['object' => Notification::OBJECT_ACTIVITY, 'objectId' => $activity->getId()]),
-
+//            // Notifications précalculées
+//            'notifications' => $this->getEntityManager()->getRepository(Notification::class)
+//                ->findBy(['object' => Notification::OBJECT_ACTIVITY, 'objectId' => $activity->getId()]),
 
             'documentTypes' => json_encode($documentTypes),
             'activityTypeChain' => $activityTypeChain,
@@ -2779,6 +2782,49 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $view->setTemplate('oscar/activity/list-view.phtml');
 
         return $view;
+    }
+
+    public function pcruAction()
+    {
+        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+        $activity = $this->getActivityFromRoute();
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        die("NOT IMPLEMENTED");
+    }
+
+    public function pcruInfosAction()
+    {
+        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        // Droit d'accès
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+
+        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        $pcruInfos = $factory->createNew($activity);
+        $headers = $factory->getHeaders();
+        $datas = $pcruInfos->toArray();
+        $validation = $pcruInfos->validation();
+        $documentPath = $this->getOscarConfigurationService()->getDocumentDropLocation().'/'.$pcruInfos->getDocumentPath();
+
+//        $valid = $pcruInfos->isValidToSend();
+
+        return [
+            //'form' => $form,
+            'validations' => $validation,
+            'headers' => $headers,
+            'datas' => $datas,
+            'activity' => $activity,
+            'documentPath' => $documentPath
+        ];
     }
 
     public function mergeAction()

@@ -38,13 +38,15 @@ $worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
 echo "OSCAR WORKER STARTED\n";
+echo "Version: " . \Oscar\OscarVersion::getBuild() . "\n";
 
-while($worker->work());
 
 function getServiceManager(){
     global $app;
     return $app->getServiceManager();
 }
+
+while($worker->work());
 
 function oscarJob_indexActivity(GearmanJob $job){
     $params = json_decode($job->workload());

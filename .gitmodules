@@ -1,0 +1,3 @@
+[submodule "public/js/certic-ui-components"]
+	path = public/js/certic-ui-components
+	url = git@git.unicaen.fr:certic/certic-ui-components.git

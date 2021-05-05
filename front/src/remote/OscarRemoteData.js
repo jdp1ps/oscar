@@ -4,6 +4,7 @@ class OscarRemoteData {
     constructor() {
         this.state = {
             loading: false,
+            debug: false,
             error: "",
             datas: null,
             errorMessage: "Erreur AJAX",
@@ -32,21 +33,44 @@ class OscarRemoteData {
         return instance;
     }
 
+    /**
+     * Permet d'activer/désactiver le mode debug
+     * @param bool
+     */
+    setDebug(b){
+        this.state.debug = b;
+        return this;
+    }
+
+    debug(){
+        if(this.state.debug){
+            console.log.apply(this, arguments);
+        }
+    }
+
     performGet(url, handlerResponse = null, handlerError = null){
+        this.debug("[ORD] GET " + url);
         this.state.loading = true;
         this.getAxiosInstance().get(url)
             .then(
                 response => {
+                    this.debug("   > response ", response);
                     this.state.datas = response.data;
                     if( handlerResponse ){
                         handlerResponse(response);
+                    } else {
+                        debug(' > NO handerResponse given');
                     }
                 })
             .catch(
                 error => {
+                    this.debug("   > error ", error);
                     this.state.error = error;
                     if( handlerError ){
                         handlerError(error);
+                    }
+                    else {
+                        debug(' > NO handlerError given');
                     }
                 })
             .finally( () => {

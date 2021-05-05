@@ -165,6 +165,13 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         ];
     }
 
+    public function testAction()
+    {
+
+        die("TEST d'EVENT");
+        return [];
+    }
+
     /**
      * Page d'accueil.
      *

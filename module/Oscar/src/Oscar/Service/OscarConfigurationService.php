@@ -29,6 +29,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const spents_account_filter = 'spents_account_filter';
     const activity_request_limit = 'activity_request_limit';
     const document_use_version_in_name = 'document_use_version_in_name';
+    const document_location = 'document_location';
+
 
     const theme = 'theme';
 
@@ -431,11 +433,50 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('spenttypeannexes');
     }
 
+    public function getPcruEnabled()
+    {
+        return $this->getEditableConfKey('pcru_enabled', false);
+    }
+
+    public function getPcruFtpInfos()
+    {
+        if (!$this->getPcruEnabled()) {
+            throw new OscarException("Le module PCRU n'est pas activé");
+        }
+        return [
+            'host' => $this->getEditableConfKey('pcru_host'),
+            'port' => $this->getEditableConfKey('pcru_port'),
+            'user' => $this->getEditableConfKey('pcru_user'),
+            'pass' => $this->getEditableConfKey('pcru_pass'),
+            'ssh' => $this->getEditableConfKey('pcru_ssh'),
+            'timeout' => $this->getEditableConfKey('pcru_timeout', 15),
+        ];
+    }
+
     /**
      * @return bool
      */
     public function getAutoUpdateSpent()
     {
         return $this->getOptionalConfiguration("autorefreshspents", false);
+    }
+
+    /**
+     * @return array|object
+     * @throws OscarException
+     */
+    public function getDocumentDropLocation(){
+        static $documentDropLocation;
+        if( $documentDropLocation == null ){
+            $path = realpath($this->getConfiguration('paths.document_oscar'));
+            if( !file_exists($path) ){
+                throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
+            }
+            if( !is_readable($path) ){
+                throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
+            }
+            $documentDropLocation = $path;
+        }
+        return $documentDropLocation;
     }
 }

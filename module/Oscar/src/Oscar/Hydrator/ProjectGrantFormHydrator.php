@@ -78,6 +78,8 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             ->setDescription($data['description'])
             ->setActivityType(array_key_exists('activityType', $data) ? $this->getActivityType($data['activityType']) : null)
             ->setCurrency($this->getCurrency($data['currency']))
+            ->setPcruPoleCompetitivite($this->getPcruPoleCompetitivite($data['pcruPoleCompetitivite']))
+            ->setPcruSourceFinancement($this->getPcruSourceFinancement($data['pcruSourceFinancement']))
             ->setCodeEOTP($data['codeEOTP'])
             ->setStatus($data['status'])
             ->setAmount($this->decimalPointComma($data['amount']))
@@ -92,6 +94,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             ->setDateEnd(DateTimeUtils::toDatetime($data['dateEnd']))
             ->setDateSigned(DateTimeUtils::toDatetime($data['dateSigned']))
             ->setDateOpened(DateTimeUtils::toDatetime($data['dateOpened']))
+            ->setPcruValidPoleCompetitivite($data['pcruValidPoleCompetitivite'] == "1")
             ->setNumbers(array_key_exists('numbers', $data) ? $data['numbers'] : [])
         ;
         if (isset($data['disciplines'])) {
@@ -132,6 +135,26 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
         return $this->getProjectGrantService()->getCurrency($currencyId);
     }
 
+    protected function getPcruPoleCompetitivite( $label )
+    {
+        if( $label == "Aucun" || $label == "" ){
+            return null;
+        }
+        else {
+            return $this->getProjectGrantService()->getPcruPoleCompetitiviteByLabel($label);
+        }
+    }
+
+    protected function getPcruSourceFinancement( $label )
+    {
+        if( $label == "Aucun" || $label == "" ){
+            return null;
+        }
+        else {
+            return $this->getProjectGrantService()->getPcruSourceFinancementByLabel($label);
+        }
+    }
+
     /**
      * @return ProjectGrantService
      */
@@ -168,6 +191,9 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             'currency' => $object->getCurrency() ? $object->getCurrency()->getId() : -1,
             'project' => $object->getProject(),
             'numbers' => $object->getNumbers(),
+            'pcruPoleCompetitivite' => $object->getPcruPoleCompetitivite() ? $object->getPcruPoleCompetitivite()->getLabel() : "",
+            'pcruSourceFinancement' => $object->getPcruSourceFinancement() ? $object->getPcruSourceFinancement()->getLabel() : "",
+            'pcruValidPoleCompetitivite' => $object->isPcruValidPoleCompetitivite(),
             'centaureNumConvention' => $object->getCentaureNumConvention(),
         ];
     }

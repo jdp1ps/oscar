@@ -106,7 +106,10 @@ requirejs.config({
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
         "rolesadminui": "oscar/dist/RolesAdminUI",
         "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
-        "activitydocument": "oscar/dist/ActivityDocument.umd.min"
+        "activitydocument": "oscar/dist/ActivityDocument.umd.min",
+        "administrationpcru": "oscar/dist/AdministrationPcru.umd.min",
+        "administrationpcrupc": "oscar/dist/AdministrationPcruPoleCompetitivite.umd.min",
+        "rnsrfield": "oscar/dist/RNSRField.umd.min",
     },
     shim: {
         "bootstrap": {

@@ -75,6 +75,20 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         ]);
         $this->add($shortName);
 
+        $labintel = new Element\Text('labintel');
+        $labintel->setAttributes([
+            'class'       => 'form-control',
+            'placeholder'   => 'Code LABINTEL'
+        ]);
+        $this->add($labintel);
+
+        $rnsr = new Element\Text('rnsr');
+        $rnsr->setAttributes([
+            'class'       => 'form-control',
+            'placeholder'   => 'N°RNSR'
+        ]);
+        $this->add($rnsr);
+
         $fullName = new Element\Text('fullName');
         $fullName->setAttributes([
             'class'       => 'form-control',
@@ -246,6 +260,8 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             'dateEnd'=> [
                 'required' => false,
             ],
+
+
         ];
     }
 }
