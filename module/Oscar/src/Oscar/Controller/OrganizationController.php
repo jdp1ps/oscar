@@ -145,7 +145,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         try {
             $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
         } catch (BadRequest400Exception $e) {
-            $error = _("Expression de recherche incorrecte");
+            $error = _("Expression de recherche incorrecte") . ' : ' . $e->getMessage();
         }
 
 

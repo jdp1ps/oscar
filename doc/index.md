@@ -37,6 +37,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
  - [Demande d'activité](activity-request.md)
  - [Personnaliser l'export des activités](activities-export.md)
+ - [Activier le mode ADAJ](adaj.md)
 
 ## Note de version
   - **VERSION 2.11 "MacClane"** ([Note de version](versions/version-2.11.md))
@@ -52,3 +53,4 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Ajouter des actions,vues,controlleurs,service dans Zend Framework 3](devnote/mvc.md)
  - [Créer un composant d'interface VUEJS](devnote/vuejs.md)
  - [Installer les drivers Oracle OCI](install-oracle-pp.md)
+ - [Modèle de données (version simplifiée)](images/oscar-database-simplified.png)

@@ -892,6 +892,13 @@ contract:
                 defaults:
                     action: exportJSON
 
+        json:
+            type: segment
+            options:
+                route: /json/:id
+                defaults:
+                    action: jsonApi
+
         generatedocument:
             type: segment
             options:

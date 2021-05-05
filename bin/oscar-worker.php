@@ -49,6 +49,8 @@ function getServiceManager(){
 function oscarJob_indexActivity(GearmanJob $job){
     $params = json_decode($job->workload());
 
+
+
     try {
         if( !property_exists($params, 'activityid') ){
             throw new Exception("Paramètres manquant ID");
@@ -56,12 +58,15 @@ function oscarJob_indexActivity(GearmanJob $job){
         /** @var \Oscar\Service\ProjectGrantService $activityService */
         $activityService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
 
+
         $activityid = $params->activityid;
+        $activityService->getLoggerService()->info("[GEARMAN] Indexation de Activity $activityid");
         $activity = $activityService->getActivityById($activityid);
         echo date('y-m-d H:i:s')." Rebuid Index [$activityid] $activity\n";
         $activityService->searchUpdate($activity);
 
     } catch (Exception $e) {
+        $activityService->getLoggerService()->info("[GEARMAN] Error " . $e->getMessage());
         echo "[ERR] " . $e->getMessage() ."\n";
     }
 }
@@ -77,11 +82,14 @@ function oscarJob_indexPerson(GearmanJob $job){
         $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
 
         $personId = $params->personid;
+
+        getServiceManager()->get('Logger')->info("[GEARMAN] Indexation de Person $personId");
         $person = $personService->getPerson($personId);
         echo date('y-m-d H:i:s')." Rebuid Index [$personId] $person\n";
         $personService->getSearchEngineStrategy()->update($person);
 
     } catch (Exception $e) {
+        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
         echo "[ERR] " . $e->getMessage() ."\n";
     }
 }
@@ -109,11 +117,14 @@ function oscarJob_notificationActivityPerson(GearmanJob $job){
         $activityId = $params->activityid;
         $activity = $projectGrantService->getActivityById($activityId);
 
+        getServiceManager()->get('Logger')->info("[GEARMAN] Notification Person:$personId - Activity:$activityId");
+
         echo date('y-m-d H:i:s')." Notification Activity Person [$activityId, $personId] $activity >  $person\n";
         $notificationService->generateNotificationsForActivity($activity, $person);
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
+        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
     }
 }
 
@@ -141,10 +152,13 @@ function oscarJob_purgeNotificationsPersonActivity(GearmanJob $job){
         $activityId = $params->activityid;
         $activity = $projectGrantService->getActivityById($activityId);
 
+        getServiceManager()->get('Logger')->info("[GEARMAN] Purge notification Person:$personId Activity:$activityId");
+
         echo date('y-m-d H:i:s')." PURGE Notification Activity Person [$activityId, $personId] $activity >  $person\n";
         $notificationService->purgeNotificationsPersonActivity($activity, $person);
 
     } catch (Exception $e) {
+        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
         echo "[ERR] " . $e->getMessage() ."\n";
     }
 }
@@ -164,7 +178,13 @@ function oscarJob_hello(GearmanJob $job){
         /** @var \Oscar\Service\NotificationService $notificationService */
         $notificationService = getServiceManager()->get(\Oscar\Service\NotificationService::class);
 
+        /** @var \Monolog\Logger $loggerService */
+        $loggerService = getServiceManager()->get('Logger');
+
         echo "Hello with " . print_r($params) . "\n";
+
+        // Envoi d'un log vers OSCAR
+        $loggerService->info("[GEARMAN] a bien reçu la tâche HELLO");
 
         $job->sendComplete("TRAITEMENT RÉUSSI");
 

@@ -2858,7 +2858,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             throw new OscarException(sprintf("Le lot %s n'est pas encore commencé au %s", $wp, $jourCreneau));
         }
 
-        if ($wp->getDateEnd() && $start > $wp->getDateEnd()) {
+        // PATCH modifier le test pour autoriser je dernier jour.
+        /** @var \DateTime $dernierJour */
+        $dernierJour = $wp->getDateEnd();
+        if( $dernierJour ){
+            $dernierJour->setTime(23,59,59);
+        }
+        if ($wp->getDateEnd() && $start > $dernierJour) {
             throw new OscarException(sprintf("Le lot %s est terminé au %s", $wp, $jourCreneau));
         }
     }
