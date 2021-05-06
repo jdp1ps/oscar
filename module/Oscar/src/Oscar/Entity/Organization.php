@@ -321,6 +321,19 @@ class Organization implements ResourceInterface, IConnectedObject
     protected $connectors;
 
 
+    /**
+     * @var string Numéro DUNS
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $duns;
+
+    /**
+     * @var string TVA Intracommunautaire
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $tvaintra;
+
+
     public function __construct()
     {
         $this->projects = new ArrayCollection();
@@ -332,6 +345,40 @@ class Organization implements ResourceInterface, IConnectedObject
     public function isClose()
     {
         return $this->getDateEnd() && $this->getDateEnd() <= new \DateTime();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDuns(): ?string
+    {
+        return $this->duns;
+    }
+
+    /**
+     * @param string $duns
+     */
+    public function setDuns(?string $duns): self
+    {
+        $this->duns = $duns;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTvaintra(): ?string
+    {
+        return $this->tvaintra;
+    }
+
+    /**
+     * @param string $tvaintra
+     */
+    public function setTvaintra(?string $tvaintra): self
+    {
+        $this->tvaintra = $tvaintra;
+        return $this;
     }
 
     /**
