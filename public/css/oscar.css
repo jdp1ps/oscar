@@ -11677,4 +11677,13 @@ pre.alert-danger, pre.alert-info {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.div-connexion {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.connect-credentials-lost {
+  display: none;
+}
+
 /*# sourceMappingURL=oscar.css.map */
