@@ -10,6 +10,8 @@
 namespace Oscar;
 
 use Oscar\Auth\UserAuthenticatedEventListener;
+use Oscar\Entity\Authentification;
+use UnicaenAuth\Event\UserAuthenticatedEvent;
 use Zend\Authentication\Result as AuthenticationResult;
 use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\MvcEvent;
@@ -21,29 +23,26 @@ class Module
 
     public function onBootstrap(MvcEvent $e)
     {
-        // TODO a tester
+        // FIX : Login
         $e->getApplication()->getEventManager()->getSharedManager()->attach(
             "*",
-            'authenticate', //"authentication.success",
+            'prePersist', //"authentication.success",
                     [$this, "onUserLogin"],
                 100
         );
     }
 
+    /**
+     * Lors de la connexion, on enregistre la Datetime de login
+     * @param $e UserAuthenticatedEvent
+     */
     public function onUserLogin( $e ) {
-        die("onUserLogin");
-
-//        if (is_string(\$identity = \$e->getIdentity())) {
-//            // login de l'utilisateur authentifié
-//            \$username = \$identity;
-//            //...
-//        } else {
-//            // id de l'utilisateur authentifié dans la table
-//            \$id = \$identity;
-//            //...
-//        }
-      //...
-}
+        if( get_class($e) == UserAuthenticatedEvent::class ){
+            /** @var Authentification $user */
+            $user = $e->getDbUser();
+            $user->setDateLogin(new \DateTime());
+        }
+    }
 
     // FIX : ZendFramework 3
     public function init(ModuleManager $manager)
