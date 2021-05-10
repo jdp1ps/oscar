@@ -11556,23 +11556,6 @@ pre.alert-danger, pre.alert-info {
   width: 100%;
 }
 
-.password-displayed {
-  background-color: #30b0d5;
-  transition: background-color linear 5s;
-}
-
-.vue-ui-textarea .vue-ui-content {
-  position: relative;
-}
-.vue-ui-textarea .vue-ui-content .errors {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: #DD423E;
-  color: white;
-  text-shadow: 1px -1px 1px rgba(0, 0, 0, 0.8);
-}
-
 .datepicker-selector {
   position: absolute;
   width: 16em;
@@ -11694,30 +11677,13 @@ pre.alert-danger, pre.alert-info {
   background: rgba(0, 0, 0, 0.05);
 }
 
-.list-selector {
-  display: block;
+.div-connexion {
+  max-width: 600px;
+  margin: 0 auto;
 }
-.list-selector div {
-  display: block;
-}
-.list-selector div article {
-  cursor: pointer;
-  display: block;
-  align-items: center;
-  justify-items: center;
-}
-.list-selector div article:nth-child(even) {
-  background: rgba(10, 55, 131, 0.05);
-}
-.list-selector div article:hover {
-  background: rgba(156, 239, 232, 0.8);
-}
-.list-selector div article strong {
-  flex: 5;
-}
-.list-selector div article small {
-  margin-left: auto;
-  flex: 0;
+
+.connect-credentials-lost {
+  display: none;
 }
 
 /*# sourceMappingURL=oscar.css.map */

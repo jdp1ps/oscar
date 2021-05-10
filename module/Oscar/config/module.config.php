@@ -23,6 +23,12 @@ return array(
                     'roles' => [],
                 ],
 
+                [
+                    'controller' => '\UnicaenAuth\Controller\Utilisateur',
+                    'action' => ['usurperIdentite'],
+                    'roles' => []
+                ],
+
                 [ 'controller' =>  'Public',
                     'action' => ['documentation', 'parameters', 'gitlog'],
                     'roles' => ['user'],

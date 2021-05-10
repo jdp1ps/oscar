@@ -9,39 +9,49 @@
 
 namespace Oscar;
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Monolog\Logger;
 use Oscar\Auth\UserAuthenticatedEventListener;
-use Oscar\Entity\LogActivity;
-use Oscar\Entity\ActivityLogRepository;
-use Oscar\Entity\Authentification;
-use Oscar\Exception\OscarException;
-use Oscar\Service\ActivityLogService;
-use Oscar\Service\OscarUserContext;
-use Oscar\Service\PersonService;
-use UnicaenAuth\Authentication\Adapter\Ldap;
-use UnicaenAuth\Event\UserAuthenticatedEvent;
-use UnicaenAuth\Provider\Identity\ChainEvent;
-use UnicaenAuth\Service\User;
-use UnicaenAuth\Service\UserContext;
-use Zend\Authentication\Result;
-use Zend\Console\Adapter\AdapterInterface;
-use Zend\EventManager\Event;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\ModuleManager\Feature\ConsoleBannerProviderInterface;
-use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
-use Zend\ModuleManager\ModuleEvent;
+use Zend\Authentication\Result as AuthenticationResult;
 use Zend\ModuleManager\ModuleManager;
-use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\Http\RouteMatch;
-use Zend\ServiceManager\ServiceManager;
 use ZfcUser\Authentication\Adapter\AdapterChainEvent;
 
 class Module
 {
+
+
+    public function onBootstrap(MvcEvent $e)
+    {
+        // TODO a tester
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            "*",
+            'authenticate', //"authentication.success",
+                    [$this, "onUserLogin"],
+                100
+        );
+    }
+
+    public function onUserLogin( $e ) {
+        die("onUserLogin");
+
+//        if (is_string(\$identity = \$e->getIdentity())) {
+//            // login de l'utilisateur authentifié
+//            \$username = \$identity;
+//            //...
+//        } else {
+//            // id de l'utilisateur authentifié dans la table
+//            \$id = \$identity;
+//            //...
+//        }
+      //...
+}
+
+    // FIX : ZendFramework 3
+    public function init(ModuleManager $manager)
+    {
+
+    }
+
+
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
