@@ -32,6 +32,12 @@ class PcruTypeContract
     private $label;
 
     /**
+     * @var ActivityType
+     * @ORM\ManyToOne(targetEntity="ActivityType")
+     */
+    private $activityType;
+
+    /**
      * @return mixed
      */
     public function getId() :int
@@ -53,6 +59,23 @@ class PcruTypeContract
     public function setLabel(string $label): self
     {
         $this->label = $label;
+        return $this;
+    }
+
+    /**
+     * @return ActivityType
+     */
+    public function getActivityType(): ?ActivityType
+    {
+        return $this->activityType;
+    }
+
+    /**
+     * @param ActivityType $activityType
+     */
+    public function setActivityType(?ActivityType $activityType): self
+    {
+        $this->activityType = $activityType;
         return $this;
     }
 

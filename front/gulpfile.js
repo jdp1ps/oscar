@@ -75,6 +75,16 @@ exports.activityDocumentWatch = function(cb){
     watch(pathModuleSrc + "ActivityDocument.vue", activityDocument);
 }
 
+//// 2.4 Correspondance Type de contrat PCRU / Type d'activité Oscar
+function contratTypePCRU(cb) {
+    compile("ContratTypePCRU");
+    cb();
+}
+exports.contratTypePCRU = contratTypePCRU;
+exports.contratTypePCRUWatch = function(cb){
+    watch(pathModuleSrc + "ContratTypePCRU.vue", contratTypePCRU);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES

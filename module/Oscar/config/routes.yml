@@ -106,6 +106,20 @@ api:
                 defaults:
                     action: activity
 
+        typeactivity:
+            type: segment
+            options:
+                route: /activity-type
+                defaults:
+                    action: activityType
+
+        typeactivitypcru:
+            type: segment
+            options:
+                route: /activity-type-pcru
+                defaults:
+                    action: activityTypePcru
+
 ################################################################################
 # NOTIFICATIONS
 notification:
@@ -1598,7 +1612,15 @@ administration:
             options:
                 route: /documents-sections
                 defaults:
-                    action: documentSections
+                    action: documentSection
+
+        contrat-type-pcru:
+            type: segment
+            may_terminate: true
+            options:
+                route: /contrat-type-pcru
+                defaults:
+                    action: contratTypePcru
 
         testconfig:
             type: segment

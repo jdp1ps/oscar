@@ -23,4 +23,26 @@ class PcruTypeContractRepository extends EntityRepository
         $entities = $query->getQuery()->getResult();
         return array_map('current', $entities);
     }
+    public function getArrayDatasJoined(): array
+    {
+        $query = $this->createQueryBuilder('ptc');
+        $out = [];
+        /** @var PcruTypeContract $pcruTypeContract */
+        foreach ($query->getQuery()->getResult() as $pcruTypeContract) {
+            $activityTypeLabel = "";
+            $activityTypeId = null;
+            if( $pcruTypeContract->getActivityType() ){
+                $activityTypeLabel = $pcruTypeContract->getActivityType()->getLabel();
+                $activityTypeId = $pcruTypeContract->getActivityType()->getId();
+            }
+
+            $out[] = [
+                'id' => $pcruTypeContract->getId(),
+                'label' => $pcruTypeContract->getLabel(),
+                'activitytype_id' => $activityTypeId,
+                'activitytype_label' => $activityTypeLabel
+            ];
+        }
+        return $out;
+    }
 }

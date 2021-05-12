@@ -27,6 +27,9 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\ProjectGrantService;
+use Oscar\Traits\UseActivityService;
+use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseAdministrativeDocumentService;
 use Oscar\Traits\UseAdministrativeDocumentServiceTrait;
 use Oscar\Traits\UseOrganizationService;
@@ -64,6 +67,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $this->serviceLocator;
     }
 
+    public function getActivityService(): ProjectGrantService
+    {
+        return $this->getServiceLocator()->get(ProjectGrantService::class);
+    }
+
     private $connectorService;
 
     /**
@@ -80,6 +88,16 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function setConnectorService( ConnectorService $connectorService)
     {
         $this->connectorService = $connectorService;
+    }
+
+    public function contratTypePcruAction(){
+        if( $this->params()->fromQuery('datas') ){
+            $datas = $this->baseJsonResponse();
+            $datas['activitytypes'] = $this->getActivityService()->getActivityTypesTree(true);
+            $datas['pcrucontracttypes'] = $this->getActivityService()->getActivityTypesPcru(true);
+            return $this->jsonOutput($datas);
+        }
+        return [];
     }
 
 

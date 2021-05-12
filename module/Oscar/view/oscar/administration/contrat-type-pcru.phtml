@@ -1,0 +1,13 @@
+<div class="container">
+    CONTrACT TYPE
+    <div id="contrattypepcru"></div>
+    <script>
+        require(['vue', 'vue-resource', 'contrattypepcru'], function(Vue, VueResource,ContratTypePCRU){
+            new Vue({
+                render(h) {
+                    return h(ContratTypePCRU, { "props": { "url": "<?php echo $this->url('administration/contrat-type-pcru') ?>?datas=1"}})
+                }
+            }).$mount('#contrattypepcru')
+        })
+    </script>
+</div>

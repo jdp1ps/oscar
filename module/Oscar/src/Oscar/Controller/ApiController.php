@@ -3,6 +3,7 @@
 namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityType;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
@@ -31,6 +32,26 @@ use Zend\View\Model\JsonModel;
 class ApiController extends AbstractOscarController implements UseOscarUserContextService, UseOscarConfigurationService, UsePersonService, UseLoggerService, UseOrganizationService, UseActivityService
 {
     use UseOscarUserContextServiceTrait, UseOscarConfigurationServiceTrait, UsePersonServiceTrait, UseLoggerServiceTrait, UseOrganizationServiceTrait, UseActivityServiceTrait;
+
+    public function activityTypeAction(){
+        $out = $this->baseJsonResponse();
+        $out['description'] = "Type d'activité configurées dans Oscar";
+
+        $types = $this->getActivityService()->getActivityTypesTree(true);
+
+        $out['types-activities'] = $types;
+        return $this->jsonOutput($out);
+    }
+
+    public function activityTypePcruAction(){
+        $out = $this->baseJsonResponse();
+        $out['description'] = "Type d'activité PCRU";
+
+        $types = $this->getActivityService()->getActivityTypesPcru(true);
+
+        $out['types-activities-pcru'] = $types;
+        return $this->jsonOutput($out);
+    }
 
     public function activityAction()
     {

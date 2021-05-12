@@ -951,6 +951,18 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         return $this->getActivityTypeService()->getActivityTypes($asArray);
     }
 
+    public function getActivityTypesTree($asArray = false)
+    {
+        return $this->getActivityTypeService()->getActivityTypesTree($asArray);
+    }
+
+    public function getActivityTypesPcru()
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        return $repository->getArrayDatasJoined();
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     public function getStatus()
     {

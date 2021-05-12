@@ -50,6 +50,7 @@ return array(
                         'connectorExecute',
                         'connectorsHome',
                         'connectorConfigure',
+                        'contratTypePcru',
                         'discipline', // OK
                         'documentSections',
                         'index',
@@ -218,6 +219,8 @@ return array(
                 ['controller' => 'Api',
                     'action' => [
                         'activity',
+                        'activityType',
+                        'activityTypePcru',
                         'help',
                         'organization',
                         'organizations',

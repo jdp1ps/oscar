@@ -110,6 +110,7 @@ requirejs.config({
         "administrationpcru": "oscar/dist/AdministrationPcru.umd.min",
         "administrationpcrupc": "oscar/dist/AdministrationPcruPoleCompetitivite.umd.min",
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
+        "contrattypepcru": "oscar/dist/ContratTypePCRU.umd.min",
     },
     shim: {
         "bootstrap": {
