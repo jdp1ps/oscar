@@ -7,7 +7,7 @@ class OscarRemoteData {
             debug: false,
             error: "",
             datas: null,
-            errorMessage: "Erreur AJAX",
+            errorMessage: "",
             pendingMessage: "Chargement des données"
         }
     }
@@ -59,18 +59,20 @@ class OscarRemoteData {
                     if( handlerResponse ){
                         handlerResponse(response);
                     } else {
-                        debug(' > NO handerResponse given');
+                        this.debug(' > NO handerResponse given');
                     }
                 })
             .catch(
                 error => {
                     this.debug("   > error ", error);
+                    this.debug(error);
+
                     this.state.error = error;
                     if( handlerError ){
                         handlerError(error);
                     }
                     else {
-                        debug(' > NO handlerError given');
+                        this.debug(' > NO handlerError given');
                     }
                 })
             .finally( () => {
@@ -88,8 +90,12 @@ class OscarRemoteData {
                 }
             })
             .catch( error => {
+                console.log(error);
+                this.debug("[ERROR] " + error);
                 if( handlerError ){
                     handlerError(error);
+                } else {
+                    this.state.error = error;
                 }
             })
             .finally( () => {

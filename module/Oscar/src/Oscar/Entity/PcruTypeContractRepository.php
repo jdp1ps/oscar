@@ -25,7 +25,7 @@ class PcruTypeContractRepository extends EntityRepository
     }
     public function getArrayDatasJoined(): array
     {
-        $query = $this->createQueryBuilder('ptc');
+        $query = $this->createQueryBuilder('ptc')->orderBy("ptc.label", "ASC");
         $out = [];
         /** @var PcruTypeContract $pcruTypeContract */
         foreach ($query->getQuery()->getResult() as $pcruTypeContract) {

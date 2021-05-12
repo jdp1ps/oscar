@@ -63,6 +63,7 @@ use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
+use phpDocumentor\Reflection\Types\Integer;
 use PHPUnit\Runner\Exception;
 
 class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService,
@@ -961,6 +962,20 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         /** @var PcruTypeContractRepository $repository */
         $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
         return $repository->getArrayDatasJoined();
+    }
+
+    public function pcruUpdateAssociateTypeContract(int $idTypeActivity, int $idPcruContractType)
+    {
+        $this->getLoggerService()->debug("Association de type de contract OSCAR:$idTypeActivity pour PCRU:$idPcruContractType");
+        /** @var ActivityType $activityType */
+        $activityType = $this->getEntityManager()->getRepository(ActivityType::class)->find($idTypeActivity);
+
+        /** @var PcruTypeContract $pcruContractType */
+        $pcruContractType = $this->getEntityManager()->getRepository(PcruTypeContract::class)->find($idPcruContractType);
+
+        $pcruContractType->setActivityType($activityType);
+
+        $this->getEntityManager()->flush();
     }
 
     ////////////////////////////////////////////////////////////////////////////

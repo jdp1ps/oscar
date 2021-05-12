@@ -207,35 +207,6 @@
             <p>Gestion des types de dépense.</p>
         </article>
 
-        <article class="card">
-            <h3 class="card-title">
-                <strong>
-                    <i class="icon-tags"></i>
-                    Référenciel des pôles de compétitivité
-                </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
-                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
-            </h3>
-            <p>Liste des pôles de compétitivité CNRS disponibles (PCRU).</p>
-        </article>
-
-        <article class="card">
-            <h3 class="card-title">
-                <strong>
-                    <i class="icon-tags"></i>
-                    Référenciel des sources de financement
-                </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
-                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
-            </h3>
-            <p>Liste des sources de financement CNRS disponibles (PCRU).</p>
-        </article>
     </section>
 
     <section>
@@ -403,6 +374,48 @@
                 <?php endif; ?>
             </h3>
             <p>Permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
+            <h4>Autre élément relatif à PCRU</h4>
+            <ul>
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                        Correspondance des types de contrat
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/contrat-type-pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br><small>Correspondance entre les types d'activités Oscar et les types de contrat PCRU</small>
+                </li>
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                    Référenciel des pôles de compétitivité :
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br>
+                    <small>La liste des pôles de compétitivité est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                </li>
+
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                        Référenciel des sources de financement
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br>
+                    <small>La liste des sources de financement est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                </li>
+            </ul>
         </article>
 
         <h2>

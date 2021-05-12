@@ -360,6 +360,113 @@ module.exports = defaults;
 
 /***/ }),
 
+/***/ "2877":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return normalizeComponent; });
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+function normalizeComponent (
+  scriptExports,
+  render,
+  staticRenderFns,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier, /* server only */
+  shadowMode /* vue-cli only */
+) {
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // render functions
+  if (render) {
+    options.render = render
+    options.staticRenderFns = staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = 'data-v-' + scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = shadowMode
+      ? function () {
+        injectStyles.call(
+          this,
+          (options.functional ? this.parent : this).$root.$options.shadowRoot
+        )
+      }
+      : injectStyles
+  }
+
+  if (hook) {
+    if (options.functional) {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functional component in vue file
+      var originalRender = options.render
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return originalRender(h, context)
+      }
+    } else {
+      // inject component registration as beforeCreate hook
+      var existing = options.beforeCreate
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    }
+  }
+
+  return {
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+
 /***/ "2d83":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -600,6 +707,97 @@ module.exports = (
     })()
 );
 
+
+/***/ }),
+
+/***/ "3b38":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+// ESM COMPAT FLAG
+__webpack_require__.r(__webpack_exports__);
+
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTypeTree.vue?vue&type=template&id=6314715e&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"tree"},[(_vm.tree.children.length > 0)?_c('span',{staticClass:"open-handler",on:{"click":function($event){_vm.open = !_vm.open}}},[(!_vm.open)?_c('i',{staticClass:"icon-right-dir"}):_c('i',{staticClass:"icon-down-dir"})]):_vm._e(),_c('strong',{staticClass:"select-handler",on:{"click":_vm.handlerSelect}},[_vm._v(_vm._s(_vm.tree.label == 'ROOT' ? './' : _vm.tree.label))]),(_vm.tree.children.length > 0)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.open),expression:"open"}],staticClass:"children"},_vm._l((_vm.tree.children),function(c){return _c('tree',{key:c.id,attrs:{"tree":c},on:{"select":function($event){return _vm.$emit('select', $event)}}})}),1):_vm._e()])}
+var staticRenderFns = []
+
+
+// CONCATENATED MODULE: ./src/ActivityTypeTree.vue?vue&type=template&id=6314715e&
+
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTypeTree.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ var ActivityTypeTreevue_type_script_lang_js_ = ({
+  props: {
+    tree: { required: true }
+  },
+
+  data(){
+    return {
+      open: false
+    }
+  },
+
+  methods: {
+
+    handlerSelect() {
+      this.$emit("select", this.tree);
+    }
+  },
+
+  beforeCreate: function () {
+    this.$options.components.tree = __webpack_require__("3b38").default
+  },
+
+  mounted(){
+    console.log("mounted tree");
+    if( this.tree.label == "ROOT" ){
+      this.open = true;
+    }
+  }
+
+});
+
+// CONCATENATED MODULE: ./src/ActivityTypeTree.vue?vue&type=script&lang=js&
+ /* harmony default export */ var src_ActivityTypeTreevue_type_script_lang_js_ = (ActivityTypeTreevue_type_script_lang_js_); 
+// EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
+var componentNormalizer = __webpack_require__("2877");
+
+// CONCATENATED MODULE: ./src/ActivityTypeTree.vue
+
+
+
+
+
+/* normalize component */
+
+var component = Object(componentNormalizer["a" /* default */])(
+  src_ActivityTypeTreevue_type_script_lang_js_,
+  render,
+  staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* harmony default export */ var ActivityTypeTree = __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
 
@@ -2293,21 +2491,23 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ContratTypePCRU.vue?vue&type=template&id=f29ea01c&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"contrattypepcru"}},[_c('h1',[_vm._v("Correspondance Type d'activité / Type de contrat PCRU")]),_c('div',{staticClass:"overlay"},[(_vm.oscartypes.length)?_c('div',{staticClass:"overlay-content"},[_vm._v(" TYPES OSCAR "),_c('tree',{attrs:{"tree":_vm.oscartypes[0]}})],1):_vm._e()]),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-6"},[_vm._m(0),_vm._l((_vm.pcrutypes),function(t){return _c('article',{key:t.id,staticClass:"card xs",class:t.activitytype_id != null ? 'active' : 'disabled'},[_c('h3',[_c('code',[_vm._v("["+_vm._s(t.id)+"]")]),_c('strong',[_vm._v(_vm._s(t.label))])]),(t.activitytype_id)?_c('div',[_vm._v(" Associé au activité "),_c('strong',[_vm._v(_vm._s(t.activitytype_label))])]):_vm._e(),_c('button',{staticClass:"btn xs"},[_vm._v(" Associer à un type dans Oscar ")])])})],2)]),_vm._v(" HOP "+_vm._s(_vm.url)+" ")])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_vm._v("Types côté "),_c('strong',[_vm._v("PCRU")])])}]
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ContratTypePCRU.vue?vue&type=template&id=6a2cd13e&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"contrattypepcru"}},[_c('h1',[_vm._v("Correspondance Type d'activité / Type de contrat PCRU")]),_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoteState}}),(_vm.selectedPcru)?_c('div',{staticClass:"overlay"},[(_vm.oscartypes.length)?_c('div',{staticClass:"overlay-content"},[_c('a',{staticClass:"overlay-closer",on:{"click":_vm.handlerClose}},[_vm._v("Fermer")]),_c('h3',[_vm._v("Correspondance")]),_vm._m(0),_c('tree',{attrs:{"tree":_vm.oscartypes[0]},on:{"select":_vm.handlerSelect}}),_c('button',{staticClass:"button button-danger",on:{"click":_vm.handlerClose}},[_vm._v(" Fermer ")])],1):_vm._e()]):_vm._e(),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-6"},[_vm._m(1),_vm._l((_vm.pcrutypes),function(t){return _c('article',{key:t.id,staticClass:"card xs",class:t.activitytype_id != null ? 'active' : 'disabled'},[_c('h3',[_c('code',[_vm._v("["+_vm._s(t.id)+"]")]),_c('strong',[_vm._v(_vm._s(t.label))])]),(t.activitytype_id)?_c('div',[_vm._v(" Associé au activité de type "),_c('strong',[_vm._v(_vm._s(t.activitytype_label))])]):_vm._e(),_c('button',{staticClass:"btn xs",on:{"click":function($event){return _vm.handlerAssociate(t)}}},[_vm._v(" Associer à un type dans Oscar ")])])})],2)])],1)}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('p',[_vm._v("Choississez un type d'activité correspondant dans Oscar pour les contrats PCRI "),_c('strong'),_vm._v(" : ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_vm._v("Types côté "),_c('strong',[_vm._v("PCRU")])])}]
 
 
-// CONCATENATED MODULE: ./src/ContratTypePCRU.vue?vue&type=template&id=f29ea01c&
+// CONCATENATED MODULE: ./src/ContratTypePCRU.vue?vue&type=template&id=6a2cd13e&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
-var AjaxOscarvue_type_template_id_3372c719_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"1em","right":"1em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('i',[_vm._v(_vm._s(_vm.oscarRemoteData.error))])]):_vm._e()])])}
-var AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns = []
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
+var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"5em","right":"5em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('code',[_vm._v(_vm._s(_vm.oscarRemoteData.error))]),_c('br'),_c('a',{staticStyle:{"color":"white"},attrs:{"href":"#"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("Fermer")])]):_vm._e()])])}
+var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
+// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=script&lang=js&
+//
+//
 //
 //
 //
@@ -2338,105 +2538,8 @@ var AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns = []
 
 // CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=script&lang=js&
  /* harmony default export */ var remote_AjaxOscarvue_type_script_lang_js_ = (AjaxOscarvue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () {
-        injectStyles.call(
-          this,
-          (options.functional ? this.parent : this).$root.$options.shadowRoot
-        )
-      }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functional component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
+// EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
+var componentNormalizer = __webpack_require__("2877");
 
 // CONCATENATED MODULE: ./src/remote/AjaxOscar.vue
 
@@ -2446,13 +2549,13 @@ function normalizeComponent (
 
 /* normalize component */
 
-var component = normalizeComponent(
+var component = Object(componentNormalizer["a" /* default */])(
   remote_AjaxOscarvue_type_script_lang_js_,
-  AjaxOscarvue_type_template_id_3372c719_scoped_true_render,
-  AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns,
+  AjaxOscarvue_type_template_id_ab46e5da_scoped_true_render,
+  AjaxOscarvue_type_template_id_ab46e5da_scoped_true_staticRenderFns,
   false,
   null,
-  "3372c719",
+  "ab46e5da",
   null
   
 )
@@ -2472,7 +2575,7 @@ class OscarRemoteData_OscarRemoteData {
             debug: false,
             error: "",
             datas: null,
-            errorMessage: "Erreur AJAX",
+            errorMessage: "",
             pendingMessage: "Chargement des données"
         }
     }
@@ -2524,18 +2627,20 @@ class OscarRemoteData_OscarRemoteData {
                     if( handlerResponse ){
                         handlerResponse(response);
                     } else {
-                        debug(' > NO handerResponse given');
+                        this.debug(' > NO handerResponse given');
                     }
                 })
             .catch(
                 error => {
                     this.debug("   > error ", error);
+                    this.debug(error);
+
                     this.state.error = error;
                     if( handlerError ){
                         handlerError(error);
                     }
                     else {
-                        debug(' > NO handlerError given');
+                        this.debug(' > NO handlerError given');
                     }
                 })
             .finally( () => {
@@ -2553,8 +2658,12 @@ class OscarRemoteData_OscarRemoteData {
                 }
             })
             .catch( error => {
+                console.log(error);
+                this.debug("[ERROR] " + error);
                 if( handlerError ){
                     handlerError(error);
+                } else {
+                    this.state.error = error;
                 }
             })
             .finally( () => {
@@ -2577,67 +2686,18 @@ class OscarRemoteData_OscarRemoteData {
 }
 
 /* harmony default export */ var remote_OscarRemoteData = (OscarRemoteData_OscarRemoteData);
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTypeTree.vue?vue&type=template&id=76707a29&
-var ActivityTypeTreevue_type_template_id_76707a29_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('strong',{on:{"click":_vm.handlerSelect}},[_vm._v(_vm._s(_vm.tree.label))]),(_vm.tree.children)?_c('div',[_vm._l((_vm.tree.children),function(c){return _c('tree',{key:c.id,attrs:{"tree":c},on:{"select":function($event){return _vm.$emit('select', $event)}}})}),_vm._v(" "+_vm._s(_vm.tree.children)+" ")],2):_vm._e()])}
-var ActivityTypeTreevue_type_template_id_76707a29_staticRenderFns = []
+// EXTERNAL MODULE: ./src/ActivityTypeTree.vue + 4 modules
+var ActivityTypeTree = __webpack_require__("3b38");
 
-
-// CONCATENATED MODULE: ./src/ActivityTypeTree.vue?vue&type=template&id=76707a29&
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTypeTree.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var ActivityTypeTreevue_type_script_lang_js_ = ({
-  props: {
-    tree: { required: true }
-  },
-  components: {
-    'tree': undefined
-  },
-  methods: {
-
-    handlerSelect() {
-      this.$emit("select", this.tree);
-    }
-  },
-
-  mounted(){
-    console.log("mounted tree");
-  }
-
-});
-
-// CONCATENATED MODULE: ./src/ActivityTypeTree.vue?vue&type=script&lang=js&
- /* harmony default export */ var src_ActivityTypeTreevue_type_script_lang_js_ = (ActivityTypeTreevue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./src/ActivityTypeTree.vue
-
-
-
-
-
-/* normalize component */
-
-var ActivityTypeTree_component = normalizeComponent(
-  src_ActivityTypeTreevue_type_script_lang_js_,
-  ActivityTypeTreevue_type_template_id_76707a29_render,
-  ActivityTypeTreevue_type_template_id_76707a29_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* harmony default export */ var ActivityTypeTree = (ActivityTypeTree_component.exports);
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ContratTypePCRU.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2687,55 +2747,104 @@ node node_modules/.bin/gulp contratTypePCRU
 
 
 
+
 // test
 let oscarRemoteData = new remote_OscarRemoteData();
-
-function flashMessage(){
-  // TODO
-}
-
-
 
 /* harmony default export */ var ContratTypePCRUvue_type_script_lang_js_ = ({
 
   components: {
     "ajax-oscar": AjaxOscar,
-    "tree": ActivityTypeTree
+    "tree": ActivityTypeTree["default"]
   },
 
   props: {
-    url: { required: true }
+    url: {required: true}
   },
 
-  data(){
+  data() {
     return {
       formData: null,
       remoterState: oscarRemoteData.state,
       configuration: null,
       oscartypes: [],
-      pcrutypes: []
+      pcrutypes: [],
+      remoteState: oscarRemoteData.state,
+      selectedPcru: null
     }
   },
 
-  methods:{
+  methods: {
 
-    handlerSuccess(success){
+    /**
+     * Quand l'utilisateur à selectionner un type d'activité Oscar depuis le liste proposée.
+     * @param evt
+     */
+    handlerSelect(evt) {
+      console.log("Selection sur ", evt, 'pour', this.selectedPcru);
+      let pcru = this.selectedPcru;
+      let oscar = evt;
+      let message = "Association des contrats '" + pcru.label + "' aux activités de recherche '" + oscar.label + "'";
+      oscarRemoteData
+          .setDebug(true)
+          .setPendingMessage(message)
+          .setErrorMessage("L'association a échouée.")
+          .performPost(this.url, {
+            pcru_id: pcru.id,
+            oscar_id: oscar.id
+          }, this.handlerAssociateSuccess);
+
+      this.selectedPcru = null;
+    },
+
+    handlerClose(){
+      console.log("CLOSE");
+        this.selectedPcru = null;
+    },
+
+    handlerAssociateError(){
+      console.log("handlerAssociateError", arguments);
+    },
+
+    handlerAssociateSuccess(){
+      console.log("handlerAssociateSuccess", arguments);
+      this.fetch();
+    },
+
+    /**
+     * L'utilisateur a selection un type de contrat PCRU pour configurer l'association.
+     * @param typePcru
+     */
+    handlerAssociate(typePcru) {
+      this.selectedPcru = typePcru;
+    },
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // TRAITEMENT des DONNEES
+
+    /**
+     * Chargement des données
+     */
+    fetch() {
+      oscarRemoteData
+          .setDebug(true)
+          .setPendingMessage("Chargement des associations pour les types d'activité")
+          .setErrorMessage("Erreur de chargement des associations des types activités")
+          .performGet(this.url, this.handlerSuccess);
+    },
+
+    /**
+     * Fin du chargement des données
+     * @param success
+     */
+    handlerSuccess(success) {
       let datas = success.data;
       this.oscartypes = datas.activitytypes;
       this.pcrutypes = datas.pcrucontracttypes;
-    },
-
-    fetch(){
-      console.log("FETCH()");
-      oscarRemoteData
-          .setDebug(true)
-          .setPendingMessage("Chargement des types de contrat")
-          .setErrorMessage("Impossible de charger la configuration")
-          .performGet(this.url, this.handlerSuccess);
     }
   },
 
-  mounted(){
+  mounted() {
     this.fetch();
   }
 
@@ -2751,7 +2860,7 @@ function flashMessage(){
 
 /* normalize component */
 
-var ContratTypePCRU_component = normalizeComponent(
+var ContratTypePCRU_component = Object(componentNormalizer["a" /* default */])(
   src_ContratTypePCRUvue_type_script_lang_js_,
   render,
   staticRenderFns,

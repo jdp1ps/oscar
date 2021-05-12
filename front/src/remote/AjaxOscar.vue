@@ -8,9 +8,11 @@
                 <i class="icon-spinner animate-spin animate"></i> {{ oscarRemoteData.pendingMessage }}
             </div>
             <div v-if="oscarRemoteData.error" class="error-message">
-                <span @click="oscarRemoteData.error = false" style="font-weight: bold; position: absolute; top: 1em; right: 1em ">x</span>
+                <span @click="oscarRemoteData.error = false" style="font-weight: bold; position: absolute; top: 5em; right: 5em ">x</span>
                 <i class="icon-attention-1"></i> <strong>{{ oscarRemoteData.errorMessage }} </strong> :
-                <i>{{ oscarRemoteData.error }}</i>
+                <code>{{ oscarRemoteData.error }}</code>
+                <br>
+                <a href="#" @click="oscarRemoteData.error = false" style="color: white">Fermer</a>
             </div>
 
         </div>

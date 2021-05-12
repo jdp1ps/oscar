@@ -91,13 +91,36 @@ class AdministrationController extends AbstractOscarController implements UsePro
     }
 
     public function contratTypePcruAction(){
-        if( $this->params()->fromQuery('datas') ){
-            $datas = $this->baseJsonResponse();
-            $datas['activitytypes'] = $this->getActivityService()->getActivityTypesTree(true);
-            $datas['pcrucontracttypes'] = $this->getActivityService()->getActivityTypesPcru(true);
-            return $this->jsonOutput($datas);
+        $method = $this->getHttpXMethod();
+
+        if( $method == 'GET' ){
+            if( $this->params()->fromQuery('datas') ){
+                $datas = $this->baseJsonResponse();
+                $datas['activitytypes'] = $this->getActivityService()->getActivityTypesTree(true);
+                $datas['pcrucontracttypes'] = $this->getActivityService()->getActivityTypesPcru(true);
+                return $this->jsonOutput($datas);
+            }
+            return [];
         }
-        return [];
+        elseif ( $method == "POST" ){
+            $this->getLoggerService()->debug(print_r($_POST, true));
+            $datas = $this->getJsonPosted();
+            $idTypeActivity = $datas['oscar_id'];
+            $idPcruContractType = $datas['pcru_id'];
+            try {
+
+                $this->getActivityService()->pcruUpdateAssociateTypeContract($idTypeActivity, $idPcruContractType);
+                return $this->getResponseOk();
+            } catch (\Exception $e){
+                $this->getLoggerService()->error($e->getMessage());
+                return $this->getResponseInternalError($e->getMessage());
+            }
+        }
+
+        else {
+            return $this->getResponseBadRequest("La méthode de transmission ne fonctionne pas");
+        }
+
     }
 
 

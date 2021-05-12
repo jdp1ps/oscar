@@ -11556,6 +11556,23 @@ pre.alert-danger, pre.alert-info {
   width: 100%;
 }
 
+.password-displayed {
+  background-color: #30b0d5;
+  transition: background-color linear 5s;
+}
+
+.vue-ui-textarea .vue-ui-content {
+  position: relative;
+}
+.vue-ui-textarea .vue-ui-content .errors {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #DD423E;
+  color: white;
+  text-shadow: 1px -1px 1px rgba(0, 0, 0, 0.8);
+}
+
 .datepicker-selector {
   position: absolute;
   width: 16em;
@@ -11677,6 +11694,32 @@ pre.alert-danger, pre.alert-info {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.list-selector {
+  display: block;
+}
+.list-selector div {
+  display: block;
+}
+.list-selector div article {
+  cursor: pointer;
+  display: block;
+  align-items: center;
+  justify-items: center;
+}
+.list-selector div article:nth-child(even) {
+  background: rgba(10, 55, 131, 0.05);
+}
+.list-selector div article:hover {
+  background: rgba(156, 239, 232, 0.8);
+}
+.list-selector div article strong {
+  flex: 5;
+}
+.list-selector div article small {
+  margin-left: auto;
+  flex: 0;
+}
+
 .div-connexion {
   max-width: 600px;
   margin: 0 auto;
@@ -11684,6 +11727,40 @@ pre.alert-danger, pre.alert-info {
 
 .connect-credentials-lost {
   display: none;
+}
+
+.overlay-content .tree-root {
+  font-size: 1.2em;
+  font-weight: 900;
+}
+
+.select-handler {
+  display: inline-block;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.select-handler:hover {
+  background: #0b93d5;
+}
+
+.open-handler {
+  cursor: pointer;
+}
+.open-handler:hover {
+  color: #0a3783;
+}
+
+.tree {
+  margin-bottom: 0.5em;
+}
+
+.children {
+  margin-left: 1em;
+  margin-bottom: 0.3em;
+  font-size: 0.9em;
+  font-weight: lighter;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /*# sourceMappingURL=app-beta.css.map */

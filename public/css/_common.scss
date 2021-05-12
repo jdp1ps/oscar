@@ -5561,3 +5561,37 @@ pre.alert-danger, pre.alert-info {
 .connect-credentials-lost {
   display: none;
 }
+
+
+.overlay-content .tree-root {
+  font-size: 1.2em;
+  font-weight: 900;
+}
+
+.select-handler {
+  display: inline-block;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  &:hover {
+    background: #0b93d5;
+  }
+}
+.open-handler {
+  cursor: pointer;
+  &:hover {
+    color: #0a3783;
+  }
+}
+
+.tree {
+  margin-bottom: .5em;
+}
+
+.children {
+  margin-left: 1em;
+  margin-bottom: .3em;
+  font-size: .9em;
+  font-weight: lighter;
+  background: rgba(0,0,0,.05);
+}

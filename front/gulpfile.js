@@ -83,6 +83,7 @@ function contratTypePCRU(cb) {
 exports.contratTypePCRU = contratTypePCRU;
 exports.contratTypePCRUWatch = function(cb){
     watch(pathModuleSrc + "ContratTypePCRU.vue", contratTypePCRU);
+    watch(pathModuleSrc + "ActivityTypeTree.vue", contratTypePCRU);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
