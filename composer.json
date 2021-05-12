@@ -10,7 +10,7 @@
 
   "require": {
     "unicaen/app": "^3.0",
-    "unicaen/auth": "^3.0",
+    "unicaen/auth": "dev-release-3.2.0",
     "oro/doctrine-extensions": "^1.2",
     "symfony/yaml": "^4.3",
     "fightbulc/moment": "^1.30",
