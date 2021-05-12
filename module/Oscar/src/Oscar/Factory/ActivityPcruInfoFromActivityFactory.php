@@ -10,6 +10,8 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\PcruTypeContract;
+use Oscar\Entity\PcruTypeContractRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Service\OscarConfigurationService;
 
@@ -69,7 +71,7 @@ class ActivityPcruInfoFromActivityFactory
 
         // Recherche automatique du responsable scientifique
         $roleRSToFind = $this->oscarConfigurationService
-            ->getOptionalConfiguration('pcru_respscien_role', 'Responsable Scientifique');
+            ->getOptionalConfiguration('pcru_respscien_role', 'Responsable scientifique');
         $responsable = "";
 
         /** @var ActivityPerson $personActivity */
@@ -92,6 +94,12 @@ class ActivityPcruInfoFromActivityFactory
             }
         }
 
+        /** @var PcruTypeContractRepository $pcruContractTypeRepository */
+        $pcruContractTypeRepository = $this->entityManager->getRepository(PcruTypeContract::class);
+
+        /** @var string $pcruContract */
+        $pcruContract = $pcruContractTypeRepository->getPcruContractLabelByActivityType($activity->getActivityType());
+
         $activityPcruInfos->setActivity($activity)
             ->setDocumentPath($documentSigned)
             ->setSigleUnite($sigleUnit)
@@ -101,6 +109,7 @@ class ActivityPcruInfoFromActivityFactory
             ->setSourceFinancement($activity->getPcruSourceFinancementStr())
             ->setResponsableScientifique($responsable)
             ->setCodeUniteLabintel($codeUniteLabintel)
+            ->setTypeContrat($pcruContract)
             ->setObjet($activity->getLabel())
             ->setAcronyme($activity->getAcronym())
             ->setMontantTotal($activity->getAmount())

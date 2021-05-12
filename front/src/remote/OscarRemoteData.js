@@ -17,17 +17,17 @@ class OscarRemoteData {
      * @param pendingMessage
      * @returns {OscarRemoteData}
      */
-    setPendingMessage(pendingMessage){
+    setPendingMessage(pendingMessage) {
         this.state.pendingMessage = pendingMessage;
         return this;
     }
 
-    setErrorMessage(errorMessage){
+    setErrorMessage(errorMessage) {
         this.state.errorMessage = errorMessage;
         return this;
     }
 
-    getAxiosInstance(){
+    getAxiosInstance() {
         let instance = axios.create({});
         instance.defaults.headers.common['X_REQUESTED_WITH'] = 'XMLHttpRequest';
         return instance;
@@ -37,18 +37,18 @@ class OscarRemoteData {
      * Permet d'activer/désactiver le mode debug
      * @param bool
      */
-    setDebug(b){
+    setDebug(b) {
         this.state.debug = b;
         return this;
     }
 
-    debug(){
-        if(this.state.debug){
+    debug() {
+        if (this.state.debug) {
             console.log.apply(this, arguments);
         }
     }
 
-    performGet(url, handlerResponse = null, handlerError = null){
+    performGet(url, handlerResponse = null, handlerError = null) {
         this.debug("[ORD] GET " + url);
         this.state.loading = true;
         this.getAxiosInstance().get(url)
@@ -56,7 +56,7 @@ class OscarRemoteData {
                 response => {
                     this.debug("   > response ", response);
                     this.state.datas = response.data;
-                    if( handlerResponse ){
+                    if (handlerResponse) {
                         handlerResponse(response);
                     } else {
                         this.debug(' > NO handerResponse given');
@@ -68,50 +68,47 @@ class OscarRemoteData {
                     this.debug(error);
 
                     this.state.error = error;
-                    if( handlerError ){
+                    if (handlerError) {
                         handlerError(error);
-                    }
-                    else {
+                    } else {
                         this.debug(' > NO handlerError given');
                     }
                 })
-            .finally( () => {
+            .finally(() => {
                 this.state.loading = false;
             })
     }
 
-    performPost(url, datas, handlerResponse = null, handlerError = null){
-        console.log("performPost", url, datas );
+    performPost(url, datas, handlerResponse = null, handlerError = null) {
         this.state.loading = true;
         this.getAxiosInstance().post(url, datas)
-            .then( response => {
-                if( handlerResponse ){
+            .then(response => {
+                if (handlerResponse) {
                     handlerResponse(response);
                 }
             })
-            .catch( error => {
-                console.log(error);
+            .catch(error => {
                 this.debug("[ERROR] " + error);
-                if( handlerError ){
+                if (handlerError) {
                     handlerError(error);
                 } else {
                     this.state.error = error;
                 }
             })
-            .finally( () => {
+            .finally(() => {
                 this.state.loading = false;
             })
     }
 
-    delete(url){
+    delete(url) {
         console.log("delete()", url)
     }
 
-    update(url, datas){
+    update(url, datas) {
         console.log("update()", url, datas)
     }
 
-    push(url, datas){
+    push(url, datas) {
         console.log("push()", url, datas)
     }
 

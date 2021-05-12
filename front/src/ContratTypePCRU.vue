@@ -7,7 +7,9 @@
     <div class="overlay" v-if="selectedPcru">
       <div class="overlay-content" v-if="oscartypes.length">
         <a class="overlay-closer" @click="handlerClose">Fermer</a>
-        <h3>Correspondance</h3>
+        <h3>
+          <i class="icon-link-ext"></i>
+          Correspondance</h3>
         <p>Choississez un type d'activité correspondant dans Oscar pour les contrats PCRI
           <strong></strong> : </p>
         <tree :tree="oscartypes[0]" @select="handlerSelect"></tree>
@@ -20,8 +22,7 @@
     <div class="row">
       <div class="col-md-6">
         <h2>Types côté <strong>PCRU</strong></h2>
-        <article class="card xs" v-for="t in pcrutypes" :key="t.id"
-                 :class="t.activitytype_id != null ? 'active' : 'disabled'">
+        <article class="card xs" v-for="t in pcrutypes" :key="t.id" :class="t.activitytype_id != null ? 'active' : 'disabled'">
           <h3><code>[{{ t.id }}]</code>
             <strong>{{ t.label }}</strong>
           </h3>

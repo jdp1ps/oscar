@@ -245,7 +245,7 @@ class ActivityPcruInfos
         $out['SigleUnite'] = $this->getSigleUnite();
         $out['NumContratTutelleGestionnaire'] = $this->getNumContratTutelleGestionnaire();
         $out['Equipe'] = $this->getEquipe();
-        $out['TypeContrat'] = $this->getTypeContrat() ? $this->getTypeContrat()->getLabel() : "ND";
+        $out['TypeContrat'] = $this->getTypeContrat() ? $this->getTypeContrat()->getLabel() : "Aucun";
         $out['Acronyme'] = $this->getAcronyme();
         $out['ContratsAssocies'] = $this->getContratsAssocies();
         $out['ResponsableScientifique'] = $this->getResponsableScientifique();
