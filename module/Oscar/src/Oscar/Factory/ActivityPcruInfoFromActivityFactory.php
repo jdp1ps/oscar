@@ -98,7 +98,7 @@ class ActivityPcruInfoFromActivityFactory
         $pcruContractTypeRepository = $this->entityManager->getRepository(PcruTypeContract::class);
 
         /** @var string $pcruContract */
-        $pcruContract = $pcruContractTypeRepository->getPcruContractLabelByActivityType($activity->getActivityType());
+        $pcruType = $pcruContractTypeRepository->getPcruContractForActivityTypeChained($activity->getActivityType());
 
         $activityPcruInfos->setActivity($activity)
             ->setDocumentPath($documentSigned)
@@ -109,7 +109,7 @@ class ActivityPcruInfoFromActivityFactory
             ->setSourceFinancement($activity->getPcruSourceFinancementStr())
             ->setResponsableScientifique($responsable)
             ->setCodeUniteLabintel($codeUniteLabintel)
-            ->setTypeContrat($pcruContract)
+            ->setTypeContrat($pcruType)
             ->setObjet($activity->getLabel())
             ->setAcronyme($activity->getAcronym())
             ->setMontantTotal($activity->getAmount())

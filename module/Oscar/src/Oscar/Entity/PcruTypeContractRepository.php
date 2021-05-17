@@ -8,6 +8,7 @@
 namespace Oscar\Entity;
 
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\IConnectedRepository;
@@ -47,12 +48,17 @@ class PcruTypeContractRepository extends EntityRepository
         return $out;
     }
 
-
-    public function getPcruContractLabelByActivityType( ActivityType $activityType ): ?PcruTypeContract
+    /**
+     * Retourne l'intitulé PCRU pour le type d'activité donnée.
+     *
+     * @param ActivityType $activityType
+     * @return string|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPcruContractByActivityType( ActivityType $activityType ): ?PcruTypeContract
     {
         try {
             $query = $this->createQueryBuilder('ptc')
-                ->select('ptc.label label')
                 ->where('ptc.activityType = :activityType')
                 ->setParameter('activityType', $activityType)
                 ->getQuery();
@@ -62,5 +68,27 @@ class PcruTypeContractRepository extends EntityRepository
         } catch (NoResultException $exception) {
             return null;
         }
+    }
+
+    /**
+     * Retourne l'intitulé PCRU pour le type d'activité donnée (en parsant l'arbre des types).
+     *
+     * @param ActivityType $activityType
+     * @return string|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getPcruContractForActivityTypeChained( ActivityType $activityType) : ?PcruTypeContract
+    {
+        $labelPcru = $this->getPcruContractByActivityType($activityType);
+        if( $labelPcru == null ){
+            $typeChain = $this->getEntityManager()->getRepository(ActivityType::class)->getChainFromActivityType($activityType);
+            foreach ($typeChain as $type) {
+                $type = $this->getPcruContractByActivityType($type);
+                if( $type ){
+                    return $type;
+                }
+            }
+        }
+        return null;
     }
 }

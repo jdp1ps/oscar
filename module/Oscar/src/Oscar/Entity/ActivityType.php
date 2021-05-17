@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class ActivityType
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityTypeRepository")
  */
 class ActivityType implements ITrackable
 {
