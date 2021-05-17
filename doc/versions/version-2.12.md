@@ -13,6 +13,7 @@ Le modèle des organisations a été enrichi, les champs suivant ont été ajout
 
 > Ces champs restent facultatif dans la majorité des cas, mais (un de ces champs est attendu par le module PCRU)
 
+
 ### Activités : Nouveau champs
 
 Les champs : 
@@ -48,6 +49,10 @@ Une fois les donnèes valident, 2 solutions :
  - **Source de financement** : Le référenciel des sources de financement peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référenciel des sources de financement), le bouton **Actualiser** permet de charger automatiquement le référenciel.
 
 ### PCRU
+
+Le module PCRU permet de gérer et d'automatiser les transmissions d'information avec PCRU.
+
+
 
 Vous pouvez activer le module PCRU depuis l'interface d'administration (Configuration et maintenance > Modules > PCRU)
  - PCRU (Privilèges)
