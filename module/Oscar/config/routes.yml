@@ -843,19 +843,19 @@ contract:
                 defaults:
                     action: debug
 
+        advancedsearch:
+            type: segment
+            options:
+                route: /advancedsearch
+                defaults:
+                    action: advancedSearch
+
         api:
             type: segment
             options:
                 route: /api
                 defaults:
                     action: api
-
-        gant:
-            type: segment
-            options:
-                route: /gant
-                defaults:
-                    action: gant
 
         apiui:
             type: segment
@@ -864,12 +864,21 @@ contract:
                 defaults:
                     action: apiUi
 
-        advancedsearch:
+        pcru-list:
             type: segment
             options:
-                route: /advancedsearch
+                route: /transmission-pcru
                 defaults:
-                    action: advancedSearch
+                    action: pcruList
+
+        gant:
+            type: segment
+            options:
+                route: /gant
+                defaults:
+                    action: gant
+
+
         orphans:
             type: segment
             options:

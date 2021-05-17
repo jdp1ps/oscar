@@ -6,6 +6,7 @@ namespace Oscar\Service;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPcruInfos;
+use Oscar\Entity\ActivityPcruInfosRepository;
 use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\PcruPoleCompetitivite;
 use Oscar\Entity\PcruSourceFinancement;
@@ -17,10 +18,41 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 
-class PCRUService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager
+class PCRUService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager, UseServiceContainer
 {
-    use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
+    use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait, UseServiceContainerTrait;
+
+
+    /**
+     * @return ProjectGrantService
+     */
+    public function getProjectGrantService()
+    {
+        return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
+    /// 1. Récupération des donnèes PCRU
+
+
+    /**
+     * @param null $settings
+     * @return ActivityPcruInfos[]
+     */
+    public function getPcruInfos( $settings = null ) :array
+    {
+        /** @var ActivityPcruInfosRepository $pcruRepository */
+        $pcruRepository = $this->getEntityManager()->getRepository(ActivityPcruInfos::class);
+
+        return $pcruRepository->findAll();
+    }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private $pcruDepotStrategy;
 

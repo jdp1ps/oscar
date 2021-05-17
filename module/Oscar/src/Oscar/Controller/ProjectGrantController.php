@@ -61,6 +61,8 @@ use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UsePCRUService;
+use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
@@ -85,10 +87,10 @@ use Zend\View\Renderer\PhpRenderer;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService, UseSpentService
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService, UseSpentService, UsePCRUService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -2793,6 +2795,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
         die("NOT IMPLEMENTED");
+    }
+
+    /**
+     * Affiche la liste des activités soumises à un processus PCRU.
+     *
+     * @return array
+     */
+    public function pcruListAction()
+    {
+        $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
+        return [
+            'pcruInfos' => $pcruInfos
+        ];
     }
 
     public function pcruInfosAction()

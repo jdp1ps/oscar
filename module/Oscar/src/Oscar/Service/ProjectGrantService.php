@@ -56,6 +56,8 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Oscar\Traits\UsePCRUService;
+use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
@@ -67,7 +69,7 @@ use phpDocumentor\Reflection\Types\Integer;
 use PHPUnit\Runner\Exception;
 
 class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService,
-    UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService, UseActivityTypeService
+    UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService, UseActivityTypeService, UsePCRUService
 {
     use UseOscarConfigurationServiceTrait,
         UseActivityLogServiceTrait,
@@ -77,7 +79,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         UsePersonServiceTrait,
         UseOrganizationServiceTrait,
         UseActivityTypeServiceTrait,
-        UseProjectServiceTrait;
+        UseProjectServiceTrait,
+        UsePCRUServiceTrait;
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
     ///

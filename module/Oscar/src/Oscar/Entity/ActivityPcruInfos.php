@@ -11,6 +11,7 @@ use Oscar\Utils\DateTimeUtils;
  * Class ActivityPcruInfos
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityRepository")
  */
 class ActivityPcruInfos
 {

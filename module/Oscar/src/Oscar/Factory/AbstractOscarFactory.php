@@ -107,8 +107,8 @@ abstract class AbstractOscarFactory
             $service->setSpentService($container->get(SpentService::class));
         }
 
-        if( is_subclass_of($service, UsePcruService::class) ){
-            $service->setPcruService($container->get(PCRUService::class));
+        if( is_subclass_of($service, UsePCRUService::class) ){
+            $service->setPCRUService($container->get(PCRUService::class));
         }
 
         // NOTIFICATION
