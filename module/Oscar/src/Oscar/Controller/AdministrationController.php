@@ -10,53 +10,42 @@ namespace Oscar\Controller;
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Monolog\Formatter\JsonFormatter;
-use Oscar\Entity\AdministrativeDocumentSection;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Discipline;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
-use Oscar\Entity\OrganizationType;
-use Oscar\Entity\Person;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
-use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\ProjectGrantService;
-use Oscar\Traits\UseActivityService;
-use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseAdministrativeDocumentService;
 use Oscar\Traits\UseAdministrativeDocumentServiceTrait;
 use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
-use Oscar\Traits\UsePcruService;
-use Oscar\Traits\UsePcruServiceTrait;
+use Oscar\Traits\UsePCRUService;
+use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
-use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Traits\UseTypeDocumentService;
 use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Yaml\Dumper;
-use Symfony\Component\Yaml\Parser;
-use Zend\Config\Writer\Yaml;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Http\Request;
 use Oscar\Entity\TypeDocument;
 use Zend\View\Model\ViewModel;
 
-class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService, UsePcruService
+class AdministrationController extends AbstractOscarController implements UseProjectGrantService, UseTypeDocumentService, UseAdministrativeDocumentService, UseOrganizationService, UseOscarConfigurationService, UsePCRUService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePcruServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait;
 
     private $serviceLocator;
 
