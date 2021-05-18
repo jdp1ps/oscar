@@ -21,6 +21,8 @@ class ActivityPcruInfos
     const VALIDATION_ERROR = 'error';
     const VALIDATION_EMPTY = 'empty';
 
+
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -190,6 +192,27 @@ class ActivityPcruInfos
      */
     private $poleCompetivite = "";
 
+
+
+    const STATUS_PREVIEW = "preview"; // Aperçu
+    const STATUS_ERROR_DATA = "error_data"; // Erreur dans les données
+    const STATUS_SEND_READY = "send_ready"; // Prêt pour envoi
+    const STATUS_SEND_PENDING = "send_pending"; // Envoyé (attente du retour)
+    const STATUS_ERROR_REMOTE = "error_remote"; // Erreur (retour PCRU)
+    const STATUS_DONE = "done"; // Envoyé (OK)
+
+    /**
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $status = "";
+
+    /**
+     * @ORM\Column(type="array", nullable=true)
+     */
+    private $error = [];
+
+
+
     /**
      * @var string Commentaire du gestionnaire de contrat
      * @ORM\Column(type="text", nullable=true)
@@ -237,6 +260,15 @@ class ActivityPcruInfos
      * @ORM\Column(type="integer", nullable=true)
      */
     private $documentId = null;
+
+    /**
+     * ActivityPcruInfos constructor.
+     * @param string $status
+     */
+    public function __construct()
+    {
+        $this->status = self::STATUS_PREVIEW;
+    }
 
 
     public function toArray() :array {
@@ -998,4 +1030,40 @@ class ActivityPcruInfos
     {
         return $this->documentPath;
     }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getError(): ?array
+    {
+        return $this->error;
+    }
+
+    /**
+     * @param array $error
+     */
+    public function setError(?array $error): self
+    {
+        $this->error = $error;
+        return $this;
+    }
+
+
 }

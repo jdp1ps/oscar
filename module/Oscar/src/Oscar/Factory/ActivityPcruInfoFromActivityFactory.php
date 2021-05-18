@@ -37,7 +37,11 @@ class ActivityPcruInfoFromActivityFactory
 
     public function createNew(Activity $activity): ActivityPcruInfos
     {
+        // Données PCRU
         $activityPcruInfos = new ActivityPcruInfos();
+
+        // Erreurs métiers
+        $errors = [];
 
         // --- Recherche automatique de l'Unité (Laboratoire)
 
@@ -51,7 +55,7 @@ class ActivityPcruInfoFromActivityFactory
         // Récupération des laboratoires
         $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
         if( count($structures) == 0 ){
-            throw new OscarException("Aucune structure $roleStructureToFind pour cette activité.");
+            $errors[] = "Aucune structure $roleStructureToFind pour cette activité.";
         }
 
 
@@ -66,7 +70,7 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         if( $codeUniteLabintel == "" ){
-            throw new OscarException("Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL");
+            $errors[] = "Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL";
         }
 
         // Recherche automatique du responsable scientifique
@@ -88,9 +92,10 @@ class ActivityPcruInfoFromActivityFactory
             if( $document->getTypeDocument()->getLabel() == $typeDocumentSigne ){
                 // Test sur les versions
                 if(  $documentSigned != null ){
-                    throw new OscarException("Il y'a plusieurs $typeDocumentSigne sur cette activité");
+                    $errors[] = "Il y'a plusieurs $typeDocumentSigne sur cette activité";
+                } else {
+                    $documentSigned = $document->getPath();
                 }
-                $documentSigned = $document->getPath();
             }
         }
 
@@ -117,6 +122,11 @@ class ActivityPcruInfoFromActivityFactory
             ->setDateFin($activity->getDateEnd())
             ->setDateDerniereSignature($activity->getDateSigned())
             ->setReference($activity->getOscarNum());
+
+        if( count($errors) ){
+            $activityPcruInfos->setError($errors)
+                ->setStatus(ActivityPcruInfos::STATUS_ERROR_DATA);
+        }
 
         return $activityPcruInfos;
     }

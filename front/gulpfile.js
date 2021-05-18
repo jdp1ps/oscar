@@ -86,9 +86,20 @@ exports.contratTypePCRUWatch = function(cb){
     watch(pathModuleSrc + "ActivityTypeTree.vue", contratTypePCRU);
 }
 
+//// 2.5 Recherche d'activité et processus PCRU
+function createProcessusPCRU(cb) {
+    compile("CreateProcessusPCRU");
+    cb();
+}
+exports.createProcessusPCRU = createProcessusPCRU;
+exports.createProcessusPCRUWatch = function(cb){
+    watch(pathModuleSrc + "CreateProcessusPCRU.vue", createProcessusPCRU);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
+// --- Password
 function componentPassword(cb) {
     compileComponent('PasswordField');
     cb();
@@ -96,6 +107,7 @@ function componentPassword(cb) {
 exports.componentPassword = componentPassword;
 exports.componentPasswordWatch = function(cb){ watch('./src/components/PasswordField.vue', componentPassword); }
 
+// --- Textarea
 function componentTextarea(cb) {
     compileComponent('TextareaField');
     cb();
@@ -103,6 +115,8 @@ function componentTextarea(cb) {
 exports.componentTextarea = componentTextarea;
 exports.componentTextareaWatch = function(cb){ watch('./src/components/TextareaField.vue', componentTextarea); }
 
+
+// --- RNSRField
 function componentRNSRField(cb) {
     compileComponent('RNSRField');
     cb();
@@ -110,7 +124,10 @@ function componentRNSRField(cb) {
 exports.componentRNSRField = componentRNSRField;
 exports.componentRNSRFieldWatch = function(cb){ watch('./src/components/RNSRField.vue', componentRNSRField); }
 
-let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC', 'componentRNSRField'];
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC', 'componentRNSRField', 'createProcessusPCRU'];
 
 function defaultTask(cb) {
     console.log("Usage : ");

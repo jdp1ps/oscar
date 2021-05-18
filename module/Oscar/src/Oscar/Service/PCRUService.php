@@ -49,6 +49,32 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $pcruRepository->findAll();
     }
 
+    public function getPreview( Activity $activity, $json = false ) :array
+    {
+        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+
+        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        $pcruInfos = $factory->createNew($activity);
+
+
+        $headers = $factory->getHeaders();
+        $datas = $pcruInfos->toArray();
+        $validation = $pcruInfos->validation();
+        $documentPath = $this->getOscarConfigurationService()->getDocumentDropLocation().'/'.$pcruInfos->getDocumentPath();
+
+        return [
+            'validations' => $validation,
+            'headers' => $headers,
+            'datas' => $datas,
+            'activity' => $json ? $activity->toArray() : $activity,
+            'documentPath' => $documentPath,
+            'errors' => $pcruInfos->getError(),
+            'status' => $pcruInfos->getStatus()
+        ];
+    }
+
 
 
 

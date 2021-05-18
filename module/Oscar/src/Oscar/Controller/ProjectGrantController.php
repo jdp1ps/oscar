@@ -2805,6 +2805,35 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function pcruListAction()
     {
         $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
+        $methods = $this->getHttpXMethod();
+
+        if( $methods == 'GET' ){
+            $action = $this->params()->fromQuery('a');
+
+            // Recherche des activités
+            if( $action == 'search' ){
+                $search = $this->params()->fromQuery('search');
+                $idsActivities = $this->getProjectGrantService()->search($search);
+                $activities = [];
+                /** @var Activity $activity */
+                foreach ($this->getProjectGrantService()->getActivitiesByIds($idsActivities) as $activity) {
+                    $a = $activity->toArray();
+                    $a['pcru'] = [];
+                    $a['pcruenable'] = false;
+                    $activities[] = $a;
+                }
+                return $this->jsonOutput(["activities" => $activities]);
+            }
+
+            // Aperçu PCRU
+            if( $action == 'preview' ){
+                $activity_id = $this->params()->fromQuery('activity_id');
+                $activity = $this->getProjectGrantService()->getActivityById($activity_id);
+                $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+                return $this->jsonOutput(["preview" => $preview]);
+            }
+        }
+
         return [
             'pcruInfos' => $pcruInfos
         ];
@@ -2812,34 +2841,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
     public function pcruInfosAction()
     {
-        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
-            throw new OscarException("Le module PCR n'est pas activé");
-        }
-
         /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
 
         // Droit d'accès
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
-
-        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
-        $pcruInfos = $factory->createNew($activity);
-        $headers = $factory->getHeaders();
-        $datas = $pcruInfos->toArray();
-        $validation = $pcruInfos->validation();
-        $documentPath = $this->getOscarConfigurationService()->getDocumentDropLocation().'/'.$pcruInfos->getDocumentPath();
-
-//        $valid = $pcruInfos->isValidToSend();
-
-        return [
-            //'form' => $form,
-            'validations' => $validation,
-            'headers' => $headers,
-            'datas' => $datas,
-            'activity' => $activity,
-            'documentPath' => $documentPath
-        ];
+        return $this->getPCRUService()->getPreview($activity);
     }
 
     public function mergeAction()
