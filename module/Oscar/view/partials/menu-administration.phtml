@@ -44,6 +44,12 @@ if(
 
         <li role="presentation" class="dropdown-header"><i class="icon-stethoscope"></i> Maintenance des données</li>
 
+        <li>
+            <a href="<?= $this->url('contract/pcru-list') ?>">
+                <?= $this->translate("Processus PCRU") ?></a>
+            </a>
+        </li>
+
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_INDEX) ):?>
         <li><a href="<?= $this->url('contract/advancedsearch') ?>?criteria[]=pp%3Bnull%3Bnull"><?= $this->translate("Activités sans projet") ?></a></li>
         <?php endif; ?>

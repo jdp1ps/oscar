@@ -55,7 +55,7 @@ class ActivityPcruInfoFromActivityFactory
         // Récupération des laboratoires
         $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
         if( count($structures) == 0 ){
-            $errors[] = "Aucune structure $roleStructureToFind pour cette activité.";
+            $activityPcruInfos->addError("Aucune structure $roleStructureToFind pour cette activité.");
         }
 
 
@@ -70,7 +70,7 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         if( $codeUniteLabintel == "" ){
-            $errors[] = "Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL";
+            $activityPcruInfos->addError("Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL");
         }
 
         // Recherche automatique du responsable scientifique
@@ -84,7 +84,8 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         // Document signé
-        $typeDocumentSigne = "Contrat Version Définitive Signée";
+        $typeDocumentSigne = $this->oscarConfigurationService
+            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");;
         $documentSigned = null;
 
         /** @var ContractDocument $document */
@@ -92,11 +93,15 @@ class ActivityPcruInfoFromActivityFactory
             if( $document->getTypeDocument()->getLabel() == $typeDocumentSigne ){
                 // Test sur les versions
                 if(  $documentSigned != null ){
-                    $errors[] = "Il y'a plusieurs $typeDocumentSigne sur cette activité";
+                    $activityPcruInfos->addError("Il y'a plusieurs $typeDocumentSigne sur cette activité");
                 } else {
                     $documentSigned = $document->getPath();
                 }
             }
+        }
+
+        if( !$documentSigned ){
+            $activityPcruInfos->addError("Oscar n'a pas trouvé de document '$typeDocumentSigne' à utiliser pour la soumission PCRU.");
         }
 
         /** @var PcruTypeContractRepository $pcruContractTypeRepository */
@@ -122,11 +127,6 @@ class ActivityPcruInfoFromActivityFactory
             ->setDateFin($activity->getDateEnd())
             ->setDateDerniereSignature($activity->getDateSigned())
             ->setReference($activity->getOscarNum());
-
-        if( count($errors) ){
-            $activityPcruInfos->setError($errors)
-                ->setStatus(ActivityPcruInfos::STATUS_ERROR_DATA);
-        }
 
         return $activityPcruInfos;
     }

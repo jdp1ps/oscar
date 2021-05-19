@@ -201,6 +201,22 @@ class ActivityPcruInfos
     const STATUS_ERROR_REMOTE = "error_remote"; // Erreur (retour PCRU)
     const STATUS_DONE = "done"; // Envoyé (OK)
 
+    static $status_str = null;
+    public static function statusStr( $status )
+    {
+            if( self::$status_str == null ){
+                self::$status_str = [
+                    self::STATUS_PREVIEW => "Aperçu",
+                    self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
+                    self::STATUS_SEND_READY => "Prêt pour l'envoi",
+                    self::STATUS_SEND_PENDING => "Envoyé",
+                    self::STATUS_ERROR_REMOTE => "ERREUR (PCRU)",
+                    self::STATUS_DONE => "OK",
+                ];
+            }
+            return self::$status_str[$status];
+    }
+
     /**
      * @ORM\Column(type="string", length=20, nullable=true)
      */
@@ -424,8 +440,32 @@ class ActivityPcruInfos
             $out['document_signed'] = self::VALIDATION_VALID;
         }
 
+        foreach ($out as $champ=>$state) {
+            if( $champ == 'contract_signed') continue;
+            if( $state == self::VALIDATION_ERROR ){
+                $this->status = self::STATUS_ERROR_DATA;
+                $this->addError($this->getMessage($champ));
+            }
+        }
+
 
         return $out;
+    }
+
+    static private $messages;
+
+    protected function getMessage( $champ )
+    {
+        if( self::$messages === null ) {
+            self::$messages = [];
+            self::$messages['SourceFinancement'] = "La source de financement est manquante, vous pouvez la renseigner depuis la fiche activité";
+        }
+
+        if( array_key_exists($champ, self::$messages) ){
+            return self::$messages[$champ];
+        } else {
+            return sprintf("Le champ %s n'est pas renseigné.", $champ);
+        }
     }
 
     /**
@@ -1040,6 +1080,14 @@ class ActivityPcruInfos
     }
 
     /**
+     * @return string
+     */
+    public function getStatusStr(): string
+    {
+        return self::statusStr($this->getStatus());
+    }
+
+    /**
      * @param string $status
      */
     public function setStatus(string $status): self
@@ -1054,6 +1102,12 @@ class ActivityPcruInfos
     public function getError(): ?array
     {
         return $this->error;
+    }
+
+    public function addError( $errorMessage ) :self
+    {
+        $this->error[] = $errorMessage;
+        return $this;
     }
 
     /**

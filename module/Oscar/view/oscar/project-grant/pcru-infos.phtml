@@ -2,9 +2,53 @@
 <link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
 <div class="container">
     <header>
-        <h1>Informations PCRU</h1>
-        <h3><?= $activity ?></h3>
+        <h3>Informations PCRU</h3>
+        <h1><?= $activity ?></h1>
     </header>
+
+    <?php if(count($errors)): ?>
+        <div class="alert alert-danger">
+            <p>Cette activité ne peut pas être envoyée à PCRU, certaines informations sont manquantes / erronées : </p>
+            <ul>
+                <?php foreach ($errors as $error): ?>
+                    <li><?= $error ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-success">
+            Toutes les informations requises semblent correctes. Vous pouvez déclencher l'envois des informations à PCRU.
+            <form action="" method="post">
+                <button type="submit" class="btn btn-success">
+                    <i class="icon-paper-plane"></i>
+                    Activer l'envoi PCRU
+                </button>
+            </form>
+        </div>
+    <?php endif; ?>
+
+    <nav>
+        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
+            <i class="icon-cube"></i>
+            Revenir sur la fiche activité</a>
+
+        <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ): ?>
+        <a href="<?= $this->url('contract/edit', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
+            <i class="icon-pencil"></i>
+            Modifier la fiche activité</a>
+        <?php endif; ?>
+    </nav>
+
+    <?php if(count($errors)): ?>
+    <div class="alert alert-danger">
+        <p>Cette activité ne peut pas être envoyée à PCRU, certaines informations sont manquantes / erronées : </p>
+        <ul>
+            <?php foreach ($errors as $error): ?>
+            <li><?= $error ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
 
     <?php if( !$documentPath ): ?>
     <div class="alert alert-danger">

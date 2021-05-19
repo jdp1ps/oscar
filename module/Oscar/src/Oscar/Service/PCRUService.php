@@ -49,6 +49,24 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $pcruRepository->findAll();
     }
 
+    public function activateActivity( Activity $activity, $json = false ) :void
+    {
+        if( !$this->getOscarConfigurationService()->getPcruEnabled() ){
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+
+        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        $pcruInfos = $factory->createNew($activity);
+        $validation = $pcruInfos->validation();
+        if( count($pcruInfos->getError()) > 0 ){
+            throw new OscarException("Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées");
+        }
+        $pcruInfos->setStatus(ActivityPcruInfos::STATUS_SEND_READY);
+        $this->getEntityManager()->persist($pcruInfos);
+        $this->getEntityManager()->flush($pcruInfos);
+    }
+
+
     public function getPreview( Activity $activity, $json = false ) :array
     {
         if( !$this->getOscarConfigurationService()->getPcruEnabled() ){

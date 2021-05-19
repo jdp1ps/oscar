@@ -2843,11 +2843,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
+        $method = $this->getHttpXMethod();
+
+        if( $method == 'POST' ){
+            $this->getProjectGrantService()->getPCRUService()->activateActivity($activity);
+            return $this->redirect()->toRoute('contract/pcru-infos');
+        }
 
         // Droit d'accès
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
-        return $this->getPCRUService()->getPreview($activity);
+        return $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
     }
 
     public function mergeAction()
