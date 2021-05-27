@@ -62,8 +62,6 @@ class OscarAuthAddCommand extends OscarCommandAbstract
             return;
         }
 
-        // TODO Vérifier l'email saisi
-
         // -------------------------------------------------------------------------------------------------------------
         // EMAIL
         $question = new Question("Entrez l' <bold>adresse éléctronique</bold> : ");

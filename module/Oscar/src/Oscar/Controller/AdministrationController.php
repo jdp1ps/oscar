@@ -52,7 +52,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * @return ContainerInterface
      */
-    public function getServiceLocator(){
+    public function getServiceLocator()
+    {
         return $this->serviceLocator;
     }
 
@@ -74,47 +75,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * @param mixed $connectorService
      */
-    public function setConnectorService( ConnectorService $connectorService)
+    public function setConnectorService(ConnectorService $connectorService)
     {
         $this->connectorService = $connectorService;
     }
 
-    public function contratTypePcruAction(){
-        $method = $this->getHttpXMethod();
-
-        if( $method == 'GET' ){
-            if( $this->params()->fromQuery('datas') ){
-                $datas = $this->baseJsonResponse();
-                $datas['activitytypes'] = $this->getActivityService()->getActivityTypesTree(true);
-                $datas['pcrucontracttypes'] = $this->getActivityService()->getActivityTypesPcru(true);
-                return $this->jsonOutput($datas);
-            }
-            return [];
-        }
-        elseif ( $method == "POST" ){
-            $this->getLoggerService()->debug(print_r($_POST, true));
-            $datas = $this->getJsonPosted();
-            $idTypeActivity = $datas['oscar_id'];
-            $idPcruContractType = $datas['pcru_id'];
-            try {
-
-                $this->getActivityService()->pcruUpdateAssociateTypeContract($idTypeActivity, $idPcruContractType);
-                return $this->getResponseOk();
-            } catch (\Exception $e){
-                $this->getLoggerService()->error($e->getMessage());
-                return $this->getResponseInternalError($e->getMessage());
-            }
-        }
-
-        else {
-            return $this->getResponseBadRequest("La méthode de transmission ne fonctionne pas");
-        }
-
-    }
-
-
-
-    public function setServiceLocator(ContainerInterface $s) {
+    public function setServiceLocator(ContainerInterface $s)
+    {
         $this->serviceLocator = $s;
     }
 
@@ -129,25 +96,25 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
 
         return $this->oscarRest(
-            function(){
+            function () {
                 return [
 
                 ];
             },
             // GET
-            function(){
+            function () {
                 return [
                     'sections' => $this->getAdministrativeDocumentService()->getSections(true)
                 ];
             },
             // POST
-            function(){
+            function () {
                 $this->getAdministrativeDocumentService()->createOrUpdateSection($this->params()->fromPost());
                 return ["response" => "Section enregistrée"];
             },
-            function(){
+            function () {
                 try {
-                    $id     = $this->params()->fromPost('id', null);
+                    $id = $this->params()->fromPost('id', null);
                     $this->getAdministrativeDocumentService()->removeSection($id);
                     return ["response" => "Section supprimée"];
                 } catch (\Exception $e) {
@@ -158,27 +125,30 @@ class AdministrationController extends AbstractOscarController implements UsePro
         );
     }
 
-    public function testconfigAction(){
+    public function testconfigAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
         var_dump($this->getOscarConfigurationService()->getConfigArray()['oscar']);
         die();
     }
 
-    public function privileges2Action(){
+    public function privileges2Action()
+    {
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_VISUALISATION);
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
 
         }
         return [];
     }
 
-    public function oscarWorkerStatusAction(){
+    public function oscarWorkerStatusAction()
+    {
 
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             $response = shell_exec('journalctl --unit=oscarworker.service -n 25 --no-pager');
-            if( $response === null ){
+            if ($response === null) {
                 $response = "Impossible de charger le status de OscarWorker";
             }
             return $this->getResponseOk($response);
@@ -204,7 +174,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'roleOrganizationPrincipal' => $rolesOrganisationPrincipal
         ];
 
-        if( $this->getHttpXMethod() == "POST" ){
+        if ($this->getHttpXMethod() == "POST") {
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
                 case OscarConfigurationService::allow_numerotation_custom:
@@ -276,49 +246,14 @@ class AdministrationController extends AbstractOscarController implements UsePro
         ];
     }
 
-    public function accessAction(){
+    public function accessAction()
+    {
         return [];
     }
 
-    protected function saveEditableConfKey($key, $value){
-        $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
-    }
-
-    public function pcruAction()
+    protected function saveEditableConfKey($key, $value)
     {
-        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
-
-        if( $this->isAjax() ){
-            $response = $this->baseJsonResponse();
-            $response['configuration_pcru'] = [
-                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
-                'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_host', 'PCRU-Depot.dr14.cnrs.fr'),
-                'pcru_user' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
-                'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
-                'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
-                'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
-            ];
-            return $this->ajaxResponse($response);
-        }
-
-        if($this->getRequest()->isPost() ){
-            $data = [
-                'pcru_enabled' => $this->params()->fromPost('pcru_enabled') == 'on' ? true : false,
-                'pcru_host' => $this->params()->fromPost('host'),
-                'pcru_port' => $this->params()->fromPost('port'),
-                'pcru_user' => $this->params()->fromPost('user'),
-                'pcru_pass' => $this->params()->fromPost('pass'),
-                'pcru_ssh' => $this->params()->fromPost('ssh'),
-            ];
-
-            foreach ($data as $key=>$value) {
-                $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
-            }
-            return $this->redirect()->toRoute('administration/pcru');
-        }
-
-        return [
-        ];
+        $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
     }
 
     public function numerotationAction()
@@ -327,7 +262,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $invalidActivityNumbers = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
 
-        if( $this->isAjax() ) {
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             switch ($method) {
                 case 'GET':
@@ -338,7 +273,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 case 'DELETE':
                     $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
                     $deleted = $this->params()->fromQuery('str');
-                    if( !in_array($deleted, $numerotation) ){
+                    if (!in_array($deleted, $numerotation)) {
                         return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
                     }
 
@@ -349,7 +284,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     try {
                         $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
                         $this->getResponseOk();
-                    } catch ( \Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError("Impossible de supprimer le type '$deleted' : " . $e->getMessage());
                     }
 
@@ -359,11 +294,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
                     $added = trim($this->params()->fromPost('str'));
 
-                    if( $added == "" ){
+                    if ($added == "") {
                         return $this->getResponseInternalError("Impossible d'ajouter une valeur vide.");
                     }
 
-                    if( in_array($added, $numerotation) ){
+                    if (in_array($added, $numerotation)) {
                         return $this->getResponseInternalError("Le type '$added' existe déjà.");
                     }
                     $numerotation[] = $added;
@@ -371,7 +306,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     try {
                         $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
                         $this->getResponseOk();
-                    } catch ( \Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError("Impossible d'ajouter le type '$added' : " . $e->getMessage());
                     }
                     break;
@@ -388,9 +323,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function tvaAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_TVA_MANAGE);
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
-            switch ( $method ){
+            switch ($method) {
                 case 'GET':
                     return $this->jsonOutput(['tvas' => $this->getProjectGrantService()->getTVAsForJson()]);
                     break;
@@ -399,9 +334,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     try {
                         $id = $this->params()->fromQuery('id');
 
-                        if( $id ){
+                        if ($id) {
                             $tva = $this->getProjectGrantService()->getTVA($id);
-                            if( !$tva ){
+                            if (!$tva) {
                                 return $this->getResponseInternalError("Impossible de charger la TVA '$id'");
                             }
                         } else {
@@ -410,7 +345,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         $this->getEntityManager()->remove($tva);
                         $this->getEntityManager()->flush();
                         return $this->getResponseOk('TVA supprimée');
-                    } catch (\Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     return $this->jsonOutput(['tvas' => $this->getProjectGrantService()->getTVAsForJson()]);
@@ -421,13 +356,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     try {
                         $id = intval($this->params()->fromPost('id', null));
                         $active = boolval($this->params()->fromPost('active', false));
-                        if( $active == 'true' ) $active = true;
+                        if ($active == 'true') $active = true;
                         $label = $this->params()->fromPost('label', "PAS d'INTITULÉ");
                         $rate = floatval($this->params()->fromPost('rate', 0.0));
 
-                        if( $id ){
+                        if ($id) {
                             $tva = $this->getProjectGrantService()->getTVA($id);
-                            if( !$tva ){
+                            if (!$tva) {
                                 throw new OscarException("Impossible de charger la TVA '$id'");
                             }
                         } else {
@@ -443,7 +378,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                         return $this->getResponseOk('TVA créée');
 
-                    } catch (\Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     break;
@@ -456,8 +391,21 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return [];
     }
 
-    public function accueilAction(){
+    public function accueilAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+        $action = $this->params()->fromQuery('action');
+        switch( $action ){
+            case "pcru-referentiel-update":
+                $this->getPCRUService()->updateTypeContrat();
+                $this->getPCRUService()->updatePoleCompetitivite();
+                $this->getPCRUService()->updateSourcesFinancement();
+                $this->flashMessenger()->addSuccessMessage('Les référentiels PCRU ont été mis à jour');
+                $this->redirect()->toRoute('administration/accueil');
+                return [];
+        }
+
         return [];
     }
 
@@ -480,7 +428,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $data = $discipline->toJson();
                     $data['actyivitiesLng'] = 0;
                     return $this->ajaxResponse(['discipline' => $data]);
-                } catch (\Exception $e ) {
+                } catch (\Exception $e) {
                     return $this->getResponseInternalError("Impossible d'ajouter la discipline : " . $e->getMessage());
                 }
 
@@ -497,7 +445,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getEntityManager()->flush($discipline);
                     $data = $discipline->toJson();
                     return $this->ajaxResponse(['discipline' => $data]);
-                } catch (\Exception $e ) {
+                } catch (\Exception $e) {
                     return $this->getResponseInternalError("Impossible d'ajouter la discipline : " . $e->getMessage());
                 }
                 return $this->getResponseNotImplemented("MODIFICATION Pas encore implanté");
@@ -517,34 +465,36 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
 
         $datas = [
-          'disciplines' => $disciplines
+            'disciplines' => $disciplines
         ];
         return $datas;
     }
 
 
-    public function activityIndexBuildAction(){
+    public function activityIndexBuildAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
         return [
             'repport' => $this->getProjectGrantService()->searchIndex_rebuild()
         ];
     }
 
-    public function organizationTypeAction(){
+    public function organizationTypeAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE);
         $datas = [];
 
-        if( ($action = $this->params()->fromQuery('action')) ){
-            if( $action == 'generate' ){
+        if (($action = $this->params()->fromQuery('action'))) {
+            if ($action == 'generate') {
                 return $this->getResponseDeprecated("Cette fonctionnalité a été retiré");
             }
             return $this->getResponseBadRequest();
         }
 
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             try {
-                switch( $method ){
+                switch ($method) {
                     case 'GET' :
                         $datas['organizationtypes'] = $this->getOrganizationService()->getOrganizationTypes();
                         return $this->ajaxResponse($datas);
@@ -568,7 +518,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $datas;
     }
 
-    public function connectorsHomeAction(){
+    public function connectorsHomeAction()
+    {
 
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_CONNECTOR_ACCESS);
 
@@ -583,12 +534,12 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $out = [];
 
-        foreach( $configConnectors as $connectorType=>$connectorsConfig ){
-            if( !array_key_exists($connectorType, $out) ){
+        foreach ($configConnectors as $connectorType => $connectorsConfig) {
+            if (!array_key_exists($connectorType, $out)) {
                 $out[$connectorType] = [];
             }
-            foreach( $connectorsConfig as $tag=>$data){
-                if( !array_key_exists($tag, $out[$connectorType]) ){
+            foreach ($connectorsConfig as $tag => $data) {
+                if (!array_key_exists($tag, $out[$connectorType])) {
                     $out[$connectorType][$tag] = [
                         'label' => $tag,
                         'class' => array_key_exists('class', $data) ? $data['class'] : null,
@@ -611,7 +562,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         try {
             $connectorsConfig = $configOscar->getConfiguration('connectors');
-            if( !array_key_exists($connectorType, $connectorsConfig) ){
+            if (!array_key_exists($connectorType, $connectorsConfig)) {
                 throw new \Exception(sprintf("Aucun connecteur de type %s n'est définit dans la configuration", $connectorType));
             }
 
@@ -619,7 +570,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $connectorTypeConfig = $connectorsConfig[$connectorType];
 
             // Configuration du connector donné
-            if( !array_key_exists($connectorName, $connectorTypeConfig) ){
+            if (!array_key_exists($connectorName, $connectorTypeConfig)) {
                 throw new \Exception(sprintf("Aucun connecteur %s n'est définit dans la configuration", $connectorName));
             }
 
@@ -627,9 +578,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
             return $this->getServiceLocator()
                 ->get(ConnectorService::class)
-                ->getConnector($connectorType.'.'.$connectorName);
+                ->getConnector($connectorType . '.' . $connectorName);
 
-        } catch(\Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException("Impossible de trouver la configuration du connecteur $connectorType/$connectorName");
         }
     }
@@ -647,8 +598,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $configOscar = $this->getOscarConfigurationService();
         $connector = $this->getRouteConnector($connectorType, $connectorName);
 
-        if( $this->getHttpXMethod() == "POST" ){
-            $connector->updateParameters($this->getRequest()->getPost("$connectorType"."_"."$connectorName"));
+        if ($this->getHttpXMethod() == "POST") {
+            $connector->updateParameters($this->getRequest()->getPost("$connectorType" . "_" . "$connectorName"));
         }
 
         $config = $connector->getConfigData(true);
@@ -675,7 +626,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         try {
             $connectorsConfig = $configOscar->getConfiguration('connectors');
-            if( !array_key_exists($connectorType, $connectorsConfig) ){
+            if (!array_key_exists($connectorType, $connectorsConfig)) {
                 throw new \Exception(sprintf("Aucun connecteur de type %s n'est définit dans la configuration", $connectorType));
             }
 
@@ -683,21 +634,21 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $connectorTypeConfig = $connectorsConfig[$connectorType];
 
             // Configuration du connector donné
-            if( !array_key_exists($connectorName, $connectorTypeConfig) ){
+            if (!array_key_exists($connectorName, $connectorTypeConfig)) {
                 throw new \Exception(sprintf("Aucun connecteur %s n'est définit dans la configuration", $connectorName));
             }
 
             $connectorConfig = $connectorTypeConfig[$connectorName];
 
 
-            $connector = $this->getConnectorService()->getConnector($connectorType.'.'.$connectorName);
+            $connector = $this->getConnectorService()->getConnector($connectorType . '.' . $connectorName);
             $repport = $connector->execute(true);
             return [
                 'repport' => $repport,
                 'connectorType' => $connectorType,
                 'connectorName' => $connectorName,
             ];
-        } catch(\Exception $e ){
+        } catch (\Exception $e) {
             throw $e;
         }
     }
@@ -716,25 +667,23 @@ class AdministrationController extends AbstractOscarController implements UsePro
             ->getConfiguration('connectors.person_organization');
 
 
-
-
         // Configurations disponibles
         $configs = [];
 
 
-        foreach($personOrganizationConnectors as $connector ){
+        foreach ($personOrganizationConnectors as $connector) {
 
-            $class  = $connector['class'];
+            $class = $connector['class'];
             $connectorInstance = new $class();
             $connectorInstance->init($this->getServiceLocator(), $connector['params']);
-            if( $this->getHttpXMethod() == "POST" && $this->getRequest()->getPost($connectorInstance->getType()) ){
+            if ($this->getHttpXMethod() == "POST" && $this->getRequest()->getPost($connectorInstance->getType())) {
                 $connectorInstance->updateParameters($this->getRequest()->getPost($connectorInstance->getType()));
             }
             $config = $connectorInstance->getConfigData(true);
             $configs[] = $config;
         }
 
-        return ['configs'=>$configs];
+        return ['configs' => $configs];
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -800,7 +749,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                     /** @var Privilege $privilege */
                     foreach ($privileges as $privilege) {
-                        if( !$privilege->getRoot() )
+                        if (!$privilege->getRoot())
                             $out['privileges'][] = $privilege->asArray();
                     }
                     /** @var Role $role */
@@ -835,10 +784,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $person = null;
             try {
                 $p = $this->getOscarUserContextService()->getPersonFromAuthentification($auth);
-                if( $p )
+                if ($p)
                     $person = $p->toJson();
-            } catch ( \Exception $e ){
-               // Pas de Personne associée à cette authentification
+            } catch (\Exception $e) {
+                // Pas de Personne associée à cette authentification
             }
 
             $d['person'] = $person;
@@ -853,8 +802,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $out;
     }
 
-    public function userRolesAction(){
-        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_USER_EDITION) ){
+    public function userRolesAction()
+    {
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_USER_EDITION)) {
             return $this->getResponseUnauthorized();
         }
 
@@ -867,24 +817,24 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
             /** @var Role $role */
             $role = $this->getEntityManager()->getRepository(Role::class)->find($roleId);
-            if( !$authentification ){
+            if (!$authentification) {
                 return $this->getResponseNotFound("Compte introuvable.");
             }
-            if( !$role ){
+            if (!$role) {
                 return $this->getResponseNotFound("Rôle '$roleId' introuvable.");
             }
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             return $this->getResponseInternalError("Rôle/Authentification introuvable : " . $e->getMessage());
         }
 
         $method = $this->getHttpXMethod();
 
-        switch( $method ){
+        switch ($method) {
             case 'POST':
                 try {
                     $authentification->addRole($role);
                     $this->getEntityManager()->flush();
-                } catch (UniqueConstraintViolationException $e ){
+                } catch (UniqueConstraintViolationException $e) {
                     return $this->getResponseInternalError("Ce compte a déjà ce rôle.");
                 }
                 return $this->ajaxResponse($authentification->toJson());
@@ -894,7 +844,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getEntityManager()->flush();
                 } /*catch (Doct $e ){
                     return $this->getResponseInternalError("Impossible de supprimer le role : " . $e->getMessage());
-                }*/ catch (\Exception $e ){
+                }*/ catch (\Exception $e) {
                     return $this->getResponseInternalError(get_class($e) . " - Impossible de supprimer le role : " . $e->getMessage());
                 }
                 return $this->ajaxResponse($authentification->toJson());
@@ -903,15 +853,16 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $this->getResponseBadRequest("Erreur");
     }
 
-    public function userLogsAction(){
+    public function userLogsAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::DROIT_USER_VISUALISATION);
         $userid = $this->params('userid');
-        $logs=[];
-        $activitiesLog = $this->getEntityManager()->getRepository(LogActivity::class)->findBy(['userId' => $userid],['dateCreated'=>'DESC'], 100);
-        foreach( $activitiesLog as $log ){
+        $logs = [];
+        $activitiesLog = $this->getEntityManager()->getRepository(LogActivity::class)->findBy(['userId' => $userid], ['dateCreated' => 'DESC'], 100);
+        foreach ($activitiesLog as $log) {
             $logs[] = $log->toArray();
         }
-       return $this->ajaxResponse($logs);
+        return $this->ajaxResponse($logs);
     }
 
 
@@ -920,7 +871,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $ldapfilter = $request->getPost('ldapFilter');
 
         $roleId = trim($request->getPost('roleId'));
-        if( !$roleId ){
+        if (!$roleId) {
             throw new OscarException("Le rôle ne peut pas être vide");
         }
 
@@ -999,7 +950,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             $this->getEntityManager()->remove($role);
                             $this->getEntityManager()->flush();
                             return $this->getResponseOk("Rôle supprimé");
-                        } catch (ForeignKeyConstraintViolationException $e ){
+                        } catch (ForeignKeyConstraintViolationException $e) {
                             return $this->getResponseInternalError("Impossible de supprimer le rôle '$role', il est encore utilisé et doit être conservé pour préserver l'historique");
                         }
 
@@ -1073,44 +1024,46 @@ class AdministrationController extends AbstractOscarController implements UsePro
     // RÔLE des ORGANISATIONS dans les ACTIVITÈS
     //
     ////////////////////////////////////////////////////////////////////////////
-    public function organizationRoleAction(){
+    public function organizationRoleAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         return [];
     }
 
 
-    public function organizationRoleApiAction(){
+    public function organizationRoleApiAction()
+    {
         $this->getLoggerService()->debug("> ORGANISATIONROLE API");
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         $roleId = $this->params('roleid', null);
         /** @var Request $request */
         $request = $this->getRequest();
-        if( $roleId == null ){
+        if ($roleId == null) {
             $this->getLoggerService()->debug("Pas de ROLEID");
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
-            if( $this->getHttpXMethod() == 'GET' ){
+            if ($this->getHttpXMethod() == 'GET') {
                 $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']);
                 $out = [];
                 /** @var OrganizationRole $role */
-                foreach( $roles as $role ){
+                foreach ($roles as $role) {
                     $out[] = $role->toArray();
                 }
                 return $this->ajaxResponse($out);
             }
             ////////////////////////////////////////////////////////////////////
             // POST : Nouveau rôle
-            elseif( $this->getHttpXMethod() == 'POST' ){
+            elseif ($this->getHttpXMethod() == 'POST') {
                 $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
 
                 // Contrôle du Role
                 $roleId = trim($request->getPost('label'));
-                if( $roleId == "" ){
+                if ($roleId == "") {
                     return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
                 }
 
                 $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(['label' => $roleId]);
-                if( $exist ){
+                if ($exist) {
                     return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
                 }
 
@@ -1122,24 +1075,23 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getEntityManager()->flush();
                 return $this->ajaxResponse($role->toArray());
             }
-        }
-        else {
+        } else {
             $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
             $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
-            if( !$role ){
+            if (!$role) {
                 return $this->getResponseInternalError("Ce rôle est introuvable dans la base de données.");
             }
 
-            if( $this->getHttpXMethod() == 'PUT' ){
+            if ($this->getHttpXMethod() == 'PUT') {
 
                 // Contrôle du Role
                 $roleId = trim($request->getPost('label'));
-                if( $roleId == "" ){
+                if ($roleId == "") {
                     return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
                 }
 
                 $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
-                if( $exist ){
+                if ($exist) {
                     return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
                 }
 
@@ -1152,7 +1104,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
             ////////////////////////////////////////////////////////////////////
             // POST : Nouveau rôle
-            elseif( $this->getHttpXMethod() == 'DELETE' ){
+            elseif ($this->getHttpXMethod() == 'DELETE') {
                 $this->getEntityManager()->remove($role);
                 $this->getEntityManager()->flush();
                 return $this->getResponseOk('le rôle a été supprimé.');
@@ -1164,20 +1116,22 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * Gestion des types de documents.
      */
-    public function typeDocumentAction() {
+    public function typeDocumentAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         return new ViewModel([]);
     }
 
 
-    public function typeDocumentApiAction() {
+    public function typeDocumentApiAction()
+    {
 
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         $method = $this->getHttpXMethod();
 
         switch ($method) {
             case 'GET' :
-                $entityRepos =  $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder('d')->orderBy('d.label');
+                $entityRepos = $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder('d')->orderBy('d.label');
                 $results = $entityRepos->getQuery()->getResult();
                 $out = [];
                 /** @var OrganizationRole $role */
@@ -1209,7 +1163,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getEntityManager()->persist($typeDocument);
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
-                } catch (\Exception $e ){
+                } catch (\Exception $e) {
                     $msg = sprintf(_("Impossible de mettre à jour le type de document %s : %s"), $typeDocument, $e->getMessage());
                     $this->getLoggerService()->error($msg);
                     return $this->getResponseInternalError($msg);
@@ -1250,13 +1204,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
             case 'POST' :
                 $declarersRelance1 = $this->params()->fromPost('declarersRelance1');
-                $declarersRelanceJour1 = (int) $this->params()->fromPost('declarersRelanceJour1');
+                $declarersRelanceJour1 = (int)$this->params()->fromPost('declarersRelanceJour1');
                 $declarersRelance2 = $this->params()->fromPost('declarersRelance2');
-                $declarersRelanceJour2 = (int) $this->params()->fromPost('declarersRelanceJour2');
+                $declarersRelanceJour2 = (int)$this->params()->fromPost('declarersRelanceJour2');
                 $validatorsRelance1 = $this->params()->fromPost('validatorsRelance1');
-                $validatorsRelanceJour1 = (int) $this->params()->fromPost('validatorsRelanceJour1');
+                $validatorsRelanceJour1 = (int)$this->params()->fromPost('validatorsRelanceJour1');
                 $validatorsRelance2 = $this->params()->fromPost('validatorsRelance2');
-                $validatorsRelanceJour2 = (int) $this->params()->fromPost('validatorsRelanceJour2');
+                $validatorsRelanceJour2 = (int)$this->params()->fromPost('validatorsRelanceJour2');
 
                 $this->getOscarConfigurationService()->setDeclarersRelance1($declarersRelance1);
                 $this->getOscarConfigurationService()->setDeclarersRelanceJour1($declarersRelanceJour1);
@@ -1275,6 +1229,99 @@ class AdministrationController extends AbstractOscarController implements UsePro
     }
 
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// PCRU
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Administration des types de contrat PCRU.
+     *
+     * @return array|\Zend\Http\Response|\Zend\View\Model\JsonModel
+     * @throws OscarException
+     */
+    public function contratTypePcruAction()
+    {
+        $method = $this->getHttpXMethod();
+
+        if ($method == 'GET') {
+
+            // Mise à jour du référentiel
+            if ($this->params()->fromQuery('action') == 'update') {
+                $this->getPcruService()->updateTypeContrat();
+                return $this->redirect()->toRoute('administration/contrat-type-pcru');
+            }
+
+            // Envois des donnèes JSON à l'UI
+            if ($this->params()->fromQuery('datas')) {
+                $datas = $this->baseJsonResponse();
+                $datas['activitytypes'] = $this->getActivityService()->getActivityTypesTree(true);
+                $datas['pcrucontracttypes'] = $this->getActivityService()->getActivityTypesPcru(true);
+                return $this->jsonOutput($datas);
+            }
+
+            return [];
+
+        } elseif ($method == "POST") {
+
+            // Enregistrement des associations TYPE OSCAR <> TYPE PCRU
+            $datas = $this->getJsonPosted();
+            $idTypeActivity = $datas['oscar_id'];
+            $idPcruContractType = $datas['pcru_id'];
+            try {
+                $this->getActivityService()->pcruUpdateAssociateTypeContract($idTypeActivity, $idPcruContractType);
+                return $this->getResponseOk();
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                return $this->getResponseInternalError($e->getMessage());
+            }
+        } else {
+            return $this->getResponseBadRequest("La méthode de transmission ne fonctionne pas");
+        }
+    }
+
+    /**
+     * Configuration FTP pour PCRU + Activation du module
+     * @return array|\Zend\Http\Response|\Zend\View\Model\JsonModel
+     */
+    public function pcruAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
+
+        if ($this->isAjax()) {
+            $response = $this->baseJsonResponse();
+            $response['configuration_pcru'] = [
+                'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+                'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_host', 'PCRU-Depot.dr14.cnrs.fr'),
+                'pcru_user' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
+                'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
+                'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
+                'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
+            ];
+            return $this->ajaxResponse($response);
+        }
+
+        if ($this->getRequest()->isPost()) {
+            $data = [
+                'pcru_enabled' => $this->params()->fromPost('pcru_enabled') == 'on' ? true : false,
+                'pcru_host' => $this->params()->fromPost('host'),
+                'pcru_port' => $this->params()->fromPost('port'),
+                'pcru_user' => $this->params()->fromPost('user'),
+                'pcru_pass' => $this->params()->fromPost('pass'),
+                'pcru_ssh' => $this->params()->fromPost('ssh'),
+            ];
+
+            foreach ($data as $key => $value) {
+                $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
+            }
+            return $this->redirect()->toRoute('administration/pcru');
+        }
+
+        return [];
+    }
+
+
     /**
      * Administration des pôles de compétitivité.
      *
@@ -1282,7 +1329,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
      */
     public function polesCompetitiviteAction()
     {
-        if( $this->params()->fromQuery('action') == 'update' ){
+        if ($this->params()->fromQuery('action') == 'update') {
             $this->getPcruService()->updatePoleCompetitivite();
             return $this->redirect()->toRoute('administration/poles-competitivite');
         }
@@ -1298,7 +1345,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
      */
     public function sourcesFinancementAction()
     {
-        if( $this->params()->fromQuery('action') == 'update' ){
+        if ($this->params()->fromQuery('action') == 'update') {
             $this->getPcruService()->updateSourcesFinancement();
             return $this->redirect()->toRoute('administration/sources-financement');
         }
@@ -1306,4 +1353,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'datas' => $this->getProjectGrantService()->getPcruSourceFinancement()
         ];
     }
+
+
 }

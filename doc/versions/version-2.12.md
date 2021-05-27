@@ -52,8 +52,5 @@ Une fois les donnèes valident, 2 solutions :
 
 Le module PCRU permet de gérer et d'automatiser les transmissions d'information avec PCRU.
 
-
-
-Vous pouvez activer le module PCRU depuis l'interface d'administration (Configuration et maintenance > Modules > PCRU)
- - PCRU (Privilèges)
+ > [Configuration du module PCRU](../config-pcru.md)
 

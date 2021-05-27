@@ -87,15 +87,22 @@ class ActivityPcruInfoFromActivityFactory
         $typeDocumentSigne = $this->oscarConfigurationService
             ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");;
         $documentSigned = null;
+        $documentId = null;
 
         /** @var ContractDocument $document */
         foreach ($activity->getDocuments() as $document){
             if( $document->getTypeDocument()->getLabel() == $typeDocumentSigne ){
                 // Test sur les versions
                 if(  $documentSigned != null ){
+                    // On regarde si on est pas entrain de parser une ancienne version du fichier
+                    if( $documentName == $document->getFileName() ){
+                        continue;
+                    }
                     $activityPcruInfos->addError("Il y'a plusieurs $typeDocumentSigne sur cette activité");
                 } else {
                     $documentSigned = $document->getPath();
+                    $documentName = $document->getFileName();
+                    $documentId = $document->getId();
                 }
             }
         }
@@ -112,6 +119,7 @@ class ActivityPcruInfoFromActivityFactory
 
         $activityPcruInfos->setActivity($activity)
             ->setDocumentPath($documentSigned)
+            ->setDocumentId($documentId)
             ->setSigleUnite($sigleUnit)
             ->setPoleCompetivite($activity->getPcruPoleCompetitiviteStr())
             ->setNumContratTutelleGestionnaire($activity->getOscarNum())
@@ -131,7 +139,7 @@ class ActivityPcruInfoFromActivityFactory
         return $activityPcruInfos;
     }
 
-    public function getHeaders(){
+    public static function getHeaders(){
         return [
             'Objet' => "Intitulé de l'activité",
             'CodeUniteLabintel' => 'Code LABINTEL (extrait depuis la fiche organisation du laboratoire)',

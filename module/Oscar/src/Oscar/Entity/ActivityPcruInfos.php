@@ -11,7 +11,7 @@ use Oscar\Utils\DateTimeUtils;
  * Class ActivityPcruInfos
  * @package Oscar\Entity
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityRepository")
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityPcruInfosRepository")
  */
 class ActivityPcruInfos
 {
@@ -192,11 +192,10 @@ class ActivityPcruInfos
      */
     private $poleCompetivite = "";
 
-
-
     const STATUS_PREVIEW = "preview"; // Aperçu
     const STATUS_ERROR_DATA = "error_data"; // Erreur dans les données
     const STATUS_SEND_READY = "send_ready"; // Prêt pour envoi
+    const STATUS_FILE_READY = "file_wait"; // En attente d'envoi
     const STATUS_SEND_PENDING = "send_pending"; // Envoyé (attente du retour)
     const STATUS_ERROR_REMOTE = "error_remote"; // Erreur (retour PCRU)
     const STATUS_DONE = "done"; // Envoyé (OK)
@@ -204,17 +203,18 @@ class ActivityPcruInfos
     static $status_str = null;
     public static function statusStr( $status )
     {
-            if( self::$status_str == null ){
-                self::$status_str = [
-                    self::STATUS_PREVIEW => "Aperçu",
-                    self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
-                    self::STATUS_SEND_READY => "Prêt pour l'envoi",
-                    self::STATUS_SEND_PENDING => "Envoyé",
-                    self::STATUS_ERROR_REMOTE => "ERREUR (PCRU)",
-                    self::STATUS_DONE => "OK",
-                ];
-            }
-            return self::$status_str[$status];
+        if( self::$status_str == null ){
+            self::$status_str = [
+                self::STATUS_PREVIEW => "Aperçu",
+                self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
+                self::STATUS_SEND_READY => "Prêt pour l'envoi",
+                self::STATUS_FILE_READY => "Fichier prêt (Attente du transfert)",
+                self::STATUS_SEND_PENDING => "Envoyé",
+                self::STATUS_ERROR_REMOTE => "ERREUR (PCRU)",
+                self::STATUS_DONE => "OK",
+            ];
+        }
+        return self::$status_str[$status];
     }
 
     /**
@@ -226,8 +226,6 @@ class ActivityPcruInfos
      * @ORM\Column(type="array", nullable=true)
      */
     private $error = [];
-
-
 
     /**
      * @var string Commentaire du gestionnaire de contrat
@@ -286,6 +284,15 @@ class ActivityPcruInfos
         $this->status = self::STATUS_PREVIEW;
     }
 
+    public function __toString()
+    {
+        return sprintf("[%s] %s : %s (%s)",
+            $this->getNumContratTutelleGestionnaire(),
+            $this->getAcronyme(),
+            $this->getObjet(),
+            $this->getResponsableScientifique()
+        );
+    }
 
     public function toArray() :array {
         $out = [];
@@ -448,7 +455,6 @@ class ActivityPcruInfos
             }
         }
 
-
         return $out;
     }
 
@@ -459,6 +465,8 @@ class ActivityPcruInfos
         if( self::$messages === null ) {
             self::$messages = [];
             self::$messages['SourceFinancement'] = "La source de financement est manquante, vous pouvez la renseigner depuis la fiche activité";
+            self::$messages['DateDerniereSignature'] = "La date de signature est manquante, vous pouvez la renseigner depuis la fiche activité";
+            self::$messages['CodeUniteLabintel'] = "Le code de l'unité de recherche (Labintel) est manquant, il peut être complété depuis la fiche organisation (type UMR XXXX)";
         }
 
         if( array_key_exists($champ, self::$messages) ){
@@ -550,6 +558,11 @@ class ActivityPcruInfos
     public function getNumContratTutelleGestionnaire(): string
     {
         return $this->numContratTutelleGestionnaire;
+    }
+
+    public function isSendable() :bool
+    {
+        return $this->getStatus() == self::STATUS_SEND_READY;
     }
 
     /**
@@ -1056,7 +1069,7 @@ class ActivityPcruInfos
 
     public function getSignedFileName()
     {
-        return $this->getNumContratTutelleGestionnaire()."pdf";
+        return $this->getNumContratTutelleGestionnaire().".pdf";
     }
 
     private $documentPath = null;
@@ -1107,6 +1120,7 @@ class ActivityPcruInfos
     public function addError( $errorMessage ) :self
     {
         $this->error[] = $errorMessage;
+        $this->setStatus(self::STATUS_ERROR_DATA);
         return $this;
     }
 

@@ -122,7 +122,6 @@
     let oscarRemoteData = new OscarRemoteData();
 
     function flashMessage(){
-        // TODO
     }
 
     export default {

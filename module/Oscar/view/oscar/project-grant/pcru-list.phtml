@@ -21,11 +21,46 @@
                 <strong><?= $pcruInfo->getAcronyme() ?></strong>
                 <em><?= $pcruInfo->getObjet() ?></em>
                 <span class="cartouche">
+                    <?= $pcruInfo->getStatus() ?>
                     <?= $pcruInfo->getStatusStr() ?>
                 </span>
+                <a href="<?= $this->url('contract/show', ['id' => $pcruInfo->getActivity()->getId()]) ?>">Voir la fiche activité</a>
         </article>
         <?php endforeach; ?>
     </section>
+
+    <nav>
+
+        <?php if( $downloadable == true): ?>
+            <a href="?a=download" class="btn btn-primary">
+                <i class="icon-download"></i>
+                Télécharger les fichiers pour PCRU
+            </a>
+        <?php else: ?>
+            <div class="alert alert-info">Il n'y a aucun documents PCRU en attente</div>
+        <?php endif; ?>
+
+        <?php if( $uploadable == true): ?>
+        <form action="" method="post">
+            <button value="upload" name="action" class="btn btn-primary">
+                <i class="icon-upload"></i>
+                Uploader les fichiers vers PCRU
+            </button>
+        </form>
+        <?php else: ?>
+            <div class="alert alert-info">Un processus PCRU est déjà en cours</div>
+        <?php endif; ?>
+
+        <?php if( $hasready == true): ?>
+        <form action="" method="post">
+            <button value="activate" name="action" class="btn btn-primary">
+                <i class="icon-upload"></i>
+                Ajouter au prochain upload les infos prêtes
+            </button>
+        </form>
+        <?php endif; ?>
+
+    </nav>
 
 
     <?php endif; ?>

@@ -2,30 +2,55 @@
 <link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
 <div class="container">
     <header>
-        <h3>Informations PCRU</h3>
-        <h1><?= $activity ?></h1>
+        <h1>Informations PCRU</h1>
+        <h2><?= $activity ?></h2>
     </header>
 
     <?php if(count($errors)): ?>
         <div class="alert alert-danger">
-            <p>Cette activité ne peut pas être envoyée à PCRU, certaines informations sont manquantes / erronées : </p>
+            <p><strong>Cette activité ne peut pas être envoyée à PCRU</strong>, certaines informations sont manquantes / erronées : </p>
             <ul>
                 <?php foreach ($errors as $error): ?>
                     <li><?= $error ?></li>
                 <?php endforeach; ?>
             </ul>
         </div>
-    <?php else: ?>
-        <div class="alert alert-success">
-            Toutes les informations requises semblent correctes. Vous pouvez déclencher l'envois des informations à PCRU.
-            <form action="" method="post">
-                <button type="submit" class="btn btn-success">
-                    <i class="icon-paper-plane"></i>
-                    Activer l'envoi PCRU
-                </button>
-            </form>
-        </div>
     <?php endif; ?>
+
+    <?php switch($status):
+        case 'preview' : ?>
+        <div class="alert alert-success">
+        Toutes les informations requises semblent correctes. Vous pouvez déclencher l'envois des informations à PCRU.
+        <form action="" method="post">
+            <button type="submit" class="btn btn-success" name="action" value="activate-pcru">
+                <i class="icon-paper-plane"></i>
+                Activer l'envoi PCRU
+            </button>
+        </form>
+        </div>
+    <?php break;  ?>
+
+    <?php case 'send_pending' : ?>
+        <div class="alert alert-success">
+            Les données ont étaient transférées, en attente d'un retour PCRU.
+        </div>
+    <?php break;  ?>
+
+    <?php case 'send_ready' : ?>
+        <div class="alert alert-success">
+            Les données sont prêtes à être envoyées.
+            <?php if($poolopen): ?>
+            <form action="" method="post"><button name="action" value="add-pool">Ajouter au prochain envoi</button></form>
+            <?php else: ?>
+            Vous devez attendre avoir de pouvoir envoyer les donnèes PCRU (un envoi a déjà été fait récamment et est en attente de traitement)
+            <?php endif; ?>
+        </div>
+    <?php break;  ?>
+
+    <?php default: ?>
+    <?php break;  ?>
+
+    <?php endswitch; ?>
 
     <nav>
         <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
@@ -39,23 +64,10 @@
         <?php endif; ?>
     </nav>
 
-    <?php if(count($errors)): ?>
-    <div class="alert alert-danger">
-        <p>Cette activité ne peut pas être envoyée à PCRU, certaines informations sont manquantes / erronées : </p>
-        <ul>
-            <?php foreach ($errors as $error): ?>
-            <li><?= $error ?></li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-    <?php endif; ?>
-
     <?php if( !$documentPath ): ?>
     <div class="alert alert-danger">
         <i class="icon-attention"></i> Pas de document signé pour cette activité
     </div>
-    <?php else: ?>
-    <code><?= $documentPath ?></code>
     <?php endif; ?>
 
     <table class="table table-bordered card xs">

@@ -162,6 +162,7 @@ class Activity implements ResourceInterface
      *
      * @var PcruPoleCompetitivite
      * @ORM\ManyToOne(targetEntity="PcruPoleCompetitivite")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $pcruPoleCompetitivite;
 
@@ -177,6 +178,7 @@ class Activity implements ResourceInterface
      *
      * @var PcruSourceFinancement
      * @ORM\ManyToOne(targetEntity="PcruSourceFinancement")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $pcruSourceFinancement;
 

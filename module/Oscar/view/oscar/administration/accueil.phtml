@@ -373,8 +373,14 @@
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>
             </h3>
-            <p>Permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
-            <h4>Autre élément relatif à PCRU</h4>
+            <p>Le modules PCRU permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
+            <hr>
+            <h4 style="font-weight: bold">Référentiels PCRU</h4>
+            <div class="alert alert-info">
+            <p>Les référentiels ci-dessous sont <strong>obligatoires</strong> si vous utilisez PCRU, mais rien ne vous empèche de les utiliser dans la qualification des activités pour compléter les informations.</p>
+            <p>Vous pouvez actualiser les référentiels en cliquant ici <a href="?action=pcru-referentiel-update" class="btn btn-success">Mettre à jour les référentiels</a></p>
+
+            </div>
             <ul>
                 <li>
                     <strong>
@@ -394,7 +400,7 @@
                     Référenciel des pôles de compétitivité :
                     </strong>
                     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
                     <?php else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
                     <?php endif; ?>
@@ -408,7 +414,7 @@
                         Référenciel des sources de financement
                     </strong>
                     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
                     <?php else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
                     <?php endif; ?>

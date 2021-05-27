@@ -19,15 +19,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class OscarPcruGenerateDataActivityCommand extends OscarCommandAbstract
+class OscarPcruUploadCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'pcru:generate-data';
+    protected static $defaultName = 'pcru:upload-data';
 
     protected function configure()
     {
         $this
-            ->setDescription("Génération des données PCRU pour l'envoi.")
-            ->addOption('path', 'd', InputOption::VALUE_OPTIONAL, 'Dossier où créer les fichiers à transmettre (Utilise la dossier en configuration par défaut)')
+            ->setDescription("Envoi desdonnées PCRU.")
+            ->addArgument('path', InputArgument::REQUIRED, 'Emplacement où créer les fichiers à transmettre')
             ->addOption('purge', 'p', InputOption::VALUE_OPTIONAL, "Une fois le transfert terminé, les fichiers sont supprimés localement", false);
     }
 
@@ -45,15 +45,33 @@ class OscarPcruGenerateDataActivityCommand extends OscarCommandAbstract
         /** @var SymfonyStyle $io */
         $io = new SymfonyStyle($input, $output);
 
-        $path = $input->getOption('path');
-        if( !$path )
-            $path = $pcruService->getOscarConfigurationService()->getPcruDirectoryForUpload();
+        $path = realpath($input->getArgument('path'));
 
+        if (!$path) {
+            $io->error("Cet emplacement n'est pas accessible");
+            exit(1);
+        }
 
         try {
-            $io->title("Build files fr PCRU into $path");
-            $pcruCsv = $pcruService->generatePcruFiles(null, $io);
-            echo $pcruCsv->makeZip();
+            $pcruService->upload($path, $io);
+
+//            $contactCsv = $path.DIRECTORY_SEPARATOR.'contrat.csv';
+//            $io->title($contactCsv);
+//            if (($handle = fopen($contactCsv, "r")) !== FALSE) {
+//                $row = 0;
+//                while (($data = fgetcsv($handle, 0, ";")) !== FALSE) {
+//                    if( $row == 0 ) {
+//                        $row++; continue;
+//                    }
+//                    // N° Oscar
+//                    $numOscar = $data[3];
+//                    $info = $pcruService->getInfosByNumOscar($numOscar);
+//
+//
+//                }
+//                fclose($handle);
+//            }
+
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }

@@ -479,4 +479,115 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         }
         return $documentDropLocation;
     }
+
+    /**
+     * Retourne le dossier racine PCRU.
+     *
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruRootDirectory(): string
+    {
+        static $pcru_root = null;
+        if( $pcru_root === null ){
+
+            // Test de la racine PCRU
+            $path = realpath($this->getConfiguration('pcru.files_path'));
+            if( !file_exists($path) ){
+                throw new OscarException("Erreur de configuration : Le dossier de traitement temporaire n'existe pas");
+            }
+            if( !is_dir($path) ){
+                throw new OscarException("Erreur de configuration : Le dossier de traitement temporaire doit être un dossier");
+            }
+            if( !is_writable($path) ){
+                throw new OscarException("Erreur de configuration : Le dossier de traitement doit être accessible en écriture");
+            }
+            $pcru_root = $path;
+        }
+        return $pcru_root;
+    }
+
+    /**
+     * Retourne le dossier où sont archivés les fichiers avant l'envoi PCRU.
+     *
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruDirectoryForUpload(): string
+    {
+        static $pcru_pool = null;
+        if( $pcru_pool === null ){
+
+            // Test de la racine PCRU
+            $path = $this->getPcruRootDirectory() . DIRECTORY_SEPARATOR . $this->getConfiguration('pcru.pool_current');
+
+            if( !file_exists($path) ){
+                if( !@mkdir($path) ){
+                    throw new OscarException("Erreur de configuration PCRU : Impossible de créer le dossier d'envoi");
+                }
+            }
+
+            if( !is_dir($path) ){
+                throw new OscarException("Erreur de configuration : Le dossier d'envoi doit être un dossier");
+            }
+
+            if( !is_writable($path) ){
+                throw new OscarException("Erreur de configuration : Le dossier d'envoi doit être accessible en écriture");
+            }
+
+            $pcru_pool = $path;
+        }
+        return $pcru_pool;
+    }
+
+    public function getPcruDirectoryForUploadEffective() :string
+    {
+        return $this->getPcruRootDirectory()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_effective');
+    }
+
+    public function getPcruPoolLockFile(): string
+    {
+        return $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_lock');
+    }
+
+    public function getPcruLogPoolFile(): string
+    {
+        return $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_log');
+    }
+
+    /**
+     * @param bool $withPath
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruContratFile($withPath = true): string
+    {
+        return $withPath ?
+            $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.filename_contrats')
+            :
+            $this->getConfiguration('pcru.filename_contrats');
+    }
+
+    /**
+     * @param bool $withPath
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruPartenaireFile($withPath = true): string
+    {
+        return $withPath ?
+            $this->getDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.filename_partenaires')
+            :
+            $this->getConfiguration('pcru.filename_partenaires');
+    }
 }

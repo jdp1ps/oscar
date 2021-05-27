@@ -104,11 +104,10 @@ class OscarTimesheetActivityPeriodCommand extends OscarCommandAbstract
         return $this->getServicemanager()->get(PersonService::class);
     }
 
-    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
-        // TODO Faire un rendu text des déclarations mensuelles des déclarants
-        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
-        echo "Non-disponible";
-    }
+//    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
+//        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
+//        echo "Non-disponible";
+//    }
 
     public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
 
