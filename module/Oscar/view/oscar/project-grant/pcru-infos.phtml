@@ -6,6 +6,12 @@
         <h2><?= $activity ?></h2>
     </header>
 
+    <?php
+    $activable = false;
+    $downloadable = false;
+    $poolable = false;
+    ?>
+
     <?php if(count($errors)): ?>
         <div class="alert alert-danger">
             <p><strong>Cette activité ne peut pas être envoyée à PCRU</strong>, certaines informations sont manquantes / erronées : </p>
@@ -18,31 +24,34 @@
     <?php endif; ?>
 
     <?php switch($status):
-        case 'preview' : ?>
+        case 'preview' : $downloadable = true; $activable = true; ?>
         <div class="alert alert-success">
-        Toutes les informations requises semblent correctes. Vous pouvez déclencher l'envois des informations à PCRU.
-        <form action="" method="post">
-            <button type="submit" class="btn btn-success" name="action" value="activate-pcru">
-                <i class="icon-paper-plane"></i>
-                Activer l'envoi PCRU
-            </button>
-        </form>
+            Toutes les informations requises semblent correctes. Vous pouvez <strong>activer PCRU</strong> pour cette activité.
         </div>
     <?php break;  ?>
 
-    <?php case 'send_pending' : ?>
+    <?php case 'send_pending' : $downloadable = true; ?>
         <div class="alert alert-success">
-            Les données ont étaient transférées, en attente d'un retour PCRU.
+            Les données ont été transférées vers PCRU, en attente d'un retour PCRU.
         </div>
     <?php break;  ?>
 
-    <?php case 'send_ready' : ?>
+    <?php case 'send_ready' : $poolable = true; $downloadable = true; ?>
         <div class="alert alert-success">
-            Les données sont prêtes à être envoyées.
             <?php if($poolopen): ?>
-            <form action="" method="post"><button name="action" value="add-pool">Ajouter au prochain envoi</button></form>
+            Vous pouvez activer le transfert PCRU, elles seront envoyées lors du prochain transfert.
             <?php else: ?>
-            Vous devez attendre avoir de pouvoir envoyer les donnèes PCRU (un envoi a déjà été fait récamment et est en attente de traitement)
+            Les données sont prêtes, un tranfert PCRU est déjà en attente de retour.
+            <?php endif; ?>
+        </div>
+    <?php break;  ?>
+
+    <?php case 'file_wait' : $downloadable = true; ?>
+        <div class="alert alert-success">
+            <?php if($poolopen): ?>
+                Données en attentes, elles seront envoyées lors du prochain transfert.
+            <?php else: ?>
+                Les données en attentes, un tranfert PCRU est déjà en attente de retour.
             <?php endif; ?>
         </div>
     <?php break;  ?>
@@ -62,6 +71,33 @@
             <i class="icon-pencil"></i>
             Modifier la fiche activité</a>
         <?php endif; ?>
+
+        <?php if($activable): ?>
+            <form action="" method="post" class="form-inline">
+                <button type="submit" class="btn btn-success" name="action" value="activate-pcru">
+                    <i class="icon-paper-plane"></i>
+                    Activer PCRU
+                </button>
+            </form>
+        <?php endif; ?>
+
+        <?php if($poolable): ?>
+            <form action="" method="post" class="form-inline">
+                <button type="submit" class="btn btn-success" name="action" value="add-pool">
+                    <i class="icon-paper-plane"></i>
+                    Transferer vers PCRU
+                </button>
+            </form>
+        <?php endif; ?>
+
+        <?php if($downloadable): ?>
+            <form action="" method="post" class="form-inline">
+                <button type="submit" class="btn btn-default" name="action" value="download-pcru">
+                    <i class="icon-download"></i>
+                    Télécharger les documents PCRU (aperçu)
+                </button>
+            </form>
+        <?php endif; ?>
     </nav>
 
     <?php if( !$documentPath ): ?>
@@ -70,6 +106,7 @@
     </div>
     <?php endif; ?>
 
+    <h3>Aperçu des données PCRU</h3>
     <table class="table table-bordered card xs">
         <thead>
             <tr>
@@ -120,10 +157,6 @@
         </tbody>
 
     </table>
-
-    <nav>
-        <button class="btn btn-info">Télécharger le fichier CSV (PCRU)</button>
-    </nav>
 
     <?php /******************************* ANCIENNE VERSION
     <div id="app" style="visibility: hidden">

@@ -153,15 +153,38 @@ class PCRUCvsFile
      * @return $this
      * @throws \Oscar\Exception\OscarException
      */
-    public function writeContratsCsv()
+    public function writeContratsCsv($dest=null)
     {
-        $dest = $this->pcruService->getOscarConfigurationService()->getPcruContratFile();
+        if( $dest == null ){
+            $dest = $this->pcruService->getOscarConfigurationService()->getPcruContratFile();
+        }
         $handler = fopen($dest, 'w');
         fputcsv($handler, $this->getHeaders(), ';');
         foreach ($this->getData() as $data) {
             fputcsv($handler, $data, ';');
         }
         return $this;
+    }
+
+    /**
+     * Retourne le contenu du document (Contrat Signé) référencé dans les informations PCRU.
+     *
+     * @param ActivityPcruInfos $pcruInfos
+     * @return string
+     * @throws OscarException
+     */
+    public function getDocumentSignedFromPcruInfo(ActivityPcruInfos $pcruInfos) :string
+    {
+        /** @var ContractDocument $document */
+        $document = $this->pcruService->getEntityManager()
+            ->getRepository(ContractDocument::class)
+            ->find($pcruInfos->getDocumentId());
+
+        $docpath = $this->pcruService->getOscarConfigurationService()->getDocumentDropLocation()
+            . DIRECTORY_SEPARATOR
+            . $document->getPath();
+
+        return file_get_contents($docpath);
     }
 
     /**
@@ -178,17 +201,10 @@ class PCRUCvsFile
             // traitement du document
             $filedest = $this->path . DIRECTORY_SEPARATOR . $info->getSignedFileName();
 
-            /** @var ContractDocument $document */
-            $document = $this->pcruService->getEntityManager()
-                ->getRepository(ContractDocument::class)
-                ->find($info->getDocumentId());
+            $doccontent = $this->getDocumentSignedFromPcruInfo($info);
 
-            $docpath = $this->pcruService->getOscarConfigurationService()->getDocumentDropLocation()
-                . DIRECTORY_SEPARATOR
-                . $document->getPath();
-
-            $this->log("Ajout du document $docpath");
-            file_put_contents($filedest, file_get_contents($docpath));
+            $this->log("Ajout du document");
+            file_put_contents($filedest, $doccontent);
 
             $returnedInfos[] = $info;
         }

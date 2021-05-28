@@ -139,9 +139,68 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return !file_exists($lockfile);
     }
 
+    /**
+     * Télécharge un aperçu des documents PCRU pour l'activité donnée.
+     *
+     * @param Activity $activity
+     */
+    public function downloadOne(Activity $activity): void
+    {
+        $num = $activity->getOscarNum();
+
+        $ziptmp = "/tmp/pcru-preview-zip-$num-" . uniqid() . ".zip";
+        $csvtmp = "/tmp/pcru-preview-csv-$num-" . uniqid() . ".zip";
+        $pdftmp = "/tmp/pcru-preview-pdf-$num-" . uniqid() . ".zip";
+
+        // Récupération des données
+        $pcruInfos = $this->getPcruInfosActivity($activity);
+
+
+        if (!$pcruInfos) {
+            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+            $pcruInfos = $factory->createNew($activity);
+        }
+
+        $csvFile = new PCRUCvsFile($this);
+        $csvFile->addEntry($pcruInfos);
+        $csvFile->writeContratsCsv($csvtmp);
+        file_put_contents($pdftmp, $csvFile->getDocumentSignedFromPcruInfo($pcruInfos));
+
+        // Création de l'archive
+        $zip = new \ZipArchive();
+        if ($zip->open($ziptmp, \ZipArchive::CREATE) !== TRUE) {
+            throw new OscarException("Impossible de créer l'archive");
+        }
+        $zip->addFile($csvtmp, 'contrats.csv');
+        $zip->addFile($pdftmp, $num . '.pdf');
+        $zip->close();
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="oscar-pcru-preview-' . $num . '.zip"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        readfile($ziptmp);
+
+        unlink($csvtmp);
+        unlink($pdftmp);
+        unlink($ziptmp);
+        exit;
+
+    }
+
+    /**
+     * Ajoute une activité à la file d'attente du prochain envoi PCRU.
+     *
+     * @param $activityOrPcruInfos
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function addToPool($activityOrPcruInfos): void
     {
-        if ( $this->isPoolOpen() ){
+        if ($this->isPoolOpen()) {
             $this->logPool("Ajout $activityOrPcruInfos à la pile d'envoi");
             // Récupération des données PCRU
             $pcruInfos = null;
@@ -163,7 +222,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException("Un envoi PCRU est déjà en cours");
         }
 
-        if( !$pcruInfos->isSendable() ){
+        if (!$pcruInfos->isSendable()) {
             $err = "Les données PCRU pour " . $pcruInfos->getNumContratTutelleGestionnaire() . " ne peuvent pas être envoyées : sont statut est " . $pcruInfos->getStatusStr();
             $this->logPool("ERROR : " . $err);
             throw new OscarException($err);
@@ -173,7 +232,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         /// Génération des documents
         $csvFile = new PCRUCvsFile($this);
         $csvFile->readCSV();
-        if( !$csvFile->entryExist($pcruInfos) ){
+        if (!$csvFile->entryExist($pcruInfos)) {
             $csvFile->addEntry($pcruInfos);
         }
         $csvFile->writeContratsCsv();
@@ -184,10 +243,10 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     }
 
-    public function logPool( string $message ) :void
+    public function logPool(string $message): void
     {
         static $logpool = null;
-        if( $logpool == null ){
+        if ($logpool == null) {
             $logpool = fopen($this->getOscarConfigurationService()->getPcruLogPoolFile(), 'w');
         }
         $msg = sprintf("%s \t%s\n", date('Y-m-d h:i:s'), $message);
@@ -196,7 +255,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     public function __destruct()
     {
-        if( $logpool ){
+        if ($logpool) {
             fclose($logpool);
         }
     }
@@ -374,7 +433,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      * @return array
      * @throws OscarException
      */
-    public function getUploadableFiles($ignoreLogFile=true)
+    public function getUploadableFiles($ignoreLogFile = true)
     {
         $files = [];
         $path = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
@@ -385,7 +444,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
                 if ($entry == '.' || $entry == '..') {
                     continue;
                 }
-                if( $entry == basename($this->getOscarConfigurationService()->getPcruLogPoolFile()) ){
+                if ($entry == basename($this->getOscarConfigurationService()->getPcruLogPoolFile())) {
                     continue;
                 }
                 $filepath = $path . DIRECTORY_SEPARATOR . $entry;
@@ -417,20 +476,20 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
     public function upload(): void
     {
 
-        if( $this->hasUploadInProgress() ){
+        if ($this->hasUploadInProgress()) {
             throw new OscarException("Une soumission PCRU est déjà en attente de traitement.");
         }
 
         $files = $this->getUploadableFiles(true);
 
-        if( count($files) <= 1 ){
+        if (count($files) <= 1) {
             throw new OscarException("Aucune donnèes PCRU en attente.");
         }
 
         // Lecture du fichier CSV pour tagguer les Informations PCRU à traiter
         $infos = [];
         $contractFile = $this->getOscarConfigurationService()->getPcruContratFile();
-        if( !file_exists($contractFile) ){
+        if (!file_exists($contractFile)) {
             throw new OscarException("Erreur PCRU : Les fichiers des contrats est absent.");
         }
 
@@ -455,6 +514,16 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             fclose($handle);
         }
 
+        $remotePath = 'pcru';
+        $local_file = '/tmp/PCRU_MARKER.tmp';
+        $remote_file = $remotePath . '/RETOUR-PCRU.OK';
+        $pcruResponseFile = $remotePath . '/CONTRACT-PCRU.csv';
+
+        // Fichier à déposer une fois le transfert terminé
+        $marker_complete = 'DEPOT-PDF.OK';
+        $marker_complete_tmp = '/tmp/' . $marker_complete;
+        $marker_complete_remote = $remotePath . DIRECTORY_SEPARATOR . $marker_complete;
+
 
         $this->logPool("Connexion FTP...");
         $co = $this->ftpConnect();
@@ -462,14 +531,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         // Mode PASSIVE
         ftp_pasv($co, true);
 
-        $remotePath = 'pcru';
-        $local_file = '/tmp/PCRU_MARKER.tmp';
-        $remote_file = $remotePath . '/PCRU.OK';
-        $pcruResponseFile = $remotePath . '/CONTRACT.PCRU.OK';
-
         // Ouverture du fichier pour écriture
         $handle = fopen($local_file, 'w');
-
 
         // On récupère les fichier FTP
         $remoteFiles = ftp_nlist($co, $remotePath);
@@ -500,7 +563,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
                 $filename = $info['name'];
                 $filepath = $info['path'];
                 $this->logPool("Envoi du contrat $filename");
-                $dest = $remotePath.DIRECTORY_SEPARATOR.$filename;
+                $dest = $remotePath . DIRECTORY_SEPARATOR . $filename;
                 $stream = fopen($filepath, 'r');
 
                 // Envois des données FTP
@@ -515,9 +578,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
                 }
 
                 try {
-                    if( $filename != $this->getOscarConfigurationService()->getPcruContratFile(false) ){
+                    if ($filename != $this->getOscarConfigurationService()->getPcruContratFile(false)) {
                         $pcruInfos = $infos[$filename];
-                        if( !$pcruInfos ){
+                        if (!$pcruInfos) {
                             throw new OscarException("L'objet ActivityPcruInfo ne correspond pas pour $filename");
                         }
                         $this->logPool("Changement d'état pour " . $pcruInfos);
@@ -530,18 +593,31 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
                 fclose($stream);
             }
+
+            // Ajout du fichier marker
+            $this->logPool("Ajout du marqueur");
+            file_put_contents($marker_complete_tmp, "");
+            $marker = fopen($marker_complete_tmp, 'r');
+
+            ftp_pasv($co, true);
+            if (!ftp_fput($co, $marker_complete_remote, $marker, FTP_BINARY)) {
+                $errors = error_get_last();
+                $err = "Erreur FTP, impossible d'envoyer le $marker_complete" . $errors['message'];
+                $this->logPool($err);
+            }
+            fclose($marker);
+
+            ftp_close($co);
+
+            $dirWait = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
+            $dirEffective = $this->getOscarConfigurationService()->getPcruDirectoryForUploadEffective();
+            $this->logPool("Déplacement du dossier $dirWait vers $dirEffective");
+
+            if (!@rename($dirWait, $dirEffective)) {
+                throw new OscarException("Error lors de la création du dossier de traitement après upload");
+            }
+
         }
-
-        ftp_close($co);
-
-        $dirWait = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
-        $dirEffective = $this->getOscarConfigurationService()->getPcruDirectoryForUploadEffective();
-        $this->logPool("Déplacement du dossier $dirWait vers $dirEffective");
-
-        if( !@rename($dirWait, $dirEffective) ){
-            throw new OscarException("Error lors de la création du dossier de traitement après upload");
-        }
-
     }
 
     /**

@@ -2779,17 +2779,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return $view;
     }
 
-//    public function pcruAction()
-//    {
-//        if (!$this->getOscarConfigurationService()->getPcruEnabled()) {
-//            throw new OscarException("Le module PCR n'est pas activé");
-//        }
-//        $activity = $this->getActivityFromRoute();
-//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
-//
-//        die("NOT IMPLEMENTED");
-//    }
-
     /**
      * Affiche la liste des activités soumises à un processus PCRU.
      *
@@ -2833,9 +2822,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $action = $this->params()->fromPost('action');
             if( $action == 'upload' ){
                 $this->getProjectGrantService()->getPCRUService()->upload();
+                $this->redirect()->toRoute('contract/pcru-list');
             }
         }
-
 
         return [
             'downloadable' => $this->getProjectGrantService()->getPCRUService()->hasDownload(),
@@ -2867,6 +2856,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 case 'add-pool':
                     $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
+                    break;
+
+                case 'download':
+                    $this->getProjectGrantService()->getPCRUService()->downloadOne($activity);
                     break;
             }
             return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId() ]);
