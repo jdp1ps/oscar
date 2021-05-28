@@ -25,18 +25,23 @@ Les champs :
 
 ### Module PCRU
 
+#### Informations PCRU d'une activité
+
 Le module PCRU permet d'automatiser l'extraction des données Oscar vers PCRU. Il propose un nouveau module pour visualiser/gérer les données PCRU d'une activité de recherche depuis la fiche activité :
 
-CAPTURE
+![Fiche information PCRU](../images/pcru-fiche-infos.png)
 
-L'écran PCRU permet de contrôler les données extraites, mais également de télécharger le fichier de donnée CSV valide PCRU.
+Si des informations sont manquantes, un message indiquera comment compléter les informations afin de rendre l'activité éligible à PCRU.
 
-Si des informations PCRU sont manquantes, elle seront indiquées ainsi qu'une solution pour résoudre le problème.
+Une fois les donnèes valides, vous pourrez rendre les données éligibles pour l'envoi automatique des informations en cliquant sur **Activer l'envoi PCRU**
 
-Une fois les donnèes valident, 2 solutions : 
+Vous pouvez également prévisualiser les documents générés en téléchargeant l'aperçu des fichiers générés
 
- - Rendre les données éligibles pour l'envoi automatique des informations
- - Télécharger manuellement les fichiers pour les soumettre via PCRU
+### Gestion PCRU
+
+Un écran centralisé permet de visualiser les données PCRU ainsi que leur état.
+
+![Liste de contrôle PCRU](../images/pcru-list.png)
 
 ---
 

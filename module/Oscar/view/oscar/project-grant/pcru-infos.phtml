@@ -66,13 +66,16 @@
             <i class="icon-cube"></i>
             Revenir sur la fiche activité</a>
 
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity) ): ?>
         <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ): ?>
         <a href="<?= $this->url('contract/edit', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
             <i class="icon-pencil"></i>
             Modifier la fiche activité</a>
         <?php endif; ?>
+        <?php endif; ?>
 
-        <?php if($activable): ?>
+        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU_ACTIVATE, $activity) ): ?>
+        <?php if( $activable): ?>
             <form action="" method="post" class="form-inline">
                 <button type="submit" class="btn btn-success" name="action" value="activate-pcru">
                     <i class="icon-paper-plane"></i>
@@ -97,6 +100,7 @@
                     Télécharger les documents PCRU (aperçu)
                 </button>
             </form>
+        <?php endif; ?>
         <?php endif; ?>
     </nav>
 

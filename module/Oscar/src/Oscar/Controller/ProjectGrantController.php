@@ -2786,6 +2786,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function pcruListAction()
     {
+
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_LIST);
+        $accessUpload = $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_PCRU_UPLOAD);
+
         $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
         $methods = $this->getHttpXMethod();
 
@@ -2819,6 +2823,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $pcru = $this->getProjectGrantService()->getPCRUService()->downloadPCRUSendableFile();
             }
         } elseif ($methods == "POST") {
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_UPLOAD);
             $action = $this->params()->fromPost('action');
             if( $action == 'upload' ){
                 $this->getProjectGrantService()->getPCRUService()->upload();
@@ -2828,7 +2833,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             'downloadable' => $this->getProjectGrantService()->getPCRUService()->hasDownload(),
-            'uploadable' => !$this->getProjectGrantService()->getPCRUService()->hasUploadInProgress(),
+            'uploadable' => !$this->getProjectGrantService()->getPCRUService()->hasUploadInProgress() && $accessUpload,
             'pcruInfos' => $pcruInfos
         ];
     }
@@ -2845,10 +2850,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
+
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
         $method = $this->getHttpXMethod();
 
         if ($method == 'POST') {
             $action = $this->params()->fromPost('action');
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU_ACTIVATE, $activity);
             switch ($action) {
                 case 'activate-pcru':
                     $this->getProjectGrantService()->getPCRUService()->activateActivity($activity);
