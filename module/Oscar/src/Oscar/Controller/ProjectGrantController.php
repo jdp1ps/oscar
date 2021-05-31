@@ -2866,7 +2866,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
                     break;
 
-                case 'download':
+                case 'download-pcru':
                     $this->getProjectGrantService()->getPCRUService()->downloadOne($activity);
                     break;
             }

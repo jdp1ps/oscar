@@ -189,8 +189,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $num = $activity->getOscarNum();
 
         $ziptmp = "/tmp/pcru-preview-zip-$num-" . uniqid() . ".zip";
-        $csvtmp = "/tmp/pcru-preview-csv-$num-" . uniqid() . ".zip";
-        $pdftmp = "/tmp/pcru-preview-pdf-$num-" . uniqid() . ".zip";
+        $csvtmp = "/tmp/pcru-preview-csv-$num-" . uniqid() . ".csv";
+        $pdftmp = "/tmp/pcru-preview-pdf-$num-" . uniqid() . ".pdf";
+        $orgtmp = "/tmp/pcru-preview-org-$num-" . uniqid() . ".csv";
 
         // Récupération des données
         $pcruInfos = $this->getPcruInfosActivity($activity);
@@ -204,6 +205,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $csvFile = new PCRUCvsFile($this);
         $csvFile->addEntry($pcruInfos);
         $csvFile->writeContratsCsv($csvtmp);
+        $csvFile->writePartenairesCSV($orgtmp);
+
         file_put_contents($pdftmp, $csvFile->getDocumentSignedFromPcruInfo($pcruInfos));
 
         // Création de l'archive
@@ -212,6 +215,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException("Impossible de créer l'archive");
         }
         $zip->addFile($csvtmp, 'contrats.csv');
+        if( file_exists($orgtmp) )
+            $zip->addFile($orgtmp, 'partenaires.csv');
         $zip->addFile($pdftmp, $num . '.pdf');
         $zip->close();
 
