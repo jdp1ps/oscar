@@ -1,17 +1,72 @@
 # version 2.12 "Spartan"
 
-## Nouveautès
+## Nouveautés
 
-### Organisations : Nouveau champs
+### MAJ Authentification
 
-Le modèle des organisations a été enrichi, les champs suivant ont été ajoutés : 
+L'une des librairies PHP utilisée par Oscar a évoluée et implique des changements mineurs dans la configuration.
+
+Il faut maintenant spécifier une clef par mode d'authentification proposée : 
+
+ - local/ldap
+ - CAS
+ - Shiboleth
+
+```php
+<?php
+// config/autoload/local.php
+$settings = array(
+    // Authentification via LDAP/BDD
+    'local' => [
+        'order' => 2,
+        'enabled' => true,
+        'db' => [
+            'enabled' => true,
+        ],
+        'ldap' => [
+            'enabled' => false,
+        ],
+    ],
+    
+    // CAS
+    'cas' => [
+        'order' => 1,
+        'enabled' => true,
+        'connection' => [
+            'default' => [
+                'params' => [
+                    'hostname' => 'host.domain.fr',
+                    'port'     => 443,
+                    'version'  => "2.0",
+                    'uri'      => "",
+                    'debug'    => false,
+                ],
+            ],
+        ]
+    ],   
+
+    // Usurpation (DEV/Préprod)
+    'usurpation_allowed_usernames' => array('bouvry', 'turbout'),
+);
+
+/**
+ * You do not need to edit below this line
+ */
+return array(
+    'unicaen-auth' => $settings,
+);
+```
+
+### Organisations : Nouveaux champs
+
+Le modèle des organisations a été enrichi, les champs suivants ont été ajoutés : 
 
  - `duns` : Numéro DUNS, 
  - `tvaintra`  : TVA Intacommunautaire,
  - `labintel` : Numéro Labintel (CNRS)
  - `rnsr` : Numéro RNSR (Répertoire National des Structures de Recherche)
 
-> Ces champs restent facultatif dans la majorité des cas, mais (un de ces champs est attendu par le module PCRU)
+> Ces champs restent facultatifs dans la majorité des cas, mais un de ces champs est attendu par le module PCRU pour authentifier les partenaires
 
 
 ### Activités : Nouveau champs
