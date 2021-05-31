@@ -248,9 +248,11 @@ class PCRUCvsFile
             }
         }
 
-        fputcsv($handler, $this->pcruService->getParenairesHeaders(), ';');
-        foreach ($partenairesCodes as $organization) {
-                fputcsv($handler, $this->pcruService->getPartenaireData($organization), ';');
+        if( count($partenairesCodes) > 0 ){
+            fputcsv($handler, $this->pcruService->getParenairesHeaders(), ';');
+            foreach ($partenairesCodes as $organization) {
+                    fputcsv($handler, $this->pcruService->getPartenaireData($organization), ';');
+            }
         }
 
         return $this;
