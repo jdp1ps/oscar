@@ -584,7 +584,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPcruPartenaireFile($withPath = true): string
     {
         return $withPath ?
-            $this->getDirectoryForUpload()
+            $this->getPcruDirectoryForUpload()
             . DIRECTORY_SEPARATOR
             . $this->getConfiguration('pcru.filename_partenaires')
             :

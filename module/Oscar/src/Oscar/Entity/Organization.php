@@ -342,6 +342,13 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->setDateCreated(new \DateTime());
     }
 
+    public function getCodePcru(){
+        if( $this->getSiret() ) return $this->getSiret();
+        if( $this->getTvaintra() ) return $this->getTvaintra();
+        if( $this->getDuns() ) return $this->getDuns();
+        return null;
+    }
+
     public function isClose()
     {
         return $this->getDateEnd() && $this->getDateEnd() <= new \DateTime();

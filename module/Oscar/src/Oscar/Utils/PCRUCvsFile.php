@@ -4,6 +4,8 @@
 namespace Oscar\Utils;
 
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ContractDocument;
 use Oscar\Exception\OscarException;
@@ -212,16 +214,48 @@ class PCRUCvsFile
         return $this;
     }
 
-    public function writePartenairesCSV()
+    /**
+     * écriture du fichier des partenaires.
+     *
+     * @param null $dest
+     * @return $this
+     * @throws OscarException
+     */
+    public function writePartenairesCSV($dest = null)
     {
-        // TODO
+        if( $dest == null ){
+            $dest = $this->pcruService->getOscarConfigurationService()->getPcruPartenaireFile();
+        }
+        $this->log("# Création du fichier partenaires " . $dest);
+        $handler = fopen($dest, 'w');
+
+        $partenairesCodes = [];
+        /** @var ActivityPcruInfos $pcruInfo */
+        foreach ($this->getEntries() as $pcruInfo){
+            $codes = explode('|', $pcruInfo->getPartenaires());
+            foreach ($codes as $code) {
+                if( !array_key_exists($code, $partenairesCodes) ){
+                    try {
+                        $partenairesCodes[$code] = $this->pcruService->getOrganizationByCodePCRU($code);
+                    } catch (NoResultException $e){
+                        throw new OscarException("Impossible de trouver les données pour le partenaire $code");
+                    } catch (NonUniqueResultException $e){
+                        throw new OscarException("Plusieurs organisations partagent un même code: $code");
+                    } catch (\Exception $e) {
+                        throw new OscarException("Un erreur est survenue la du chargement de l'organisations $code : " . $e->getMessage());
+                    }
+                }
+            }
+        }
+
+        fputcsv($handler, $this->pcruService->getParenairesHeaders(), ';');
+        foreach ($partenairesCodes as $organization) {
+                fputcsv($handler, $this->pcruService->getPartenaireData($organization), ';');
+        }
+
         return $this;
     }
 
-    public function writeCSVs()
-    {
-
-    }
 
     public function makeZip(): ?string
     {

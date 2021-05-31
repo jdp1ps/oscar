@@ -2786,10 +2786,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function pcruListAction()
     {
-
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_LIST);
         $accessUpload = $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_PCRU_UPLOAD);
-
         $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
         $methods = $this->getHttpXMethod();
 

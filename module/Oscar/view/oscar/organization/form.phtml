@@ -90,13 +90,14 @@
                 <?= $this->formElementErrors($form->get('rnsr')); ?>
                 <div id="rnsrfield"></div>
                 <script>
+
                     require(['vue', 'vue-resource', 'rnsrfield'], function(Vue, VueResource, RNSRField){
                         /**
                          * Système de recherche des RSNS, pas très classe, mais fonctionnel
                          */
                         var v = new Vue({
                             components: { 'rsnsfield': RNSRField },
-                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization ? $organisation->getShortname() : "" ?>\'" />',
+                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization &&  $organization->getShortname() ? $organization->getShortname() : "" ?>\'" />',
                             methods: {
                                 selectrsns(foo){
                                     this.$emit('change', foo);

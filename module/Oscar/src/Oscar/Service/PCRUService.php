@@ -11,6 +11,7 @@ use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPcruInfosRepository;
 use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Organization;
 use Oscar\Entity\PcruPoleCompetitivite;
 use Oscar\Entity\PcruSourceFinancement;
 use Oscar\Entity\PcruTypeContract;
@@ -79,6 +80,45 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
     public function getPartenaireFile($withPath = true): string
     {
         return $this->getOscarConfigurationService()->getPcruPartenaireFile($withPath);
+    }
+
+    public function getParenairesHeaders() :array
+    {
+        return [
+            "LibelleCourt",
+            "LibelleLong",
+            "Siren",
+            "Siret",
+            "TvaIntra",
+            "Duns",
+            "TypeEtablissement",
+            "Adresse",
+            "CodePostal",
+            "Ville",
+            "Pays",
+        ];
+    }
+
+    public function getPartenaireData( Organization $organization ) :array
+    {
+        return [
+            $organization->getShortName(),
+            $organization->getFullName(),
+            "",
+            $organization->getSiret(),
+            $organization->getTvaintra(),
+            $organization->getDuns(),
+            "",
+            $organization->getStreet1(),
+            $organization->getZipCode(),
+            $organization->getCity(),
+            $organization->getCountry()
+        ];
+    }
+
+    public function getOrganizationByCodePCRU( $codePcru ): ?Organization
+    {
+        return $this->getEntityManager()->getRepository(Organization::class)->getOrganizationByCodePCRU($codePcru);
     }
 
     ///
@@ -236,8 +276,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             $csvFile->addEntry($pcruInfos);
         }
         $csvFile->writeContratsCsv();
+        $csvFile->writePartenairesCSV();
         $csvFile->writeContratsPDF();
-
         $pcruInfos->setStatus(ActivityPcruInfos::STATUS_FILE_READY);
         $this->getEntityManager()->flush($pcruInfos);
 

@@ -349,7 +349,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     return $this->jsonOutput(['tvas' => $this->getProjectGrantService()->getTVAsForJson()]);
-                    break;
 
                 case 'POST':
 
@@ -381,7 +380,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
-                    break;
 
                 default:
                     return $this->getResponseBadRequest("Erreur d'API");
@@ -404,15 +402,19 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->flashMessenger()->addSuccessMessage('Les référentiels PCRU ont été mis à jour');
                 $this->redirect()->toRoute('administration/accueil');
                 return [];
-
-            case "iso-3166-update":
-
-                return [];
+            default:
+                return $this->getResponseBadRequest();
         }
 
         return [];
     }
 
+    /**
+     * Liste des pays ISO 3166
+     *
+     * @return array|\Zend\Http\Response
+     * @throws OscarException
+     */
     public function paysIso3166Action()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);

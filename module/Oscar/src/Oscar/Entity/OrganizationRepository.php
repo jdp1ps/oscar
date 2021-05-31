@@ -138,4 +138,23 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->setParameter('search', '%"'.$connector.'";s:'.strlen($value).':"'.$value.'";%');
         return $qb;
     }
+
+    /**
+     * @param $code
+     * @return Organization|null
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getOrganizationByCodePCRU( $code ) :?Organization
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder('o')
+            ->select('o')
+            ->from(Organization::class, 'o')
+            ->where('o.siret = :code OR o.duns = :code OR o.tvaintra = :code')
+            ->getQuery()
+            ->setParameter('code', $code)
+        ;
+
+        return $qb->getSingleResult();
+    }
 }

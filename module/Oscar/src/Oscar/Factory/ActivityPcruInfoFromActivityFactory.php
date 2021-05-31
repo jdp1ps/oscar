@@ -47,6 +47,7 @@ class ActivityPcruInfoFromActivityFactory
 
         // Intitulé du rôle "Laboratoire" pour PCRU
         $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
+        $rolePartnerToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_patner_role', 'Financeur');
 
         // Donnèes trouvées
         $codeUniteLabintel = "";
@@ -58,7 +59,6 @@ class ActivityPcruInfoFromActivityFactory
             $activityPcruInfos->addError("Aucune structure $roleStructureToFind pour cette activité.");
         }
 
-
         $organizationsParsed = [];
         /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
@@ -66,6 +66,14 @@ class ActivityPcruInfoFromActivityFactory
             if( $unite->getOrganization()->getLabintel() ){
                 $codeUniteLabintel = $unite->getOrganization()->getLabintel();
                 $sigleUnit = $unite->getOrganization()->getShortName();
+            }
+        }
+
+        $partners = [];
+        /** @var ActivityOrganization $partner */
+        foreach ($activity->getOrganizationsWithRole($rolePartnerToFind) as $partner) {
+            if( $partner->getOrganization()->getCodePcru() ){
+                $partners[] = $partner->getOrganization()->getCodePcru();
             }
         }
 
@@ -121,6 +129,7 @@ class ActivityPcruInfoFromActivityFactory
             ->setDocumentPath($documentSigned)
             ->setDocumentId($documentId)
             ->setSigleUnite($sigleUnit)
+            ->setPartenaires(implode('|', $partners))
             ->setPoleCompetivite($activity->getPcruPoleCompetitiviteStr())
             ->setNumContratTutelleGestionnaire($activity->getOscarNum())
             ->setValidePoleCompetivite($activity->isPcruPolePoleCompetitiviteStr())
