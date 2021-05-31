@@ -1,9 +1,4 @@
 <?php
-/**
- * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
- * @date: 03/11/15 14:47
- * @copyright Certic (c) 2015
- */
 
 namespace Oscar\Entity;
 
@@ -11,31 +6,49 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class Currency
  * @package Oscar\Entity
  * @Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\Country3166Repository")
  */
-class Currency
+class Country3166
 {
-    use TraitTrackable;
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=20)
+     * @ORM\Column(type="string", length=100)
      */
-    private $label;
+    private $fr;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=4)
+     * @ORM\Column(type="string", length=100)
      */
-    private $symbol;
+    private $en;
 
     /**
-     * @var double
-     * @ORM\Column(type="float")
+     * @var string
+     * @ORM\Column(type="string", length=2)
      */
-    private $rate = 1.0;
+    private $alpha2;
+
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=3)
+     */
+    private $alpha3;
+
+    /**
+     * @var string
+     * @ORM\Column(type="integer")
+     */
+    private $numeric;
 
     public function asArray()
     {
@@ -48,58 +61,103 @@ class Currency
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getLabel()
+    public function getId()
     {
-        return $this->label;
-    }
-
-    /**
-     * @param string $label
-     */
-    public function setLabel($label)
-    {
-        $this->label = $label;
-
-        return $this;
+        return $this->id;
     }
 
     /**
      * @return string
      */
-    public function getSymbol()
+    public function getFr(): string
     {
-        return $this->symbol;
+        return $this->fr;
     }
 
     /**
-     * @param string $symbol
+     * @param string $fr
      */
-    public function setSymbol($symbol)
+    public function setFr(string $fr): self
     {
-        $this->symbol = $symbol;
-
+        $this->fr = $fr;
         return $this;
     }
 
     /**
-     * @return float
+     * @return string
      */
-    public function getRate()
+    public function getEn(): string
     {
-        return $this->rate;
+        return $this->en;
     }
 
     /**
-     * @param float $rate
+     * @param string $en
      */
-    public function setRate($rate)
+    public function setEn(string $en): self
     {
-        $this->rate = $rate;
-
+        $this->en = $en;
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getAlpha2(): string
+    {
+        return $this->alpha2;
+    }
+
+    /**
+     * @param string $alpha2
+     */
+    public function setAlpha2(string $alpha2): self
+    {
+        $this->alpha2 = $alpha2;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAlpha3(): string
+    {
+        return $this->alpha3;
+    }
+
+    /**
+     * @param string $alpha3
+     */
+    public function setAlpha3(string $alpha3): self
+    {
+        $this->alpha3 = $alpha3;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNumeric(): string
+    {
+        return $this->numeric;
+    }
+
+    /**
+     * @param string $numeric
+     */
+    public function setNumeric(string $numeric): self
+    {
+        $this->numeric = $numeric;
+        return $this;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->getFr();
+    }
+
 
     function __toString()
     {

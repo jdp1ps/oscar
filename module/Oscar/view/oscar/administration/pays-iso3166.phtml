@@ -1,0 +1,25 @@
+<section class="container">
+    <h1>PAYS (ISO 3166)</h1>
+    <table class="table table-condensed table-hover">
+        <thead>
+            <th>CODE</th>
+            <th>Label(FR)</th>
+            <th>CODE (3 chars)</th>
+            <th>Label EN</th>
+            <th>CODE (numeric)</th>
+        </thead>
+        <tbody>
+            <?php
+            /** @var \Oscar\Entity\Country3166 $country */
+            foreach ($countries as $country): ?>
+            <tr>
+                <td><?= $country->getAlpha2() ?></td>
+                <td><?= $country->getFr() ?></td>
+                <td><?= $country->getAlpha3() ?></td>
+                <td><?= $country->getEn() ?></td>
+                <td><?= $country->getNumeric() ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</section>

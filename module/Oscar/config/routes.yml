@@ -1600,6 +1600,16 @@ administration:
 
 
     child_routes:
+
+        # Gestion et chargement du référenciel des pays
+        countries:
+            type: segment
+            may_terminate: true
+            options:
+                route: /pays-iso-3166
+                defaults:
+                    action: paysIso3166
+
         gestionprivilege:
             type: segment
             may_terminate: true

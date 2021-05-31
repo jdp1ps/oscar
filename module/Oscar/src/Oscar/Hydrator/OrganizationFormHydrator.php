@@ -15,16 +15,18 @@ class OrganizationFormHydrator implements HydratorInterface
 {
     private $connectors;
     private $types;
+    private $countries;
 
     /**
      * OrganizationFormHydrator constructor.
      * @param $connectors
      * @param $types
      */
-    public function __construct($connectors, $types)
+    public function __construct($connectors, $types, $countries)
     {
         $this->connectors = $connectors;
         $this->types = $types;
+        $this->countries = $countries;
     }
 
 
@@ -51,7 +53,6 @@ class OrganizationFormHydrator implements HydratorInterface
             !$data['dateEnd'] ? null : new \DateTime($data['dateEnd'])
         );
 
-
         // ADDRESS
         $object->setStreet1($data['street1']);
         $object->setStreet2($data['street2']);
@@ -60,7 +61,6 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setCity($data['city']);
         $object->setCountry($data['country']);
         $object->setPhone($data['phone']);
-
         $object->setEmail($data['email']);
         $object->setUrl($data['url']);
         $object->setDescription($data['description']);

@@ -1,10 +1,10 @@
-// Usage : node install/iso-3166.js
+// Usage : node install/iso-3166.js iso-3166-final.js
 // Description : génère un JSON propre avec les codes ISO "pompés" sur le site ISO
 var fs = require('fs'),
     xml2js = require('xml2js');
 
 var parser = new xml2js.Parser();
-fs.readFile(__dirname + '/iso-3166.xml', function(err, data) {
+fs.readFile(__dirname + '/iso-3166-src.xml', function(err, data) {
     let output = [];
     parser.parseString(data, function (err, result) {
         let country = result.table.tbody[0].tr;

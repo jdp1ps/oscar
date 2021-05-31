@@ -429,7 +429,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     public function newAction()
     {
-        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesSelect());
         $entity = new Organization();
         $form->init();
         $form->bind($entity);
@@ -797,7 +797,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $entity = $result->getQuery()->getSingleResult();
         }
 
-        $form = new OrganizationIdentificationForm($this->getOrganizationService()->getConnectorsList(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesSelect());
         $form->init();
         $form->bind($entity);
 

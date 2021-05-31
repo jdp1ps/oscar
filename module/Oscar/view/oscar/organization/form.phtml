@@ -96,7 +96,7 @@
                          */
                         var v = new Vue({
                             components: { 'rsnsfield': RNSRField },
-                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization->getShortname(); ?>\'" />',
+                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization ? $organisation->getShortname() : "" ?>\'" />',
                             methods: {
                                 selectrsns(foo){
                                     this.$emit('change', foo);
@@ -197,7 +197,7 @@
             <div class="form-group">
                 <div class="input-group input-group-sm">
                     <span class="input-group-addon">Pays</span>
-                    <?= $this->formInput($form->get('country')) ?>
+                    <?= $this->formSelect($form->get('country')) ?>
                 </div>
                 <?= $this->formElementErrors($form->get('country')); ?>
             </div>
@@ -390,6 +390,8 @@
             $('[name="type"]').select2({
                 results: <?= json_encode($types) ?>
             });
+
+            $('[name="country"]').select2({});
         });
     </script>
 <?php

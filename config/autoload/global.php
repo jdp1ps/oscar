@@ -18,6 +18,13 @@ return array(
         'theme' => 'oscar',
         'themes' => ['oscar', 'adaj', 'debug'],
 
+        // Paramètres liés à l'installation/initialisation d'une
+        // instance d'oscar
+        'install' => [
+            // Liste des pays (Norme ISO 3166)
+            'iso-3166' => __DIR__ . '/../../install/iso/iso-3166-final.js'
+        ],
+
 
         'pcru' => [
             // Référenciel PCRU (Fichiers contenant les données officielles)

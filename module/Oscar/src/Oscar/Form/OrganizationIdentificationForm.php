@@ -3,6 +3,7 @@
 namespace Oscar\Form;
 
 use Oscar\Hydrator\OrganizationFormHydrator;
+use Oscar\Service\OrganizationService;
 use Zend\Form\Element;
 use Zend\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
@@ -17,16 +18,17 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
 
     private $connectors = [];
     private $types = [];
+    private $countries = [];
 
-    function __construct($connectors = [], $types = [])
+    function __construct(OrganizationService $organizationService, $types = [])
     {
         parent::__construct('organization');
-        $this->connectors = $connectors;
-        $this->types = $types;
+        $this->connectors = $organizationService->getConnectorsList();
+        $this->countries = $organizationService->getCountriesIso366Labels();
     }
 
     public function init(){
-        $this->setHydrator(new OrganizationFormHydrator($this->connectors, $this->types));
+        $this->setHydrator(new OrganizationFormHydrator($this->connectors, $this->types, $this->countries));
 
         $typesSelect = [];
         $typesSelect[] = "";
@@ -137,13 +139,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             ],
             'type'=>'DateTime'
         ]);
-        //$dateStart->setValue('FICK');
-        //$this->get('dateStart')->setValue('FUCK');
 
-
-
-
-//
         // DateEnd
         $this->add([
             'name'   => 'dateEnd',
@@ -194,12 +190,18 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         ]);
         $this->add($city);
 
-        $country = new Element\Text('country');
-        $country->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Pays'
+        $this->add([
+            'name'   => 'country',
+            'options' => [
+                'label' => 'Pays (ISO)',
+                'value_options' => $this->countries
+            ],
+            'attributes' => [
+                'class' => 'form-control',
+                'placeholder'   => 'Pays'
+            ],
+            'type'=>'Select'
         ]);
-        $this->add($country);
 
         $phone = new Element\Text('phone');
         $phone->setAttributes([

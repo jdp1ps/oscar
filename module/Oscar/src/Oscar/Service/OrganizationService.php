@@ -13,6 +13,8 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\Country3166;
+use Oscar\Entity\Country3166Repository;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationType;
@@ -620,5 +622,62 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 //        }
 //        return $this->getResponseNotImplemented("En cours de développement");
         throw new \Exception("A FAIRE !!");
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// REPOSITORIES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @return Country3166Repository
+     */
+    public function getCountries3166Repository()
+    {
+        return $this->getEntityManager()->getRepository(Country3166::class);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// REFERENCIELS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public function updateCountriesIso3166() :void
+    {
+        $referencielFilePath = realpath($this->getOscarConfigurationService()->getConfiguration('install.iso-3166'));
+        if( !$referencielFilePath ){
+            throw new OscarException("Fichier référenciel non-disponible");
+        }
+
+        $datas = json_decode(file_get_contents($referencielFilePath), true);
+        $exists = $this->getCountries3166Repository()->allKeyByAlpha2();
+        if( count($exists) ){
+            var_dump($exists);
+            die();
+        }
+
+        foreach ($datas as $data) {
+            // Création du pays
+            if( !array_key_exists($data['alpha2'], $exists) ){
+                $country = new Country3166();
+                $this->getEntityManager()->persist($country);
+                $country->setAlpha2($data['alpha2'])
+                    ->setAlpha3($data['alpha3'])
+                    ->setEn($data['en'])
+                    ->setFr($data['fr'])
+                    ->setNumeric(intval($data['numeric']));
+            }
+        }
+        $this->getEntityManager()->flush();
+    }
+
+    public function getCountriesIso366(): array
+    {
+        return $this->getCountries3166Repository()->getAll();
+    }
+
+    public function getCountriesIso366Labels(): array
+    {
+        return $this->getCountries3166Repository()->getAllForSelects();
     }
 }

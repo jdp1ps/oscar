@@ -404,9 +404,36 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->flashMessenger()->addSuccessMessage('Les référentiels PCRU ont été mis à jour');
                 $this->redirect()->toRoute('administration/accueil');
                 return [];
+
+            case "iso-3166-update":
+
+                return [];
         }
 
         return [];
+    }
+
+    public function paysIso3166Action()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+        $method = $this->getHttpXMethod();
+
+        if( $method == "POST" ){
+            if( $this->params()->fromPost('action') == 'update-countries-3166'){
+                $this->getOrganizationService()->updateCountriesIso3166();
+                $this->flashMessenger()->addSuccessMessage('Le référentiel des pays (ISO 3166) a bien été mis à jour');
+                $this->redirect()->toRoute('administration/accueil');
+                return [];
+            }
+            return $this->getResponseInternalError();
+        }
+
+        // Liste des pays
+        $countries = $this->getOrganizationService()->getCountriesIso366();
+        return [
+            'countries' => $countries
+        ];
     }
 
     public function disciplineAction()
