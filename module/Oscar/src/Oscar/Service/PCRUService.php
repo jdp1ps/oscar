@@ -460,13 +460,22 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $files;
     }
 
+    /**
+     * Retourne TRUE si des données en attente sont disponibles.
+     *
+     * @return bool
+     * @throws OscarException
+     */
     public function hasDownload()
     {
-        $path = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
-        //die($path);
-        return file_exists($path);
+        return file_exists($this->getOscarConfigurationService()->getPcruContratFile());
     }
 
+    /**
+     * Retourne TRUE si des données envoyées sont en attente d'un retour.
+     *
+     * @return bool
+     */
     public function hasUploadInProgress()
     {
         $path = $this->getOscarConfigurationService()->getPcruDirectoryForUploadEffective();
@@ -475,7 +484,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     public function upload(): void
     {
-
         if ($this->hasUploadInProgress()) {
             throw new OscarException("Une soumission PCRU est déjà en attente de traitement.");
         }
@@ -523,7 +531,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $marker_complete = 'DEPOT-PDF.OK';
         $marker_complete_tmp = '/tmp/' . $marker_complete;
         $marker_complete_remote = $remotePath . DIRECTORY_SEPARATOR . $marker_complete;
-
 
         $this->logPool("Connexion FTP...");
         $co = $this->ftpConnect();
@@ -616,7 +623,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             if (!@rename($dirWait, $dirEffective)) {
                 throw new OscarException("Error lors de la création du dossier de traitement après upload");
             }
-
         }
     }
 
