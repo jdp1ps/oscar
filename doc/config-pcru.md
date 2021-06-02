@@ -2,7 +2,7 @@
 
 Le module PCRU de Oscar permet d'automatiser la soumission des contrats de recherche depuis Oscar vers les systèmes PCRU.
 
-## Chargement des référenciels
+## Chargement des référentiels
 
 La qualification pour PCRU implique de compléter les informations sur la contrat de recherche avec de nouvelles données : 
 
@@ -10,7 +10,7 @@ La qualification pour PCRU implique de compléter les informations sur la contra
  - Pôle de compétitivité
  - Type de contrat
 
-Ces informations ont été ajoutées au modèle de données (optionnelles) mais implique de charger un référenciel fournit par la CNRS.
+Ces informations ont été ajoutées au modèle de données (optionnelles) mais implique de charger un référentiel fournit par la CNRS.
 
 Rendez-vous dans **Administration > Configuration et maintenance > Modules > PCRU** puis, cliquer sur *Mettre à jour les référentiels* 
 

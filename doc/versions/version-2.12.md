@@ -4,7 +4,7 @@
 
 ### MAJ Authentification
 
-L'une des librairies PHP utilisée par Oscar a évoluée et implique des changements mineurs dans la configuration. L'interêt principal de ce changement est de permettre l'authentification depuis plusieurs système d'authentification (Local/LDAP, CAS, Shibboleth).
+L'une des librairies PHP utilisée par Oscar a évoluée et implique des changements mineurs dans la configuration. L'intérêt principal de ce changement est de permettre l'authentification depuis plusieurs systèmes d'authentification (Local/LDAP, CAS, Shibboleth).
 
 
 ### Organisations : Nouveaux champs
@@ -16,6 +16,8 @@ Le modèle des organisations a été enrichi, les champs suivants ont été ajou
  - `labintel` : Numéro Labintel (CNRS)
  - `rnsr` : Numéro RNSR (Répertoire National des Structures de Recherche)
 
+![Fiche organisation](../images/organisation-nvo-champs.png)
+
 > Ces champs restent facultatifs dans la majorité des cas, mais un de ces champs est attendu par le module PCRU pour authentifier les partenaires
 
 
@@ -25,6 +27,8 @@ Les champs :
 
  - Source de financement
  - Pôle de compétitivité / Validé par le côle de compétitivité
+
+![Fiche organisation](../images/activity-nvo-champs.png)
 
 > Les listes proposent des sources fixes officielles (CNRS)
 
@@ -38,7 +42,7 @@ Le module PCRU permet d'automatiser l'extraction des données Oscar vers PCRU. I
 
 Si des informations sont manquantes, un message indiquera comment compléter les informations afin de rendre l'activité éligible à PCRU.
 
-Une fois les donnèes valides, vous pourrez rendre les données éligibles pour l'envoi automatique des informations en cliquant sur **Activer l'envoi PCRU**
+Une fois les données valides, vous pourrez rendre les données éligibles pour l'envoi automatique des informations en cliquant sur **Activer l'envoi PCRU**
 
 Vous pouvez également prévisualiser les documents générés en téléchargeant l'aperçu des fichiers générés
 
@@ -103,11 +107,20 @@ return array(
 );
 ```
 
-### référenciels
+### référentiels
 
-- **Pôles de compétitivité** : Le référenciel des pôles de compétitivité peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référenciel des pôles de compétitivité), le bouton **Actualiser** permet de charger automatiquement le référenciel.
+- **Pôles de compétitivité** : Le référentiel des pôles de compétitivité peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référentiel des pôles de compétitivité), le bouton **Actualiser** permet de charger automatiquement le référentiel.
 
- - **Source de financement** : Le référenciel des sources de financement peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référenciel des sources de financement), le bouton **Actualiser** permet de charger automatiquement le référenciel.
+ - **Source de financement** : Le référentiel des sources de financement peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référentiel des sources de financement), le bouton **Actualiser** permet de charger automatiquement le référentiel.
+
+![Référentiel PCRU](../images/referentiels.png)
+
+ - **Pays ISO** : Le référentiel des pays peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Pays, le bouton **Actualiser les pays** permet de charger automatiquement le référentiel.
+
+![Référentiel PAYS](../images/pays-iso.png)
+
+
+
 
 ### Activer PCRU
 
