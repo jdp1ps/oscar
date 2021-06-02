@@ -4,58 +4,8 @@
 
 ### MAJ Authentification
 
-L'une des librairies PHP utilisée par Oscar a évoluée et implique des changements mineurs dans la configuration.
+L'une des librairies PHP utilisée par Oscar a évoluée et implique des changements mineurs dans la configuration. L'interêt principal de ce changement est de permettre l'authentification depuis plusieurs système d'authentification (Local/LDAP, CAS, Shibboleth).
 
-Il faut maintenant spécifier une clef par mode d'authentification proposée : 
-
- - local/ldap
- - CAS
- - Shiboleth
-
-```php
-<?php
-// config/autoload/local.php
-$settings = array(
-    // Authentification via LDAP/BDD
-    'local' => [
-        'order' => 2,
-        'enabled' => true,
-        'db' => [
-            'enabled' => true,
-        ],
-        'ldap' => [
-            'enabled' => false,
-        ],
-    ],
-    
-    // CAS
-    'cas' => [
-        'order' => 1,
-        'enabled' => true,
-        'connection' => [
-            'default' => [
-                'params' => [
-                    'hostname' => 'host.domain.fr',
-                    'port'     => 443,
-                    'version'  => "2.0",
-                    'uri'      => "",
-                    'debug'    => false,
-                ],
-            ],
-        ]
-    ],   
-
-    // Usurpation (DEV/Préprod)
-    'usurpation_allowed_usernames' => array('bouvry', 'turbout'),
-);
-
-/**
- * You do not need to edit below this line
- */
-return array(
-    'unicaen-auth' => $settings,
-);
-```
 
 ### Organisations : Nouveaux champs
 
@@ -92,6 +42,8 @@ Une fois les donnèes valides, vous pourrez rendre les données éligibles pour 
 
 Vous pouvez également prévisualiser les documents générés en téléchargeant l'aperçu des fichiers générés
 
+> Une évolution future permettra de compléter/préciser certaines informations à cette étape.
+
 ### Gestion PCRU
 
 Un écran centralisé permet de visualiser les données PCRU ainsi que leur état.
@@ -102,9 +54,54 @@ Un écran centralisé permet de visualiser les données PCRU ainsi que leur éta
 
 ## Mise en place technique
 
-Vous pouvez activer le module PCRU depuis l'interface d'administration (Administration > Module > PCRU > Configurer)
+Commencez par appliquer la procédure de mise à jour classique : 
+[Procédure de mise à jour Oscar](../update.md)
 
-![Liste de contrôle PCRU](../images/pcru-ftp.png)
+### Configuration authentification
+
+Vous devez modifier le fichier **config/autoload/local.php**
+
+```php
+<?php
+// config/autoload/local.php
+$settings = array(
+    // Authentification via LDAP/BDD
+    'local' => [
+        'order' => 2,
+        'enabled' => true,
+        'db' => [
+            'enabled' => true,
+        ],
+        'ldap' => [
+            'enabled' => false,
+        ],
+    ],
+    
+    // CAS
+    'cas' => [
+        'order' => 1,
+        'enabled' => false,
+        'connection' => [
+            'default' => [
+                'params' => [
+                    'hostname' => 'host.domain.fr',
+                    'port'     => 443,
+                    'version'  => "2.0",
+                    'uri'      => "",
+                    'debug'    => false,
+                ],
+            ],
+        ]
+    ]
+);
+
+/**
+ * You do not need to edit below this line
+ */
+return array(
+    'unicaen-auth' => $settings,
+);
+```
 
 ### référenciels
 
@@ -112,7 +109,13 @@ Vous pouvez activer le module PCRU depuis l'interface d'administration (Administ
 
  - **Source de financement** : Le référenciel des sources de financement peut être actualisé automatiquement depuis l'interface (Configuration et maintenance > Nomenclatures > Référenciel des sources de financement), le bouton **Actualiser** permet de charger automatiquement le référenciel.
 
-### PCRU
+### Activer PCRU
+
+Vous pouvez activer le module PCRU depuis l'interface d'administration (Administration > Module > PCRU > Configurer)
+
+![Liste de contrôle PCRU](../images/pcru-ftp.png)
+
+### Détails PCRU
 
 Le module PCRU permet de gérer et d'automatiser les transmissions d'information avec PCRU.
 
