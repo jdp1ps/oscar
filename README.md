@@ -1,7 +1,7 @@
 # OSCAR 2.12 "Spartan" (Documentation technique)
 
 ### Version actuelle
-- **VERSION 2.12 "Spartan"** ([Note de version](doc/versions/version-2.11.md))
+- **VERSION 2.12 "Spartan"** ([Note de version](doc/versions/version-2.12.md))
   
 ### Version antérieurs
  - VERSION 2.11 "MacClane" ([Note de version](doc/versions/version-2.11.md))
