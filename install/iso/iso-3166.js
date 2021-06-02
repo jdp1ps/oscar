@@ -14,6 +14,10 @@ fs.readFile(__dirname + '/iso-3166-src.xml', function(err, data) {
             let alpha2 = tr.td[2]._.replace(/(\r\n|\n|\r)/gm, "").replace(/\s\s+/g, ' ').trim();
             let alpha3 = tr.td[3]._.replace(/(\r\n|\n|\r)/gm, "").replace(/\s\s+/g, ' ').trim();
             let numeric = tr.td[4]._.replace(/(\r\n|\n|\r)/gm, "").replace(/\s\s+/g, ' ').trim();
+
+            // Petit coup de propre
+            fr = fr.replace(/^(.*) \((la |La|l'|le|la|les)?\)\*?$/gm, '$1');
+
             output.push({
                 "en" : en,
                 "fr" : fr,
@@ -21,7 +25,6 @@ fs.readFile(__dirname + '/iso-3166-src.xml', function(err, data) {
                 "alpha3" : alpha3,
                 "numeric" : numeric
             })
-
         });
         console.log(JSON.stringify(output));
     });

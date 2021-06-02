@@ -651,16 +651,19 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         $datas = json_decode(file_get_contents($referencielFilePath), true);
         $exists = $this->getCountries3166Repository()->allKeyByAlpha2();
-        if( count($exists) ){
-            var_dump($exists);
-            die();
-        }
 
         foreach ($datas as $data) {
             // Création du pays
             if( !array_key_exists($data['alpha2'], $exists) ){
                 $country = new Country3166();
                 $this->getEntityManager()->persist($country);
+                $country->setAlpha2($data['alpha2'])
+                    ->setAlpha3($data['alpha3'])
+                    ->setEn($data['en'])
+                    ->setFr($data['fr'])
+                    ->setNumeric(intval($data['numeric']));
+            } else {
+                $country = $exists[$data['alpha2']];
                 $country->setAlpha2($data['alpha2'])
                     ->setAlpha3($data['alpha3'])
                     ->setEn($data['en'])
