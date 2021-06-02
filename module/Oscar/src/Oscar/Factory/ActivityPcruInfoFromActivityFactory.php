@@ -47,7 +47,7 @@ class ActivityPcruInfoFromActivityFactory
 
         // Intitulé du rôle "Laboratoire" pour PCRU
         $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
-        $rolePartnerToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_patner_role', 'Financeur');
+        $rolePartnerToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_partner_role', 'Financeur');
 
         // Donnèes trouvées
         $codeUniteLabintel = "";
@@ -76,7 +76,6 @@ class ActivityPcruInfoFromActivityFactory
                 $partners[] = $partner->getOrganization()->getCodePcru();
             }
         }
-
         if( $codeUniteLabintel == "" ){
             $activityPcruInfos->addError("Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL");
         }

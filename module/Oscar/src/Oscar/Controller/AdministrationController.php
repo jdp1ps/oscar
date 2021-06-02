@@ -403,7 +403,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->redirect()->toRoute('administration/accueil');
                 return [];
             default:
-                return $this->getResponseBadRequest();
+                //return $this->getResponseBadRequest();
         }
 
         return [];

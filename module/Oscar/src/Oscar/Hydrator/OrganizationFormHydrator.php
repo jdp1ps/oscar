@@ -45,6 +45,8 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setFullName($data['fullName']);
         $object->setLabintel($data['labintel']);
         $object->setRnsr($data['rnsr']);
+        $object->setDuns($data["duns"]);
+        $object->setTvaintra($data["tvaintra"]);
 
         $object->setDateStart(
             !$data['dateStart'] ? null : new \DateTime($data['dateStart'])
@@ -85,6 +87,10 @@ class OrganizationFormHydrator implements HydratorInterface
             'code' => $object->getCode(),
             'labintel' => $object->getLabintel(),
             'rnsr' => $object->getRnsr(),
+
+            'duns' => $object->getDuns(),
+            'tvaintra' => $object->getTvaintra(),
+
             'typeObj' => $object->getTypeObj() ? $object->getTypeObj()->getId() : null,
             'siret' => $object->getSiret(),
             'fullname' => $object->getFullName(),

@@ -233,16 +233,20 @@ class PCRUCvsFile
         /** @var ActivityPcruInfos $pcruInfo */
         foreach ($this->getEntries() as $pcruInfo){
             $codes = explode('|', $pcruInfo->getPartenaires());
+
             foreach ($codes as $code) {
-                if( !array_key_exists($code, $partenairesCodes) ){
-                    try {
-                        $partenairesCodes[$code] = $this->pcruService->getOrganizationByCodePCRU($code);
-                    } catch (NoResultException $e){
-                        throw new OscarException("Impossible de trouver les données pour le partenaire $code");
-                    } catch (NonUniqueResultException $e){
-                        throw new OscarException("Plusieurs organisations partagent un même code: $code");
-                    } catch (\Exception $e) {
-                        throw new OscarException("Un erreur est survenue la du chargement de l'organisations $code : " . $e->getMessage());
+                // TODO code PCRU
+                if ($code != '' ) {
+                    if( !array_key_exists($code, $partenairesCodes) ){
+                        try {
+                            $partenairesCodes[$code] = $this->pcruService->getOrganizationByCodePCRU($code);
+                        } catch (NoResultException $e){
+                            throw new OscarException("Impossible de trouver les données pour le partenaire $code");
+                        } catch (NonUniqueResultException $e){
+                            throw new OscarException("Plusieurs organisations partagent un même code: $code");
+                        } catch (\Exception $e) {
+                            throw new OscarException("Un erreur est survenue la du chargement de l'organisations $code : " . $e->getMessage());
+                        }
                     }
                 }
             }

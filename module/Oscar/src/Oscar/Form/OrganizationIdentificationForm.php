@@ -84,6 +84,20 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         ]);
         $this->add($labintel);
 
+        $duns = new Element\Text('duns');
+        $duns->setAttributes([
+            'class'       => 'form-control',
+            'placeholder'   => 'N°DUNS'
+        ]);
+        $this->add($duns);
+
+        $tvaintra = new Element\Text('tvaintra');
+        $tvaintra->setAttributes([
+            'class'       => 'form-control',
+            'placeholder'   => 'TVA Intracommunautaire'
+        ]);
+        $this->add($tvaintra);
+
         $rnsr = new Element\Text('rnsr');
         $rnsr->setAttributes([
             'class'       => 'form-control',
@@ -262,8 +276,6 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             'dateEnd'=> [
                 'required' => false,
             ],
-
-
         ];
     }
 }

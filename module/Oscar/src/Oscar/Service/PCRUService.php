@@ -288,20 +288,21 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     }
 
+    private $_logpool;
+
     public function logPool(string $message): void
     {
-        static $logpool = null;
-        if ($logpool == null) {
-            $logpool = fopen($this->getOscarConfigurationService()->getPcruLogPoolFile(), 'w');
+        if ($this->_logpool == null) {
+            $this->_logpool = fopen($this->getOscarConfigurationService()->getPcruLogPoolFile(), 'w');
         }
         $msg = sprintf("%s \t%s\n", date('Y-m-d h:i:s'), $message);
-        fwrite($logpool, $msg);
+        fwrite($this->_logpool, $msg);
     }
 
     public function __destruct()
     {
-        if ($logpool) {
-            fclose($logpool);
+        if ($this->_logpool) {
+            fclose($this->_logpool);
         }
     }
 
