@@ -59,7 +59,7 @@ return array(
 
 ### Organisations : Nouveaux champs
 
-Le modèle des organisations a été enrichi, les champs suivants ont été ajoutés : 
+Le modèle des organisations a été enrichi, les champs suivants ont été ajoutés dans le modèle des organisations (Connector inclus) : 
 
  - `duns` : Numéro DUNS, 
  - `tvaintra`  : TVA Intacommunautaire,
@@ -101,6 +101,10 @@ Un écran centralisé permet de visualiser les données PCRU ainsi que leur éta
 ---
 
 ## Mise en place technique
+
+Vous pouvez activer le module PCRU depuis l'interface d'administration (Administration > Module > PCRU > Configurer)
+
+![Liste de contrôle PCRU](../images/pcru-ftp.png)
 
 ### référenciels
 
