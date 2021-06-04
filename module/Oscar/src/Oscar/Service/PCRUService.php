@@ -369,6 +369,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             'datas' => $datas,
             'activity' => $json ? $activity->toArray() : $activity,
             'documentPath' => $documentPath,
+            'infos' => $pcruInfos,
             'errors' => $pcruInfos->getError(),
             'status' => $pcruInfos->getStatus()
         ];

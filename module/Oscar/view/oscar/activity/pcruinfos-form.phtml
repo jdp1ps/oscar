@@ -1,0 +1,437 @@
+<?php
+/**
+ * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
+ * @date: 16/10/15 13:41
+ * @copyright Certic (c) 2015
+ */
+?>
+<link rel="stylesheet" type="text/css"
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
+<div class="container">
+    <h1>
+        <?php if($activity->getProject()): ?>
+            <small class="text-light">
+                <i class="icon-cubes"></i>
+                <?= $activity->getProject() ?>
+            </small><br/>
+        <?php endif; ?>
+        <?php if( $activity->getId() ): ?>
+            <strong><i class="icon-cube"></i> <?= $activity->getLabel() ?></strong> (Modification)
+        <?php else: ?>
+            <strong><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></strong>
+        <?php endif; ?>
+    </h1>
+    <div class="form">
+        <h3>
+            <i class="icon-info-circled"></i>
+            <?= $this->translate("Informations") ?>
+        </h3>
+        <?= $this->form()->openTag($form->prepare()); ?>
+
+        <table class="table table-bordered card xs">
+            <thead>
+            <tr>
+                <th title="Numéro de colonne de le fichier d'export">N°</th>
+                <th>Champ PCRU</th>
+                <th>Géré</th>
+                <th>Valide</th>
+                <th>Valeur envoyée</th>
+                <th>Informations</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <th>1</th>
+                    <td>Objet</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('objet')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>2</th>
+                    <td>CodeUniteLabintel</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('codeunitelabintel')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>3</th>
+                    <td>SigleUnite</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('sigleunite')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>4</th>
+                    <td>NumContratTutelleGestionnaire</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('numcontrattutellegestionnaire')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>5</th>
+                    <td>Equipe</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('equipe')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>6</th>
+                    <td>TypeContrat</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('typecontrat')); ?></td>
+                </tr>
+
+                 <tr>
+                    <th>7</th>
+                    <td>Acronyme</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('acronyme')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>8</th>
+                    <td>ContratsAssocies</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('contratsassocies')); ?></td>
+                </tr>
+                <tr>
+                    <th>9</th>
+                    <td>ResponsableScientifique</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('responsablescientifique')); ?></td>
+                </tr>
+                <tr>
+                    <th>10</th>
+                    <td>EmployeurResponsableScientifique</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('employeurresponsablescientifique')); ?></td>
+                </tr>
+                <tr>
+                    <th>11</th>
+                    <td>CoordinateurConsortium</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('coordinateurconsortium')); ?></td>
+                </tr>
+                <tr>
+                    <th>12</th>
+                    <td>Partenaires</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('partenaires')); ?></td>
+                </tr>
+                <tr>
+                    <th>13</th>
+                    <td>PartenairePrincipal</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('partenaireprincipal')); ?></td>
+                </tr>
+                <tr>
+                    <th>14</th>
+                    <td>IdPartenairePrincipal</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('idpartenaireprincipal')); ?></td>
+                </tr>
+                <tr>
+                    <th>15</th>
+                    <td>SourceFinancement</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('sourcefinancement')); ?></td>
+                </tr>
+                <tr>
+                    <th>16</th>
+                    <td>LieuExecution</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('lieuexecution')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>17</th>
+                    <td>DateDerniereSignature</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('datedernieresignature')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>18</th>
+                    <td>Duree</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('duree')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>19</th>
+                    <td>DateDebut</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('datedebut')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>20</th>
+                    <td>DateFin</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('datefin')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>21</th>
+                    <td>MontantPercuUnite</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('montantpercuunite')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>22</th>
+                    <td>CoutTotalEtude</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('couttotaletude')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>23</th>
+                    <td>MontantTotal</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('montanttotal')); ?></td>
+                </tr>
+                <tr>
+                    <th>24</th>
+                    <td>DateDebut</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('datedebut')); ?></td>
+                </tr>
+                <tr>
+                    <th>25</th>
+                    <td>ValidePoleCompetivite</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('validepolecompetivite')); ?></td>
+                </tr>
+                <tr>
+                    <th>26</th>
+                    <td>Commentaires</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('commentaires')); ?></td>
+                </tr>
+                <tr>
+                    <th>27</th>
+                    <td>Pia</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('pia')); ?></td>
+                </tr>
+                <tr>
+                    <th>28</th>
+                    <td>Reference</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('reference')); ?></td>
+                </tr>
+                <tr>
+                    <th>29</th>
+                    <td>AccordCadre</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('accordcadre')); ?></td>
+                </tr>
+
+                <tr>
+                    <th>30</th>
+                    <td>Cifre</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('cifre')); ?></td>
+                </tr>
+                <tr>
+                    <th>31</th>
+                    <td>ChaireIndustrielle</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('chaireindustrielle')); ?></td>
+                </tr>
+                <tr>
+                    <th>32</th>
+                    <td>PresencePartenaireIndustriel</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formInput($form->get('presencepartenaireindustriel')); ?></td>
+                </tr>
+            </tbody>
+
+        </table>
+
+
+
+
+<?php /*
+        <?php if( $withOrganization ): ?>
+            <h3><?= $this->translate("Rôle de votre structure") ?></h3>
+            <?php if($errorRoles): ?>
+                <p class="alert alert-danger"><?= $errorRoles ?></p>
+            <?php endif; ?>
+            <p class="alert alert-info">
+                <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", count($organizations)) ?><br>
+            </p>
+            <?php foreach ($withOrganization as $org): ?>
+                <label for="organization[<?= $org->getId() ?>]"><?= $org ?></label>
+                <select name="roles[<?= $org->getId() ?>]" >
+                    <option value=""></option>
+                    <?php foreach ($organizationRoles as $id=>$roleOrganization): ?>
+                        <option value="<?= $id ?>"><?= $roleOrganization ?></option>
+                    <?php endforeach; ?>
+                </select>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <h3><?= $this->translate("Données administratives") ?></h3>
+
+        <div class="row">
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('codeEOTP'));?>
+                <?php echo $this->formInput($form->get('codeEOTP'));?>
+                <?php echo $this->formElementErrors($form->get('codeEOTP'), ["class" => "alert alert-danger"]); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('status'));?>
+                <?php echo $this->formSelect($form->get('status'));?>
+                <?php echo $this->formElementErrors($form->get('status')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php echo $this->formLabel($form->get('activityType'));?>
+                <?php echo $this->formSelect($form->get('activityType'));?>
+                <?php echo $this->formElementErrors($form->get('activityType')); ?>
+            </div>
+            <div class="col-md-3">
+                <?php if( !in_array('disciplines', $hidden)): ?>
+                    <?php echo $this->formLabel($form->get('disciplines'));?>
+                    <?php echo $this->formSelect($form->get('disciplines'));?>
+                    <?php echo $this->formElementErrors($form->get('disciplines')); ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <h3><?= $this->translate("Informations financières") ?></h3>
+        <div class="row">
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('financialImpact')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('amount')); ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('currency')); ?>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('tva')); ?>
+
+                <?= $this->formControlGroup($form->get('pcruPoleCompetitivite')); ?>
+                <?= $this->formControlGroup($form->get('pcruValidPoleCompetitivite')); ?>
+
+                <?= $this->formControlGroup($form->get('pcruSourceFinancement')); ?>
+            </div>
+            <div class="col-md-4">
+                <?php if( !in_array('fraisDeGestion', $hidden)): ?>
+
+                    <div><?php echo $this->formLabel($form->get('fraisDeGestion'));?></div>
+                    <div class="help-message">
+                        <i class="icon-help-circled"></i>
+                        Vous pouvez saisir un montant (ex 237.25) ou un pourcentage en ajoutant le symbole <strong>%</strong> (ex: 3.75%)
+                    </div>
+                    <?php echo $this->formInput($form->get('fraisDeGestion'));?>
+                    <?php echo $this->formElementErrors($form->get('fraisDeGestion')); ?>
+
+                    <?= $this->formControlGroup($form->get('fraisDeGestionPartHebergeur')); ?>
+                <?php endif; ?>
+            </div>
+            <div class="col-md-4">
+                <?= $this->formControlGroup($form->get('assietteSubventionnable')); ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $this->formControlGroup($form->get('noteFinanciere')); ?>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Dates clefs</h3>
+                <div><?php echo $this->formLabel($form->get('dateStart'));?></div>
+                <?php echo $this->formInput($form->get('dateStart'));?>
+                <?php echo $this->formElementErrors($form->get('dateStart')); ?>
+
+                <div><?php echo $this->formLabel($form->get('dateEnd'));?></div>
+                <?php echo $this->formInput($form->get('dateEnd')); ?>
+                <?php echo $this->formElementErrors($form->get('dateEnd')); ?>
+                <div><?php echo $this->formLabel($form->get('dateSigned'));?></div>
+                <?php echo $this->formInput($form->get('dateSigned')); ?>
+                <?php echo $this->formElementErrors($form->get('dateSigned')); ?>
+                <div><?php echo $this->formLabel($form->get('dateOpened'));?></div>
+                <?php echo $this->formInput($form->get('dateOpened'));?>
+                <?php echo $this->formElementErrors($form->get('dateOpened')); ?>
+            </div>
+            <div class="col-md-6">
+                <h3><?= $this->translate("Numérotation") ?></h3>
+                <?php echo $this->keyvalue($form->get('numbers'));?>
+                <?php echo $this->formElementErrors($form->get('numbers')); ?>
+            </div>
+        </div>
+
+        <?= $this->formHidden($form->get('id')); ?>
+        <div class="text-center">
+            <nav class="btn-group">
+                <a class="btn btn-default" href="javascript:history.back()">
+                    <i class="icon-angle-left"></i>
+                    Retour
+                </a>
+                <button class="btn btn-primary" type="submit">
+                    <i class="icon-floppy"></i>
+                    <?= $this->translate("Enregistrer") ?></button>
+            </nav>
+        </div>
+        </datalist>
+ /******/ ?>
+        <?= $this->form()->closeTag() ?>
+    </div>
+    <hr>
+</div>
+<script>
+    Initer.ready(function(){
+        require(['select2'], function(){
+            $('[name="activityType"], .select2').select2();
+        });
+
+        require(['Keyvalue'], function(KeyValue){
+            console.log(KeyValue);
+        });
+    })
+</script>

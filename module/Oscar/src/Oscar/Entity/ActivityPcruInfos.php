@@ -786,6 +786,11 @@ class ActivityPcruInfos
         return $this->dateDerniereSignature;
     }
 
+    public function getDateDerniereSignatureStr() :string
+    {
+        return $this->getDateDerniereSignature() ? $this->getDateDerniereSignature()->format('Y-m-d') : "";
+    }
+
     /**
      * @param \DateTime $dateDerniereSignature
      */
@@ -820,6 +825,11 @@ class ActivityPcruInfos
         return $this->dateDebut;
     }
 
+    public function getDateDebutStr() :string
+    {
+        return $this->getDateDebut() ? $this->getDateDebut()->format('Y-m-d') : "";
+    }
+
     /**
      * @param \DateTime $dateDebut
      */
@@ -835,6 +845,11 @@ class ActivityPcruInfos
     public function getDateFin()
     {
         return $this->dateFin;
+    }
+
+    public function getDateFinStr() :string
+    {
+        return $this->getDateFin() ? $this->getDateFin()->format('Y-m-d') : "";
     }
 
     /**

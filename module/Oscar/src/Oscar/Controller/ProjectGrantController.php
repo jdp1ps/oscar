@@ -38,6 +38,7 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
+use Oscar\Form\ActivityInfosPcruForm;
 use Oscar\Form\PcruInfosForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
@@ -47,6 +48,7 @@ use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Hydrator\ActivityInfosPCRUFormHydrator;
 use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
@@ -903,7 +905,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
         $this->getNotificationService()->purgeNotificationsActivity($entity);
         $this->getNotificationService()->generateNotificationsForActivity($entity);
-        // die("ICI");
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
         return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
     }
@@ -2848,6 +2849,21 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
+
+        if( $this->params()->fromQuery("a") == "beta" ){
+            $form = new ActivityInfosPcruForm();
+            $form->setHydrator(new ActivityInfosPCRUFormHydrator());
+            $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+            $form->init();
+            $form->bind($preview['infos']);
+
+            $preview['form'] = $form;
+            $preview['activity'] = $activity;
+            $view = new ViewModel($preview);
+            $view->setTemplate('oscar/activity/pcruinfos-form.phtml');
+
+            return $view;
+        }
 
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
