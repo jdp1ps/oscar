@@ -21,6 +21,10 @@
             <strong><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></strong>
         <?php endif; ?>
     </h1>
+
+    <pre>
+        <?php var_dump($headers) ?>
+    </pre>
     <div class="form">
         <h3>
             <i class="icon-info-circled"></i>
@@ -47,6 +51,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('objet')); ?></td>
+                    <td><?= $headers['Objet'] == 'off' ? 'Non géré' : $headers['Objet']  ?></td>
                 </tr>
 
                 <tr>
@@ -55,6 +60,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('codeunitelabintel')); ?></td>
+                    <td><?= $headers['CodeUniteLabintel'] == 'off' ? 'Non géré' : $headers['CodeUniteLabintel']  ?></td>
                 </tr>
 
                 <tr>
@@ -63,6 +69,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('sigleunite')); ?></td>
+                    <td><?= $headers['SigleUnite'] == 'off' ? 'Non géré' : $headers['SigleUnite']  ?></td>
                 </tr>
 
                 <tr>
@@ -71,6 +78,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('numcontrattutellegestionnaire')); ?></td>
+                    <td><?= $headers['NumContratTutelleGestionnaire'] == 'off' ? 'Non géré' : $headers['NumContratTutelleGestionnaire']  ?></td>
                 </tr>
 
                 <tr>
@@ -79,6 +87,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('equipe')); ?></td>
+                    <td><?= $headers['Equipe'] == 'off' ? 'Non géré' : $headers['Equipe']  ?></td>
                 </tr>
 
                 <tr>
@@ -86,7 +95,8 @@
                     <td>TypeContrat</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('typecontrat')); ?></td>
+                    <td><?= $this->formSelect($form->get('typecontrat')); ?></td>
+                    <td><?= $headers['TypeContrat'] == 'off' ? 'Non géré' : $headers['TypeContrat']  ?></td>
                 </tr>
 
                  <tr>
@@ -95,6 +105,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('acronyme')); ?></td>
+                     <td><?= $headers['Acronyme'] == 'off' ? 'Non géré' : $headers['Acronyme']  ?></td>
                 </tr>
 
                 <tr>
@@ -103,13 +114,15 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('contratsassocies')); ?></td>
+                    <td><?= $headers['ContratsAssocies'] == 'off' ? 'Non géré' : $headers['ContratsAssocies']  ?></td>
                 </tr>
                 <tr>
                     <th>9</th>
                     <td>ResponsableScientifique</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('responsablescientifique')); ?></td>
+                    <td><?= $this->formSelect($form->get('responsablescientifique')); ?></td>
+                    <td><?= $headers['ResponsableScientifique'] == 'off' ? 'Non géré' : $headers['ResponsableScientifique']  ?></td>
                 </tr>
                 <tr>
                     <th>10</th>
@@ -117,6 +130,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('employeurresponsablescientifique')); ?></td>
+                    <td><?= $headers['EmployeurResponsableScientifique'] == 'off' ? 'Non géré' : $headers['EmployeurResponsableScientifique']  ?></td>
                 </tr>
                 <tr>
                     <th>11</th>
@@ -124,6 +138,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('coordinateurconsortium')); ?></td>
+                    <td><?= $headers['CoordinateurConsortium'] == 'off' ? 'Non géré' : $headers['CoordinateurConsortium']  ?></td>
                 </tr>
                 <tr>
                     <th>12</th>
@@ -131,13 +146,15 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('partenaires')); ?></td>
+                    <td><?= $headers['Partenaires'] == 'off' ? 'Non géré' : $headers['Partenaires']  ?></td>
                 </tr>
                 <tr>
                     <th>13</th>
                     <td>PartenairePrincipal</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('partenaireprincipal')); ?></td>
+                    <td><?= $this->formSelect($form->get('partenaireprincipal')); ?></td>
+                    <td><?= $headers['PartenairePrincipal'] == 'off' ? 'Non géré' : $headers['PartenairePrincipal']  ?></td>
                 </tr>
                 <tr>
                     <th>14</th>
@@ -145,13 +162,17 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('idpartenaireprincipal')); ?></td>
+                    <td><?= $headers['IdPartenairePrincipal'] == 'off' ? 'Non géré' : $headers['IdPartenairePrincipal']  ?></td>
                 </tr>
                 <tr>
                     <th>15</th>
                     <td>SourceFinancement</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('sourcefinancement')); ?></td>
+                    <td>
+                        <?= $this->formSelect($form->get('sourcefinancement')); ?>
+                    </td>
+                    <td><?= $headers['SourceFinancement'] == 'off' ? 'Non géré' : $headers['SourceFinancement']  ?></td>
                 </tr>
                 <tr>
                     <th>16</th>
@@ -159,6 +180,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('lieuexecution')); ?></td>
+                    <td><?= $headers['LieuExecution'] == 'off' ? 'Non géré' : $headers['LieuExecution']  ?></td>
                 </tr>
 
                 <tr>
@@ -167,6 +189,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('datedernieresignature')); ?></td>
+                    <td><?= $headers['DateDerniereSignature'] == 'off' ? 'Non géré' : $headers['DateDerniereSignature']  ?></td>
                 </tr>
 
                 <tr>
@@ -175,6 +198,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('duree')); ?></td>
+                    <td><?= $headers['Duree'] == 'off' ? 'Non géré' : $headers['Duree']  ?></td>
                 </tr>
 
                 <tr>
@@ -183,6 +207,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
+                    <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
                 </tr>
 
                 <tr>
@@ -191,6 +216,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('datefin')); ?></td>
+                    <td><?= $headers['DateFin'] == 'off' ? 'Non géré' : $headers['DateFin']  ?></td>
                 </tr>
 
                 <tr>
@@ -199,6 +225,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('montantpercuunite')); ?></td>
+                    <td><?= $headers['MontantPercuUnite'] == 'off' ? 'Non géré' : $headers['MontantPercuUnite']  ?></td>
                 </tr>
 
                 <tr>
@@ -207,6 +234,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('couttotaletude')); ?></td>
+                    <td><?= $headers['CoutTotalEtude'] == 'off' ? 'Non géré' : $headers['CoutTotalEtude']  ?></td>
                 </tr>
 
                 <tr>
@@ -215,6 +243,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('montanttotal')); ?></td>
+                    <td><?= $headers['MontantTotal'] == 'off' ? 'Non géré' : $headers['MontantTotal']  ?></td>
                 </tr>
                 <tr>
                     <th>24</th>
@@ -222,27 +251,39 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
+                    <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
+                </tr>
+                <tr>
+                    <th>25</th>
+                    <td>PoleCompetivite</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td>VALID ?</td>
+                    <td><?= $this->formSelect($form->get('polecompetivite')); ?></td>
+                    <td><?= $headers['PoleCompetivite'] == 'off' ? 'Non géré' : $headers['PoleCompetivite']  ?></td>
                 </tr>
                 <tr>
                     <th>25</th>
                     <td>ValidePoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('validepolecompetivite')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('validepolecompetivite')); ?></td>
+                    <td><?= $headers['ValidePoleCompetivite'] == 'off' ? 'Non géré' : $headers['ValidePoleCompetivite']  ?></td>
                 </tr>
                 <tr>
                     <th>26</th>
                     <td>Commentaires</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('commentaires')); ?></td>
+                    <td><?= $this->formTextarea($form->get('commentaires')); ?></td>
+                    <td><?= $headers['Commentaires'] == 'off' ? 'Non géré' : $headers['Commentaires']  ?></td>
                 </tr>
                 <tr>
                     <th>27</th>
                     <td>Pia</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('pia')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('pia')); ?></td>
+                    <td><small>Est PIA ?</small></td>
                 </tr>
                 <tr>
                     <th>28</th>
@@ -250,13 +291,15 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('reference')); ?></td>
+                    <td><?= $headers['Reference'] == 'off' ? 'Non géré' : $headers['Reference']  ?></td>
                 </tr>
                 <tr>
                     <th>29</th>
                     <td>AccordCadre</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('accordcadre')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('accordcadre')); ?></td>
+                    <td><?= $headers['AccordCadre'] == 'off' ? 'Non géré' : $headers['AccordCadre']  ?></td>
                 </tr>
 
                 <tr>
@@ -264,7 +307,8 @@
                     <td>Cifre</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('cifre')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('cifre')); ?></td>
+                    <td><?= $headers['Cifre'] == 'off' ? 'Non géré' : $headers['Cifre']  ?></td>
                 </tr>
                 <tr>
                     <th>31</th>
@@ -272,13 +316,15 @@
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
                     <td><?= $this->formInput($form->get('chaireindustrielle')); ?></td>
+                    <td><?= $headers['ChaireIndustrielle'] == 'off' ? 'Non géré' : $headers['ChaireIndustrielle']  ?></td>
                 </tr>
                 <tr>
                     <th>32</th>
                     <td>PresencePartenaireIndustriel</td>
                     <td><i class="icon-ok-circled"></td>
                     <td>VALID ?</td>
-                    <td><?= $this->formInput($form->get('presencepartenaireindustriel')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('presencepartenaireindustriel')); ?></td>
+                    <td><?= $headers['PresencePartenaireIndustriel'] == 'off' ? 'Non géré' : $headers['PresencePartenaireIndustriel']  ?></td>
                 </tr>
             </tbody>
 
@@ -287,139 +333,6 @@
 
 
 
-<?php /*
-        <?php if( $withOrganization ): ?>
-            <h3><?= $this->translate("Rôle de votre structure") ?></h3>
-            <?php if($errorRoles): ?>
-                <p class="alert alert-danger"><?= $errorRoles ?></p>
-            <?php endif; ?>
-            <p class="alert alert-info">
-                <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", count($organizations)) ?><br>
-            </p>
-            <?php foreach ($withOrganization as $org): ?>
-                <label for="organization[<?= $org->getId() ?>]"><?= $org ?></label>
-                <select name="roles[<?= $org->getId() ?>]" >
-                    <option value=""></option>
-                    <?php foreach ($organizationRoles as $id=>$roleOrganization): ?>
-                        <option value="<?= $id ?>"><?= $roleOrganization ?></option>
-                    <?php endforeach; ?>
-                </select>
-            <?php endforeach; ?>
-        <?php endif; ?>
-
-        <h3><?= $this->translate("Données administratives") ?></h3>
-
-        <div class="row">
-            <div class="col-md-3">
-                <?php echo $this->formLabel($form->get('codeEOTP'));?>
-                <?php echo $this->formInput($form->get('codeEOTP'));?>
-                <?php echo $this->formElementErrors($form->get('codeEOTP'), ["class" => "alert alert-danger"]); ?>
-            </div>
-            <div class="col-md-3">
-                <?php echo $this->formLabel($form->get('status'));?>
-                <?php echo $this->formSelect($form->get('status'));?>
-                <?php echo $this->formElementErrors($form->get('status')); ?>
-            </div>
-            <div class="col-md-3">
-                <?php echo $this->formLabel($form->get('activityType'));?>
-                <?php echo $this->formSelect($form->get('activityType'));?>
-                <?php echo $this->formElementErrors($form->get('activityType')); ?>
-            </div>
-            <div class="col-md-3">
-                <?php if( !in_array('disciplines', $hidden)): ?>
-                    <?php echo $this->formLabel($form->get('disciplines'));?>
-                    <?php echo $this->formSelect($form->get('disciplines'));?>
-                    <?php echo $this->formElementErrors($form->get('disciplines')); ?>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <h3><?= $this->translate("Informations financières") ?></h3>
-        <div class="row">
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('financialImpact')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('amount')); ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('currency')); ?>
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('tva')); ?>
-
-                <?= $this->formControlGroup($form->get('pcruPoleCompetitivite')); ?>
-                <?= $this->formControlGroup($form->get('pcruValidPoleCompetitivite')); ?>
-
-                <?= $this->formControlGroup($form->get('pcruSourceFinancement')); ?>
-            </div>
-            <div class="col-md-4">
-                <?php if( !in_array('fraisDeGestion', $hidden)): ?>
-
-                    <div><?php echo $this->formLabel($form->get('fraisDeGestion'));?></div>
-                    <div class="help-message">
-                        <i class="icon-help-circled"></i>
-                        Vous pouvez saisir un montant (ex 237.25) ou un pourcentage en ajoutant le symbole <strong>%</strong> (ex: 3.75%)
-                    </div>
-                    <?php echo $this->formInput($form->get('fraisDeGestion'));?>
-                    <?php echo $this->formElementErrors($form->get('fraisDeGestion')); ?>
-
-                    <?= $this->formControlGroup($form->get('fraisDeGestionPartHebergeur')); ?>
-                <?php endif; ?>
-            </div>
-            <div class="col-md-4">
-                <?= $this->formControlGroup($form->get('assietteSubventionnable')); ?>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <?= $this->formControlGroup($form->get('noteFinanciere')); ?>
-            </div>
-        </div>
-
-
-
-        <div class="row">
-            <div class="col-md-6">
-                <h3>Dates clefs</h3>
-                <div><?php echo $this->formLabel($form->get('dateStart'));?></div>
-                <?php echo $this->formInput($form->get('dateStart'));?>
-                <?php echo $this->formElementErrors($form->get('dateStart')); ?>
-
-                <div><?php echo $this->formLabel($form->get('dateEnd'));?></div>
-                <?php echo $this->formInput($form->get('dateEnd')); ?>
-                <?php echo $this->formElementErrors($form->get('dateEnd')); ?>
-                <div><?php echo $this->formLabel($form->get('dateSigned'));?></div>
-                <?php echo $this->formInput($form->get('dateSigned')); ?>
-                <?php echo $this->formElementErrors($form->get('dateSigned')); ?>
-                <div><?php echo $this->formLabel($form->get('dateOpened'));?></div>
-                <?php echo $this->formInput($form->get('dateOpened'));?>
-                <?php echo $this->formElementErrors($form->get('dateOpened')); ?>
-            </div>
-            <div class="col-md-6">
-                <h3><?= $this->translate("Numérotation") ?></h3>
-                <?php echo $this->keyvalue($form->get('numbers'));?>
-                <?php echo $this->formElementErrors($form->get('numbers')); ?>
-            </div>
-        </div>
-
-        <?= $this->formHidden($form->get('id')); ?>
-        <div class="text-center">
-            <nav class="btn-group">
-                <a class="btn btn-default" href="javascript:history.back()">
-                    <i class="icon-angle-left"></i>
-                    Retour
-                </a>
-                <button class="btn btn-primary" type="submit">
-                    <i class="icon-floppy"></i>
-                    <?= $this->translate("Enregistrer") ?></button>
-            </nav>
-        </div>
-        </datalist>
- /******/ ?>
         <?= $this->form()->closeTag() ?>
     </div>
     <hr>

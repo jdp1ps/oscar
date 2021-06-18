@@ -29,5 +29,8 @@
     "mocha": "^8.2.1",
     "poi": "^9.6.13",
     "sass-loader": "^7.1.0"
+  },
+  "dependencies": {
+    "xml2js": "^0.4.23"
   }
 }

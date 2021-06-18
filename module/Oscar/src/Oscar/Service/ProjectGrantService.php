@@ -2005,6 +2005,22 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractSelect() :array
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        $out = [];
+        foreach ($repository->getFlatArrayLabel() as $type) {
+            $out[$type] = $type;
+        }
+        return $out;
+    }
+
+    /**
      * Retourne la liste des pôles de compétitivité PCRU certified chargé en BDD.
      * @return PcruPoleCompetitivite[]
      */

@@ -2851,8 +2851,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getActivityFromRoute();
 
         if( $this->params()->fromQuery("a") == "beta" ){
-            $form = new ActivityInfosPcruForm();
-            $form->setHydrator(new ActivityInfosPCRUFormHydrator());
+            $form = new ActivityInfosPcruForm($this->getProjectGrantService(), $activity);
             $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
             $form->init();
             $form->bind($preview['infos']);

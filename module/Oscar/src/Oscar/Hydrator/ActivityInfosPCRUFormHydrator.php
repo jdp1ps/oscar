@@ -33,6 +33,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
         $object->setSigleUnite($data['sigleunite']);
         $object->setFullName($data['fullname']);
         $object->setNumContratTutelleGestionnaire($data['numcontrattutellegestionnaire']);
+        $object->setReference($data['reference']);
         $object->setEquipe($data['equipe']);
         $object->setTypeContrat($data["typecontrat"]);
         $object->setAcronyme($data["acronyme"]);
@@ -73,8 +74,9 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
             'codeunitelabintel' => $object->getCodeUniteLabintel(),
             'sigleunite' => $object->getSigleUnite(),
             'numcontrattutellegestionnaire' => $object->getNumContratTutelleGestionnaire(),
+            'reference' => $object->getReference(),
             'equipe' => $object->getEquipe(),
-            "typecontrat" => $object->getTypeContrat(),
+            "typecontrat" => $object->getTypeContrat() ? $object->getTypeContrat()->getLabel() : "",
             "acronyme" => $object->getAcronyme(),
             "contratsassocies" => $object->getContratsAssocies(),
             "responsablescientifique" => $object->getResponsableScientifique(),

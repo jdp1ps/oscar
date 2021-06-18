@@ -7,8 +7,10 @@ namespace Oscar\Service;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPcruInfosRepository;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Organization;
@@ -403,6 +405,42 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         fclose($buffer);
 
         return $content;
+    }
+
+    /**
+     * Récupération des partenaires éligibles PCRU.
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getActivityPartenaires(Activity $activity) :array
+    {
+        $out = [];
+        /** @var ActivityOrganization $org */
+        foreach ($activity->getOrganizationsDeep() as $org) {
+            $out[$org->getOrganization()->getCodePcru()] = $org->getOrganization()->__toString();
+        }
+
+        return $out;
+    }
+
+    /**
+     * Récupération des partenaires éligibles PCRU.
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getResponsableScientifiques(Activity $activity) :array
+    {
+        $roleStr = $this->getOscarConfigurationService()->getOptionalConfiguration('pcru_responsablescientifique', 'Responsable scientifique');
+        $out = [];
+        /** @var ActivityPerson $per */
+        foreach ($activity->getPersonsDeep() as $per) {
+            if( $per->getRoleObj()->getRoleId() == $roleStr )
+                $out[$per->getPerson()->getFullname()] = $per->getPerson()->getFullname();
+        }
+
+        return $out;
     }
 
     /**

@@ -80,6 +80,7 @@ class PcruTypeContractRepository extends EntityRepository
     public function getPcruContractForActivityTypeChained( ActivityType $activityType) : ?PcruTypeContract
     {
         $labelPcru = $this->getPcruContractByActivityType($activityType);
+
         if( $labelPcru == null ){
             $typeChain = $this->getEntityManager()->getRepository(ActivityType::class)->getChainFromActivityType($activityType);
             foreach ($typeChain as $type) {
@@ -89,6 +90,7 @@ class PcruTypeContractRepository extends EntityRepository
                 }
             }
         }
-        return null;
+
+        return $labelPcru;
     }
 }

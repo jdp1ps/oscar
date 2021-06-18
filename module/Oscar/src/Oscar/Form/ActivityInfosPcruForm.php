@@ -2,9 +2,11 @@
 
 namespace Oscar\Form;
 
+use Oscar\Entity\Activity;
 use Oscar\Hydrator\ActivityInfosPCRUFormHydrator;
 use Oscar\Hydrator\OrganizationFormHydrator;
 use Oscar\Service\OrganizationService;
+use Oscar\Service\ProjectGrantService;
 use Zend\Form\Element;
 use Zend\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
@@ -16,10 +18,14 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProviderInterface
 {
 
-    function __construct()
+    private $projectGrantService;
+    private $activity;
+
+    function __construct(ProjectGrantService $projectGrantService, Activity $activity)
     {
         parent::__construct('activityinfospcru');
-
+        $this->projectGrantService = $projectGrantService;
+        $this->activity = $activity;
     }
 
     public function init(){
@@ -30,6 +36,7 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
             'type'  => 'Text',
             'attributes'    => [
                 'class'       => 'form-control',
+                'readonly'  => "readonly"
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -69,6 +76,7 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
             'type'  => 'Text',
             'attributes'    => [
                 'class'       => 'form-control',
+                'readonly'  => "readonly"
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -90,16 +98,18 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
             )
         ));
 
+
         $this->add(array(
             'name'  => 'typecontrat',
-            'type'  => 'Text',
+            'type'  => 'Select',
             'attributes'    => [
                 'class'       => 'form-control',
             ],
             'options'   => array(
                 'label_attributes'  => [
                     'class' => 'form-label required'
-                ]
+                ],
+                'value_options' => $this->projectGrantService->getPcruTypeContractSelect()
             )
         ));
 
@@ -131,14 +141,15 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'responsablescientifique',
-            'type'  => 'Text',
+            'type'  => 'Select',
             'attributes'    => [
                 'class'       => 'form-control',
             ],
             'options'   => array(
                 'label_attributes'  => [
                     'class' => 'form-label required'
-                ]
+                ],
+                'value_options' => $this->projectGrantService->getPCRUService()->getResponsableScientifiques($this->activity)
             )
         ));
 
@@ -183,16 +194,18 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'partenaireprincipal',
-            'type'  => 'Text',
+            'type'  => 'Select',
             'attributes'    => [
                 'class'       => 'form-control',
             ],
             'options'   => array(
                 'label_attributes'  => [
                     'class' => 'form-label required'
-                ]
+                ],
+                'value_options' => $this->projectGrantService->getPCRUService()->getActivityPartenaires($this->activity)
             )
         ));
+
 
         $this->add(array(
             'name'  => 'idpartenaireprincipal',
@@ -209,11 +222,12 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'sourcefinancement',
-            'type'  => 'Text',
+            'type'  => 'Select',
             'attributes'    => [
                 'class'       => 'form-control',
             ],
             'options'   => array(
+                'value_options' => $this->projectGrantService->getPcruSourceFinancementSelect(),
                 'label_attributes'  => [
                     'class' => 'form-label required'
                 ]
@@ -338,10 +352,24 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
         ));
 
         $this->add(array(
-            'name'  => 'validepolecompetivite',
-            'type'  => 'Text',
+            'name'  => 'polecompetivite',
+            'type'  => 'Select',
             'attributes'    => [
-                'class'       => 'form-control',
+
+            ],
+            'options'   => array(
+                'label_attributes'  => [
+                    'class' => 'form-label required'
+                ],
+                'value_options' => $this->projectGrantService->getPcruPoleCompetitiviteSelect()
+            )
+        ));
+
+        $this->add(array(
+            'name'  => 'validepolecompetivite',
+            'type'  => 'Checkbox',
+            'attributes'    => [
+
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -365,9 +393,9 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'pia',
-            'type'  => 'Text',
+            'type'  => 'Checkbox',
             'attributes'    => [
-                'class'       => 'form-control',
+                'class'       => '',
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -381,6 +409,7 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
             'type'  => 'Text',
             'attributes'    => [
                 'class'       => 'form-control',
+                'readonly'  => "readonly"
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -391,9 +420,9 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'accordcadre',
-            'type'  => 'Text',
+            'type'  => 'Checkbox',
             'attributes'    => [
-                'class'       => 'form-control',
+
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -404,9 +433,9 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'cifre',
-            'type'  => 'Text',
+            'type'  => 'Checkbox',
             'attributes'    => [
-                'class'       => 'form-control',
+
             ],
             'options'   => array(
                 'label_attributes'  => [
@@ -430,9 +459,8 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'presencepartenaireindustriel',
-            'type'  => 'Text',
+            'type'  => 'Checkbox',
             'attributes'    => [
-                'class'       => 'form-control',
             ],
             'options'   => array(
                 'label_attributes'  => [
