@@ -6,17 +6,6 @@
  * drop this config file in it and change the values as you wish.
  */
 $settings = array(
-    /**
-     * Paramètres de connexion au serveur CAS :
-     * - pour désactiver l'authentification CAS, le tableau 'cas' doit être vide.
-     * - pour l'activer, renseigner les paramètres.
-     */
-    /**
-     * Authentification LDAP (compte établissement).
-     */
-    /**
-     * Authentification BDD (compte dédié à l'appli).
-     */
     'local' => [
         'order' => 2,
         'enabled' => true,
@@ -37,18 +26,13 @@ $settings = array(
         ],
     ],
 
-
     /**
      * Authentification via la fédération d'identité (Shibboleth).
      */
     'shib' => [
         'order' => 4,
         'enabled' => false,
-        'description' =>
-            "Cliquez sur le bouton ci-dessous pour accéder à l'authentification via la fédération d'identité. " .
-            "<strong>NB: Vous devrez utiliser votre compte " .
-            "&laquo; <a href='http://vie-etudiante.unicaen.fr/vie-numerique/etupass/'>etupass</a> &raquo; " .
-            "pour vous authentifier...</strong>",
+        'description' => "Authentification via la fédération d'identité.",
 
         /**
          * URL de déconnexion.
@@ -127,13 +111,7 @@ $settings = array(
         ]
     ],
 
-    /**
-     * Identifiants de connexion LDAP autorisés à faire de l'usurpation d'identité.
-     * NB: à réserver exclusivement aux tests.
-     */
-    'usurpation_allowed_usernames' => array('bouvry', 'turbout'),
-    // Champ utilisé pour l'autentification (côté LDAP)
-    //'ldap_username' => 'supanaliaslogin',
+
     /**
      * Flag indiquant si l'utilisateur authenitifié avec succès via l'annuaire LDAP doit
      * être enregistré/mis à jour dans la table des utilisateurs de l'appli.
