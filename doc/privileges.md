@@ -22,7 +22,7 @@ Une procédure automatique existe pour effectuer la mise à jour des privilèges
 
 1. Se connecter à la machine Oscar en SSH
 2. Se rendre à la racine de oscar
-3. Taper la commande `php public/index.php oscar patch checkPrivilegesJSON`
+3. Taper la commande `php bin/oscar.php patch checkPrivilegesJSON`
 
 L'invite en ligne de commande vous indiquera les opérations qui seront réalisées
 
@@ -110,7 +110,7 @@ Puis dans le fichier `install/privileges.json`
 
 Enfin lancer la commande suivante pour mettre à jour la base de données : 
 
-`php public/index.php oscar patch checkprivilegesJSON`
+`php bin/oscar.php check:privileges`
 
 ```
 Le(s) privilège(s) suivant(s) vont/va être ajouté(s) ? 

@@ -44,7 +44,7 @@ return array(
 
 Un fichier d'exemple `config/autoload/local.php.dist` est disponible dans le dépôt. Ce fichier propose les paramètres obligatoires ainsi que ceux facultatifs (commentés).
 
-Vous pouvez utiliser la commande `php public/index.php oscar test:config` pour tester la conformité de votre configuration. Ce test, sans être exaustif, vous alertera si des paramètres sont manquants ou mal configurés.
+Vous pouvez utiliser la commande `php bin/oscar.php test:config` pour tester la conformité de votre configuration. Ce test, sans être exaustif, vous alertera si des paramètres sont manquants ou mal configurés.
 
 
 ## *oscar.paths* Emplacements des documents administratifs et activités
