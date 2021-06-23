@@ -29,7 +29,7 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
     }
 
     public function init(){
-        $this->setHydrator(new ActivityInfosPCRUFormHydrator());
+        $this->setHydrator(new ActivityInfosPCRUFormHydrator($this->projectGrantService));
 
         $this->add(array(
             'name'  => 'objet',
@@ -168,9 +168,9 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
         $this->add(array(
             'name'  => 'coordinateurconsortium',
-            'type'  => 'Text',
+            'type'  => 'Checkbox',
             'attributes'    => [
-                'class'       => 'form-control',
+                'class'       => 'checkbox',
             ],
             'options'   => array(
                 'label_attributes'  => [

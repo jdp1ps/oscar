@@ -10,9 +10,7 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\IConnectedRepository;
-use Oscar\Import\Activity\FieldStrategy\FieldImportOrganizationStrategy;
-use Oscar\Import\Data\DataExtractorOrganization;
+
 
 class PcruSourceFinancementRepository extends EntityRepository
 {
@@ -22,5 +20,14 @@ class PcruSourceFinancementRepository extends EntityRepository
         $query->select('psf.label');
         $entities = $query->getQuery()->getResult();
         return array_map('current', $entities);
+    }
+
+    /**
+     * @param string $label
+     * @return PcruSourceFinancement|null
+     */
+    public function getByLabel( string $label ): ?PcruSourceFinancement
+    {
+        return $this->findOneByLabel($label);
     }
 }

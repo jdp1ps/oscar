@@ -99,9 +99,9 @@ class ActivityPcruInfos
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", name="cordinateurconsortium")
      */
-    private $cordinateurConsortium = false;
+    private $coordinateurConsortium = false;
 
     /**
      * @var string
@@ -145,8 +145,8 @@ class ActivityPcruInfos
 
 
     /**
-     * @var float Durée en mois (min 0.5)
-     * @ORM\Column(type="float", nullable=true)
+     * @var string Durée en mois (min 0.5)
+     * @ORM\Column(type="string", nullable=true)
      */
     private $duree;
 
@@ -163,22 +163,22 @@ class ActivityPcruInfos
     private $dateFin;
 
     /**
-     * @var float Montant reçu (par l'unité)
-     * @ORM\Column(type="float", nullable=true)
+     * @var string Montant reçu (par l'unité)
+     * @ORM\Column(type="string", nullable=true)
      */
-    private $montantPercuUnite = 0.0;
+    private $montantPercuUnite = "";
 
     /**
-     * @var float Coût/Frais
-     * @ORM\Column(type="float", nullable=true)
+     * @var string Coût/Frais
+     * @ORM\Column(type="string", nullable=true)
      */
-    private $coutTotalEtude = 0.0;
+    private $coutTotalEtude = "";
 
     /**
-     * @var float Montant total (du contrat)
-     * @ORM\Column(type="float", nullable=true)
+     * @var string Montant total (du contrat)
+     * @ORM\Column(type="string", nullable=true)
      */
-    private $montantTotal = 0.0;
+    private $montantTotal = "";
 
     /**
      * @var boolean Validé par le pôle de compétivité
@@ -294,7 +294,8 @@ class ActivityPcruInfos
         );
     }
 
-    public function toArray() :array {
+    public function toArray() :array
+    {
         $out = [];
         $out['Objet'] = $this->getObjet();
         $out['CodeUniteLabintel'] = $this->getCodeUniteLabintel();
@@ -306,7 +307,7 @@ class ActivityPcruInfos
         $out['ContratsAssocies'] = $this->getContratsAssocies();
         $out['ResponsableScientifique'] = $this->getResponsableScientifique();
         $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
-        $out['CoordinateurConsortium'] = $this->isCordinateurConsortium() ? 'True' : 'False';
+        $out['CoordinateurConsortium'] = $this->isCoordinateurConsortium() ? 'True' : 'False';
         $out['Partenaires'] = $this->getPartenaires();
         $out['PartenairePrincipal'] = "Part inconnu"; // TODO
         $out['IdPartenairePrincipal'] = $this->getIdPartenairePrincipal();
@@ -594,7 +595,7 @@ class ActivityPcruInfos
     /**
      * @return PcruTypeContract
      */
-    public function getTypeContrat()
+    public function getTypeContrat() :?PcruTypeContract
     {
         return $this->typeContrat;
     }
@@ -602,7 +603,7 @@ class ActivityPcruInfos
     /**
      * @param PcruTypeContract $typeContrat
      */
-    public function setTypeContrat($typeContrat): self
+    public function setTypeContrat( PcruTypeContract $typeContrat): self
     {
         $this->typeContrat = $typeContrat;
         return $this;
@@ -679,17 +680,17 @@ class ActivityPcruInfos
     /**
      * @return bool
      */
-    public function isCordinateurConsortium(): bool
+    public function isCoordinateurConsortium(): bool
     {
-        return $this->cordinateurConsortium;
+        return $this->coordinateurConsortium;
     }
 
     /**
-     * @param bool $cordinateurConsortium
+     * @param bool $coordinateurConsortium
      */
-    public function setCordinateurConsortium(bool $cordinateurConsortium): self
+    public function setCoordinateurConsortium(bool $coordinateurConsortium): self
     {
-        $this->cordinateurConsortium = $cordinateurConsortium;
+        $this->coordinateurConsortium = $coordinateurConsortium;
         return $this;
     }
 
@@ -801,7 +802,7 @@ class ActivityPcruInfos
     }
 
     /**
-     * @return float
+     * @return string
      */
     public function getDuree()
     {
@@ -809,7 +810,7 @@ class ActivityPcruInfos
     }
 
     /**
-     * @param float $duree
+     * @param string $duree
      */
     public function setDuree($duree): self
     {
@@ -862,51 +863,51 @@ class ActivityPcruInfos
     }
 
     /**
-     * @return float
+     * @return string
      */
-    public function getMontantPercuUnite(): float
+    public function getMontantPercuUnite(): string
     {
         return $this->montantPercuUnite;
     }
 
     /**
-     * @param float $montantPercuUnite
+     * @param string $montantPercuUnite
      */
-    public function setMontantPercuUnite(float $montantPercuUnite): self
+    public function setMontantPercuUnite(string $montantPercuUnite): self
     {
         $this->montantPercuUnite = $montantPercuUnite;
         return $this;
     }
 
     /**
-     * @return float
+     * @return string
      */
-    public function getCoutTotalEtude(): float
+    public function getCoutTotalEtude(): string
     {
         return $this->coutTotalEtude;
     }
 
     /**
-     * @param float $coutTotalEtude
+     * @param string $coutTotalEtude
      */
-    public function setCoutTotalEtude(float $coutTotalEtude): self
+    public function setCoutTotalEtude(string $coutTotalEtude): self
     {
         $this->coutTotalEtude = $coutTotalEtude;
         return $this;
     }
 
     /**
-     * @return float
+     * @return string
      */
-    public function getMontantTotal(): float
+    public function getMontantTotal(): string
     {
         return $this->montantTotal;
     }
 
     /**
-     * @param float $montantTotal
+     * @param string $montantTotal
      */
-    public function setMontantTotal(float $montantTotal): self
+    public function setMontantTotal(string $montantTotal): self
     {
         $this->montantTotal = $montantTotal;
         return $this;

@@ -22,9 +22,7 @@
         <?php endif; ?>
     </h1>
 
-    <pre>
-        <?php var_dump($headers) ?>
-    </pre>
+
     <div class="form">
         <h3>
             <i class="icon-info-circled"></i>
@@ -49,7 +47,7 @@
                     <th>1</th>
                     <td>Objet</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('objet')); ?></td>
                     <td><?= $this->formInput($form->get('objet')); ?></td>
                     <td><?= $headers['Objet'] == 'off' ? 'Non géré' : $headers['Objet']  ?></td>
                 </tr>
@@ -58,7 +56,7 @@
                     <th>2</th>
                     <td>CodeUniteLabintel</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('codeunitelabintel')); ?></td>
                     <td><?= $this->formInput($form->get('codeunitelabintel')); ?></td>
                     <td><?= $headers['CodeUniteLabintel'] == 'off' ? 'Non géré' : $headers['CodeUniteLabintel']  ?></td>
                 </tr>
@@ -67,7 +65,7 @@
                     <th>3</th>
                     <td>SigleUnite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('sigleunite')); ?></td>
                     <td><?= $this->formInput($form->get('sigleunite')); ?></td>
                     <td><?= $headers['SigleUnite'] == 'off' ? 'Non géré' : $headers['SigleUnite']  ?></td>
                 </tr>
@@ -76,7 +74,7 @@
                     <th>4</th>
                     <td>NumContratTutelleGestionnaire</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('numcontrattutellegestionnaire')); ?></td>
                     <td><?= $this->formInput($form->get('numcontrattutellegestionnaire')); ?></td>
                     <td><?= $headers['NumContratTutelleGestionnaire'] == 'off' ? 'Non géré' : $headers['NumContratTutelleGestionnaire']  ?></td>
                 </tr>
@@ -85,7 +83,7 @@
                     <th>5</th>
                     <td>Equipe</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('equipe')); ?></td>
                     <td><?= $this->formInput($form->get('equipe')); ?></td>
                     <td><?= $headers['Equipe'] == 'off' ? 'Non géré' : $headers['Equipe']  ?></td>
                 </tr>
@@ -94,7 +92,7 @@
                     <th>6</th>
                     <td>TypeContrat</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('typecontrat')); ?></td>
                     <td><?= $this->formSelect($form->get('typecontrat')); ?></td>
                     <td><?= $headers['TypeContrat'] == 'off' ? 'Non géré' : $headers['TypeContrat']  ?></td>
                 </tr>
@@ -103,7 +101,7 @@
                     <th>7</th>
                     <td>Acronyme</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                     <td><?= $this->formElementErrors($form->get('acronyme')); ?></td>
                     <td><?= $this->formInput($form->get('acronyme')); ?></td>
                      <td><?= $headers['Acronyme'] == 'off' ? 'Non géré' : $headers['Acronyme']  ?></td>
                 </tr>
@@ -112,7 +110,7 @@
                     <th>8</th>
                     <td>ContratsAssocies</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('contratsassocies')); ?></td>
                     <td><?= $this->formInput($form->get('contratsassocies')); ?></td>
                     <td><?= $headers['ContratsAssocies'] == 'off' ? 'Non géré' : $headers['ContratsAssocies']  ?></td>
                 </tr>
@@ -120,7 +118,7 @@
                     <th>9</th>
                     <td>ResponsableScientifique</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('responsablescientifique')); ?></td>
                     <td><?= $this->formSelect($form->get('responsablescientifique')); ?></td>
                     <td><?= $headers['ResponsableScientifique'] == 'off' ? 'Non géré' : $headers['ResponsableScientifique']  ?></td>
                 </tr>
@@ -128,23 +126,34 @@
                     <th>10</th>
                     <td>EmployeurResponsableScientifique</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('employeurresponsablescientifique')); ?></td>
                     <td><?= $this->formInput($form->get('employeurresponsablescientifique')); ?></td>
                     <td><?= $headers['EmployeurResponsableScientifique'] == 'off' ? 'Non géré' : $headers['EmployeurResponsableScientifique']  ?></td>
                 </tr>
+
+
                 <tr>
                     <th>11</th>
                     <td>CoordinateurConsortium</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('coordinateurconsortium')); ?></td>
                     <td><?= $this->formInput($form->get('coordinateurconsortium')); ?></td>
                     <td><?= $headers['CoordinateurConsortium'] == 'off' ? 'Non géré' : $headers['CoordinateurConsortium']  ?></td>
+                    <?php /*
+                    <th>11</th>
+                    <td>CoordinateurConsortium</td>
+                    <td><i class="icon-ok-circled"></td>
+                    <td><?= $this->formElementErrors($form->get('coordinateurconsortium')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('coordinateurconsortium')); ?></td>
+                    <td><?= $headers['CoordinateurConsortium'] == 'off' ? 'Non géré' : $headers['CoordinateurConsortium']  ?></td>
+                       */ ?>
                 </tr>
+
                 <tr>
                     <th>12</th>
                     <td>Partenaires</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('partenaires')); ?></td>
                     <td><?= $this->formInput($form->get('partenaires')); ?></td>
                     <td><?= $headers['Partenaires'] == 'off' ? 'Non géré' : $headers['Partenaires']  ?></td>
                 </tr>
@@ -152,7 +161,7 @@
                     <th>13</th>
                     <td>PartenairePrincipal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('partenaireprincipal')); ?></td>
                     <td><?= $this->formSelect($form->get('partenaireprincipal')); ?></td>
                     <td><?= $headers['PartenairePrincipal'] == 'off' ? 'Non géré' : $headers['PartenairePrincipal']  ?></td>
                 </tr>
@@ -160,7 +169,7 @@
                     <th>14</th>
                     <td>IdPartenairePrincipal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('idpartenaireprincipal')); ?></td>
                     <td><?= $this->formInput($form->get('idpartenaireprincipal')); ?></td>
                     <td><?= $headers['IdPartenairePrincipal'] == 'off' ? 'Non géré' : $headers['IdPartenairePrincipal']  ?></td>
                 </tr>
@@ -168,7 +177,7 @@
                     <th>15</th>
                     <td>SourceFinancement</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('sourcefinancement')); ?></td>
                     <td>
                         <?= $this->formSelect($form->get('sourcefinancement')); ?>
                     </td>
@@ -178,7 +187,7 @@
                     <th>16</th>
                     <td>LieuExecution</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('lieuexecution')); ?></td>
                     <td><?= $this->formInput($form->get('lieuexecution')); ?></td>
                     <td><?= $headers['LieuExecution'] == 'off' ? 'Non géré' : $headers['LieuExecution']  ?></td>
                 </tr>
@@ -187,7 +196,7 @@
                     <th>17</th>
                     <td>DateDerniereSignature</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('datedernieresignature')); ?></td>
                     <td><?= $this->formInput($form->get('datedernieresignature')); ?></td>
                     <td><?= $headers['DateDerniereSignature'] == 'off' ? 'Non géré' : $headers['DateDerniereSignature']  ?></td>
                 </tr>
@@ -196,7 +205,7 @@
                     <th>18</th>
                     <td>Duree</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('duree')); ?></td>
                     <td><?= $this->formInput($form->get('duree')); ?></td>
                     <td><?= $headers['Duree'] == 'off' ? 'Non géré' : $headers['Duree']  ?></td>
                 </tr>
@@ -205,7 +214,7 @@
                     <th>19</th>
                     <td>DateDebut</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('datedebut')); ?></td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
                     <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
                 </tr>
@@ -214,7 +223,7 @@
                     <th>20</th>
                     <td>DateFin</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('datefin')); ?></td>
                     <td><?= $this->formInput($form->get('datefin')); ?></td>
                     <td><?= $headers['DateFin'] == 'off' ? 'Non géré' : $headers['DateFin']  ?></td>
                 </tr>
@@ -223,7 +232,7 @@
                     <th>21</th>
                     <td>MontantPercuUnite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('montantpercuunite')); ?></td>
                     <td><?= $this->formInput($form->get('montantpercuunite')); ?></td>
                     <td><?= $headers['MontantPercuUnite'] == 'off' ? 'Non géré' : $headers['MontantPercuUnite']  ?></td>
                 </tr>
@@ -232,7 +241,7 @@
                     <th>22</th>
                     <td>CoutTotalEtude</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('couttotaletude')); ?></td>
                     <td><?= $this->formInput($form->get('couttotaletude')); ?></td>
                     <td><?= $headers['CoutTotalEtude'] == 'off' ? 'Non géré' : $headers['CoutTotalEtude']  ?></td>
                 </tr>
@@ -241,7 +250,7 @@
                     <th>23</th>
                     <td>MontantTotal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('montanttotal')); ?></td>
                     <td><?= $this->formInput($form->get('montanttotal')); ?></td>
                     <td><?= $headers['MontantTotal'] == 'off' ? 'Non géré' : $headers['MontantTotal']  ?></td>
                 </tr>
@@ -249,7 +258,7 @@
                     <th>24</th>
                     <td>DateDebut</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('datedebut')); ?></td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
                     <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
                 </tr>
@@ -257,7 +266,7 @@
                     <th>25</th>
                     <td>PoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('polecompetivite')); ?></td>
                     <td><?= $this->formSelect($form->get('polecompetivite')); ?></td>
                     <td><?= $headers['PoleCompetivite'] == 'off' ? 'Non géré' : $headers['PoleCompetivite']  ?></td>
                 </tr>
@@ -265,7 +274,7 @@
                     <th>25</th>
                     <td>ValidePoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('validepolecompetivite')); ?></td>
                     <td><?= $this->formCheckbox($form->get('validepolecompetivite')); ?></td>
                     <td><?= $headers['ValidePoleCompetivite'] == 'off' ? 'Non géré' : $headers['ValidePoleCompetivite']  ?></td>
                 </tr>
@@ -273,7 +282,7 @@
                     <th>26</th>
                     <td>Commentaires</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('commentaires')); ?></td>
                     <td><?= $this->formTextarea($form->get('commentaires')); ?></td>
                     <td><?= $headers['Commentaires'] == 'off' ? 'Non géré' : $headers['Commentaires']  ?></td>
                 </tr>
@@ -281,7 +290,7 @@
                     <th>27</th>
                     <td>Pia</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('pia')); ?></td>
                     <td><?= $this->formCheckbox($form->get('pia')); ?></td>
                     <td><small>Est PIA ?</small></td>
                 </tr>
@@ -289,7 +298,7 @@
                     <th>28</th>
                     <td>Reference</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('reference')); ?></td>
                     <td><?= $this->formInput($form->get('reference')); ?></td>
                     <td><?= $headers['Reference'] == 'off' ? 'Non géré' : $headers['Reference']  ?></td>
                 </tr>
@@ -297,7 +306,7 @@
                     <th>29</th>
                     <td>AccordCadre</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('accordcadre')); ?></td>
                     <td><?= $this->formCheckbox($form->get('accordcadre')); ?></td>
                     <td><?= $headers['AccordCadre'] == 'off' ? 'Non géré' : $headers['AccordCadre']  ?></td>
                 </tr>
@@ -306,7 +315,7 @@
                     <th>30</th>
                     <td>Cifre</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('cifre')); ?></td>
                     <td><?= $this->formCheckbox($form->get('cifre')); ?></td>
                     <td><?= $headers['Cifre'] == 'off' ? 'Non géré' : $headers['Cifre']  ?></td>
                 </tr>
@@ -314,7 +323,7 @@
                     <th>31</th>
                     <td>ChaireIndustrielle</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('chaireindustrielle')); ?></td>
                     <td><?= $this->formInput($form->get('chaireindustrielle')); ?></td>
                     <td><?= $headers['ChaireIndustrielle'] == 'off' ? 'Non géré' : $headers['ChaireIndustrielle']  ?></td>
                 </tr>
@@ -322,7 +331,7 @@
                     <th>32</th>
                     <td>PresencePartenaireIndustriel</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td>VALID ?</td>
+                    <td><?= $this->formElementErrors($form->get('presencepartenaireindustriel')); ?></td>
                     <td><?= $this->formCheckbox($form->get('presencepartenaireindustriel')); ?></td>
                     <td><?= $headers['PresencePartenaireIndustriel'] == 'off' ? 'Non géré' : $headers['PresencePartenaireIndustriel']  ?></td>
                 </tr>
@@ -331,7 +340,7 @@
         </table>
 
 
-
+        <button type="submit" class="btn btn-success btn-lg">Activer PCRU</button>
 
         <?= $this->form()->closeTag() ?>
     </div>

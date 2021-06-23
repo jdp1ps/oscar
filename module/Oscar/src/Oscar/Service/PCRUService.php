@@ -145,14 +145,18 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function activateActivity(Activity $activity, $json = false): void
+    public function activateActivity(Activity $activity, ?ActivityPcruInfos $pcruInfos = null, $json = false): void
     {
         if (!$this->getOscarConfigurationService()->getPcruEnabled()) {
             throw new OscarException("Le module PCR n'est pas activé");
         }
 
-        $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
-        $pcruInfos = $factory->createNew($activity);
+        if( $pcruInfos == null ) {
+            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+            $pcruInfos = $factory->createNew($activity);
+        }
+
+        // Contrôle des informations
         $validation = $pcruInfos->validation();
         if (count($pcruInfos->getError()) > 0) {
             throw new OscarException("Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées");

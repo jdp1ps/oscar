@@ -123,6 +123,26 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->notificationService = $notificationService;
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// REPOSITORY
+    /**
+     * @return PcruTypeContractRepository
+     */
+    public function getPcruTypeContratRepository() :PcruTypeContractRepository
+    {
+        return $this->getEntityManager()->getRepository(PcruTypeContract::class);
+    }
+
+    /**
+     * @return PcruSourceFinancementRepository
+     */
+    public function getPcruSourceFinancementRepository() :PcruSourceFinancementRepository
+    {
+        return $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function getActivityFull(Activity $activity)
@@ -2018,6 +2038,18 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $out[$type] = $type;
         }
         return $out;
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractByLabel( string $label ) :?PcruTypeContract
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        return $repository->findBy(['label' => $label]);
     }
 
     /**

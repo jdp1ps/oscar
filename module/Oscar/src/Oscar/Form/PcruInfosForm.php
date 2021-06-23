@@ -17,6 +17,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Util;
 use Zend\Filter\StringTrim;
+use Zend\Form\Element\Checkbox;
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilterProviderInterface;
 use Oscar\Hydrator\ProjectGrantFormHydrator;
@@ -34,8 +35,6 @@ class PcruInfosForm extends Form implements InputFilterProviderInterface, UseSer
     public function getProjectGrantService(){
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
-
-
 
     public function init()
     {
@@ -191,19 +190,6 @@ en assure la gestion");
                 'placeholder' => $label,
             ],
             'type'=>'Text'
-        ]);
-
-        $label = _("Le responsable scientifique est aussi coordinateur du consortium");
-        $this->add([
-            'name'   => 'coordinateurConsortium',
-            'options' => [
-                'label' => $label,
-            ],
-            'attributes' => [
-                'class' => '',
-                'placeholder' => $label,
-            ],
-            'type'=>'Checkbox'
         ]);
 
         $label = _("Partenaires");
@@ -375,6 +361,8 @@ en assure la gestion");
             'type'=>'Checkbox'
         ]);
 
+
+
         $label = _("Pôle de compétitivité");
         $this->add([
             'name'   => 'poleCompetivite',
@@ -469,6 +457,18 @@ en assure la gestion");
         $label = _("Présence d'un partenaire industrielle");
         $this->add([
             'name'   => 'presencePartenaireIndustriel',
+            'options' => [
+                'label' => $label,
+            ],
+            'attributes' => [
+                'placeholder' => $label,
+            ],
+            'type'=>'Checkbox'
+        ]);
+
+        $label = _("Le responsable scientifique est aussi le coordinateur du consorsium");
+        $this->add([
+            'name'   => 'coordinateurconsortium',
             'options' => [
                 'label' => $label,
             ],

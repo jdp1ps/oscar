@@ -25,6 +25,15 @@ class PcruTypeContractRepository extends EntityRepository
         return array_map('current', $entities);
     }
 
+    /**
+     * @param string $label
+     * @return PcruTypeContract
+     */
+    public function getPcruTypeContratByLabel( string $label ): ?PcruTypeContract
+    {
+        return $this->findOneBy(['label' => $label]);
+    }
+
     public function getArrayDatasJoined(): array
     {
         $query = $this->createQueryBuilder('ptc')->orderBy("ptc.label", "ASC");
