@@ -99,7 +99,7 @@ class ActivityPcruInfos
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="cordinateurconsortium")
+     * @ORM\Column(type="boolean", name="coordinateurconsortium")
      */
     private $coordinateurConsortium = false;
 
@@ -247,7 +247,7 @@ class ActivityPcruInfos
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="boolean")
      */
     private $accordCadre = false;
 
@@ -265,9 +265,9 @@ class ActivityPcruInfos
 
     /**
      * @var string (True/False/Indéfini)
-     * @ORM\Column(type="string", length=8)
+     * @ORM\Column(type="boolean")
      */
-    private $PresencePartenaireIndustriel = "Indéfini";
+    private $PresencePartenaireIndustriel = false;
 
     /**
      * @var integer Identifiant du document "Contrat Signé"
@@ -292,6 +292,11 @@ class ActivityPcruInfos
             $this->getObjet(),
             $this->getResponsableScientifique()
         );
+    }
+
+    public function isWaiting() :bool
+    {
+        return $this->getStatus() == self::STATUS_FILE_READY;
     }
 
     public function toArray() :array
@@ -328,7 +333,7 @@ class ActivityPcruInfos
         $out['AccordCadre'] = $this->isAccordCadre() ? "True" : "False";
         $out['Cifre'] = $this->getCifre();
         $out['ChaireIndustrielle'] = $this->getChaireIndustrielle();
-        $out['PresencePartenaireIndustriel'] = $this->getPresencePartenaireIndustriel();
+        $out['PresencePartenaireIndustriel'] = $this->isPresencePartenaireIndustriel();
         return $out;
     }
 
@@ -1052,10 +1057,12 @@ class ActivityPcruInfos
     /**
      * @return string
      */
-    public function getPresencePartenaireIndustriel(): string
+    public function isPresencePartenaireIndustriel(): bool
     {
         return $this->PresencePartenaireIndustriel;
     }
+
+
 
     /**
      * @return int
@@ -1075,9 +1082,9 @@ class ActivityPcruInfos
     }
 
     /**
-     * @param string $PresencePartenaireIndustriel
+     * @param bool $PresencePartenaireIndustriel
      */
-    public function setPresencePartenaireIndustriel(string $PresencePartenaireIndustriel): self
+    public function setPresencePartenaireIndustriel(bool $PresencePartenaireIndustriel): self
     {
         $this->PresencePartenaireIndustriel = $PresencePartenaireIndustriel;
         return $this;

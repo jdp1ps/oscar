@@ -45,7 +45,7 @@ class ActivityPcruInfosToFormArray
             'accordCadre' => $activityPcruInfos->isAccordCadre(),
             'cifre' => $activityPcruInfos->getCifre(),
             'chaireIndustrielle' => $activityPcruInfos->getChaireIndustrielle(),
-            'resencepartenaireindustriel' => $activityPcruInfos->getPresencePartenaireIndustriel(),
+            'presencepartenaireindustriel' => $activityPcruInfos->isPresencePartenaireIndustriel(),
         ];
     }
 }

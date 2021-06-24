@@ -31,15 +31,11 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
-use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
-use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
-use Oscar\Factory\ActivityPcruInfoFromActivityFactory;
 use Oscar\Form\ActivityInfosPcruForm;
-use Oscar\Form\PcruInfosForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\ActivityToJsonFormatter;
@@ -47,8 +43,6 @@ use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
-use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
-use Oscar\Hydrator\ActivityInfosPCRUFormHydrator;
 use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
@@ -59,8 +53,6 @@ use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
-use Oscar\Traits\UseActivityLogService;
-use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePCRUService;
@@ -75,7 +67,6 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Psr\Log\LogLevel;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
@@ -2850,6 +2841,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Activity $activity */
         $activity = $this->getActivityFromRoute();
 
+        // Accès
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
         if( $this->params()->fromQuery("a") == "activate" ){
 
             // Formulaire
@@ -2880,15 +2874,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
 
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
         $method = $this->getHttpXMethod();
 
         if ($method == 'POST') {
-            die("A FACTORISER");
+
             $action = $this->params()->fromPost('action');
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU_ACTIVATE, $activity);
             switch ($action) {
+
+                case 'remove-waiting';
+                    $idActivityPcruInfo = intval($this->params()->fromPost('activitypcruinfo_id'));
+                    $this->getProjectGrantService()->getPCRUService()->removeWaiting($idActivityPcruInfo);
 
                 case 'add-pool':
                     $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
@@ -2905,6 +2902,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
         $return = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+
+        /** @var ActivityPcruInfos $pcruInfos */
+        $pcruInfos = $return['infos'];
+
+        if( $pcruInfos->isWaiting() ){
+            $return['deletable'] = true;
+            $return['activitypcruinfo_id'] = $pcruInfos->getId();
+
+        }
 
         $return['poolopen'] = $this->getProjectGrantService()->getPCRUService()->isPoolOpen();
 

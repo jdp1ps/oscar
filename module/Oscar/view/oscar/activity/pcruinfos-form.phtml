@@ -49,7 +49,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('objet')); ?></td>
                     <td><?= $this->formInput($form->get('objet')); ?></td>
-                    <td><?= $headers['Objet'] == 'off' ? 'Non géré' : $headers['Objet']  ?></td>
+                    <td><?= $headers['Objet'] == 'off' ? 'Saisie manuelle' : $headers['Objet']  ?></td>
                 </tr>
 
                 <tr>
@@ -58,7 +58,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('codeunitelabintel')); ?></td>
                     <td><?= $this->formInput($form->get('codeunitelabintel')); ?></td>
-                    <td><?= $headers['CodeUniteLabintel'] == 'off' ? 'Non géré' : $headers['CodeUniteLabintel']  ?></td>
+                    <td><?= $headers['CodeUniteLabintel'] == 'off' ? 'Saisie manuelle' : $headers['CodeUniteLabintel']  ?></td>
                 </tr>
 
                 <tr>
@@ -67,7 +67,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('sigleunite')); ?></td>
                     <td><?= $this->formInput($form->get('sigleunite')); ?></td>
-                    <td><?= $headers['SigleUnite'] == 'off' ? 'Non géré' : $headers['SigleUnite']  ?></td>
+                    <td><?= $headers['SigleUnite'] == 'off' ? 'Saisie manuelle' : $headers['SigleUnite']  ?></td>
                 </tr>
 
                 <tr>
@@ -76,7 +76,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('numcontrattutellegestionnaire')); ?></td>
                     <td><?= $this->formInput($form->get('numcontrattutellegestionnaire')); ?></td>
-                    <td><?= $headers['NumContratTutelleGestionnaire'] == 'off' ? 'Non géré' : $headers['NumContratTutelleGestionnaire']  ?></td>
+                    <td><?= $headers['NumContratTutelleGestionnaire'] == 'off' ? 'Saisie manuelle' : $headers['NumContratTutelleGestionnaire']  ?></td>
                 </tr>
 
                 <tr>
@@ -85,7 +85,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('equipe')); ?></td>
                     <td><?= $this->formInput($form->get('equipe')); ?></td>
-                    <td><?= $headers['Equipe'] == 'off' ? 'Non géré' : $headers['Equipe']  ?></td>
+                    <td><?= $headers['Equipe'] == 'off' ? 'Saisie manuelle' : $headers['Equipe']  ?></td>
                 </tr>
 
                 <tr>
@@ -94,7 +94,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('typecontrat')); ?></td>
                     <td><?= $this->formSelect($form->get('typecontrat')); ?></td>
-                    <td><?= $headers['TypeContrat'] == 'off' ? 'Non géré' : $headers['TypeContrat']  ?></td>
+                    <td><?= $headers['TypeContrat'] == 'off' ? 'Saisie manuelle' : $headers['TypeContrat']  ?></td>
                 </tr>
 
                  <tr>
@@ -103,7 +103,7 @@
                     <td><i class="icon-ok-circled"></td>
                      <td><?= $this->formElementErrors($form->get('acronyme')); ?></td>
                     <td><?= $this->formInput($form->get('acronyme')); ?></td>
-                     <td><?= $headers['Acronyme'] == 'off' ? 'Non géré' : $headers['Acronyme']  ?></td>
+                     <td><?= $headers['Acronyme'] == 'off' ? 'Saisie manuelle' : $headers['Acronyme']  ?></td>
                 </tr>
 
                 <tr>
@@ -112,7 +112,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('contratsassocies')); ?></td>
                     <td><?= $this->formInput($form->get('contratsassocies')); ?></td>
-                    <td><?= $headers['ContratsAssocies'] == 'off' ? 'Non géré' : $headers['ContratsAssocies']  ?></td>
+                    <td><?= $headers['ContratsAssocies'] == 'off' ? 'Saisie manuelle' : $headers['ContratsAssocies']  ?></td>
                 </tr>
                 <tr>
                     <th>9</th>
@@ -120,7 +120,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('responsablescientifique')); ?></td>
                     <td><?= $this->formSelect($form->get('responsablescientifique')); ?></td>
-                    <td><?= $headers['ResponsableScientifique'] == 'off' ? 'Non géré' : $headers['ResponsableScientifique']  ?></td>
+                    <td><?= $headers['ResponsableScientifique'] == 'off' ? 'Saisie manuelle' : $headers['ResponsableScientifique']  ?></td>
                 </tr>
                 <tr>
                     <th>10</th>
@@ -128,7 +128,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('employeurresponsablescientifique')); ?></td>
                     <td><?= $this->formInput($form->get('employeurresponsablescientifique')); ?></td>
-                    <td><?= $headers['EmployeurResponsableScientifique'] == 'off' ? 'Non géré' : $headers['EmployeurResponsableScientifique']  ?></td>
+                    <td><?= $headers['EmployeurResponsableScientifique'] == 'off' ? 'Saisie manuelle' : $headers['EmployeurResponsableScientifique']  ?></td>
                 </tr>
 
 
@@ -137,16 +137,11 @@
                     <td>CoordinateurConsortium</td>
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('coordinateurconsortium')); ?></td>
-                    <td><?= $this->formInput($form->get('coordinateurconsortium')); ?></td>
-                    <td><?= $headers['CoordinateurConsortium'] == 'off' ? 'Non géré' : $headers['CoordinateurConsortium']  ?></td>
-                    <?php /*
-                    <th>11</th>
-                    <td>CoordinateurConsortium</td>
-                    <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('coordinateurconsortium')); ?></td>
                     <td><?= $this->formCheckbox($form->get('coordinateurconsortium')); ?></td>
-                    <td><?= $headers['CoordinateurConsortium'] == 'off' ? 'Non géré' : $headers['CoordinateurConsortium']  ?></td>
-                       */ ?>
+                    <td>
+                        <?= $headers['CoordinateurConsortium'] == 'off' ? 'Saisie manuelle' : $headers['CoordinateurConsortium']  ?>
+                        Le Responsable scientifique est également le coordinateur du consortium
+                    </td>
                 </tr>
 
                 <tr>
@@ -155,7 +150,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('partenaires')); ?></td>
                     <td><?= $this->formInput($form->get('partenaires')); ?></td>
-                    <td><?= $headers['Partenaires'] == 'off' ? 'Non géré' : $headers['Partenaires']  ?></td>
+                    <td><?= $headers['Partenaires'] == 'off' ? 'Saisie manuelle' : $headers['Partenaires']  ?></td>
                 </tr>
                 <tr>
                     <th>13</th>
@@ -163,7 +158,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('partenaireprincipal')); ?></td>
                     <td><?= $this->formSelect($form->get('partenaireprincipal')); ?></td>
-                    <td><?= $headers['PartenairePrincipal'] == 'off' ? 'Non géré' : $headers['PartenairePrincipal']  ?></td>
+                    <td><?= $headers['PartenairePrincipal'] == 'off' ? 'Saisie manuelle' : $headers['PartenairePrincipal']  ?></td>
                 </tr>
                 <tr>
                     <th>14</th>
@@ -171,7 +166,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('idpartenaireprincipal')); ?></td>
                     <td><?= $this->formInput($form->get('idpartenaireprincipal')); ?></td>
-                    <td><?= $headers['IdPartenairePrincipal'] == 'off' ? 'Non géré' : $headers['IdPartenairePrincipal']  ?></td>
+                    <td><?= $headers['IdPartenairePrincipal'] == 'off' ? 'Saisie manuelle' : $headers['IdPartenairePrincipal']  ?></td>
                 </tr>
                 <tr>
                     <th>15</th>
@@ -181,7 +176,7 @@
                     <td>
                         <?= $this->formSelect($form->get('sourcefinancement')); ?>
                     </td>
-                    <td><?= $headers['SourceFinancement'] == 'off' ? 'Non géré' : $headers['SourceFinancement']  ?></td>
+                    <td><?= $headers['SourceFinancement'] == 'off' ? 'Saisie manuelle' : $headers['SourceFinancement']  ?></td>
                 </tr>
                 <tr>
                     <th>16</th>
@@ -189,7 +184,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('lieuexecution')); ?></td>
                     <td><?= $this->formInput($form->get('lieuexecution')); ?></td>
-                    <td><?= $headers['LieuExecution'] == 'off' ? 'Non géré' : $headers['LieuExecution']  ?></td>
+                    <td><?= $headers['LieuExecution'] == 'off' ? 'Saisie manuelle' : $headers['LieuExecution']  ?></td>
                 </tr>
 
                 <tr>
@@ -198,7 +193,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('datedernieresignature')); ?></td>
                     <td><?= $this->formInput($form->get('datedernieresignature')); ?></td>
-                    <td><?= $headers['DateDerniereSignature'] == 'off' ? 'Non géré' : $headers['DateDerniereSignature']  ?></td>
+                    <td><?= $headers['DateDerniereSignature'] == 'off' ? 'Saisie manuelle' : $headers['DateDerniereSignature']  ?></td>
                 </tr>
 
                 <tr>
@@ -207,7 +202,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('duree')); ?></td>
                     <td><?= $this->formInput($form->get('duree')); ?></td>
-                    <td><?= $headers['Duree'] == 'off' ? 'Non géré' : $headers['Duree']  ?></td>
+                    <td><?= $headers['Duree'] == 'off' ? 'Saisie manuelle' : $headers['Duree']  ?></td>
                 </tr>
 
                 <tr>
@@ -216,7 +211,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('datedebut')); ?></td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
-                    <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
+                    <td><?= $headers['DateDebut'] == 'off' ? 'Saisie manuelle' : $headers['DateDebut']  ?></td>
                 </tr>
 
                 <tr>
@@ -225,7 +220,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('datefin')); ?></td>
                     <td><?= $this->formInput($form->get('datefin')); ?></td>
-                    <td><?= $headers['DateFin'] == 'off' ? 'Non géré' : $headers['DateFin']  ?></td>
+                    <td><?= $headers['DateFin'] == 'off' ? 'Saisie manuelle' : $headers['DateFin']  ?></td>
                 </tr>
 
                 <tr>
@@ -234,7 +229,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('montantpercuunite')); ?></td>
                     <td><?= $this->formInput($form->get('montantpercuunite')); ?></td>
-                    <td><?= $headers['MontantPercuUnite'] == 'off' ? 'Non géré' : $headers['MontantPercuUnite']  ?></td>
+                    <td><?= $headers['MontantPercuUnite'] == 'off' ? 'Saisie manuelle' : $headers['MontantPercuUnite']  ?></td>
                 </tr>
 
                 <tr>
@@ -243,7 +238,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('couttotaletude')); ?></td>
                     <td><?= $this->formInput($form->get('couttotaletude')); ?></td>
-                    <td><?= $headers['CoutTotalEtude'] == 'off' ? 'Non géré' : $headers['CoutTotalEtude']  ?></td>
+                    <td><?= $headers['CoutTotalEtude'] == 'off' ? 'Saisie manuelle' : $headers['CoutTotalEtude']  ?></td>
                 </tr>
 
                 <tr>
@@ -252,39 +247,33 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('montanttotal')); ?></td>
                     <td><?= $this->formInput($form->get('montanttotal')); ?></td>
-                    <td><?= $headers['MontantTotal'] == 'off' ? 'Non géré' : $headers['MontantTotal']  ?></td>
+                    <td><?= $headers['MontantTotal'] == 'off' ? 'Saisie manuelle' : $headers['MontantTotal']  ?></td>
                 </tr>
                 <tr>
                     <th>24</th>
-                    <td>DateDebut</td>
+                    <td>ValidePoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('datedebut')); ?></td>
-                    <td><?= $this->formInput($form->get('datedebut')); ?></td>
-                    <td><?= $headers['DateDebut'] == 'off' ? 'Non géré' : $headers['DateDebut']  ?></td>
+                    <td><?= $this->formElementErrors($form->get('validepolecompetivite')); ?></td>
+                    <td><?= $this->formCheckbox($form->get('validepolecompetivite')); ?></td>
+                    <td><?= $headers['ValidePoleCompetivite'] == 'off' ? 'Saisie manuelle' : $headers['ValidePoleCompetivite']  ?></td>
                 </tr>
+
                 <tr>
                     <th>25</th>
                     <td>PoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('polecompetivite')); ?></td>
                     <td><?= $this->formSelect($form->get('polecompetivite')); ?></td>
-                    <td><?= $headers['PoleCompetivite'] == 'off' ? 'Non géré' : $headers['PoleCompetivite']  ?></td>
+                    <td><?= $headers['PoleCompetivite'] == 'off' ? 'Saisie manuelle' : $headers['PoleCompetivite']  ?></td>
                 </tr>
-                <tr>
-                    <th>25</th>
-                    <td>ValidePoleCompetivite</td>
-                    <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('validepolecompetivite')); ?></td>
-                    <td><?= $this->formCheckbox($form->get('validepolecompetivite')); ?></td>
-                    <td><?= $headers['ValidePoleCompetivite'] == 'off' ? 'Non géré' : $headers['ValidePoleCompetivite']  ?></td>
-                </tr>
+
                 <tr>
                     <th>26</th>
                     <td>Commentaires</td>
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('commentaires')); ?></td>
                     <td><?= $this->formTextarea($form->get('commentaires')); ?></td>
-                    <td><?= $headers['Commentaires'] == 'off' ? 'Non géré' : $headers['Commentaires']  ?></td>
+                    <td><?= $headers['Commentaires'] == 'off' ? 'Saisie manuelle' : $headers['Commentaires']  ?></td>
                 </tr>
                 <tr>
                     <th>27</th>
@@ -300,7 +289,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('reference')); ?></td>
                     <td><?= $this->formInput($form->get('reference')); ?></td>
-                    <td><?= $headers['Reference'] == 'off' ? 'Non géré' : $headers['Reference']  ?></td>
+                    <td><?= $headers['Reference'] == 'off' ? 'Saisie manuelle' : $headers['Reference']  ?></td>
                 </tr>
                 <tr>
                     <th>29</th>
@@ -308,7 +297,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('accordcadre')); ?></td>
                     <td><?= $this->formCheckbox($form->get('accordcadre')); ?></td>
-                    <td><?= $headers['AccordCadre'] == 'off' ? 'Non géré' : $headers['AccordCadre']  ?></td>
+                    <td><?= $headers['AccordCadre'] == 'off' ? 'Saisie manuelle' : $headers['AccordCadre']  ?></td>
                 </tr>
 
                 <tr>
@@ -317,7 +306,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('cifre')); ?></td>
                     <td><?= $this->formCheckbox($form->get('cifre')); ?></td>
-                    <td><?= $headers['Cifre'] == 'off' ? 'Non géré' : $headers['Cifre']  ?></td>
+                    <td><?= $headers['Cifre'] == 'off' ? 'Saisie manuelle' : $headers['Cifre']  ?></td>
                 </tr>
                 <tr>
                     <th>31</th>
@@ -325,7 +314,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('chaireindustrielle')); ?></td>
                     <td><?= $this->formInput($form->get('chaireindustrielle')); ?></td>
-                    <td><?= $headers['ChaireIndustrielle'] == 'off' ? 'Non géré' : $headers['ChaireIndustrielle']  ?></td>
+                    <td><?= $headers['ChaireIndustrielle'] == 'off' ? 'Saisie manuelle' : $headers['ChaireIndustrielle']  ?></td>
                 </tr>
                 <tr>
                     <th>32</th>
@@ -333,7 +322,7 @@
                     <td><i class="icon-ok-circled"></td>
                     <td><?= $this->formElementErrors($form->get('presencepartenaireindustriel')); ?></td>
                     <td><?= $this->formCheckbox($form->get('presencepartenaireindustriel')); ?></td>
-                    <td><?= $headers['PresencePartenaireIndustriel'] == 'off' ? 'Non géré' : $headers['PresencePartenaireIndustriel']  ?></td>
+                    <td><?= $headers['PresencePartenaireIndustriel'] == 'off' ? 'Saisie manuelle' : $headers['PresencePartenaireIndustriel']  ?></td>
                 </tr>
             </tbody>
 
@@ -351,6 +340,12 @@
         require(['select2'], function(){
             $('[name="activityType"], .select2').select2();
         });
+
+        $('[name=partenaireprincipal]').on('change', function(e){
+            var value = $(e.currentTarget).val();
+            $('[name=idpartenaireprincipal]').val(value);
+            console.log(value);
+        })
 
         require(['Keyvalue'], function(KeyValue){
             console.log(KeyValue);

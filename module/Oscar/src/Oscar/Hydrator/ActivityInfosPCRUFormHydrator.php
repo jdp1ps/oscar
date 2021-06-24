@@ -116,7 +116,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
             "accordcadre" => $object->isAccordCadre(),
             "cifre" => $object->getCifre(),
             "chaireindustrielle" => $object->getChaireIndustrielle(),
-            "presencepartenaireindustriel" => $object->getPresencePartenaireIndustriel(),
+            "presencepartenaireindustriel" => $object->isPresencePartenaireIndustriel(),
         ];
 
         return $datas;

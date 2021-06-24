@@ -241,6 +241,30 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     }
 
+    public function removeWaiting( int $idActivityPcruInfo ):void
+    {
+        // Récupération du PCRUInfo et vérifier l'état
+        /** @var ActivityPcruInfos $pcruInfo */
+        $pcruInfo = $this->getActivityPCRUInfoRepository()->find($idActivityPcruInfo);
+
+        if( $pcruInfo == null ){
+            throw new OscarException("Informations PCRU introuvable (id = $idActivityPcruInfo)");
+        }
+
+        if( !$pcruInfo->isWaiting() ){
+            throw new OscarException("Impossible de réinitialiser des informations PCRU qui ne sont pas en attente d'envoi");
+        }
+
+        // Retirer du CSV
+        $csvFile = new PCRUCvsFile($this);
+        $csvFile->readCSV();
+        $csvFile->purgeFiles();
+        $csvFile->remove($pcruInfo);
+        $this->getEntityManager()->remove($pcruInfo);
+        $this->getEntityManager()->flush();
+        $csvFile->generateFiles();
+    }
+
     /**
      * Ajoute une activité à la file d'attente du prochain envoi PCRU.
      *
@@ -420,9 +444,12 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
     public function getActivityPartenaires(Activity $activity) :array
     {
         $out = [];
+        $out[""] = "Aucun";
         /** @var ActivityOrganization $org */
         foreach ($activity->getOrganizationsDeep() as $org) {
-            $out[$org->getOrganization()->getCodePcru()] = $org->getOrganization()->__toString();
+            if( $org->getOrganization()->getCodePcru() ){
+                $out[$org->getOrganization()->getCodePcru()] = $org->getOrganization()->__toString();
+            }
         }
 
         return $out;
