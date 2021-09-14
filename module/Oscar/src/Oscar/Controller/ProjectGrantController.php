@@ -2511,11 +2511,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'aj':
                         $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
                         break;
-                    case 'add' :
                     case 'ds' :
                         $qb->andWhere('dis.id = :discipline');
                         $parameters['discipline'] = $value1;
                         break;
+                    case 'add' :
                     case 'adf' :
                     case 'adm' :
                     case 'adc' :
