@@ -379,7 +379,21 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///
+        /// GEARMMAN
+        ///
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $io->section(" ### GEARMAN : ");
+
+
+        // On teste la présence du worker
+        $oscarWorkerFile = __DIR__ . '/../../../../../config/oscarworker.service';
+        if( !file_exists($oscarWorkerFile)) {
+            $io->error("Le fichier OscarWorker est absent (config/oscarworker.service)");
+            die();
+        }
+
         $io->write(sprintf("* Envoi d'un job 'HELLO' à Gearman sur '%s' : ", $oscarConfig->getGearmanHost()));
         $client = new \GearmanClient();
         try {

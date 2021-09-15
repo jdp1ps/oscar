@@ -47,6 +47,7 @@ use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use UnicaenApp\Mapper\Ldap\People;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -456,8 +457,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      *
      * @param string $dateRef
      */
-    public function mailPersonsWithUnreadNotification($dateRef = "")
+    public function mailPersonsWithUnreadNotification($dateRef = "", SymfonyStyle $io = null)
     {
+        $logger = $this->getLoggerService();
+
+        if( $io ){
+            $log = function ($msg) use ($io, $logger) {
+                $logger->info($msg);
+                $io->writeln($msg);
+            };
+        } else {
+            $log = function($msg) use ($logger){
+                $logger->info($msg);
+            };
+        }
+
         $date = new \DateTime($dateRef);
 
         $rel = [
@@ -473,14 +487,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         // Fromat du cron
         $cron = $rel[$date->format('D')] . $date->format('G');
 
-        $this->getLoggerService()->info("Notifications des inscrits à '$cron'");
+        $log("Notifications des inscrits à '$cron'");
 
         // Liste des personnes ayant des notifications non-lues
         $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification(
             $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false)
         );
 
-        $this->getLoggerService()->info(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
+        $log(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
         /** @var Person $person */
         foreach ($persons as $person) {
@@ -499,9 +513,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $settings['frequency'] = array_merge($settings['frequency'], $this->getOscarConfigurationService()->getConfiguration('notifications.fixed'));
 
             if (in_array($cron, $settings['frequency'])) {
+                $log(sprintf('Envoi de mail pour %s', $person));
                 $this->mailNotificationsPerson($person);
             } else {
-                $this->getLoggerService()->info(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
+                $log(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
             }
         }
     }

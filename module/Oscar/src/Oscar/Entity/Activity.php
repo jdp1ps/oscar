@@ -32,22 +32,19 @@ class Activity implements ResourceInterface
 
     const STATUS_PROGRESS = 102;
     /** Activité en cours de réalisation (dossier) */
-
     const STATUS_DEPOSIT = 103;
+    const STATUS_MONTAGE = 104;
+    const STATUS_JUSTIFY = 105;
 
     // 200 : Terminées / Abandonnées
+    const STATUS_CLOSED = 200;     // Activité fermée
+    const STATUS_TERMINATED = 201; // Activité terminée
+    const STATUS_ABORDED = 250; // Activité abandonnée
+    const STATUS_REFUSED = 210; // Activité refusée
 
-    // Activité fermée
-    const STATUS_CLOSED = 200;
-
-    // Activité terminée
-    const STATUS_TERMINATED = 201;
-
-    // Activité abandonnée
-    const STATUS_ABORDED = 250;
-
-    // Activité refusée
-    const STATUS_REFUSED = 210;
+    // 400 : Conflits
+    const STATUS_DISPUTE = 400; // Litige
+    const STATUS_ERROR_STATUS = 404; // Pas de status (suite à l'import)
 
     ///////////////////////////////////////////////////////////////////
     // Incidence financière
@@ -74,24 +71,22 @@ class Activity implements ResourceInterface
         return $finacialImpctValues;
     }
 
-    // 400 : Conflits
-    const STATUS_DISPUTE = 400; // Litige
-    const STATUS_ERROR_STATUS = 404; // Pas de status (suite à l'import)
-
     public static function getStatusSelect()
     {
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
-                self::STATUS_ERROR_STATUS   => 'Conflit : pas de statut',
-                self::STATUS_ACTIVE         => 'Actif',
-                self::STATUS_PROGRESS       => 'Brouillon',
-                self::STATUS_DEPOSIT        => 'Déposé',
-                self::STATUS_ABORDED        => 'Dossier abandonné',
-                self::STATUS_DISPUTE        => 'Litige',
-                self::STATUS_REFUSED        => 'Refusé',
-                self::STATUS_TERMINATED     => 'Résilié',
-                self::STATUS_CLOSED         => 'Terminé',
+                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
+                self::STATUS_ACTIVE => 'Actif',
+                self::STATUS_PROGRESS => 'Brouillon',
+                self::STATUS_DEPOSIT => 'Déposé',
+                self::STATUS_ABORDED => 'Dossier abandonné',
+                self::STATUS_DISPUTE => 'Litige',
+                self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_TERMINATED => 'Résilié',
+                self::STATUS_CLOSED => 'Terminé',
+                self::STATUS_MONTAGE => 'Montage',
+                self::STATUS_JUSTIFY => 'Justifié',
             ];
         }
 
@@ -101,23 +96,23 @@ class Activity implements ResourceInterface
     ////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////// FEUILLE DE TEMPS (FORMAT)
-    const TIMESHEET_FORMAT_NONE             = 0;
-    const TIMESHEET_FORMAT_HOURS_BY_YEAR    = 10;
-    const TIMESHEET_FORMAT_HOURS_BY_MONTH   = 20;
-    const TIMESHEET_FORMAT_HOURS_BY_WEEK    = 30;
-    const TIMESHEET_FORMAT_HOURS_BY_DAY     = 40;
-    const TIMESHEET_FORMAT_FREE             = 50;
+    const TIMESHEET_FORMAT_NONE = 0;
+    const TIMESHEET_FORMAT_HOURS_BY_YEAR = 10;
+    const TIMESHEET_FORMAT_HOURS_BY_MONTH = 20;
+    const TIMESHEET_FORMAT_HOURS_BY_WEEK = 30;
+    const TIMESHEET_FORMAT_HOURS_BY_DAY = 40;
+    const TIMESHEET_FORMAT_FREE = 50;
 
     public static function getTimesheetFormatSelect()
     {
         static $timesheetFormatSelect;
         if ($timesheetFormatSelect === null) {
             $timesheetFormatSelect = [
-                self::TIMESHEET_FORMAT_NONE             => 'Aucun',
-                self::TIMESHEET_FORMAT_HOURS_BY_MONTH   => 'Heures par mois',
-                self::TIMESHEET_FORMAT_HOURS_BY_WEEK    => 'Heures par semaine',
-                self::TIMESHEET_FORMAT_HOURS_BY_DAY     => 'Heures par jour',
-                self::TIMESHEET_FORMAT_FREE             => 'Heures détaillées',
+                self::TIMESHEET_FORMAT_NONE => 'Aucun',
+                self::TIMESHEET_FORMAT_HOURS_BY_MONTH => 'Heures par mois',
+                self::TIMESHEET_FORMAT_HOURS_BY_WEEK => 'Heures par semaine',
+                self::TIMESHEET_FORMAT_HOURS_BY_DAY => 'Heures par jour',
+                self::TIMESHEET_FORMAT_FREE => 'Heures détaillées',
             ];
         }
 
@@ -406,7 +401,7 @@ class Activity implements ResourceInterface
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="EstimatedSpentLine", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
-     * 
+     *
      */
     private $estimatedSpentLines;
 
@@ -464,11 +459,13 @@ class Activity implements ResourceInterface
         return $this->totalSpent;
     }
 
-    public function getPercentSpent(){
+    public function getPercentSpent()
+    {
         return 100 / $this->getAmount() * abs($this->getTotalSpent());
     }
 
-    public function getRemainder(){
+    public function getRemainder()
+    {
         return $this->getAmount() - abs($this->getTotalSpent());
     }
 
@@ -565,8 +562,8 @@ class Activity implements ResourceInterface
 
     public function getFraisDeGestionDisplay()
     {
-        if( ($partH = $this->getFraisDeGestion()) ){
-            if( strpos($partH, '%') ){
+        if (($partH = $this->getFraisDeGestion())) {
+            if (strpos($partH, '%')) {
                 return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol() . " ($partH)";
             } else {
                 return $partH . $this->getCurrency()->getSymbol();
@@ -594,8 +591,8 @@ class Activity implements ResourceInterface
 
     public function getFraisDeGestionPartHebergeurDisplay()
     {
-        if( ($partH = $this->getFraisDeGestionPartHebergeur()) ){
-            if( strpos($partH, '%') ){
+        if (($partH = $this->getFraisDeGestionPartHebergeur())) {
+            if (strpos($partH, '%')) {
                 return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol();
             } else {
                 return $partH . $this->getCurrency()->getSymbol();
@@ -636,14 +633,14 @@ class Activity implements ResourceInterface
         return $this->pcruMissings;
     }
 
-
     /**
      * Retourne l'acronyme du projet si disponible.
      *
      * @return mixed|null
      */
-    public function getAcronym(){
-        if( $this->getProject() ){
+    public function getAcronym()
+    {
+        if ($this->getProject()) {
             return $this->getProject()->getAcronym();
         }
         return null;
@@ -654,8 +651,9 @@ class Activity implements ResourceInterface
      */
     public function getNumbers()
     {
-        if( $this->numbers == null )
+        if ($this->numbers == null) {
             $this->numbers = [];
+        }
         return $this->numbers;
     }
 
@@ -674,7 +672,8 @@ class Activity implements ResourceInterface
      * @param $value
      * @return $this
      */
-    public function addNumber( $key, $value ){
+    public function addNumber($key, $value)
+    {
         $this->numbers[$key] = $value;
         return $this;
     }
@@ -683,8 +682,9 @@ class Activity implements ResourceInterface
      * @param $key
      * @return $this
      */
-    public function removeNumber( $key ){
-        if( key_exists($key, $this->numbers) ){
+    public function removeNumber($key)
+    {
+        if (key_exists($key, $this->numbers)) {
             unset($this->numbers[$key]);
         }
         return $this;
@@ -694,8 +694,9 @@ class Activity implements ResourceInterface
      * @param $key
      * @return null
      */
-    public function getNumber( $key ){
-        if( $this->numbers && key_exists($key, $this->numbers) ){
+    public function getNumber($key)
+    {
+        if ($this->numbers && key_exists($key, $this->numbers)) {
             return $this->numbers[$key];
         }
         return null;
@@ -948,7 +949,7 @@ class Activity implements ResourceInterface
      */
     public function addWorkPackages(WorkPackage $workPackage)
     {
-        if( !$this->workPackages->contains($workPackage) ){
+        if (!$this->workPackages->contains($workPackage)) {
             $this->workPackages->add($workPackage);
             $workPackage->setActivity($this);
         }
@@ -959,7 +960,7 @@ class Activity implements ResourceInterface
      */
     public function removeWorkPackages(WorkPackage $workPackage)
     {
-        if( !$this->workPackages->contains($workPackage) ){
+        if (!$this->workPackages->contains($workPackage)) {
             $this->workPackages->removeElement($workPackage);
             $workPackage->setActivity(null);
         }
@@ -996,7 +997,7 @@ class Activity implements ResourceInterface
      */
     public function setDateStart($dateStart)
     {
-        if( is_string($dateStart) ){
+        if (is_string($dateStart)) {
             $dateStart = (new DataExtractorDate())->extract($dateStart);
         }
         $this->dateStart = $dateStart;
@@ -1017,7 +1018,7 @@ class Activity implements ResourceInterface
      */
     public function setDateEnd($dateEnd)
     {
-        if( is_string($dateEnd) ){
+        if (is_string($dateEnd)) {
             $dateEnd = (new DataExtractorDate())->extract($dateEnd);
         }
         $this->dateEnd = $dateEnd;
@@ -1067,7 +1068,7 @@ class Activity implements ResourceInterface
     public function touch()
     {
         $this->setDateUpdated(new \DateTime());
-        if( $this->getProject() ){
+        if ($this->getProject()) {
             $this->getProject()->touch();
         }
     }
@@ -1099,7 +1100,8 @@ class Activity implements ResourceInterface
         return $this->label;
     }
 
-    public function getFullLabel(){
+    public function getFullLabel()
+    {
         return sprintf('[%s] %s', $this->getAcronym(), $this->getLabel());
     }
 
@@ -1157,9 +1159,10 @@ class Activity implements ResourceInterface
         return $this->duration;
     }
 
-    public function getCalculatedDuration(){
-        if( $this->getDateStart() && $this->getDateEnd() ){
-            return ceil(($this->getDateEnd()->getTimestamp() - $this->getDateStart()->getTimestamp())/(60*60*24));
+    public function getCalculatedDuration()
+    {
+        if ($this->getDateStart() && $this->getDateEnd()) {
+            return ceil(($this->getDateEnd()->getTimestamp() - $this->getDateStart()->getTimestamp()) / (60 * 60 * 24));
         }
         return 0;
     }
@@ -1246,12 +1249,13 @@ class Activity implements ResourceInterface
      *
      * @return array
      */
-    public function getPredictedPeriods(){
+    public function getPredictedPeriods()
+    {
         $out = [
             'warnings' => null,
             'periods' => [],
         ];
-        if( !$this->getDateStart() || !$this->getDateEnd()){
+        if (!$this->getDateStart() || !$this->getDateEnd()) {
             $out['warnings'] = "Les dates de début et de fin de l'activité doivent être renseignée";
         }
 
@@ -1326,10 +1330,10 @@ class Activity implements ResourceInterface
     /**
      * @return Discipline[]
      */
-    public function setDisciplines( $disciplines )
+    public function setDisciplines($disciplines)
     {
         $this->disciplines = new ArrayCollection();
-        foreach( $disciplines as $d ){
+        foreach ($disciplines as $d) {
             $this->addDiscipline($d);
         }
         return $this;
@@ -1355,7 +1359,7 @@ class Activity implements ResourceInterface
     public function getDisciplinesIds()
     {
         $ids = [];
-        foreach( $this->getDisciplines() as $discipline ){
+        foreach ($this->getDisciplines() as $discipline) {
             $ids[] = $discipline->getId();
         }
         return $ids;
@@ -1395,14 +1399,16 @@ class Activity implements ResourceInterface
         $today = new \DateTime();
         /** @var ActivityPerson $member */
         foreach ($this->getPersons() as $member) {
-            if(!$member->getPerson()){continue;}
+            if (!$member->getPerson()) {
+                continue;
+            }
             if ($member->getPerson()->getId() === $person->getId()) {
                 // Date de début non-nulle et suppérieur à ajourd'hui
-                if( $member->getDateStart() !== null && $member->getDateStart() > $today ){
+                if ($member->getDateStart() !== null && $member->getDateStart() > $today) {
                     continue;
                 }
                 // Date de début non-nulle et suppérieur à ajourd'hui
-                if( $member->getDateEnd() !== null && $member->getDateEnd() < $today ){
+                if ($member->getDateEnd() !== null && $member->getDateEnd() < $today) {
                     continue;
                 }
                 $roles[] = $member->getRole();
@@ -1419,8 +1425,8 @@ class Activity implements ResourceInterface
      *
      * @return array
      */
-    public function getPersonPrincipalActive(){
-
+    public function getPersonPrincipalActive()
+    {
         $persons = [];
 
         /** @var ActivityPerson $member */
@@ -1430,7 +1436,7 @@ class Activity implements ResourceInterface
             }
         }
 
-        if( $this->getProject() ){
+        if ($this->getProject()) {
             /** @var ProjectMember $projectMember */
             foreach ($this->getProject()->getPersons() as $projectMember) {
                 if (!$projectMember->isOutOfDate()) {
@@ -1468,11 +1474,11 @@ class Activity implements ResourceInterface
      * Retourne la liste des personnes ayant le rôle.
      * @param string $role
      */
-    public function getPersonsRoled( array $roles, $includeInactives = true )
+    public function getPersonsRoled(array $roles, $includeInactives = true)
     {
         $persons = [];
-        foreach( $this->getPersons($includeInactives) as $p ){
-            if( in_array($p->getRole(), $roles ) ) {
+        foreach ($this->getPersons($includeInactives) as $p) {
+            if (in_array($p->getRole(), $roles)) {
                 $persons[] = $p;
             }
         }
@@ -1483,37 +1489,38 @@ class Activity implements ResourceInterface
      * Retourne la liste des personnes ayant le rôle.
      * @param string $role
      */
-    public function getPersonsRoledDeep( array $roles )
+    public function getPersonsRoledDeep(array $roles)
     {
         $persons = $this->getPersonsRoled($roles);
-        if( $this->getProject() ){
-            foreach( $this->getProject()->getPersonsRoled($roles) as $p ){
+        if ($this->getProject()) {
+            foreach ($this->getProject()->getPersonsRoled($roles) as $p) {
                 $persons[] = $p;
             }
         }
         return $persons;
     }
 
-    public function getPersonJson(){
+    public function getPersonJson()
+    {
         $json = [];
         /** @var ActivityPerson $activityPerson */
-        foreach ($this->getPersonsDeep() as $activityPerson ){
+        foreach ($this->getPersonsDeep() as $activityPerson) {
             $json[] = [
-                'id'                => $activityPerson->getId(),
-                'end'               => $activityPerson->getDateEnd(),
-                'start'               => $activityPerson->getDateStart(),
-                'enrolled'          => $activityPerson->getPerson()->getId(),
-                'enrolledLabel'     => $activityPerson->getPerson()->__toString(),
-                'enroller'          => $activityPerson->getEnroller()->getId(),
-                'enrollerLabel'     => $activityPerson->getEnroller()->__toString(),
-                'role'              => $activityPerson->getRole(),
-                'roleLabel'         => $activityPerson->getRole(),
+                'id' => $activityPerson->getId(),
+                'end' => $activityPerson->getDateEnd(),
+                'start' => $activityPerson->getDateStart(),
+                'enrolled' => $activityPerson->getPerson()->getId(),
+                'enrolledLabel' => $activityPerson->getPerson()->__toString(),
+                'enroller' => $activityPerson->getEnroller()->getId(),
+                'enrollerLabel' => $activityPerson->getEnroller()->__toString(),
+                'role' => $activityPerson->getRole(),
+                'roleLabel' => $activityPerson->getRole(),
             ];
         }
         return $json;
     }
 
-    public function getPersonsDeep( $ignoreMain = false )
+    public function getPersonsDeep($ignoreMain = false)
     {
         $persons = [];
 
@@ -1530,7 +1537,7 @@ class Activity implements ResourceInterface
         return $persons;
     }
 
-    public function getOrganizationsDeep( $ignoreMain = false )
+    public function getOrganizationsDeep($ignoreMain = false)
     {
         $partners = [];
         if ($this->getProject()) {
@@ -1565,7 +1572,9 @@ class Activity implements ResourceInterface
         }
 
         if (!isset($sluged[$this->getActivityType()->getNature()])) {
-            $sluged[$this->getActivityType()->getNature()] = 'icon-acttype-' . $slugify->slugify($this->getActivityType()->getNatureStr());
+            $sluged[$this->getActivityType()->getNature()] = 'icon-acttype-' . $slugify->slugify(
+                    $this->getActivityType()->getNatureStr()
+                );
         }
 
         return $sluged[$this->getActivityType()->getNature()];
@@ -1774,8 +1783,12 @@ class Activity implements ResourceInterface
 
     public function __toString()
     {
-        return sprintf("[%s%s] %s", $this->getOscarNum(),
-            $this->getCodeEOTP() ? ' ~ ' . $this->getCodeEOTP() : '', $this->getLabel());
+        return sprintf(
+            "[%s%s] %s",
+            $this->getOscarNum(),
+            $this->getCodeEOTP() ? ' ~ ' . $this->getCodeEOTP() : '',
+            $this->getLabel()
+        );
     }
 
     public function log()
@@ -1820,20 +1833,23 @@ class Activity implements ResourceInterface
         return $inCharge;
     }
 
-    public function hasMilestoneAt( DateType $type, \DateTime $date){
+    public function hasMilestoneAt(DateType $type, \DateTime $date)
+    {
         /** @var ActivityDate $milestone */
-        foreach ($this->getMilestones() as $milestone ){
-            if( $milestone->getDateStart() == $date  && $milestone->getType() == $type ){
+        foreach ($this->getMilestones() as $milestone) {
+            if ($milestone->getDateStart() == $date && $milestone->getType() == $type) {
                 return true;
             }
         }
         return false;
     }
 
-    public function hasPaymentAt( $amount, $datePayment, $datePredicted ){
+    public function hasPaymentAt($amount, $datePayment, $datePredicted)
+    {
         /** @var ActivityPayment $payment */
-        foreach ($this->getPayments() as $payment ){
-            if( $payment->getDatePayment() == $datePayment  && $payment->getAmount() == $amount && $payment->getDatePredicted() == $datePredicted){
+        foreach ($this->getPayments() as $payment) {
+            if ($payment->getDatePayment() == $datePayment && $payment->getAmount(
+                ) == $amount && $payment->getDatePredicted() == $datePredicted) {
                 return true;
             }
         }
@@ -1904,7 +1920,6 @@ class Activity implements ResourceInterface
      */
     public function getCorpus()
     {
-
     }
 
     private $_cachedPercentDone = null;
@@ -1913,24 +1928,25 @@ class Activity implements ResourceInterface
 
     private $_cachedTodoDone = null;
 
-    protected function getTodoDone(){
-        if( $this->_cachedTodoDone === null ){
+    protected function getTodoDone()
+    {
+        if ($this->_cachedTodoDone === null) {
             $todo = 0.0;
             $tovalidate = 0.0;
             $done = 0.0;
             $percent = 0.0;
             /** @var WorkPackage $workPackage */
-            foreach( $this->getWorkPackages() as $workPackage ){
+            foreach ($this->getWorkPackages() as $workPackage) {
                 /** @var WorkPackagePerson $workPackagePerson */
-                foreach( $workPackage->getPersons() as $workPackagePerson ){
+                foreach ($workPackage->getPersons() as $workPackagePerson) {
                     $todo += $workPackagePerson->getDuration();
                 }
                 /** @var TimeSheet $timeSheet */
-                foreach( $workPackage->getTimesheets() as $timeSheet ){
-                    if( $timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE ){
+                foreach ($workPackage->getTimesheets() as $timeSheet) {
+                    if ($timeSheet->getStatus() == TimeSheet::STATUS_TOVALIDATE) {
                         $tovalidate += $timeSheet->getHours();
                     }
-                    if( $timeSheet->getStatus() == TimeSheet::STATUS_ACTIVE){
+                    if ($timeSheet->getStatus() == TimeSheet::STATUS_ACTIVE) {
                         $done += $timeSheet->getHours();
                     }
                 }
@@ -1940,7 +1956,7 @@ class Activity implements ResourceInterface
                 'tovalidate' => $tovalidate,
                 'done' => $done
             ];
-            if( $todo > 0 ) {
+            if ($todo > 0) {
                 $percent = 100 / $todo * $done;
             }
             $this->_cachedTodoDone['percent'] = $percent;
@@ -1952,14 +1968,17 @@ class Activity implements ResourceInterface
     {
         return $this->getTodoDone()['percent'];
     }
+
     public function getDone()
     {
         return $this->getTodoDone()['done'];
     }
+
     public function getTodo()
     {
         return $this->getTodoDone()['todo'];
     }
+
     public function getTovalidate()
     {
         return $this->getTodoDone()['tovalidate'];
@@ -1971,8 +1990,9 @@ class Activity implements ResourceInterface
      * @param string $format
      * @return string
      */
-    public function getDateStartStr( $format = 'Y-m-d' ){
-        if( $this->getDateStart() ){
+    public function getDateStartStr($format = 'Y-m-d')
+    {
+        if ($this->getDateStart()) {
             return $this->getDateStart()->format($format);
         } else {
             return "";
@@ -1985,8 +2005,9 @@ class Activity implements ResourceInterface
      * @param string $format
      * @return string
      */
-    public function getDateEndStr( $format = 'Y-m-d' ){
-        if( $this->getDateEnd() ){
+    public function getDateEndStr($format = 'Y-m-d')
+    {
+        if ($this->getDateEnd()) {
             return $this->getDateEnd()->format($format);
         } else {
             return "";
@@ -1996,8 +2017,8 @@ class Activity implements ResourceInterface
     /**
      * Retourne les données préparées pour le génération des documents
      */
-    public function documentDatas(){
-
+    public function documentDatas()
+    {
         //
         $datas = [
             'id' => $this->getId(),
@@ -2006,7 +2027,11 @@ class Activity implements ResourceInterface
             'pfi' => $this->getCodeEOTP(),
             'oscar' => $this->getOscarNum(),
             'montant' => number_format(
-                (double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol(),
+                    (double)$this->getAmount(),
+                    2,
+                    ',',
+                    ' '
+                ) . $this->getCurrency()->getSymbol(),
             'annee-debut' => $this->getDateStartStr('Y'),
             'annee-fin' => $this->getDateEndStr('Y'),
             'debut' => $this->getDateStartStr('d/m/Y'),
@@ -2014,7 +2039,7 @@ class Activity implements ResourceInterface
             'intitule' => htmlspecialchars($this->getLabel()),
             'label' => htmlspecialchars($this->getLabel()),
             'tva' => $this->getTva() ? (string)$this->getTva() : '',
-            'assiette-subventionnable' => (string) $this->getAssietteSubventionnable(),
+            'assiette-subventionnable' => (string)$this->getAssietteSubventionnable(),
             'note-financiere' => $this->getNoteFinanciere(),
 
             'type' => (string)$this->getActivityType(),
@@ -2023,21 +2048,21 @@ class Activity implements ResourceInterface
         $sluger = Slugify::create();
 
         // Dépenses
-        $datas['total-depense'] = number_format($this->getTotalSpent(),2,',', ' '); // as $spent)
-        $datas['total-depense-percent'] = number_format($this->getPercentSpent(),2, ',', ''); // as $spent)
-        $datas['total-reste'] = number_format($this->getRemainder(),2, ',', ' ');
+        $datas['total-depense'] = number_format($this->getTotalSpent(), 2, ',', ' '); // as $spent)
+        $datas['total-depense-percent'] = number_format($this->getPercentSpent(), 2, ',', ''); // as $spent)
+        $datas['total-reste'] = number_format($this->getRemainder(), 2, ',', ' ');
 
 
         $persons = [];
 
-        foreach ($this->getPersonsDeep() as $personActivity){
+        foreach ($this->getPersonsDeep() as $personActivity) {
             $roleStr = (string)$personActivity->getRoleObj();
-            if( !array_key_exists($roleStr, $persons) ){
+            if (!array_key_exists($roleStr, $persons)) {
                 $persons[$roleStr] = [];
             }
-            $persons[$roleStr][] = (string) $personActivity->getPerson();
+            $persons[$roleStr][] = (string)$personActivity->getPerson();
         }
-        foreach ($persons as $role=>$ps) {
+        foreach ($persons as $role => $ps) {
             $slug = $sluger->slugify($role);
             $datas[$slug] = implode(', ', $ps);
             $datas["$slug-list"] = $ps;
@@ -2045,15 +2070,15 @@ class Activity implements ResourceInterface
 
         $organizations = [];
 
-        foreach ($this->getOrganizationsDeep() as $organisationActivity){
+        foreach ($this->getOrganizationsDeep() as $organisationActivity) {
             $roleStr = (string)$organisationActivity->getRoleObj();
-            if( !array_key_exists($roleStr, $organizations) ){
+            if (!array_key_exists($roleStr, $organizations)) {
                 $organizations[$roleStr] = [];
             }
-            $organizations[$roleStr][] = (string) $organisationActivity->getOrganization();
+            $organizations[$roleStr][] = (string)$organisationActivity->getOrganization();
         }
 
-        foreach ($organizations as $role=>$ps) {
+        foreach ($organizations as $role => $ps) {
             $slug = $sluger->slugify($role);
             $datas[$slug] = implode(', ', $ps);
             $datas["$slug-list"] = $ps;
@@ -2063,15 +2088,15 @@ class Activity implements ResourceInterface
         /** @var ActivityDate $milestone */
         foreach ($this->getMilestones() as $milestone) {
             $milestoneStr = $milestone->getType()->getLabel();
-            if( !array_key_exists($milestoneStr, $jalons) ){
+            if (!array_key_exists($milestoneStr, $jalons)) {
                 $jalons[$milestoneStr] = [];
             }
             $jalons[$milestoneStr][] = $milestone->getDateStart()->format('d/m/Y');
         }
 
-        foreach ($jalons as $type=>$date) {
+        foreach ($jalons as $type => $date) {
             $slug = $sluger->slugify($type);
-            $datas['jalon-'.$slug] = implode(', ', $date);
+            $datas['jalon-' . $slug] = implode(', ', $date);
             $datas["jalon-$slug-list"] = $date;
         }
 
@@ -2085,11 +2110,10 @@ class Activity implements ResourceInterface
         $versementsEffectuesDate = [];
 
         /** @var ActivityPayment $payment */
-        foreach ($this->getPayments() as $payment){
-
+        foreach ($this->getPayments() as $payment) {
             $amount = number_format($payment->getAmount(), 2) . ' ' . $this->getCurrency()->getSymbol();
 
-            if($payment->getDatePayment()){
+            if ($payment->getDatePayment()) {
                 $date = $payment->getDatePayment()->format('d/m/Y');
                 $versementsEffectues[] = $amount;
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
@@ -2113,10 +2137,9 @@ class Activity implements ResourceInterface
 
 
         return $datas;
-
     }
 
-    public function csv($dateFormat='Y-m-d')
+    public function csv($dateFormat = 'Y-m-d')
     {
         return array(
             'ID' => $this->getId(),
@@ -2141,6 +2164,7 @@ class Activity implements ResourceInterface
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'incidence financière' => $this->getIncidenceFinanciere(),
+            'Note financière' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
@@ -2164,12 +2188,14 @@ class Activity implements ResourceInterface
             'Fin',
             'Date de signature',
             'versement effectué',
+            'versement effectué',
             'versement prévu',
             'écart de paiement',
             'justificatif écart de paiement',
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'incidence financière',
+            'Note financière',
             'Disciplines'
         );
     }
@@ -2197,6 +2223,7 @@ class Activity implements ResourceInterface
     }
 
     private $totalEcartPaiement;
+
     public function getEcartPaiement()
     {
         if ($this->totalEcartPaiement === null) {
@@ -2213,6 +2240,7 @@ class Activity implements ResourceInterface
     }
 
     private $justificatifEcartPaiement;
+
     public function getJustificatifEcartPaiement()
     {
         if ($this->justificatifEcartPaiement === null) {
@@ -2220,7 +2248,7 @@ class Activity implements ResourceInterface
             /** @var ActivityPayment $payment */
             foreach ($this->getPayments() as $payment) {
                 if ($payment->getStatus() === ActivityPayment::STATUS_ECART) {
-                    $this->justificatifEcartPaiement .= $payment->getComment()." ";
+                    $this->justificatifEcartPaiement .= $payment->getComment() . " ";
                 }
             }
         }
@@ -2235,11 +2263,11 @@ class Activity implements ResourceInterface
 
 
     /**
-    'écart de paiement' => $this->getEcartPaiement(),
-    'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
-    'Frais de gestion' => $this->getFraisDeGestion(),
-    'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
-    'incidence financière' => $this->getIncidenceFinanciere(),
+     * 'écart de paiement' => $this->getEcartPaiement(),
+     * 'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
+     * 'Frais de gestion' => $this->getFraisDeGestion(),
+     * 'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
+     * 'incidence financière' => $this->getIncidenceFinanciere(),
      */
 
     private $totalPaymentProvided;
@@ -2287,19 +2315,29 @@ class Activity implements ResourceInterface
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );
 
-        if( $withAssoc === true ){
+        if ($withAssoc === true) {
             $out['persons'] = [];
-            foreach ( $this->getPersons() as $personActivity ){
+            foreach ($this->getPersons() as $personActivity) {
                 $out['persons'][] = sprintf('%s (%s)', $personActivity->getPerson(), $personActivity->getRoleObj());
             }
             $out['organizations'] = [];
-            foreach ( $this->getOrganizations() as $organizationActivity ){
-                $out['organizations'][] = sprintf('%s (%s)', $organizationActivity->getOrganization()->__toString(), $organizationActivity->getRoleObj());
+            foreach ($this->getOrganizations() as $organizationActivity) {
+                $out['organizations'][] = sprintf(
+                    '%s (%s)',
+                    $organizationActivity->getOrganization()->__toString(),
+                    $organizationActivity->getRoleObj()
+                );
             }
             $out['payments'] = [];
             /** @var ActivityPayment $payment */
-            foreach ( $this->getPayments() as $payment ){
-                $out['payments'][] = sprintf('%s (%s)', $payment->getAmount(), $payment->getDatePayment() ? $payment->getDatePayment()->format('Ymd') : 'nop');
+            foreach ($this->getPayments() as $payment) {
+                $out['payments'][] = sprintf(
+                    '%s (%s)',
+                    $payment->getAmount(),
+                    $payment->getDatePayment() ? $payment->getDatePayment()->format(
+                        'Ymd'
+                    ) : 'nop'
+                );
             }
         }
 
@@ -2325,18 +2363,20 @@ class Activity implements ResourceInterface
     /// COMPUTED
     ///
 
-    public function hasDeclarant( $person ){
-        if( !$person ){
+    public function hasDeclarant($person)
+    {
+        if (!$person) {
             return false;
         }
-        if( $person instanceof ActivityPerson || $person instanceof ProjectMember )
+        if ($person instanceof ActivityPerson || $person instanceof ProjectMember) {
             $person = $person->getPerson();
+        }
 
         /** @var WorkPackage $wp */
-        foreach( $this->getWorkPackages() as $wp ){
+        foreach ($this->getWorkPackages() as $wp) {
             /** @var WorkPackagePerson $p */
-            foreach( $wp->getPersons() as $p ){
-                if( $person->getId() == $p->getPerson()->getId() ){
+            foreach ($wp->getPersons() as $p) {
+                if ($person->getId() == $p->getPerson()->getId()) {
                     return true;
                 }
             }
@@ -2349,10 +2389,11 @@ class Activity implements ResourceInterface
      *
      * @return bool
      */
-    public function hasDeclarers(){
+    public function hasDeclarers()
+    {
         /** @var WorkPackage $wp */
-        foreach( $this->getWorkPackages() as $wp ){
-            foreach( $wp->getPersons() as $p ){
+        foreach ($this->getWorkPackages() as $wp) {
+            foreach ($wp->getPersons() as $p) {
                 return true;
             }
         }
@@ -2362,14 +2403,15 @@ class Activity implements ResourceInterface
     /**
      * @return Person[]
      */
-    public function getDeclarers(){
+    public function getDeclarers()
+    {
         $persons = [];
 
         /** @var WorkPackage $workPackage */
-        foreach ($this->getWorkPackages() as $workPackage){
+        foreach ($this->getWorkPackages() as $workPackage) {
             /** @var WorkPackagePerson $workPackagePerson */
             foreach ($workPackage->getPersons() as $workPackagePerson) {
-                if( !array_key_exists($workPackagePerson->getPerson()->getId(), $persons) ){
+                if (!array_key_exists($workPackagePerson->getPerson()->getId(), $persons)) {
                     $persons[$workPackagePerson->getPerson()->getId()] = $workPackagePerson->getPerson();
                 }
             }
@@ -2378,42 +2420,46 @@ class Activity implements ResourceInterface
         return $persons;
     }
 
-    public function getTimesheets(){
+    public function getTimesheets()
+    {
         $timesheets = [];
         /** @var WorkPackage $workPackage */
-        foreach($this->getWorkPackages() as $workPackage ){
+        foreach ($this->getWorkPackages() as $workPackage) {
             /** @var TimeSheet $timesheet */
-            foreach ($workPackage->getTimesheets() as $timesheet ){
+            foreach ($workPackage->getTimesheets() as $timesheet) {
                 $timesheets[] = $timesheet;
             }
         }
         return $timesheets;
     }
 
-    public function hasTimesheetsUpForValidation(){
+    public function hasTimesheetsUpForValidation()
+    {
         /** @var TimeSheet $timesheet */
-        foreach ($this->getTimesheets() as $timesheet ){
-            if( true === $timesheet->isWaitingValidation() ){
+        foreach ($this->getTimesheets() as $timesheet) {
+            if (true === $timesheet->isWaitingValidation()) {
                 return true;
             }
         }
         return false;
     }
 
-    public function hasTimesheetsUpForValidationAdmin(){
+    public function hasTimesheetsUpForValidationAdmin()
+    {
         /** @var TimeSheet $timesheet */
-        foreach ($this->getTimesheets() as $timesheet ){
-            if( true === $timesheet->isWaitingValidationAdmin() ){
+        foreach ($this->getTimesheets() as $timesheet) {
+            if (true === $timesheet->isWaitingValidationAdmin()) {
                 return true;
             }
         }
         return false;
     }
 
-    public function hasTimesheetsUpForValidationSci(){
+    public function hasTimesheetsUpForValidationSci()
+    {
         /** @var TimeSheet $timesheet */
-        foreach ($this->getTimesheets() as $timesheet ){
-            if( true === $timesheet->isWaitingValidationSci() ){
+        foreach ($this->getTimesheets() as $timesheet) {
+            if (true === $timesheet->isWaitingValidationSci()) {
                 return true;
             }
         }
@@ -2424,13 +2470,15 @@ class Activity implements ResourceInterface
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private $tmpOrganizationsWithRoleForm = [];
 
-    public function setOrganizationsWithRoleForm( $formName, $formValue ){
+    public function setOrganizationsWithRoleForm($formName, $formValue)
+    {
         var_dump($formName);
         var_dump($formValue);
     }
 
-    public function getOrganizationsWithRoleForm( $formName ){
-        if( array_key_exists($formName) ){
+    public function getOrganizationsWithRoleForm($formName)
+    {
+        if (array_key_exists($formName)) {
             return $this->tmpOrganizationsWithRoleForm[$formName];
         } else {
             return '';

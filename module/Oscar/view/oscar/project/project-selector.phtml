@@ -22,7 +22,7 @@
         if (repo.loading) return repo.text;
 
         var markup = '<div class="clearfix">';
-        markup += ( (repo.acronym?'<strong>['+repo.acronym+']</strong> ':'') + repo.label) || repo.text;
+        markup += ((repo.acronym ? '<strong>[' + repo.acronym + ']</strong> ' : '') + repo.label) || repo.text;
         markup += '</div>';
 
         return markup;
@@ -35,10 +35,10 @@
      * @returns {*}
      */
     formatRepoSelection = function (repo) {
-        return repo.label || repo.text;
+        return repo.acronym + " " + (repo.label || repo.text);
     };
 
-    Initer.ready(function(){
+    Initer.ready(function () {
         require(['select2'], function () {
             console.log('Chargement OK.');
 

@@ -34,6 +34,6 @@ class OscarNotificationsMailsPersonsCommand extends OscarCommandAbstract
         /** @var PersonService $oscarConfig */
         $personService = $this->getServicemanager()->get(PersonService::class);
 
-        $personService->mailPersonsWithUnreadNotification();
+        $personService->mailPersonsWithUnreadNotification(null, $io);
     }
 }
