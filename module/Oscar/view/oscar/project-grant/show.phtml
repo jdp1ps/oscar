@@ -80,7 +80,7 @@
             <span> <i class="icon-cube"></i> <?= $entity->getLabel() ?></span>
             <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
             <div class="budget">
-                <em>Budget</em>
+                <em>Montant</em>
                 <strong><?= $this->currency($entity) ?></strong>
                 <?php if( $entity->getFraisDegestion() ): ?>
                     <div>
@@ -103,6 +103,12 @@
                         </small>
                     </div>
                 <?php endif ?>
+                <?php if( $entity->getAssietteSubventionnable() != null ): ?>
+                    <em>Assiette éligible</em>
+                    <strong>
+                        <?= $this->currency($entity->getAssietteSubventionnable()) ?>
+                    </strong>
+                <?php endif; ?>
 
             </div>
             <?php endif; ?>
@@ -415,10 +421,6 @@
                 </script>
 
                 <div>
-                    <?php if( $entity->getAssietteSubventionnable() != null ): ?>
-                        <h3>Assiette Subventionnable : <strong><?= $entity->getAssietteSubventionnable() ?></strong></h3>
-                    <?php endif; ?>
-
                     <?php if( $entity->getNoteFinanciere() != null ): ?>
                         <h3>Note financière</h3>
                         <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
