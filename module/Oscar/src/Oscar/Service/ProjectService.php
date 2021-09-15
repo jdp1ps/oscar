@@ -6,13 +6,13 @@
  *
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Service;
 
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
-use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
@@ -20,14 +20,11 @@ use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Cette classe fournit des automatismes liés à la manipulation et la
@@ -40,7 +37,8 @@ class ProjectService implements UseServiceContainer
 
     use UseServiceContainerTrait;
 
-    public function getServiceLocator(){
+    public function getServiceLocator()
+    {
         return $this->getServiceContainer();
     }
 
@@ -55,29 +53,44 @@ class ProjectService implements UseServiceContainer
     /**
      * @return ProjectGrantService
      */
-    public function getProjectGrantService(){
+    public function getProjectGrantService()
+    {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
     /**
      * @return EntityManager
      */
-    public function getEntityManager(){
+    public function getEntityManager()
+    {
         return $this->getServiceContainer()->get(EntityManager::class);
+    }
+
+    /**
+     * @return ProjectRepository
+     */
+    public function getProjectRepository()
+    {
+        return $this->getEntityManager()->getRepository(Project::class);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function fixMovePartnersToActivities( Project $project, $flush =
-    true )
-    {
-        foreach ($project->getActivities() as $activity ){
+    public function fixMovePartnersToActivities(
+        Project $project,
+        $flush =
+        true
+    ) {
+        foreach ($project->getActivities() as $activity) {
             /** @var ProjectMember $member */
-            foreach ($project->getMembers() as $member ){
-                if( !$activity->hasPerson($member->getPerson(),
-                    $member->getRole(), $member->getDateStart(),
-                        $member->getDateEnd(), false
-                ) ){
+            foreach ($project->getMembers() as $member) {
+                if (!$activity->hasPerson(
+                    $member->getPerson(),
+                    $member->getRole(),
+                    $member->getDateStart(),
+                    $member->getDateEnd(),
+                    false
+                )) {
 //                    $activityPerson = new ActivityPerson();
 //                    //$this->getEntityManager()->persist($activityPerson);
 //                    $activityPerson->setPerson($member->getPerson())
@@ -87,25 +100,24 @@ class ProjectService implements UseServiceContainer
 //                        ->setDateEnd($member->getDateEnd());
 
                     $this->getLogger()->addDebug("Déplacement");
-
                 }
-
             }
         }
     }
 
-    public function fusion( Project $main, Project $fusionned ){
-        echo "Fusion de " . $main->getId() ." " . $fusionned->getId() ." <br />";
+    public function fusion(Project $main, Project $fusionned)
+    {
+        echo "Fusion de " . $main->getId() . " " . $fusionned->getId() . " <br />";
         /** @var Activity $activity */
-        foreach( $fusionned->getGrants() as $activity ){
+        foreach ($fusionned->getGrants() as $activity) {
             echo "Déplacement de l'activité $activity";
             $activity->setProject($main);
         }
 
         // On déplace les membres
         /** @var ProjectMember $member */
-        foreach( $fusionned->getMembers() as $member ){
-            if( !$fusionned->hasPerson($member->getPerson(), $member->getRole()) ){
+        foreach ($fusionned->getMembers() as $member) {
+            if (!$fusionned->hasPerson($member->getPerson(), $member->getRole())) {
                 $member->setProject($main);
             } else {
                 $this->getEntityManager()->remove($member);
@@ -114,8 +126,8 @@ class ProjectService implements UseServiceContainer
 
         // On déplace les partenaires
         /** @var ProjectPartner $partner */
-        foreach( $fusionned->getPartners() as $partner ){
-            if( !$fusionned->hasPartner($partner->getOrganization(), $partner->getRole()) ){
+        foreach ($fusionned->getPartners() as $partner) {
+            if (!$fusionned->hasPartner($partner->getOrganization(), $partner->getRole())) {
                 $partner->setProject($main);
             } else {
                 $this->getEntityManager()->remove($partner);
@@ -132,7 +144,7 @@ class ProjectService implements UseServiceContainer
      *
      * @param $projectId
      */
-    public function simplifyMember( $projectId )
+    public function simplifyMember($projectId)
     {
         /** @var Project $project */
         $project = $this->getEntityManager()->getRepository(Project::class)->find($projectId);
@@ -141,42 +153,38 @@ class ProjectService implements UseServiceContainer
         $distrib = [];
 
         /** @var Activity $activity */
-        foreach( $project->getGrants() as $activity ){
-
+        foreach ($project->getGrants() as $activity) {
             /** @var ActivityPerson $member */
-            foreach( $activity->getPersons() as $member ){
-
+            foreach ($activity->getPersons() as $member) {
                 // Déjà présent dans le projet avec le même rôle
-                if( $project->hasPerson($member->getPerson(), $member->getRole()) ){
+                if ($project->hasPerson($member->getPerson(), $member->getRole())) {
                     $this->getEntityManager()->remove($member);
-                }
-
-                // On enregistre la distribution
+                } // On enregistre la distribution
                 else {
                     $personId = $member->getPerson()->getId();
                     $role = $member->getRole();
-                    if( !isset($distrib[$personId.$role]) ){
-                        $distrib[$personId.$role] = [
+                    if (!isset($distrib[$personId . $role])) {
+                        $distrib[$personId . $role] = [
                             'person' => $member->getPerson(),
                             'role' => $role,
                             'count' => [$member]
                         ];
                     } else {
-                        $distrib[$personId.$role]['count'][] = $member;
+                        $distrib[$personId . $role]['count'][] = $member;
                     }
                 }
             }
         }
 
         // On parse la distribution pour factoriser
-        foreach( $distrib as $parter=>$dist ){
-            if( count($dist['count']) == count($project->getGrants()) ){
+        foreach ($distrib as $parter => $dist) {
+            if (count($dist['count']) == count($project->getGrants())) {
                 $merged = new ProjectMember();
                 $this->getEntityManager()->persist($merged);
                 $merged->setProject($project)
                     ->setPerson($dist['person'])
                     ->setRole($dist['role']);
-                foreach($dist['count'] as $member){
+                foreach ($dist['count'] as $member) {
                     $this->getEntityManager()->remove($member);
                 }
             }
@@ -191,7 +199,7 @@ class ProjectService implements UseServiceContainer
      *
      * @param $projectId
      */
-    public function simplifyPartners( $projectId )
+    public function simplifyPartners($projectId)
     {
         /** @var Project $project */
         $project = $this->getEntityManager()->getRepository(Project::class)->find($projectId);
@@ -201,42 +209,39 @@ class ProjectService implements UseServiceContainer
 
         // Partenaires des activités rangés par id
         /** @var Activity $activity */
-        foreach( $project->getGrants() as $activity ){
+        foreach ($project->getGrants() as $activity) {
             // Liste des membres de l'activité
             /** @var ActivityOrganization $partner */
-            foreach( $activity->getOrganizations() as $partner ){
-
+            foreach ($activity->getOrganizations() as $partner) {
                 // Déjà présent dans le projet avec le même rôle
-                if( $project->hasPartner($partner->getOrganization(), $partner->getRole()) ){
+                if ($project->hasPartner($partner->getOrganization(), $partner->getRole())) {
                     $this->getEntityManager()->remove($partner);
-                }
-
-                // On enregistre la distribution
+                } // On enregistre la distribution
                 else {
                     $organizationId = $partner->getOrganization()->getId();
                     $role = $partner->getRole();
-                    if( !isset($distrib[$organizationId.$role]) ){
-                        $distrib[$organizationId.$role] = [
+                    if (!isset($distrib[$organizationId . $role])) {
+                        $distrib[$organizationId . $role] = [
                             'organization' => $partner->getOrganization(),
                             'role' => $role,
                             'count' => [$partner]
                         ];
                     } else {
-                        $distrib[$organizationId.$role]['count'][] = $partner;
+                        $distrib[$organizationId . $role]['count'][] = $partner;
                     }
                 }
             }
         }
 
         // On parse la distribution pour factoriser
-        foreach( $distrib as $parter=>$dist ){
-            if( count($dist['count']) == count($project->getGrants()) ){
+        foreach ($distrib as $parter => $dist) {
+            if (count($dist['count']) == count($project->getGrants())) {
                 $merged = new ProjectPartner();
                 $this->getEntityManager()->persist($merged);
                 $merged->setProject($project)
                     ->setOrganization($dist['organization'])
                     ->setRole($dist['role']);
-                foreach($dist['count'] as $partner){
+                foreach ($dist['count'] as $partner) {
                     $this->getEntityManager()->remove($partner);
                 }
             }
@@ -260,8 +265,7 @@ class ProjectService implements UseServiceContainer
             ->leftJoin('pr.organization', 'o')
             ->leftJoin('p.grants', 'g')
             ->leftJoin('g.organizations', 'go')
-            ->leftJoin('g.persons', 'gp')
-        ;
+            ->leftJoin('g.persons', 'gp');
         return $queryBuilder;
     }
 
@@ -288,12 +292,12 @@ class ProjectService implements UseServiceContainer
         return new UnicaenDoctrinePaginator($qb, $page);
     }
 
-    public function searchUpdate( Project $project )
+    public function searchUpdate(Project $project)
     {
         /** @var ProjectGrantService $activityService */
         $activityService = $this->getProjectGrantService();
 
-        foreach($project->getActivities() as $activity ){
+        foreach ($project->getActivities() as $activity) {
             $activityService->jobSearchUpdate($activity);
         }
     }
@@ -302,12 +306,24 @@ class ProjectService implements UseServiceContainer
      * @param $search
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function search( $search )
+    public function search($search)
     {
+        // IDS des PROJETS
         $idsProject = $this->getProjectGrantService()->searchProject($search);
+        $idsProjectsEmpty = $this->getProjectRepository()->getEmptyIds($search);
+        $idsProject = array_merge($idsProject, $idsProjectsEmpty);
+
         return $qb = $this->getBaseQuery()
             ->where('p.id IN (:ids)')
             ->setParameter('ids', $idsProject);
+    }
+
+    /**
+     * @return Project[]
+     */
+    public function getEmptyProject()
+    {
+        return $this->getProjectRepository()->getEmptyProjects();
     }
 
     /**
@@ -345,7 +361,7 @@ class ProjectService implements UseServiceContainer
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getProject($id, $throw=false)
+    public function getProject($id, $throw = false)
     {
         try {
             $project = $this->getBaseQuery()->where('p.id = :id')
@@ -353,8 +369,8 @@ class ProjectService implements UseServiceContainer
                 ->getQuery()
                 ->getSingleResult();
             return $project;
-        } catch ( \Exception $e ){
-            if( $throw ){
+        } catch (\Exception $e) {
+            if ($throw) {
                 throw new OscarException(sprintf("Impossible de charger le projet(%s) : %s", $id, $e->getMessage()));
             }
             return null;
@@ -366,13 +382,16 @@ class ProjectService implements UseServiceContainer
      * @return bool
      * @throws OscarException
      */
-    public function deleteProject( Project $project ){
+    public function deleteProject(Project $project)
+    {
         try {
             $this->getEntityManager()->remove($project);
             $this->getEntityManager()->flush($project);
             return true;
-        } catch ( ConstraintViolationException $e ) {
-            throw new OscarException("Ce projet contient encore des activités, vous devez les retirer du projet avant pour pouvoir supprimer ce projet.");
+        } catch (ConstraintViolationException $e) {
+            throw new OscarException(
+                "Ce projet contient encore des activités, vous devez les retirer du projet avant pour pouvoir supprimer ce projet."
+            );
         } catch (\Exception $e) {
             throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $project, $e->getMessage()));
         }
@@ -384,7 +403,7 @@ class ProjectService implements UseServiceContainer
      * @param $eotp
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getProjectByEOTP( $eotp )
+    public function getProjectByEOTP($eotp)
     {
         return $this->getBaseQuery()->where('g.codeEOTP = :eotp')
             ->setParameter('eotp', $eotp);
@@ -395,7 +414,7 @@ class ProjectService implements UseServiceContainer
      * @param Project $project
      * @return ContractDocument[]
      */
-    public function getProjectDocuments( Project $project )
+    public function getProjectDocuments(Project $project)
     {
         $documents = $this->getEntityManager()->getRepository(ContractDocument::class)
             ->createQueryBuilder('d')

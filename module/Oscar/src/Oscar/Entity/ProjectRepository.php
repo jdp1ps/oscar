@@ -12,20 +12,22 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 
-class ProjectRepository extends EntityRepository {
-    public function getUserProjects( $userId ){
+class ProjectRepository extends EntityRepository
+{
+    public function getUserProjects($userId)
+    {
         return $this->findAll();
     }
 
-    public function getProjectByLabelOrCreate( $label ){
-
+    public function getProjectByLabelOrCreate($label)
+    {
         $projects = $this->createQueryBuilder('p')
             ->select('p')
             ->where('p.label = :label')
             ->setParameter('label', $label)
             ->getQuery()
             ->getResult();
-        if( count($projects) == 0 ){
+        if (count($projects) == 0) {
             $project = new Project();
             $this->getEntityManager()->persist($project);
             $project->setLabel($label)->setAcronym($label);
@@ -35,10 +37,9 @@ class ProjectRepository extends EntityRepository {
         } else {
             return $projects[0];
         }
-
     }
 
-    public function getByUserEmail( $userEmail, $time='all' )
+    public function getByUserEmail($userEmail, $time = 'all')
     {
         $ids = $this->getEntityManager()->createQueryBuilder()
             ->select('p.id')
@@ -68,35 +69,82 @@ class ProjectRepository extends EntityRepository {
 
     /**
      * Retourne le projet avec l'identifiant $id.
-     * 
+     *
      * @param type $id Identifiant du projet.
      * @return Project
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getSingle( $id, $options=[] )
+    public function getSingle($id, $options = [])
     {
         $query = $this->baseQuery($options)->andWhere('p.id = :id');
 
         return $query->getQuery()->setParameter('id', $id)->getSingleResult();
     }
 
-    protected function applyOptions( QueryBuilder $query, array $options = null )
+    /**
+     * @param null $searchExp
+     * @return integer[]
+     */
+    public function getEmptyIds($searchExp = null)
     {
+        return array_map(
+            'current',
+            $this->getQueryBuildEmpty($searchExp)
+                ->select('p.id')
+                ->getQuery()
+                ->getScalarResult()
+        );
+    }
 
+    /**
+     * @param null $searchExp
+     * @return Project[]
+     */
+    public function getEmptyProjects($searchExp = null)
+    {
+        return $this->getQueryBuildEmpty($searchExp)
+            ->select('p')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param null $searchExp
+     * @return QueryBuilder
+     */
+    protected function getQueryBuildEmpty($searchExp = null)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.grants', 'g')
+            ->where('g.id IS NULL');
+
+        if ($searchExp) {
+            $qb->andWhere('p.label LIKE :exp OR p.description LIKE :exp OR p.acronym LIKE :exp')
+                ->setParameter('exp', "%$searchExp%");
+        }
+
+        return $qb;
+    }
+
+
+    protected function applyOptions(QueryBuilder $query, array $options = null)
+    {
     }
 
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function baseQuery($options=[])
+    protected function baseQuery($options = [])
     {
         $query = $this->getCoreQuery();
 
         // --- Options
         // ignoreDateMember: boolean
         // Filtre les personnes en fonction des dates d'affectations
-        if( !(isset($options['ignoreDateMember']) && $options['ignoreDateMember'] === true) ){
-            $query->andWhere('(m.dateStart <= :now OR m.dateStart IS NULL) AND (m.dateEnd IS NULL OR m.dateEnd >= :now)');
+        if (!(isset($options['ignoreDateMember']) && $options['ignoreDateMember'] === true)) {
+            $query->andWhere(
+                '(m.dateStart <= :now OR m.dateStart IS NULL) AND (m.dateEnd IS NULL OR m.dateEnd >= :now)'
+            );
             $query->setParameter('now', new \DateTime());
         }
 
@@ -123,7 +171,7 @@ class ProjectRepository extends EntityRepository {
         return $query;
     }
 
-    public function getByIds( array $ids )
+    public function getByIds(array $ids)
     {
         return $this->baseQuery()->andWhere('p.id IN (:ids)')
             ->addOrderBy('p.dateCreated', 'DESC')
@@ -133,8 +181,8 @@ class ProjectRepository extends EntityRepository {
             ->getQuery()
             ->execute();
     }
-    
-    public function getById( $id )
+
+    public function getById($id)
     {
         return $this->baseQuery()->andWhere('p.id = :id')
             ->addOrderBy('p.dateCreated', 'DESC')
@@ -145,22 +193,28 @@ class ProjectRepository extends EntityRepository {
             ->getSingleResult();
     }
 
-    public function allByOrganization( $organizationId )
+    public function allByOrganization($organizationId)
     {
         return $this->baseQuery()->where(':member MEMBER OF p.partners')
             ->addOrderBy('p.dateCreated', 'DESC')
-            ->getQuery()->execute(array(
-            'member'    => $this->getEntityManager()->getRepository('Oscar\Entity\Organization')->find($organizationId)
-        ));
+            ->getQuery()->execute(
+                array(
+                    'member' => $this->getEntityManager()->getRepository('Oscar\Entity\Organization')->find(
+                        $organizationId
+                    )
+                )
+            );
     }
 
-    public function allByPerson( $personId )
+    public function allByPerson($personId)
     {
         return $this->baseQuery()->where('mp.id = :id')
             ->addOrderBy('p.dateCreated', 'DESC')
-            ->getQuery()->execute(array(
-            'id'    => $personId
-        ));
+            ->getQuery()->execute(
+                array(
+                    'id' => $personId
+                )
+            );
     }
 
     public function all()

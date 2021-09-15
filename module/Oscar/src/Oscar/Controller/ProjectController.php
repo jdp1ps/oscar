@@ -6,6 +6,7 @@
  *
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Controller;
 
 use BjyAuthorize\Exception\UnAuthorizedException;
@@ -82,9 +83,11 @@ class ProjectController extends AbstractOscarController
 
     protected function htmlProjectDetail($project)
     {
-        $view = new ViewModel([
-            'project' => $project
-        ]);
+        $view = new ViewModel(
+            [
+                'project' => $project
+            ]
+        );
         $view->setTerminal(true);
         $view->setTemplate('/oscar/project/details');
 
@@ -94,13 +97,13 @@ class ProjectController extends AbstractOscarController
     protected function getRouteProject($throw = false)
     {
         $id = $this->params()->fromRoute('id', null);
-        if( !$id && $throw ){
+        if (!$id && $throw) {
             throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
         }
         try {
             return $this->getProjectService()->getProject($id);
-        } catch ( \Exception $e ){
-            if( $throw ){
+        } catch (\Exception $e) {
+            if ($throw) {
                 throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
             }
             return null;
@@ -139,7 +142,7 @@ class ProjectController extends AbstractOscarController
 
 
             return array(
-               // 'access' => $this->getAccessResolverService()->getProjectAccess($entity),
+                // 'access' => $this->getAccessResolverService()->getProjectAccess($entity),
                 'project' => $entity,
                 'documents' => $documents,
                 'logs' => $this->getActivityLogService()->projectActivities($entity->getId())->getQuery()->getResult()
@@ -169,14 +172,9 @@ class ProjectController extends AbstractOscarController
 
     public function emptyAction()
     {
-        $projects = $this->getProjectService()->getBaseQuery()
-            ->where('g.id IS NULL');
-        $orderBy = $this->params()->fromQuery('sort', 'p.dateUpdated');
-        $projects->orderBy($orderBy, 'DESC');
-
-
+        $projects = $this->getProjectService()->getEmptyProject();
         return array(
-            'projects' => $projects->getQuery()->getResult(),
+            'projects' => $projects,
             'search' => '',
         );
     }
@@ -188,24 +186,28 @@ class ProjectController extends AbstractOscarController
      */
     public function newAction()
     {
-
         // Récupération de/des activités à associer
         $activitiesIds = $this->params()->fromQuery('ids', null);
         $activities = [];
 
-        if( $activitiesIds ){
+        if ($activitiesIds) {
             // Récupération des activités et évaluation des droits d'accès
             $ids = explode(',', $activitiesIds);
 
             $activities = $this->getProjectGrantService()->getActivitiesByIds($ids);
 
-            if( count($ids) != count($activities) ){
+            if (count($ids) != count($activities)) {
                 return $this->getResponseInternalError("Une ou plusieurs activités sont manquantes");
             }
 
             foreach ($activities as $activity) {
-                if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT, $activity) ){
-                    throw new UnAuthorizedException(_("Vous n'avez les les droits suffisant pour modifier le projet de l'activité '%s'", $activity));
+                if (!$this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_CHANGE_PROJECT,
+                    $activity
+                )) {
+                    throw new UnAuthorizedException(
+                        _("Vous n'avez les les droits suffisant pour modifier le projet de l'activité '%s'", $activity)
+                    );
                 }
                 $activities[] = $activity;
             }
@@ -225,16 +227,22 @@ class ProjectController extends AbstractOscarController
 
 
         // ACCÈS GÉNÉRALE
-        if( ! $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_CREATE) ){
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_CREATE)) {
             // VIA ORGANISATION
-            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::PROJECT_CREATE) ){
+            if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::PROJECT_CREATE)) {
                 throw new UnAuthorizedException(_("Vous n'avez pas les droits pour créer des nouveau projets"));
             }
 
             // Liste des organisations de l'utilisateur
-            $organizations = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(Privileges::PROJECT_CREATE);
+            $organizations = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(
+                Privileges::PROJECT_CREATE
+            );
 
-            foreach ($this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(['principal' => true]) as $role) {
+            foreach (
+                $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(
+                    ['principal' => true]
+                ) as $role
+            ) {
                 if ($role->isPrincipal()) {
                     $organizationRoles[$role->getId()] = $role;
                 }
@@ -245,18 +253,16 @@ class ProjectController extends AbstractOscarController
         /** @var Request $request */
         $request = $this->getRequest();
         if ($this->getRequest()->isPost()) {
-
             $form->setData($request->getPost());
 
-            if($form->isValid()) {
-
+            if ($form->isValid()) {
                 $assoDatas = [];
 
-                if( $organizations ){
+                if ($organizations) {
                     $organizationRolesError = "Vous devez selectionner un rôle.";
 
-                    foreach ($this->params()->fromPost('organizationsRoles') as $idOrganization=>$idRole) {
-                        if( $idRole ){
+                    foreach ($this->params()->fromPost('organizationsRoles') as $idOrganization => $idRole) {
+                        if ($idRole) {
                             $assoDatas[] = [
                                 'organization' => $organizations[$idOrganization],
                                 'role' => $organizationRoles[$idRole],
@@ -264,12 +270,12 @@ class ProjectController extends AbstractOscarController
                         }
                     }
 
-                    if( count($assoDatas) )
+                    if (count($assoDatas)) {
                         $organizationRolesError = "";
-
+                    }
                 }
 
-                if( !$organizationRolesError ) {
+                if (!$organizationRolesError) {
                     $em = $this->getProjectService()->getEntityManager();
                     $em->persist($entity);
 
@@ -303,11 +309,17 @@ class ProjectController extends AbstractOscarController
                         LogActivity::LEVEL_INCHARGE
                     );
 
-                    $this->flashMessenger()->addSuccessMessage(sprintf("Le projet '%s' a bien été créé.",
-                        $entity->log()));
+                    $this->flashMessenger()->addSuccessMessage(
+                        sprintf(
+                            "Le projet '%s' a bien été créé.",
+                            $entity->log()
+                        )
+                    );
 
-                    return $this->redirect()->toRoute('project/show',
-                        array('id' => $entity->getId()));
+                    return $this->redirect()->toRoute(
+                        'project/show',
+                        array('id' => $entity->getId())
+                    );
                 }
             }
         }
@@ -343,36 +355,42 @@ class ProjectController extends AbstractOscarController
 
         $structures = $this->getEntityManager()->getRepository(OrganizationPerson::class)->createQueryBuilder('s')
             ->where('s.person = :person AND s.role IN(:roles)')
-            ->setParameters([
-                'person'    => $currentPerson,
-                'roles'     => $roles,
-            ])
+            ->setParameters(
+                [
+                    'person' => $currentPerson,
+                    'roles' => $roles,
+                ]
+            )
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
 
 
         $projects = [];
 
         /** @var OrganizationPerson $organizationPerson */
-        foreach( $structures as $organizationPerson ){
+        foreach ($structures as $organizationPerson) {
             $orgaId = $organizationPerson->getOrganization()->getId();
-            if( !isset($projects[$orgaId]) ){
+            if (!isset($projects[$orgaId])) {
                 $projects[$orgaId] = [
                     'organization' => $organizationPerson->getOrganization(),
                     'projects' => []
                 ];
             }
             /** @var ProjectPartner $partner */
-            foreach($organizationPerson->getOrganization()->getProjects() as $partner ){
-                if( in_array($partner->getRole(), $this->getOscarUserContextService()->getRolesOrganisationLeader()))
+            foreach ($organizationPerson->getOrganization()->getProjects() as $partner) {
+                if (in_array($partner->getRole(), $this->getOscarUserContextService()->getRolesOrganisationLeader())) {
                     $projects[$orgaId]['projects'][] = $partner->getProject();
+                }
             }
             /** @var ActivityOrganization $activityPartner */
-            foreach($organizationPerson->getOrganization()->getActivities() as $activityPartner ){
+            foreach ($organizationPerson->getOrganization()->getActivities() as $activityPartner) {
                 // Cas des activités sans projet
-                if( $activityPartner->getActivity()->getProject() && in_array($activityPartner->getRole(), $this->getOscarUserContextService()->getRolesOrganisationLeader()) )
+                if ($activityPartner->getActivity()->getProject() && in_array(
+                        $activityPartner->getRole(),
+                        $this->getOscarUserContextService()->getRolesOrganisationLeader()
+                    )) {
                     $projects[$orgaId]['projects'][] = $activityPartner->getActivity()->getProject();
+                }
             }
         }
 
@@ -405,7 +423,7 @@ class ProjectController extends AbstractOscarController
             $posted = $this->getRequest()->getPost();
             $form->setData($posted);
 
-            if( $form->isValid() ){
+            if ($form->isValid()) {
                 $entity->touch();
                 $this->getProjectService()->getEntityManager()->flush($entity);
                 $this->getActivityLogService()->addUserInfo(
@@ -416,11 +434,13 @@ class ProjectController extends AbstractOscarController
             }
         }
 
-        $view = new ViewModel(array(
-            'id' => $id,
-            'project' => $entity,
-            'form' => $form,
-        ));
+        $view = new ViewModel(
+            array(
+                'id' => $id,
+                'project' => $entity,
+                'form' => $form,
+            )
+        );
 
         $view->setTemplate('oscar/project/new');
 
@@ -442,10 +462,12 @@ class ProjectController extends AbstractOscarController
             ->getRepository('Oscar\Entity\Project')
             ->getSingle($id, ['ignoreDateMember' => true]);
 
-        $view = new ViewModel(array(
-            'id' => $id,
-            'project' => $project
-        ));
+        $view = new ViewModel(
+            array(
+                'id' => $id,
+                'project' => $project
+            )
+        );
         $view->setTemplate('oscar/project/managemembers');
 
         return $view;
@@ -499,12 +521,14 @@ class ProjectController extends AbstractOscarController
         $_SESSION['token_' . $tokenName] = $tokenValue;
 
 
-        $view = new ViewModel([
-            'tokenName' => $tokenName,
-            'tokenValue' => $tokenValue,
-            'urlCancel' => $this->url()->fromRoute('project/show', ['id' => $projectId]),
-            'message' => 'Cette opération va supprimer les partenaires des activités déjà présents dans le projet et déplacer dans le projet les partenaires communs à toutes les activités',
-        ]);
+        $view = new ViewModel(
+            [
+                'tokenName' => $tokenName,
+                'tokenValue' => $tokenValue,
+                'urlCancel' => $this->url()->fromRoute('project/show', ['id' => $projectId]),
+                'message' => 'Cette opération va supprimer les partenaires des activités déjà présents dans le projet et déplacer dans le projet les partenaires communs à toutes les activités',
+            ]
+        );
         $view->setTemplate('/oscar/prototype/confirm.phtml');
         return $view;
     }
@@ -531,12 +555,14 @@ class ProjectController extends AbstractOscarController
         $_SESSION['token_' . $tokenName] = $tokenValue;
 
 
-        $view = new ViewModel([
-            'tokenName' => $tokenName,
-            'tokenValue' => $tokenValue,
-            'urlCancel' => $this->url()->fromRoute('project/show', ['id' => $projectId]),
-            'message' => 'Cette opération va supprimer les membres des activités déjà présents dans le projet et déplacer dans le projet les membres communs à toutes les activités',
-        ]);
+        $view = new ViewModel(
+            [
+                'tokenName' => $tokenName,
+                'tokenValue' => $tokenValue,
+                'urlCancel' => $this->url()->fromRoute('project/show', ['id' => $projectId]),
+                'message' => 'Cette opération va supprimer les membres des activités déjà présents dans le projet et déplacer dans le projet les membres communs à toutes les activités',
+            ]
+        );
         $view->setTemplate('/oscar/prototype/confirm.phtml');
         return $view;
     }
@@ -575,8 +601,10 @@ class ProjectController extends AbstractOscarController
      */
     public function searchAction()
     {
-        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT) ){
-            if( !$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_CHANGE_PROJECT) ){
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT)) {
+            if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(
+                Privileges::ACTIVITY_CHANGE_PROJECT
+            )) {
                 return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des projets.");
             }
         }
@@ -591,10 +619,11 @@ class ProjectController extends AbstractOscarController
             'datas' => []
         ];
 
+        /** @var Project $data */
         foreach ($datas as $data) {
             $json['datas'][] = [
                 'id' => $data->getId(),
-                'label' => $data->getLabel(),
+                'label' => $data->getLabel() . " - " . count($data->getActivities()) . " activité(s)",
                 'acronym' => $data->getAcronym(),
                 'description' => $data->getDescription(),
             ];
@@ -627,10 +656,12 @@ class ProjectController extends AbstractOscarController
 
         $organisation = $qb->getQuery()->execute(array('id' => $id));
 
-        $viewModel = new ViewModel(array(
-            'organization' => $organisation[0],
-            'projects' => $organisation[0]->getProjects(),
-        ));
+        $viewModel = new ViewModel(
+            array(
+                'organization' => $organisation[0],
+                'projects' => $organisation[0]->getProjects(),
+            )
+        );
         $viewModel->setTemplate('oscar/project/search');
 
         return $viewModel;
@@ -653,15 +684,19 @@ class ProjectController extends AbstractOscarController
             ->orderBy('pj.dateCreated', 'DESC')
             ->where('p.id = :id');
 
-        $person = $qb->getQuery()->setParameter('id',
-            $id)->getOneOrNullResult();
+        $person = $qb->getQuery()->setParameter(
+            'id',
+            $id
+        )->getOneOrNullResult();
         // $projects = $em->getRepository('Oscar\Entity\Project')->allByPerson($id);
 
-        $viewModel = new ViewModel(array(
-            'person' => $person,
-            'search' => '',
-            'projects' => $person->getProjectAffectations(),
-        ));
+        $viewModel = new ViewModel(
+            array(
+                'person' => $person,
+                'search' => '',
+                'projects' => $person->getProjectAffectations(),
+            )
+        );
         $viewModel->setTemplate('oscar/project/search');
 
         return $viewModel;
@@ -709,12 +744,12 @@ class ProjectController extends AbstractOscarController
         $projectId = $this->params()->fromRoute('id');
         try {
             $project = $this->getProjectService()->getProject($projectId, true);
-        } catch (\Exception $e ){
+        } catch (\Exception $e) {
             return $this->getResponseInternalError($e->getMessage());
         }
 
         $activitiesIds = $this->params()->fromPost('activities_ids', []);
-        if( !count($activitiesIds) ){
+        if (!count($activitiesIds)) {
             return $this->getResponseInternalError("Aucune activité ne correspond.");
         }
 
@@ -726,8 +761,8 @@ class ProjectController extends AbstractOscarController
             ->getResult();
 
         /** @var Activity $activity */
-        foreach( $activities as $activity ){
-            if( $activity->getProject() != $project ){
+        foreach ($activities as $activity) {
+            if ($activity->getProject() != $project) {
                 $activity->touch();
                 $activity->setProject($project);
             }
