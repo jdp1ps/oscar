@@ -31,22 +31,19 @@ class Activity implements ResourceInterface
 
     const STATUS_PROGRESS = 102;
     /** Activité en cours de réalisation (dossier) */
-
     const STATUS_DEPOSIT = 103;
+    const STATUS_MONTAGE = 104;
+    const STATUS_JUSTIFY = 105;
 
     // 200 : Terminées / Abandonnées
+    const STATUS_CLOSED = 200;     // Activité fermée
+    const STATUS_TERMINATED = 201; // Activité terminée
+    const STATUS_ABORDED = 250; // Activité abandonnée
+    const STATUS_REFUSED = 210; // Activité refusée
 
-    // Activité fermée
-    const STATUS_CLOSED = 200;
-
-    // Activité terminée
-    const STATUS_TERMINATED = 201;
-
-    // Activité abandonnée
-    const STATUS_ABORDED = 250;
-
-    // Activité refusée
-    const STATUS_REFUSED = 210;
+    // 400 : Conflits
+    const STATUS_DISPUTE = 400; // Litige
+    const STATUS_ERROR_STATUS = 404; // Pas de status (suite à l'import)
 
     ///////////////////////////////////////////////////////////////////
     // Incidence financière
@@ -73,10 +70,6 @@ class Activity implements ResourceInterface
         return $finacialImpctValues;
     }
 
-    // 400 : Conflits
-    const STATUS_DISPUTE = 400; // Litige
-    const STATUS_ERROR_STATUS = 404; // Pas de status (suite à l'import)
-
     public static function getStatusSelect()
     {
         static $statusSelect;
@@ -91,6 +84,8 @@ class Activity implements ResourceInterface
                 self::STATUS_REFUSED => 'Refusé',
                 self::STATUS_TERMINATED => 'Résilié',
                 self::STATUS_CLOSED => 'Terminé',
+                self::STATUS_MONTAGE => 'Montage',
+                self::STATUS_JUSTIFY => 'Justifié',
             ];
         }
 
