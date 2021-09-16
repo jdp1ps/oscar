@@ -48,6 +48,13 @@ $settings = array(
         'informatiqueEtLibertes' => 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/',
     ),
 
+    'hostlocalization' => [
+        'activated' => "",
+        'proxies' => "",
+        'reverse-proxies' => "",
+        'masque-ip' => "",
+   ]
+
    // 'session_refresh_period' => 0, // 0 <=> aucune requête exécutée
 
 
