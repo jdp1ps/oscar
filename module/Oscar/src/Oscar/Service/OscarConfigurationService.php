@@ -187,6 +187,9 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getEditableConfKey($key, $default = null)
     {
         $conf = $this->getEditableConfRoot();
+        if ($conf == null ){
+            $conf = [];
+        }
         if (array_key_exists($key, $conf)) {
             return $conf[$key];
         } else {
