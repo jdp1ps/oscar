@@ -9,6 +9,7 @@
 namespace Oscar\Traits;
 
 use Monolog\Logger;
+use Oscar\Service\LoggerService;
 
 trait UseLoggerServiceTrait
 {
@@ -26,7 +27,7 @@ trait UseLoggerServiceTrait
     }
 
     /**
-     * @return Logger
+     * @return LoggerService
      */
     public function getLoggerService() :Logger {
         return $this->logger;

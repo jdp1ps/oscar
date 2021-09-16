@@ -51,7 +51,7 @@ class LoggerServiceFactory implements FactoryInterface
         $stream = new StreamHandler($logPath, $logLevel);
         $firephp = new FirePHPHandler($logLevel);
 
-        $logger = new Logger('oscar');
+        $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);
         $logger->pushHandler($firephp);
 
