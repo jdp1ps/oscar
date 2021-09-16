@@ -12,7 +12,8 @@ databases_maintenance/backup/*.sql
 databases_maintenance/copy-prod-to-local.sh
 !databases_maintenance/backup/.gitkeep
 
-tmp
+tmp/*
+!tmp/.gitkeep
 sandbox
 debug
 DEV.md
