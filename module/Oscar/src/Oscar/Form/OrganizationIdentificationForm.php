@@ -25,6 +25,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
         parent::__construct('organization');
         $this->connectors = $organizationService->getConnectorsList();
         $this->countries = $organizationService->getCountriesIso366Labels();
+        $this->types = $types;
     }
 
     public function init(){
@@ -111,18 +112,32 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             'placeholder'   => 'Nom complet',
         ]);
         $this->add($fullName);
-
+        /*
+        *  $this->add([
+           'name'   => 'country',
+           'options' => [
+               'label' => 'Pays (ISO)',
+               'value_options' => $this->countries
+           ],
+           'attributes' => [
+               'class' => 'form-control',
+               'placeholder'   => 'Pays'
+           ],
+           'type'=>'Select'
+       ]);
+        */
         // Source
         $this->add([
             'name'   => 'type',
             'options' => [
-                'label' => "Type"
+                'label' => "Type",
+                'value_options' => $this->types
             ],
             'attributes' => [
                 'class' => 'form-control',
                 'list' => 'types'
             ],
-            'type'=>'Text'
+            'type'=>'Select'
         ]);
 
         ////////////////////////////////////////////////////////////////////////
@@ -153,6 +168,7 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             ],
             'type'=>'DateTime'
         ]);
+
 
         // DateEnd
         $this->add([
@@ -278,6 +294,10 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
             ],
 
             'country' => [
+                'required' => false
+            ],
+
+            'type' => [
                 'required' => false
             ]
         ];
