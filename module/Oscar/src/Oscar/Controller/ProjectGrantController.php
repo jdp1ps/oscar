@@ -288,6 +288,126 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         );
     }
 
+    /**
+     * Affiche la liste des activités soumises à un processus PCRU.
+     *
+     * @return array
+     */
+    public function pcruListAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_LIST);
+        $accessUpload = $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_PCRU_UPLOAD);
+        $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
+        $methods = $this->getHttpXMethod();
+
+        if ($methods == 'GET') {
+            $action = $this->params()->fromQuery('a');
+
+            // Recherche des activités
+            if ($action == 'search') {
+                $search = $this->params()->fromQuery('search');
+                $idsActivities = $this->getProjectGrantService()->search($search);
+                $activities = [];
+                /** @var Activity $activity */
+                foreach ($this->getProjectGrantService()->getActivitiesByIds($idsActivities) as $activity) {
+                    $a = $activity->toArray();
+                    $a['pcru'] = [];
+                    $a['pcruenable'] = false;
+                    $activities[] = $a;
+                }
+                return $this->jsonOutput(["activities" => $activities]);
+            }
+
+            // Aperçu PCRU
+            if ($action == 'preview') {
+                $activity_id = $this->params()->fromQuery('activity_id');
+                $activity = $this->getProjectGrantService()->getActivityById($activity_id);
+                $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+                return $this->jsonOutput(["preview" => $preview]);
+            }
+
+            if ($action == 'download') {
+                $pcru = $this->getProjectGrantService()->getPCRUService()->downloadPCRUSendableFile();
+            }
+        } elseif ($methods == "POST") {
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_UPLOAD);
+            $action = $this->params()->fromPost('action');
+            if( $action == 'upload' ){
+                $this->getProjectGrantService()->getPCRUService()->upload();
+                $this->redirect()->toRoute('contract/pcru-list');
+            }
+        }
+
+        return [
+            'downloadable' => $this->getProjectGrantService()->getPCRUService()->hasDownload(),
+            'uploadable' => !$this->getProjectGrantService()->getPCRUService()->hasUploadInProgress() && $accessUpload,
+            'pcruInfos' => $pcruInfos
+        ];
+    }
+
+    /**
+     * Gestion/récapitulatif des informations PCRU
+     *
+     * @return array|\Zend\Http\Response
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function pcruInfosAction()
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        if( $this->params()->fromQuery("a") == "beta" ){
+            $form = new ActivityInfosPcruForm();
+            $form->setHydrator(new ActivityInfosPCRUFormHydrator());
+            $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+            $form->init();
+            $form->bind($preview['infos']);
+
+            $preview['form'] = $form;
+            $preview['activity'] = $activity;
+            $view = new ViewModel($preview);
+            $view->setTemplate('oscar/activity/pcruinfos-form.phtml');
+
+            return $view;
+        }
+
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        $method = $this->getHttpXMethod();
+
+        if ($method == 'POST') {
+            $action = $this->params()->fromPost('action');
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU_ACTIVATE, $activity);
+            switch ($action) {
+                case 'activate-pcru':
+                    $this->getProjectGrantService()->getPCRUService()->activateActivity($activity);
+                    break;
+
+                case 'add-pool':
+                    $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
+                    break;
+
+                case 'download-pcru':
+                    $this->getProjectGrantService()->getPCRUService()->downloadOne($activity);
+                    break;
+            }
+            return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId() ]);
+        }
+
+        // Droit d'accès
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        $return = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+
+        $return['poolopen'] = $this->getProjectGrantService()->getPCRUService()->isPoolOpen();
+
+        return $return;
+    }
+
+
     public function adminDemandeAction()
     {
         /** @var Person $demandeur */

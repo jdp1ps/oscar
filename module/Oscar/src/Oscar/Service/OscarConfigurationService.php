@@ -497,13 +497,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             // Test de la racine PCRU
             $path = realpath($this->getConfiguration('pcru.files_path'));
             if( !file_exists($path) ){
-                throw new OscarException("Erreur de configuration : Le dossier de traitement temporaire n'existe pas");
+                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement temporaire n'existe pas");
             }
             if( !is_dir($path) ){
-                throw new OscarException("Erreur de configuration : Le dossier de traitement temporaire doit être un dossier");
+                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement temporaire doit être un dossier");
             }
             if( !is_writable($path) ){
-                throw new OscarException("Erreur de configuration : Le dossier de traitement doit être accessible en écriture");
+                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement doit être accessible en écriture");
             }
             $pcru_root = $path;
         }
@@ -531,11 +531,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             }
 
             if( !is_dir($path) ){
-                throw new OscarException("Erreur de configuration : Le dossier d'envoi doit être un dossier");
+                throw new OscarException("Erreur de configuration PCRU : Le dossier d'envoi doit être un dossier");
             }
 
             if( !is_writable($path) ){
-                throw new OscarException("Erreur de configuration : Le dossier d'envoi doit être accessible en écriture");
+                throw new OscarException("Erreur de configuration PCRU : Le dossier d'envoi doit être accessible en écriture");
             }
 
             $pcru_pool = $path;
