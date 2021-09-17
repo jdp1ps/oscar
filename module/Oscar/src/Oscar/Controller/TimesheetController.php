@@ -803,7 +803,7 @@ class TimesheetController extends AbstractOscarController
 
         }
 
-        if( $format == "json" ){
+        if( $format == "json" || $this->isAjax() ){
             return $this->jsonOutput($datas);
         }
 

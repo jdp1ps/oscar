@@ -64,20 +64,7 @@
         <?php else: ?>
             <div class="alert alert-info">Un processus PCRU est déjà en cours (En attente d'un retour)</div>
         <?php endif; ?>
-
-        <?php if( $hasready == true): ?>
-        <form action="" method="post" class="form-inline">
-            <button value="activate" name="action" class="btn btn-primary">
-                <i class="icon-upload"></i>
-                Ajouter au prochain upload les infos prêtes
-            </button>
-        </form>
-        <?php endif; ?>
-
-
     </nav>
-
-
     <?php endif; ?>
     <?php /* <script>
         require(['vue', 'vue-resource', 'createprocessuspcru'], function(Vue,VueResource,CreateProcessusPCRU){

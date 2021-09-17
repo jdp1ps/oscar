@@ -1,7 +1,8 @@
-<?php /** @var $entity Oscar\Entity\Activity */ ?>
-<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css" />
-<link rel="stylesheet" href="/js/oscar/dist/milestones.css" />
-<link rel="stylesheet" href="/js/oscar/dist/Payments.css" />
+<?php
+/** @var $entity Oscar\Entity\Activity */ ?>
+<link rel="stylesheet" href="/js/vendor/timewalker/src/styles/timewalker.css"/>
+<link rel="stylesheet" href="/js/oscar/dist/milestones.css"/>
+<link rel="stylesheet" href="/js/oscar/dist/Payments.css"/>
 
 <div class="container activity-full">
     <nav>
@@ -11,14 +12,18 @@
 
     <header class="activity-header oscar-header jumbotron has-btn">
         <h2>
-            <?php if( $entity->getProject() ): $labelBtn = "Modifier le projet"; ?>
+            <?php
+            if ($entity->getProject()): $labelBtn = "Modifier le projet"; ?>
                 <small class="text-light">
                     <?= $this->link()->project($entity->getProject()) ?> : </small>
-            <?php else: $labelBtn = "Affecter un projet existant"; ?>
+            <?php
+            else: $labelBtn = "Affecter un projet existant"; ?>
                 <small>Sans projet</small>
-            <?php endif; ?>
+            <?php
+            endif; ?>
         </h2>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $entity) ): ?>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $entity)): ?>
             <div class="dropdown" style="position: absolute; right: 12px; top: 12px">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                         data-toggle="dropdown"
@@ -27,10 +32,11 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT, $entity)): ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT, $entity)): ?>
                         <li class="dropdown-header"><i class="icon-cubes"></i> Projet</li>
                         <li>
-                            <a href="<?= $this->url('contract/moveToProject', ['id'=>$entity->getId()]) ?>">
+                            <a href="<?= $this->url('contract/moveToProject', ['id' => $entity->getId()]) ?>">
                                 <?= $labelBtn ?>
                             </a>
                         </li>
@@ -40,27 +46,31 @@
                             </a>
                         </li>
 
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                     <li class="dropdown-header">
                         <i class="icon-cube"></i>
                         Données de l'activité
                     </li>
                     <li>
                     <li>
-                        <a href="<?= $this->url('contract/edit', ['id'=>$entity->getId()]) ?>" class="smoke">
+                        <a href="<?= $this->url('contract/edit', ['id' => $entity->getId()]) ?>" class="smoke">
                             Modifier les informations
                         </a>
                     </li>
-                    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DUPLICATE, $entity)): ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DUPLICATE, $entity)): ?>
                         <li>
                             <a href="#" class="smoke" id="cloneBtn">
                                 Dupliquer cette activité
                             </a>
                         </li>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                 </ul>
             </div>
-        <?php endif; ?>
+        <?php
+        endif; ?>
 
         <div>
             <small>
@@ -69,7 +79,7 @@
                     <?= $entity->getStatusLabel() ?>
                  </span>
                 :::
-                 <span>
+                <span>
                     <i class="<?= $entity->getTypeSlug() ?>"></i>
                     <span class="text-light"><?= $this->activityTypeHlp()->chain($entity->getActivityType()) ?></span>
                  </span>
@@ -78,87 +88,119 @@
 
         <h1>
             <span> <i class="icon-cube"></i> <?= $entity->getLabel() ?></span>
-            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
-            <div class="budget">
-                <em>Montant</em>
-                <strong><?= $this->currency($entity) ?></strong>
-                <?php if( $entity->getFraisDegestion() ): ?>
-                    <div>
-                        <small>
-                            Frais de gestion :
-                            <b><?= $entity->getFraisDeGestionDisplay() ?></b>
-                        </small>
-                        <?php if( $entity->getFraisDeGestionPartHebergeur() ):?>
-                        <br><small>
-                            Part hébergeur :
-                            <b><?= $entity->getFraisDeGestionPartHebergeurDisplay() ?></b>
-                        </small>
-                        <?php endif; ?>
-                    </div>
-                <?php endif ?>
-                <?php if( $entity->getTva() ): ?>
-                    <div><small>
-                            TVA :
-                            <b><?= $entity->getTva() ?></b>
-                        </small>
-                    </div>
-                <?php endif ?>
-                <?php if( $entity->getAssietteSubventionnable() != null ): ?>
-                    <em>Assiette éligible</em>
-                    <strong>
-                        <?= $this->currency($entity->getAssietteSubventionnable()) ?>
-                    </strong>
-                <?php endif; ?>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
+                <div class="budget">
+                    <em>Montant</em>
+                    <strong><?= $this->currency($entity) ?></strong>
+                    <?php
+                    if ($entity->getFraisDegestion()): ?>
+                        <div>
+                            <small>
+                                Frais de gestion :
+                                <b><?= $entity->getFraisDeGestionDisplay() ?></b>
+                            </small>
+                            <?php
+                            if ($entity->getFraisDeGestionPartHebergeur()): ?>
+                                <br><small>
+                                    Part hébergeur :
+                                    <b><?= $entity->getFraisDeGestionPartHebergeurDisplay() ?></b>
+                                </small>
+                            <?php
+                            endif; ?>
+                        </div>
+                    <?php
+                    endif ?>
+                    <?php
+                    if ($entity->getTva()): ?>
+                        <div><small>
+                                TVA :
+                                <b><?= $entity->getTva() ?></b>
+                            </small>
+                        </div>
+                    <?php
+                    endif ?>
+                    <?php
+                    if ($entity->getAssietteSubventionnable() != null): ?>
+                        <em>Assiette éligible</em>
+                        <strong>
+                            <?= $this->currency($entity->getAssietteSubventionnable()) ?>
+                        </strong>
+                    <?php
+                    endif; ?>
 
-            </div>
-            <?php endif; ?>
+                </div>
+            <?php
+            endif; ?>
         </h1>
 
-        <?php if( $entity->getDescription() ): ?>
-        <p class="baseline">
-            <small><?= $entity->getDescription() ?></small>
-        </p>
-        <?php endif; ?>
+        <?php
+        if ($entity->getDescription()): ?>
+            <p class="baseline">
+                <small><?= $entity->getDescription() ?></small>
+            </p>
+        <?php
+        endif; ?>
 
         <p class="dates text-highlight baseline">
-            Début : <time><?= $this->moment($entity->getDateStart()) ?></time> /
-            Fin : <time><?= $this->moment($entity->getDateEnd()) ?></time> -
-            Signé le <time><?= $this->moment($entity->getDateSigned()) ?></time>
+            Début :
+            <time><?= $this->moment($entity->getDateStart()) ?></time>
+            /
+            Fin :
+            <time><?= $this->moment($entity->getDateEnd()) ?></time>
+            -
+            Signé le
+            <time><?= $this->moment($entity->getDateSigned()) ?></time>
         </p>
 
         <p class="texthighlight baseline">
             <?= $this->translate("N° Oscar") ?> : <strong><?= $entity->getOscarNum() ?></strong><br/>
             PFI :
-            <?php if( $entity->getCodeEOTP() ): ?>
+            <?php
+            if ($entity->getCodeEOTP()): ?>
                 <strong><?= $entity->getCodeEOTP() ?></strong> -
-            <?php endif; ?>
-            <?php if( $entity->getDateOpened() ): ?>
-                ouvert le <time><?= $this->moment($entity->getDateOpened()) ?></time>
-            <?php else: ?>
+            <?php
+            endif; ?>
+            <?php
+            if ($entity->getDateOpened()): ?>
+                ouvert le
+                <time><?= $this->moment($entity->getDateOpened()) ?></time>
+            <?php
+            else: ?>
                 non daté
-            <?php endif; ?><br/>
+            <?php
+            endif; ?><br/>
 
-            <?php if( $entity->getNumbers() ): ?>
-            Autre numérotation :
-            <?php foreach( $entity->getNumbers() as $key=>$value ): ?>
-                <span class="number">
+            <?php
+            if ($entity->getNumbers()): ?>
+                Autre numérotation :
+                <?php
+                foreach ($entity->getNumbers() as $key => $value): ?>
+                    <span class="number">
                         <span class="key"><?= $key ?></span>
                         <span class="value"><?= $value ?></span>
                     </span>
-            <?php endforeach; ?>
-            <?php endif; ?>
-            Disciplines:  <?php if( $entity->getDisciplines() ): ?>
-                <?php foreach ($entity->getDisciplines() as $d) : ?>
+                <?php
+                endforeach; ?>
+            <?php
+            endif; ?>
+            Disciplines: <?php
+            if ($entity->getDisciplines()): ?>
+                <?php
+                foreach ($entity->getDisciplines() as $d) : ?>
                     <span class="cartouche xs"><?= $d ?></span>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                <?php
+                endforeach; ?>
+            <?php
+            endif; ?>
         </p>
     </header>
 
     <div class="row">
         <div class="col-md-8">
 
-            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
                 <section class="has-btn">
                     <h2>
                         <i class="icon-group"></i>
@@ -168,32 +210,42 @@
 
                 </section>
                 <script>
-                    require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
+                    require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function (Vue, VueResource, EntityWithRole, moment) {
                         Vue.use(VueResource);
                         Vue.http.options.emulateJSON = true;
                         Vue.http.options.emulateHTTP = true;
                         new Vue({
                             el: "#organizations",
-                            render(h){
-                                return h(EntityWithRole.default, { props: {
+                            render(h) {
+                                return h(EntityWithRole.default, {
+                                    props: {
                                         url: "<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>",
-                                        urlNew: "<?= $this->url('personactivity/new', ['idenroller' => $entity->getId()]) ?>",
-                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE, $entity) ? "true" : 'false' ?>,
+                                        urlNew: "<?= $this->url(
+                                            'personactivity/new',
+                                            ['idenroller' => $entity->getId()]
+                                        ) ?>",
+                                        manage: <?= $this->grant()->privilege(
+                                            \Oscar\Provider\Privileges::ACTIVITY_PERSON_MANAGE,
+                                            $entity
+                                        ) ? "true" : 'false' ?>,
                                         title: "Personne",
                                         roles: <?= json_encode($rolesPersons) ?>,
                                         moment: moment
-                                    }});
+                                    }
+                                });
                             }
 
                         })
                     });
                 </script>
-            <?php endif; ?>
+            <?php
+            endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
                 <section id="involved"></section>
                 <script>
-                    require(['vue'], function(Vue){
+                    require(['vue'], function (Vue) {
                         new Vue({
                             el: '#involved',
                             template: `<div>
@@ -223,96 +275,115 @@
                                 persons: <?= $involvedPerson ?>
                             },
                             computed: {
-                                filteredPersons(){
+                                filteredPersons() {
                                     var ret;
-                                    if( !this.filter ) ret = this.persons;
+                                    if (!this.filter) ret = this.persons;
                                     else {
                                         var criteria = this.filter;
-                                        ret = this.persons.filter(p => p.displayname.indexOf(criteria)>=0 ||  p.affectation.indexOf(criteria)>=0 );
+                                        ret = this.persons.filter(p => p.displayname.indexOf(criteria) >= 0 || p.affectation.indexOf(criteria) >= 0);
                                     }
-                                    return ret.sort( (a, b) => a.displayname.localeCompare(b.displayname));
+                                    return ret.sort((a, b) => a.displayname.localeCompare(b.displayname));
 
                                 }
                             }
                         })
                     })
                 </script>
-            <?php endif; ?>
+            <?php
+            endif; ?>
 
 
-            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
-            <section class="has-btn">
-                <h2>
-                    <i class="icon-building-filled"></i>
-                    Partenaires
-                </h2>
-                <section id="organizations" class="has-btn"></section>
-            </section>
-            <script>
-                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
-                    Vue.use(VueResource);
-                    Vue.http.options.emulateJSON = true;
-                    Vue.http.options.emulateHTTP = true;
-                    new Vue({
-                        el: "#organizations",
-                        render(h){
-                            return h(EntityWithRole.default, { props: {
-                                    url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
-                                    urlNew: "<?= $this->url('organizationactivity/new', ['idenroller' => $entity->getId()]) ?>",
-                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE, $entity) ? "true" : 'false' ?>,
-                                    title: "Organisation",
-                                    roles: <?= json_encode($rolesOrganizations) ?>,
-                                    moment: moment
-                                }});
-                        }
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+                <section class="has-btn">
+                    <h2>
+                        <i class="icon-building-filled"></i>
+                        Partenaires
+                    </h2>
+                    <section id="organizations" class="has-btn"></section>
+                </section>
+                <script>
+                    require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function (Vue, VueResource, EntityWithRole, moment) {
+                        Vue.use(VueResource);
+                        Vue.http.options.emulateJSON = true;
+                        Vue.http.options.emulateHTTP = true;
+                        new Vue({
+                            el: "#organizations",
+                            render(h) {
+                                return h(EntityWithRole.default, {
+                                    props: {
+                                        url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
+                                        urlNew: "<?= $this->url(
+                                            'organizationactivity/new',
+                                            ['idenroller' => $entity->getId()]
+                                        ) ?>",
+                                        manage: <?= $this->grant()->privilege(
+                                            \Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                                            $entity
+                                        ) ? "true" : 'false' ?>,
+                                        title: "Organisation",
+                                        roles: <?= json_encode($rolesOrganizations) ?>,
+                                        moment: moment
+                                    }
+                                });
+                            }
 
-                    })
-                });
-            </script>
-            <?php endif; ?>
+                        })
+                    });
+                </script>
+            <?php
+            endif; ?>
 
             <?php
             $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity);
 
-            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity) ): ?>
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity)): ?>
                 <section id="documents" class="has-btn">
 
 
                     <h2><i class="icon-book"></i> Documents</h2>
 
-                    <?php if( $manage ): ?>
+                    <?php
+                    if ($manage): ?>
                         <div class="btn-area">
-                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId() ]) ?>" class="smoke">
+                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>"
+                               class="smoke">
                                 <i class="icon-book"></i>
                                 Téléverser un document
                             </a>
                         </div>
-                    <?php endif; ?>
-                    
+                    <?php
+                    endif; ?>
+
                     <nav>
-                        <?php foreach($generatedDocuments as $key=>$infos ): ?>
-                            <a href="<?= $this->url('contract/generatedocument', ['id' => $entity->getId(), 'doc' => $key]) ?>" class="btn btn-primary">
+                        <?php
+                        foreach ($generatedDocuments as $key => $infos): ?>
+                            <a href="<?= $this->url(
+                                'contract/generatedocument',
+                                ['id' => $entity->getId(), 'doc' => $key]
+                            ) ?>" class="btn btn-primary">
                                 <?= $infos['label'] ?>
                             </a>
-                        <?php endforeach; ?>
+                        <?php
+                        endforeach; ?>
                     </nav>
 
                     <div id="docv2"></div>
                     <script>
-                        requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function(Vue, VueResource, moment, DocumentsActivity){
+                        requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
                             Vue.use(VueResource);
 
-                            Vue.filter('dateFull', function(date) {
+                            Vue.filter('dateFull', function (date) {
                                 var m = moment(date);
                                 return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
                             });
 
-                            Vue.filter('dateFullSort', function(date) {
+                            Vue.filter('dateFullSort', function (date) {
                                 var m = moment(date);
                                 return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
                             });
 
-                            Vue.filter('filesize', function(octets) {
+                            Vue.filter('filesize', function (octets) {
                                 var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
                                 if (octets == 0) return '0 Octet';
                                 var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
@@ -324,8 +395,13 @@
                                 render(h) {
                                     return h(DocumentsActivity, {
                                         props: {
-                                            url: '<?= $this->url('contract/documents-json', ['id' => $entity->getId()]) ?>',
-                                            urlDocumentType: '<?= $this->url('contractdocument/document-change-type') ?>',
+                                            url: '<?= $this->url(
+                                                'contract/documents-json',
+                                                ['id' => $entity->getId()]
+                                            ) ?>',
+                                            urlDocumentType: '<?= $this->url(
+                                                'contractdocument/document-change-type'
+                                            ) ?>',
                                             documentTypes: <?= $documentTypes ?>,
                                             moment: moment
                                         }
@@ -335,102 +411,118 @@
                         });
                     </script>
                 </section>
-            <?php endif; ?>
+            <?php
+            endif; ?>
         </div>
         <div class="col-md-4">
 
             <?php
             // -------------------------------------------------------------------------------------------------- PCRU
-            if( $pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity) ):?>
+            if ($pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity)):?>
                 <div id="pcru-infos">
                     <h2><i class="icon-beaker"></i>PCRU</h2>
-                    <?php if(!$entity->isPcruFriendly()): ?>
-                    <div class="alert alert-danger">
-                        Cette activité n'est pas éligible à PCRU :
-                        <ul>
-                            <?php foreach ($entity->getPcruMissings() as $item): ?>
-                            <li><?= $item ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    <?php else: ?>
-                        <a href="<?= $this->url('contract/pcru-infos', ['id' => $entity->getId()]) ?>" class="btn btn-primary btn-xs">
+                    <?php
+                    if (!$entity->isPcruFriendly()): ?>
+                        <div class="alert alert-danger">
+                            Cette activité n'est pas éligible à PCRU :
+                            <ul>
+                                <?php
+                                foreach ($entity->getPcruMissings() as $item): ?>
+                                    <li><?= $item ?></li>
+                                <?php
+                                endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php
+                    else: ?>
+                        <a href="<?= $this->url('contract/pcru-infos', ['id' => $entity->getId()]) ?>"
+                           class="btn btn-primary btn-xs">
                             Accès aux informations PCRU
                         </a>
                         <ul>
-                            <?php foreach ($entity->getPcruMissings() as $item): ?>
+                            <?php
+                            foreach ($entity->getPcruMissings() as $item): ?>
                                 <li><?= $item ?></li>
-                            <?php endforeach; ?>
+                            <?php
+                            endforeach; ?>
                         </ul>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                 </div>
-            <?php endif; ?>
+            <?php
+            endif; ?>
             <?php
             // -------------------------------------------------------------------------------------------------- JALONS
-            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity) ): ?>
-            <div id="milestones"></div>
-            <script>
-                require(['ActivityModel', 'vue','vue-resource', 'mm','milestones'], function(
-                    ActivityModel,
-                    Vue,
-                    VueResource,
-                    moment,
-                    milestone)
-                {
-                    Vue.use(VueResource);
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity)): ?>
+                <div id="milestones"></div>
+                <script>
+                    require(['ActivityModel', 'vue', 'vue-resource', 'mm', 'milestones'], function (
+                        ActivityModel,
+                        Vue,
+                        VueResource,
+                        moment,
+                        milestone) {
+                        Vue.use(VueResource);
 
 
-                    new Vue({ data: ActivityModel });
+                        new Vue({data: ActivityModel});
 
-                    Vue.filter('moment', function(value){
-                        var m = moment(value.date);
-                        return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
-                    });
+                        Vue.filter('moment', function (value) {
+                            var m = moment(value.date);
+                            return m.format('D MMMM YYYY') + ' (' + m.fromNow() + ')'
+                        });
 
-                    var milestonesVue = new Vue({
-                        render(h){
-                            return h(milestone.default, {
-                                props: {
-                                    url: '<?= $this->url("milestones/activity", ['idactivity' => $entity->getId()]) ?>',
-                                    moment: moment,
-                                    model: ActivityModel
-                                }
-                            })
-                        }
-                    }).$mount('#milestones');
+                        var milestonesVue = new Vue({
+                            render(h) {
+                                return h(milestone.default, {
+                                    props: {
+                                        url: '<?= $this->url(
+                                            "milestones/activity",
+                                            ['idactivity' => $entity->getId()]
+                                        ) ?>',
+                                        moment: moment,
+                                        model: ActivityModel
+                                    }
+                                })
+                            }
+                        }).$mount('#milestones');
 
-                })
-            </script>
-            <?php endif; ?>
+                    })
+                </script>
+            <?php
+            endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity) ): ?>
-                <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>" class="btn btn-default">
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity)): ?>
+                <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>"
+                   class="btn btn-default">
                     <i class="icon-bell"></i>
                     Voir les notifications planifiées
                 </a>
-            <?php endif; ?>
+            <?php
+            endif; ?>
 
 
             <?php
             // ---------------------------------------------------------------------------------------------- VERSEMENTS
-            if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity) ): ?>
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity)): ?>
 
                 <div id="payments"></div>
                 <script>
-                    require(['ActivityModel', 'vue','vue-resource', 'mm','payments', 'VueFilters'], function(ActivityModel, Vue, VueResource, moment, payments, VueFilters){
+                    require(['ActivityModel', 'vue', 'vue-resource', 'mm', 'payments', 'VueFilters'], function (ActivityModel, Vue, VueResource, moment, payments, VueFilters) {
                         Vue.use(VueResource);
 
-                        Vue.filter('moment', function(value){
+                        Vue.filter('moment', function (value) {
                             var m = moment(value.date);
-                            return m.format('D MMMM YYYY') + ' (' + m.fromNow() +')'
+                            return m.format('D MMMM YYYY') + ' (' + m.fromNow() + ')'
                         });
 
                         Vue.filter('money', VueFilters.default.money);
 
-                        new Vue({ data: ActivityModel });
+                        new Vue({data: ActivityModel});
 
                         new Vue({
-                            render(h){
+                            render(h) {
                                 return h(payments.default, {
                                     props: {
                                         url: '<?= $this->url("activitypayment", ['idactivity' => $entity->getId()]) ?>',
@@ -439,7 +531,10 @@
                                         currencies: <?= json_encode($currencies) ?>,
                                         currency: <?= json_encode($entity->getCurrency()->asArray()) ?>,
                                         model: ActivityModel,
-                                        manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE, $entity) ? 'true' : 'false' ?>
+                                        manage: <?= $this->grant()->privilege(
+                                            \Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE,
+                                            $entity
+                                        ) ? 'true' : 'false' ?>
                                     }
                                 })
                             }
@@ -448,259 +543,360 @@
                 </script>
 
                 <div>
-                    <?php if( $entity->getNoteFinanciere() != null ): ?>
+                    <?php
+                    if ($entity->getNoteFinanciere() != null): ?>
                         <h3>Note financière</h3>
                         <blockquote><?= $entity->getNoteFinanciere() ?></blockquote>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                 </div>
-            <?php endif; ?>
+            <?php
+            endif; ?>
 
             <?php
             // ------------------------------------------------------------------------------------------------ DÉPENSES
-            if( $this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity) ): ?>
-            <section>
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_SHOW, $entity)): ?>
+                <section>
                 <h2><i class="icon-book"></i> Dépenses</h2>
 
-                <?php if( !$this->entity->getCodeEOTP() ): ?>
-                <div class="alert alert-warning">
-                    L'activité doit avoir un PFI pour le suivi des dépenses
-                </div>
-                <?php else: ?>
-                <div id="depenses">DÉPENSES</div>
+                <?php
+                if (!$this->entity->getCodeEOTP()): ?>
+                    <div class="alert alert-warning">
+                        L'activité doit avoir un PFI pour le suivi des dépenses
+                    </div>
+                <?php
+                else: ?>
+                    <div id="depenses">DÉPENSES</div>
                     <script>
-                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function(Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment){
+                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function (Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment) {
                             Vue.use(VueResource);
-                           Vue.filter('money', VueFilters.default.money);
-                            Vue.filter('dateFull', function(date) {
+                            Vue.filter('money', VueFilters.default.money);
+                            Vue.filter('dateFull', function (date) {
                                 var m = moment(date);
                                 return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
                             });
                             new Vue({
                                 el: "#depenses",
-                                render:function(h){
-                                    return h(ActivitySpendSynthesis.default, {"props":
-                                        {
-                                            "manageDepense": '<?= $this->grant(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ? $this->url('depense/manage') : "null" ?>',
-                                            "url": "<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>"
-                                        }
+                                render: function (h) {
+                                    return h(ActivitySpendSynthesis.default, {
+                                        "props":
+                                            {
+                                                "manageDepense": '<?= $this->grant(
+                                                    \Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
+                                                ) ? $this->url('depense/manage') : "null" ?>',
+                                                "url": "<?= $this->url(
+                                                    'contract/spent-synthesis',
+                                                    ['id' => $entity->getId()]
+                                                ) ?>"
+                                            }
                                     });
                                 }
                             })
                         })
                     </script>
-                <nav>
-                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DETAILS, $entity)): ?>
-                    <a class="btn btn-primary" href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le détail des dépenses</a>
-                    <?php endif; ?>
-                </nav>
-            </section>
-            <?php endif; ?>
+                    <nav>
+                        <?php
+                        if ($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DETAILS, $entity)): ?>
+                            <a class="btn btn-primary"
+                               href="<?= $this->url("contract/list-spent", ['id' => $entity->getId()]) ?>">Voir le
+                                détail des dépenses</a>
+                        <?php
+                        endif; ?>
+                    </nav>
+                    </section>
+                <?php
+                endif; ?>
 
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW) ): ?>
-                <a class="btn btn-primary" href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel (Beta)</a>
-            <?php endif; ?>
-        <?php endif; ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW)): ?>
+                    <a class="btn btn-primary"
+                       href="<?= $this->url("contract/estimated-spent", ['id' => $entity->getId()]) ?>">Prévisionnel
+                        (Beta)</a>
+                <?php
+                endif; ?>
+            <?php
+            endif; ?>
         </div>
     </div>
     <hr>
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity) ): ?>
-    <section>
-        <?php if( count($entity->getWorkPackages()) == 0 ) : ?>
-            <p>Pas de lot de travail</p>
-        <?php else: ?>
-            <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
-        <?php if( !$entity->getProject() ): ?>
-        <div class="alert alert-danger">
-            <i class="icon-attention-1"></i>
-            Cette activité doit être associée à un projet pour garantir le fonctionnement des feuilles de temps.
-        </div>
-        <?php endif; ?>
-        <h3>Validateurs</h3>
-        <div class="row">
-            <div class="col-md-4">
-                <h4>Activité</h4>
-                <?php if(count($validatorsPrj)):?>
-                    <?php foreach($validatorsPrj as $validateur): ?>
-                        <article class="card">
-                            <?= $validateur ?>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="alert alert-danger">
-                        Aucun validateur scientifique identifié pour cette activité
+    <?php
+    if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity)): ?>
+        <section>
+            <?php
+            if (count($entity->getWorkPackages()) == 0) : ?>
+                <p>Pas de lot de travail</p>
+            <?php
+            else: ?>
+                <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
+            <?php
+            if (!$entity->getProject()): ?>
+                <div class="alert alert-danger">
+                    <i class="icon-attention-1"></i>
+                    Cette activité doit être associée à un projet pour garantir le fonctionnement des feuilles de temps.
+                </div>
+            <?php
+            endif; ?>
+                <h3>Validateurs</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Activité</h4>
+                        <?php
+                        if (count($validatorsPrj)): ?>
+                            <?php
+                            foreach ($validatorsPrj as $validateur): ?>
+                                <article class="card">
+                                    <?= $validateur ?>
+                                </article>
+                            <?php
+                            endforeach; ?>
+                        <?php
+                        else: ?>
+                            <div class="alert alert-danger">
+                                Aucun validateur scientifique identifié pour cette activité
+                            </div>
+                        <?php
+                        endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
-            <div class="col-md-4">
-                <h4>Scientifique</h4>
-                <?php if(count($validatorsSci)):?>
-                    <?php foreach($validatorsSci as $validateur): ?>
-                        <article class="card">
-                            <?= $validateur ?>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="alert alert-danger">
-                        Aucun validateur scientifique identifié pour cette activité
+                    <div class="col-md-4">
+                        <h4>Scientifique</h4>
+                        <?php
+                        if (count($validatorsSci)): ?>
+                            <?php
+                            foreach ($validatorsSci as $validateur): ?>
+                                <article class="card">
+                                    <?= $validateur ?>
+                                </article>
+                            <?php
+                            endforeach; ?>
+                        <?php
+                        else: ?>
+                            <div class="alert alert-danger">
+                                Aucun validateur scientifique identifié pour cette activité
+                            </div>
+                        <?php
+                        endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
-            <div class="col-md-4">
-                <h4>Administratif</h4>
-                <?php if(count($validatorsAdm)):?>
-                    <?php foreach($validatorsAdm as $validateur): ?>
-                        <article class="card">
-                            <?= $validateur ?>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="alert alert-danger">
-                        Aucun validateur administratif identifié pour cette activité
+                    <div class="col-md-4">
+                        <h4>Administratif</h4>
+                        <?php
+                        if (count($validatorsAdm)): ?>
+                            <?php
+                            foreach ($validatorsAdm as $validateur): ?>
+                                <article class="card">
+                                    <?= $validateur ?>
+                                </article>
+                            <?php
+                            endforeach; ?>
+                        <?php
+                        else: ?>
+                            <div class="alert alert-danger">
+                                Aucun validateur administratif identifié pour cette activité
+                            </div>
+                        <?php
+                        endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
-        </div>
+                </div>
 
-        <h3>Synthèse de déclarations</h3>
-        <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
-            <i class="icon-calendar"></i>
-            Synthèse pour cette activité
-        </a>
+                <h3>Synthèse de déclarations</h3>
+               <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
+                   <i class="icon-calendar"></i>
+                   Synthèse pour cette activité
+               </a>
 
-        <h3>Déclarants</h3>
-        <?php
-        $declarers = [];
-        foreach ($entity->getPersonsDeep() as $personActivity): ?>
-            <?php if( $entity->hasDeclarant($personActivity->getPerson()) ):
-                $declarers[] = $personActivity->getPerson()->toJson();
-                $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
-                ?>
+            <?php
+            /**** V2.0
+                <div id="synthesis-timesheet">FEUILLE de TEMPS</div>
+                <script>
+                    require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
+                        Vue.use(VueResource);
+                        Vue.http.options.emulateJSON = true;
+                        Vue.http.options.emulateHTTP = true;
+
+                        new Vue({
+                            render: function (h) {
+                                return h(ActivityTimesheetSynthesisMenu, {
+                                    props: {
+                                        url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId(
+                                        ) ?>'
+                                    }
+                                })
+                            },
+                            el: '#synthesis-timesheet'
+                        }).$mount()
+                    })
+                </script>
+            /****/ ?>
+
+                <h3>Déclarants</h3>
+            <?php
+            $declarers = [];
+            foreach ($entity->getPersonsDeep() as $personActivity): ?>
+            <?php
+            if ($entity->hasDeclarant($personActivity->getPerson())):
+            $declarers[] = $personActivity->getPerson()->toJson();
+            $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
+            ?>
 
                 <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $personActivity->getPerson()->getId() ?>"
-                   class="btn <?=  $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
+                   class="btn <?= $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
                     <i class="icon-calendar"></i>
                     <?= $personActivity->getPerson() ?>
-                    <?php if(!$hasDeclaration): ?>
-                    <small>(N'a encore rien déclaré)</small>
-                    <?php endif; ?>
+                    <?php
+                    if (!$hasDeclaration): ?>
+                        <small>(N'a encore rien déclaré)</small>
+                    <?php
+                    endif; ?>
                 </a>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    <?php endif; ?>
-    </section>
-<?php endif; ?>
+            <?php
+            endif; ?>
+            <?php
+            endforeach; ?>
+            <?php
+            endif; ?>
+        </section>
+    <?php
+    endif; ?>
 
-<?php
-$manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
-if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-    <section>
-        <h2><i class="icon-archive"></i> Lot de travail</h2>
-        <?php if( !($entity->getProject() && $entity->getAcronym()) ): ?>
-        <div class="alert alert-danger">
-            <?php if( !$entity->getProject() ): ?>
-                <p>L'activité doit appartenir à un projet pour activer les lots de travail</p>
-            <?php elseif (!$entity->getAcronym() ): ?>
-                <p>Le projet <strong><?= $entity->getProject() ?></strong> n'a pas d'acronyme !</p>
-            <?php endif; ?>
-        </div>
-        <?php else: ?>
-        <div id="workpackages"></div>
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity) ): ?>
-            <script>
-                require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function(Vue, VueResource, Bootbox, Workpackage){
-                    Vue.use(VueResource);
+    <?php
+    $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity);
+    if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity)): ?>
+        <section>
+            <h2><i class="icon-archive"></i> Lot de travail</h2>
+            <?php
+            if (!($entity->getProject() && $entity->getAcronym())): ?>
+                <div class="alert alert-danger">
+                    <?php
+                    if (!$entity->getProject()): ?>
+                        <p>L'activité doit appartenir à un projet pour activer les lots de travail</p>
+                    <?php
+                    elseif (!$entity->getAcronym()): ?>
+                        <p>Le projet <strong><?= $entity->getProject() ?></strong> n'a pas d'acronyme !</p>
+                    <?php
+                    endif; ?>
+                </div>
+            <?php
+            else: ?>
+                <div id="workpackages"></div>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity)): ?>
+                <script>
+                    require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function (Vue, VueResource, Bootbox, Workpackage) {
+                        Vue.use(VueResource);
 
-                    Vue.http.options.emulateJSON = true;
-                    Vue.http.options.emulateHTTP = true;
+                        Vue.http.options.emulateJSON = true;
+                        Vue.http.options.emulateHTTP = true;
 
-                    Vue.filter('heures', function(v){
-                        var heures = parseInt(v);
-                        var minutes = Math.round((parseFloat(v) - heures)*60);
-                        if( minutes == 0 ) minutes = '';
-                        else if (minutes < 10) minutes = ':0' +minutes;
-                        else minutes = ':'+minutes
-                       return heures+minutes;
+                        Vue.filter('heures', function (v) {
+                            var heures = parseInt(v);
+                            var minutes = Math.round((parseFloat(v) - heures) * 60);
+                            if (minutes == 0) minutes = '';
+                            else if (minutes < 10) minutes = ':0' + minutes;
+                            else minutes = ':' + minutes
+                            return heures + minutes;
+                        });
+
+                        // Transmission du jeton
+                        Vue.http.interceptors.push((request, next) => {
+                            request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
+                            request.headers.set('Authorization', 'OSCAR TOKEN');
+                            next();
+                        });
+
+                        new Vue({
+                            render: function (h) {
+                                return h(Workpackage.default, {
+                                    props: {
+                                        url: '<?= $this->url(
+                                            'workpackage/rest',
+                                            ['idactivity' => $entity->getId()]
+                                        ) ?>',
+                                        token: '<?= $tokenValue ?>',
+                                        isValidateur: true,
+                                        editable: true,
+                                        Bootbox: Bootbox,
+                                    }
+                                })
+                            },
+                            el: '#workpackages'
+                        })
                     });
+                </script>
+            <?php
+            endif; ?>
+            <?php
+            endif; ?>
+        </section>
 
-                    // Transmission du jeton
-                    Vue.http.interceptors.push((request, next) => {
-                        request.headers.set('X-CSRF-TOKEN', '<?= $tokenValue ?>');
-                        request.headers.set('Authorization', 'OSCAR TOKEN');
-                        next();
-                    });
+    <?php
+    endif; ?>
 
-                    new Vue({
-                        render: function(h){
-                            return h(Workpackage.default,{ props: {
-                                    url: '<?= $this->url('workpackage/rest', ['idactivity' => $entity->getId()]) ?>',
-                                    token: '<?= $tokenValue ?>',
-                                    isValidateur: true,
-                                    editable: true,
-                                    Bootbox: Bootbox,
-                                }})
-                        },
-                        el: '#workpackages'
-                    })
-                });
-            </script>
-        <?php endif; ?>
-        <?php endif; ?>
-    </section>
-
-    <?php endif; ?>
-
-    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
+    <?php
+    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
         <hr/>
-    <section id="logs">
-        <h2><i class="icon-signal"></i> Log</h2>
-            <?= $this->partial('oscar/activity-log/frag-list.phtml',
-                ['entities' => $traces]) ?>
-    </section>
-    <?php endif; ?>
+        <section id="logs">
+            <h2><i class="icon-signal"></i> Log</h2>
+            <?= $this->partial(
+                'oscar/activity-log/frag-list.phtml',
+                ['entities' => $traces]
+            ) ?>
+        </section>
+    <?php
+    endif; ?>
 
-    <script id="enrollTpl" type="template" >
+    <script id="enrollTpl" type="template">
         <article class="stack">
             <span class="stacker">{{ label }}</span>
-        <ul class="list-stacked">
-            {{#each roles}}
-        <li class="stacked">{{ label }}</li>
-        {{/each}}
-        </ul>
+            <ul class="list-stacked">
+                {{#each roles}}
+                <li class="stacked">{{ label }}</li>
+                {{/each}}
+            </ul>
         </article>
     </script>
 
     <style>
         .stack {
             text-shadow: -1px 1px 0 #fff;
-            background:  #eee;
+            background: #eee;
             padding: 4px;
             margin: 1em;
             border-radius: 4px;
-            box-shadow: 0 0 8px rgba(0,0,0,.1);
+            box-shadow: 0 0 8px rgba(0, 0, 0, .1);
             display: inline-block;
         }
+
         .stacker {
-            font-weight: 600;}
+            font-weight: 600;
+        }
+
         .stacker:after {
-            content: ' : ';}
-        .list-stacked { display: inline; margin: 0; padding: 0}
+            content: ' : ';
+        }
+
+        .list-stacked {
+            display: inline;
+            margin: 0;
+            padding: 0
+        }
+
         .stacked {
             display: inline;
             margin: 0 0;
             padding: 4px;
             background: #ccc;
             border-radius: 4px;
-            font-size: .9em;}
+            font-size: .9em;
+        }
     </style>
 
     <script>
-       var view;
-        Initer.ready(function(){
+        var view;
+        Initer.ready(function () {
 
-           require(['modalform'], function(modalform){
+            require(['modalform'], function (modalform) {
                 modalform($('body'));
                 modalform.modalify('[data-activitydate-add]',
-                    function(){
+                    function () {
                         milestones.fetch();
                     }
                 );
@@ -711,25 +907,25 @@ if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_S
 
 <div id="activityclone"></div>
 <script>
-    require(['activityclone', 'vue'], function(Activityclone, Vue){
+    require(['activityclone', 'vue'], function (Activityclone, Vue) {
         var activityClone = new Vue({
-            render(h){
+            render(h) {
                 return h(Activityclone.default, {
                     props: {
                         foo: this.foo,
                         displayed: false,
                         activity: <?= json_encode($entity->toArray()) ?>,
-                        urlPost: '<?= $this->url('contract/duplicate', ['id'=>$entity->getId()]) ?>'
+                        urlPost: '<?= $this->url('contract/duplicate', ['id' => $entity->getId()]) ?>'
                     }
                 });
             }
         }).$mount('#activityclone');
 
-        activityClone.$on('test', function(){
+        activityClone.$on('test', function () {
             console.log('test déclenché');
         })
 
-        document.querySelector('#cloneBtn').addEventListener('click', function(e){
+        document.querySelector('#cloneBtn').addEventListener('click', function (e) {
             console.log(activityClone.$children[0]);
             console.log(activityClone.$children[0].$data);
             console.log(activityClone.$children[0].$data.displayed);

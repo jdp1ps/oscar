@@ -2,7 +2,7 @@ const { watch, src, dest } = require('gulp');
 const exec = require('child_process').exec;
 
 const pathModuleSrc = './src/';
-const pathModuleDest = './../public/js/oscar/dist/'
+const pathModuleDest = './../public/js/oscar/dist/';
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +94,16 @@ function createProcessusPCRU(cb) {
 exports.createProcessusPCRU = createProcessusPCRU;
 exports.createProcessusPCRUWatch = function(cb){
     watch(pathModuleSrc + "CreateProcessusPCRU.vue", createProcessusPCRU);
+}
+
+//// 2.6 Bouton de synthèse Feuille de temps
+function activityTimesheetSynthesisMenu(cb) {
+    compile("ActivityTimesheetSynthesisMenu");
+    cb();
+}
+exports.activityTimesheetSynthesisMenu = activityTimesheetSynthesisMenu;
+exports.activityTimesheetSynthesisMenuWatch = function(cb){
+    watch(pathModuleSrc + "ActivityTimesheetSynthesisMenu.vue", activityTimesheetSynthesisMenu);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

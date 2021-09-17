@@ -1,56 +1,23 @@
-<?php ?>
-<link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
 <div class="container">
-    <section class="row">
-        <div class="col-md-4">
-            <pre><?php var_dump($_POST);?></pre>
-        </div>
-        <div class="col-md-8">
-            <section id="app">
-                <form method="post">
-                    <h1>Form {{ foo }}</h1>
-                    Valeur : <code style="font-weight: 900">{{ passvalue }}</code>
-                    <passwordfield name="mot-de-passe"
-                                   v-model="passvalue"
-                                   label="Mot de passe"
-                                   :required="true"></passwordfield>
-                    <hr>
-
-                    <textarea-field id="description"
-                                    label="Description"
-                                    name="description-envoyee"
-                                    maxlength="20"
-                                    :required="true"></textarea-field>
-
-                    <datepicker-field v-model="datestart" name="datestart" id="datestart"></datepicker-field>
-
-                    <button type="submit">Envoyer</button>
-                </form>
-            </section>
-        </div>
-    </section>
+    <div id="synthesis-timesheet">ICI</div>
 </div>
 
-<script>
-    require(["vue"
-        , '../js/certic-ui-components/build/PasswordField.umd'
-        , '../js/certic-ui-components/build/TextareaField.umd'
-        , '../js/certic-ui-components/build/DatepickerField.umd'
-        ],
+    <script>
+        require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
 
-        function(Vue, PasswordField, TextareaField, DatepickerField){
-
-        Vue.component('passwordfield', PasswordField);
-        Vue.component('textarea-field', TextareaField);
-        Vue.component('datepicker-field', DatepickerField);
+        Vue.use(VueResource);
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
 
         new Vue({
-            el: "#app",
-            data:{
-                foo: "Bar",
-                passvalue: "mon mot de passe",
-                datestart: ""
-            }
-        })
+            render: function (h) {
+        return h(ActivityTimesheetSynthesisMenu, {
+        props: {
+        url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=9310'
+    }
     })
+    },
+        el: '#synthesis-timesheet'
+    }).$mount()
+    });
 </script>
