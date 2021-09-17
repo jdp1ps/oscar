@@ -76,8 +76,8 @@
 
         <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU_ACTIVATE, $activity) ): ?>
         <?php if( $activable): ?>
-            <form action="" method="post" class="form-inline">
-                <button type="submit" class="btn btn-success" name="action" value="activate-pcru">
+            <form action="" method="get" class="form-inline">
+                <button type="submit" class="btn btn-success" name="a" value="activate">
                     <i class="icon-paper-plane"></i>
                     Activer PCRU
                 </button>
@@ -101,6 +101,16 @@
                 </button>
             </form>
         <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if($deletable): ?>
+            <form action="" method="post" class="form-inline">
+                <input type="hidden" name="activitypcruinfo_id" value="<?= $activitypcruinfo_id ?>" />
+                <button type="submit" class="btn btn-danger" name="action" value="remove-waiting">
+                    <i class="icon-trash"></i>
+                    Réinitialiser
+                </button>
+            </form>
         <?php endif; ?>
     </nav>
 

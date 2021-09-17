@@ -4,6 +4,7 @@
 namespace Oscar\Utils;
 
 
+use Doctrine\Inflector\Rules\Word;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\ActivityPcruInfos;
@@ -130,6 +131,20 @@ class PCRUCvsFile
         return $this;
     }
 
+    /**
+     * @param $numOscar
+     * @return $this
+     */
+    public function remove(ActivityPcruInfos $activityPcruInfo): self
+    {
+        if( array_key_exists($activityPcruInfo->getNumContratTutelleGestionnaire(), $this->datas) ){
+            unset($this->datas[$activityPcruInfo->getNumContratTutelleGestionnaire()]);
+            $filedest = $this->path . DIRECTORY_SEPARATOR . $activityPcruInfo->getSignedFileName();
+            unlink($filedest);
+        }
+        return $this;
+    }
+
     public function getLogs(): string
     {
         return implode("\n", $this->logs);
@@ -139,6 +154,16 @@ class PCRUCvsFile
     /// GENERATION des FICHIERS
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function purgeFiles()
+    {
+        $files = glob($this->pcruService->getOscarConfigurationService()->getPcruDirectoryForUpload() . DIRECTORY_SEPARATOR . '*');
+        foreach($files as $file){ // iterate files
+            if(is_file($file)) {
+                unlink($file); // delete file
+            }
+        }
+    }
+
     public function generateFiles(): self
     {
         $this->readCSV()
@@ -155,9 +180,9 @@ class PCRUCvsFile
      * @return $this
      * @throws \Oscar\Exception\OscarException
      */
-    public function writeContratsCsv($dest=null)
+    public function writeContratsCsv($dest = null)
     {
-        if( $dest == null ){
+        if ($dest == null) {
             $dest = $this->pcruService->getOscarConfigurationService()->getPcruContratFile();
         }
         $handler = fopen($dest, 'w');
@@ -175,7 +200,7 @@ class PCRUCvsFile
      * @return string
      * @throws OscarException
      */
-    public function getDocumentSignedFromPcruInfo(ActivityPcruInfos $pcruInfos) :string
+    public function getDocumentSignedFromPcruInfo(ActivityPcruInfos $pcruInfos): string
     {
         /** @var ContractDocument $document */
         $document = $this->pcruService->getEntityManager()
@@ -223,7 +248,7 @@ class PCRUCvsFile
      */
     public function writePartenairesCSV($dest = null)
     {
-        if( $dest == null ){
+        if ($dest == null) {
             $dest = $this->pcruService->getOscarConfigurationService()->getPcruPartenaireFile();
         }
         $this->log("# Création du fichier partenaires " . $dest);
@@ -231,18 +256,18 @@ class PCRUCvsFile
 
         $partenairesCodes = [];
         /** @var ActivityPcruInfos $pcruInfo */
-        foreach ($this->getEntries() as $pcruInfo){
+        foreach ($this->getEntries() as $pcruInfo) {
             $codes = explode('|', $pcruInfo->getPartenaires());
 
             foreach ($codes as $code) {
                 // TODO code PCRU
-                if ($code != '' ) {
-                    if( !array_key_exists($code, $partenairesCodes) ){
+                if ($code != '') {
+                    if (!array_key_exists($code, $partenairesCodes)) {
                         try {
                             $partenairesCodes[$code] = $this->pcruService->getOrganizationByCodePCRU($code);
-                        } catch (NoResultException $e){
+                        } catch (NoResultException $e) {
                             throw new OscarException("Impossible de trouver les données pour le partenaire $code");
-                        } catch (NonUniqueResultException $e){
+                        } catch (NonUniqueResultException $e) {
                             throw new OscarException("Plusieurs organisations partagent un même code: $code");
                         } catch (\Exception $e) {
                             throw new OscarException("Un erreur est survenue la du chargement de l'organisations $code : " . $e->getMessage());
@@ -252,10 +277,10 @@ class PCRUCvsFile
             }
         }
 
-        if( count($partenairesCodes) > 0 ){
+        if (count($partenairesCodes) > 0) {
             fputcsv($handler, $this->pcruService->getParenairesHeaders(), ';');
             foreach ($partenairesCodes as $organization) {
-                    fputcsv($handler, $this->pcruService->getPartenaireData($organization), ';');
+                fputcsv($handler, $this->pcruService->getPartenaireData($organization), ';');
             }
         }
 

@@ -9,16 +9,19 @@ namespace Oscar\Hydrator;
 
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\Organization;
+use Oscar\Service\ProjectGrantService;
 use Zend\Hydrator\HydratorInterface;
 
 class ActivityInfosPCRUFormHydrator implements HydratorInterface
 {
+    private $projectGrantService;
 
     /**
      * OrganizationFormHydrator constructor.
      */
-    public function __construct()
+    public function __construct( ProjectGrantService $projectGrantService )
     {
+        $this->projectGrantService = $projectGrantService;
     }
 
 
@@ -31,25 +34,40 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
         $object->setObjet($data['objet']);
         $object->setCodeUniteLabintel($data['codeunitelabintel']);
         $object->setSigleUnite($data['sigleunite']);
-        $object->setFullName($data['fullname']);
+        //$object->setFullName($data['fullname']);
         $object->setNumContratTutelleGestionnaire($data['numcontrattutellegestionnaire']);
+        $object->setReference($data['reference']);
         $object->setEquipe($data['equipe']);
-        $object->setTypeContrat($data["typecontrat"]);
+
+        $typeContrat = $this->projectGrantService->getPcruTypeContratRepository()->getPcruTypeContratByLabel($data['typecontrat']);
+        $object->setTypeContrat($typeContrat);
+
         $object->setAcronyme($data["acronyme"]);
         $object->setContratsAssocies($data["contratsassocies"]);
         $object->setResponsableScientifique($data["responsablescientifique"]);
         $object->setEmployeurResponsableScientifique($data["employeurresponsablescientifique"]);
-        $object->setCordinateurConsortium($data["cordinateurconsortium"]);
+        $object->setCoordinateurConsortium($data["coordinateurconsortium"]);
         $object->setPartenaires($data["partenaires"]);
         $object->setPartenairePrincipal($data["partenaireprincipal"]);
         $object->setIdPartenairePrincipal($data["idpartenaireprincipal"]);
-        $object->setSourceFinancement($data["sourcefinancement"]);
-        $object->setDateDerniereSignature($data["datedernieresignature"]);
+
+        $sourceFinancement = $this->projectGrantService->getPcruSourceFinancementRepository()->findOneByLabel($data['sourcefinancement']);
+        $object->setSourceFinancement($sourceFinancement);
+
+        $dateSignature = $data["datedernieresignature"] ? new \DateTime($data["datedernieresignature"]) : null;
+        $object->setDateDerniereSignature($dateSignature);
+
         $object->setDuree($data["duree"]);
-        $object->setDateDebut($data["datedebut"]);
-        $object->setDateFin($data["datefin"]);
-        $object->setMontantPercuUnite($data["montantpercuunite"]);
-        $object->setMontantTotal($data["montanttotal"]);
+
+        $dateDebut = $data["datedebut"] ? new \DateTime($data["datedebut"]) : null;
+        $object->setDateDebut($dateDebut);
+
+        $dateFin = $data["datefin"] ? new \DateTime($data["datefin"]) : null;
+        $object->setDateDebut($dateFin);
+
+        $object->setMontantPercuUnite(floatval($data["montantpercuunite"]));
+        $object->setCoutTotalEtude(floatval($data["couttotaletude"]));
+        $object->setMontantTotal(floatval($data["montanttotal"]));
         $object->setValidePoleCompetivite($data["validepolecompetivite"]);
         $object->setPoleCompetivite($data["polecompetivite"]);
         $object->setCommentaires($data["commentaires"]);
@@ -73,13 +91,14 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
             'codeunitelabintel' => $object->getCodeUniteLabintel(),
             'sigleunite' => $object->getSigleUnite(),
             'numcontrattutellegestionnaire' => $object->getNumContratTutelleGestionnaire(),
+            'reference' => $object->getReference(),
             'equipe' => $object->getEquipe(),
-            "typecontrat" => $object->getTypeContrat(),
+            "typecontrat" => $object->getTypeContrat() ? $object->getTypeContrat()->getLabel() : "",
             "acronyme" => $object->getAcronyme(),
             "contratsassocies" => $object->getContratsAssocies(),
             "responsablescientifique" => $object->getResponsableScientifique(),
             "employeurresponsablescientifique" => $object->getEmployeurResponsableScientifique(),
-            "cordinateurconsortium" => $object->isCordinateurConsortium(),
+            "coordinateurconsortium" => $object->isCoordinateurConsortium(),
             "partenaires" => $object->getPartenaires(),
             "partenaireprincipal" => "",
             "idpartenaireprincipal" => $object->getIdPartenairePrincipal(),
@@ -97,7 +116,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
             "accordcadre" => $object->isAccordCadre(),
             "cifre" => $object->getCifre(),
             "chaireindustrielle" => $object->getChaireIndustrielle(),
-            "presencepartenaireindustriel" => $object->getPresencePartenaireIndustriel(),
+            "presencepartenaireindustriel" => $object->isPresencePartenaireIndustriel(),
         ];
 
         return $datas;

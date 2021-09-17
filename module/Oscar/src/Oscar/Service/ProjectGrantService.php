@@ -123,6 +123,26 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->notificationService = $notificationService;
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// REPOSITORY
+    /**
+     * @return PcruTypeContractRepository
+     */
+    public function getPcruTypeContratRepository() :PcruTypeContractRepository
+    {
+        return $this->getEntityManager()->getRepository(PcruTypeContract::class);
+    }
+
+    /**
+     * @return PcruSourceFinancementRepository
+     */
+    public function getPcruSourceFinancementRepository() :PcruSourceFinancementRepository
+    {
+        return $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function getActivityFull(Activity $activity)
@@ -2002,6 +2022,34 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             return $repository->getFlatArrayLabel();
         else
             throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractSelect() :array
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        $out = [];
+        foreach ($repository->getFlatArrayLabel() as $type) {
+            $out[$type] = $type;
+        }
+        return $out;
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruTypeContractByLabel( string $label ) :?PcruTypeContract
+    {
+        /** @var PcruTypeContractRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
+        return $repository->findBy(['label' => $label]);
     }
 
     /**

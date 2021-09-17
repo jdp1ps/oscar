@@ -124,6 +124,7 @@ class ActivityPcruInfoFromActivityFactory
         /** @var string $pcruContract */
         $pcruType = $pcruContractTypeRepository->getPcruContractForActivityTypeChained($activity->getActivityType());
 
+
         $activityPcruInfos->setActivity($activity)
             ->setDocumentPath($documentSigned)
             ->setDocumentId($documentId)

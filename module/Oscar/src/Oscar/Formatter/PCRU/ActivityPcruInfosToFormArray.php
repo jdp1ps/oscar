@@ -24,7 +24,7 @@ class ActivityPcruInfosToFormArray
             'contratsAssocies' => $activityPcruInfos->getContratsAssocies(),
             'responsableScientifique' => $activityPcruInfos->getResponsableScientifique(),
             'employeurResponsableScientifique' => $activityPcruInfos->getEmployeurResponsableScientifique(),
-            'coordinateurConsortium' => $activityPcruInfos->isCordinateurConsortium(),
+            'coordinateurConsortium' => $activityPcruInfos->isCoordinateurConsortium(),
             'partenaires' => $activityPcruInfos->getPartenaires(),
             'partenairePrincipal' => $activityPcruInfos->isPartenairePrincipal(),
             'idPartenairePrincipal' => $activityPcruInfos->getIdPartenairePrincipal(),
@@ -45,7 +45,7 @@ class ActivityPcruInfosToFormArray
             'accordCadre' => $activityPcruInfos->isAccordCadre(),
             'cifre' => $activityPcruInfos->getCifre(),
             'chaireIndustrielle' => $activityPcruInfos->getChaireIndustrielle(),
-            'resencepartenaireindustriel' => $activityPcruInfos->getPresencePartenaireIndustriel(),
+            'presencepartenaireindustriel' => $activityPcruInfos->isPresencePartenaireIndustriel(),
         ];
     }
 }

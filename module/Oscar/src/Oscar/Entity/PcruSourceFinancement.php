@@ -12,7 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @package Oscar\Entity
- * @ORM\Entity
  * @ORM\Entity(repositoryClass="Oscar\Entity\PcruSourceFinancementRepository")
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(name="sourcefinancementlabel_idx", columns={"label"})})
  */

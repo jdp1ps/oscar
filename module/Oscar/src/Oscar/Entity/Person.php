@@ -494,6 +494,11 @@ class Person implements ResourceInterface
         return $this->firstname;
     }
 
+    public function getFullname()
+    {
+        return $this->getFirstname() . ' ' . $this->getLastname();
+    }
+
     /**
      * @param string $firstname
      */
