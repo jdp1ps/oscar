@@ -202,13 +202,28 @@ return array(
         ],
 
         'horslots' => [
-//            'conges' => [ 'code' => 'conges',  'label' => 'Congés',  'description' => 'Congès, RTT, récupération', 'icon' => true ],
-//            'training' => [ 'code' => 'training',  'label' => 'Formation',  'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
-//            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',  'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
-//            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',  'description' => '', 'icon' => true ],
-//            //  'absent' => [ 'code' => 'absent',  'label' => 'Absent',  'description' => '', 'icon' => true ],
-//            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',  'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
-//            'other' => [ 'code' => 'other', 'label' => 'Divers',  'description' => 'Autre activité', 'icon' => true ],
+            ////////////////////////////////// EXEMPLE de CONFIGURATION DES
+//            'conges' => [ 'code' => 'conges',  'label' => 'Congés',
+//                'group' => 'abs',
+//                'description' => 'Congès, RTT, récupération', 'icon' => true ],
+//            'training' => [ 'code' => 'training',  'label' => 'Formation',
+//                'group' => 'other',
+//                'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+//            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',
+//                'group' => 'education',
+//                'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+//            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',
+//                'description' => '', 'icon' => true ],
+//                'group' => 'abs',
+//                'absent' => [ 'code' => 'absent',  'label' => 'Absent',
+//                'description' => '', 'icon' => true ],
+//            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',
+//                'group' => 'research',
+//                'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+//            'other' => [ 'code' => 'other', 'label' => 'Divers',
+//                'group' => 'other',
+//                'description' => 'Autre activité', 'icon' => true ],
+
         ],
 
 
