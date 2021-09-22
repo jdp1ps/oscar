@@ -10,6 +10,7 @@ namespace Oscar\Command;
 
 
 use Moment\Moment;
+use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
@@ -57,7 +58,10 @@ class OscarActivitySearchRebuildCommand extends OscarCommandAbstract
         $projectGrantService = $this->getServicemanager()->get(ProjectGrantService::class);
 
         try {
-           $projectGrantService->searchIndex_rebuild();
+            /** @var ConnectorRepport $repport */
+           $repport = $projectGrantService->searchIndex_rebuild();
+            $io->success(sprintf('Index de recherche mis à jour avec %s activité(s) indexée(s)', count($repport->getAdded())));
+
 
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
