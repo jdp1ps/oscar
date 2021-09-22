@@ -2107,6 +2107,11 @@ class TimesheetController extends AbstractOscarController
         $declarerId = $this->params()->fromQuery('person', null);
         $usurpation = false;
 
+        // Vérification de declarerId
+        if( $declarerId && !preg_match('/[0-9]*/', $declarerId )){
+            return $this->getResponseBadRequest("Identifiant de déclarant incorrect");
+        }
+
         if( $declarerId ){
             $usurpation = $declarerId;
         } else {
