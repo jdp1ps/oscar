@@ -24,4 +24,23 @@ class NotificationRepository extends EntityRepository
         }
     }
 
+    /**
+     * Retourne la liste des notifications d'une activité
+     */
+    public function getNotificationsActivity( $activityId )
+    {
+        $qb = $this->createQueryBuilder("n")
+            ->where("n.object = :object AND n.objectId = :objectid")
+        ;
+
+        $qb->setParameters([
+            'object' => 'activity',
+            'objectid' => $activityId
+         ]);
+
+        return $qb->getQuery()->getResult();
+
+
+    }
+
 }

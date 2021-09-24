@@ -202,7 +202,7 @@ return array(
         ],
 
         'horslots' => [
-            ////////////////////////////////// EXEMPLE de CONFIGURATION DES
+            ////////////////////////////////// EXEMPLE de CONFIGURATION DES HORS-LOTS
 //            'conges' => [ 'code' => 'conges',  'label' => 'Congés',
 //                'group' => 'abs',
 //                'description' => 'Congès, RTT, récupération', 'icon' => true ],
@@ -213,9 +213,7 @@ return array(
 //                'group' => 'education',
 //                'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
 //            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',
-//                'description' => '', 'icon' => true ],
 //                'group' => 'abs',
-//                'absent' => [ 'code' => 'absent',  'label' => 'Absent',
 //                'description' => '', 'icon' => true ],
 //            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',
 //                'group' => 'research',

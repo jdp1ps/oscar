@@ -125,9 +125,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function searchUpdate(Person $person)
     {
+        $this->getLoggerService()->debug("[elastic] update Person:" . $person->getId());
         $this->getSearchEngineStrategy()->update($person);
     }
 
+    /**
+     * Envoi à Gearman une demande d'actualisation du moteur de recherche.
+     *
+     * @param Person $person
+     */
     public function jobSearchUpdate(Person $person)
     {
         $client = new \GearmanClient();
@@ -137,6 +143,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         ]),
             sprintf('personsearchupdate-%s', $person->getId())
         );
+        $this->getLoggerService()->debug("[job:send] personSearchUpdate " . $person->getId());
     }
 
     /**
@@ -1298,18 +1305,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $client = new \GearmanClient();
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
         $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
+        $this->getLoggerService()->debug("[job:send] indexPerson" .  $person->getId());
     }
 
+    /**
+     * @deprecated
+     */
     public function jobNotificationActivityPerson(Activity $activity, Person $person)
     {
-        $client = new \GearmanClient();
-        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
-        $client->doBackground('notificationActivityPerson', json_encode([
-            'activityid' => $activity->getId(),
-            'personid' => $person->getId(),
-        ]),
-            sprintf('notificationactivity-%s-%s', $activity->getId(), $person->getId())
-        );
+        $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
     }
 
 
@@ -1440,7 +1444,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     if ($oa->isPrincipal()) {
                         $this->getLoggerService()->info("Activités, rôle principal");
                         $this->getEntityManager()->refresh($oa->getActivity());
-                        $this->jobNotificationActivityPerson($oa->getActivity(), $person);
+                        $this->getNotificationService()->jobUpdateNotificationsActivity($oa->getActivity());
                     }
                 }
                 foreach ($organization->getProjects() as $op) {
@@ -1449,8 +1453,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         foreach ($op->getProject()->getActivities() as $a) {
                             $this->getLoggerService()->info("Project > Activités, rôle principal");
                             $this->getEntityManager()->refresh($a);
-                            $this->jobNotificationActivityPerson($a, $person);
-//                            $this->getNotificationService()->generateNotificationsForActivity($a, $person);
+                            $this->getNotificationService()->jobUpdateNotificationsActivity($a->getActivity());
                         }
                     }
                 }
@@ -1521,7 +1524,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         if (!$activity->hasPerson($person, $role, $dateStart, $dateEnd)) {
 
-
             $personActivity = new ActivityPerson();
             $this->getEntityManager()->persist($personActivity);
 
@@ -1539,13 +1541,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 'Activity:person', $activity->getId()
             );
 
-            // Si le rôle est principal, on actualise les notifications de la personne
-            if ($role->isPrincipal()) {
-                $this->getEntityManager()->refresh($activity);
-                $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
-            }
+            $this->getEntityManager()->refresh($activity);
 
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
             $this->getProjectGrantService()->jobSearchUpdate($activity);
+        } else {
+            $this->getLoggerService()->debug(sprintf("%s(%s) n'a pas été ajouté dans %s, car déjà présent", $person->log(), $role->getRoleId(), $activity->log()));
         }
     }
 
@@ -1559,7 +1560,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
         $roleId = $activityPerson->getRole();
-        $updateNotification = $activityPerson->isPrincipal();
+        //$updateNotification = $activityPerson->isPrincipal();
         $this->getEntityManager()->remove($activityPerson);
 
         // LOG
@@ -1568,13 +1569,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             'Activity:person', $activity->getId()
         );
 
-        // Si le rôle est principal, on actualise les notifications de la personne
-        if ($updateNotification) {
-            $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-            //$this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
-        }
+        // $this->getNotificationService()->updateNotificationsPersonActivity($activity, $person);
 
         $this->jobSearchUpdate($person);
+        $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+
+    //    $this->getNotificationService()->updateNotificationsActivity($activity);
+        //$this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
+//        $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
+//        $this->getProjectGrantService()->jobSearchUpdate($activity);
     }
 
     public function personActivityChangeRole(ActivityPerson $activityPerson, Role $newRole, $dateStart, $dateEnd)
@@ -1583,19 +1586,20 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
 
-        $updateNotification = $activityPerson->isPrincipal() || $newRole->isPrincipal();
+        $updateNotification = $activityPerson->getRoleObj()->isPrincipal() || $newRole->isPrincipal();
+        $this->getLoggerService()->info("BESOIN d'UPDATE ? " . ($updateNotification ? 'OUI' : 'NON'));
         $activityPerson->setRoleObj($newRole);
         $activityPerson->setDateStart($dateStart)->setDateEnd($dateEnd);
         $this->getEntityManager()->flush($activityPerson);
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans l'activité %s", $person, $activity));
 
         // Si le rôle est principal, on actualise les notifications de la personne
-        if ($updateNotification) {
+        //if ($updateNotification) {
             $this->getEntityManager()->refresh($activity);
-            $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
-            $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
-        }
-
+//            $this->getNotificationService()->purgeNotificationsPersonActivity($activity, $person);
+//            $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
+        //}
+        $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
         $this->jobSearchUpdate($person);
     }
 
@@ -1627,11 +1631,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $this->getLoggerService()->info(sprintf("La personne %s a été ajouté au projet %s", $person, $project));
 
             // Si le rôle est principal, on actualise les notifications de la personne
-            if ($role->isPrincipal()) {
-                foreach ($project->getActivities() as $activity) {
-                    $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
-                }
+
+            foreach ($project->getActivities() as $activity) {
+                $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+                $this->jobSearchUpdate($person);
+                $this->getProjectGrantService()->jobSearchUpdate($activity);
             }
+
             $this->jobSearchUpdate($person);
         }
     }
@@ -1642,7 +1648,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $project = $projectPerson->getProject();
 
         $roleId = $projectPerson->getRole();
-        $updateNotification = $projectPerson->isPrincipal();
 
         $this->getEntityManager()->remove($projectPerson);
 
@@ -1652,11 +1657,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             'Project:person', $project->getId()
         );
 
-        // Si le rôle est principal, on actualise les notifications de la personne
-        if ($updateNotification) {
-            $this->getEntityManager()->refresh($project);
-            $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
+        foreach ($project->getActivities() as $activity) {
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            $this->getProjectGrantService()->jobSearchUpdate($activity);
+            $this->jobSearchUpdate($person);
         }
+
+        $this->jobSearchUpdate($person);
     }
 
     // PROJECT
@@ -1677,12 +1684,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans le projet %s", $person, $project));
 
-        // Si le rôle est principal, on actualise les notifications de la personne
-        if ($updateNotification) {
-            $this->getEntityManager()->refresh($project);
-            $this->getNotificationService()->purgeNotificationsPersonProject($project, $person);
-            $this->getNotificationService()->generateNotificationsForProject($project, $person);
+        foreach ($project->getActivities() as $activity) {
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            $this->jobSearchUpdate($person);
+            $this->getProjectGrantService()->jobSearchUpdate($activity);
         }
+
+        $this->jobSearchUpdate($person);
     }
 
 

@@ -923,9 +923,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $entity = $this->getActivityFromRoute();
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
-        $this->getNotificationService()->purgeNotificationsActivity($entity);
-        $this->getNotificationService()->generateNotificationsForActivity($entity);
-        // die("ICI");
+        $this->getNotificationService()->updateNotificationsActivity($entity);
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
         return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
     }

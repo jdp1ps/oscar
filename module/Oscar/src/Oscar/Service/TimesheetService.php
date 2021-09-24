@@ -3009,6 +3009,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $daysInfos[$dayInt]['total'] += (float)$t->getDuration();
             $periodTotal += (float)$t->getDuration();
 
+            // TODO Tester d'éventuel problème liés à la disparition d'activité
             $activities[$activity->getId()]['total'] += $t->getDuration();
             $workPackages[$workpackage->getId()]['total'] += $t->getDuration();
 

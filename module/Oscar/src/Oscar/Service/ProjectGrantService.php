@@ -821,7 +821,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
-        $this->getLoggerService()->info('[INDEX ACTIVITY] Reindex de ' . count($activities) . ' activité(s)');
+        $this->getLoggerService()->info('[elasic] Reindex ' . count($activities) . ' activitie(s)');
         return $this->getSearchEngineStrategy()->rebuildIndex($activities);
     }
 
@@ -875,13 +875,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function searchDelete($id)
     {
-        $this->getLoggerService()->info("[INDEX ACTIVTY] Suppression de l'index '$id'");
+        $this->getLoggerService()->debug("[search:delete] Activity:$id");
         $this->getSearchEngineStrategy()->searchDelete($id);
     }
 
     public function searchUpdate(Activity $activity)
     {
-        $this->getLoggerService()->info("[INDEX ACTIVTY] Réindexation de l'activité '$activity'");
+        $this->getLoggerService()->debug("[search:update] Activity:" . $activity->getId());
         $this->getSearchEngineStrategy()->searchUpdate($activity);
     }
 
@@ -895,7 +895,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
 
         $gearmanid = sprintf('activitysearchupdate-%s', $activity->getId());
-        $this->getLoggerService()->info("[INDEX ACTIVTY] Envoi à gearman : Réindexation de l'activité '$activity'");
+        $this->getLoggerService()->debug("[job:send] activitySearchUpdate" . $activity->getOscarNum());
 
 
         $client->doBackground('activitySearchUpdate', json_encode([
@@ -905,7 +905,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function searchIndex_reset()
     {
-        $this->getLoggerService()->info("[INDEX ACTIVITY] Remise à zéro de l'index");
+        $this->getLoggerService()->debug("[elasic] reset");
         $this->getSearchEngineStrategy()->resetIndex();
     }
 
@@ -1250,8 +1250,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $payment->setRate($rate)
             ->setStatus($status);
         $this->getEntityManager()->flush($payment);
-        $this->getNotificationService()->purgeNotificationPayment($payment);
-        $this->getNotificationService()->generatePaymentsNotifications($payment);
+        $this->getNotificationService()->jobUpdateNotificationsActivity($payment->getActivity());
         return $payment;
     }
 
@@ -1293,7 +1292,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
 
         $this->getEntityManager()->flush($payment);
-        $this->getNotificationService()->generatePaymentsNotifications($payment);
+        $this->getNotificationService()->jobUpdateNotificationsActivity($payment->getActivity());
         return $payment;
     }
 

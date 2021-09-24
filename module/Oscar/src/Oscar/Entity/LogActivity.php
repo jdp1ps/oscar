@@ -4,6 +4,7 @@
  * @date: 07/09/15 11:33
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -14,24 +15,24 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class LogActivity
 {
-    const LEVEL_ADMIN           = 100;
-    const LEVEL_INCHARGE        = 200; // Responsable / chargé de valo
-    const LEVEL_PRIVATE         = 300; // Membres
-    const LEVEL_PUBLIC          = 400; // Tout le monde
+    const LEVEL_ADMIN = 100;
+    const LEVEL_INCHARGE = 200; // Responsable / chargé de valo
+    const LEVEL_PRIVATE = 300; // Membres
+    const LEVEL_PUBLIC = 400; // Tout le monde
 
-    const TYPE_DEBUG            = 'debug';
-    const TYPE_INFO             = 'info';
-    const TYPE_WARN             = 'warn';
-    const TYPE_ERROR            = 'error';
-    const TYPE_CRITICAL         = 'critical';
+    const TYPE_DEBUG = 'debug';
+    const TYPE_INFO = 'info';
+    const TYPE_WARN = 'warn';
+    const TYPE_ERROR = 'error';
+    const TYPE_CRITICAL = 'critical';
 
-    const USER_OSCAR            = -1;
+    const USER_OSCAR = -1;
 
-    const DEFAULT_LEVEL         = self::LEVEL_ADMIN;
-    const DEFAULT_CONTEXT       = 'Application';
-    const DEFAULT_CONTEXTID     = -1;
-    const DEFAULT_USER          = self::USER_OSCAR;
-    const DEFAULT_TYPE          = self::TYPE_INFO;
+    const DEFAULT_LEVEL = self::LEVEL_ADMIN;
+    const DEFAULT_CONTEXT = 'Application';
+    const DEFAULT_CONTEXTID = -1;
+    const DEFAULT_USER = self::USER_OSCAR;
+    const DEFAULT_TYPE = self::TYPE_INFO;
 
 
     /**
@@ -93,37 +94,51 @@ class LogActivity
      */
     private $datas;
 
+
+    static public function getRemoteAddr()
+    {
+        static $_remoteAddr;
+        if ($_remoteAddr === null) {
+            if (php_sapi_name() == 'cli') {
+                $_remoteAddr = '0.0.0.0';
+            } else {
+                $_remoteAddr = $_SERVER['REMOTE_ADDR'];
+            }
+        }
+        return $_remoteAddr;
+    }
+
     function __construct()
     {
-        $this->dateCreated  = new \DateTime();
-        $this->context      = self::DEFAULT_CONTEXT;
-        $this->level        = self::DEFAULT_LEVEL;
-        $this->datas        = null;
-        $this->userId       = self::DEFAULT_USER;
-        $this->type         = self::DEFAULT_TYPE;
-        $this->ip           = $_SERVER['REMOTE_ADDR'];
+        $this->dateCreated = new \DateTime();
+        $this->context = self::DEFAULT_CONTEXT;
+        $this->level = self::DEFAULT_LEVEL;
+        $this->datas = null;
+        $this->userId = self::DEFAULT_USER;
+        $this->type = self::DEFAULT_TYPE;
+        $this->ip = self::getRemoteAddr();
     }
 
     function __toString()
     {
         return
             $this->getDateCreated()->format('Y-m-d H:i:s')
-            ." " . $this->getIp() ."@".$this->getUserId().':'."\t"
-            ."[".$this->getLevel().":".$this->getType()."] "
-            ."(".$this->getContext().":".$this->getContextId().") "
-            .$this->getMessage()
-            ;
+            . " " . $this->getIp() . "@" . $this->getUserId() . ':' . "\t"
+            . "[" . $this->getLevel() . ":" . $this->getType() . "] "
+            . "(" . $this->getContext() . ":" . $this->getContextId() . ") "
+            . $this->getMessage();
     }
 
-    public function toArray(){
+    public function toArray()
+    {
         return [
-            'dateCreated' =>  $this->getDateCreated(),
+            'dateCreated' => $this->getDateCreated(),
             'message' => $this->getMessage(),
-            'context' =>  $this->getContext(),
-            'level' =>  $this->getLevel(),
-            'userId' =>  $this->getUserId(),
-            'type' =>  $this->getType(),
-            'ip' =>  $this->getIp()
+            'context' => $this->getContext(),
+            'level' => $this->getLevel(),
+            'userId' => $this->getUserId(),
+            'type' => $this->getType(),
+            'ip' => $this->getIp()
         ];
     }
 
@@ -243,7 +258,6 @@ class LogActivity
 
         return $this;
     }
-
 
 
     /**

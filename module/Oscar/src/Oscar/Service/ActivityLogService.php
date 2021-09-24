@@ -85,8 +85,14 @@ class ActivityLogService implements UseServiceContainer {
     public function addInfo($message, Authentification $user=null, $level=LogActivity::LEVEL_ADMIN, $context='Application', $contextId=-1)
     {
         $userid = $user ? $user->getId() : -1;
+        $requestUri = "";
+        if( php_sapi_name() === 'cli' ){
+            $requestUri = "console";
+        } else {
+            $requestUri = $_SERVER['REQUEST_URI'];
+        }
         $data = [
-          'REQUEST_URI' => $_SERVER['REQUEST_URI']
+          'REQUEST_URI' => $requestUri
         ];
 
         $this->addActivity($message, LogActivity::TYPE_INFO, $level, $userid, $context, $contextId, $data);

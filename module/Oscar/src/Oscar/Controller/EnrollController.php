@@ -603,14 +603,12 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             case ProjectMember::class :
                 $project = $enroll->getProject();
                 $this->getPersonService()->personProjectRemove($enroll);
-                $this->updateIndex('Project', $project);
                 return $this->redirect()->toRoute( 'project/show', ['id'=>$project->getId()]);
                 break;
 
             case ActivityPerson::class :
                 $activity = $enroll->getActivity();
                 $this->getPersonService()->personActivityRemove($enroll);
-                $this->updateIndex('Activity', $activity);
                 return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()]);
                 break;
 
@@ -718,7 +716,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
             return $this->deleteEnroll(ProjectMember::class);
         } catch (\Exception $e) {
-            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne : " . $e->getMessage());
+            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans le projet : " . $e->getMessage());
         }
     }
 
@@ -792,7 +790,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $datas = $this->getEnrollDatas(ActivityPerson::class);
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
             $this->getPersonService()->personActivityRemove($datas['enroll']);
-            $this->updateIndex('Activity', $datas['enroller']);
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans l'activité : " . $e->getMessage());
@@ -801,16 +798,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
     public function personActivityEditAction()
     {
-//        try {
-//            $datas = $this->getEnrollDatas(ActivityPerson::class);
-//            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
-//            $this->getPersonService()->personActivityChangeRole($datas['enroll'], $datas['role'], $datas['dateStart'], $datas['dateEnd']);
-//            // PATCH DATE
-//            $this->updateIndex('Activity', $datas['enroller']);
-//            return $this->redirect()->toRoute( 'contract/show', ['id'=>$datas['enroller']->getId()]);
-//        } catch (\Exception $e) {
-//            return $this->getResponseInternalError("Impossible de modifier l'affectation de cette personne dans l'activité : " . $e->getMessage());
-//        }
         $datas = $this->getEnrollDatas(ActivityPerson::class);
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $datas['enroller']);
         return $this->saveEnroll(ActivityPerson::class, $datas['enroll']);
@@ -850,7 +837,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $this->getActivityService()->activityOrganizationRemove($organizationActivity);
             return $this->redirect()->toRoute( 'contract/show', ['id'=>$activity->getId()]);
         } catch (\Exception $e) {
-            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette personne dans l'activité : " . $e->getMessage());
+            return $this->getResponseInternalError("Impossible de supprimer l'affectation de cette organisation dans l'activité : " . $e->getMessage());
         }
     }
 
