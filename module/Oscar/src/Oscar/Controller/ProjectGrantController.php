@@ -2735,7 +2735,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
 
             $activities = null;
-
+            $idsExport = [];
 
             if ($startEmpty === false) {
                 if ($projectview == 'on') {
