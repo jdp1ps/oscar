@@ -4,9 +4,12 @@
 namespace Oscar\Command;
 
 
+use Oscar\Entity\Notification;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantService;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -37,6 +40,9 @@ class OscarNotificationsCheckCommand extends OscarCommandAbstract
         /** @var PersonService $personService */
         $personService = $this->getServicemanager()->get(PersonService::class);
 
+        /** @var ProjectGrantService $activityService */
+        $activityService = $this->getServicemanager()->get(ProjectGrantService::class);
+
         /** @var NotificationService $notificationService */
         $notificationService = $this->getServicemanager()->get(NotificationService::class);
 
@@ -57,6 +63,33 @@ class OscarNotificationsCheckCommand extends OscarCommandAbstract
             foreach ($activities as $activity) {
                 $io->writeln("$activity");
             }
+        }
+
+        if ($activityId) {
+            $activity = $activityService->getActivityById($activityId);
+            $io->title("Notifications pour l'activités : $activity");
+            $notifications = $notificationService->getNotificationsActivity($activity);
+            $headers = ["hash","object","objectid", "datereal", "dateeffective", "context", "persons"];
+            $rows = [];
+
+            /** @var Notification $n */
+            foreach ($notifications as $n){
+                $persons = [];
+                foreach ($n->getPersons() as $person) {
+                    $persons[] = "" . $person->getPerson();
+                }
+                $row = [
+                    $n->getHash(),
+                    $n->getObject(),
+                    $n->getObjectId(),
+                    $n->getDateReal()->format('Y-m-d'),
+                    $n->getDateEffective()->format('Y-m-d'),
+                    $n->getContext(),
+                    implode(', ', $persons)
+                ];
+                $rows[] = $row;
+            }
+            $io->table($headers, $rows);
         }
     }
 }

@@ -22,8 +22,8 @@ class OscarConsoleCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Permet de contrôler les notifications des personnes")
-            ->addArgument('action', null, InputOption::VALUE_OPTIONAL, 'ID de la personne')
-            ->addArgument('params', null, InputOption::VALUE_OPTIONAL, "ID de l'activité");
+            ->addArgument('action', null, InputOption::VALUE_OPTIONAL, 'action')
+            ->addArgument('params', null, InputOption::VALUE_OPTIONAL, "paramêtres");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -62,10 +62,22 @@ class OscarConsoleCommand extends OscarCommandAbstract
                 break;
 
             case "notificationsactivity":
-                //$person = $personService->getPersonById($params['personid'], true);
-                $activity = $projectGrantService->getActivityById($params['activityid']);
 
+                $activity = $projectGrantService->getActivityById($params['activityid']);
+                $notificationService->getLoggerService()->debug("[console:notificationsactivity] $activity");
                 $notificationService->updateNotificationsActivity($activity);
+                break;
+
+            case "indexactivity":
+                $activity = $projectGrantService->getActivityById($params['activityid']);
+                $notificationService->getLoggerService()->debug("[console:indexactivity] $activity");
+                $projectGrantService->searchUpdate($activity);
+                break;
+
+            case "indexperson":
+                $person = $personService->getPerson($params['personid']);
+                $notificationService->getLoggerService()->debug("[console:indexperson] $person");
+                $personService->searchUpdate($person);
                 break;
 
             default :

@@ -247,23 +247,22 @@ class NotificationService implements UseServiceContainer
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
-            $this->generateNotificationsForActivity($activity);
-            $this->generatePaymentsNotificationsForActivity($activity);
+            $this->updateNotificationsActivity($activity);
         }
     }
-
-    public function generateMilestonesNotificationsForActivity(Activity $activity, $person = null)
-    {
-        $msg = "[notifications:generate] Activity:" . $activity->getOscarNum();
-        if ($person) {
-            $msg .= " et Person:" . $person->getId();
-        }
-        $this->getLoggerService()->debug($msg);
-        /** @var ActivityDate $milestone */
-        foreach ($activity->getMilestones() as $milestone) {
-            $this->generateMilestoneNotifications($milestone, $person);
-        }
-    }
+//
+//    public function generateMilestonesNotificationsForActivity(Activity $activity, $person = null)
+//    {
+//        $msg = "[notifications:generate] Activity:" . $activity->getOscarNum();
+//        if ($person) {
+//            $msg .= " et Person:" . $person->getId();
+//        }
+//        $this->getLoggerService()->debug($msg);
+//        /** @var ActivityDate $milestone */
+//        foreach ($activity->getMilestones() as $milestone) {
+//            $this->generateMilestoneNotifications($milestone, $person);
+//        }
+//    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// CACHE
@@ -275,11 +274,15 @@ class NotificationService implements UseServiceContainer
      * @param $privilege
      * @param Activity $activity
      */
-    public function getPersonsIdFor($privilege, Activity $activity)
+    public function getPersonsIdFor($privilege, Activity $activity, $forceRecalculate = false)
     {
         $activityId = $activity->getId();
 
-        if (!array_key_exists($activityId, $this->_object_privilege_persons)) {
+        if( $forceRecalculate ){
+            $this->getEntityManager()->refresh($activity);
+        }
+
+        if ($forceRecalculate === true || !array_key_exists($activityId, $this->_object_privilege_persons)) {
             $this->_object_privilege_persons[$activityId] = [];
         }
 
@@ -481,7 +484,7 @@ class NotificationService implements UseServiceContainer
 
         // Création de la notification
         if (!$notif) {
-            $this->getLoggerService()->debug("[notification] $hash");
+            $this->getLoggerService()->debug("[ + notification] $hash");
 
             /** @var Notification $notif */
             $notif = new Notification();
@@ -495,7 +498,7 @@ class NotificationService implements UseServiceContainer
                 ->setSerie($serie)
                 ->setHash($hash);
         } else {
-            $this->getLoggerService()->debug(" [ + notifications:update] $hash");
+            $this->getLoggerService()->debug(" [ ~ notifications:update] $hash");
             $notif->setDateReal($dateReal)
                 ->setDateEffective($dateEffective);
         }
@@ -629,7 +632,15 @@ class NotificationService implements UseServiceContainer
         $this->updateNotificationCorePayment($activity);
     }
 
-    public function jobUpdateNotificationsActivity($activity){
+    public function jobUpdateNotificationsProject(Project $project) :void
+    {
+        foreach ($project->getActivities() as $activity) {
+            $this->jobUpdateNotificationsActivity($activity);
+        }
+    }
+
+    public function jobUpdateNotificationsActivity(Activity $activity) :void
+    {
         $client = new \GearmanClient();
         $client->addServer($this->getOrganizationService()->getOscarConfigurationService()->getGearmanHost());
 
@@ -658,11 +669,18 @@ class NotificationService implements UseServiceContainer
     {
         $this->updateNotificationCore($activity);
         $this->updateNotificationsMilestonePersonActivity($activity);
+    }
 
+    public function updateNotificationsProject( Project $project )
+    {
+        foreach ($project->getActivities() as $activity) {
+            $this->updateNotificationsActivity($activity);
+        }
     }
 
     public function updateNotificationsMilestonePersonActivity(Activity $activity)
     {
+        $this->getLoggerService()->debug("Recalcule des notifications pour les personnes");
         // TODO Recalculer les Notification (objet) à partir des jalons
         //
         $this->getEntityManager()->refresh($activity);
@@ -671,12 +689,14 @@ class NotificationService implements UseServiceContainer
         $notificationsActivity = $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
 
         // Personnes devant être inscrite
-        $expectedSubscribers = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $activity);
+        $expectedSubscribers = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $activity, true);
         $expectedSubscribersById = [];
         $idsExpectedSubscribers = [];
 
+        $this->getLoggerService()->debug("Personnes : ");
         /** @var Person $p */
         foreach ($expectedSubscribers as $p) {
+            $this->getLoggerService()->debug(" - $p");
             $expectedSubscribersById[$p->getId()] = $p;
             $idsExpectedSubscribers[] = $p->getId();
         }
@@ -684,21 +704,28 @@ class NotificationService implements UseServiceContainer
         $ignorePast = false;
         $now = new \DateTime('now');
 
+        $this->getLoggerService()->debug("Notifications : ");
         /** @var Notification $na */
         foreach ($notificationsActivity as $na) {
+
+            $debug = "" . $na->getContext() . " " . $na->getDateEffective()->format('Y-m-d') . " : ";
             $idsPersonInPlace = [];
 
             if( $ignorePast && $na->getDateEffective() < $now ){
+                $this->getLoggerService()->debug($debug."date passée");
                 continue;
             }
 
+            $this->getLoggerService()->debug($debug." Inscrit(s) : " . count($na->getPersons()));
             /** @var NotificationPerson $inscrit */
             foreach ($na->getPersons() as $inscrit) {
                 $idPersonInscrit = $inscrit->getPerson()->getId();
 
                 // Ne devrait pas avoir la notif
                 if (!array_key_exists($idPersonInscrit, $expectedSubscribersById)) {
+                    $this->getLoggerService()->debug("" . $inscrit->getPerson() . " n'est plus inscrit à ce jalon.");
                     $this->getEntityManager()->remove($inscrit);
+                    $this->getEntityManager()->flush($inscrit);
                 } // OK
                 else {
                     $idsPersonInPlace[] = $idPersonInscrit;
@@ -706,19 +733,17 @@ class NotificationService implements UseServiceContainer
             }
             $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
             if (count($diff) > 0) {
+                $this->getLoggerService()->debug("Mise à jour des personnes complémentaire ");
                 foreach ($diff as $idPersonToAdd) {
                     $personToAdd = $expectedSubscribersById[$idPersonToAdd];
+                    $this->getLoggerService()->debug(" + Ajout de $personToAdd");
                     $subscribe = new NotificationPerson();
                     $this->getEntityManager()->persist($subscribe);
                     $subscribe->setNotification($na)
                         ->setPerson($personToAdd);
+                    $this->getEntityManager()->flush($subscribe);
                 }
             }
-        }
-        try {
-            $this->getEntityManager()->flush();
-        } catch (\Exception $e) {
-            $this->getLoggerService()->alert($e->getMessage());
         }
     }
 
@@ -1005,6 +1030,11 @@ class NotificationService implements UseServiceContainer
                 false
             );
         }
+    }
+
+    public function getNotificationsActivity( Activity $activity )
+    {
+        return $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
     }
 
 

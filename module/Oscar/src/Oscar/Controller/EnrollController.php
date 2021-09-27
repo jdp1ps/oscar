@@ -140,7 +140,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
      */
     private function editEnroll($class)
     {
-
+        $this->getLoggerService()->debug("EDITENROLL $class");
         $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
         $enrolled = null;
 
@@ -184,18 +184,17 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 ->setDateEnd($dateEnd);
 
             $enroll->getEnroller()->touch();
-
-
-
             $this->getEntityManager()->flush($enroll);
 
             // Mise à jour de l'index
             if( get_class($enroll->getEnroller()) == Activity::class ){
-                $this->getProjectGrantService->searchUpdate($enroll->getEnroller());
+                $this->getProjectGrantService()->jobSearchUpdate($enroll->getEnroller());
+                $this->getNotificationService()->jobUpdateNotificationsActivity($enroll->getEnroller());
             }
             if( get_class($enroll->getEnroller()) == Project::class ){
                 foreach ($enroll->getEnroller()->getActivities() as $activity) {
-                    $this->getProjectGrantService->searchUpdate($activity);
+                    $this->getProjectGrantService()->jobSearchUpdate($activity);
+                    $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
                 }
             }
 
@@ -214,12 +213,12 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
                 case ProjectMember::class :
                     $urlEnrollerShow = 'project/show';
-                    $this->getNotificationService()->generateNotificationsForProject($enroll->getProject(), $enroll->getPerson());
+                    $this->getNotificationService()->jobUpdateNotificationsProject($enroll->getProject());
                     break;
 
                 case ActivityPerson::class :
                     $urlEnrollerShow = 'contract/show';
-                    $this->getNotificationService()->jobNotificationsPersonActivity($enroll->getActivity(), $enroll->getPerson());
+                    $this->getNotificationService()->jobUpdateNotificationsActivity($enroll->getActivity());
                     break;
 
                 case ActivityOrganization::class :
@@ -458,19 +457,31 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                     $enrole = $exist;
                 }
 
-
-
-
-
-
-
-
-
-
-                $this->updateIndex($context, $enroller);
-
                 $this->getActivityLogService()->addUserInfo(sprintf("a ajouté %s", $enrole->log()), $context, $enroller->getId());
 
+                switch ($class) {
+                    case ProjectMember::class :
+                        $this->getNotificationService()->jobUpdateNotificationsProject($enroller);
+                        $this->getPersonService()->jobSearchUpdate($enrolled);
+                        break;
+
+                    case ActivityPerson::class :
+                        $this->getNotificationService()->jobUpdateNotificationsActivity($enroller);
+                        $this->getPersonService()->jobSearchUpdate($enrolled);
+                        break;
+
+                    case OrganizationPerson::class :
+                        // PATCH 2021-04-14 : à nettoyer
+                        if( $enroller == null ){
+                            $enroller = $this->getOrganizationService()->getOrganization(
+                                $this->params()->fromRoute('idenroller'));
+                        }
+                        $this->getPersonService()->personOrganizationAdd($enroller, $enrolled, $roleObj, $dateStart, $dateEnd);
+                        break;
+
+                    default:
+
+                }
 
             }
             $this->redirect()->toRoute($urlEnrollerShow, ['id'=> $enroller->getId()]);
