@@ -113,7 +113,7 @@ class ActivityLogService implements UseServiceContainer {
         return $repo->getUserActivity($authentificationId, $limit);
     }
 
-    public function addUserInfo($message, $context = 'Application', $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
+    public function addUserInfo($message, $context = LogActivity::CONTEXT_APPLICATION, $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
     {
         $this->getLoggerService()->info($message);
         $person = $this->getCurrentPerson();

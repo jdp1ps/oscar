@@ -11,12 +11,15 @@ namespace Oscar\Service;
 
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
@@ -40,6 +43,14 @@ class ProjectService implements UseServiceContainer
     public function getServiceLocator()
     {
         return $this->getServiceContainer();
+    }
+
+    /**
+     * @return GearmanJobLauncherService
+     */
+    public function getGearmanJobLauncherService(): GearmanJobLauncherService
+    {
+        return $this->getServiceContainer()->get(GearmanJobLauncherService::class);
     }
 
     /**
@@ -394,6 +405,55 @@ class ProjectService implements UseServiceContainer
             );
         } catch (\Exception $e) {
             throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $project, $e->getMessage()));
+        }
+    }
+
+    public function removeProjectOrganization(ProjectPartner $projectPartner): void
+    {
+        $organization = $projectPartner->getOrganization();
+        $project = $projectPartner->getProject();
+        $update = $projectPartner->getRoleObj()->isPrincipal();
+
+        $this->getLogger()->debug("Suppression du partenaire $projectPartner");
+
+        try {
+            $this->getEntityManager()->remove($projectPartner);
+            $this->getEntityManager()->flush();
+
+            if ($update) {
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationProject($project);
+            }
+
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexProject($project);
+        } catch (ConstraintViolationException $e) {
+            $this->getLogger()->debug("Impossible de supprimer le partenaire");
+        }
+    }
+
+    public function addProjectOrganisation(Project $project, Organization $organization, OrganizationRole $role, $dateStart, $dateEnd): void
+    {
+        if (!$project->hasPartner($organization, $role)) {
+            $projectOrganization = new ProjectPartner();
+            $this->getEntityManager()->persist($projectOrganization);
+            $projectOrganization->setOrganization($organization)
+                ->setProject($project)
+                ->setRoleObj($role)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd)
+            ;
+            $this->getEntityManager()->flush();
+
+            if ($role->isPrincipal()) {
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationProject($project);
+            }
+
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexProject($project);
+        } else {
+            throw new OscarException(
+                sprintf("L'organization %s est déjà partenaire pour le projet %s", $organization->log(), $project->log())
+            );
         }
     }
 

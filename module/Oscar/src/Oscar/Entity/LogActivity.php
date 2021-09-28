@@ -34,6 +34,9 @@ class LogActivity
     const DEFAULT_USER = self::USER_OSCAR;
     const DEFAULT_TYPE = self::TYPE_INFO;
 
+    const CONTEXT_APPLICATION = 'Application';
+    const CONTEXT_ACTIVITY = 'Activity';
+
 
     /**
      * @ORM\Id

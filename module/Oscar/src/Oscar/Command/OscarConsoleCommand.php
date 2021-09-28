@@ -5,6 +5,7 @@ namespace Oscar\Command;
 
 
 use Oscar\Service\NotificationService;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
@@ -34,6 +35,9 @@ class OscarConsoleCommand extends OscarCommandAbstract
         $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
 
         $io = new SymfonyStyle($input, $output);
+
+        /** @var OrganizationService $organizationService */
+        $organizationService = $this->getServicemanager()->get(OrganizationService::class);
 
         /** @var PersonService $personService */
         $personService = $this->getServicemanager()->get(PersonService::class);
@@ -78,6 +82,12 @@ class OscarConsoleCommand extends OscarCommandAbstract
                 $person = $personService->getPerson($params['personid']);
                 $notificationService->getLoggerService()->debug("[console:indexperson] $person");
                 $personService->searchUpdate($person);
+                break;
+
+            case "indexorganization":
+                $organization = $organizationService->getOrganization($params['organizationid']);
+                $notificationService->getLoggerService()->debug("[console:indexorganization] $organization");
+                $organizationService->searchUpdate($organization);
                 break;
 
             default :

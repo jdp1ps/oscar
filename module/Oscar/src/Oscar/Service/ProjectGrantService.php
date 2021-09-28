@@ -1209,7 +1209,16 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $activityPayment->getActivity()->touch();
             $this->getEntityManager()->remove($activityPayment);
             $this->getEntityManager()->flush();
-            $this->getActivityLogService()->addUserInfo(sprintf("a supprimer le verserment de %s %s sur l'activité %s", $activityPayment->getAmount(), $activityPayment->getCurrency(), $activityPayment->getActivity()->log()));
+
+            $this->getActivityLogService()->addUserInfo(
+                sprintf("a supprimer le verserment de %s %s sur l'activité %s", $activityPayment->getAmount(),  $activityPayment->getCurrency(), $activityPayment->getActivity()->log()),
+                LogActivity::CONTEXT_ACTIVITY,
+                $activityPayment->getActivity()->getId()
+
+            );
+
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activityPayment->getActivity());
+
             return true;
         } catch (\Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
@@ -1250,7 +1259,16 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $payment->setRate($rate)
             ->setStatus($status);
         $this->getEntityManager()->flush($payment);
+
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a modifié le verserment de %s %s sur l'activité %s", $payment->getAmount(),  $payment->getCurrency(), $payment->getActivity()->log()),
+            LogActivity::CONTEXT_ACTIVITY,
+            $payment->getActivity()->getId()
+
+        );
+
         $this->getNotificationService()->jobUpdateNotificationsActivity($payment->getActivity());
+
         return $payment;
     }
 
@@ -1258,9 +1276,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
 
         $payment = new ActivityPayment();
-
-        // TODO Vérifier les données de création du nouveau payment
-
         $this->getEntityManager()->persist($payment);
 
         $payment->setAmount($datas['amount'])
@@ -1292,6 +1307,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
 
         $this->getEntityManager()->flush($payment);
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a ajouté le verserment de %s %s sur l'activité %s", $payment->getAmount(),  $payment->getCurrency(), $payment->getActivity()->log()),
+            LogActivity::CONTEXT_ACTIVITY,
+            $payment->getActivity()->getId()
+
+        );
         $this->getNotificationService()->jobUpdateNotificationsActivity($payment->getActivity());
         return $payment;
     }
@@ -1772,14 +1793,16 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 ->setDateEnd($dateEnd);
             $this->getEntityManager()->flush($activityorganization);
 
-            try {
-                if ($buildIndex) {
-                    $this->jobSearchUpdate($activityorganization->getActivity());
-                    $this->getOrganizationService()->updateIndex($activityorganization->getOrganization());
-                }
-            } catch (\Exception $e) {
-                $this->getLoggerService()->error($e->getMessage());
-            }
+            $activity = $activityorganization->getActivity();
+            $organization = $activityorganization->getOrganization();
+
+            $this->jobSearchUpdate($activity);
+            $this->getOrganizationService()->updateIndex($organization);
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+
+            $this->getActivityLogService()->addUserInfo(
+                sprintf(" a modifié l'organisation %s(%s) de l'activité %s", $organization->log(), $roleOrganization, $activity->log()),
+                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
 
         } catch (\Exception $e) {
             throw new OscarException(sprintf(_("Impossible de mettre à jour le rôle de l'organisation %s comme %s dans %s : %s", $activityorganization->getOrganization(), $roleOrganization, $activityorganization->getActivity(), $e->getMessage())));
@@ -1802,10 +1825,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 ->setRoleObj($roleOrganization);
             $this->getEntityManager()->flush($organizationActivity);
 
-            if ($buildIndex) {
-                $this->jobSearchUpdate($activity);
-                $this->getOrganizationService()->updateIndex($organization);
-            }
+
+            $this->jobSearchUpdate($activity);
+            $this->getOrganizationService()->updateIndex($organization);
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+
+            $this->getActivityLogService()->addUserInfo(
+                sprintf(" a ajouté l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
+                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
+
         } catch (\Exception $e) {
             throw new OscarException(sprintf(_("Impossible d'ajouter l'organisation %s comme %s dans %s : %s", $organization, $roleOrganization, $activity, $e->getMessage())));
         }
@@ -1818,8 +1846,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $organization = $activityOrganization->getOrganization();
             $this->getEntityManager()->remove($activityOrganization);
             $this->getEntityManager()->flush($activityOrganization);
+
             $this->jobSearchUpdate($activity);
             $this->getOrganizationService()->updateIndex($organization);
+            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+
+            $this->getActivityLogService()->addUserInfo(
+                sprintf(" a supprimé l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
+                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
+
         } catch (\Exception $e) {
             throw new OscarException(sprintf(_("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())));
         }

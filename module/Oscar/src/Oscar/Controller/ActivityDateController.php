@@ -9,18 +9,12 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityType;
-use Oscar\Entity\DateType;
 use Oscar\Entity\LogActivity;
 use Oscar\Form\ActivityDateForm;
-use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\MilestoneService;
-use Oscar\Service\NotificationService;
 use Oscar\Service\ProjectGrantService;
 use Zend\Http\Request;
 use Zend\View\Model\JsonModel;
@@ -124,11 +118,6 @@ class ActivityDateController extends AbstractOscarController
                         $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
                         $milestone = $this->getMilestoneService()->getMilestone($this->params()->fromQuery('id'));
                         $this->getMilestoneService()->deleteMilestoneById($milestone->getId());
-                        $this->getActivityLogService()->addUserInfo(
-                            sprintf("a supprimé le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                            'Activity',
-                            $milestone->getActivity()->getId()
-                        );
                         return $this->getResponseOk("Jalon supprimé");
                         break;
 
@@ -149,9 +138,11 @@ class ActivityDateController extends AbstractOscarController
                             ]);
                             $this->getActivityLogService()->addUserInfo(
                                 sprintf("a ajouté le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
-                                'Activity',
+                                LogActivity::CONTEXT_ACTIVITY,
                                 $milestone->getActivity()->getId()
                             );
+
+
                             return $this->ajaxResponse($milestone->toArray());
                         }
 
