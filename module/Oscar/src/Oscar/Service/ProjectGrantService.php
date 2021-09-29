@@ -9,7 +9,6 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
@@ -18,7 +17,6 @@ use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Discipline;
-use Oscar\Entity\GrantSource;
 use Oscar\Entity\ContractType;
 use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
@@ -26,7 +24,6 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
-use Oscar\Entity\ProjectGrantRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
 use Oscar\Entity\TypeDocument;
@@ -43,6 +40,8 @@ use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
+use Oscar\Traits\UseNotificationService;
+use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOrganizationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
@@ -56,12 +55,14 @@ use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
-use PHPUnit\Runner\Exception;
 
-class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService, UseOscarUserContextService,
-    UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService, UseActivityTypeService
+class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
+                                     UseOscarUserContextService,
+                                     UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService,
+                                     UseActivityTypeService, UseNotificationService
 {
     use UseOscarConfigurationServiceTrait,
+        UseNotificationServiceTrait,
         UseActivityLogServiceTrait,
         UseEntityManagerTrait,
         UseLoggerServiceTrait,
@@ -75,9 +76,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     ///
     /** @var MilestoneService */
     private $milestoneService;
-
-    /** @var NotificationService */
-    private $notificationService;
 
     /**
      * @return MilestoneService
@@ -93,22 +91,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function setMilestoneService(MilestoneService $milestoneService): void
     {
         $this->milestoneService = $milestoneService;
-    }
-
-    /**
-     * @return NotificationService
-     */
-    public function getNotificationService(): NotificationService
-    {
-        return $this->notificationService;
-    }
-
-    /**
-     * @param NotificationService $notificationService
-     */
-    public function setNotificationService(NotificationService $notificationService): void
-    {
-        $this->notificationService = $notificationService;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,14 +115,14 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function getTypeDocument($typeDocumentId, $throw = false)
     {
         $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($typeDocumentId);
-        if ($type == null && $throw === true)
+        if ($type == null && $throw === true) {
             throw new OscarException(sprintf(_("Le type de document %s n'existe pas"), $typeDocumentId));
+        }
         return $type;
     }
 
     public function getWorkPackagePersonPeriod(Person $person, $year, $month)
     {
-
         // extraction de la période
         $from = sprintf("%s-%s-01", $year, $month);
         $to = sprintf("%s-%s-%s", $year, $month, cal_days_in_month(CAL_GREGORIAN, $month, $year));
@@ -152,11 +134,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->innerJoin('wpp.workPackage', 'wp')
             ->innerJoin('wp.activity', 'a')
             ->where('wpp.person = :person AND NOT(a.dateEnd < :from OR a.dateStart > :to)')
-            ->setParameters([
-                'person' => $person,
-                'from' => $from,
-                'to' => $to
-            ])
+            ->setParameters(
+                [
+                    'person' => $person,
+                    'from' => $from,
+                    'to' => $to
+                ]
+            )
             ->getQuery();
 
         return $query->getResult();
@@ -186,10 +170,24 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     {
         $activity = $this->getActivityRepository()->find($id);
         if (!$activity) {
-            if ($throw === TRUE)
+            if ($throw === true) {
                 throw new OscarException("Impossible de charger l'activité (ID = $id)");
-            else
+            } else {
                 return null;
+            }
+        }
+        return $activity;
+    }
+
+    public function getActivityByOscarNum(string $oscarNum, $throw = true): ?Activity
+    {
+        $activity = $this->getActivityRepository()->findOneBy(['oscarNum' => $oscarNum]);
+        if (!$activity) {
+            if ($throw === true) {
+                throw new OscarException("Impossible de charger l'activité (OSCAR N° = $oscarNum)");
+            } else {
+                return null;
+            }
         }
         return $activity;
     }
@@ -201,10 +199,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      * @param bool $asArray
      * @return array|object[]
      */
-    public function getTypesDocuments( $asArray = true )
+    public function getTypesDocuments($asArray = true)
     {
         $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
-        if( $asArray ){
+        if ($asArray) {
             $documentTypes = [];
             /** @var TypeDocument $type */
             foreach ($types as $type) {
@@ -214,8 +212,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $documentTypes = $types;
         }
         return $documentTypes;
-
-
     }
 
     /**
@@ -276,7 +272,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getActivitiesByIds($ids, $page = 1, $resultByPage = 50)
     {
-
         $offsetSQL = ($page - 1) * $resultByPage;
         $limitSQL = $resultByPage;
 
@@ -379,10 +374,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                     }
                 }
             }
-
         }
         return $customNum;
-
     }
 
     public function exportJson($object)
@@ -415,7 +408,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity)) {
             $datas['persons']['readable'] = true;
-            $editable = $datas['persons']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+            $editable = $datas['persons']['editable'] = $oscaruserContext->hasPrivileges(
+                Privileges::ACTIVITY_PERSON_MANAGE,
+                $activity
+            );
             /** @var ActivityPerson $p */
             foreach ($activity->getPersonsDeep() as $p) {
                 $person = $p->getPerson();
@@ -438,7 +434,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity)) {
             $datas['organizations']['readable'] = true;
-            $editable = $datas['organizations']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
+            $editable = $datas['organizations']['editable'] = $oscaruserContext->hasPrivileges(
+                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                $activity
+            );
             foreach ($activity->getOrganizationsDeep() as $p) {
                 $organization = $p->getOrganization();
                 $datas['organizations']['datas'][$organization->getId()] = [
@@ -459,7 +458,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity)) {
             $datas['milestones']['readable'] = true;
-            $editable = $datas['milestones']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
+            $editable = $datas['milestones']['editable'] = $oscaruserContext->hasPrivileges(
+                Privileges::ACTIVITY_MILESTONE_MANAGE,
+                $activity
+            );
 
             if ($editable) {
                 $datas['milestones']['types'] = $this->getMilestoneTypesArray();
@@ -479,7 +481,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $datas['payments']['readable'] = true;
-            $editable = $datas['payments']['editable'] = $oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
+            $editable = $datas['payments']['editable'] = $oscaruserContext->hasPrivileges(
+                Privileges::ACTIVITY_PAYMENT_MANAGE,
+                $activity
+            );
 
             /** @var ActivityPayment $p */
             foreach ($activity->getPayments() as $p) {
@@ -518,7 +523,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getFieldsCSV()
     {
-
         $headers = [
             'core' => Activity::csvHeaders(),
             'organizations' => [],
@@ -604,7 +608,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getActivitiesWithUnreferencedNumbers()
     {
-
         // Clefs connues
         $authorisedKeys = $this->getOscarConfigurationService()->getNumerotationKeys();
         $this->getLoggerService()->debug("Clefs connues : " . print_r($authorisedKeys, true));
@@ -663,9 +666,11 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      * @param bool $flush Flush les modifications via l'entity manager
      * @return bool
      */
-    public function setLonelyPartnerAsFinancer(Activity $activity, $flush =
-    true)
-    {
+    public function setLonelyPartnerAsFinancer(
+        Activity $activity,
+        $flush =
+        true
+    ) {
         if ($activity->getCodeEOTP()) {
             $found = null;
 
@@ -693,12 +698,17 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 if ($flush === true) {
                     $this->getEntityManager()->flush($organization);
                     $this->getActivityLogService()->addInfo(
-                        sprintf("OSCAR BOT a définit le rôle 'Financeur' pour le 
+                        sprintf(
+                            "OSCAR BOT a définit le rôle 'Financeur' pour le 
                     partenaire %s dans l'activité %s\n",
                             $found->getOrganization()->log(),
-                            $found->getActivity()->log()),
+                            $found->getActivity()->log()
+                        ),
                         null,
-                        LogActivity::LEVEL_ADMIN, 'Activity', $activity->getId());
+                        LogActivity::LEVEL_ADMIN,
+                        'Activity',
+                        $activity->getId()
+                    );
                 }
                 return true;
             }
@@ -720,10 +730,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->select('c')
             ->from(Activity::class, 'c')
             ->where('c.' . $field . ' >= :from AND c.' . $field . ' <= :to')
-            ->setParameters([
-                'from' => $from->format('Y-m-d'),
-                'to' => $to->format('Y-m-d')
-            ]);
+            ->setParameters(
+                [
+                    'from' => $from->format('Y-m-d'),
+                    'to' => $to->format('Y-m-d')
+                ]
+            );
     }
 
     /**
@@ -773,7 +785,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $qb = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
             ->setMaxResults(10);
         return $qb->getQuery()->getResult();
-
     }
 
     ////////////////////////////////////////////////////////////////////// INDEX
@@ -793,7 +804,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 }
                 // Lucene configuration globale
                 \Zend_Search_Lucene_Search_QueryParser::setDefaultEncoding('utf-8');
-                \Zend_Search_Lucene_Analysis_Analyzer::setDefault(new \Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8_CaseInsensitive());
+                \Zend_Search_Lucene_Analysis_Analyzer::setDefault(
+                    new \Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8_CaseInsensitive()
+                );
             }
             return $this->index;
         } catch (\Zend_Search_Lucene_Exception $e) {
@@ -885,7 +898,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->getSearchEngineStrategy()->searchUpdate($activity);
     }
 
-    public function testGearmanError(){
+    public function testGearmanError()
+    {
         throw new OscarException("Erreur envoyée depuis un service OSCAR.");
     }
 
@@ -898,9 +912,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->getLoggerService()->debug("[job:send] activitySearchUpdate" . $activity->getOscarNum());
 
 
-        $client->doBackground('activitySearchUpdate', json_encode([
-            'activityid' => $activity->getId()
-        ]),$gearmanid);
+        $client->doBackground(
+            'activitySearchUpdate',
+            json_encode(
+                [
+                    'activityid' => $activity->getId()
+                ]
+            ),
+            $gearmanid
+        );
     }
 
     public function searchIndex_reset()
@@ -998,7 +1018,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
         }
-
     }
 
     /**
@@ -1025,7 +1044,10 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 ];
             }
 
-            $options[$facet]['options'][$data->getId()] = $data->getLabel() . ($data->getDescription() ? sprintf(' (%s)', $data->getDescription()) : '');
+            $options[$facet]['options'][$data->getId()] = $data->getLabel() . ($data->getDescription() ? sprintf(
+                    ' (%s)',
+                    $data->getDescription()
+                ) : '');
         }
 
         return $options;
@@ -1099,7 +1121,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 ->setCodeEOTP($source->getCodeEOTP());
             $newActivity->setFraisDeGestion($source->getFraisDeGestion());
             $newActivity->getAssietteSubventionnable($source->getAssietteSubventionnable());
-
         }
 
         $this->getEntityManager()->flush($newActivity);
@@ -1148,7 +1169,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         }
 
         if ($options['workpackages']) {
-
             /** @var WorkPackage $workpackage */
             foreach ($source->getWorkPackages() as $workpackage) {
                 $new = new WorkPackage();
@@ -1178,7 +1198,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $this->getEntityManager()->flush($newActivity);
 
         return $newActivity;
-
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1211,7 +1230,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getEntityManager()->flush();
 
             $this->getActivityLogService()->addUserInfo(
-                sprintf("a supprimer le verserment de %s %s sur l'activité %s", $activityPayment->getAmount(),  $activityPayment->getCurrency(), $activityPayment->getActivity()->log()),
+                sprintf(
+                    "a supprimer le verserment de %s %s sur l'activité %s",
+                    $activityPayment->getAmount(),
+                    $activityPayment->getCurrency(),
+                    $activityPayment->getActivity()->log()
+                ),
                 LogActivity::CONTEXT_ACTIVITY,
                 $activityPayment->getActivity()->getId()
 
@@ -1223,7 +1247,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         } catch (\Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
             if ($throw) {
-                throw new OscarException(sprintf("Impossible de supprimer le versement '%s'.", $activityPayment->getId()));
+                throw new OscarException(
+                    sprintf("Impossible de supprimer le versement '%s'.", $activityPayment->getId())
+                );
             }
             return false;
         }
@@ -1237,9 +1263,11 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $payment->setAmount($data['amount'])
             ->setComment($data['comment'])
             ->setCodeTransaction($data['codeTransaction'])
-            ->setCurrency($this->getEntityManager()
-                ->getRepository(Currency::class)
-                ->find($data['currencyId']));
+            ->setCurrency(
+                $this->getEntityManager()
+                    ->getRepository(Currency::class)
+                    ->find($data['currencyId'])
+            );
 
 
         $status = $data['status'];
@@ -1247,21 +1275,28 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $datePredicted = $data['datePredicted'];
         $datePayment = $data['datePayment'];
 
-        if ($datePayment)
+        if ($datePayment) {
             $payment->setDatePayment(new \DateTime($datePayment));
-        else
+        } else {
             $payment->setDatePayment(null);
+        }
 
-        if ($datePredicted)
+        if ($datePredicted) {
             $payment->setDatePredicted(new \DateTime($datePredicted));
-        else
+        } else {
             $payment->setDatePredicted(null);
+        }
         $payment->setRate($rate)
             ->setStatus($status);
         $this->getEntityManager()->flush($payment);
 
         $this->getActivityLogService()->addUserInfo(
-            sprintf("a modifié le verserment de %s %s sur l'activité %s", $payment->getAmount(),  $payment->getCurrency(), $payment->getActivity()->log()),
+            sprintf(
+                "a modifié le verserment de %s %s sur l'activité %s",
+                $payment->getAmount(),
+                $payment->getCurrency(),
+                $payment->getActivity()->log()
+            ),
             LogActivity::CONTEXT_ACTIVITY,
             $payment->getActivity()->getId()
 
@@ -1274,7 +1309,6 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function addNewActivityPayment($datas, $notification = true)
     {
-
         $payment = new ActivityPayment();
         $this->getEntityManager()->persist($payment);
 
@@ -1282,9 +1316,11 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->setComment($datas['comment'])
             ->setActivity($datas['activity'])
             ->setCodeTransaction($datas['codeTransaction'])
-            ->setCurrency($this->getEntityManager()
-                ->getRepository(Currency::class)
-                ->find($datas['currencyId']));
+            ->setCurrency(
+                $this->getEntityManager()
+                    ->getRepository(Currency::class)
+                    ->find($datas['currencyId'])
+            );
 
 
         $status = $datas['status'];
@@ -1292,15 +1328,17 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $datePredicted = $datas['datePredicted'];
         $datePayment = $datas['datePayment'];
 
-        if ($datePayment)
+        if ($datePayment) {
             $payment->setDatePayment(new \DateTime($datePayment));
-        else
+        } else {
             $payment->setDatePayment(null);
+        }
 
-        if ($datePredicted)
+        if ($datePredicted) {
             $payment->setDatePredicted(new \DateTime($datePredicted));
-        else
+        } else {
             $payment->setDatePredicted(null);
+        }
 
         $payment->setRate($rate)
             ->setStatus($status);
@@ -1308,7 +1346,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
         $this->getEntityManager()->flush($payment);
         $this->getActivityLogService()->addUserInfo(
-            sprintf("a ajouté le verserment de %s %s sur l'activité %s", $payment->getAmount(),  $payment->getCurrency(), $payment->getActivity()->log()),
+            sprintf(
+                "a ajouté le verserment de %s %s sur l'activité %s",
+                $payment->getAmount(),
+                $payment->getCurrency(),
+                $payment->getActivity()->log()
+            ),
             LogActivity::CONTEXT_ACTIVITY,
             $payment->getActivity()->getId()
 
@@ -1427,11 +1470,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->from(ActivityPayment::class, 'p')
             ->where('p.datePredicted >= :start AND p.datePredicted <= :end AND p.status = :status')
             ->orderBy('p.datePredicted', 'desc')
-            ->setParameters([
-                'start' => $start->format('Y-m-d'),
-                'end' => $end->format('Y-m-d'),
-                'status' => ActivityPayment::STATUS_PREVISIONNEL,
-            ]);
+            ->setParameters(
+                [
+                    'start' => $start->format('Y-m-d'),
+                    'end' => $end->format('Y-m-d'),
+                    'status' => ActivityPayment::STATUS_PREVISIONNEL,
+                ]
+            );
 
         return $qb->getQuery()->getResult();
     }
@@ -1444,10 +1489,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->from(ActivityPayment::class, 'p')
             ->where('p.datePredicted < :date AND p.status = :status')
             ->orderBy('p.datePredicted', 'desc')
-            ->setParameters([
-                'date' => $date->format('Y-m-d'),
-                'status' => ActivityPayment::STATUS_PREVISIONNEL,
-            ]);
+            ->setParameters(
+                [
+                    'date' => $date->format('Y-m-d'),
+                    'status' => ActivityPayment::STATUS_PREVISIONNEL,
+                ]
+            );
 
         return $qb->getQuery()->getResult();
     }
@@ -1459,9 +1506,11 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->from(ActivityPayment::class, 'p')
             ->where('p.status = :status')
             ->orderBy('p.dateCreated', 'desc')
-            ->setParameters([
-                'status' => ActivityPayment::STATUS_ECART,
-            ]);
+            ->setParameters(
+                [
+                    'status' => ActivityPayment::STATUS_ECART,
+                ]
+            );
 
         return $qb->getQuery()->getResult();
     }
@@ -1673,12 +1722,14 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     public function getDisciplines()
     {
         $array = [];
-        foreach ($this->getEntityManager()
-                     ->createQueryBuilder()
-                     ->select('d')
-                     ->from(Discipline::class, 'd')
-                     ->getQuery()
-                     ->getResult() as $discipline) {
+        foreach (
+            $this->getEntityManager()
+                ->createQueryBuilder()
+                ->select('d')
+                ->from(Discipline::class, 'd')
+                ->getQuery()
+                ->getResult() as $discipline
+        ) {
             $array[$discipline->getId()] = strval($discipline);
         }
         return $array;
@@ -1714,13 +1765,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $open = [];
 
         /** @var ContractType $grantType */
-        foreach ($this->getEntityManager()
-                     ->createQueryBuilder()
-                     ->select('t')
-                     ->from(ContractType::class, 't')
-                     ->orderBy('t.lft', 'ASC')
-                     ->getQuery()
-                     ->getResult() as $grantType) {
+        foreach (
+            $this->getEntityManager()
+                ->createQueryBuilder()
+                ->select('t')
+                ->from(ContractType::class, 't')
+                ->orderBy('t.lft', 'ASC')
+                ->getQuery()
+                ->getResult() as $grantType
+        ) {
             $close = count($open);
             $prefix = '';
             while ($close > 0) {
@@ -1782,11 +1835,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function deleteActivityPerson(ActivityPerson $activityPerson)
     {
-
     }
 
-    public function organizationActivityEdit(ActivityOrganization $activityorganization, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true)
-    {
+    public function organizationActivityEdit(
+        ActivityOrganization $activityorganization,
+        OrganizationRole $roleOrganization,
+        $dateStart = null,
+        $dateEnd = null,
+        $buildIndex = true
+    ) {
         try {
             $activityorganization->setRoleObj($roleOrganization)
                 ->setDateStart($dateStart)
@@ -1801,19 +1858,41 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
 
             $this->getActivityLogService()->addUserInfo(
-                sprintf(" a modifié l'organisation %s(%s) de l'activité %s", $organization->log(), $roleOrganization, $activity->log()),
-                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
-
+                sprintf(
+                    " a modifié l'organisation %s(%s) de l'activité %s",
+                    $organization->log(),
+                    $roleOrganization,
+                    $activity->log()
+                ),
+                LogActivity::CONTEXT_ACTIVITY,
+                $activity->getId()
+            );
         } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Impossible de mettre à jour le rôle de l'organisation %s comme %s dans %s : %s", $activityorganization->getOrganization(), $roleOrganization, $activityorganization->getActivity(), $e->getMessage())));
+            throw new OscarException(
+                sprintf(
+                    _(
+                        "Impossible de mettre à jour le rôle de l'organisation %s comme %s dans %s : %s",
+                        $activityorganization->getOrganization(),
+                        $roleOrganization,
+                        $activityorganization->getActivity(),
+                        $e->getMessage()
+                    )
+                )
+            );
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Affectation ORGANISATION <> ACTIVITÉ
 
-    public function organizationActivityAdd(Organization $organization, Activity $activity, OrganizationRole $roleOrganization, $dateStart = null, $dateEnd = null, $buildIndex = true)
-    {
+    public function organizationActivityAdd(
+        Organization $organization,
+        Activity $activity,
+        OrganizationRole $roleOrganization,
+        $dateStart = null,
+        $dateEnd = null,
+        $buildIndex = true
+    ) {
         try {
             // TODO Date de début/fin
             $organizationActivity = new ActivityOrganization();
@@ -1832,10 +1911,21 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(" a ajouté l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
-                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
-
+                LogActivity::CONTEXT_ACTIVITY,
+                $activity->getId()
+            );
         } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Impossible d'ajouter l'organisation %s comme %s dans %s : %s", $organization, $roleOrganization, $activity, $e->getMessage())));
+            throw new OscarException(
+                sprintf(
+                    _(
+                        "Impossible d'ajouter l'organisation %s comme %s dans %s : %s",
+                        $organization,
+                        $roleOrganization,
+                        $activity,
+                        $e->getMessage()
+                    )
+                )
+            );
         }
     }
 
@@ -1853,10 +1943,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(" a supprimé l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
-                LogActivity::CONTEXT_ACTIVITY, $activity->getId());
-
+                LogActivity::CONTEXT_ACTIVITY,
+                $activity->getId()
+            );
         } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())));
+            throw new OscarException(
+                sprintf(
+                    _("Impossible de supprimer %s de l'activité %s : %s", $organization, $activity, $e->getMessage())
+                )
+            );
         }
     }
 
@@ -1870,7 +1965,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
      */
     public function getBaseQuery($includeObsolet = false)
     {
-        if ($includeObsolet === TRUE) {
+        if ($includeObsolet === true) {
             $roleClaude = ' AND ((m.dateStart is NULL OR m.dateStart <= :dateRef)AND(m.dateEnd is NULL OR m.dateEnd >= :dateRef))';
         } else {
             $roleClaude = '';
@@ -1888,8 +1983,9 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
             ->leftJoin('d.typeDocument', 'dt')
             ->leftJoin('p.organization', 'org');
 
-        if ($includeObsolet === true)
+        if ($includeObsolet === true) {
             $qb->setParameter('dateRef', new \DateTime());
+        }
 
         return $qb;
     }

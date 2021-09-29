@@ -36,6 +36,8 @@ abstract class OscarCommandAbstract extends Command
         return $this->servicemanager;
     }
 
+
+
     public function addOutputStyle(OutputInterface $output) {
         $outputStyle = new OutputFormatterStyle('cyan', 'default', ['bold']);
         $output->getFormatter()->setStyle('id', $outputStyle);
