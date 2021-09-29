@@ -731,6 +731,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
+     * @param int $personActivityId
+     * @param bool $throw
+     * @return ActivityPerson|null
+     * @throws OscarException
+     */
+    public function getPersonActivityById( int $personActivityId, $throw = true ) :?ActivityPerson
+    {
+        $activityPerson = $this->getEntityManager()->getRepository(ActivityPerson::class)->find($personActivityId);
+        if( !$activityPerson && $throw === true ){
+            throw new OscarException("Impossible de trouver l'affectation de la personnes à l'activité ($personActivityId)");
+        }
+        return $activityPerson;
+    }
+
+    /**
      * @return array
      * @throws \Exception
      */
