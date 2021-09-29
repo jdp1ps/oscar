@@ -16,6 +16,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\OrganizationTypeRepository;
 use Oscar\Entity\ProjectPartner;
@@ -93,6 +94,56 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
     }
 
+    /**
+     * Retourne le OrganizationRole via l'ID
+     *
+     * @param int $organizationRoleId
+     * @param bool $throw
+     * @return OrganizationRole
+     * @throws OscarException
+     */
+    public function getRoleOrganizationById(int $organizationRoleId, $throw = true): OrganizationRole
+    {
+        /** @var OrganizationRoleRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(OrganizationRole::class);
+
+        $role = $repo->find($organizationRoleId);
+
+        if ($role === null && $throw === true) {
+            throw new OscarException("Impossible de charger le rôle d'organisation '$organizationRoleId'");
+        }
+
+        return $role;
+    }
+
+    /**
+     * Retourne l'ActivityOrganization via l'ID.
+     *
+     * @param int $activityOrganizationId
+     * @param bool $throw
+     * @return ActivityOrganization
+     * @throws OscarException
+     */
+    public function getActivityOrganization(int $activityOrganizationId, $throw = true): ActivityOrganization
+    {
+        $repo = $this->getEntityManager()->getRepository(ActivityOrganization::class);
+
+        $activityOrganization = $repo->find($activityOrganizationId);
+
+        if ($activityOrganization === null && $throw === true) {
+            throw new OscarException("Impossible de charger le rôle d'organisation '$activityOrganizationId'");
+        }
+
+        return $activityOrganization;
+    }
+
+    /**
+     * @param $id
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @deprecated
+     */
     public function deleteOrganization($id)
     {
         $o = $this->getOrganization($id);
@@ -102,6 +153,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     /**
      * Retourne la liste des Organizations pour la personne
+     *
      * @param Person $person
      * @param null $specifiqueRoleIds
      * @param bool $rolePrincipaux
@@ -562,7 +614,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         ?>
         <pre>;
         <?= $organizationA ?>
-        <?= $organizationB ?>
+            <?= $organizationB ?>
         </pre>
         <?php
     }

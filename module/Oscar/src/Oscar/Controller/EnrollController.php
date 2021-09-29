@@ -150,9 +150,9 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $label = sprintf($labelTpl, $enroll->getEnrolled(), $enroll->getEnroller());
         $form = new RoleForm(
             $this->getRoles($class), [
-            'label' => $label,
-            'url' => ''
-        ]
+                                       'label' => $label,
+                                       'url' => ''
+                                   ]
         );
 
         $form->setData(
@@ -375,9 +375,9 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
         $form = new RoleForm(
             $roles, [
-            'label' => $labelEnrolled,
-            'url' => $this->url()->fromRoute($urlSearch)
-        ]
+                      'label' => $labelEnrolled,
+                      'url' => $this->url()->fromRoute($urlSearch)
+                  ]
         );
 
 
@@ -919,6 +919,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     // Person <> Activity
     ////////////////////////////////////////////////////////////////////////////
     /**
+     * Ajout d'une nouvelle personne dans une activité.
+     *
      * @return \Zend\Http\Response
      * @throws OscarException
      */
@@ -946,6 +948,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
+    /**
+     * Suppression d'une personne dans une activité.
+     *
+     * @return \Zend\Http\Response
+     */
     public function personActivityDeleteAction()
     {
         try {
@@ -965,6 +972,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
+    /**
+     * Modification d'une personne dans une activité.
+     *
+     * @return \Zend\Http\Response
+     */
     public function personActivityEditAction()
     {
         try {
@@ -996,49 +1008,57 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     // Organization <> Activity
     ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return \Zend\Http\Response
+     */
     public function organizationActivityNewAction()
     {
+        $activity = $this->getActivityEntity();
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
+
         try {
-            /** @var Organization $organization */
-            $organization = $this->getOrganizationService()->getOrganization($this->params()->fromPost('enroled'));
+            $organization = $this->getOrganizationService()->getOrganization(
+                $this->getPostedInteger('enroled')
+            );
+            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'));
+            $dateStart = $this->getPostedDateTime('dateStart');
+            $dateEnd = $this->getPostedDateTime('dateEnd');
 
-            /** @var  $activity */
-            $activity = $this->getActivityEntity();
-
-            /** @var RoleOrganization\ $role */
-            $role = $this->getOrganizationRoleEntity();
-
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
-
-            $this->getActivityService()->organizationActivityAdd(
+            $this->getProjectGrantService()->organizationActivityAdd(
                 $organization,
                 $activity,
                 $role,
-                $this->getDateStartPosted(),
-                $this->getDateEndPosted(),
-                true
+                $dateStart,
+                $dateEnd
             );
-
-            return $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
+            return $this->getResponseOk("La personne a bien été ajouté");
         } catch (\Exception $e) {
-            return $this->getResponseInternalError(
-                "Impossible d'ajouter l'organisation dans l'activité : " . $e->getMessage()
-            );
+            $msg = "Impossible d'ajouter l'organisation à l'activité";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
         }
     }
 
+    /**
+     * @return \Zend\Http\Response
+     */
     public function activityOrganizationDeleteAction()
     {
         try {
-            $organizationActivity = $this->getPostedActivityOrganization();
-            $activity = $organizationActivity->getActivity();
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
-            $this->getActivityService()->activityOrganizationRemove($organizationActivity);
-            return $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
-        } catch (\Exception $e) {
-            return $this->getResponseInternalError(
-                "Impossible de supprimer l'affectation de cette organisation dans l'activité : " . $e->getMessage()
+            /** @var ActivityPerson $personActivity */
+            $activityOrganization = $this->getOrganizationService()->getActivityOrganization($this->getRoutedInteger('idenroll'));
+
+            $this->getOscarUserContextService()->check(
+                Privileges::ACTIVITY_PERSON_MANAGE,
+                $activityOrganization->getActivity()
             );
+            $this->getProjectGrantService()->activityOrganizationRemove($activityOrganization);
+            return $this->getResponseOk("L'organisation a bien été supprimée de l'activité");
+        } catch (\Exception $e) {
+            $msg = "Impossible de supprimer l'affectation de cette organisation dans l'activité";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
         }
     }
 
@@ -1046,33 +1066,27 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     {
         try {
             /** @var ActivityOrganization $activityOrganization */
-            $organizationActivity = $this->getEntityManager()->getRepository(ActivityOrganization::class)->find(
-                $this->params()->fromRoute('idenroll')
+            $activityOrganization = $this->getOrganizationService()->getActivityOrganization($this->getRoutedInteger('idenroll'));
+
+            $this->getOscarUserContextService()->check(
+                Privileges::ACTIVITY_PERSON_MANAGE,
+                $activityOrganization->getActivity()
             );
-
-            if (!$organizationActivity) {
-                throw new OscarException("Affectation introuvable");
-            }
-
-            if (!$this->getOscarUserContextService()->hasPrivileges(
-                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
-                $organizationActivity->getActivity()
-            )) {
-                throw new OscarException("Droits insufisants");
-            }
-
+            $role = $this->getOrganizationService()->getRoleOrganizationById(
+                $this->getPostedInteger('role'),
+                true
+            );
             $this->getProjectGrantService()->organizationActivityEdit(
-                $organizationActivity,
-                $this->getPostedOrganizationRole(),
-                $this->getDateStartPosted(),
-                $this->getDateEndPosted()
+                $activityOrganization,
+                $role,
+                $this->getPostedDateTime('dateStart'),
+                $this->getPostedDateTime('dateEnd')
             );
-
-            return $this->redirect()->toRoute('contract/show', ['id' => $organizationActivity->getActivity()->getId()]);
+            return $this->getResponseOk("L'organisation a bien été modifiée dans l'activité");
         } catch (\Exception $e) {
-            return $this->getResponseInternalError(
-                "Impossible de modifier l'affectation de cette organisation dans l'activité : " . $e->getMessage()
-            );
+            $msg = "Impossible de modifier l'affectation de cette organisation dans l'activité";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
         }
     }
 
@@ -1100,7 +1114,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             );
         }
     }
-
 
     /**
      * @return Role
@@ -1135,24 +1148,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             throw new OscarException(sprintf(_("Impossible de charger le rôle (%s).", $e->getMessage())));
         }
     }
-
-
-
-//    public function getPosted($type){
-//        $idEnroll = $this->params()->fromRoute('idenroll');
-//        try {
-//            return $this->getEntityManager()->getRepository($type)->find($idEnroll);
-//        } catch (\Exception $e) {
-//            throw new OscarException(sprintf(_("Impossible de charger l'affectation [%s]%s : %s", $idEnroll, $type, $e->getMessage())));
-//        }
-//    }
-
-
-//    public function organizationActivityEditAction()
-//    {
-//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $this->getActivityEntity());
-//        return $this->editEnroll(ActivityOrganization::class);
-//    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Fin des rôles

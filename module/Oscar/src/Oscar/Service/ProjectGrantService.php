@@ -1833,17 +1833,21 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         $buildIndex = true
     ) {
         try {
+            $updateNotification = $activityorganization->getRoleObj()->isPrincipal() !== $roleOrganization->isPrincipal();
             $activityorganization->setRoleObj($roleOrganization)
                 ->setDateStart($dateStart)
                 ->setDateEnd($dateEnd);
+
             $this->getEntityManager()->flush($activityorganization);
 
             $activity = $activityorganization->getActivity();
             $organization = $activityorganization->getOrganization();
 
-            $this->jobSearchUpdate($activity);
-            $this->getOrganizationService()->updateIndex($organization);
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+            if( $updateNotification ){
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+            }
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(
@@ -1856,17 +1860,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
                 $activity->getId()
             );
         } catch (\Exception $e) {
-            throw new OscarException(
-                sprintf(
-                    _(
-                        "Impossible de mettre à jour le rôle de l'organisation %s comme %s dans %s : %s",
-                        $activityorganization->getOrganization(),
-                        $roleOrganization,
-                        $activityorganization->getActivity(),
-                        $e->getMessage()
-                    )
-                )
-            );
+            throw $e;
         }
     }
 
@@ -1922,12 +1916,15 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         try {
             $activity = $activityOrganization->getActivity();
             $organization = $activityOrganization->getOrganization();
+            $updateNotification = $activityOrganization->getRoleObj()->isPrincipal();
             $this->getEntityManager()->remove($activityOrganization);
-            $this->getEntityManager()->flush($activityOrganization);
+            $this->getEntityManager()->flush();
 
-            $this->jobSearchUpdate($activity);
-            $this->getOrganizationService()->updateIndex($organization);
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+            if ($updateNotification) {
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+            }
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(" a supprimé l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
