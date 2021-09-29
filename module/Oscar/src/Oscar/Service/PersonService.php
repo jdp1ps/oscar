@@ -1512,6 +1512,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             $personActivity = new ActivityPerson();
             $this->getEntityManager()->persist($personActivity);
+            $updateNotification = $role->isPrincipal();
 
             $personActivity->setPerson($person)
                 ->setActivity($activity)
@@ -1527,11 +1528,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 'Activity:person', $activity->getId()
             );
 
-            $this->getEntityManager()->refresh($activity);
-            $this->getEntityManager()->refresh($person);
-
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
-            $this->getProjectGrantService()->jobSearchUpdate($activity);
+            if( $updateNotification ){
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+            }
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
         } else {
             $this->getLoggerService()->debug(sprintf("%s(%s) n'a pas été ajouté dans %s, car déjà présent", $person->log(), $role->getRoleId(), $activity->log()));
         }
@@ -1547,6 +1548,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
         $roleId = $activityPerson->getRole();
+        $updateNotification = $activityPerson->getRoleObj()->isPrincipal();
         $this->getEntityManager()->remove($activityPerson);
         $this->getEntityManager()->flush();
 
@@ -1556,8 +1558,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             'Activity:person', $activity->getId()
         );
 
-        $this->jobSearchUpdate($person);
-        $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+        if( $updateNotification ){
+            $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+        }
+
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
     /**
@@ -1585,7 +1591,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if( $updateNotification ){
             $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
         }
-        $this->jobSearchUpdate($person);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
     /**
@@ -1603,6 +1609,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             $personProject = new ProjectMember();
             $this->getEntityManager()->persist($personProject);
+            $updateNotification = $role->isPrincipal();
 
             $personProject->setPerson($person)
                 ->setProject($project)
@@ -1612,13 +1619,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             $this->getEntityManager()->flush($personProject);
 
+
             foreach ($project->getActivities() as $activity) {
-                $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
-                $this->getProjectGrantService()->jobSearchUpdate($activity);
-                $this->jobSearchUpdate($person);
+                if( $updateNotification ){
+                    $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+                }
+                $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
             }
 
-            $this->jobSearchUpdate($person);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
         }
     }
 
@@ -1626,6 +1635,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         $person = $projectPerson->getPerson();
         $project = $projectPerson->getProject();
+        $updateNotification = $projectPerson->getRoleObj()->isPrincipal();
 
         $roleId = $projectPerson->getRole();
 
@@ -1638,12 +1648,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         );
 
         foreach ($project->getActivities() as $activity) {
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
-            $this->getProjectGrantService()->jobSearchUpdate($activity);
-            $this->jobSearchUpdate($person);
+            if( $updateNotification ){
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+            }
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
         }
 
-        $this->jobSearchUpdate($person);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
     // PROJECT
@@ -1655,22 +1666,22 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $personProject->getPerson();
         $project = $personProject->getProject();
 
-        $updateNotification = $personProject->isPrincipal() || $newRole->isPrincipal();
+        $updateNotification = $personProject->getRoleObj()->isPrincipal() != $newRole->isPrincipal();
         $personProject->setRoleObj($newRole);
         $project->touch();
 
-        $this->getEntityManager()->flush($personProject);
-        $this->getEntityManager()->flush($project);
+        $this->getEntityManager()->flush();
 
         $this->getLoggerService()->info(sprintf("Le rôle de personne %s a été modifié dans le projet %s", $person, $project));
 
         foreach ($project->getActivities() as $activity) {
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
-            $this->jobSearchUpdate($person);
-            $this->getProjectGrantService()->jobSearchUpdate($activity);
+            if( $updateNotification ){
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+            }
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
         }
 
-        $this->jobSearchUpdate($person);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
 

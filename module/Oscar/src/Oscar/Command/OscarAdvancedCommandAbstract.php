@@ -52,6 +52,8 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
 
         $this->addOutputStyle($output);
 
+        $this->getLoggerService()->debug("CMD " . $this->getName());
+
         return 0;
     }
 
@@ -62,7 +64,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
 
     protected function isInteractive(): bool
     {
-        return !$this->isForce() || $this->getIO()->isQuiet();
+        return !($this->isForce() || !$this->getIO()->isQuiet);
     }
 
     protected function isForce(): bool

@@ -53,9 +53,7 @@ class OscarConsoleCommand extends OscarCommandAbstract
 
         $params = json_decode($input->getArgument('params'), true);
 
-        $io->writeln("Action <bold>$action</bold>");
-        $io->writeln("Params \n<bold>" . json_encode($params, JSON_PRETTY_PRINT) . "</bold>");
-        $io->writeln("---");
+        $this->getServicemanager()->get('Logger')->debug("command : $action " . $input->getArgument('params'));
 
         switch ($action) {
             case "addpersonactivity":
@@ -68,36 +66,52 @@ class OscarConsoleCommand extends OscarCommandAbstract
 
             case "notificationsactivity":
 
-                $activity = $projectGrantService->getActivityById($params['activityid']);
-                $notificationService->getLoggerService()->debug("[console:notificationsactivity] $activity");
-                $notificationService->updateNotificationsActivity($activity);
-                break;
-
-            case "indexactivity":
-
-                $command = $this->getApplication()->find('activity:search:reindex');
+                $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_ACTIVITY_NOTIFICATION_UPDATE);
 
                 $arguments = [
                     OscarActivitySearchReindexCommand::ARGUMENT_ACTIVITY_ID => $params['activityid'],
-                    '-q' => true,
+                    '--force' => null
+                ];
+
+                $input = new ArrayInput($arguments);
+                return $command->run($input, $output);
+
+            case "indexactivity":
+
+                $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_ACTIVITY_SEARCH_REINDEX);
+
+                $arguments = [
+                    OscarActivitySearchReindexCommand::ARGUMENT_ACTIVITY_ID => $params['activityid'],
+                    '--force' => null
                 ];
 
                 $input = new ArrayInput($arguments);
                 return $command->run($input, $output);
 
             case "indexperson":
-                $person = $personService->getPerson($params['personid']);
-                $notificationService->getLoggerService()->debug("[console:indexperson] $person");
-                $personService->searchUpdate($person);
-                break;
+                $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_PERSON_SEARCH_REINDEX);
+
+                $arguments = [
+                    OscarPersonSearchReindexCommand::ARGUMENT_PERSON_ID => $params['personid'],
+                    '--force' => null
+                ];
+
+                $input = new ArrayInput($arguments);
+                return $command->run($input, $output);
 
             case "indexorganization":
-                $organization = $organizationService->getOrganization($params['organizationid']);
-                $notificationService->getLoggerService()->debug("[console:indexorganization] $organization");
-                $organizationService->searchUpdate($organization);
-                break;
+                $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_ORGANIZATION_SEARCH_REINDEX);
+
+                $arguments = [
+                    OscarOrganizationSearchReindexCommand::ARGUMENT_ORGANIZATION_ID => $params['organizationid'],
+                    '--force' => null
+                ];
+
+                $input = new ArrayInput($arguments);
+                return $command->run($input, $output);
 
             default :
+                $this->getServicemanager()->get('Logger')->error("BAD COMMAND $action");
                 break;
         }
     }

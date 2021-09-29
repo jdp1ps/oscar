@@ -17,6 +17,8 @@ use Zend\ServiceManager\ServiceManager;
 abstract class OscarCommandAbstract extends Command
 {
 
+    const COMMAND_ACTIVITY_NOTIFICATION_UPDATE = 'activity:notification:update';
+
     const COMMAND_ACTIVITY_SEARCH_REINDEX = 'activity:search:reindex';
     const COMMAND_PERSON_SEARCH_REINDEX = 'person:search:reindex';
     const COMMAND_ORGANIZATION_SEARCH_REINDEX = 'organization:search:reindex';

@@ -483,9 +483,6 @@ class NotificationService implements UseServiceContainer
             }
         }
 
-        // Suppression
-        $this->getLoggerService()->debug("SUPPRESSION : " . implode(',', $hashs));
-
         $deleteQuery = $this->getNotificationRepository()->createQueryBuilder('n')
             ->delete()
             ->where("n.object = :object AND n.objectId = :objectid AND n.context LIKE :like");
@@ -539,6 +536,7 @@ class NotificationService implements UseServiceContainer
      */
     public function updateNotificationsActivity(Activity $activity)
     {
+        $this->getLoggerService()->debug("Mise à jour des notifications pour l'activité $activity");
         $this->updateNotificationCore($activity);
         $this->updateNotificationsMilestonePersonActivity($activity);
     }

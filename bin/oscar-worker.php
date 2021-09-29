@@ -57,7 +57,7 @@ function oscarJob_updateIndexActivity(GearmanJob $job){
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        echo "[search:activity:update] " . $activityid;
+        echo "[worker] indexactivity " . $activityid;
         exec($oscarCmd . ' indexactivity \'{"activityid":'. $params->activityid .'}\'');
 
     } catch (Exception $e) {
@@ -73,7 +73,7 @@ function oscarJob_updateIndexPerson(GearmanJob $job){
             throw new Exception("Paramètres manquant 'personid'");
         }
         $personid = $params->personid;
-        echo "[search:person:update] " . $personid;
+        echo "[worker] indexperson " . $personid;
         exec($oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'');
 
     } catch (Exception $e) {
@@ -88,9 +88,9 @@ function oscarJob_updateIndexOrganization(GearmanJob $job){
         if( !property_exists($params, 'organizationid') ){
             throw new Exception("Paramètres manquant 'organizationid'");
         }
-        $personid = $params->personid;
-        echo "[search:organization:update] " . $personid;
-        exec($oscarCmd . ' indexorganization \'{"organizationid":'. $personid .'}\'');
+        $organizationid = $params->organizationid;
+        echo "[worker] indexorganization " . $organizationid;
+        exec($oscarCmd . ' indexorganization \'{"organizationid":'. $organizationid .'}\'');
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";
@@ -107,7 +107,7 @@ function oscarJob_updateNotificationsActivity(GearmanJob $job){
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        echo "[notification:update] " . $activityid;
+        echo "[worker] notificationsactivity " . $activityid;
         exec($oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'');
 
     } catch (Exception $e) {
