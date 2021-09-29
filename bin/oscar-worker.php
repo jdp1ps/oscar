@@ -30,16 +30,17 @@ $oscarConfigurationService = $app->getServiceManager()->get(\Oscar\Service\Oscar
 // Worker
 $worker = new GearmanWorker();
 $worker->addServer($oscarConfigurationService->getGearmanHost());
-$worker->addFunction('indexPerson', 'oscarJob_indexPerson');
+
+$worker->addFunction('updateIndexActivity', 'oscarJob_updateIndexActivity');
+$worker->addFunction('updateIndexPerson', 'oscarJob_updateIndexPerson');
+$worker->addFunction('updateIndexOrganization', 'oscarJob_updateIndexOrganization');
 $worker->addFunction('updateNotificationsActivity', 'oscarJob_updateNotificationsActivity');
-$worker->addFunction('personSearchUpdate', 'oscarJob_indexPerson');
-$worker->addFunction('indexActivity', 'oscarJob_indexActivity');
-$worker->addFunction('activitySearchUpdate', 'oscarJob_indexActivity');
+
 $worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
 $execDev = "2";
-echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild(). "Exec:$execDev\n";
+echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()."\n";
 
 while($worker->work());
 
@@ -48,7 +49,7 @@ function getServiceManager(){
     return $app->getServiceManager();
 }
 
-function oscarJob_indexActivity(GearmanJob $job){
+function oscarJob_updateIndexActivity(GearmanJob $job){
     global $oscarCmd;
     $params = json_decode($job->workload());
     try {
@@ -64,7 +65,7 @@ function oscarJob_indexActivity(GearmanJob $job){
     }
 }
 
-function oscarJob_indexPerson(GearmanJob $job){
+function oscarJob_updateIndexPerson(GearmanJob $job){
     global $oscarCmd;
     $params = json_decode($job->workload());
     try {
@@ -74,6 +75,22 @@ function oscarJob_indexPerson(GearmanJob $job){
         $personid = $params->personid;
         echo "[search:person:update] " . $personid;
         exec($oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'');
+
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() . "\n";
+    }
+}
+
+function oscarJob_updateIndexOrganization(GearmanJob $job){
+    global $oscarCmd;
+    $params = json_decode($job->workload());
+    try {
+        if( !property_exists($params, 'organizationid') ){
+            throw new Exception("Paramètres manquant 'organizationid'");
+        }
+        $personid = $params->personid;
+        echo "[search:organization:update] " . $personid;
+        exec($oscarCmd . ' indexorganization \'{"organizationid":'. $personid .'}\'');
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";

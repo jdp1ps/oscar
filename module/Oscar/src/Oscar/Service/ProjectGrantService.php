@@ -38,6 +38,8 @@ use Oscar\Traits\UseActivityTypeService;
 use Oscar\Traits\UseActivityTypeServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseGearmanJobLauncherService;
+use Oscar\Traits\UseGearmanJobLauncherServiceTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseNotificationService;
@@ -59,7 +61,7 @@ use Oscar\Validator\EOTP;
 class ProjectGrantService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
                                      UseOscarUserContextService,
                                      UseProjectService, UsePersonService, UseOrganizationService, UseActivityLogService,
-                                     UseActivityTypeService, UseNotificationService
+                                     UseActivityTypeService, UseNotificationService, UseGearmanJobLauncherService
 {
     use UseOscarConfigurationServiceTrait,
         UseNotificationServiceTrait,
@@ -70,7 +72,8 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
         UsePersonServiceTrait,
         UseOrganizationServiceTrait,
         UseActivityTypeServiceTrait,
-        UseProjectServiceTrait;
+        UseProjectServiceTrait,
+        UseGearmanJobLauncherServiceTrait;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
     ///
@@ -888,13 +891,13 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function searchDelete($id)
     {
-        $this->getLoggerService()->debug("[search:delete] Activity:$id");
+        $this->getLoggerService()->debug("[elastic:activity:delete] Activity:" . $id);
         $this->getSearchEngineStrategy()->searchDelete($id);
     }
 
     public function searchUpdate(Activity $activity)
     {
-        $this->getLoggerService()->debug("[search:update] Activity:" . $activity->getId());
+        $this->getLoggerService()->debug("[elastic:activity:update] Activity:" . $activity->getId());
         $this->getSearchEngineStrategy()->searchUpdate($activity);
     }
 
@@ -905,27 +908,12 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
 
     public function jobSearchUpdate(Activity $activity)
     {
-        $client = new \GearmanClient();
-        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
-
-        $gearmanid = sprintf('activitysearchupdate-%s', $activity->getId());
-        $this->getLoggerService()->debug("[job:send] activitySearchUpdate" . $activity->getOscarNum());
-
-
-        $client->doBackground(
-            'activitySearchUpdate',
-            json_encode(
-                [
-                    'activityid' => $activity->getId()
-                ]
-            ),
-            $gearmanid
-        );
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
     }
 
     public function searchIndex_reset()
     {
-        $this->getLoggerService()->debug("[elasic] reset");
+        $this->getLoggerService()->debug("[elastic:activity:reset]");
         $this->getSearchEngineStrategy()->resetIndex();
     }
 

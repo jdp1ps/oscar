@@ -73,7 +73,7 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
      *
      * @param Project $project
      */
-    public function triggerUpdateNotificationProject( Project $project ): void
+    public function triggerUpdateNotificationProject(Project $project): void
     {
         foreach ($project->getActivities() as $activity) {
             $this->triggerUpdateNotificationActivity($activity);
@@ -83,7 +83,7 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
     /**
      * @param Project $project
      */
-    public function triggerUpdateSearchIndexProject( Project $project ): void
+    public function triggerUpdateSearchIndexProject(Project $project): void
     {
         foreach ($project->getActivities() as $activity) {
             $this->triggerUpdateSearchIndexActivity($activity);
@@ -95,7 +95,7 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
      *
      * @param Organization $organization
      */
-    public function triggerUpdateSearchIndexOrganization( Organization $organization ): void
+    public function triggerUpdateSearchIndexOrganization(Organization $organization): void
     {
         $task = self::UPDATE_INDEX_ORGANIZATION;
         $params = ['organizationid' => $organization->getId()];
@@ -108,7 +108,7 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
      *
      * @param Person $person
      */
-    public function triggerUpdateSearchIndexPerson ( Person $person ): void
+    public function triggerUpdateSearchIndexPerson(Person $person): void
     {
         $task = self::UPDATE_INDEX_PERSON;
         $params = ['personid' => $person->getId()];
@@ -119,13 +119,13 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
     /**
      * Mise à jour de l'index de recherche de l'activity
      *
-     * @param Activity $person
+     * @param Activity $activity
      */
-    public function triggerUpdateSearchIndexActivity ( Activity $person ): void
+    public function triggerUpdateSearchIndexActivity(Activity $activity): void
     {
         $task = self::UPDATE_INDEX_ACTIVITY;
-        $params = ['personid' => $person->getId()];
-        $key = sprintf('%s-%s', $task, $person->getId());
+        $params = ['activityid' => $activity->getId()];
+        $key = sprintf('%s-%s', $task, $activity->getId());
         $this->sendBackgroundTask($task, $params, $key);
     }
 

@@ -9,6 +9,7 @@ use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -53,7 +54,7 @@ class OscarConsoleCommand extends OscarCommandAbstract
         $params = json_decode($input->getArgument('params'), true);
 
         $io->writeln("Action <bold>$action</bold>");
-        $io->writeln("Params \n<bold>". json_encode($params, JSON_PRETTY_PRINT ) ."</bold>");
+        $io->writeln("Params \n<bold>" . json_encode($params, JSON_PRETTY_PRINT) . "</bold>");
         $io->writeln("---");
 
         switch ($action) {
@@ -73,10 +74,16 @@ class OscarConsoleCommand extends OscarCommandAbstract
                 break;
 
             case "indexactivity":
-                $activity = $projectGrantService->getActivityById($params['activityid']);
-                $notificationService->getLoggerService()->debug("[console:indexactivity] $activity");
-                $projectGrantService->searchUpdate($activity);
-                break;
+
+                $command = $this->getApplication()->find('activity:search:reindex');
+
+                $arguments = [
+                    OscarActivitySearchReindexCommand::ARGUMENT_ACTIVITY_ID => $params['activityid'],
+                    '-q' => true,
+                ];
+
+                $input = new ArrayInput($arguments);
+                return $command->run($input, $output);
 
             case "indexperson":
                 $person = $personService->getPerson($params['personid']);

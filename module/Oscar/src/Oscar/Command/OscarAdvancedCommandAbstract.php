@@ -9,7 +9,9 @@
 namespace Oscar\Command;
 
 use Monolog\Logger;
+use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
+use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -163,6 +165,16 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
     protected function getProjectGrantService(): ProjectGrantService
     {
         return $this->getServicemanager()->get(ProjectGrantService::class);
+    }
+
+    protected function getPersonService(): PersonService
+    {
+        return $this->getServicemanager()->get(PersonService::class);
+    }
+
+    protected function getOrganizationService(): OrganizationService
+    {
+        return $this->getServicemanager()->get(OrganizationService::class);
     }
 
     protected function getLoggerService(): Logger

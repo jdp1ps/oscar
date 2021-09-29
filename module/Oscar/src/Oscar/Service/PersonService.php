@@ -127,7 +127,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function searchUpdate(Person $person)
     {
-        $this->getLoggerService()->debug("[elastic] update Person:" . $person->getId());
+        $this->getLoggerService()->debug("[elastic:person:update] Person:" . $person->getId());
         $this->getSearchEngineStrategy()->update($person);
     }
 
@@ -138,14 +138,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function jobSearchUpdate(Person $person)
     {
-        $client = new \GearmanClient();
-        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
-        $client->doBackground('personSearchUpdate', json_encode([
-            'personid' => $person->getId()
-        ]),
-            sprintf('personsearchupdate-%s', $person->getId())
-        );
-        $this->getLoggerService()->debug("[job:send] personSearchUpdate " . $person->getId());
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
     /**
@@ -153,6 +146,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function searchIndex_reset()
     {
+        $this->getLoggerService()->debug("[elastic:person:reset]");
         $this->getSearchEngineStrategy()->resetIndex();
     }
 
@@ -162,6 +156,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function searchIndexRebuild()
     {
+        $this->getLoggerService()->debug("[elastic:person:rebuild]");
         $this->searchIndex_reset();
         $persons = $this->getEntityManager()->getRepository(Person::class)->findAll();
         return $this->getSearchEngineStrategy()->rebuildIndex($persons);
@@ -1301,20 +1296,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function jobIndexPerson(Person $person)
     {
-        $client = new \GearmanClient();
-        $client->addServer($this->getOscarConfigurationService()->getGearmanHost());
-        $client->doBackground('indexPerson', json_encode(['personid' => $person->getId()]), sprintf('personsearchupdate-%s', $person->getId()));
-        $this->getLoggerService()->debug("[job:send] indexPerson" .  $person->getId());
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
-
-    /**
-     * @deprecated
-     */
-    public function jobNotificationActivityPerson(Activity $activity, Person $person)
-    {
-        $this->getNotificationService()->jobNotificationsPersonActivity($activity, $person);
-    }
-
 
     /**
      * Retourne la liste des rôles disponibles niveau activité.
