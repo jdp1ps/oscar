@@ -770,14 +770,84 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $this->deleteEnroll(OrganizationPerson::class);
     }
 
+    /**
+     * Extraction du champ $name des données postées en tant qu'entier.
+     *
+     * @param string $name
+     * @return int
+     * @throws OscarException
+     */
+    protected function getPostedInteger( string $name ) :int
+    {
+        $input = $this->params()->fromPost($name, null);
+        if( $input == null ){
+            throw new OscarException("Le champs '$name' n'a pas été transmis.");
+        } else {
+            $input = intval($input);
+        }
+        if( !is_int($input) ){
+            throw new OscarException("Le champs '$name' = '$input' n'est pas un entier.");
+        }
+        return intval($input);
+    }
+
+    /**
+     * Extraction du champ $name comme DateTime (ou NULL).
+     *
+     * @param string $name
+     * @return int
+     * @throws OscarException
+     */
+    protected function getPostedDateTime( string $name ) :?\DateTime
+    {
+        $postedDate = $this->params()->fromPost($name, null);
+        $date = null;
+        if( $postedDate != null ){
+            $date = DateTimeUtils::toDatetime($postedDate);
+        }
+        return $date;
+    }
+
+    /**
+     * Récupération des données POST pour une création.
+     *
+     * @return array
+     * @throws OscarException
+     */
+    protected function getPostedNew() :array
+    {
+        $datas = [
+            "role" => $this->getPostedInteger('role'),
+            "enroled" => $this->getPostedInteger('enroled'),
+            "dateStart" => $this->getPostedDateTime('dateStart'),
+            "dateEnd" => $this->getPostedDateTime('dateEnd'),
+        ];
+        return $datas;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Person <> Activity
     ////////////////////////////////////////////////////////////////////////////
+    /**
+     * @return \Zend\Http\Response
+     * @throws OscarException
+     */
     public function personActivityNewAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $this->getActivityEntity());
-        return $this->saveEnroll(ActivityPerson::class);
+        $activity = $this->getActivityEntity();
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
+
+        try {
+            $datas = $this->getPostedNew();
+            $person = $this->getPersonService()->getPersonById($datas['enroled'], true);
+            $role = $this->getPersonService()->getRolePersonById($datas['role'], true);
+            $this->getPersonService()->personActivityAdd($activity, $person, $role, $datas['dateStart'], $datas['dateEnd']);
+            return $this->getResponseOk("La personne a bien été ajouté");
+        } catch (\Exception $e) {
+            $msg = "Impossible d'ajouter la personne à l'activité";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
+        }
     }
 
     public function personActivityDeleteAction()
@@ -918,34 +988,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
-    /**
-     * @param $field
-     * @return \DateTime
-     * @throws OscarException
-     */
-    public function getPostedDateTime($field){
-        $strVal = $dateStart = $this->params()->fromPost($field, "");
-
-        try {
-            if( $strVal == "" || $strVal == "null" )
-                return null;
-
-
-            return new \DateTime($strVal);
-
-            return null;
-        } catch (\Exception $e) {
-            throw new OscarException(sprintf(_("Problème d'extraction de date du champ %s = %s : %s"), $field, print_r($strVal), $e->getMessage()));
-        }
-    }
-
-    public function getDateStartPosted(){
-        return $this->getPostedDateTime('dateStart');
-    }
-
-    public function getDateEndPosted(){
-        return $this->getPostedDateTime('dateEnd');
-    }
 
 
 //    public function getPosted($type){
