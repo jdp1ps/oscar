@@ -16,6 +16,8 @@
 <script>
     import OscarBus from './OscarBus.js';
 
+  let tempo;
+
     export default {
         data(){
             return {
@@ -30,7 +32,12 @@
         watch: {
             expression(n, o){
                 if( n.length >= 2 ){
-                    this.search();
+                    if(tempo){
+                      clearTimeout(tempo);
+                    }
+                    tempo = setTimeout( () => {
+                      this.search();
+                    }, 500)
                 }
             }
         },
