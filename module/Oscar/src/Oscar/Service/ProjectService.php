@@ -464,7 +464,7 @@ class ProjectService implements UseServiceContainer
     }
 
     public function addProjectOrganisation(
-        ProjectP $project,
+        Project $project,
         Organization $organization,
         OrganizationRole $role,
         $dateStart,
