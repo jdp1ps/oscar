@@ -25,13 +25,13 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
     const OPTION_VERBOSE = 'verbose';
 
     /** @var InputInterface */
-    private InputInterface $input;
+    private $input;
 
     /** @var OutputInterface */
-    private OutputInterface $output;
+    private $output;
 
     /** @var SymfonyStyle */
-    private SymfonyStyle $io;
+    private $io;
 
     protected function configure()
     {

@@ -16,8 +16,8 @@ use \Zend\Mvc\Controller\Plugin\Url;
 
 class EnrollToArrayFormatter
 {
-    private OscarUserContext $oscarUserContext;
-    private Url $url;
+    private $oscarUserContext;
+    private $url;
 
     /**
      * EnrollToArrayFormatter constructor.
