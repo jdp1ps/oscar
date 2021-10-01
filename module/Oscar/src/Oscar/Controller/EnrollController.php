@@ -753,68 +753,70 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $role;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Person <> Project
-    ////////////////////////////////////////////////////////////////////////////
-    public function personProjectNewAction()
-    {
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $this->getProjectEntity());
 
-        return $this->saveEnroll(ProjectMember::class);
-    }
-
-    public function personProjectDeleteAction()
-    {
-        try {
-            $rolledId = $this->params()->fromRoute('idenroll');
-            /** @var ProjectMember $rolled */
-            $rolled = $this->getEntityManager()->getRepository(ProjectMember::class)->find($rolledId);
-            $project = $rolled->getProject();
-            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
-            return $this->deleteEnroll(ProjectMember::class);
-        } catch (\Exception $e) {
-            return $this->getResponseInternalError(
-                "Impossible de supprimer l'affectation de cette personne dans le projet : " . $e->getMessage()
-            );
-        }
-    }
-
-    public function personProjectEditAction()
-    {
-        /** @var ProjectMember $personProject */
-        $personProject = $this->getEntityManager()->getRepository(ProjectMember::class)->find(
-            $this->params()->fromRoute('idenroll')
-        );
-
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $personProject->getProject());
-        return $this->editEnroll(ProjectMember::class);
-    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Organization <> Project
     ////////////////////////////////////////////////////////////////////////////
     public function organizationProjectNewAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $this->getProjectEntity());
-        return $this->saveEnroll(ProjectPartner::class);
+        $project = $this->getProjectEntity();
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_SHOW, $project);
+
+        try {
+            $organization = $this->getOrganizationService()->getOrganization($this->getPostedInteger('enroled'));
+            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'), true);
+            $this->getProjectService()->addProjectOrganisation(
+                $project,
+                $organization,
+                $role,
+                $this->getPostedDateTime('dateStart'),
+                $this->getPostedDateTime('dateEnd')
+            );
+            return $this->getResponseOk("L'organisation a bien été ajouté au projet");
+        } catch (\Exception $e) {
+            $msg = "Impossible d'ajouter l'organisation au projet";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
+        }
     }
 
     public function organizationProjectDeleteAction()
     {
-        $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find(
-            $this->params()->fromRoute('idenroll')
-        );
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
-        return $this->deleteEnroll(ProjectPartner::class);
+        try {
+            $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find(
+                $this->params()->fromRoute('idenroll')
+            );
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
+
+            $this->getProjectService()->removeProjectOrganization($enroll);
+            return $this->getResponseOk("L'organisation a lien été supprimée");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de supprimer l'organisation : " . $e->getMessage());
+        }
     }
 
     public function organizationProjectEditAction()
     {
-        $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find(
-            $this->params()->fromRoute('idenroll')
-        );
-        $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
-        return $this->editEnroll(ProjectPartner::class);
+        try {
+            $rolledId = $this->params()->fromRoute('idenroll');
+            /** @var ProjectPartner $rolled */
+            $rolled = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($rolledId);
+            $project = $rolled->getProject();
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $project);
+            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'),true);
+            $this->getProjectService()->editProjectOrganisation(
+                $rolled,
+                $role,
+                $this->getPostedDateTime('dateStart'),
+                $this->getPostedDateTime('dateEnd')
+            );
+            return $this->getResponseOk("L'organisation a bien été modifée dans le projet");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError(
+                "Impossible de modifier l'affectation de cette orgaisation dans le projet : " . $e->getMessage()
+            );
+        }
     }
 
 
@@ -841,78 +843,74 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $this->deleteEnroll(OrganizationPerson::class);
     }
 
-    /**
-     * Extraction du champ $name des données postées en tant qu'entier.
-     *
-     * @param string $name
-     * @return int
-     * @throws OscarException
-     */
-    protected function getPostedInteger(string $name): int
+    ////////////////////////////////////////////////////////////////////////////
+    // Person <> Project
+    ////////////////////////////////////////////////////////////////////////////
+    public function personProjectNewAction()
     {
-        $input = $this->params()->fromPost($name, null);
-        return $this->getInteger($input);
-    }
+        $project = $this->getProjectEntity();
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
 
-    /**
-     * Extraction du champ $name des données d'URL en tant qu'entier.
-     *
-     * @param string $name
-     * @return int
-     * @throws OscarException
-     */
-    protected function getRoutedInteger(string $name): int
-    {
-        $input = $this->params()->fromRoute($name, null);
-        return $this->getInteger($input);
-    }
-
-
-    protected function getInteger($value): int
-    {
-        if ($value == null) {
-            throw new OscarException("Aucune valeur donnée");
-        } else {
-            $input = intval($value);
+        try {
+            $person = $this->getPersonService()->getPersonById($this->getPostedInteger('enroled'), true);
+            $role = $this->getPersonService()->getRolePersonById($this->getPostedInteger('role'), true);
+            $this->getPersonService()->personProjectAdd(
+                $project,
+                $person,
+                $role,
+                $this->getPostedDateTime('dateStart'),
+                $this->getPostedDateTime('dateEnd')
+            );
+            return $this->getResponseOk("La personne a bien été ajouté au projet");
+        } catch (\Exception $e) {
+            $msg = "Impossible d'ajouter la personne au projet";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            return $this->getResponseInternalError($msg);
         }
-        if (!is_int($input)) {
-            throw new OscarException("La valeur '$input' n'est pas un entier.");
-        }
-        return $value;
     }
 
-    /**
-     * Extraction du champ $name comme DateTime (ou NULL).
-     *
-     * @param string $name
-     * @return int
-     * @throws OscarException
-     */
-    protected function getPostedDateTime(string $name): ?\DateTime
+    public function personProjectDeleteAction()
     {
-        $postedDate = $this->params()->fromPost($name, null);
-        $date = null;
-        if ($postedDate != null && $postedDate != 'null') {
-            $date = DateTimeUtils::toDatetime($postedDate);
+        try {
+            $rolledId = $this->params()->fromRoute('idenroll');
+            /** @var ProjectMember $rolled */
+            $rolled = $this->getEntityManager()->getRepository(ProjectMember::class)->find($rolledId);
+            $project = $rolled->getProject();
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
+            $this->getPersonService()->personProjectRemove($rolled);
+            $this->deleteEnroll(ProjectMember::class);
+            return $this->getResponseOk("La personne a bien été supprimée du projet");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError(
+                "Impossible de supprimer l'affectation de cette personne dans le projet : " . $e->getMessage()
+            );
         }
-        return $date;
     }
 
-    /**
-     * Récupération des données POST pour une création.
-     *
-     * @return array
-     * @throws OscarException
-     */
-    protected function getPostedNew(): array
+    public function personProjectEditAction()
     {
-        $datas = [
-            "role" => $this->getPostedInteger('role'),
-            "enroled" => $this->getPostedInteger('enroled'),
-            "dateStart" => $this->getPostedDateTime('dateStart'),
-            "dateEnd" => $this->getPostedDateTime('dateEnd'),
-        ];
-        return $datas;
+        try {
+            $rolledId = $this->params()->fromRoute('idenroll');
+            /** @var ProjectMember $rolled */
+            $rolled = $this->getEntityManager()->getRepository(ProjectMember::class)->find($rolledId);
+            $project = $rolled->getProject();
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_MANAGE, $project);
+            $role = $this->getPersonService()->getRolePersonById(
+                $this->getPostedInteger('role'),
+                true
+            );
+            $this->getPersonService()->personProjectChangeRole(
+                $rolled,
+                $role,
+                $this->getPostedDateTime('dateStart'),
+                $this->getPostedDateTime('dateEnd')
+            );
+            return $this->getResponseOk("La personnes a bien été modifée dans le projet");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError(
+                "Impossible de modifier l'affectation de cette personne dans le projet : " . $e->getMessage()
+            );
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1047,7 +1045,9 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     {
         try {
             /** @var ActivityPerson $personActivity */
-            $activityOrganization = $this->getOrganizationService()->getActivityOrganization($this->getRoutedInteger('idenroll'));
+            $activityOrganization = $this->getOrganizationService()->getActivityOrganization(
+                $this->getRoutedInteger('idenroll')
+            );
 
             $this->getOscarUserContextService()->check(
                 Privileges::ACTIVITY_PERSON_MANAGE,
@@ -1062,11 +1062,16 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
+    /**
+     * @return \Zend\Http\Response
+     */
     public function activityOrganizationEditAction()
     {
         try {
             /** @var ActivityOrganization $activityOrganization */
-            $activityOrganization = $this->getOrganizationService()->getActivityOrganization($this->getRoutedInteger('idenroll'));
+            $activityOrganization = $this->getOrganizationService()->getActivityOrganization(
+                $this->getRoutedInteger('idenroll')
+            );
 
             $this->getOscarUserContextService()->check(
                 Privileges::ACTIVITY_PERSON_MANAGE,
@@ -1093,6 +1098,85 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Récupération des données postées
     ///
+
+    /**
+     * Extraction du champ $name des données postées en tant qu'entier.
+     *
+     * @param string $name
+     * @return int
+     * @throws OscarException
+     */
+    protected function getPostedInteger(string $name): int
+    {
+        $input = $this->params()->fromPost($name, null);
+        return $this->getInteger($input);
+    }
+
+    /**
+     * Extraction du champ $name des données d'URL en tant qu'entier.
+     *
+     * @param string $name
+     * @return int
+     * @throws OscarException
+     */
+    protected function getRoutedInteger(string $name): int
+    {
+        $input = $this->params()->fromRoute($name, null);
+        return $this->getInteger($input);
+    }
+
+
+    /**
+     * @param $value
+     * @return int
+     * @throws OscarException
+     */
+    protected function getInteger($value): int
+    {
+        if ($value == null) {
+            throw new OscarException("Aucune valeur donnée");
+        } else {
+            $input = intval($value);
+        }
+        if (!is_int($input)) {
+            throw new OscarException("La valeur '$input' n'est pas un entier.");
+        }
+        return $value;
+    }
+
+    /**
+     * Extraction du champ $name comme DateTime (ou NULL).
+     *
+     * @param string $name
+     * @return int
+     * @throws OscarException
+     */
+    protected function getPostedDateTime(string $name): ?\DateTime
+    {
+        $postedDate = $this->params()->fromPost($name, null);
+        $date = null;
+        if ($postedDate != null && $postedDate != 'null' && $postedDate != 'undefined') {
+            $date = DateTimeUtils::toDatetime($postedDate);
+        }
+        return $date;
+    }
+
+    /**
+     * Récupération des données POST pour une création.
+     *
+     * @return array
+     * @throws OscarException
+     */
+    protected function getPostedNew(): array
+    {
+        $datas = [
+            "role" => $this->getPostedInteger('role'),
+            "enroled" => $this->getPostedInteger('enroled'),
+            "dateStart" => $this->getPostedDateTime('dateStart'),
+            "dateEnd" => $this->getPostedDateTime('dateEnd'),
+        ];
+        return $datas;
+    }
 
     /**
      * @return ActivityOrganization

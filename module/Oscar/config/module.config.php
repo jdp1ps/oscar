@@ -79,7 +79,7 @@ return array(
                 // PROJET
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Project',
-                    'action' => ['show', 'new', 'edit', 'search', 'makeProject'],
+                    'action' => ['show', 'new', 'edit', 'search', 'makeProject', 'persons', 'organizations'],
                     'roles' => ['user'],
                 ],
                 [   'controller' =>   'Project',

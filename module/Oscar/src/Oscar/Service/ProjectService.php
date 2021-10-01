@@ -11,7 +11,6 @@ namespace Oscar\Service;
 
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\Expr\Join;
 use Monolog\Logger;
 use Oscar\Entity\Activity;
@@ -25,9 +24,12 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\EnrollToArrayFormatter;
+use Oscar\Provider\Privileges;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use Zend\Mvc\Controller\Plugin\Url;
 
 /**
  * Cette classe fournit des automatismes liés à la manipulation et la
@@ -431,8 +433,43 @@ class ProjectService implements UseServiceContainer
         }
     }
 
-    public function addProjectOrganisation(Project $project, Organization $organization, OrganizationRole $role, $dateStart, $dateEnd): void
-    {
+    // editProjectOrganisation
+    public function editProjectOrganisation(
+        ProjectPartner $projectPartner,
+        OrganizationRole $role,
+        $dateStart,
+        $dateEnd
+    ): void {
+
+        try {
+            $update = $role->isPrincipal() != $projectPartner->getRoleObj()->isPrincipal();
+
+            $projectPartner
+                ->setRoleObj($role)
+                ->setDateStart($dateStart)
+                ->setDateEnd($dateEnd);
+
+            $this->getEntityManager()->flush();
+
+            if ($update) {
+                $this->getGearmanJobLauncherService()->triggerUpdateNotificationProject($projectPartner->getProject());
+            }
+
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($projectPartner->getOrganization());
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexProject($projectPartner->getProject());
+        } catch (\Exception $e) {
+            $msg = "Impossible de modifier l'organisation dans le projet";
+            $this->getLogger()->error("$msg : " . $e->getMessage());
+        }
+    }
+
+    public function addProjectOrganisation(
+        ProjectP $project,
+        Organization $organization,
+        OrganizationRole $role,
+        $dateStart,
+        $dateEnd
+    ): void {
         if (!$project->hasPartner($organization, $role)) {
             $projectOrganization = new ProjectPartner();
             $this->getEntityManager()->persist($projectOrganization);
@@ -440,8 +477,7 @@ class ProjectService implements UseServiceContainer
                 ->setProject($project)
                 ->setRoleObj($role)
                 ->setDateStart($dateStart)
-                ->setDateEnd($dateEnd)
-            ;
+                ->setDateEnd($dateEnd);
             $this->getEntityManager()->flush();
 
             if ($role->isPrincipal()) {
@@ -452,7 +488,11 @@ class ProjectService implements UseServiceContainer
             $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexProject($project);
         } else {
             throw new OscarException(
-                sprintf("L'organization %s est déjà partenaire pour le projet %s", $organization->log(), $project->log())
+                sprintf(
+                    "L'organization %s est déjà partenaire pour le projet %s",
+                    $organization->log(),
+                    $project->log()
+                )
             );
         }
     }
@@ -504,4 +544,68 @@ class ProjectService implements UseServiceContainer
             return [];
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// API
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function getPersonsProjectsAPI(Project $projet, ?array &$output = null, Url $urlHelper): array
+    {
+        if ($output === null) {
+            $output = [];
+        }
+
+        $output['persons'] = [];
+
+        if ($this->getProjectGrantService()->getOscarUserContextService()->hasPrivileges(
+            Privileges::PROJECT_PERSON_MANAGE,
+            $projet
+        )) {
+            $output['urlNew'] = $urlHelper->fromRoute('personproject/new', ['idenroller' => $projet->getId()]);
+            $output['roles'] = $this->getProjectGrantService()->getOscarUserContextService(
+            )->getAllRoleIdPersonInActivity();
+        }
+
+        $personProjectFormatter = new EnrollToArrayFormatter(
+            $this->getProjectGrantService()->getOscarUserContextService(), $urlHelper
+        );
+
+        foreach ($projet->getPersonsDeep() as $personProject) {
+            $output['persons'][] = $personProjectFormatter->format($personProject);
+        }
+
+        return $output;
+    }
+
+    public function getOrganizationsProjectsAPI(Project $projet, ?array &$output = null, Url $urlHelper): array
+    {
+        if ($output === null) {
+            $output = [];
+        }
+
+        $output['organizations'] = [];
+
+        if ($this->getProjectGrantService()->getOscarUserContextService()->hasPrivileges(
+            Privileges::PROJECT_ORGANIZATION_MANAGE,
+            $projet
+        )) {
+            $output['urlNew'] = $urlHelper->fromRoute('organizationproject/new', ['idenroller' => $projet->getId()]);
+            $output['roles'] = $this->getProjectGrantService()->getOscarUserContextService(
+            )->getRolesOrganizationInActivity();
+        }
+
+        $organizationProjectFormatter = new EnrollToArrayFormatter(
+            $this->getProjectGrantService()->getOscarUserContextService(), $urlHelper
+        );
+
+        foreach ($projet->getOrganisationsDeep() as $organizationProject) {
+            $output['organizations'][] = $organizationProjectFormatter->format($organizationProject);
+        }
+
+        return $output;
+    }
+
+
+    ///
 }
