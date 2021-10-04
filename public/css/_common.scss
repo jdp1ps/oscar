@@ -5588,3 +5588,99 @@ pre.alert-danger, pre.alert-info {
   font-weight: lighter;
   background: rgba(0,0,0,.05);
 }
+
+
+
+//////////////////////////////////////////////////////////
+///
+//////////////////////////////////////////////////////////
+.activity-timesheet-synthesis {
+  background: rgba(#fff, .5);
+
+  h2, h3, h4, h5 {
+    font-size: 1.5rem;
+    margin: 0 1rem;
+    padding: 0;
+  }
+
+  .line {
+    border-top: solid thin $brand-primary;
+    display: flex;
+    strong { flex: 1; font-weight: 400 }
+    em { flex: 0 10rem; text-align: right; font-weight: 400; font-style: normal  }
+    &.totalline {
+      strong { font-weight: 700 !important }
+      em { font-weight: 700; }
+    }
+    &:hover {
+      background: lighten($brand-primary, 50%);
+    }
+  }
+
+  .year {
+    border: solid thin grey;
+    border-left: 4px solid grey;
+    margin: 1em;
+    h3 {
+      cursor: pointer;
+      line-height: 1.5rem;
+      strong {
+        font-size: 2rem;
+      }
+    }
+    &:hover {
+      border-color: $brand-primary;
+    }
+    &:not(.open){
+      h3 em {
+        font-weight: 700;
+      }
+    }
+    &.open {
+      h3 strong {
+        font-weight: 700;
+      }
+      .month h4 strong {
+        // font-weight: 700;
+      }
+    }
+  }
+
+  .month {
+    margin-left: 1rem;
+    margin-bottom: .25em;
+    border: solid thin grey;
+    border-left: 2px solid grey;
+    border-right: none;
+    padding: .1em;
+    background: rgba(#fff, .7);
+    h4 {
+      cursor: pointer;
+    }
+    &:hover {
+      border-color: $brand-primary;
+      em {
+        color: $brand-primary;
+      }
+    }
+  }
+
+  .person {
+    margin-left: 2rem ;
+    font-size: 1.5rem;
+    border-top: thin $colorMedium solid;
+    background: rgba(#fff, .7);
+
+    .line {
+      strong { font-weight: 300 };
+    }
+    &:hover {
+      background: lighten($brand-primary, 60%);
+    }
+    &:nth-child(odd) {
+      background: rgba($brand-primary,.1);
+    }
+  }
+
+
+}

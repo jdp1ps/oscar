@@ -173,17 +173,51 @@ Pour l'URL "liste", le service REST doit retourner un tableau composé d'objets 
 
 ```JSON
 [
-  {  
-    "uid": "person1",
-    "login": "etc..." 
+  {
+    "uid": "p1001",
+    "login": "alberteinstein",
+    "firstname": "Albert",
+    "lastname": "Einstein",
+    "displayname": "Albert Einstein",
+    "mail": "albert.einstein@univ-berne.com",
+    "civilite": "",
+    "preferedlanguage": "",
+    "status": "",
+    "affectation": "",
+    "structure": "",
+    "inm": "",
+    "phone": "",
+    "birthday": "",
+    "datefininscription": "",
+    "datecreated": "",
+    "dateupdated": "1905-07-04",
+    "datecached": "2020-07-04",
+    "address": null,
+    "groups": [],
+    "roles": {}
   },
   {
-    "uid": "person2",
-   "login": "etc..." 
-  },
-  { 
-    "uid": "person3",
-    "login": "etc..." 
+    "uid": "p1002",
+    "login": "maxplank",
+    "firstname": "Max",
+    "lastname": "Plank",
+    "displayname": "Max Plank",
+    "mail": "max.plank@univ-berlin.com",
+    "civilite": "",
+    "preferedlanguage": "",
+    "status": "",
+    "affectation": "",
+    "structure": "",
+    "inm": "",
+    "phone": "",
+    "birthday": "",
+    "datefininscription": "",
+    "datecreated": "",
+    "dateupdated": "1905-07-04",
+    "datecached": "2020-07-04",
+    "address": null,
+    "groups": [],
+    "roles": {}
   }
 ]
 ```
