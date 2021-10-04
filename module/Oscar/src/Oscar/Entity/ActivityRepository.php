@@ -17,6 +17,23 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ActivityRepository extends EntityRepository
 {
+
+    /**
+     * @param null $limitEnd
+     * @param bool $statusActive
+     * @return Activity[]
+     */
+    public function getActivitiesActive( $limitEnd = null, $statusActive = true ){
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->where('a.status = :status');
+
+        $queryBuilder->setParameters([
+            'status' => Activity::STATUS_ACTIVE
+        ]);
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
     /**
      * Retourne la liste des IDS des activités impliquant l'organisation (avec un rôle principal).
      *

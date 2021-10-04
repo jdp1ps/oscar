@@ -152,7 +152,7 @@ class ProjectGrantService implements UseOscarConfigurationService, UseEntityMana
     /**
      * @return ActivityRepository
      */
-    protected function getActivityRepository()
+    public function getActivityRepository()
     {
         return $this->getEntityManager()->getRepository(Activity::class);
     }

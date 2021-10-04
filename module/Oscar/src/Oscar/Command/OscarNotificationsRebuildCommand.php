@@ -13,36 +13,58 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class OscarActivitySearchReindexCommand extends OscarAdvancedCommandAbstract
+class OscarNotificationsRebuildCommand extends OscarAdvancedCommandAbstract
 {
-    protected static $defaultName = OscarCommandAbstract::COMMAND_ACTIVITY_SEARCH_REINDEX;
+    protected static $defaultName = OscarCommandAbstract::COMMAND_NOTIFICATIONS_REBUILD;
 
-    const ARGUMENT_ACTIVITY_ID = 'activityid';
+    const OPTION_INCLUDE_PAST = 'include-past';
+    const OPTION_PURGE = 'purge-old';
 
     protected function configure()
     {
         parent::configure();
         $this
-            ->setDescription("Reconstruction de l'index de recherche pour une activité")
-            ->addArgument(self::ARGUMENT_ACTIVITY_ID, InputArgument::REQUIRED, "ID de l'activité");
+            ->setDescription("Reconstruction des notifications des activités de recherche")
+            ->addOption(
+                self::OPTION_INCLUDE_PAST,
+                null,
+                InputArgument::OPTIONAL,
+                "Forcer le recalcule des notifications pour les activités"
+            )
+            ->addOption(
+                self::OPTION_PURGE,
+                null,
+                InputArgument::OPTIONAL,
+                "Supprime TOUTES les notifications avant de recalculer"
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
 
-        $activityId = $input->getArgument(self::ARGUMENT_ACTIVITY_ID);
+        $includePast = $input->getOption(self::OPTION_INCLUDE_PAST);
+        $purgeBefore = $input->getOption(self::OPTION_PURGE);
 
         try {
-            $activity = $this->getProjectGrantService()->getActivityById($activityId);
 
-            if (!$this->ask("Réindexer l'activité '$activity' ?")) {
+            // TODO Récupérer les activités en fonction des critères
+            $activities = $this->getProjectGrantService()->getActivityRepository()->getActivitiesActive();
+
+            if (!$this->ask("Recalculer les notifications pour ces ". count($activities) ." activité(s) ?")) {
                 return 0;
             }
 
-            $this->getProjectGrantService()->searchUpdate($activity);
+            foreach ($activities as $activity) {
+                $this->info("Recalcule des notifications pour l'activité '$activity'");
+                try {
+                    $this->getProjectGrantService()->getNotificationService()->updateNotificationsActivity($activity);
+                } catch (Exception $e) {
+                    return $this->finalFatalError($e);
+                }
+            }
 
-            return $this->finalSuccess("Index de recherche mis à jour pour '$activity' mis à jour");
+            return $this->finalSuccess("Les notifications ont été recalculées");
         } catch (Exception $e) {
             return $this->finalFatalError($e);
         }
