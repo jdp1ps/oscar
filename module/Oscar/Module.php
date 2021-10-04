@@ -48,7 +48,6 @@ class Module
     public function init(ModuleManager $manager)
     {
         $sharedEventManager = $manager->getEventManager()->getSharedManager();
-        $sharedEventManager->attach('*', 'authentification.ldap.fail', [$this, 'onLdapError'], 100);
     }
 
     public function onLdapError(Event $event)
