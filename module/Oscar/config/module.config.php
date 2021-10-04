@@ -90,7 +90,7 @@ return array(
                 // PROJET
                 ////////////////////////////////////////////////////////////////
                 [   'controller' =>   'Project',
-                    'action' => ['show', 'new', 'edit', 'search', 'makeProject'],
+                    'action' => ['show', 'new', 'edit', 'search', 'makeProject', 'persons', 'organizations'],
                     'roles' => ['user'],
                 ],
                 [   'controller' =>   'Project',
@@ -806,6 +806,7 @@ return array(
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
+            \Oscar\Service\GearmanJobLauncherService::class => \Oscar\Service\GearmanJobLauncherServiceFactory::class,
             \Oscar\Service\MailingService::class => \Oscar\Service\MailingServiceFactory::class,
             \Oscar\Service\MaintenanceService::class => \Oscar\Service\MaintenanceServiceFactory::class,
             \Oscar\Service\MilestoneService::class => \Oscar\Service\MilestoneServiceFactory::class,

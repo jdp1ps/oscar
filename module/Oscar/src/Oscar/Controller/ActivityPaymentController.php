@@ -147,7 +147,6 @@ class ActivityPaymentController extends AbstractOscarController
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
 
             $method = $this->getHttpXMethod();
-            $this->getLoggerService()->info($method);
 
             if( $method != "GET" && !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
                 $this->getResponseBadRequest("Vous ne disposez pas des droits suffisants pour gérer les versements");
@@ -158,7 +157,6 @@ class ActivityPaymentController extends AbstractOscarController
                     try {
                         /** @var ActivityPayment $payment */
                         $payment = $this->getProjectGrantService()->getActivityPaymentById($this->params()->fromQuery('id'));
-                        $this->getNotificationService()->purgeNotificationPayment($payment);
                         $this->getProjectGrantService()->deleteActivityPayment($payment);
                         return $this->getResponseOk("Le versement a bien été supprimé");
                     } catch ( \Exception $e ){

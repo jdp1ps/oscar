@@ -13,6 +13,8 @@
 // Chemin "simplifié"
 chdir(dirname(__DIR__));
 
+$oscarCmd = '/usr/bin/php bin/oscar.php console ';
+
 // Autoload & Co
 require __DIR__.'/../vendor/autoload.php';
 
@@ -28,139 +30,87 @@ $oscarConfigurationService = $app->getServiceManager()->get(\Oscar\Service\Oscar
 // Worker
 $worker = new GearmanWorker();
 $worker->addServer($oscarConfigurationService->getGearmanHost());
-$worker->addFunction('indexPerson', 'oscarJob_indexPerson');
-$worker->addFunction('personSearchUpdate', 'oscarJob_indexPerson');
-$worker->addFunction('indexActivity', 'oscarJob_indexActivity');
-$worker->addFunction('activitySearchUpdate', 'oscarJob_indexActivity');
-$worker->addFunction('notificationActivityPerson', 'oscarJob_notificationActivityPerson');
-$worker->addFunction('purgeNotificationsPersonActivity', 'oscarJob_purgeNotificationsPersonActivity');
+
+$worker->addFunction('updateIndexActivity', 'oscarJob_updateIndexActivity');
+$worker->addFunction('updateIndexPerson', 'oscarJob_updateIndexPerson');
+$worker->addFunction('updateIndexOrganization', 'oscarJob_updateIndexOrganization');
+$worker->addFunction('updateNotificationsActivity', 'oscarJob_updateNotificationsActivity');
+
 $worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
-echo "OSCAR WORKER STARTED\n";
-echo "Version: " . \Oscar\OscarVersion::getBuild() . "\n";
+$execDev = "2";
+echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()."\n";
 
+while($worker->work());
 
 function getServiceManager(){
     global $app;
     return $app->getServiceManager();
 }
 
-while($worker->work());
-
-function oscarJob_indexActivity(GearmanJob $job){
+function oscarJob_updateIndexActivity(GearmanJob $job){
+    global $oscarCmd;
     $params = json_decode($job->workload());
+    try {
+        if( !property_exists($params, 'activityid') ){
+            throw new Exception("Paramètres manquant 'activityid'");
+        }
+        $activityid = $params->activityid;
+        echo "[worker] indexactivity " . $activityid;
+        exec($oscarCmd . ' indexactivity \'{"activityid":'. $params->activityid .'}\'');
 
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() ."\n";
+    }
+}
 
+function oscarJob_updateIndexPerson(GearmanJob $job){
+    global $oscarCmd;
+    $params = json_decode($job->workload());
+    try {
+        if( !property_exists($params, 'personid') ){
+            throw new Exception("Paramètres manquant 'personid'");
+        }
+        $personid = $params->personid;
+        echo "[worker] indexperson " . $personid;
+        exec($oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'');
+
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() . "\n";
+    }
+}
+
+function oscarJob_updateIndexOrganization(GearmanJob $job){
+    global $oscarCmd;
+    $params = json_decode($job->workload());
+    try {
+        if( !property_exists($params, 'organizationid') ){
+            throw new Exception("Paramètres manquant 'organizationid'");
+        }
+        $organizationid = $params->organizationid;
+        echo "[worker] indexorganization " . $organizationid;
+        exec($oscarCmd . ' indexorganization \'{"organizationid":'. $organizationid .'}\'');
+
+    } catch (Exception $e) {
+        echo "[ERR] " . $e->getMessage() . "\n";
+    }
+}
+
+function oscarJob_updateNotificationsActivity(GearmanJob $job){
+    global $oscarCmd;
+
+    $params = json_decode($job->workload());
 
     try {
         if( !property_exists($params, 'activityid') ){
-            throw new Exception("Paramètres manquant ID");
+            throw new Exception("Paramètres manquant 'activityid'");
         }
-        /** @var \Oscar\Service\ProjectGrantService $activityService */
-        $activityService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
-
-
         $activityid = $params->activityid;
-        $activityService->getLoggerService()->info("[GEARMAN] Indexation de Activity $activityid");
-        $activity = $activityService->getActivityById($activityid);
-        echo date('y-m-d H:i:s')." Rebuid Index [$activityid] $activity\n";
-        $activityService->searchUpdate($activity);
+        echo "[worker] notificationsactivity " . $activityid;
+        exec($oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'');
 
     } catch (Exception $e) {
-        $activityService->getLoggerService()->info("[GEARMAN] Error " . $e->getMessage());
-        echo "[ERR] " . $e->getMessage() ."\n";
-    }
-}
-
-function oscarJob_indexPerson(GearmanJob $job){
-    $params = json_decode($job->workload());
-
-    try {
-        if( !property_exists($params, 'personid') ){
-            throw new Exception("Paramètres manquant ID");
-        }
-        /** @var \Oscar\Service\PersonService $personService */
-        $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
-
-        $personId = $params->personid;
-
-        getServiceManager()->get('Logger')->info("[GEARMAN] Indexation de Person $personId");
-        $person = $personService->getPerson($personId);
-        echo date('y-m-d H:i:s')." Rebuid Index [$personId] $person\n";
-        $personService->getSearchEngineStrategy()->update($person);
-
-    } catch (Exception $e) {
-        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
-        echo "[ERR] " . $e->getMessage() ."\n";
-    }
-}
-
-function oscarJob_notificationActivityPerson(GearmanJob $job){
-    $params = json_decode($job->workload());
-
-    try {
-        if( !property_exists($params, 'personid') || !property_exists($params, 'activityid') ){
-            throw new Exception("Paramètres manquant ID");
-        }
-
-        /** @var \Oscar\Service\ProjectGrantService $projectGrantService */
-        $projectGrantService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
-
-        /** @var \Oscar\Service\PersonService $personService */
-        $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
-
-        /** @var \Oscar\Service\NotificationService $notificationService */
-        $notificationService = getServiceManager()->get(\Oscar\Service\NotificationService::class);
-
-        $personId = $params->personid;
-        $person = $personService->getPerson($personId);
-
-        $activityId = $params->activityid;
-        $activity = $projectGrantService->getActivityById($activityId);
-
-        getServiceManager()->get('Logger')->info("[GEARMAN] Notification Person:$personId - Activity:$activityId");
-
-        echo date('y-m-d H:i:s')." Notification Activity Person [$activityId, $personId] $activity >  $person\n";
-        $notificationService->generateNotificationsForActivity($activity, $person);
-
-    } catch (Exception $e) {
-        echo "[ERR] " . $e->getMessage() ."\n";
-        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
-    }
-}
-
-
-function oscarJob_purgeNotificationsPersonActivity(GearmanJob $job){
-    $params = json_decode($job->workload());
-
-    try {
-        if( !property_exists($params, 'personid') || !property_exists($params, 'activityid') ){
-            throw new Exception("Paramètres manquant ID");
-        }
-
-        /** @var \Oscar\Service\ProjectGrantService $projectGrantService */
-        $projectGrantService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
-
-        /** @var \Oscar\Service\PersonService $personService */
-        $personService = getServiceManager()->get(\Oscar\Service\PersonService::class);
-
-        /** @var \Oscar\Service\NotificationService $notificationService */
-        $notificationService = getServiceManager()->get(\Oscar\Service\NotificationService::class);
-
-        $personId = $params->personid;
-        $person = $personService->getPerson($personId);
-
-        $activityId = $params->activityid;
-        $activity = $projectGrantService->getActivityById($activityId);
-
-        getServiceManager()->get('Logger')->info("[GEARMAN] Purge notification Person:$personId Activity:$activityId");
-
-        echo date('y-m-d H:i:s')." PURGE Notification Activity Person [$activityId, $personId] $activity >  $person\n";
-        $notificationService->purgeNotificationsPersonActivity($activity, $person);
-
-    } catch (Exception $e) {
-        getServiceManager()->get('Logger')->info("[GEARMAN] Error " . $e->getMessage());
         echo "[ERR] " . $e->getMessage() ."\n";
     }
 }
@@ -186,7 +136,7 @@ function oscarJob_hello(GearmanJob $job){
         echo "Hello with " . print_r($params) . "\n";
 
         // Envoi d'un log vers OSCAR
-        $loggerService->info("[GEARMAN] a bien reçu la tâche HELLO");
+        getServiceManager()->get('Logger')->info(" > [gearman:call] TEST OK]");
 
         $job->sendComplete("TRAITEMENT RÉUSSI");
 

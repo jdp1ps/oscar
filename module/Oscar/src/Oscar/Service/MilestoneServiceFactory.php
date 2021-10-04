@@ -26,6 +26,7 @@ class MilestoneServiceFactory implements FactoryInterface
         $s->setOscarUserContextService($container->get(OscarUserContext::class));
         $s->setEntityManager($container->get(EntityManager::class));
         $s->setNotificationService($container->get(NotificationService::class));
+        $s->setActivityLogService($container->get(ActivityLogService::class));
         return $s;
     }
 }

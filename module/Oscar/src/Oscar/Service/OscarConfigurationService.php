@@ -170,7 +170,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $path = $this->getYamlConfigPath();
         if (file_exists($path)) {
             $parser = new Parser();
-            return $parser->parse(file_get_contents($path));
+            $parsed = $parser->parse(file_get_contents($path));
+            if( $parsed ){
+                $parser->parse(file_get_contents($path));
+            } else {
+                return [];
+            }
         } else {
             return [];
         }

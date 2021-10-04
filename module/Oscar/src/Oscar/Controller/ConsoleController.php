@@ -448,16 +448,6 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
 
     }
 
-    public function notificationsPersonAction()
-    {
-        $personId = $this->params('idperson');
-        $person = $this->getPersonService()->getPerson($personId);
-        $this->getNotificationService()->generateNotificationsPerson($person);
-        die("$person");
-    }
-
-//'route' => 'oscar notifications:person:purge <idperson> <idactivity></idactivity>',
-
     public function notificationsPersonActivityPurgeAction()
     {
         $personId = $this->params('idperson');
