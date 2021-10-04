@@ -139,12 +139,6 @@ postgres=# \q
 xxx@zzzz:~$ déconnexion
 ```
 
-Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
-
-```bash
-# Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql postgresql-client postgresql-client-common
-```
 Vérification du bon fonctionnement
 ```
 sudo -i -u postgres
@@ -258,44 +252,24 @@ Gearman est un *daemon* qui se chargera de gérer les tâches Oscar.
 apt install gearman-job-server
 
 # Status du deamon
+systemctl status gearman-job-server.service
+# ou (selon que vous utilisiez systemd ou non selon votre version debian)
 service gearman-job-server status
 
 # Surveiller les tâches en attentes
 watch "gearadmin --status | sort -n | column -t"
+# Dans le cas ou vous avez un message "gearadmin not found", installez le nécessaire
+apt-get install gearman-tools
 ```
 
-### Création de la base de données vide
+Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/7.3/cli/php.ini** et **/etc/php/7.3/apache2/php.ini** en ajoutant la ligne :
 
-Création de l'utilisateur/bdd locale si besoin :
-
-```bash
-su - postgres
-psql
+```ini
+; /etc/php/7.3/cli/php.ini - /etc/php/7.3/apache2/php.ini
+extension=gearman
 ```
 
-### Création de l'utilisateur
-
-Puis création de l'utilisateur/bdd :
-
-```sql
-CREATE USER oscar WITH PASSWORD 'azerty';
-CREATE DATABASE oscar_dev;
-GRANT ALL PRIVILEGES ON DATABASE oscar_dev to oscar;
-\q
-```
-
-### Structure de données initiales
-
-Les données "de base" sont à disposition dans
-le dépôt dans le fichier : `install/oscar-install.sql`.
-
-```bash
-psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
-```
-
-> La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
-
-Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur : 
+Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur :
 
 ```bash
 # on copie le gabarit de configuration du service
@@ -321,6 +295,8 @@ ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
 
 # On lance le service
 service oscarworker start
+# Si vous utilisez systemd
+systemctl start oscarworker.service
 
 # On regarde si tout est OK
 journalctl -u oscarworker.service -f
@@ -330,7 +306,6 @@ service enable oscarworker
 ```
 
 Etape détaillée dans [Installation de Gearman](./install-gearman.md)
-
 
 
 ## Installation de la base de données
@@ -367,7 +342,6 @@ psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 > La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
 
 
-
 ## Configuration d'oscar
 
 ### Configuration éditable 
@@ -381,7 +355,7 @@ touch config/autoload/oscar-editable.yml
 Assurez vous qu'il est accessible en écriture
 
 
-### Base de données
+### Base de données configuration
 
 Oscar est conçu pour fonctionner avec une base de données *Postgresql*.
 
@@ -442,7 +416,7 @@ Il faut donc à chaque mise à jour mettre à jour ces privilèges en base de do
 Pour **mettre à jour les privilèges**, executez la commande : 
 
 ```bash
-php public/index.php oscar patch checkPrivilegesJSON
+php bin/oscar.php check:privileges
 ```
 
 > Executer cette commande jusqu'à obtenir un message "Les privilèges sont à jour" (sera prochainement corrigé).
@@ -485,7 +459,7 @@ Ce fichier est utilisé pour les paramètres administrable depuis l'interface (A
 Vous pouvez tester la configuration avec la commande :
 
 ```bash
-$ php public/index.php oscar test:config
+php bin/oscar.php check:config
 ```
 
 Assurez vous que les modules PHP requis sont bien détectés avec la mention "Installed" et que la base de données réponds. A cette étape, Oscar est fonctionnel mais il reste encore quelques paramètres à configurer.
@@ -504,6 +478,8 @@ Activer les modules Apache si besoin :
 a2enmod rewrite
 a2enmod ssl
 service apache2 reload
+# Si sous systemd
+systemctl restart apache2.service
 ```
 
 Éditer le fichier de configuration apache2 :
@@ -780,13 +756,13 @@ cd /var/oscar_path
 Puis on commence par créer un compte d'autentification :
 
 ```bash
-php public/index.php oscar auth:add
+php bin/oscar.php auth:add
 ```
 
 Puis on lui attribue le rôle "Administrateur" :
 
 ```bash
-php public/index.php oscar auth:promote <USER> Administrateur
+php bin/oscar.php auth:promote
 ```
 
 Utiliser ensuite le navigateur pour vous rendre sur oscar et utiliser l'identifiant **admin** avec la mot de passe **password** pour vous connecter en tant qu'administrateur.
