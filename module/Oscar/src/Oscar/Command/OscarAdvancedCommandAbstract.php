@@ -64,7 +64,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
 
     protected function isInteractive(): bool
     {
-        return !($this->isForce() || !$this->getIO()->isQuiet);
+        return !($this->isForce() || $this->isQuiet());
     }
 
     protected function isForce(): bool
