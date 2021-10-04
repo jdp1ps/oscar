@@ -40,6 +40,7 @@
         <p>{{ s.message }}</p>
         <strong><i class="icon-group"></i> Personnes concernées :</strong>
         <span class="cartouche xs" v-for="p in s.persons" :class="p.read ? 'read' : ''">
+            <i class="icon-valid" v-if="p.read"></i>
             {{ p.person }}
         </span>
         <br>

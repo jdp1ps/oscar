@@ -29,6 +29,21 @@ class ProjectGrantRepository extends EntityRepository{
         return $qb;
     }
 
+    /**
+     * Retourne la liste des activités dont la date de fin n'est pas encore atteinte.
+     *
+     * @return Activity[]
+     */
+    public function getActivitiesWithDateEndUnrushed() :array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->createQueryBuilder('a')
+            ->where('a.dateEnd IS NULL OR a.dateEnd >= :now')
+            ->setParameter('now', (new \DateTime())->format('Y-m-d'));
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function getAllByYear( $year=null ){
         $query = $this->getBaseQuery();
         if( $year != null ){

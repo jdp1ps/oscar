@@ -33,6 +33,7 @@ class Notification
     const OBJECT_PERSON = 'person';
     const OBJECT_ACTIVITY = 'activity';
     const OBJECT_APPLICATION = 'application';
+    const OBJECT_TIMESHEET = 'timesheet';
 
     // Valeurs par défaut
     const DEFAULT_LEVEL = self::LEVEL_INFO;

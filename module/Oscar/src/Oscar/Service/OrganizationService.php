@@ -6,6 +6,7 @@
  *
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Service;
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
@@ -17,6 +18,7 @@ use Oscar\Entity\Country3166;
 use Oscar\Entity\Country3166Repository;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\OrganizationTypeRepository;
 use Oscar\Entity\ProjectPartner;
@@ -46,14 +48,14 @@ use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
  *
  * Class OrganizationService
  */
-class OrganizationService implements UseOscarConfigurationService, UseEntityManager, UseOscarUserContextService, UseLoggerService
+class OrganizationService implements UseOscarConfigurationService, UseEntityManager, UseOscarUserContextService,
+                                     UseLoggerService
 {
 
     use UseOscarConfigurationServiceTrait,
         UseEntityManagerTrait,
         UseLoggerServiceTrait,
-        UseOscarUserContextServiceTrait
-        ;
+        UseOscarUserContextServiceTrait;
 
     /** @var PersonService */
     private $personService;
@@ -75,8 +77,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
 
-
-
     private $cacheCountries = null;
     private $cacheConnectors = null;
 
@@ -91,11 +91,63 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
      */
-    public function getAvailableRolesOrganisationActivity(){
+    public function getAvailableRolesOrganisationActivity()
+    {
         return $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
     }
 
-    public function deleteOrganization( $id ){
+    /**
+     * Retourne le OrganizationRole via l'ID
+     *
+     * @param int $organizationRoleId
+     * @param bool $throw
+     * @return OrganizationRole
+     * @throws OscarException
+     */
+    public function getRoleOrganizationById(int $organizationRoleId, $throw = true): OrganizationRole
+    {
+        /** @var OrganizationRoleRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(OrganizationRole::class);
+
+        $role = $repo->find($organizationRoleId);
+
+        if ($role === null && $throw === true) {
+            throw new OscarException("Impossible de charger le rôle d'organisation '$organizationRoleId'");
+        }
+
+        return $role;
+    }
+
+    /**
+     * Retourne l'ActivityOrganization via l'ID.
+     *
+     * @param int $activityOrganizationId
+     * @param bool $throw
+     * @return ActivityOrganization
+     * @throws OscarException
+     */
+    public function getActivityOrganization(int $activityOrganizationId, $throw = true): ActivityOrganization
+    {
+        $repo = $this->getEntityManager()->getRepository(ActivityOrganization::class);
+
+        $activityOrganization = $repo->find($activityOrganizationId);
+
+        if ($activityOrganization === null && $throw === true) {
+            throw new OscarException("Impossible de charger le rôle d'organisation '$activityOrganizationId'");
+        }
+
+        return $activityOrganization;
+    }
+
+    /**
+     * @param $id
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @deprecated
+     */
+    public function deleteOrganization($id)
+    {
         $o = $this->getOrganization($id);
         $this->getEntityManager()->remove($o);
         $this->getEntityManager()->flush();
@@ -103,22 +155,23 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     /**
      * Retourne la liste des Organizations pour la personne
+     *
      * @param Person $person
      * @param null $specifiqueRoleIds
      * @param bool $rolePrincipaux
      * @return Organization[]
      */
-    public function getOrganizationsWithPersonRolled(Person $person, $specifiqueRoleIds = null, $rolePrincipaux = false){
-
+    public function getOrganizationsWithPersonRolled(Person $person, $specifiqueRoleIds = null, $rolePrincipaux = false)
+    {
         // Filtrer les rôles
 
-        if( $rolePrincipaux == true ){
+        if ($rolePrincipaux == true) {
             $roles = $this->getOscarUserContext()->getRoleIdPrimary();
         } else {
             $roles = $this->getOscarUserContext()->getRoleId();
         }
 
-        if( $specifiqueRoleIds ){
+        if ($specifiqueRoleIds) {
             $roles = array_intersect($roles, $specifiqueRoleIds);
         }
 
@@ -126,10 +179,12 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             ->innerJoin('o.persons', 'p')
             ->innerJoin('p.roleObj', 'r')
             ->where('p.person = :person AND r.roleId IN(:roles)')
-            ->setParameters([
-                'person'    => $person,
-                'roles'     => $roles,
-            ])
+            ->setParameters(
+                [
+                    'person' => $person,
+                    'roles' => $roles,
+                ]
+            )
             ->getQuery()
             ->getResult();
 
@@ -138,7 +193,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getConnectorsList()
     {
-        if( $this->cacheConnectors == null ){
+        if ($this->cacheConnectors == null) {
             $this->cacheConnectors = [];
             // todo Utiliser le service qui gère l'accès à la configuration
             $config = $this->getOscarConfigurationService();
@@ -152,7 +207,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getCountriesList()
     {
-        if( $this->cacheCountries == null ){
+        if ($this->cacheCountries == null) {
             $this->cacheCountries = [];
             $countries = $this->getEntityManager()->createQueryBuilder()
                 ->select('o.country')
@@ -160,14 +215,14 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 ->distinct('o.country')
                 ->getQuery()
                 ->getScalarResult();
-            foreach($countries as $r ){
+            foreach ($countries as $r) {
                 $this->cacheCountries[] = $r['country'];
             }
         }
         return $this->cacheCountries;
     }
 
-    public function getActivities( $organizationId )
+    public function getActivities($organizationId)
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('a, p, o, o, pe, m')
@@ -189,22 +244,25 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * @param Organization $o
      * @return array
      */
-    public function getOrganizationActivititiesPrincipalActive( Organization $o ){
+    public function getOrganizationActivititiesPrincipalActive(Organization $o)
+    {
         $activities = [];
         /** @var ActivityOrganization $activity */
-        foreach ($o->getActivities() as $activity ){
-            if( $activity->isPrincipal() && !$activity->isOutOfDate() ){
-                if( !in_array($activity->getActivity(), $activities) )
+        foreach ($o->getActivities() as $activity) {
+            if ($activity->isPrincipal() && !$activity->isOutOfDate()) {
+                if (!in_array($activity->getActivity(), $activities)) {
                     $activities[] = $activity->getActivity();
+                }
             }
         }
 
         /** @var ProjectPartner $p */
-        foreach ($o->getProjects() as $p ){
-            if( $p->isPrincipal() && !$p->isOutOfDate() ){
+        foreach ($o->getProjects() as $p) {
+            if ($p->isPrincipal() && !$p->isOutOfDate()) {
                 foreach ($p->getProject()->getActivities() as $activity) {
-                    if( !in_array($activity, $activities) )
+                    if (!in_array($activity, $activities)) {
                         $activities[] = $activity;
+                    }
                 }
             }
         }
@@ -212,21 +270,24 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $activities;
     }
 
-    public function getOrganizationTypes(){
-
+    public function getOrganizationTypes()
+    {
         $types = [];
-        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(['root' => null], ['label' => 'DESC']);
+        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(
+            ['root' => null],
+            ['label' => 'DESC']
+        );
 
         /** @var OrganizationType $type */
-        foreach ($result as $type ) {
+        foreach ($result as $type) {
             $types[$type->getId()] = $type->toJson();
         }
 
         return $types;
     }
 
-    public function getTypes(){
-
+    public function getTypes()
+    {
         $types = Organization::getTypes();
 
         $query = $this->getEntityManager()->createQueryBuilder('o')
@@ -235,16 +296,18 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             ->distinct()
             ->getQuery();
 
-        foreach ($query->getResult(Query::HYDRATE_ARRAY) as $type ) {
+        foreach ($query->getResult(Query::HYDRATE_ARRAY) as $type) {
             $t = $type['type'];
-            if (!in_array($t, $types) && $t != null)
+            if (!in_array($t, $types) && $t != null) {
                 $types[] = $t;
+            }
         }
         sort($types);
         return $types;
     }
 
-    public function getOrganizationTypesSelect(){
+    public function getOrganizationTypesSelect()
+    {
         $options = [];
 
         $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
@@ -252,11 +315,15 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $options[$type->getId()] = $type;
         }
         return $options;
-
-
     }
 
-    public function updateIndex( Organization $organization ){
+    public function searchUpdate(Organization $organization): void
+    {
+        $this->updateIndex($organization);
+    }
+
+    public function updateIndex(Organization $organization): void
+    {
         $this->getSearchEngineStrategy()->update($organization);
     }
 
@@ -266,7 +333,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getSearchEngineStrategy()
     {
         static $searchStrategy;
-        if( $searchStrategy === null ){
+        if ($searchStrategy === null) {
             $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
             $class = new \ReflectionClass($opt['class']);
             $searchStrategy = $class->newInstanceArgs($opt['params']);
@@ -286,7 +353,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      *
      * @return Organization[]
      */
-    public function getOrganizationsSearchPaged($search, $page, $filter=[])
+    public function getOrganizationsSearchPaged($search, $page, $filter = [])
     {
         // $qb = $this->getSearchNativeQuery($search, $filter);
         $qb = $this->getSearchQuery($search, $filter);
@@ -300,24 +367,22 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * @return \Doctrine\ORM\QueryBuilder
      * @throws OscarException
      */
-    protected function getSearchNativeQuery($search, $filter){
+    protected function getSearchNativeQuery($search, $filter)
+    {
         $qb = $this->getBaseQuery();
         if ($search) {
-
             // Recherche sur le connector
             $reg = preg_match('/([a-z]*)=(.*)/', $search, $matches);
-            if( $reg ){
+            if ($reg) {
                 $connectors = $this->getConnectorsList();
                 $connectorName = $matches[1];
-                if( !in_array($connectorName, $connectors) ){
+                if (!in_array($connectorName, $connectors)) {
                     throw new OscarException("Le connecteur $connectorName n'existe pas.");
                 }
-                $connectorValue = $matches[2].'%';
-                $where = 'o.connectors LIKE \'%"'.$connectorName.'";s:%:"'.$connectorValue.'"%\'';
+                $connectorValue = $matches[2] . '%';
+                $where = 'o.connectors LIKE \'%"' . $connectorName . '";s:%:"' . $connectorValue . '"%\'';
                 $qb->orWhere($where);
-            }
-            else {
-
+            } else {
                 $qb
                     ->orWhere('LOWER(o.shortName) LIKE :search')
                     ->orWhere('LOWER(o.fullName) LIKE :search')
@@ -325,33 +390,33 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                     ->orWhere('o.zipCode = :searchStrict')
                     ->orWhere('LOWER(o.code) LIKE :search');
 
-                if (strlen($search) == 14)
+                if (strlen($search) == 14) {
                     $qb->orWhere('o.siret = :searchStrict');
+                }
 
 
-                $qb->setParameters([
+                $qb->setParameters(
+                    [
                         'search' => '%' . strtolower($search) . '%',
                         'searchStrict' => strtolower($search),
                     ]
                 );
             }
-
         }
 
         // -------------------------------------------------------------------------------------------------------------
         // FILTRE sur les types d'organisations
-        if (isset($filter['type']) && $filter['type']){
-
+        if (isset($filter['type']) && $filter['type']) {
             // On purge les types vides (option "Tous")
             $cleanTypes = [];
 
             foreach ($filter['type'] as $typeValue) {
-                if( $typeValue ){
+                if ($typeValue) {
                     $cleanTypes[] = $typeValue;
                 }
             }
 
-            if( count($cleanTypes) > 0 ){
+            if (count($cleanTypes) > 0) {
                 $types = $this->getEntityManager()->getRepository(OrganizationType::class)->createQueryBuilder('t')
                     ->where('t.id IN (:types)')
                     ->setParameter('types', $cleanTypes)
@@ -364,12 +429,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             }
         }
 
-        if (isset($filter['active']) && $filter['active']){
-            if( $filter['active'] == 'ON' ){
+        if (isset($filter['active']) && $filter['active']) {
+            if ($filter['active'] == 'ON') {
                 $qb->andWhere('o.dateEnd IS NULL OR o.dateEnd > :now')->setParameter('now', new \DateTime());
-            }
-            else if( $filter['active'] == 'OFF' ){
-                $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+            } else {
+                if ($filter['active'] == 'OFF') {
+                    $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+                }
             }
         }
 
@@ -379,8 +445,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 ->where('r.role IN (:roles)')
                 ->setParameter('roles', $filter['roles'])->getQuery()->getResult();
             /** @var ProjectPartner $role */
-            foreach( $roles as $role ){
-                if( !in_array($role->getOrganization()->getId(), $ids) ){
+            foreach ($roles as $role) {
+                if (!in_array($role->getOrganization()->getId(), $ids)) {
                     $ids[] = $role->getOrganization()->getId();
                 }
             }
@@ -395,20 +461,20 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     {
         $qb = $this->getBaseQuery();
 
-        if( $search != "" ){
+        if ($search != "") {
             $ids = $this->search($search, true);
 
             $sortSize = 25;
 
             // ORDER BY de LREM
             // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
-            if( count($ids) > 1 ){
+            if (count($ids) > 1) {
                 $selectHidden = "(CASE ";
                 $i = 0;
                 foreach ($ids as $id) {
                     $selectHidden .= " WHEN o.id = $id THEN $i ";
                     $i++;
-                    if( $i > $sortSize ){
+                    if ($i > $sortSize) {
                         break;
                     }
                 }
@@ -426,18 +492,17 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         // -------------------------------------------------------------------------------------------------------------
         // FILTRE sur les types d'organisations
-        if (isset($filter['type']) && $filter['type']){
-
+        if (isset($filter['type']) && $filter['type']) {
             // On purge les types vides (option "Tous")
             $cleanTypes = [];
 
             foreach ($filter['type'] as $typeValue) {
-                if( $typeValue ){
+                if ($typeValue) {
                     $cleanTypes[] = $typeValue;
                 }
             }
 
-            if( count($cleanTypes) > 0 ){
+            if (count($cleanTypes) > 0) {
                 $types = $this->getEntityManager()->getRepository(OrganizationType::class)->createQueryBuilder('t')
                     ->where('t.id IN (:types)')
                     ->setParameter('types', $cleanTypes)
@@ -450,12 +515,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             }
         }
 
-        if (isset($filter['active']) && $filter['active']){
-            if( $filter['active'] == 'ON' ){
+        if (isset($filter['active']) && $filter['active']) {
+            if ($filter['active'] == 'ON') {
                 $qb->andWhere('o.dateEnd IS NULL OR o.dateEnd > :now')->setParameter('now', new \DateTime());
-            }
-            else if( $filter['active'] == 'OFF' ){
-                $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+            } else {
+                if ($filter['active'] == 'OFF') {
+                    $qb->andWhere('o.dateEnd < :now')->setParameter('now', new \DateTime());
+                }
             }
         }
 
@@ -465,8 +531,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 ->where('r.role IN (:roles)')
                 ->setParameter('roles', $filter['roles'])->getQuery()->getResult();
             /** @var ProjectPartner $role */
-            foreach( $roles as $role ){
-                if( !in_array($role->getOrganization()->getId(), $ids) ){
+            foreach ($roles as $role) {
+                if (!in_array($role->getOrganization()->getId(), $ids)) {
                     $ids[] = $role->getOrganization()->getId();
                 }
             }
@@ -503,19 +569,22 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $this->getBaseQuery()->getQuery()->getResult();
     }
 
-    public function getOrganizationsByIds( array $ids ){
+    public function getOrganizationsByIds(array $ids)
+    {
         $query = $this->getBaseQuery()->where('o.id IN(:ids)')
             ->setParameter('ids', $ids)
             ->getQuery();
         return $query->getResult();
     }
 
-    public function search( $search, $justIds = false ){
+    public function search($search, $justIds = false)
+    {
         $strategy = $this->getSearchEngineStrategy();
-        if( $strategy ){
+        if ($strategy) {
             $ids = $strategy->search($search);
-            if( $justIds == true )
+            if ($justIds == true) {
                 return $ids;
+            }
 
             return $this->getOrganizationsByIds($ids);
         } else {
@@ -524,6 +593,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
     ////////////////////////////////////////////////////////////////////////////
+
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
@@ -536,24 +606,27 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
     const STRUCTURES_BASE_DN = 'ou=structures,dc=unicaen,dc=fr';
-    const STAFF_ACTIVE_OR_DISABLED                = 'ou=people,dc=unicaen,dc=fr';
+    const STAFF_ACTIVE_OR_DISABLED = 'ou=people,dc=unicaen,dc=fr';
 
-    private function areSameOrganization( Organization $organizationA, Organization $organizationB ){
-        if( $organizationA->getCentaureId() == $organizationB->getCentaureId() ){
+    private function areSameOrganization(Organization $organizationA, Organization $organizationB)
+    {
+        if ($organizationA->getCentaureId() == $organizationB->getCentaureId()) {
             return true;
         }
-        ?><pre>;
+        ?>
+        <pre>;
         <?= $organizationA ?>
-        <?= $organizationB ?>
+            <?= $organizationB ?>
         </pre>
         <?php
     }
     /////////////////////////////////////////////////////////////////////////////////////////////// TYPES D'ORGANISATION
     ///
-    public function updateOrCreateOrganizationType($datas){
+    public function updateOrCreateOrganizationType($datas)
+    {
         $id = $datas['id'] ?? null;
         $type = null;
-        if( $id ){
+        if ($id) {
             /** @var OrganizationType $urganizationType */
             $type = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
         } else {
@@ -566,8 +639,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $root = null;
         $root_id = intval($datas['root_id']);
 
-        if( $root_id && $root_id != $type->getId() )
+        if ($root_id && $root_id != $type->getId()) {
             $root = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $root_id]);
+        }
 
         $type->setRoot($root);
         $this->getEntityManager()->flush();
@@ -575,13 +649,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $type;
     }
 
-    public function removeOrganizationType( $id ){
+    public function removeOrganizationType($id)
+    {
         try {
             /** @var OrganizationType $urganizationType */
-            $organizationType = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['id' => $id]);
+            $organizationType = $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(
+                ['id' => $id]
+            );
 
             /** @var OrganizationType $t */
-            foreach ($organizationType->getChildren() as $t ){
+            foreach ($organizationType->getChildren() as $t) {
                 $t->setRoot(null);
             }
 
@@ -592,10 +669,15 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 //                        $t->setRoot(null);
 //                    }
 
-        } catch (NoResultException $e){
+        } catch (NoResultException $e) {
             throw new OscarException(sprintf(_("Impossible de charger le type d'organisation '%s'."), $id));
-        } catch (ForeignKeyConstraintViolationException $e ){
-            throw new OscarException(sprintf(_("Impossible de supprimer le type d'organisation '%s', il est encore utilisé."), $organizationType));
+        } catch (ForeignKeyConstraintViolationException $e) {
+            throw new OscarException(
+                sprintf(
+                    _("Impossible de supprimer le type d'organisation '%s', il est encore utilisé."),
+                    $organizationType
+                )
+            );
         }
 
 //        if( $id ){

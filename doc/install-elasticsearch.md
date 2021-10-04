@@ -74,6 +74,17 @@ La commande `service --status-all` va vous permettre de lister les services char
 
 > Attention : le [ - ] indique que le service est INACTIF
 
+#### Sous systemd la commande a utiliser est la suivante
+
+```
+systemctl list-unit-files --type=service | grep elastic
+```
+> Attention: l'état disabled indique que le service est INACTIF
+
+```
+elasticsearch.service                      disabled 
+```
+
 
 ### Elasticsearch en tant que service
 
@@ -99,6 +110,8 @@ systemctl stop elasticsearch.service
 ```
 
 Vous pouvez tester l'état du service avec la commande `service elasticsearch status` :
+
+Si vous êtes sous systemd, utilisez la commande `systemctl status elasticsearch.service` :
 
 ```
 ● elasticsearch.service - Elasticsearch

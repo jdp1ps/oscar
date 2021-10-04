@@ -28,9 +28,7 @@ class PersonServiceFactory implements FactoryInterface
         $s->setEntityManager($container->get(EntityManager::class));
         $s->setLoggerService($container->get('Logger'));
         $s->setNotificationService($container->get(NotificationService::class));
-        //$s->setProjectGrantService($container->get(ProjectGrantService::class));
-//        //$s = $this->init($s, $container);
-
+        $s->setGearmanJobLauncherService($container->get(GearmanJobLauncherService::class));
         return $s;
     }
 }

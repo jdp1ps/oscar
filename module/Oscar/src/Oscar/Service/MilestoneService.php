@@ -15,9 +15,12 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\DateType;
+use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseActivityService;
 use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -37,10 +40,10 @@ use Zend\Log\Logger;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService, UseNotificationService
+class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService, UseNotificationService, UseActivityLogService
 {
 
-    use UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait;
+    use UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait, UseActivityLogServiceTrait;
 
 
     private $serviceContainer;
@@ -255,9 +258,11 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @param $id
      */
     public function deleteMilestoneById( $id ){
+        /** @var ActivityDate $milestone */
         $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-        if( $milestone)
-            return $this->deleteMilestone($milestone);
+        if( $milestone) {
+            $this->deleteMilestone($milestone);
+        }
     }
 
     /**
@@ -265,9 +270,20 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @param $id
      */
     public function deleteMilestone( ActivityDate $milestone ){
-        $this->getNotificationService()->purgeNotificationMilestone($milestone);
-        $this->getEntityManager()->remove($milestone);
-        $this->getEntityManager()->flush();
+        try {
+            $this->getEntityManager()->remove($milestone);
+            $this->getEntityManager()->flush();
+            $this->getActivityLogService()->addUserInfo(
+                sprintf("a supprimé le jalon %s dans  l'activité %s", $milestone, $milestone->getActivity()->log()),
+                LogActivity::CONTEXT_ACTIVITY,
+                $milestone->getActivity()->getId()
+            );
+            $this->getNotificationService()->jobUpdateNotificationsActivity($milestone->getActivity());
+        } catch (\Exception $e) {
+            $msg = "Impossible de supprimer le jalon";
+            $this->getLoggerService()->error($msg . " : " . $e->getMessage());
+            throw new OscarException("Impossible de supprimer le jalon");
+        }
     }
 
     public function updateFromArray( ActivityDate $milestone, array $dataArray ){
@@ -280,30 +296,24 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             $type = $this->getEntityManager()
                 ->getRepository(DateType::class)->find($typeId);
 
-            // Changement de type
-            $rebuildNotifications = false;
             if( $milestone->getType()->getId() != $type->getId() ){
-                $rebuildNotifications = true;
                 $milestone->setType($type);
             }
 
             if( $milestone->getDateStart() != $date ){
-                $rebuildNotifications = true;
                 $milestone->setDateStart($date);
             }
 
-
-            $milestone
-                ->setComment($comment)
-            ;
-
-            if( $rebuildNotifications ){
-                /** @var NotificationService $notificationService */
-                $this->getNotificationService()->purgeNotificationMilestone($milestone);
-                $this->getNotificationService()->generateMilestoneNotifications($milestone);
-            }
+            $milestone->setComment($comment);
 
             $this->getEntityManager()->flush($milestone);
+
+            $this->getActivityLogService()->addUserInfo(
+                sprintf("a modifié le jalon %s dans l'activité %s", $milestone, $milestone->getActivity()->log()),
+                LogActivity::CONTEXT_ACTIVITY,
+                $milestone->getActivity()->getId()
+            );
+            $this->getNotificationService()->jobUpdateNotificationsActivity($milestone->getActivity());
 
             return $milestone;
 
@@ -339,10 +349,13 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         }
 
         $this->getEntityManager()->flush($milestone);
-        $this->getNotificationService()->purgeNotificationMilestone($milestone);
-        $this->getNotificationService()->generateMilestoneNotifications($milestone);
 
-        // TODO Mise à jour des notifications en fonction de l'évolution de la progression
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a modifié la progression du jalon %s dans l'activité %s", $milestone, $milestone->getActivity()->log()),
+            LogActivity::CONTEXT_ACTIVITY,
+            $milestone->getActivity()->getId()
+        );
+        $this->getNotificationService()->jobUpdateNotificationsActivity($milestone->getActivity());
 
         return $milestone;
     }
@@ -370,7 +383,12 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             ->setType($type);
         $this->getEntityManager()->flush($milestone);
 
-        $this->getNotificationService()->generateMilestoneNotifications($milestone);
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a ajouté le jalon %s dans l'activité %s", $milestone, $milestone->getActivity()->log()),
+            LogActivity::CONTEXT_ACTIVITY,
+            $milestone->getActivity()->getId()
+        );
+        $this->getNotificationService()->jobUpdateNotificationsActivity($milestone->getActivity());
 
         return $milestone;
     }

@@ -547,6 +547,20 @@ project:
                 defaults:
                     action: search
 
+        persons:
+            type: segment
+            options:
+                route: /persons/:idproject
+                defaults:
+                    action: persons
+
+        organizations:
+            type: segment
+            options:
+                route: /organizations/:idproject
+                defaults:
+                    action: organizations
+
 ################################################################################
 # GESTION des PERSONNES
 person:

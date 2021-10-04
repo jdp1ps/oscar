@@ -58,13 +58,13 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
      */
     protected function getClient()
     {
-        if (!$this->elasticSearchClient)
+        if (!$this->elasticSearchClient) {
             $this->elasticSearchClient = ClientBuilder::create()
                 ->setHosts($this->getHosts())
                 ->build();
+        }
         return $this->elasticSearchClient;
     }
-
 
 
     public function add(Organization $organization)
@@ -94,8 +94,6 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         $repport = new ConnectorRepport();
         $this->resetIndex();
         $repport->addnotice("Index réinitialisé");
-
-
 
 
         /****/
@@ -147,19 +145,20 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
 
         /** @var ActivityOrganization $activityOrganization */
         foreach ($organization->getActivities() as $activityOrganization) {
-            if( $activityOrganization->getActivity()->getProject() ){
-                $project = (string) $activityOrganization->getActivity()->getProject()->getAcronym() ." " . (string) $activityOrganization->getActivity()->getProject()->getLabel();
-                if( !in_array($project, $projects) ){
+            if ($activityOrganization->getActivity()->getProject()) {
+                $project = (string)$activityOrganization->getActivity()->getProject()->getAcronym(
+                    ) . " " . (string)$activityOrganization->getActivity()->getProject()->getLabel();
+                if (!in_array($project, $projects)) {
                     $projects[] = $project;
                 }
             }
             $activity = (string)$activityOrganization->getActivity()->getLabel();
-            if( !in_array($activity, $activities) ){
+            if (!in_array($activity, $activities)) {
                 $activities[] = $activity;
             }
         }
-        if( $organization->getConnectors() ){
-            foreach ($organization->getConnectors() as $name=>$value) {
+        if ($organization->getConnectors()) {
+            foreach ($organization->getConnectors() as $name => $value) {
                 $connectors[] = $value;
             }
         }
@@ -196,8 +195,20 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
 
                 "query" => [
                     'query_string' => [
-                        'fields' => [ 'code^3','shortname^4', 'fullname^8','description','email',
-                            'city', 'siret', 'country', 'connectors', 'zipcode', 'persons'],
+                        'fields' => [
+                            'code^3',
+                            'shortname^4',
+                            'fullname^8',
+                            'description',
+                            'email',
+                            'city',
+                            'siret',
+                            'country',
+                            'connectors',
+                            'zipcode',
+                            'persons',
+                            'activities'
+                        ],
                         'query' => $search,
 
                     ]
@@ -251,14 +262,11 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         $response = $this->getClient()->search($params);
         $ids = [];
 
-        //echo "<pre>";
         if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
-        //        echo $hit['_id'] . "\t " . $hit['_score'] . "- " . $hit['_source']['fullname'] ."\n";
                 $ids[] = $hit["_id"];
             }
         }
-        //echo "</pre>";
 
         return $ids;
     }
@@ -285,7 +293,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         ];
         try {
             return $this->getClient()->update($params);
-        } catch (Missing404Exception $e){
+        } catch (Missing404Exception $e) {
             return $this->add($organization);
         }
     }

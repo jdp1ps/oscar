@@ -17,6 +17,17 @@ use Zend\ServiceManager\ServiceManager;
 abstract class OscarCommandAbstract extends Command
 {
 
+
+    const COMMAND_ACTIVITY_SEARCH_REINDEX = 'activity:search:reindex';
+
+    const COMMAND_ACTIVITY_NOTIFICATION_UPDATE = 'activity:notification:update';
+
+    const COMMAND_NOTIFICATIONS_REBUILD = 'notifications:rebuild';
+
+    const COMMAND_ORGANIZATION_SEARCH_REINDEX = 'organization:search:reindex';
+
+    const COMMAND_PERSON_SEARCH_REINDEX = 'person:search:reindex';
+
     /** @var ServiceManager ServiceManager */
     private $servicemanager;
 
@@ -35,6 +46,8 @@ abstract class OscarCommandAbstract extends Command
     protected function getServicemanager(){
         return $this->servicemanager;
     }
+
+
 
     public function addOutputStyle(OutputInterface $output) {
         $outputStyle = new OutputFormatterStyle('cyan', 'default', ['bold']);

@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationPerson;
@@ -27,6 +28,7 @@ use Oscar\Form\ProjectIdentificationForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
+use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -113,6 +115,7 @@ class ProjectController extends AbstractOscarController
     public function deleteAction()
     {
         $p = $this->getRouteProject();
+        $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT, $p);
         $this->getProjectService()->deleteProject($p);
         $this->redirect()->toRoute('project/mine');
     }
@@ -344,6 +347,111 @@ class ProjectController extends AbstractOscarController
         return [
             'person' => $this->getCurrentPerson()
         ];
+    }
+
+    public function organizationsAction()
+    {
+        try {
+            // Récupération de l'activités
+            $project = $this->getProjectService()->getProject($this->params()->fromRoute('idproject'), true);
+
+            // Accès
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_SHOW, $project);
+
+            $out = $this->baseJsonResponse();
+
+            $this->getProjectService()->getOrganizationsProjectsAPI($project, $out, $this->url());
+
+            return $this->ajaxResponse($out);
+
+            $hasPersonShowAccess = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError($e->getMessage());
+        }
+    }
+
+    public function personsAction()
+    {
+
+        try {
+            // Récupération de l'activités
+            $project = $this->getProjectService()->getProject($this->params()->fromRoute('idproject'), true);
+
+            // Accès
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_PERSON_SHOW, $project);
+
+            $out = $this->baseJsonResponse();
+
+            $this->getProjectService()->getPersonsProjectsAPI($project, $out, $this->url());
+
+            return $this->ajaxResponse($out);
+
+            $hasPersonShowAccess = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError($e->getMessage());
+        }
+
+//        /**
+//         * @var ActivityPerson $activityPerson
+//         */
+//        foreach ($activity->getPersonsDeep() as $activityPerson) {
+//            if (get_class($activityPerson) == ActivityPerson::class) {
+//                $urlDelete = $deletableA ? $this->url()->fromRoute(
+//                    'personactivity/delete',
+//                    ['idenroll' => $activityPerson->getId()]
+//                ) : false;
+//                $urlEdit = $editableA ? $this->url()->fromRoute(
+//                    'personactivity/edit',
+//                    ['idenroll' => $activityPerson->getId()]
+//                ) : false;
+//                $editable = $editableA;
+//                $deletable = $deletableA;
+//                $context = "activity";
+//                $idEnroller = $activityPerson->getActivity()->getId();
+//            } else {
+//                $urlDelete = $deletableA ? $this->url()->fromRoute(
+//                    'personproject/delete',
+//                    ['idenroll' => $activityPerson->getId()]
+//                ) : false;
+//                $urlEdit = $editableA ? $this->url()->fromRoute(
+//                    'personproject/edit',
+//                    ['idenroll' => $activityPerson->getId()]
+//                ) : false;
+//                $editable = $editableP;
+//                $deletable = $deletableP;
+//                $context = "project";
+//                $idEnroller = $activityPerson->getProject()->getId();
+//            }
+//            $urlShow = false;
+//            if ($showable) {
+//                $urlShow = $showable ? $this->url()->fromRoute(
+//                    'person/show',
+//                    ['id' => $activityPerson->getPerson()->getId()]
+//                ) : false;
+//            }
+//
+//            $out[] = [
+//                'id' => $activityPerson->getId(),
+//                'role' => $activityPerson->getRole(),
+//                'roleLabel' => $activityPerson->getRole(),
+//                'roleId' => $activityPerson->getRoleObj() ? $activityPerson->getRoleObj()->getId() : "",
+//                'rolePrincipal' => $activityPerson->isPrincipal(),
+//                'urlDelete' => $urlDelete,
+//                'context' => $context,
+//                'urlEdit' => $urlEdit,
+//                'urlShow' => $urlShow,
+//                'enroller' => $idEnroller,
+//                'enrollerLabel' => $activity->getLabel(),
+//                'editable' => $editable,
+//                'deletable' => $deletable,
+//                'enrolled' => $activityPerson->getPerson()->getId(),
+//                'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
+//                'start' => DateTimeUtils::toStr($activityPerson->getDateStart(), 'Y-m-d'),
+//                'end' => DateTimeUtils::toStr($activityPerson->getDateEnd(), 'Y-m-d'),
+//            ];
+//        }
+
+        return $this->ajaxResponse($out);
     }
 
     public function currentUserStructureProjectsAction()
