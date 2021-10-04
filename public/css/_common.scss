@@ -3640,9 +3640,6 @@ form {
     >*:not(time){
       opacity: .3;
     }
-    .details {
-      display: none;
-    }
   }
   &.inprogress {
     border-left-color: $colorBlue;

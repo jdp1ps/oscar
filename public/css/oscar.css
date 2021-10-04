@@ -9968,9 +9968,6 @@ form .help {
 .jalon.past > *:not(time) {
   opacity: 0.3;
 }
-.jalon.past .details {
-  display: none;
-}
 .jalon.inprogress {
   border-left-color: #30b0d5;
 }

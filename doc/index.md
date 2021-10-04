@@ -53,3 +53,4 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Ajouter des actions,vues,controlleurs,service dans Zend Framework 3](devnote/mvc.md)
  - [Créer un composant d'interface VUEJS](devnote/vuejs.md)
  - [Installer les drivers Oracle OCI](install-oracle-pp.md)
+ - [Modèle de données (version simplifiée)](images/oscar-database-simplified.png)
