@@ -25,6 +25,7 @@ use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
@@ -662,6 +663,7 @@ class TimesheetController extends AbstractOscarController
         $person_id      = $this->params()->fromQuery('person_id', null);
         $format         = $this->params()->fromQuery('format', '');
         $period         = $this->params()->fromQuery('period', null);
+        $version        = $this->params()->fromQuery('v', 1);
         $error          = null;
         $validations    = null;
 
@@ -804,6 +806,19 @@ class TimesheetController extends AbstractOscarController
         }
 
         if( $format == "json" || $this->isAjax() ){
+            if( $version == "2" ){
+                $json = [
+                    'date' => date("Y-m-d H:i:s"),
+                    'version' => OscarVersion::getBuild(),
+                    'activity_id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'start' => $activity->getDateStartStr(),
+                    'end' => $activity->getDateEndStr(),
+                    'synthesis' => $datas
+                ];
+                return $this->jsonOutput($json);
+            }
             return $this->jsonOutput($datas);
         }
 
