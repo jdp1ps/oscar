@@ -610,20 +610,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
-        $mailer = $this->getMailingService();
+        $mailer = $this->getServiceContainer()->get(MailingService::class);
         $to = $person->getEmail();
         $content .= "</ul>\n";
         $mail = $mailer->newMessage("Notifications en attente", ['body' => $content]);
         $mail->setTo([$to => (string)$person]);
         $mailer->send($mail);
-    }
-
-    /**
-     * @return MailingService
-     */
-    public function getMailingService()
-    {
-        return $this->getServiceContainer()->get(MailingService::class);
     }
 
 
@@ -1557,12 +1549,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
             }
         }
+        $organization = $organizationPerson->getOrganization();
+        $person = $organizationPerson->getPerson();
+
         $this->getEntityManager()->remove($organizationPerson);
         $this->getEntityManager()->flush();
 
-        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization(
-            $organizationPerson->getOrganization()
-        );
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
 

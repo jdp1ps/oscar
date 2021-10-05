@@ -250,7 +250,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
     public function getRolesOrganizationArray()
     {
-        return $this->getEntityManager()->getRepository(Role::class)->getRolesAtOrganizationArray();
+        return $this->getEntityManager()->getRepository(Role::class)->getRolesAvailableForPersonInOrganizationArray();
     }
 
 
