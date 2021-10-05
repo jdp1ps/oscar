@@ -40,7 +40,7 @@ $worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
 $execDev = "2";
-echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()."\n";
+echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()." OKOK\n";
 
 while($worker->work());
 
@@ -57,8 +57,9 @@ function oscarJob_updateIndexActivity(GearmanJob $job){
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        echo "[worker] indexactivity " . $activityid;
-        exec($oscarCmd . ' indexactivity \'{"activityid":'. $params->activityid .'}\'');
+        $cmd = $oscarCmd . ' indexactivity \'{"activityid":'. $params->activityid .'}\'';
+        echo "[worker] exec $cmd\n";
+        exec($cmd);
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
@@ -73,8 +74,10 @@ function oscarJob_updateIndexPerson(GearmanJob $job){
             throw new Exception("Paramètres manquant 'personid'");
         }
         $personid = $params->personid;
-        echo "[worker] indexperson " . $personid;
-        exec($oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'');
+        $cmd = $oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'';
+        echo "[worker] exec $cmd\n";
+        exec($cmd);
+
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";
@@ -89,8 +92,9 @@ function oscarJob_updateIndexOrganization(GearmanJob $job){
             throw new Exception("Paramètres manquant 'organizationid'");
         }
         $organizationid = $params->organizationid;
-        echo "[worker] indexorganization " . $organizationid;
-        exec($oscarCmd . ' indexorganization \'{"organizationid":'. $organizationid .'}\'');
+        $cmd = $oscarCmd . ' indexorganization \'{"organizationid":'. $organizationid .'}\'';
+        echo "[worker] exec $cmd\n";
+        exec($cmd);
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";
@@ -107,8 +111,8 @@ function oscarJob_updateNotificationsActivity(GearmanJob $job){
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        echo "[worker] notificationsactivity " . $activityid;
-        exec($oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'');
+        $cmd = $oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'';
+        echo "[worker] exec $cmd\n";
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
@@ -133,7 +137,7 @@ function oscarJob_hello(GearmanJob $job){
         /** @var \Monolog\Logger $loggerService */
         $loggerService = getServiceManager()->get('Logger');
 
-        echo "Hello with " . print_r($params) . "\n";
+        echo "[worker] Hello with " . print_r($params) . "\n";
 
         // Envoi d'un log vers OSCAR
         getServiceManager()->get('Logger')->info(" > [gearman:call] TEST OK]");
