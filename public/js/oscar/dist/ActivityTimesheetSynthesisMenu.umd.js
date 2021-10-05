@@ -212,14 +212,110 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"a257e54e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTimesheetSynthesisMenu.vue?vue&type=template&id=be334a84&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[(_vm.open)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('a',{staticClass:"overlay-closer",attrs:{"href":"#"},on:{"click":function($event){return _vm.handlerCloseSynthesis()}}},[_vm._v("Close")]),_vm._v(" OPTIONS ICI ")])]):_vm._e(),_c('pre',[_vm._v(_vm._s(_vm.url))]),_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){return _vm.handlerOpenSynthesis()}}},[_c('i',{staticClass:"icon-calendar"}),_vm._v(" Synthèse des déclarations ")])])}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"a257e54e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTimesheetSynthesisMenu.vue?vue&type=template&id=e7973db4&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('button',{staticClass:"btn btn-primary",class:{'disabled': _vm.loading},on:{"click":function($event){return _vm.handlerOpenSynthesis()}}},[(_vm.loading)?_c('i',{staticClass:"icon-spinner animate-spin"}):_c('i',{staticClass:"icon-calendar"}),_vm._v(" Synthèse des déclarations ")]),_c('div',{staticClass:"overlay-content"},[_c('a',{staticClass:"overlay-closer",attrs:{"href":"#"},on:{"click":function($event){return _vm.handlerCloseSynthesis()}}},[_vm._v("Close")]),(_vm.synthese)?_c('div',{staticClass:"activity-timesheet-synthesis"},[_c('nav',{staticClass:"text-center"},_vm._l((_vm.persons),function(p,person_id){return _c('button',{staticClass:"btn",class:_vm.filterPersons.indexOf(parseInt(person_id)) < 0 ? 'btn-primary' : 'btn-default',on:{"click":function($event){return _vm.handlerTooglePerson(person_id)}}},[_vm._v(" "+_vm._s(p)+" ")])}),0),_vm._l((_vm.sortedDatas.years),function(y){return _c('section',{staticClass:"year",class:{'open': y.open }},[_c('h3',{staticClass:"line",on:{"click":function($event){return _vm.handlerOpenYear(y)}}},[_c('strong',[_c('i',{directives:[{name:"show",rawName:"v-show",value:(!y.open),expression:"!y.open"}],staticClass:"icon-angle-right"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(y.open),expression:"y.open"}],staticClass:"icon-angle-down"}),_vm._v(" "+_vm._s(y.label)+" ")]),_c('em',{directives:[{name:"show",rawName:"v-show",value:(!y.open),expression:"!y.open"}],staticClass:"total"},[_vm._v(_vm._s(_vm._f("hours")(y.totalmain)))])]),_vm._l((y.periods),function(p){return _c('section',{directives:[{name:"show",rawName:"v-show",value:(y.open),expression:"y.open"}],staticClass:"month",class:{'open': y.open }},[_c('h4',{staticClass:"line",on:{"click":function($event){return _vm.handlerOpenPeriod(p)}}},[_c('strong',[_c('i',{directives:[{name:"show",rawName:"v-show",value:(!p.open),expression:"!p.open"}],staticClass:"icon-angle-right"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(p.open),expression:"p.open"}],staticClass:"icon-angle-down"}),_vm._v(" "+_vm._s(p.label)+" ")]),_c('em',{directives:[{name:"show",rawName:"v-show",value:(!p.open),expression:"!p.open"}],staticClass:"total"},[_vm._v(_vm._s(_vm._f("hours")(p.totalmain)))])]),_vm._l((p.persons),function(pers){return _c('section',{directives:[{name:"show",rawName:"v-show",value:(p.open),expression:"p.open"}],staticClass:"person",class:{'open': p.open },on:{"click":function($event){return _vm.handlerOpenPerson(pers)}}},[_c('h5',{staticClass:"line"},[_c('strong',[_vm._v(_vm._s(pers.label))]),_c('em',{staticClass:"total"},[_vm._v(_vm._s(_vm._f("hours")(pers.totalmain)))])]),(pers.open)?_c('section',{staticClass:"details-person"},[_c('article',{staticClass:"line"},[_c('strong',[_c('i',{staticClass:"icon-cube"}),_vm._v(" "+_vm._s(_vm.mainContext)+" ")]),_c('em',[_vm._v(" "+_vm._s(_vm._f("hours")(pers.totalmain))+" ")])]),(pers.othersprojects.total > 0)?_c('section',{staticClass:"othersprojects"},_vm._l((pers.othersprojects.projects),function(projectDuration,projectName){return _c('article',{staticClass:"line"},[_c('strong',[_c('i',{staticClass:"icon-cube"}),_vm._v(" "+_vm._s(projectName)+" ")]),_c('em',{staticStyle:{"font-weight":"800"}},[_vm._v(" "+_vm._s(_vm._f("hours")(projectDuration))+" ")])])}),0):_vm._e(),(pers.others.total > 0)?_c('section',{staticClass:"othersprojects"},_vm._l((pers.others.context),function(otherDuration,otherName){return _c('article',{staticClass:"line"},[_c('strong',[_vm._v(" "+_vm._s(_vm._f("contextLabel")(otherName))+" ")]),_c('em',[_vm._v(" "+_vm._s(_vm._f("hours")(otherDuration))+" ")])])}),0):_vm._e(),_c('article',{staticClass:"line totalline"},[_c('strong',[_vm._v(" Total pour cette période : ")]),_c('em',[_vm._v(" "+_vm._s(_vm._f("hours")(pers.total))+" ")])])]):_vm._e()])}),_c('section',{directives:[{name:"show",rawName:"v-show",value:(p.open),expression:"p.open"}],staticClass:"person"},[_c('h5',{staticClass:"line totalline"},[_c('strong',[_vm._v("Total pour la période "+_vm._s(p.label))]),_c('em',{staticClass:"total"},[_vm._v(_vm._s(_vm._f("hours")(p.totalmain)))])])])],2)}),_c('section',{directives:[{name:"show",rawName:"v-show",value:(y.open),expression:"y.open"}],staticClass:"person"},[_c('h5',{staticClass:"line totalline"},[_c('strong',[_vm._v("Total pour "+_vm._s(y.label))]),_c('em',{staticClass:"total"},[_vm._v(_vm._s(_vm._f("hours")(y.totalmain)))])])])],2)})],2):_vm._e()]),(_vm.open)?_c('div',{staticClass:"overlay"}):_vm._e()])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/ActivityTimesheetSynthesisMenu.vue?vue&type=template&id=be334a84&
+// CONCATENATED MODULE: ./src/ActivityTimesheetSynthesisMenu.vue?vue&type=template&id=e7973db4&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityTimesheetSynthesisMenu.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -250,51 +346,307 @@ node node_modules/.bin/gulp activityTimesheetSynthesisMenu
 
  */
 
-// import AjaxOscar from "./remote/AjaxOscar";
-// import OscarRemoteData from "./remote/OscarRemoteData";
+let periodStr = function (year, month) {
+  return year + '-' + (month < 10 ? '0' + month : month);
+};
 
-// test
+let months = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+let periodFullStr = function (year, month) {
+  return months[month] + ' ' + year;
+};
+
+let contextsLabels = {
+  'research' : "Autres recherches",
+      'conges' : "Congès",
+      'training' : "Formation",
+      'sickleave' : "Arrêt maladie",
+      'other' : "Autre activité"
+};
+
 /* harmony default export */ var ActivityTimesheetSynthesisMenuvue_type_script_lang_js_ = ({
 
-  // components: {
-  //   "ajax-oscar": AjaxOscar
-  // },
-
   props: {
-    url: { require: true }
+    url: {require: true}
   },
 
   data() {
     return {
       configuration: null,
       open: false,
-      synthese: null
+      // Donnèes brutes
+      synthese: null,
+      structuredDatas: {},
+
+      // Filtres
+      filterPersons: [],
+
+      // Donnèes calculées au fetch
+      mainContext: null, // Projet référent
+      mainContextId: null, // Projet référent
+      contexts: null, // Autres contextes
+      periods: null, // Liste des périodes
+      persons: null, // Liste des déclarants
+      years: null, // Années
+
+      //
+      openYear: [],
+      openPeriod: [],
+      openPerson: [],
+    }
+  },
+
+  filters: {
+    hours(str) {
+      let t = parseFloat(str);
+      let rnd = Math.round(t * 100);
+      return (rnd / 100).toFixed(2);
+    },
+    contextLabel(contextKey){
+      if( contextsLabels.hasOwnProperty(contextKey) ){
+        return contextsLabels[contextKey];
+      }
+      return contextKey+"*";
+    }
+  },
+
+  computed: {
+    byDate() {
+      let bydate = {};
+    },
+
+    sortedDatas() {
+
+      // Structure racine
+      let out = {
+        "totaux": {
+          "all": 0.0,
+          "totalmain": 0.0,
+          "othersprojects": {
+            "projects": {},
+            "total": 0.0
+          },
+          "others": {
+            "context": {},
+            "total": 0.0
+          },
+        },
+        "years": {},
+      };
+
+      // Annèes
+      this.years.forEach(year => {
+        out.years[year] = {
+          "key": year,
+          "label": year,
+          "totalmain": 0.0,
+          "open": this.openYear.indexOf(year) >= 0,
+          "periods": {}
+        }
+      });
+
+      //
+      this.periods.forEach(period => {
+        let year = period.substring(0, 4);
+        let month = period.substring(5, 7);
+        out.years[year].periods[period] = {
+          "key": period,
+          "label": periodFullStr(year, parseInt(month)),
+          "totalmain": 0.0,
+          "persons": {},
+          "open": this.openPeriod.indexOf(period) >= 0,
+        }
+      });
+
+      this.synthese.synthesis.forEach(d => {
+
+        let period = d.period;
+        let year = parseInt(d.period.substring(0, 4));
+        let month = parseInt(d.period.substring(5, 7));
+        let person_id = d.person_id;
+        let person = d.displayname;
+        let context = d.context;
+        let activity_id = d.activity_id;
+        let type = d.type;
+        let duration = parseFloat(d.duration);
+
+        if (this.filterPersons.indexOf(person_id) >= 0) {
+          return;
+        }
+
+        if (!out.years[year].periods[period].persons.hasOwnProperty(person_id)) {
+          let indexOpen = year+"-"+period+"-"+person_id;
+          out.years[year].periods[period].persons[person_id] = {
+            "key": person_id,
+            "label": person,
+            "indexOpen": indexOpen,
+            "open": this.openPerson.indexOf(indexOpen) >= 0,
+            "totalmain": 0.0,
+            "total": 0.0,
+            "othersprojects": {
+              "projects": {},
+              "total": 0.0
+            },
+            "others": {
+              "context": {},
+              "total": 0.0
+            },
+          }
+        }
+
+        // --- Comptabilisé pour le projet principal
+        if (activity_id == this.mainContextId) {
+          out.totaux.totalmain += duration;
+          out.years[year].totalmain += duration;
+          out.years[year].periods[period].totalmain += duration;
+          out.years[year].periods[period].persons[person_id].totalmain += duration;
+        }
+        // --- Comptabilisé pour les autres projets
+        else if (type == "wp") {
+          out.years[year].periods[period].persons[person_id].othersprojects.total += duration;
+          //
+          if (!out.years[year].periods[period].persons[person_id].othersprojects.projects.hasOwnProperty(context)) {
+            out.years[year].periods[period].persons[person_id].othersprojects.projects[context] = 0.0;
+          }
+          out.years[year].periods[period].persons[person_id].othersprojects.projects[context] += duration;
+          let project = context;
+          if (!out.totaux.othersprojects.projects.hasOwnProperty(project)) {
+            out.totaux.othersprojects.projects[project] = 0.0;
+          }
+          out.totaux.othersprojects.projects[project] += duration;
+          out.totaux.othersprojects.total += duration;
+        }
+        // --- Autre (Congès, enseignement, etc...)
+        else {
+          out.years[year].periods[period].persons[person_id].others.total += duration;
+          if (!out.years[year].periods[period].persons[person_id].others.context.hasOwnProperty(context)) {
+            out.years[year].periods[period].persons[person_id].others.context[context] = 0.0;
+          }
+          out.years[year].periods[period].persons[person_id].others.context[context] += duration;
+        }
+        out.years[year].periods[period].persons[person_id].total += duration;
+        out.totaux.all += duration;
+      });
+
+      return out;
     }
   },
 
   methods: {
+    handlerTooglePerson(id) {
+      let personId = parseInt(id);
+      let indexId = this.filterPersons.indexOf(personId);
+      if (indexId < 0) {
+        this.filterPersons.push(personId);
+      } else {
+        this.filterPersons.splice(indexId, 1);
+      }
+    },
+
+    handlerOpenPerson(person) {
+      console.log(person);
+      let indexId = this.openPerson.indexOf(person.indexOpen);
+      if (indexId < 0) {
+        this.openPerson.push(person.indexOpen);
+      } else {
+        this.openPerson.splice(indexId, 1);
+      }
+    },
+
+    handlerOpenYear(year) {
+      let i = this.openYear.indexOf(year.key);
+      if (i < 0) {
+        this.openYear.push(year.key);
+      } else {
+        this.openYear.splice(i, 1);
+      }
+    },
+
+    handlerOpenPeriod(period) {
+      console.log(period.key, this.openPeriod);
+      let i = this.openPeriod.indexOf(period.key);
+      if (i < 0) {
+        this.openPeriod.push(period.key);
+      } else {
+        this.openPeriod.splice(i, 1);
+      }
+    },
+
     handlerOpenSynthesis() {
       this.open = true;
       this.loadSynthesis();
     },
+
     handlerCloseSynthesis() {
       this.open = false;
-      console.log("CLOSE Synthesis");
+      console.log("CLOSE Synthesis 'update'");
     },
-    loadSynthesis(){
+
+    buildStructuredDatas() {
+      // @deprecated
+    },
+
+    buildSynthese(datas) {
+      // TODO Tester les dates de début/fin
+      // ...
+      this.mainContext = datas.acronym;
+      this.mainContextId = datas.activity_id;
+
+      // Constuction de la liste des périodes
+      let fromYear = parseInt(datas.start.substring(0, 4));
+      let toYear = parseInt(datas.end.substring(0, 4));
+      let fromMonth = parseInt(datas.start.substring(5, 7));
+      let toMonth = parseInt(datas.end.substring(5, 7));
+
+      let periods = [];
+      let years = [];
+      let j = fromMonth;
+      for (let i = fromYear; i <= toYear; i++) {
+        years.push(i);
+        for (; j <= 12 || (j <= toMonth && i == toYear); j++) {
+          periods.push(periodStr(i, j));
+        }
+        j = 1;
+      }
+
+      let persons = {};
+      let contexts = [];
+
+      datas.synthesis.forEach(e => {
+        if (!persons.hasOwnProperty(e.person_id)) {
+          persons[e.person_id] = e.displayname;
+        }
+        if (contexts.indexOf(e.context) < 0 && e.activity_id != this.mainContextId) {
+          contexts.push(e.context)
+        }
+      });
+
+      this.periods = periods;
+      this.contexts = contexts;
+      this.persons = persons;
+      this.years = years;
+
+    },
+
+    loadSynthesis() {
       this.loading = "Chargement de la synthèse...";
       this.$http.get(this.url).then(
           ok => {
             console.log(ok);
+            this.synthese = ok.body;
+            this.buildSynthese(ok.body);
           }, ko => {
 
           }
-      )
+      ).then(foo => {
+        this.loading = false;
+      })
     }
   },
 
   mounted() {
-    console.log("ActivityTimesheetSynthesisMenu.vue")
+    console.log("ActivityTimesheetSynthesisMenu.vue");
+    this.loadSynthesis();
   }
 
 });
