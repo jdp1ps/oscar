@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Exception\OscarException;
+use Oscar\Utils\OscarConstants;
 
 class RoleRepository extends EntityRepository
 {
@@ -67,19 +68,28 @@ class RoleRepository extends EntityRepository
     /**
      * Retourne la liste des rôles d'une activité sous la forme d'un tableau
      *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return array
      */
-    public function getRolesAtOrganizationArray()
+    public function getRolesAvailableForPersonInOrganizationArray()
     {
         static $rolesOrganization;
         if( $rolesOrganization === null ){
             $rolesOrganization = [];
-            /** @var Role $role */
-            foreach( $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult() as $role ){
+            foreach( $this->getRolesAvailableForPersonInOrganization() as $role ){
                 $rolesOrganization[$role->getId()] = $role->getRoleId();
             }
         }
         return $rolesOrganization;
+    }
+
+    /**
+     * Retourne la liste des rôles disponibles pour une personne dans une organisation.
+     *
+     * @return Role[]
+     */
+    public function getRolesAvailableForPersonInOrganization() :array
+    {
+        return $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
     }
 
     /**

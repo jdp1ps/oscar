@@ -8,13 +8,16 @@
 namespace Oscar\Form;
 
 
+use Oscar\Hydrator\RoleFormHydrator;
 use Zend\Form\Form;
+use Zend\InputFilter\InputFilterProviderInterface;
 
-class RoleForm extends Form
+class RoleForm extends Form implements InputFilterProviderInterface
 {
-    function __construct( $roles, $enroledData )
+    function __construct( $roles, $personService, $enroller, $enroledData )
     {
         parent::__construct('role');
+        $this->setHydrator(new RoleFormHydrator($personService, $enroller));
 
         $this->add(array(
             'name'  => 'id',
@@ -23,16 +26,16 @@ class RoleForm extends Form
 
         // Enroled
         $this->add([
-            'name'   => 'enroled',
+            'name'   => 'enrolled',
             'options' => [
                 'label' => $enroledData['label']
             ],
             'attributes'    => [
-                'class'       => 'form-control select2',
+                'class'       => 'form-control',
                 'placeholder'   => $enroledData['label'],
                 'data-url' => $enroledData['url']
             ],
-            'type'=>'Select'
+            'type'=>'Hidden'
         ]);
 
 
@@ -81,4 +84,21 @@ class RoleForm extends Form
             'type'  => 'Csrf',
         ));
     }
+    public function getInputFilterSpecification()
+    {
+        return [
+            'dateStart'=> [
+                'required' => false,
+            ],
+
+            'dateEnd'=> [
+                'required' => false,
+            ],
+
+            'enrolled'=> [
+                'required' => false,
+            ]
+        ];
+    }
+
 }

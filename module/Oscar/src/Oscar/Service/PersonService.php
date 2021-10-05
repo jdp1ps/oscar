@@ -1452,6 +1452,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
 
             $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
         }
     }
 
@@ -1473,10 +1474,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
             }
         }
+        $organization = $organizationPerson->getOrganization();
+        $person = $organizationPerson->getPerson();
+
         $this->getEntityManager()->remove($organizationPerson);
         $this->getEntityManager()->flush();
 
-        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organizationPerson->getOrganization());
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+        $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
     }
 
 

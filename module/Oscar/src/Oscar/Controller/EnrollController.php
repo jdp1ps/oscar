@@ -81,7 +81,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
                 break;
             case OrganizationPerson::class:
-                $roles = $repo->getRolesAtOrganizationArray();
+                $roles = $repo->getRolesAvailableForPersonInOrganizationArray();
         }
         return $roles;
     }
@@ -823,10 +823,56 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     // Organization <> Person
     ////////////////////////////////////////////////////////////////////////////
+    protected function getOrganizationPersonForm(Organization $enroller)
+    {
+        $form = new RoleForm(
+            $this->getOscarUserContextService()->getAvailabledRolesPersonOrganization(),
+            $this->getPersonService(),
+            $enroller,
+            [
+                'label' => 'Personne',
+                'url' => $this->url()->fromRoute('person/search')
+            ]
+        );
+
+        return $form;
+    }
+
     public function organizationPersonNewAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getOrganizationEntity());
-        return $this->saveEnroll(OrganizationPerson::class);
+        $organization = $this->getOrganizationEntity();
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $organization);
+        $organizationPerson = new OrganizationPerson();
+        $form = $this->getOrganizationPersonForm($organization);
+        $form->bind($organizationPerson);
+
+        if( $this->getRequest()->isPost() ){
+            $posted = $this->getRequest()->getPost();
+            $form->setData($posted);
+            if( $form->isValid() ){
+                $this->getPersonService()->personOrganizationAdd($organization, $organizationPerson->getPerson(), $organizationPerson->getRoleObj(), $organizationPerson->getDateStart(), $organizationPerson->getDateEnd());
+                $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+            }
+        }
+
+        $view = new ViewModel(
+            array(
+                'id' => null,
+                'title' => "Nouvelle personne dans $organization",
+                'form' => $form,
+                'labelEnrolled' => "Personne",
+                'enroller' => $organization,
+                'enrolled' => null
+            )
+        );
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $view->setTerminal(true);
+        }
+
+        $view->setTemplate('partials/role-form.phtml');
+
+        return $view;
     }
 
     public function organizationPersonDeleteAction()
@@ -836,11 +882,15 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $this->params()->fromRoute('idenroll')
         );
 
+        $organization = $organizationPerson->getOrganization();
+
         $this->getOscarUserContextService()->check(
             Privileges::ORGANIZATION_EDIT,
-            $organizationPerson->getOrganization()
+            $organization
         );
-        return $this->deleteEnroll(OrganizationPerson::class);
+
+        $this->getPersonService()->personOrganizationRemove($organizationPerson);
+        $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
     }
 
     ////////////////////////////////////////////////////////////////////////////
