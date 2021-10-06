@@ -56,45 +56,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 {
     use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseActivityServiceTrait, UseOrganizationServiceTrait;
 
-    /**
-     * Retourne la liste des rôles éligibles selon l'association $class.
-     *
-     * @param $class
-     * @return array|\Doctrine\ORM\QueryBuilder|null
-     */
-    protected function getRoles($class)
-    {
-        $roles = [];
-
-        /** @var RoleRepository $repo */
-        $repo = $this->getEntityManager()->getRepository(Role::class);
-
-        switch ($class) {
-            case ActivityOrganization::class:
-            case ProjectPartner::class:
-                $roles = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
-                break;
-
-            case ActivityPerson::class:
-            case ProjectMember::class:
-                $roles = $repo->getRolesAtActivityArray();
-
-                break;
-            case OrganizationPerson::class:
-                $roles = $repo->getRolesAvailableForPersonInOrganizationArray();
-        }
-        return $roles;
-    }
-
-    private function getRoleObj($class, $id)
-    {
-        if ($class == ActivityOrganization::class || $class == ProjectPartner::class) {
-            return $this->getEntityManager()->getRepository(OrganizationRole::class)->find($id);
-        } else {
-            return $this->getEntityManager()->getRepository(Role::class)->find($id);
-        }
-    }
-
     private function closeEnroll($class)
     {
         $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
@@ -131,596 +92,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $msg = sprinf("Impossible de mettre le rôle de la person à jour : %s", $e->getMessage());
             $this->getActivityLogService()->addUserInfo($msg, "organizationperson", $enroll->getId());
             throw new OscarException($msg);
-        }
-    }
-
-    /**
-     * Modification générique de l'Enroll.
-     *
-     * @param $class
-     * @return ViewModel
-     */
-    private function editEnroll($class)
-    {
-        $this->getLoggerService()->debug("EDITENROLL $class");
-        $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
-        $enrolled = null;
-
-        $labelTpl = "Modification du rôle de <em>%s</em> dans <strong>%s</strong>";
-        $label = sprintf($labelTpl, $enroll->getEnrolled(), $enroll->getEnroller());
-        $form = new RoleForm(
-            $this->getRoles($class), [
-                                       'label' => $label,
-                                       'url' => ''
-                                   ]
-        );
-
-        $form->setData(
-            [
-                'dateStart' => $enroll->getDateStart() ? $enroll->getDateStart()->format('Y-m-d') : '',
-                'dateEnd' => $enroll->getDateEnd() ? $enroll->getDateEnd()->format('Y-m-d') : '',
-                'enroled' => $enroll->getEnrolled()->getId(),
-                'role' => $enroll->getRoleObj() ? $enroll->getRoleObj()->getId() : 0
-            ]
-        );
-
-        $form->setAttribute('action', $this->getRequest()->getRequestUri());
-
-        if ($this->getRequest()->isPost()) {
-            $roleIndex = intval($this->params()->fromPost('role'));
-            $role = $this->getRoleObj($class, $roleIndex);
-
-            $dateStart = $this->params()->fromPost('dateStart');
-            if ($dateStart) {
-                $dateStart = new \DateTime($dateStart);
-            } else {
-                $dateStart = null;
-            }
-            $dateEnd = $this->params()->fromPost('dateEnd');
-            if ($dateEnd) {
-                $dateEnd = new \DateTime($dateEnd);
-            } else {
-                $dateEnd = null;
-            }
-
-            $enroll->setRole("")
-                ->setDateStart($dateStart)
-                ->setRoleObj($role)
-                ->setDateEnd($dateEnd);
-
-            $enroll->getEnroller()->touch();
-            $this->getEntityManager()->flush($enroll);
-
-            // Mise à jour de l'index
-            if (get_class($enroll->getEnroller()) == Activity::class) {
-                $this->getProjectGrantService()->jobSearchUpdate($enroll->getEnroller());
-                $this->getNotificationService()->jobUpdateNotificationsActivity($enroll->getEnroller());
-            }
-            if (get_class($enroll->getEnroller()) == Project::class) {
-                foreach ($enroll->getEnroller()->getActivities() as $activity) {
-                    $this->getProjectGrantService()->jobSearchUpdate($activity);
-                    $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
-                }
-            }
-
-            $reflect = new \ReflectionClass($enroll);
-
-            $this->getActivityLogService()->addUserInfo(
-                sprintf(
-                    " a modifié %s, nouveau rôle '%s' dans %s",
-                    $enroll->getEnrolled()->log(),
-                    $role,
-                    $enroll->getEnroller()->log()
-                )
-                ,
-                $reflect->getShortName(),
-                $enroll->getEnroller()->getId()
-            );
-
-            $activities = [];
-
-            switch ($class) {
-                case ProjectPartner::class:
-                    $urlEnrollerShow = 'project/show';
-                    break;
-
-                case ProjectMember::class :
-                    $urlEnrollerShow = 'project/show';
-                    $this->getNotificationService()->jobUpdateNotificationsProject($enroll->getProject());
-                    break;
-
-                case ActivityPerson::class :
-                    $urlEnrollerShow = 'contract/show';
-                    $this->getNotificationService()->jobUpdateNotificationsActivity($enroll->getActivity());
-                    break;
-
-                case ActivityOrganization::class :
-                    $urlEnrollerShow = 'contract/show';
-                    break;
-            }
-            $this->redirect()->toRoute($urlEnrollerShow, ['id' => $enroll->getEnroller()->getId()]);
-        }
-
-        $view = new ViewModel(
-            array(
-                'id' => null,
-                'title' => $label,
-                'form' => $form,
-                'enroller' => $enroll->getEnroller(),
-                'enrolled' => $enroll->getEnrolled()
-            )
-        );
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $view->setTerminal(true);
-        }
-
-        $view->setTemplate('partials/role-form.phtml');
-
-        return $view;
-    }
-
-    private function saveEnroll($class, $exist = null)
-    {
-        $labelTpl = ($exist ? "Modification " : "Ajout") . " d'un <em>%s</em> dans <strong>%s</strong>";
-
-        $enrollerId = $this->params()->fromRoute('idenroller', null);
-        $enrolledId = $this->params()->fromQuery('idenroled', null);
-        if (!$enrolledId) {
-            $enrolledId = $this->params()->fromPost('enrolled', null);
-        }
-        if (!$enrolledId) {
-            $enrolledId = $this->params()->fromPost('enroled', null);
-        }
-        $roles = $this->getRoles($class);
-
-        switch ($class) {
-            case ProjectPartner::class:
-                $enroller = $this->getProjectEntity();
-                $urlEnrollerShow = 'project/show';
-                $urlSearch = 'organization/search';
-                $setEnrolled = 'setOrganization';
-                $labelEnrolled = 'Organisation';
-                $setEnroller = 'setProject';
-                $enrolledClass = Organization::class;
-                $textWhere = 'le projet ' . $enroller;
-                $textWhat = "partenaire";
-                $context = 'Project';
-
-
-                break;
-
-            case ProjectMember::class :
-                $enroller = $this->getProjectEntity();
-                $urlEnrollerShow = 'project/show';
-                $urlSearch = 'person/search';
-                $setEnrolled = 'setPerson';
-                $labelEnrolled = 'Personne';
-                $setEnroller = 'setProject';
-                $enrolledClass = Person::class;
-                $textWhere = 'le projet ' . $enroller;
-                $textWhat = "membre";
-                $context = 'Project';
-
-                break;
-
-            case ActivityPerson::class :
-                if ($exist) {
-                    $enroller = $exist->getActivity();
-                    $enrolled = $exist->getPerson();
-                } else {
-                    $enroller = $this->getActivityEntity();
-                }
-                $urlEnrollerShow = 'contract/show';
-                $urlSearch = 'person/search';
-                $setEnrolled = 'setPerson';
-                $labelEnrolled = 'Personne';
-                $setEnroller = 'setActivity';
-                $enrolledClass = Person::class;
-                $textWhere = 'l\'activité  ' . $enroller;
-                $textWhat = "membre";
-                $context = 'Activity';
-                break;
-
-            case OrganizationPerson::class :
-
-                $urlEnrollerShow = 'organization/show';
-
-                if ($enrolledId) {
-                    $enrolled = $this->getEntityManager()->getRepository(Person::class)->find($enrolledId);
-                    $urlSearch = 'organization/search';
-                    $labelEnrolled = 'Organisation';
-                    $textWhere = 'la personne ' . $enrolled;
-                } else {
-                    $enroller = $this->getEntityManager()->getRepository(Organization::class)->find($enrollerId);
-                    $urlSearch = 'person/search';
-                    $labelEnrolled = 'Personne';
-                    $textWhere = 'l\'organisation  ' . $enroller;
-                }
-                //$enrollerId = $this->params()->fromRoute('idenroller', null);
-
-
-                $setEnrolled = 'setPerson';
-                $setEnroller = 'setOrganization';
-                $enrolledClass = Person::class;
-                $textWhat = "";
-                $context = 'Organisation';
-                break;
-
-            case ActivityOrganization::class :
-                $enroller = $this->getActivityEntity();
-                $urlEnrollerShow = 'contract/show';
-                $urlSearch = 'organization/search';
-                $context = 'Activity';
-                $setEnrolled = 'setOrganization';
-                $labelEnrolled = 'Organisation';
-                $setEnroller = 'setActivity';
-                $enrolledClass = Organization::class;
-                $textWhere = 'l\'activité  ' . $enroller;
-                $textWhat = "partenaire";
-
-                break;
-
-            default:
-                throw new \Exception('Bad usage');
-                break;
-        }
-
-        if ($enrolledId) {
-            $enrolled = $this->getEntityManager()->getRepository($enrolledClass)->find($enrolledId);
-            $label = sprintf($labelTpl, " rôle au $textWhat $enrolled", $textWhere);
-        } else {
-            $label = sprintf($labelTpl, $textWhat, $textWhere);
-        }
-
-        $form = new RoleForm(
-            $roles, [
-                      'label' => $labelEnrolled,
-                      'url' => $this->url()->fromRoute($urlSearch)
-                  ]
-        );
-
-
-        $form->setData(
-            [
-                'dateStart' => '',
-                'enroled' => $enrolledId
-            ]
-        );
-
-        $form->setAttribute('action', $this->getRequest()->getRequestUri());
-
-
-        if ($this->getRequest()->isPost()) {
-            // $enrolledId = intval($this->params()->fromPost('enroled'));
-            $enrolled = $this->getEntityManager()->getRepository($enrolledClass)->find($enrolledId);
-
-
-            if (!$enrolled) {
-                $this->flashMessenger()->addErrorMessage("Modification annulée, personne/organisation manquante");
-                return $this->getResponseInternalError("Personne introuvable");
-            } else {
-                $roleIndex = intval($this->params()->fromPost('role'));
-                $role = $roles[$roleIndex];
-                $roleObj = $this->getRoleObj($class, $roleIndex);
-
-                if (!$roleObj) {
-                    return $this->getResponseInternalError("Rôle inconnu");
-                }
-
-                $dateStart = $this->params()->fromPost('dateStart');
-                if ($dateStart) {
-                    $dateStart = new \DateTime($dateStart);
-                } else {
-                    $dateStart = null;
-                }
-                $dateEnd = $this->params()->fromPost('dateEnd');
-                if ($dateEnd) {
-                    $dateEnd = new \DateTime($dateEnd);
-                } else {
-                    $dateEnd = null;
-                }
-
-
-                if (!$exist) {
-                    switch ($class) {
-                        case ProjectPartner::class :
-                            $this->getProjectService()->addProjectOrganisation(
-                                $enroller,
-                                $enrolled,
-                                $roleObj,
-                                $dateStart,
-                                $dateEnd
-                            );
-                            $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
-                            return;
-
-                        case ProjectMember::class :
-                            $this->getPersonService()->personProjectAdd(
-                                $enroller,
-                                $enrolled,
-                                $roleObj,
-                                $dateStart,
-                                $dateEnd
-                            );
-                            $this->redirect()->toRoute('project/show', ['id' => $enroller->getId()]);
-                            return;
-                            break;
-
-                        case ActivityPerson::class :
-                            $this->getPersonService()->personActivityAdd(
-                                $enroller,
-                                $enrolled,
-                                $roleObj,
-                                $dateStart,
-                                $dateEnd
-                            );
-                            $this->redirect()->toRoute('contract/show', ['id' => $enroller->getId()]);
-                            return;
-                            break;
-
-                        case OrganizationPerson::class :
-
-                            // PATCH 2021-04-14 : à nettoyer
-                            if ($enroller == null) {
-                                $enroller = $this->getOrganizationService()->getOrganization(
-                                    $this->params()->fromRoute('idenroller')
-                                );
-                            }
-                            $this->getPersonService()->personOrganizationAdd(
-                                $enroller,
-                                $enrolled,
-                                $roleObj,
-                                $dateStart,
-                                $dateEnd
-                            );
-                            $this->redirect()->toRoute('organization/show', ['id' => $enroller->getId()]);
-                            return;
-                            break;
-
-                        default:
-                    }
-
-                    $enrole = new $class();
-                    $this->getEntityManager()->persist($enrole);
-                    $enrole->setRole($role)
-                        ->$setEnrolled(
-                            $enrolled
-                        )
-                        ->$setEnroller(
-                            $enroller
-                        )
-                        ->setRoleObj($roleObj)
-                        ->setDateStart($dateStart)
-                        ->setDateEnd($dateEnd);
-                    $enroller->touch();
-
-                    $this->getEntityManager()->flush($enrole);
-                } else {
-                    $exist->setRoleObj($roleObj)
-                        ->setDateStart($dateStart)
-                        ->setDateEnd($dateEnd);
-                    $this->getEntityManager()->flush();
-
-                    $enrole = $exist;
-                }
-
-                $this->getActivityLogService()->addUserInfo(
-                    sprintf("a ajouté %s", $enrole->log()),
-                    $context,
-                    $enroller->getId()
-                );
-
-                switch ($class) {
-                    case ProjectMember::class :
-                        $this->getNotificationService()->jobUpdateNotificationsProject($enroller);
-                        $this->getPersonService()->jobSearchUpdate($enrolled);
-                        break;
-
-                    case ActivityPerson::class :
-                        $this->getNotificationService()->jobUpdateNotificationsActivity($enroller);
-                        $this->getPersonService()->jobSearchUpdate($enrolled);
-                        break;
-
-                    case OrganizationPerson::class :
-                        // PATCH 2021-04-14 : à nettoyer
-                        if ($enroller == null) {
-                            $enroller = $this->getOrganizationService()->getOrganization(
-                                $this->params()->fromRoute('idenroller')
-                            );
-                        }
-                        $this->getPersonService()->personOrganizationAdd(
-                            $enroller,
-                            $enrolled,
-                            $roleObj,
-                            $dateStart,
-                            $dateEnd
-                        );
-                        break;
-
-                    default:
-                }
-            }
-            $this->redirect()->toRoute($urlEnrollerShow, ['id' => $enroller->getId()]);
-        }
-
-        $view = new ViewModel(
-            array(
-                'id' => null,
-                'title' => $label,
-                'form' => $form,
-                'labelEnrolled' => $labelEnrolled,
-                'enroller' => $enroller,
-                'enrolled' => $enrolled
-            )
-        );
-
-        if ($this->getRequest()->isXmlHttpRequest()) {
-            $view->setTerminal(true);
-        }
-
-        $view->setTemplate('partials/role-form.phtml');
-
-        return $view;
-    }
-
-    private function getEnrollDatas($type)
-    {
-        $datas = [
-
-        ];
-        $datas['idenroll'] = $idEnroll = $this->params()->fromRoute('idenroll');
-        $datas['enroll'] = $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
-
-        $postDateStart = $this->params()->fromPost('dateStart', null);
-        $dateStart = null;
-        if ($postDateStart != null) {
-            $dateStart = DateTimeUtils::toDatetime($postDateStart);
-        }
-        $datas['dateStart'] = $dateStart;
-
-        $postDateEnd = $this->params()->fromPost('dateEnd', null);
-        $dateEnd = null;
-        if ($postDateEnd != null) {
-            $dateEnd = DateTimeUtils::toDatetime($postDateEnd);
-        }
-        $datas['dateEnd'] = $dateEnd;
-
-        switch ($type) {
-            case ProjectPartner::class:
-                $datas['enroller'] = $enroll->getProject();
-                $datas['enrolled'] = $enroll->getOrganization();
-                $datas['role'] = $this->getEntityManager()->getRepository(Role::class)->find(
-                    $this->params()->fromPost('role')
-                );
-                $datas['url_show_enroller'] = 'project/show';
-                $datas['url_show_enrolled'] = 'organization/show';
-                $datas['context'] = 'Project';
-                $datas['privilege'] = Privileges::PROJECT_ORGANIZATION_MANAGE;
-                break;
-
-            case ProjectMember::class :
-                $datas['enroller'] = $enroll->getProject();
-                $datas['enrolled'] = $enroll->getPerson();
-                $datas['role'] = $this->getEntityManager()->getRepository(Role::class)->find(
-                    $this->params()->fromPost('role')
-                );
-                $datas['url_show_enroller'] = 'project/show';
-                $datas['url_show_enrolled'] = 'person/show';
-                $datas['context'] = 'Project';
-                $datas['privilege'] = Privileges::PROJECT_PERSON_MANAGE;
-                break;
-
-            case ActivityPerson::class :
-                $datas['enroller'] = $enroll->getActivity();
-                $datas['enrolled'] = $enroll->getPerson();
-                $datas['role'] = $enroll->getRoleObj();
-                $datas['url_show_enroller'] = 'contract/show';
-                $datas['url_show_enrolled'] = 'person/show';
-                $datas['context'] = 'Activity';
-                $datas['privilege'] = Privileges::ACTIVITY_PERSON_MANAGE;
-                break;
-
-            case ActivityOrganization::class :
-                $datas['enroller'] = $enroll->getActivity();
-                $datas['enrolled'] = $enroll->getOrganization();
-                $datas['role'] = $this->params()->fromPost('role', null) ?
-                    $this->getEntityManager()->getRepository(OrganizationRole::class)->find(
-                        $this->params()->fromPost('role')
-                    ) :
-                    null;
-                $datas['url_show_enroller'] = 'contract/show';
-                $datas['url_show_enrolled'] = 'organization/show';
-                $datas['context'] = 'Activity';
-                $datas['privilege'] = Privileges::ACTIVITY_ORGANIZATION_MANAGE;
-                break;
-
-            case OrganizationPerson::class :
-                $datas['enroller'] = $enroll->getOrganization();
-                $datas['enrolled'] = $enroll->getPerson();
-                $datas['role'] = $this->getEntityManager()->getRepository(Role::class)->find(
-                    $this->params()->fromPost('role')
-                );
-                $datas['url_show_enroller'] = 'organization/show';
-                $datas['url_show_enrolled'] = 'person/show';
-                $datas['context'] = 'Organization';
-                $datas['privilege'] = Privileges::ORGANIZATION_EDIT;
-                break;
-
-            default:
-                throw new \Exception('Bad usage');
-                break;
-        }
-
-        $this->getOscarUserContextService()->check($datas['privilege'], $datas['enroller']);
-
-        return $datas;
-    }
-
-    private function deleteEnroll($type)
-    {
-        $idEnroll = $this->params()->fromRoute('idenroll');
-
-        if (!$idEnroll) {
-            throw new OscarException("IDENROLL manquant");
-        }
-
-        $enroll = $this->getEntityManager()->getRepository($type)->find($idEnroll);
-
-        switch ($type) {
-            case ProjectPartner::class:
-                $project = $enroll->getProject();
-                $this->getProjectService()->removeProjectOrganization($enroll);
-                return $this->redirect()->toRoute('project/show', ['id' => $project->getId()]);
-
-
-            case ProjectMember::class :
-                $project = $enroll->getProject();
-                $this->getPersonService()->personProjectRemove($enroll);
-                return $this->redirect()->toRoute('project/show', ['id' => $project->getId()]);
-                break;
-
-            case ActivityPerson::class :
-                $activity = $enroll->getActivity();
-                $this->getPersonService()->personActivityRemove($enroll);
-                return $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
-                break;
-
-            case ActivityOrganization::class :
-                throw new OscarException("Suppression d'une organisation d'une activité");
-                $getEnroller = 'getActivity';
-                $url = 'contract/show';
-                $context = 'Activity';
-                break;
-
-            case OrganizationPerson::class :
-                $organization = $enroll->getOrganization();
-                $this->getPersonService()->personOrganizationRemove($enroll);
-                return $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
-                break;
-
-            default:
-                throw new \Exception('Bad usage');
-                break;
-        }
-    }
-
-    private function updateIndex($context, $enroller)
-    {
-        $this->getEntityManager()->refresh($enroller);
-        if ($context === 'Project') {
-            $this->getProjectService()->searchUpdate($enroller);
-        } elseif ($context === 'Activity') {
-            if ($enroller->getProject()) {
-                $this->getProjectService()->searchUpdate($enroller->getProject());
-            } else {
-                $this->getProjectGrantService()->jobSearchUpdate($enroller);
-//                $this->getProjectGrantService()->searchUpdate($enroller);
-            }
-        } else {
-            $this->getLoggerService()->error(
-                sprintf("Impossible d'actualiser %s avec le context '%s", $enroller, $context)
-            );
         }
     }
 
@@ -784,6 +155,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     public function organizationProjectDeleteAction()
     {
         try {
+            /** @var ProjectPartner $enroll */
             $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find(
                 $this->params()->fromRoute('idenroll')
             );
@@ -804,7 +176,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $rolled = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($rolledId);
             $project = $rolled->getProject();
             $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $project);
-            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'),true);
+            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'), true);
             $this->getProjectService()->editProjectOrganisation(
                 $rolled,
                 $role,
@@ -838,6 +210,11 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $form;
     }
 
+    /**
+     * Ajout d'un association entre une Person et une Oragnization avec un Role.
+     *
+     * @return ViewModel
+     */
     public function organizationPersonNewAction()
     {
         $organization = $this->getOrganizationEntity();
@@ -846,12 +223,24 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $form = $this->getOrganizationPersonForm($organization);
         $form->bind($organizationPerson);
 
-        if( $this->getRequest()->isPost() ){
+        if ($this->getRequest()->isPost()) {
             $posted = $this->getRequest()->getPost();
             $form->setData($posted);
-            if( $form->isValid() ){
-                $this->getPersonService()->personOrganizationAdd($organization, $organizationPerson->getPerson(), $organizationPerson->getRoleObj(), $organizationPerson->getDateStart(), $organizationPerson->getDateEnd());
-                $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+            if ($form->isValid()) {
+                try {
+                    $this->getPersonService()->personOrganizationAdd(
+                        $organization,
+                        $organizationPerson->getPerson(),
+                        $organizationPerson->getRoleObj(),
+                        $organizationPerson->getDateStart(),
+                        $organizationPerson->getDateEnd()
+                    );
+                    $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+                } catch (\Exception $e){
+                    $msg = "Impossible d'ajouter la personne dans l'organisation";
+                    $this->getLoggerService()->error("$msg : " . $e->getMessage());
+                    throw new OscarException($msg);
+                }
             }
         }
 
@@ -862,7 +251,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 'form' => $form,
                 'labelEnrolled' => "Personne",
                 'enroller' => $organization,
-                'enrolled' => null
+                'enrolled' => null,
+                'backlink' => $this->url('organization/show', ['id' => $organization->getId()])
             )
         );
 
@@ -875,22 +265,34 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         return $view;
     }
 
+    /**
+     * Suppression d'une association entre une Person et une Oragnization.
+     *
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function organizationPersonDeleteAction()
     {
-        /** @var OrganizationPerson $organizationPerson */
-        $organizationPerson = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find(
-            $this->params()->fromRoute('idenroll')
-        );
+        try {
+            /** @var OrganizationPerson $organizationPerson */
+            $organizationPerson = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find(
+                $this->params()->fromRoute('idenroll')
+            );
 
-        $organization = $organizationPerson->getOrganization();
+            $organization = $organizationPerson->getOrganization();
 
-        $this->getOscarUserContextService()->check(
-            Privileges::ORGANIZATION_EDIT,
-            $organization
-        );
+            $this->getOscarUserContextService()->check(
+                Privileges::ORGANIZATION_EDIT,
+                $organization
+            );
 
-        $this->getPersonService()->personOrganizationRemove($organizationPerson);
-        $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+            $this->getPersonService()->personOrganizationRemove($organizationPerson);
+            $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+        } catch (\Exception $e) {
+            $msg = "Impossible de supprimer l'affectation de la personne dans l'organisation";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            $this->getResponseInternalError($msg);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////

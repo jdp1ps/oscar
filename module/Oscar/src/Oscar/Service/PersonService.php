@@ -1502,8 +1502,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 ->setDateEnd($dateEnd);
 
             $this->getEntityManager()->flush($op);
-            $this->getEntityManager()->refresh($organization);
-            $this->getEntityManager()->refresh($person);
 
             if ($role->isPrincipal()) {
                 /** @var ActivityOrganization $oa */
