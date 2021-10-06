@@ -56,45 +56,6 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 {
     use UsePersonServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseActivityServiceTrait, UseOrganizationServiceTrait;
 
-    private function closeEnroll($class)
-    {
-        $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
-
-        /** @var OrganizationPerson $enroll */
-        $enroll = $this->getEntityManager()->getRepository($class)->find($this->params()->fromRoute('idenroll'));
-
-        $date = $this->params()->fromPost('at');
-        if (!$date || !$enroll) {
-            throw new OscarException("Erreur, données manquantes, veuillez reessayer");
-        }
-
-        switch ($class) {
-            case OrganizationPerson::class :
-                $route = 'organization/show';
-                $routeOpt = ['id' => $enroll->getOrganization()->getId()];
-                break;
-            default:
-                return $this->getResponseInternalError("Objet $class non pris en charge");
-        }
-
-        try {
-            $datet = new \DateTime($date);
-        } catch (\Exception $e) {
-            throw new OscarException("Erreur, données inconhérente");
-        }
-
-        try {
-            $enroll->setDateEnd($datet);
-            $this->getEntityManager()->flush($enroll);
-
-            $this->redirect()->toRoute($route, $routeOpt);
-        } catch (\Exception $e) {
-            $msg = sprinf("Impossible de mettre le rôle de la person à jour : %s", $e->getMessage());
-            $this->getActivityLogService()->addUserInfo($msg, "organizationperson", $enroll->getId());
-            throw new OscarException($msg);
-        }
-    }
-
     private function getProjectEntity(): Project
     {
         $idProject = $this->params()->fromRoute('idenroller');
@@ -684,12 +645,30 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Fin des rôles
+    /**
+     * @throws OscarException
+     */
     public function organizationPersonCloseAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getActivityEntity());
-        return $this->closeEnroll(OrganizationPerson::class);
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT);
+
+        /** @var OrganizationPerson $enroll */
+        $enroll = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find($this->params()->fromRoute('idenroll'));
+
+        $organization = $enroll->getOrganization();
+        $date = $this->getPostedDateTime('at');
+
+        if (!$date || !$enroll) {
+            throw new OscarException("Erreur, données manquantes, veuillez reessayer");
+        }
+
+        try {
+            $this->getOrganizationService()->closeOrganizationPerson($enroll, $date);
+            $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
+        } catch (\Exception $e) {
+            $msg = "Impossible de cloturer le rôle de la personne dans l'organisation";
+            throw new OscarException($e->getMessage());
+        }
     }
 }
 

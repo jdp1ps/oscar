@@ -17,6 +17,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Country3166;
 use Oscar\Entity\Country3166Repository;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\OrganizationType;
@@ -590,6 +591,39 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         } else {
             return $this->getSearchNativeQuery($search, [])->getQuery()->getResult();
         }
+    }
+
+
+
+    public function closeOrganizationPerson(OrganizationPerson $organizationPerson, \DateTime $dateEnd) :void
+    {
+        $person = $organizationPerson->getPerson();
+        $organization = $organizationPerson->getOrganization();
+        $role = $organizationPerson->getRoleObj();
+
+        $msg = sprintf(
+                "Résiliation du rôle '%s' de '%s' dans l'organisation '%s'",
+            $role->getRoleId(),
+            $person,
+            $organization
+        );
+        $this->getLoggerService()->notice($msg);
+
+        try {
+            $updateNotification = $role->isPrincipal();
+            $organizationPerson->setDateEnd($dateEnd);
+            $this->getEntityManager()->flush();
+            if($updateNotification ){
+             $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateNotificationOrganization($organization);
+
+            }
+            $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
+            $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+
+        } catch (\Exception $e){
+
+        }
+
     }
 
     ////////////////////////////////////////////////////////////////////////////

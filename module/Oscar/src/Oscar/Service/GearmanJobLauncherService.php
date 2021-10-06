@@ -4,9 +4,11 @@
 namespace Oscar\Service;
 
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\ProjectPartner;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
@@ -66,6 +68,23 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
         $params = ['activityid' => $activity->getId()];
         $key = sprintf('%s-%s', self::UPDATE_NOTIFICATION_ACTIVITY, $activity->getId());
         $this->sendBackgroundTask($task, $params, $key);
+    }
+
+    public function triggerUpdateNotificationOrganization(Organization $organization): void
+    {
+        /** @var ActivityOrganization $activityOrganization */
+        foreach ($organization->getActivities() as $activityOrganization) {
+            if( $activityOrganization->isPrincipal() ){
+                $this->triggerUpdateNotificationActivity($activityOrganization->getActivity());
+            }
+        }
+
+        /** @var ProjectPartner $projectPartner */
+        foreach ($organization->getProjects() as $projectPartner) {
+            if( $projectPartner->isPrincipal() ){
+                $this->triggerUpdateNotificationProject($projectPartner->getProject());
+            }
+        }
     }
 
     /**
