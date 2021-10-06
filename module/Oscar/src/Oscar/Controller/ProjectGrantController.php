@@ -778,7 +778,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
-                $this->getActivityService()->jobSearchUpdate($projectGrant);
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($projectGrant);
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($projectGrant);
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]

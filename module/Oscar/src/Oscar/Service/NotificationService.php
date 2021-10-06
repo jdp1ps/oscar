@@ -289,6 +289,15 @@ class NotificationService implements UseServiceContainer
         $this->getEntityManager()->flush();
     }
 
+    public function purgeNotificationsAll() :void
+    {
+        /** @var NotificationRepository $notificationRepository */
+        $notificationRepository = $this->getEntityManager()->getRepository(Notification::class);
+
+        $notificationRepository->purgeAll();
+
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// RECUPERATION des DONNEES
@@ -574,17 +583,23 @@ class NotificationService implements UseServiceContainer
         $expectedSubscribersById = [];
         $idsExpectedSubscribers = [];
 
+        $this->getLoggerService()->debug("Inscrits : ");
         /** @var Person $p */
         foreach ($expectedSubscribers as $p) {
+            $this->getLoggerService()->debug(" - $p");
             $expectedSubscribersById[$p->getId()] = $p;
             $idsExpectedSubscribers[] = $p->getId();
         }
 
         $now = (new \DateTime('now'))->modify('-1 month');
 
+        $this->getLoggerService()->debug("Notifications : ");
         foreach ($notificationsActivity as $na) {
+            $this->getLoggerService()->debug(" - " . $na->getDateEffective()->format('Y-m-d') . " - " . $na->getMessage());
+            $isPasted = $ignorePast && ($na->getDateEffective() < $now);
             $idsPersonInPlace = [];
-            if ($ignorePast && $na->getDateEffective() < $now) {
+            if ($isPasted) {
+                $this->getLoggerService()->debug("passé");
                 continue;
             }
             /** @var NotificationPerson $inscrit */
@@ -600,6 +615,9 @@ class NotificationService implements UseServiceContainer
                 }
             }
             $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
+            $this->getLoggerService()->debug(print_r($idsExpectedSubscribers, true));
+            $this->getLoggerService()->debug(print_r($idsPersonInPlace, true));
+            $this->getLoggerService()->debug(print_r($diff, true));
             if (count($diff) > 0) {
                 /** @var int $idPersonToAdd */
                 foreach ($diff as $idPersonToAdd) {

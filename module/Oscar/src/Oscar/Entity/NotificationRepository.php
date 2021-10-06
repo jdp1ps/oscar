@@ -55,12 +55,12 @@ class NotificationRepository extends EntityRepository
             'person' => $personId
         ];
 
-        if( $active === true ){
+        if ($active === true) {
             $qb->andWhere('n.dateEffective <= :now');
             $parameters['now'] = date('Y-m-d');
         }
 
-        if( $unread === true ){
+        if ($unread === true) {
             $qb->andWhere('p.read IS NULL');
         }
 
@@ -94,7 +94,7 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->execute();
     }
 
-    public function deleteNotificationsPerson( int $personId )
+    public function deleteNotificationsPerson(int $personId)
     {
         $qb = $this->getEntityManager()->getRepository(NotificationPerson::class, 'np')
             ->createQueryBuilder('np')
@@ -106,5 +106,26 @@ class NotificationRepository extends EntityRepository
                 ]
             );
         return $qb->getQuery()->execute();
+    }
+
+    public function purgeAll()
+    {
+        $dql = 'DELETE ' . Notification::class;
+        $this->getEntityManager()->createQuery($dql)->getResult();
+
+    }
+
+    protected function getQueryBuilderDeleteBase()
+    {
+        return $this->getBaseQueryBuilder()
+            ->delete();
+    }
+
+    /**
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function getBaseQueryBuilder()
+    {
+        return $this->createQueryBuilder('n');
     }
 }

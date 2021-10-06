@@ -56,20 +56,13 @@ class OscarConsoleCommand extends OscarCommandAbstract
         $this->getServicemanager()->get('Logger')->debug("command : $action " . $input->getArgument('params'));
 
         switch ($action) {
-            case "addpersonactivity":
-                $person = $personService->getPersonById($params['personid'], true);
-                $activity = $projectGrantService->getActivityById($params['activityid']);
-                $role = $oscaruserContext->getRoleByRoleId($params['roleid']);
-
-                $personService->personActivityAdd($activity, $person, $role);
-                break;
 
             case "notificationsactivity":
 
                 $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_ACTIVITY_NOTIFICATION_UPDATE);
 
                 $arguments = [
-                    OscarActivitySearchReindexCommand::ARGUMENT_ACTIVITY_ID => $params['activityid'],
+                    OscarActivityNotificationUpdateCommand::ARGUMENT_ACTIVITY_ID => $params['activityid'],
                     '--force' => null
                 ];
 

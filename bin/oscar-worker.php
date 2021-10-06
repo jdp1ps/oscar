@@ -40,7 +40,10 @@ $worker->addFunction('hello', 'oscarJob_hello');
 
 // Affiche dans le journalctl -u oscarworker.service -f
 $execDev = "2";
-echo "OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()." OKOK\n";
+echo "###################################################################\n";
+echo "# OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()." SPARTAN\n";
+echo "# working directory : '" . __DIR__."'\n";
+echo "###################################################################\n";
 
 while($worker->work());
 
@@ -113,6 +116,7 @@ function oscarJob_updateNotificationsActivity(GearmanJob $job){
         $activityid = $params->activityid;
         $cmd = $oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'';
         echo "[worker] exec $cmd\n";
+        exec($cmd);
 
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() ."\n";
