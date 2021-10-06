@@ -56,7 +56,6 @@ class OscarConsoleCommand extends OscarCommandAbstract
         $this->getServicemanager()->get('Logger')->debug("command : $action " . $input->getArgument('params'));
 
         switch ($action) {
-
             case "notificationsactivity":
 
                 $command = $this->getApplication()->find(OscarCommandAbstract::COMMAND_ACTIVITY_NOTIFICATION_UPDATE);

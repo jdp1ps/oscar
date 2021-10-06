@@ -136,7 +136,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
      */
     protected function finalFatalError(\Exception $e): int
     {
-        $this->getLoggerService()->error($e->getMessage());
+        $this->getLoggerService()->error("CMD error : " . $e->getMessage());
         if( !$this->getIO()->isQuiet() ) {
             $this->getIO()->error($e->getMessage());
         }
@@ -151,7 +151,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
      */
     protected function finalSuccess( string $message ):int
     {
-        $this->getLoggerService()->notice($message);
+        $this->getLoggerService()->notice("CMD success : " . $message);
         if( !$this->io->isQuiet() ){
             $this->getIO()->success($message);
         }

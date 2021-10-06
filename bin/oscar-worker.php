@@ -16,7 +16,7 @@ chdir(dirname(__DIR__));
 $oscarCmd = '/usr/bin/php bin/oscar.php console ';
 
 // Autoload & Co
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 // Configuration
 $conf = require 'config/application.config.php';
@@ -41,94 +41,95 @@ $worker->addFunction('hello', 'oscarJob_hello');
 // Affiche dans le journalctl -u oscarworker.service -f
 $execDev = "2";
 echo "###################################################################\n";
-echo "# OSCAR WORKER STARTED ".\Oscar\OscarVersion::getBuild()." SPARTAN\n";
-echo "# working directory : '" . __DIR__."'\n";
+echo "# OSCAR WORKER STARTED " . \Oscar\OscarVersion::getBuild() . " SPARTAN\n";
+echo "# working directory : '" . __DIR__ . "'\n";
 echo "###################################################################\n";
 
-while($worker->work());
+while ($worker->work()) {
+    ;
+}
 
-function getServiceManager(){
+function getServiceManager()
+{
     global $app;
     return $app->getServiceManager();
 }
 
-function oscarJob_updateIndexActivity(GearmanJob $job){
+function oscarJob_updateIndexActivity(GearmanJob $job)
+{
     global $oscarCmd;
     $params = json_decode($job->workload());
     try {
-        if( !property_exists($params, 'activityid') ){
+        if (!property_exists($params, 'activityid')) {
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        $cmd = $oscarCmd . ' indexactivity \'{"activityid":'. $params->activityid .'}\'';
+        $cmd = $oscarCmd . ' indexactivity \'{"activityid":' . $params->activityid . '}\'';
         echo "[worker] exec $cmd\n";
         exec($cmd);
-
     } catch (Exception $e) {
-        echo "[ERR] " . $e->getMessage() ."\n";
+        echo "[ERR] " . $e->getMessage() . "\n";
     }
 }
 
-function oscarJob_updateIndexPerson(GearmanJob $job){
+function oscarJob_updateIndexPerson(GearmanJob $job)
+{
     global $oscarCmd;
     $params = json_decode($job->workload());
     try {
-        if( !property_exists($params, 'personid') ){
+        if (!property_exists($params, 'personid')) {
             throw new Exception("Paramètres manquant 'personid'");
         }
         $personid = $params->personid;
-        $cmd = $oscarCmd . ' indexperson \'{"personid":'. $personid .'}\'';
+        $cmd = $oscarCmd . ' indexperson \'{"personid":' . $personid . '}\'';
         echo "[worker] exec $cmd\n";
         exec($cmd);
-
-
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";
     }
 }
 
-function oscarJob_updateIndexOrganization(GearmanJob $job){
+function oscarJob_updateIndexOrganization(GearmanJob $job)
+{
     global $oscarCmd;
     $params = json_decode($job->workload());
     try {
-        if( !property_exists($params, 'organizationid') ){
+        if (!property_exists($params, 'organizationid')) {
             throw new Exception("Paramètres manquant 'organizationid'");
         }
         $organizationid = $params->organizationid;
-        $cmd = $oscarCmd . ' indexorganization \'{"organizationid":'. $organizationid .'}\'';
+        $cmd = $oscarCmd . ' indexorganization \'{"organizationid":' . $organizationid . '}\'';
         echo "[worker] exec $cmd\n";
         exec($cmd);
-
     } catch (Exception $e) {
         echo "[ERR] " . $e->getMessage() . "\n";
     }
 }
 
-function oscarJob_updateNotificationsActivity(GearmanJob $job){
+function oscarJob_updateNotificationsActivity(GearmanJob $job)
+{
     global $oscarCmd;
 
     $params = json_decode($job->workload());
 
     try {
-        if( !property_exists($params, 'activityid') ){
+        if (!property_exists($params, 'activityid')) {
             throw new Exception("Paramètres manquant 'activityid'");
         }
         $activityid = $params->activityid;
-        $cmd = $oscarCmd . ' notificationsactivity \'{"activityid":'. $params->activityid .'}\'';
+        $cmd = $oscarCmd . ' notificationsactivity \'{"activityid":' . $params->activityid . '}\'';
         echo "[worker] exec $cmd\n";
         exec($cmd);
-
     } catch (Exception $e) {
-        echo "[ERR] " . $e->getMessage() ."\n";
+        echo "[ERR] " . $e->getMessage() . "\n";
     }
 }
 
-function oscarJob_hello(GearmanJob $job){
+function oscarJob_hello(GearmanJob $job)
+{
     $params = json_decode($job->workload());
 
     try {
-
-
         /** @var \Oscar\Service\ProjectGrantService $projectGrantService */
         $projectGrantService = getServiceManager()->get(\Oscar\Service\ProjectGrantService::class);
 
@@ -147,7 +148,6 @@ function oscarJob_hello(GearmanJob $job){
         getServiceManager()->get('Logger')->info(" > [gearman:call] TEST OK]");
 
         $job->sendComplete("TRAITEMENT RÉUSSI");
-
     } catch (Exception $e) {
         $job->sendException("[ERR] HELLO FAIL : " . $e->getMessage());
     }

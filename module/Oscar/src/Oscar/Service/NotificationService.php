@@ -289,13 +289,12 @@ class NotificationService implements UseServiceContainer
         $this->getEntityManager()->flush();
     }
 
-    public function purgeNotificationsAll() :void
+    public function purgeNotificationsAll(): void
     {
         /** @var NotificationRepository $notificationRepository */
         $notificationRepository = $this->getEntityManager()->getRepository(Notification::class);
 
         $notificationRepository->purgeAll();
-
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,36 +389,35 @@ class NotificationService implements UseServiceContainer
 
         /** @var ActivityPayment $payment */
         foreach ($activity->getPayments() as $payment) {
-
             $message = "$payment dans l'activité " . $activity->log();
             $context = "payment:" . $payment->getId();
 
             // Prévisionnel
-            if( $payment->getStatus() == ActivityPayment::STATUS_PREVISIONNEL ){
-                if( $payment->getDatePredicted() < $now ) {
+            if ($payment->getStatus() == ActivityPayment::STATUS_PREVISIONNEL) {
+                if ($payment->getDatePredicted() < $now) {
                     $message .= " EST EN RETARD";
                 } else {
                     $message .= " EST PREVU";
                 }
                 $dateNotification = $payment->getDatePredicted();
-            }
-
-            // écart de payment
-            else if ( $payment->getStatus() == ActivityPayment::STATUS_ECART ){
-                $dateNotification = $payment->getDatePredicted();
-                if( $dateNotification == null ){
+            } // écart de payment
+            else {
+                if ($payment->getStatus() == ActivityPayment::STATUS_ECART) {
+                    $dateNotification = $payment->getDatePredicted();
+                    if ($dateNotification == null) {
+                        $dateNotification = $payment->getDatePayment();
+                    }
+                } // Réalisé
+                else {
+                    $message .= " EST REALISE";
                     $dateNotification = $payment->getDatePayment();
                 }
             }
 
-            // Réalisé
-            else {
-                $message .= " EST REALISE";
-                $dateNotification = $payment->getDatePayment();
-            }
-
-            if( $dateNotification == null ){
-                $this->getLoggerService()->alert(sprintf("Le payment [%s]%s a un problème de date dans %s", $payment->getId(), $payment, $activity));
+            if ($dateNotification == null) {
+                $this->getLoggerService()->alert(
+                    sprintf("Le payment [%s]%s a un problème de date dans %s", $payment->getId(), $payment, $activity)
+                );
                 continue;
             }
 
@@ -516,7 +514,7 @@ class NotificationService implements UseServiceContainer
             'like' => 'milestone:%'
         ];
 
-        if( count($hashs) > 0 ){
+        if (count($hashs) > 0) {
             $deleteQuery->andWhere('n.hash NOT IN(:hashs)');
             $parameters['hashs'] = $hashs;
         }
@@ -573,7 +571,6 @@ class NotificationService implements UseServiceContainer
 
     public function updateNotificationsMilestonePersonActivity(Activity $activity, $ignorePast = true)
     {
-        $this->getLoggerService()->debug(" ## updateNotificationsMilestonePersonActivity $activity : ");
         // Liste des notifications Programmées
         $notificationsActivity = $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
 
@@ -583,23 +580,18 @@ class NotificationService implements UseServiceContainer
         $expectedSubscribersById = [];
         $idsExpectedSubscribers = [];
 
-        $this->getLoggerService()->debug("Inscrits : ");
         /** @var Person $p */
         foreach ($expectedSubscribers as $p) {
-            $this->getLoggerService()->debug(" - $p");
             $expectedSubscribersById[$p->getId()] = $p;
             $idsExpectedSubscribers[] = $p->getId();
         }
 
         $now = (new \DateTime('now'))->modify('-1 month');
 
-        $this->getLoggerService()->debug("Notifications : ");
         foreach ($notificationsActivity as $na) {
-            $this->getLoggerService()->debug(" - " . $na->getDateEffective()->format('Y-m-d') . " - " . $na->getMessage());
             $isPasted = $ignorePast && ($na->getDateEffective() < $now);
             $idsPersonInPlace = [];
             if ($isPasted) {
-                $this->getLoggerService()->debug("passé");
                 continue;
             }
             /** @var NotificationPerson $inscrit */
@@ -615,9 +607,6 @@ class NotificationService implements UseServiceContainer
                 }
             }
             $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
-            $this->getLoggerService()->debug(print_r($idsExpectedSubscribers, true));
-            $this->getLoggerService()->debug(print_r($idsPersonInPlace, true));
-            $this->getLoggerService()->debug(print_r($diff, true));
             if (count($diff) > 0) {
                 /** @var int $idPersonToAdd */
                 foreach ($diff as $idPersonToAdd) {

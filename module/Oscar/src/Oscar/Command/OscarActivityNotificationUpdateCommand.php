@@ -42,7 +42,7 @@ class OscarActivityNotificationUpdateCommand extends OscarAdvancedCommandAbstrac
             }
             $this->getProjectGrantService()->getNotificationService()->updateNotificationsActivity($activity);
 
-            return $this->finalSuccess("Notifications pour '$activity' mises à jour");
+            return $this->finalSuccess("Notifications mises à jour '$activity'");
         } catch (Exception $e) {
             return $this->finalFatalError($e);
         }

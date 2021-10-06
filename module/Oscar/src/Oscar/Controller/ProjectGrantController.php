@@ -79,7 +79,9 @@ use Zend\View\Renderer\PhpRenderer;
  *
  * @package Oscar\Controller
  */
-class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService, UseServiceContainer, UseProjectService, UseSpentService, UsePCRUService
+class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService,
+                                                                        UseServiceContainer, UseProjectService,
+                                                                        UseSpentService, UsePCRUService
 {
 
     use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait;
@@ -778,8 +780,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
-                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($projectGrant);
-                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($projectGrant);
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity(
+                    $projectGrant
+                );
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity(
+                    $projectGrant
+                );
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]
