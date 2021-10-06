@@ -101,7 +101,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      */
     public function getLoggerLevel(): int
     {
-        return $this->getOptionalConfiguration('log_level', Logger::WARNING);
+        return $this->getOptionalConfiguration('log_level', Logger::INFO);
     }
 
 
