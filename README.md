@@ -2,6 +2,8 @@
 
 ### Version actuelle
 - **VERSION 2.12 "Spartan"** ([Note de version](doc/versions/version-2.12.md))
+
+- [Mise à jour technique](doc/upgrade-to-spartan.md) 
   
 ### Version antérieurs
  - VERSION 2.11 "MacClane" ([Note de version](doc/versions/version-2.11.md))

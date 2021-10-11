@@ -172,7 +172,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             $parser = new Parser();
             $parsed = $parser->parse(file_get_contents($path));
             if( $parsed ){
-                $parser->parse(file_get_contents($path));
+                return $parsed;
             } else {
                 return [];
             }
@@ -184,6 +184,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function saveEditableConfKey($key, $value)
     {
         $conf = $this->getEditableConfRoot();
+        error_log("Save edit : " . print_r($conf, true));
         $conf[$key] = $value;
         $writer = new Dumper();
         file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
