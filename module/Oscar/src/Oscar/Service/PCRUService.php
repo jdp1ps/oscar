@@ -246,6 +246,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         /** @var ActivityPcruInfos $pcruInfo */
         $pcruInfo = $this->getActivityPCRUInfoRepository()->find($idActivityPcruInfo);
 
+        $this->getLoggerService()->debug("Suppression PCRU (en attente)");
+
         if( $pcruInfo == null ){
             throw new OscarException("Informations PCRU introuvable (id = $idActivityPcruInfo)");
         }

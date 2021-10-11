@@ -608,7 +608,7 @@ class ActivityPcruInfos
     /**
      * @param PcruTypeContract $typeContrat
      */
-    public function setTypeContrat( PcruTypeContract $typeContrat): self
+    public function setTypeContrat( ?PcruTypeContract $typeContrat): self
     {
         $this->typeContrat = $typeContrat;
         return $this;

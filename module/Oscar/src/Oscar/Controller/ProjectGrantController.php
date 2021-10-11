@@ -3029,6 +3029,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 case 'remove-waiting';
                     $idActivityPcruInfo = intval($this->params()->fromPost('activitypcruinfo_id'));
                     $this->getProjectGrantService()->getPCRUService()->removeWaiting($idActivityPcruInfo);
+                    $this->redirect()->toRoute('contract/show', ['id'=>$activity->getId()]);
 
                 case 'add-pool':
                     $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
