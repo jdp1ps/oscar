@@ -1614,7 +1614,14 @@ administration:
 
 
     child_routes:
-
+        # Gestion et chargement du référenciel des pays
+        logs:
+            type: segment
+            may_terminate: true
+            options:
+                route: /logs
+                defaults:
+                    action: logs
         # Gestion et chargement du référenciel des pays
         countries:
             type: segment

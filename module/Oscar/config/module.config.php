@@ -54,6 +54,7 @@ return array(
                         'discipline', // OK
                         'documentSections',
                         'index',
+                        'logs',
                         'messages',
                         'organizationRole',
                         'organizationRoleApi',

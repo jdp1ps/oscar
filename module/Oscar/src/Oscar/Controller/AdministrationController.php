@@ -147,13 +147,31 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 
         if ($this->isAjax()) {
-            $response = shell_exec('journalctl --unit=oscarworker.service -n 25 --no-pager');
+            $response = shell_exec('journalctl -u oscarworker -n 25 --no-pager');
             if ($response === null) {
                 $response = "Impossible de charger le status de OscarWorker";
             }
             return $this->getResponseOk($response);
         }
         return [];
+    }
+
+    public function logsAction()
+    {
+
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+        if ($this->isAjax()) {
+            $response = shell_exec('tail -n 15 ' . $this->getOscarConfigurationService()->getLoggerFilePath());
+            if ($response === null) {
+                $response = "Impossible de charger les logs oscar";
+            }
+            return $this->getResponseOk($response);
+        }
+        return [
+            'log_file' => $this->getOscarConfigurationService()->getLoggerFilePath(),
+            'log_level' => $this->getOscarConfigurationService()->getLoggerLevel(),
+        ];
     }
 
     public function parametersAction()

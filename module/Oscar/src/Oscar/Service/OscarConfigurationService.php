@@ -93,7 +93,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      */
     public function getLoggerFilePath(): string
     {
-        return $this->getOptionalConfiguration('log_path', __DIR__ . '/../../../../../logs/oscar.log');
+        return realpath($this->getOptionalConfiguration('log_path', __DIR__ . '/../../../../../logs/oscar.log'));
     }
 
     /**

@@ -1,11 +1,11 @@
 <section class="container">
     <h1><i class="icon-user-md"></i>Logs</h1>
     <p class="alert alert-info">
-        Cet écran n'affiche que les 25 dernières lignes de la sortie standard <strong>logs/oscar.log</strong>. Pour afficher les logs en temps réél, connectez-vous à l'instance d'Oscar et utilisez la commande <code>tail -f logs/oscar.log</code>.
+        Cet écran n'affiche que les 25 dernières lignes de la sortie standard <strong><?= $log_file ?></strong>. Pour afficher les logs en temps réél, connectez-vous à l'instance d'Oscar et utilisez la commande <code>tail -f <?= $log_file ?></code>.
     </p>
 
     <p>
-        Le niveau de log est fixé à <code>LEVEL</code>
+        Le niveau de log est fixé à <code><?= $log_level ?></code>
     </p>
 
     <pre id="logs">
