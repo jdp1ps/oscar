@@ -273,6 +273,9 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $pathDocuments = $config->getConfiguration('oscar.mailer.template');
             $this->checkPath($io, $pathDocuments, "Modèle de mail > TEMPLATE");
 
+            $pathDocuments = $config->getConfiguration('oscar.pcru.files_path');
+            $this->checkPath($io, $pathDocuments, "Documents temporaires PCRU");
+
         } catch ( OscarException $e ){
             $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
         }
