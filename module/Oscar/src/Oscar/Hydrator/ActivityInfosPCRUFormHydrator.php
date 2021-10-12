@@ -100,7 +100,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
             "employeurresponsablescientifique" => $object->getEmployeurResponsableScientifique(),
             "coordinateurconsortium" => $object->isCoordinateurConsortium(),
             "partenaires" => $object->getPartenaires(),
-            "partenaireprincipal" => "",
+            "partenaireprincipal" => $object->getIdPartenairePrincipal(),
             "idpartenaireprincipal" => $object->getIdPartenairePrincipal(),
             "sourcefinancement" => $object->getSourceFinancement(),
             "datedernieresignature" => $object->getDateDerniereSignatureStr(),

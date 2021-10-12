@@ -193,6 +193,7 @@ class ActivityPcruInfos
     private $poleCompetivite = "";
 
     const STATUS_PREVIEW = "preview"; // Aperçu
+    const STATUS_DRAFT = "draft"; // Aperçu
     const STATUS_ERROR_DATA = "error_data"; // Erreur dans les données
     const STATUS_SEND_READY = "send_ready"; // Prêt pour envoi
     const STATUS_FILE_READY = "file_wait"; // En attente d'envoi
@@ -339,6 +340,7 @@ class ActivityPcruInfos
 
     public function validation()
     {
+        $this->error = [];
         $datas = $this->toArray();
 
         $out = [];
@@ -404,7 +406,7 @@ class ActivityPcruInfos
         if( $datas['NumContratTutelleGestionnaire'] )
             $out['NumContratTutelleGestionnaire'] = self::VALIDATION_VALID;
 
-        if( $datas['TypeContrat'] )
+        if( $datas['TypeContrat'] != 'Aucun' )
             $out['TypeContrat'] = self::VALIDATION_VALID;
 
         if( $datas['Acronyme'] )
@@ -471,6 +473,7 @@ class ActivityPcruInfos
         if( self::$messages === null ) {
             self::$messages = [];
             self::$messages['SourceFinancement'] = "La source de financement est manquante, vous pouvez la renseigner depuis la fiche activité";
+            self::$messages['TypeContrat'] = "Le type de contrat est manquant. Vous pouvez automatiser la correspondance Oscar/PCRU depuis l'interface d'administration et éditer le type manuellement";
             self::$messages['DateDerniereSignature'] = "La date de signature est manquante, vous pouvez la renseigner depuis la fiche activité";
             self::$messages['CodeUniteLabintel'] = "Le code de l'unité de recherche (Labintel) est manquant, il peut être complété depuis la fiche organisation (type UMR XXXX)";
         }

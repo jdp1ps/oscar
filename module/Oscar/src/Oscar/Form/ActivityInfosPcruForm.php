@@ -482,6 +482,10 @@ class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProvid
 
             'dateEnd'=> [
                 'required' => false,
+            ],
+
+            'polecompetivite'=> [
+                'required' => false,
             ]
         ];
     }

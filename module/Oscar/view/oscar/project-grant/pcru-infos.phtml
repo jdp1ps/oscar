@@ -1,6 +1,7 @@
-<?php /****/ ?>
-<link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
-<div class="container">
+<?php
+/****/ ?>
+    <link rel="stylesheet" href="/js/certic-ui-components/build/DatepickerField.css">
+    <div class="container">
     <header>
         <h1>Informations PCRU</h1>
         <h2><?= $activity ?></h2>
@@ -10,143 +11,240 @@
     $activable = false;
     $downloadable = false;
     $poolable = false;
+    $editable = false;
+    $resetable = false;
     ?>
 
-    <?php if(count($errors)): ?>
+    <?php
+
+    if (count($errors)): ?>
         <div class="alert alert-danger">
-            <p><strong>Cette activité ne peut pas être envoyée à PCRU</strong>, certaines informations sont manquantes / erronées : </p>
+            <p><strong>Cette activité ne peut pas être envoyée à PCRU</strong>, certaines informations sont manquantes /
+                erronées : </p>
             <ul>
-                <?php foreach ($errors as $error): ?>
+                <?php
+                foreach ($errors as $error): ?>
                     <li><?= $error ?></li>
-                <?php endforeach; ?>
+                <?php
+                endforeach; ?>
             </ul>
         </div>
-    <?php endif; ?>
+    <?php
+    endif; ?>
 
-    <?php switch($status):
-        case 'preview' : $downloadable = true; $activable = true; ?>
-        <div class="alert alert-success">
-            Toutes les informations requises semblent correctes. Vous pouvez <strong>activer PCRU</strong> pour cette activité.
-        </div>
-    <?php break;  ?>
+    <?php
+    switch ($status):
+        case 'preview' :
+            $downloadable = true;
+            $activable = true; ?>
+            <div class="alert alert-success">
+                Toutes les informations requises semblent correctes. Vous pouvez <strong>activer PCRU</strong> pour
+                cette activité.
+            </div>
+            <?php
+            break; ?>
 
-    <?php case 'send_pending' : $downloadable = true; ?>
-        <div class="alert alert-success">
-            Les données ont été transférées vers PCRU, en attente d'un retour PCRU.
-        </div>
-    <?php break;  ?>
+        <?php
+        case 'error_data' :
+            $editable = true;
+            $downloadable = false;
+            $resetable = $preview == false;
+            ?>
+            <?php
+            break; ?>
 
-    <?php case 'send_ready' : $poolable = true; $downloadable = true; ?>
-        <div class="alert alert-success">
-            <?php if($poolopen): ?>
-            Vous pouvez activer le transfert PCRU, elles seront envoyées lors du prochain transfert.
-            <?php else: ?>
-            Les données sont prêtes, un tranfert PCRU est déjà en attente de retour.
-            <?php endif; ?>
-        </div>
-    <?php break;  ?>
+        <?php
+        case 'draft' :
+            $editable = true;
+            $downloadable = true;
+            $resetable = true;
+            ?>
+            <div class="alert alert-info">
+                Ces données sont en mode édition, vous pouvez télécharger l'aperçu des données.
+            </div>
+            <?php
+            break; ?>
 
-    <?php case 'file_wait' : $downloadable = true; ?>
-        <div class="alert alert-success">
-            <?php if($poolopen): ?>
-                Données en attentes, elles seront envoyées lors du prochain transfert.
-            <?php else: ?>
-                Les données en attentes, un tranfert PCRU est déjà en attente de retour.
-            <?php endif; ?>
-        </div>
-    <?php break;  ?>
+        <?php
+        case 'send_pending' :
+            $downloadable = true; ?>
+            <div class="alert alert-success">
+                Les données ont été transférées vers PCRU, en attente d'un retour PCRU.
+            </div>
+            <?php
+            break; ?>
 
-    <?php default: ?>
-    <?php break;  ?>
+        <?php
+        case 'send_ready' :
+            $poolable = true;
+            $downloadable = true; ?>
+            <div class="alert alert-success">
+                <?php
+                if ($poolopen): ?>
+                    Vous pouvez activer le transfert PCRU, elles seront envoyées lors du prochain transfert.
+                <?php
+                else: ?>
+                    Les données sont prêtes, un tranfert PCRU est déjà en attente de retour.
+                <?php
+                endif; ?>
+            </div>
+            <?php
+            break; ?>
 
-    <?php endswitch; ?>
+        <?php
+        case 'file_wait' :
+            $downloadable = true; ?>
+            <div class="alert alert-success">
+                <?php
+                if ($poolopen): ?>
+                    Données en attentes, elles seront envoyées lors du prochain transfert.
+                <?php
+                else: ?>
+                    Les données en attentes, un tranfert PCRU est déjà en attente de retour.
+                <?php
+                endif; ?>
+            </div>
+            <?php
+            break; ?>
+
+        <?php
+        default: ?>
+            <?php
+            break; ?>
+
+        <?php
+    endswitch; ?>
 
     <nav>
         <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
             <i class="icon-cube"></i>
             Revenir sur la fiche activité</a>
 
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity) ): ?>
-        <?php if($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT) ): ?>
-        <a href="<?= $this->url('contract/edit', ['id' => $activity->getId()]) ?>" class="btn btn-default btn-sm">
-            <i class="icon-pencil"></i>
-            Modifier la fiche activité</a>
-        <?php endif; ?>
-        <?php endif; ?>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity)): ?>
+            <?php
+            if ($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EDIT)): ?>
+                <a href="<?= $this->url('contract/edit', ['id' => $activity->getId()]) ?>"
+                   class="btn btn-default btn-sm">
+                    <i class="icon-pencil"></i>
+                    Modifier la fiche activité</a>
+            <?php
+            endif; ?>
+        <?php
+        endif; ?>
 
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU_ACTIVATE, $activity) ): ?>
-        <?php if( $activable): ?>
-            <form action="" method="get" class="form-inline">
-                <button type="submit" class="btn btn-success" name="a" value="activate">
-                    <i class="icon-paper-plane"></i>
-                    Activer PCRU
-                </button>
-            </form>
-        <?php endif; ?>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU_ACTIVATE, $activity)): ?>
+            <?php
+            if ($activable): ?>
+                <form action="" method="get" class="form-inline">
+                    <button type="submit" class="btn btn-success" name="a" value="activate">
+                        <i class="icon-paper-plane"></i>
+                        Activer PCRU
+                    </button>
+                </form>
+            <?php
+            endif; ?>
 
-        <?php if($poolable): ?>
+            <?php
+            if ($editable): ?>
+                <form action="" method="get" class="form-inline">
+                    <button type="submit" class="btn btn-info" name="a" value="edit">
+                        <i class="icon-pencil"></i>
+                        Edition manuelle des données PCRU
+                    </button>
+                </form>
+            <?php
+            endif; ?>
+
+            <?php
+            if ($resetable): ?>
+                <form action="" method="get" class="form-inline">
+                    <button type="submit" class="btn btn-info" name="a" value="reset">
+                        <i class="icon-rewind-outline"></i>
+                        Réinitialiser
+                    </button>
+                </form>
+            <?php
+            endif; ?>
+
+            <?php
+            if ($poolable): ?>
+                <form action="" method="post" class="form-inline">
+                    <button type="submit" class="btn btn-success" name="action" value="add-pool">
+                        <i class="icon-paper-plane"></i>
+                        Transferer vers PCRU
+                    </button>
+                </form>
+            <?php
+            endif; ?>
+
+            <?php
+            if ($downloadable): ?>
+                <form action="" method="post" class="form-inline">
+                    <button type="submit" class="btn btn-default" name="action" value="download-pcru">
+                        <i class="icon-download"></i>
+                        Télécharger les documents PCRU (aperçu)
+                    </button>
+                </form>
+            <?php
+            endif; ?>
+        <?php
+        endif; ?>
+
+        <?php
+        if ($deletable): ?>
             <form action="" method="post" class="form-inline">
-                <button type="submit" class="btn btn-success" name="action" value="add-pool">
-                    <i class="icon-paper-plane"></i>
-                    Transferer vers PCRU
-                </button>
-            </form>
-        <?php endif; ?>
-
-        <?php if($downloadable): ?>
-            <form action="" method="post" class="form-inline">
-                <button type="submit" class="btn btn-default" name="action" value="download-pcru">
-                    <i class="icon-download"></i>
-                    Télécharger les documents PCRU (aperçu)
-                </button>
-            </form>
-        <?php endif; ?>
-        <?php endif; ?>
-
-        <?php if($deletable): ?>
-            <form action="" method="post" class="form-inline">
-                <input type="hidden" name="activitypcruinfo_id" value="<?= $activitypcruinfo_id ?>" />
+                <input type="hidden" name="activitypcruinfo_id" value="<?= $activitypcruinfo_id ?>"/>
                 <button type="submit" class="btn btn-danger" name="action" value="remove-waiting">
                     <i class="icon-trash"></i>
                     Réinitialiser
                 </button>
             </form>
-        <?php endif; ?>
+        <?php
+        endif; ?>
     </nav>
 
-    <?php if( !$documentPath ): ?>
-    <div class="alert alert-danger">
-        <i class="icon-attention"></i> Pas de document signé pour cette activité
-    </div>
-    <?php endif; ?>
+    <?php
+    if (!$documentPath): ?>
+        <div class="alert alert-danger">
+            <i class="icon-attention"></i> Pas de document signé pour cette activité
+        </div>
+    <?php
+    endif; ?>
 
     <h3>Aperçu des données PCRU</h3>
     <table class="table table-bordered card xs">
         <thead>
-            <tr>
-                <th title="Numéro de colonne de le fichier d'export">N°</th>
-                <th>Champ PCRU</th>
-                <th>Géré</th>
-                <th>Valide</th>
-                <th>Valeur envoyée</th>
-                <th>Informations</th>
-            </tr>
+        <tr>
+            <th title="Numéro de colonne de le fichier d'export">N°</th>
+            <th>Champ PCRU</th>
+            <th>Géré</th>
+            <th>Valide</th>
+            <th>Valeur envoyée</th>
+            <th>Informations</th>
+        </tr>
         </thead>
 
         <tbody>
-            <?php $i = 1; foreach( $headers as $header=>$description): ?>
+        <?php
+        $i = 1;
+        foreach ($headers as $header => $description): ?>
             <tr>
                 <th><?= $i++ ?></th>
                 <th><?= $header ?></th>
-                <?php if(strpos($description, 'off') === 0) : ?>
+                <?php
+                if (strpos($description, 'off') === 0) : ?>
                     <td><i class="icon-cancel-circled-outline"></i></td>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <td><i class="icon-ok-circled"></i></td>
-                <?php endif; ?>
+                <?php
+                endif; ?>
 
                 <td>
                     <?php
-                    switch( $validations[$header] ){
+                    switch ($validations[$header]) {
                         case 'valid':
                             echo '<i class="icon-ok-circled text-success"></i>';
                             break;
@@ -161,306 +259,311 @@
                     <?= $validations[$header] ?></td>
 
                 <td><code><?= $datas[$header] ?></code></td>
-                <?php if(strpos($description, 'off') === 0) : ?>
+                <?php
+                if (strpos($description, 'off') === 0) : ?>
                     <td><p>Ce champ n'est pas géré dans Oscar</p></td>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <td><small><?= $description ?></small></td>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </tr>
-            <?php endforeach; ?>
+        <?php
+        endforeach; ?>
         </tbody>
 
     </table>
 
-    <?php /******************************* ANCIENNE VERSION
-    <div id="app" style="visibility: hidden">
-        <div class="">
-
-            <?= $this->form()->openTag($form->prepare()); ?>
-            <?= $this->formControlGroup($form->get('id')); ?>
-
-            <section class="">
-                <h2>
-                    <i class="icon-info-circled"></i>
-                    Informations générales
-                </h2>
-
-                <fieldset>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <?= $this->formControlGroup($form->get('acronyme')); ?>
-                        </div>
-                        <div class="col-md-10">
-                            <?= $this->formControlGroup($form->get('objet')); ?>
-                        </div>
-                    </div>
-
-                    <div>
-                        Date Signed :
-                        <?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateSigned(),'Y-m-d') ?>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="dateDerniereSignature">Date de signature</label>
-                            <datepicker-field :name="'dateDerniereSignature'" :value="dateDerniereSignature" />
-                        </div>
-                        <div class="col-md-3">
-                            <label for="dateDerniereSignature">Date de signature</label>
-                            <datepicker-field :name="'dateDebut'" :value="dateDebut" />
-                        </div>
-                        <div class="col-md-3">
-                            <label for="dateFin">Date de fin</label>
-                            <datepicker-field :name="'dateFin'" :value="dateFin" />
-                        </div>
-                        <div class="col-md-3">
-                            <?= $this->formControlGroup($form->get('duree')); ?>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <h2>
-                    <i class="icon-calculator"></i>
-                    Financement
-                </h2>
-
-                <fieldset>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
-                        </div>
-                        <div class="col-md-4">
-                            <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
-                        </div>
-                        <div class="col-md-4">
-                            <?= $this->formControlGroup($form->get('montantTotal')); ?>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-8">
-                            <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
-                        </div>
-                        <div class="col-md-4">
-                            <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <section>
-                    <h2>
-                        <i class="icon-building-filled"></i>
-                        Unité/structure référente
-                    </h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
-                        </div>
-                        <div class="col-md-6">
-                            <?= $this->formControlGroup($form->get('sigleUnite')); ?>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <?= $this->formControlGroup($form->get('equipe')); ?>
-                            <p class="help">
-                                Le nom de l’équipe concernée par le
-                                contrat (ou de la sous-unité)
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
-                            <p class="help">N° du suivi pour l'unité référente</p>
-                        </div>
-                    </div>
-                </section>
-
-
-                <section>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <?= $this->formControlGroup($form->get('typeContrat')); ?>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="">Contracts Associès</label>
-                            <select type="text" name="contratsAssocies" id="contratsAssocies" class="select2" multiple="true"></select>
-                         </div>
-                    </div>
-                </section>
-
-                <section>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <?= $this->formControlGroup($form->get('partenaires')); ?>
-                        </div>
-                        <div class="col-md-6">
-                            <?= $this->formControlGroup($form->get('partenairePrincipal')); ?>
-                            <?= $this->formControlGroup($form->get('idPartenairePrincipal')); ?>
-                        </div>
-                    </div>
-                </section>
-
-
-
-                <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
-                <?= $this->formControlGroup($form->get('employeurResponsableScientifique')); ?>
-
-
-                <?= $this->formControlGroup($form->get('sourceFinancement')); ?>
-                <?= $this->formControlGroup($form->get('lieuExecution')); ?>
-
-
-
-
-
-
-                <?= $this->formControlGroup($form->get('commentaires')); ?>
-                <?= $this->formControlGroup($form->get('pia')); ?>
-                <?= $this->formControlGroup($form->get('reference')); ?>
-                <?= $this->formControlGroup($form->get('accordCadre')); ?>
-                <?= $this->formControlGroup($form->get('cifre')); ?>
-                <?= $this->formControlGroup($form->get('chaireIndustrielle')); ?>
-                <?= $this->formControlGroup($form->get('presencePartenaireIndustriel')); ?>
-
-
-                <div>
-                    <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
-                        <i class="icon-cancel-circled"></i>
-                        Revenir à la fiche activité
-                    </a>
-                    <button class="btn btn-primary">
-                        <i class="icon-floppy"></i>
-                        Enregistrer les informations
-                    </button>
-                </div>
-
-            </section>
-
-            <label for="datestart">Date de début</label>
-            <datepicker-field :name="'datestart'" />
-        </div>
-    </div>
-<?php /*
-
-
-    <script>
-        require(["vue"
-                , '../js/certic-ui-components/build/PasswordField.umd'
-                , '../js/certic-ui-components/build/TextareaField.umd'
-                , '../js/certic-ui-components/build/DatepickerField.umd'
-            ],
-
-            function(Vue, PasswordField, TextareaField, DatepickerField){
-
-                Vue.component('passwordfield', PasswordField);
-                Vue.component('textarea-field', TextareaField);
-                Vue.component('datepicker-field', DatepickerField);
-
-
-                //$(function(){
-                //    console.log("DOM READY",  $('#contratsAssocies'));
-                //    $('#contratsAssocies').select2({
-                //        placeholder: 'Rechercher une activité...',
-                //        width: '100%',
-                //        allowClear: true,
-                //        tags: true,
-                //            ajax: {
-                //                url: '<?//= $this->url('api/activity') ?>//?format=select2',
-                //                dataType: 'json',
-                //                delay: 250,
-                //                data: function (params) {
-                //                    console.log("data(", params,")");
-                //                    return {
-                //                        q: params.term, // search term
-                //                        page: params.page
-                //                    };
-                //                },
-                //                processResults: function (data, page) {
-                //                    console.log(data);
-                //                    return {results: data.datas};
-                //                },
-                //                cache: true
-                //            },
-                //            escapeMarkup: function (markup) {
-                //                return markup;
-                //            },
-                //            minimumInputLength: 3,
-                //            id: function (dt) {
-                //                return dt.uid;
-                //            }
-                //            // templateResult: formatRepo, // omitted for brevity, see the source of this page
-                //            // templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                //        }
-                //    );
-                //})
-
-                new Vue({
-                    el: "#app",
-                    data:{
-                        dateDerniereSignature: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateSigned(),'Y-m-d') ?>",
-                        dateDebut: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateStart(),'Y-m-d') ?>",
-                        dateFin: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateEnd(),'Y-m-d') ?>",
-                        duree: ""
-                    }
-                })
-
-                document.querySelector('#app').style.visibility = 'visible';
-            })
-
-    </script>
-
-    <script>
-        require(['jquery', 'select2'], function($){
-            Initer.ready(function(){
-                console.log($);
-                $(function(){
-                    console.log("DOM READY",  $('#contratsAssocies'));
-                    $('#contratsAssocies').select2({
-                            placeholder: 'Rechercher une activité...',
-                            width: '100%',
-                            allowClear: true,
-                            tags: true,
-                            ajax: {
-                                url: '<?= $this->url('api/activity') ?>?format=select2',
-                                dataType: 'json',
-                                delay: 250,
-                                data: function (params) {
-                                    console.log("data(", params,")");
-                                    return {
-                                        s: params.term, // search term
-                                        page: params.page
-                                    };
-                                },
-                                processResults: function (data, page) {
-                                    console.log(data);
-                                    return {results: data.activities};
-                                },
-                                cache: true
-                            },
-                            escapeMarkup: function (markup) {
-                                return markup;
-                            },
-                            minimumInputLength: 3,
-
-                            templateResult: formatState, // omitted for brevity, see the source of this page
-                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                        }
-                    );
-                })
-            });
-        })
-
-
-        function formatState (state) {
-            return state.text;
-        }
-
-        function formatRepoSelection( data ){
-            return data.id;
-        }
-    </script>
-
-</div>
-***/ ?>
+<?php
+/******************************* ANCIENNE VERSION
+ * <div id="app" style="visibility: hidden">
+ * <div class="">
+ *
+ * <?= $this->form()->openTag($form->prepare()); ?>
+ * <?= $this->formControlGroup($form->get('id')); ?>
+ *
+ * <section class="">
+ * <h2>
+ * <i class="icon-info-circled"></i>
+ * Informations générales
+ * </h2>
+ *
+ * <fieldset>
+ * <div class="row">
+ * <div class="col-md-2">
+ * <?= $this->formControlGroup($form->get('acronyme')); ?>
+ * </div>
+ * <div class="col-md-10">
+ * <?= $this->formControlGroup($form->get('objet')); ?>
+ * </div>
+ * </div>
+ *
+ * <div>
+ * Date Signed :
+ * <?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateSigned(),'Y-m-d') ?>
+ * </div>
+ *
+ * <div class="row">
+ * <div class="col-md-3">
+ * <label for="dateDerniereSignature">Date de signature</label>
+ * <datepicker-field :name="'dateDerniereSignature'" :value="dateDerniereSignature" />
+ * </div>
+ * <div class="col-md-3">
+ * <label for="dateDerniereSignature">Date de signature</label>
+ * <datepicker-field :name="'dateDebut'" :value="dateDebut" />
+ * </div>
+ * <div class="col-md-3">
+ * <label for="dateFin">Date de fin</label>
+ * <datepicker-field :name="'dateFin'" :value="dateFin" />
+ * </div>
+ * <div class="col-md-3">
+ * <?= $this->formControlGroup($form->get('duree')); ?>
+ * </div>
+ * </div>
+ * </fieldset>
+ *
+ * <h2>
+ * <i class="icon-calculator"></i>
+ * Financement
+ * </h2>
+ *
+ * <fieldset>
+ * <div class="row">
+ * <div class="col-md-4">
+ * <?= $this->formControlGroup($form->get('montantPercuUnite')); ?>
+ * </div>
+ * <div class="col-md-4">
+ * <?= $this->formControlGroup($form->get('coutTotalEtude')); ?>
+ * </div>
+ * <div class="col-md-4">
+ * <?= $this->formControlGroup($form->get('montantTotal')); ?>
+ * </div>
+ * </div>
+ *
+ * <div class="row">
+ * <div class="col-md-8">
+ * <?= $this->formControlGroup($form->get('poleCompetivite')); ?>
+ * </div>
+ * <div class="col-md-4">
+ * <?= $this->formControlGroup($form->get('validePoleCompetivite')); ?>
+ * </div>
+ * </div>
+ * </fieldset>
+ *
+ * <section>
+ * <h2>
+ * <i class="icon-building-filled"></i>
+ * Unité/structure référente
+ * </h2>
+ * <div class="row">
+ * <div class="col-md-6">
+ * <?= $this->formControlGroup($form->get('codeUniteLabintel')); ?>
+ * </div>
+ * <div class="col-md-6">
+ * <?= $this->formControlGroup($form->get('sigleUnite')); ?>
+ * </div>
+ * </div>
+ * <div class="row">
+ * <div class="col-md-12">
+ * <?= $this->formControlGroup($form->get('equipe')); ?>
+ * <p class="help">
+ * Le nom de l’équipe concernée par le
+ * contrat (ou de la sous-unité)
+ * </p>
+ * </div>
+ * </div>
+ * <div class="row">
+ * <div class="col-md-12">
+ * <?= $this->formControlGroup($form->get('numContratTutelleGestionnaire')); ?>
+ * <p class="help">N° du suivi pour l'unité référente</p>
+ * </div>
+ * </div>
+ * </section>
+ *
+ *
+ * <section>
+ * <div class="row">
+ * <div class="col-md-6">
+ * <?= $this->formControlGroup($form->get('typeContrat')); ?>
+ * </div>
+ * <div class="col-md-6">
+ * <label for="">Contracts Associès</label>
+ * <select type="text" name="contratsAssocies" id="contratsAssocies" class="select2" multiple="true"></select>
+ * </div>
+ * </div>
+ * </section>
+ *
+ * <section>
+ * <div class="row">
+ * <div class="col-md-6">
+ * <?= $this->formControlGroup($form->get('partenaires')); ?>
+ * </div>
+ * <div class="col-md-6">
+ * <?= $this->formControlGroup($form->get('partenairePrincipal')); ?>
+ * <?= $this->formControlGroup($form->get('idPartenairePrincipal')); ?>
+ * </div>
+ * </div>
+ * </section>
+ *
+ *
+ *
+ * <?= $this->formControlGroup($form->get('responsableScientifique')); ?>
+ * <?= $this->formControlGroup($form->get('employeurResponsableScientifique')); ?>
+ *
+ *
+ * <?= $this->formControlGroup($form->get('sourceFinancement')); ?>
+ * <?= $this->formControlGroup($form->get('lieuExecution')); ?>
+ *
+ *
+ *
+ *
+ *
+ *
+ * <?= $this->formControlGroup($form->get('commentaires')); ?>
+ * <?= $this->formControlGroup($form->get('pia')); ?>
+ * <?= $this->formControlGroup($form->get('reference')); ?>
+ * <?= $this->formControlGroup($form->get('accordCadre')); ?>
+ * <?= $this->formControlGroup($form->get('cifre')); ?>
+ * <?= $this->formControlGroup($form->get('chaireIndustrielle')); ?>
+ * <?= $this->formControlGroup($form->get('presencePartenaireIndustriel')); ?>
+ *
+ *
+ * <div>
+ * <a class="btn btn-default" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+ * <i class="icon-cancel-circled"></i>
+ * Revenir à la fiche activité
+ * </a>
+ * <button class="btn btn-primary">
+ * <i class="icon-floppy"></i>
+ * Enregistrer les informations
+ * </button>
+ * </div>
+ *
+ * </section>
+ *
+ * <label for="datestart">Date de début</label>
+ * <datepicker-field :name="'datestart'" />
+ * </div>
+ * </div>
+ * <?php /*
+ *
+ *
+ * <script>
+ * require(["vue"
+ * , '../js/certic-ui-components/build/PasswordField.umd'
+ * , '../js/certic-ui-components/build/TextareaField.umd'
+ * , '../js/certic-ui-components/build/DatepickerField.umd'
+ * ],
+ *
+ * function(Vue, PasswordField, TextareaField, DatepickerField){
+ *
+ * Vue.component('passwordfield', PasswordField);
+ * Vue.component('textarea-field', TextareaField);
+ * Vue.component('datepicker-field', DatepickerField);
+ *
+ *
+ * //$(function(){
+ * //    console.log("DOM READY",  $('#contratsAssocies'));
+ * //    $('#contratsAssocies').select2({
+ * //        placeholder: 'Rechercher une activité...',
+ * //        width: '100%',
+ * //        allowClear: true,
+ * //        tags: true,
+ * //            ajax: {
+ * //                url: '<?//= $this->url('api/activity') ?>//?format=select2',
+ * //                dataType: 'json',
+ * //                delay: 250,
+ * //                data: function (params) {
+ * //                    console.log("data(", params,")");
+ * //                    return {
+ * //                        q: params.term, // search term
+ * //                        page: params.page
+ * //                    };
+ * //                },
+ * //                processResults: function (data, page) {
+ * //                    console.log(data);
+ * //                    return {results: data.datas};
+ * //                },
+ * //                cache: true
+ * //            },
+ * //            escapeMarkup: function (markup) {
+ * //                return markup;
+ * //            },
+ * //            minimumInputLength: 3,
+ * //            id: function (dt) {
+ * //                return dt.uid;
+ * //            }
+ * //            // templateResult: formatRepo, // omitted for brevity, see the source of this page
+ * //            // templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+ * //        }
+ * //    );
+ * //})
+ *
+ * new Vue({
+ * el: "#app",
+ * data:{
+ * dateDerniereSignature: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateSigned(),'Y-m-d') ?>",
+ * dateDebut: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateStart(),'Y-m-d') ?>",
+ * dateFin: "<?php echo \Oscar\Utils\DateTimeUtils::toStr($activity->getDateEnd(),'Y-m-d') ?>",
+ * duree: ""
+ * }
+ * })
+ *
+ * document.querySelector('#app').style.visibility = 'visible';
+ * })
+ *
+ * </script>
+ *
+ * <script>
+ * require(['jquery', 'select2'], function($){
+ * Initer.ready(function(){
+ * console.log($);
+ * $(function(){
+ * console.log("DOM READY",  $('#contratsAssocies'));
+ * $('#contratsAssocies').select2({
+ * placeholder: 'Rechercher une activité...',
+ * width: '100%',
+ * allowClear: true,
+ * tags: true,
+ * ajax: {
+ * url: '<?= $this->url('api/activity') ?>?format=select2',
+ * dataType: 'json',
+ * delay: 250,
+ * data: function (params) {
+ * console.log("data(", params,")");
+ * return {
+ * s: params.term, // search term
+ * page: params.page
+ * };
+ * },
+ * processResults: function (data, page) {
+ * console.log(data);
+ * return {results: data.activities};
+ * },
+ * cache: true
+ * },
+ * escapeMarkup: function (markup) {
+ * return markup;
+ * },
+ * minimumInputLength: 3,
+ *
+ * templateResult: formatState, // omitted for brevity, see the source of this page
+ * templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+ * }
+ * );
+ * })
+ * });
+ * })
+ *
+ *
+ * function formatState (state) {
+ * return state.text;
+ * }
+ *
+ * function formatRepoSelection( data ){
+ * return data.id;
+ * }
+ * </script>
+ *
+ * </div>
+ ***/ ?>

@@ -174,6 +174,29 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
     }
 
+    public function updatePcruInfos(Activity $activity, ?ActivityPcruInfos $pcruInfos = null, $json = false): void
+    {
+        if (!$this->getOscarConfigurationService()->getPcruEnabled()) {
+            throw new OscarException("Le module PCR n'est pas activé");
+        }
+
+        if( $pcruInfos == null ) {
+            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+            $pcruInfos = $factory->createNew($activity);
+        }
+
+        try {
+
+            $pcruInfos->setStatus(ActivityPcruInfos::STATUS_DRAFT);
+            $pcruInfos->validation();
+
+            $this->getEntityManager()->persist($pcruInfos);
+            $this->getEntityManager()->flush($pcruInfos);
+        } catch (UniqueConstraintViolationException $e) {
+            throw new OscarException("Les donnèes PCRU de cette activité existent déjà");
+        }
+    }
+
 
     /**
      * @return bool
@@ -368,6 +391,15 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $this->getActivityPCRUInfoRepository()->findOneBy(['numContratTutelleGestionnaire' => $numOscar]);
     }
 
+    public function resetTmpPcruInfos(Activity $activity) :void
+    {
+        $pcruInfos = $this->getPcruInfosActivity($activity);
+        if( $pcruInfos ){
+            $this->getEntityManager()->remove($pcruInfos);
+            $this->getEntityManager()->flush();
+        }
+    }
+
 
     /**
      * Affichage des donnèes PCRU :
@@ -387,9 +419,11 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         // Récupération des données
         $pcruInfos = $this->getPcruInfosActivity($activity);
+        $preview = false;
 
 
         if (!$pcruInfos) {
+            $preview = true;
             $factory = new ActivityPcruInfoFromActivityFactory(
                 $this->getOscarConfigurationService(),
                 $this->getEntityManager()
@@ -411,7 +445,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             'documentPath' => $documentPath,
             'infos' => $pcruInfos,
             'errors' => $pcruInfos->getError(),
-            'status' => $pcruInfos->getStatus()
+            'status' => $pcruInfos->getStatus(),
+            'preview' => $preview
         ];
     }
 

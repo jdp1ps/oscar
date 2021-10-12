@@ -47,7 +47,7 @@
                     <th>1</th>
                     <td>Objet</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('objet')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('objet'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('objet')); ?></td>
                     <td><?= $headers['Objet'] == 'off' ? 'Saisie manuelle' : $headers['Objet']  ?></td>
                 </tr>
@@ -56,7 +56,7 @@
                     <th>2</th>
                     <td>CodeUniteLabintel</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('codeunitelabintel')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('codeunitelabintel'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('codeunitelabintel')); ?></td>
                     <td><?= $headers['CodeUniteLabintel'] == 'off' ? 'Saisie manuelle' : $headers['CodeUniteLabintel']  ?></td>
                 </tr>
@@ -65,7 +65,7 @@
                     <th>3</th>
                     <td>SigleUnite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('sigleunite')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('sigleunite'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('sigleunite')); ?></td>
                     <td><?= $headers['SigleUnite'] == 'off' ? 'Saisie manuelle' : $headers['SigleUnite']  ?></td>
                 </tr>
@@ -74,7 +74,7 @@
                     <th>4</th>
                     <td>NumContratTutelleGestionnaire</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('numcontrattutellegestionnaire')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('numcontrattutellegestionnaire'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('numcontrattutellegestionnaire')); ?></td>
                     <td><?= $headers['NumContratTutelleGestionnaire'] == 'off' ? 'Saisie manuelle' : $headers['NumContratTutelleGestionnaire']  ?></td>
                 </tr>
@@ -83,7 +83,7 @@
                     <th>5</th>
                     <td>Equipe</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('equipe')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('equipe'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('equipe')); ?></td>
                     <td><?= $headers['Equipe'] == 'off' ? 'Saisie manuelle' : $headers['Equipe']  ?></td>
                 </tr>
@@ -92,7 +92,7 @@
                     <th>6</th>
                     <td>TypeContrat</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('typecontrat')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('typecontrat'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formSelect($form->get('typecontrat')); ?></td>
                     <td><?= $headers['TypeContrat'] == 'off' ? 'Saisie manuelle' : $headers['TypeContrat']  ?></td>
                 </tr>
@@ -101,7 +101,7 @@
                     <th>7</th>
                     <td>Acronyme</td>
                     <td><i class="icon-ok-circled"></td>
-                     <td><?= $this->formElementErrors($form->get('acronyme')); ?></td>
+                     <td><?= $this->formElementErrors($form->get('acronyme'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('acronyme')); ?></td>
                      <td><?= $headers['Acronyme'] == 'off' ? 'Saisie manuelle' : $headers['Acronyme']  ?></td>
                 </tr>
@@ -110,7 +110,7 @@
                     <th>8</th>
                     <td>ContratsAssocies</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('contratsassocies')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('contratsassocies'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('contratsassocies')); ?></td>
                     <td><?= $headers['ContratsAssocies'] == 'off' ? 'Saisie manuelle' : $headers['ContratsAssocies']  ?></td>
                 </tr>
@@ -118,7 +118,7 @@
                     <th>9</th>
                     <td>ResponsableScientifique</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('responsablescientifique')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('responsablescientifique'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formSelect($form->get('responsablescientifique')); ?></td>
                     <td><?= $headers['ResponsableScientifique'] == 'off' ? 'Saisie manuelle' : $headers['ResponsableScientifique']  ?></td>
                 </tr>
@@ -126,7 +126,7 @@
                     <th>10</th>
                     <td>EmployeurResponsableScientifique</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('employeurresponsablescientifique')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('employeurresponsablescientifique'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('employeurresponsablescientifique')); ?></td>
                     <td><?= $headers['EmployeurResponsableScientifique'] == 'off' ? 'Saisie manuelle' : $headers['EmployeurResponsableScientifique']  ?></td>
                 </tr>
@@ -136,7 +136,7 @@
                     <th>11</th>
                     <td>CoordinateurConsortium</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('coordinateurconsortium')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('coordinateurconsortium'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('coordinateurconsortium')); ?></td>
                     <td>
                         <?= $headers['CoordinateurConsortium'] == 'off' ? 'Saisie manuelle' : $headers['CoordinateurConsortium']  ?>
@@ -148,7 +148,7 @@
                     <th>12</th>
                     <td>Partenaires</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('partenaires')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('partenaires'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('partenaires')); ?></td>
                     <td><?= $headers['Partenaires'] == 'off' ? 'Saisie manuelle' : $headers['Partenaires']  ?></td>
                 </tr>
@@ -156,7 +156,7 @@
                     <th>13</th>
                     <td>PartenairePrincipal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('partenaireprincipal')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('partenaireprincipal'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formSelect($form->get('partenaireprincipal')); ?></td>
                     <td><?= $headers['PartenairePrincipal'] == 'off' ? 'Saisie manuelle' : $headers['PartenairePrincipal']  ?></td>
                 </tr>
@@ -164,7 +164,7 @@
                     <th>14</th>
                     <td>IdPartenairePrincipal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('idpartenaireprincipal')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('idpartenaireprincipal'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('idpartenaireprincipal')); ?></td>
                     <td><?= $headers['IdPartenairePrincipal'] == 'off' ? 'Saisie manuelle' : $headers['IdPartenairePrincipal']  ?></td>
                 </tr>
@@ -172,7 +172,7 @@
                     <th>15</th>
                     <td>SourceFinancement</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('sourcefinancement')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('sourcefinancement'), ['class' => 'alert alert-danger']); ?></td>
                     <td>
                         <?= $this->formSelect($form->get('sourcefinancement')); ?>
                     </td>
@@ -182,7 +182,7 @@
                     <th>16</th>
                     <td>LieuExecution</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('lieuexecution')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('lieuexecution'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('lieuexecution')); ?></td>
                     <td><?= $headers['LieuExecution'] == 'off' ? 'Saisie manuelle' : $headers['LieuExecution']  ?></td>
                 </tr>
@@ -191,7 +191,7 @@
                     <th>17</th>
                     <td>DateDerniereSignature</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('datedernieresignature')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('datedernieresignature'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('datedernieresignature')); ?></td>
                     <td><?= $headers['DateDerniereSignature'] == 'off' ? 'Saisie manuelle' : $headers['DateDerniereSignature']  ?></td>
                 </tr>
@@ -200,7 +200,7 @@
                     <th>18</th>
                     <td>Duree</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('duree')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('duree'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('duree')); ?></td>
                     <td><?= $headers['Duree'] == 'off' ? 'Saisie manuelle' : $headers['Duree']  ?></td>
                 </tr>
@@ -209,7 +209,7 @@
                     <th>19</th>
                     <td>DateDebut</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('datedebut')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('datedebut'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('datedebut')); ?></td>
                     <td><?= $headers['DateDebut'] == 'off' ? 'Saisie manuelle' : $headers['DateDebut']  ?></td>
                 </tr>
@@ -218,7 +218,7 @@
                     <th>20</th>
                     <td>DateFin</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('datefin')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('datefin'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('datefin')); ?></td>
                     <td><?= $headers['DateFin'] == 'off' ? 'Saisie manuelle' : $headers['DateFin']  ?></td>
                 </tr>
@@ -227,7 +227,7 @@
                     <th>21</th>
                     <td>MontantPercuUnite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('montantpercuunite')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('montantpercuunite'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('montantpercuunite')); ?></td>
                     <td><?= $headers['MontantPercuUnite'] == 'off' ? 'Saisie manuelle' : $headers['MontantPercuUnite']  ?></td>
                 </tr>
@@ -236,7 +236,7 @@
                     <th>22</th>
                     <td>CoutTotalEtude</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('couttotaletude')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('couttotaletude'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('couttotaletude')); ?></td>
                     <td><?= $headers['CoutTotalEtude'] == 'off' ? 'Saisie manuelle' : $headers['CoutTotalEtude']  ?></td>
                 </tr>
@@ -245,7 +245,7 @@
                     <th>23</th>
                     <td>MontantTotal</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('montanttotal')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('montanttotal'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('montanttotal')); ?></td>
                     <td><?= $headers['MontantTotal'] == 'off' ? 'Saisie manuelle' : $headers['MontantTotal']  ?></td>
                 </tr>
@@ -253,7 +253,7 @@
                     <th>24</th>
                     <td>ValidePoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('validepolecompetivite')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('validepolecompetivite'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('validepolecompetivite')); ?></td>
                     <td><?= $headers['ValidePoleCompetivite'] == 'off' ? 'Saisie manuelle' : $headers['ValidePoleCompetivite']  ?></td>
                 </tr>
@@ -262,7 +262,7 @@
                     <th>25</th>
                     <td>PoleCompetivite</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('polecompetivite')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('polecompetivite'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formSelect($form->get('polecompetivite')); ?></td>
                     <td><?= $headers['PoleCompetivite'] == 'off' ? 'Saisie manuelle' : $headers['PoleCompetivite']  ?></td>
                 </tr>
@@ -271,7 +271,7 @@
                     <th>26</th>
                     <td>Commentaires</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('commentaires')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('commentaires'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formTextarea($form->get('commentaires')); ?></td>
                     <td><?= $headers['Commentaires'] == 'off' ? 'Saisie manuelle' : $headers['Commentaires']  ?></td>
                 </tr>
@@ -279,7 +279,7 @@
                     <th>27</th>
                     <td>Pia</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('pia')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('pia'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('pia')); ?></td>
                     <td><small>Est PIA ?</small></td>
                 </tr>
@@ -287,7 +287,7 @@
                     <th>28</th>
                     <td>Reference</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('reference')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('reference'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('reference')); ?></td>
                     <td><?= $headers['Reference'] == 'off' ? 'Saisie manuelle' : $headers['Reference']  ?></td>
                 </tr>
@@ -295,7 +295,7 @@
                     <th>29</th>
                     <td>AccordCadre</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('accordcadre')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('accordcadre'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('accordcadre')); ?></td>
                     <td><?= $headers['AccordCadre'] == 'off' ? 'Saisie manuelle' : $headers['AccordCadre']  ?></td>
                 </tr>
@@ -304,7 +304,7 @@
                     <th>30</th>
                     <td>Cifre</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('cifre')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('cifre'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('cifre')); ?></td>
                     <td><?= $headers['Cifre'] == 'off' ? 'Saisie manuelle' : $headers['Cifre']  ?></td>
                 </tr>
@@ -312,7 +312,7 @@
                     <th>31</th>
                     <td>ChaireIndustrielle</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('chaireindustrielle')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('chaireindustrielle'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formInput($form->get('chaireindustrielle')); ?></td>
                     <td><?= $headers['ChaireIndustrielle'] == 'off' ? 'Saisie manuelle' : $headers['ChaireIndustrielle']  ?></td>
                 </tr>
@@ -320,7 +320,7 @@
                     <th>32</th>
                     <td>PresencePartenaireIndustriel</td>
                     <td><i class="icon-ok-circled"></td>
-                    <td><?= $this->formElementErrors($form->get('presencepartenaireindustriel')); ?></td>
+                    <td><?= $this->formElementErrors($form->get('presencepartenaireindustriel'), ['class' => 'alert alert-danger']); ?></td>
                     <td><?= $this->formCheckbox($form->get('presencepartenaireindustriel')); ?></td>
                     <td><?= $headers['PresencePartenaireIndustriel'] == 'off' ? 'Saisie manuelle' : $headers['PresencePartenaireIndustriel']  ?></td>
                 </tr>
@@ -328,8 +328,20 @@
 
         </table>
 
-
-        <button type="submit" class="btn btn-success btn-lg">Activer PCRU</button>
+        <nav class="buttons text-center">
+            <a class="btn btn-default btn-lg" href="<?= $this->url('contract/pcru-infos', ['id' => $activity->getId() ]) ?>">
+                Revenir
+            </a>
+            <button type="submit" class="btn btn-success btn-lg">
+                <?php if( $mode == 'edit' ):?>
+                <i class="icon-floppy"></i>
+                Enregistrement
+                <?php else: ?>
+                <i class="icon-paper-plane"></i>
+                Activer PCRU
+                <?php endif; ?>
+            </button>
+        </nav>
 
         <?= $this->form()->closeTag() ?>
     </div>
