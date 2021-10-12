@@ -7,8 +7,24 @@
 Commencez par mettre à jour le système.
 
 ```bash
-apt update
-apt upgrade
+# Sources en Bullseye
+for file in \
+  $(ls /etc/apt/sources.list.d/*buster*)
+  do new=$(echo $file | sed s/buster/bullseye/)
+  cp $file $new; sed -i s/buster/bullseye/ $new
+done
+
+# Cas particulier pour security
+sed -i 's/bullseye\/updates/bullseye-security/' /etc/apt/sources.list.d/debian.unicaen.fr-bullseye-security.list
+
+# update des sources
+apt -qq update
+
+# Mise à jour du serveur SSH d'abord
+# Cf https://www.debian.org/releases/bullseye/amd64/release-notes/ch-information#ssh-not-available
+apt -y -o Dpkg::Options::="--force-confold" install openssh-server
+apt -y full-upgrade -o Dpkg::Options::="--force-confold" --allow-downgrades
+apt -y autoremove
 ```
 
 ### Installation de PHP7.4
@@ -101,6 +117,8 @@ php bin/oscar.php check:config
 
 ## Passage à composer 2.x
 
+Oscar supporte maintenant *Composer 2.x*
+
 ```
 wget https://getcomposer.org/download/latest-stable/composer.phar
 ```
@@ -116,6 +134,9 @@ php composer.phar install
 
 # Mise à jour du modèle
 php vendor/bin/doctrine-module orm:schema-tool:update --force
+
+# Mise à jour des privilèges
+php bin/oscar.php check:privileges
 ```
 
 ### Mise à jour de la configuration LDAP
@@ -180,13 +201,13 @@ Vérifier son fonctionnement
 journalctl -u oscarworker -f
 ```
 
-Puis dans lancez le check:config
+Dans une autre fenêtre, vous pouvez déclencher un *check:config* et surveiller l'activité dans les logs du worker
 
 ```
 php bin/oscar.php check:config
 ```
 
-Vous devriez voir dans le journal du Worker ce type de sortie : 
+Vous devriez voir dans les logs du Worker ce type de sortie : 
 
 ```
 oct. 11 10:41:10 woscar-pp systemd[1]: Stopped OSCAR Worker.
@@ -207,6 +228,8 @@ Les logs Oscar ont également été enrichies, les interactions entre Oscar et G
 ```bash
 tail -f logs.oscar.log
 ```
+
+Vous devrier pouvoir y observer l'échange entre Oscar > Gearman > Command oscar
 
 ```
 [2021-10-11T10:43:46.641506+02:00] oscar.INFO: [COMMAND] check:config [] []
@@ -230,6 +253,8 @@ oct. 11 11:41:24 woscar-pp php[378252]: [worker] exec /usr/bin/php bin/oscar.php
 oct. 11 11:41:24 woscar-pp php[378252]: [worker] exec /usr/bin/php bin/oscar.php console  indexperson '{"personid":5063}'
 ```
 
+> Le worker déclenche maintenant des commandes "natives" Oscar. En cas de problème, vous pouvez copier/coller les commandes depuis les logs du *worker* pour tester le résultat.
+
 ### Réindexation de la recherche
 
 Il est chaudement recommandé de recalculer les index de recherche : 
@@ -246,15 +271,17 @@ php bin/oscar.php person:search-rebuild
 ```
 
 
+## Problèmes connus
+
 ### Elastic : cluster_block_exception
 
-Si vous voyez l'erreur : 
+Lors des actions impliquant l'index de recherche (Elastic Searchà, vous pouvez voir passer l'erreur **cluster_block_exception** (elle est visible dans log/oscar.log) : 
 
 ```
 [2021-10-11T10:51:43.473403+02:00] oscar.ERROR: CMD error : {"error":{"root_cause":[{"type":"cluster_block_exception","reason":"blocked by: [FORBIDDEN/12/index read-only / allow delete (api)];"}],"type":"cluster_block_exception","reason":"blocked by: [FORBIDDEN/12/index read-only / allow delete (api)];"},"status":403} [] []
 ```
 
-C'est que **Elastic Search** est passé en mode *readonly**. Ce problème est généralement consécutif à une saturation de l'espace disque.
+C'est que **Elastic Search** est passé en mode *readonly*. Ce problème est généralement consécutif à une saturation de l'espace disque.
 
 Pour régler le problème, faites un peu de place sur la machine, puis faites sauter le verrou placé par Elastic via la commande CURL : 
 
@@ -268,9 +295,36 @@ Depuis l'interface d'administration : `Administration > Configuration et mainten
 
  - Dans la section **Nomenclatures > Pays (ISO 3166)**, cliquez sur le bouton **Actualiser les pays**
 
+![Pays ISO](./images/pays-iso.png)
+
  - Dans la section **Modules > PCRU**, cliquez sur le bouton **Mettre à jour les référentiels**.
+
+![Référentiels](./images/pcru-config.png)
 
 ### Activer PCRU
 
-Depuis l'interface d'administration : `Administration > Configuration et maintenance` :
+Depuis l'interface d'administration : `Administration > Configuration et maintenance`, Allez dans la section **Module > PCRU** puis cliquez sur **"configurer"**
 
+![Activation de PCRU](./images/pcru-ftp.png)
+
+Activez PCRU.
+
+> L'accès FTP est fonctionnel, mais cette fonctionnalité est encore expérimentale
+
+### Privilèges PCRU
+
+Enfin, il faut accorder des privilèges à des utilisateurs pour géré la partie PCRU d'une activité de recherche.
+
+Rendez-vous dans **Administration > Configuration et maintenance > Privilèges et droits d'accès > Privilèges et rôles**
+
+Plusieurs privilèges sont disponibles.
+
+#### Au niveau de l'activité
+
+![Privilèges PCRU](./images/pcru-privileges.png)
+
+ - **Afficher les informations PCRU** : Permet de voir les données PCRU pour l'activité et de télécharger les données PCRU d'une activité.
+   
+ - **Activer les données PCRU** : Permet de modifier/valider les informations PCRU d'une activité
+
+ 
