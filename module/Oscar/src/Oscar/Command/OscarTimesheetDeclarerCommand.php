@@ -35,17 +35,21 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'timesheets:declarer';
 
-    const OPT_FORCE         = "force";
-    const OPT_DECLARER      = "declarer";
-    const OPT_PERIOD        = "period";
+    const OPT_FORCE = "force";
+    const OPT_DECLARER = "declarer";
+    const OPT_PERIOD = "period";
 
     protected function configure()
     {
         $this
             ->setDescription("Système de relance des déclarants")
             ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
-            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_OPTIONAL, "Identifiant du déclarant")
-            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période");
+            ->addOption(
+                self::OPT_DECLARER,
+                'd',
+                InputOption::VALUE_OPTIONAL,
+                "Identifiant du déclarant"
+            )
         ;
     }
 
@@ -55,30 +59,33 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
 
         /// OPTIONS and PARAMETERS
         $declarerId = $input->getOption(self::OPT_DECLARER);
-        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
+        $declarerPeriod = false; //$input->getOption(self::OPT_PERIOD);
 
         // Récupération du déclarant
-        if( $declarerId ){
-            if( !$declarerPeriod )
-                $this->declarer($input,$output, $declarerId);
-            else
-                $this->declarerPeriod($input, $output, $declarerId, $declarerPeriod);
+        if ($declarerId) {
+            if (!$declarerPeriod) {
+                $this->declarer($input, $output, $declarerId);
+            } else {
+                $this->declarer($input, $output, $declarerId, $declarerPeriod);
+            }
         } else {
-            $this->declarersList($input,$output);
+            $this->declarersList($input, $output);
         }
     }
 
     /**
      * @return TimesheetService
      */
-    protected function getTimesheetService(){
+    protected function getTimesheetService()
+    {
         return $this->getServicemanager()->get(TimesheetService::class);
     }
 
     /**
      * @return PersonService
      */
-    protected function getPersonService(){
+    protected function getPersonService()
+    {
         return $this->getServicemanager()->get(PersonService::class);
     }
 
@@ -87,8 +94,8 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
 //        echo "Non-disponible";
 //    }
 
-    public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
-
+    public function declarer(InputInterface $input, OutputInterface $output, $declarerId)
+    {
         $io = new SymfonyStyle($input, $output);
 
         try {
@@ -98,27 +105,27 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
             $periods = $this->getTimesheetService()->getPersonRecallDeclaration($declarer);
 
             $io->table(["Période", "Durée", "état"], $periods);
-
         } catch (\Exception $e) {
             $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
             exit(0);
         }
     }
 
-    public function declarersList( InputInterface $input, OutputInterface $output ){
+    public function declarersList(InputInterface $input, OutputInterface $output)
+    {
         $io = new SymfonyStyle($input, $output);
         $io->title("Lite des déclarants");
         try {
             $declarants = $this->getTimesheetService()->getDeclarers();
             $out = [];
             /** @var Person $declarer */
-            foreach ($declarants['persons'] as $personId=>$datas) {
+            foreach ($declarants['persons'] as $personId => $datas) {
                 $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
             }
             $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
             $io->table($headers, $out);
 
-            $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
+            $io->comment("Entrez la commande '" . self::getName() . " -d <ID>' pour afficher les détails");
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }

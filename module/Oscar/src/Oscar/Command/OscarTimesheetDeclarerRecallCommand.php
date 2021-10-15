@@ -35,199 +35,140 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use UnicaenApp\Service\Mailer\MailerService;
 use Zend\Validator\Date;
 
-class OscarTimesheetDeclarerRecallCommand extends OscarCommandAbstract
+class OscarTimesheetDeclarerRecallCommand extends OscarAdvancedCommandAbstract
 {
-    protected static $defaultName = 'timesheets:declarers-recall';
+    protected static $defaultName = 'timesheets:declarer-recall';
 
-    const OPT_FORCE         = "force";
-    const OPT_DECLARER      = "declarer";
-    const OPT_PERIOD        = "period";
-    const OPT_PROCESSDATE        = "processdate";
+    const OPT_FORCE = "force";
+    const OPT_DECLARER = "declarer";
+    const OPT_PERIOD = "period";
+    const OPT_PROCESSDATE = "processdate";
 
-    const ARG_ALL        = "all";
+    const ARG_PERSONID = "personid";
 
     protected function configure()
     {
         $this
-            ->setDescription("Système de relance des déclarants")
-            ->addOption(self::OPT_FORCE, 'f', InputOption::VALUE_NONE, "Forcer le mode non-interactif")
-            ->addOption(self::OPT_DECLARER, 'd', InputOption::VALUE_REQUIRED, "Identifiant du déclarant")
-            ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL, "Période")
-            ->addOption(self::OPT_PROCESSDATE, 'c', InputOption::VALUE_OPTIONAL, "Date de relance (par défaut date actuelle)")
-            ->addArgument(self::ARG_ALL, InputArgument::OPTIONAL, "Déclencher pour tous les déclarants", false);
-        ;
+            ->setDescription("Relance ponctuelle d'un déclarant")
+            ->addOption(
+                self::OPT_PROCESSDATE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Date effective du rappel",
+                null
+            )
+            ->addOption(
+                self::OPT_PERIOD,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Période (par défaut, période en cours)",
+                null
+            )
+            ->addOption(
+                self::OPTION_FORCE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Forcer l'envoi du mail même si ça n'est pas necessaire",
+                null
+            )
+            ->addArgument(
+                self::ARG_PERSONID,
+                InputArgument::OPTIONAL,
+                "ID du déclarant"
+            );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->addOutputStyle($output);
-
-        $io = new SymfonyStyle($input, $output);
+        parent::execute($input, $output);
 
         // Argument ALL
-        $all = $input->getArgument(self::ARG_ALL);
+        $personId = $input->getArgument(self::ARG_PERSONID);
 
         /// OPTIONS and PARAMETERS
-        $declarerLogin = $input->getOption(self::OPT_DECLARER);
         $processDate = $input->getOption(self::OPT_PROCESSDATE);
 
-        if( $processDate ){
-            $processDate = new \DateTime($processDate);
+        $force = $input->getOption(self::OPTION_FORCE) === null;
+
+        // Période
+        $period = $input->getOption(self::OPT_PERIOD);
+
+        $helps = [];
+
+        if (!$period) {
+            $period = null;
+            $periodText = " (Période non-spécifée)";
+            $helps[] = "l'option '--period=<PERIOD>' permet de spécifier la période sous la forme YYYY-MM (ou 'now' pour la période en cours)";
         } else {
-            $processDate = new \DateTime();
-        }
-
-        $io->writeln("Date effective de la relance : <bold>". $processDate->format('D d M Y') ."</bold>");
-        //die();
-
-        if( $all == false && $declarerLogin == null ){
-            $io->writeln("Utiliser l'option --declarant=ID");
-            $this->declarersList($input, $output);
-            return;
-        }
-
-        if( $all != 'all' ){
-            try {
-                $person = $this->getPersonService()->getPersonByLdapLogin($declarerLogin);
-                if( !$person ){
-                    throw new \Exception("Nop !");
-                }
-                $personId = $person->getId();
-
-            } catch (NoResultException $e){
-                $io->error("Impossible de charger la personne à partir de son identifiant de connexion : $declarerLogin");
-                return;
+            if ($period == 'now') {
+                $period = (new \DateTime())->format('Y-m');
             }
-            $declarerId = $personId;
-            $all = false;
+            $periodInfos = DateTimeUtils::periodBounds($period);
+            $periodlabel = $periodInfos['periodLabel'];
+            $periodText = " (Pour la période $periodlabel)";
         }
 
-        $declarerPeriod = $input->getOption(self::OPT_PERIOD);
-        if( !$declarerPeriod ){
-            $today = date('Y-m-d');
-            $time = strtotime($today);
-            $final = date("Y-m-d", strtotime("-1 month", $time));
-            $declarerPeriod = DateTimeUtils::getPeriodStrFromDateStr($final);
-        }
+        if ($personId == null) {
+            $this->getIO()->title("Liste des déclarants $periodText");
 
-        $io->writeln("Pour la période : <bold>". $declarerPeriod ."</bold>.");
-
-
-        $do = false;
-
-        if( $all == true ){
-            $declarants = $this->getTimesheetService()->getDeclarers();
-            $out = [];
-            /** @var Person $declarer */
-            foreach ($declarants['persons'] as $personId=>$datas) {
-                //$io->text("Traitement pour " . $declarants)
-                try {
-                    $result = $this->recallDeclarer($personId, $declarerPeriod, $io, $processDate);
-                } catch (\Exception $e) {
-                    $io->warning($e->getMessage());
-                }
+            $declarers = $this->getPersonService()->getPersonsByIds(
+                $period == null ?
+                    $this->getPersonService()->getDeclarersIds() :
+                    $this->getPersonService()->getDeclarersIdsPeriod($period)
+            );
+            $headers = ['ID', 'Personne', 'Email', "Identifiant"];
+            $rows = [];
+            foreach ($declarers as $declarer) {
+                $rows[] = [
+                    $declarer->getId(),
+                    $declarer->getDisplayName(),
+                    $declarer->getEmail(),
+                    $declarer->getLadapLogin()
+                ];
             }
+            $this->getIO()->table($headers, $rows);
+            $this->getIO()->comment("Vous pouvez utiliser l'ID de la personne en fin de commande");
         } else {
-            try {
-                $result = $this->recallDeclarer($personId, $declarerPeriod, $io, $processDate);
-            } catch (\Exception $e) {
-                $io->warning($e->getMessage());
+            // Déclarant
+            $declarer = $this->getPersonService()->getPersonById($personId, true);
+
+            if (!$period) {
+                $periods = $this->getTimesheetService()->getPeriodsPerson($declarer);
+                $rows = [];
+                foreach ($periods as $period) {
+                    $rows[] = [$period, DateTimeUtils::periodBounds($period)['periodLabel']];
+                }
+                $this->getIO()->title("Périodes pour la personne $declarer");
+                $headers = ["Code", "Période"];
+                $this->getIO()->table($headers, $rows);
+                $this->getIO()->comment("Utiliser --period=CODE_PERIOD pour déclencher le rappel");
+            } else {
+                $this->getIO()->title("Rappel pour $declarer $periodText");
+                if ($this->getTimesheetService()->isDeclarerAtPeriod($declarer, $period)) {
+                    $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period, null, $force);
+
+                    $this->getIO()->writeln(sprintf("Infos : <bold>%s</bold>", $result['recall_info']));
+                    $this->getIO()->writeln(sprintf("Temps MIN/MAX attendu : <bold>%s/%s</bold>", $result['min'], $result['max']));
+                    $this->getIO()->writeln(sprintf("Temps DELCARE/ATTENDU : <bold>%s</bold> / <bold>%s</bold>", $result['total'], $result['needed']));
+                    $this->getIO()->writeln(sprintf("Mail envoyé : <bold>%s</bold>", $result['mailSend'] ? 'OUI' : 'NON'));
+                    $this->getIO()->writeln(sprintf("Conflit : <bold>%s</bold>", $result['hasConflict'] ? 'OUI' : 'non'));
+                    $this->getIO()->writeln(sprintf("Dernière relance envoyée : <bold>%s</bold>", $result['lastSend']));
+                    $this->getIO()->writeln(sprintf("Relance envoyées pour cette période : <bold>%s</bold>", $result['recalls']));
+
+                } else {
+                    $this->getIO()->warning("'$declarer' n'est pas déclarant pour la période '$periodlabel'");
+                }
             }
         }
-        $io->comment("Opération terminée");
-        return;
-    }
 
-    protected function recallDeclarer($declarerId, $declarerPeriod, SymfonyStyle $io, $processDate = null)
-    {
-        /** @var Person $declarer */
-        $declarer = $this->getPersonService()->getPersonById($declarerId);
-
-        $result = $this->declarerPeriod($declarerId, $declarerPeriod, $processDate);
-        if( $result ) {
-            $io->title($result['person']);
-            $io->writeln(sprintf("Message : <options=bold>%s</>", $result['message']));
-            $io->writeln(sprintf("Mail ? <options=bold>%s</>", $result['needSend'] ? 'Oui' : 'Non'));
-            $io->writeln(sprintf("Déclaration (heures) : <options=bold>%s/%s</>", $result['total'], $result['needed']));
-            $io->writeln(sprintf("Max : <options=bold>%s</>", $result['max']));
-            $io->writeln(sprintf("Min : <options=bold>%s</>", $result['min']));
-            $io->writeln(sprintf("Mail requis : <options=bold>%s</>", $result['mailRequired'] ? "Oui" : "Non"));
-            $io->writeln(sprintf("Mail envoyé : <options=bold>%s</>", $result['mailSend'] ? "Oui" : "Non"));
-            $io->writeln(sprintf("Dernier envoi : <options=bold>%s</>", $result['lastSend']));
-            $io->writeln(sprintf("Prochain envoi : <options=bold>%s</>", $result['nextSend']));
-            $io->writeln(sprintf("Status : <options=bold>%s</>", $result['status']));
-        }
-        else {
-            $io->warning("Pas de données pour $declarer à la période $declarerPeriod");
-        }
-        return;
-    }
-
-    /**
-     * @return MailingService
-     */
-    protected function getMailer()
-    {
-        return $this->getServicemanager()->get(MailingService::class);
+        return 1;
     }
 
     /**
      * @return TimesheetService
      */
-    protected function getTimesheetService(){
+    protected function getTimesheetService(): TimesheetService
+    {
         return $this->getServicemanager()->get(TimesheetService::class);
-    }
-
-    /**
-     * @return PersonService
-     */
-    protected function getPersonService(){
-        return $this->getServicemanager()->get(PersonService::class);
-    }
-
-    //public function declarerRecall
-
-    public function declarerPeriod( $declarerId, $period, $processDate = null ){
-        if( $processDate == null ){
-            $processDate = new \DateTime();
-        }
-        return $this->getTimesheetService()->recallProcess($declarerId, $period, $processDate);
-    }
-
-    public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
-
-        $io = new SymfonyStyle($input, $output);
-
-        try {
-            $declarer = $this->getPersonService()->getPerson($declarerId);
-
-            $io->title("Système de relance pour $declarer");
-            $periods = $this->getTimesheetService()->getPersonRecallDeclaration($declarer);
-
-            $io->table(["Période", "Durée", "état"], $periods);
-
-        } catch (\Exception $e) {
-            $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
-            exit(0);
-        }
-    }
-
-    public function declarersList( InputInterface $input, OutputInterface $output ){
-        $io = new SymfonyStyle($input, $output);
-        $io->title("Lite des déclarants");
-        try {
-            $declarants = $this->getTimesheetService()->getDeclarers();
-            $out = [];
-            /** @var Person $declarer */
-            foreach ($declarants['persons'] as $personId=>$datas) {
-                $out[] = [$personId, $datas['displayname'], $datas['login'], $datas['affectation'], count($datas['declarations'])];
-            }
-            $headers = ['ID', 'login', 'Déclarant', 'Affectation', 'Déclaration(s)'];
-            $io->table($headers, $out);
-
-            $io->comment("Entrez la commande '".self::getName()." --". self::OPT_DECLARER . "=<ID>' pour afficher les détails");
-        } catch (\Exception $e) {
-            $io->error($e->getMessage());
-        }
     }
 }
