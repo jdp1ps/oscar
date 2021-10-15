@@ -30,6 +30,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const activity_request_limit = 'activity_request_limit';
     const document_use_version_in_name = 'document_use_version_in_name';
     const document_location = 'document_location';
+    const declarers_white_list = 'declarers_white_list';
 
 
     const theme = 'theme';
@@ -81,11 +82,14 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getPayementsConfig()
     {
-        return $this->getOptionalConfiguration('payements', [
-            'separator' => '$$',
-            'persons' => '',
-            'organizations' => ''
-        ]);
+        return $this->getOptionalConfiguration(
+            'payements',
+            [
+                'separator' => '$$',
+                'persons' => '',
+                'organizations' => ''
+            ]
+        );
     }
 
     /**
@@ -102,6 +106,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getLoggerLevel(): int
     {
         return $this->getOptionalConfiguration('log_level', Logger::INFO);
+    }
+
+    public function useDeclarersWhiteList(): bool
+    {
+        return $this->getEditableConfKey(self::declarers_white_list, true);
+    }
+
+    public function setUseDeclarerWhiteList(bool $use): void
+    {
+        $this->saveEditableConfKey(self::declarers_white_list, $use);
     }
 
 
@@ -159,8 +173,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             if (!is_writeable($dir)) {
                 throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
             }
-        } else if (!is_writeable($file)) {
-            throw new OscarException("Impossible d'écrire le fichier $file");
+        } else {
+            if (!is_writeable($file)) {
+                throw new OscarException("Impossible d'écrire le fichier $file");
+            }
         }
         return $file;
     }
@@ -171,7 +187,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         if (file_exists($path)) {
             $parser = new Parser();
             $parsed = $parser->parse(file_get_contents($path));
-            if( $parsed ){
+            if ($parsed) {
                 return $parsed;
             } else {
                 return [];
@@ -193,7 +209,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getEditableConfKey($key, $default = null)
     {
         $conf = $this->getEditableConfRoot();
-        if ($conf == null ){
+        if ($conf == null) {
             $conf = [];
         }
         if (array_key_exists($key, $conf)) {
@@ -362,7 +378,9 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         if ($publicdoclocation == null) {
             $conf = $this->getConfiguration('paths.document_admin_oscar');
             if (!file_exists($conf) || !is_writable($conf)) {
-                throw new OscarException("L'emplacement des documents publiques n'est pas un dossier accessible en écriture");
+                throw new OscarException(
+                    "L'emplacement des documents publiques n'est pas un dossier accessible en écriture"
+                );
             }
             $publicdoclocation = $conf . '/';
         }
@@ -474,14 +492,15 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return array|object
      * @throws OscarException
      */
-    public function getDocumentDropLocation(){
+    public function getDocumentDropLocation()
+    {
         static $documentDropLocation;
-        if( $documentDropLocation == null ){
+        if ($documentDropLocation == null) {
             $path = realpath($this->getConfiguration('paths.document_oscar'));
-            if( !file_exists($path) ){
+            if (!file_exists($path)) {
                 throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
             }
-            if( !is_readable($path) ){
+            if (!is_readable($path)) {
                 throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
             }
             $documentDropLocation = $path;
@@ -498,18 +517,23 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPcruRootDirectory(): string
     {
         static $pcru_root = null;
-        if( $pcru_root === null ){
-
+        if ($pcru_root === null) {
             // Test de la racine PCRU
             $path = realpath($this->getConfiguration('pcru.files_path'));
-            if( !file_exists($path) ){
-                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement temporaire n'existe pas");
+            if (!file_exists($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement temporaire n'existe pas"
+                );
             }
-            if( !is_dir($path) ){
-                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement temporaire doit être un dossier");
+            if (!is_dir($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement temporaire doit être un dossier"
+                );
             }
-            if( !is_writable($path) ){
-                throw new OscarException("Erreur de configuration PCRU : Le dossier de traitement doit être accessible en écriture");
+            if (!is_writable($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement doit être accessible en écriture"
+                );
             }
             $pcru_root = $path;
         }
@@ -525,23 +549,24 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPcruDirectoryForUpload(): string
     {
         static $pcru_pool = null;
-        if( $pcru_pool === null ){
-
+        if ($pcru_pool === null) {
             // Test de la racine PCRU
             $path = $this->getPcruRootDirectory() . DIRECTORY_SEPARATOR . $this->getConfiguration('pcru.pool_current');
 
-            if( !file_exists($path) ){
-                if( !@mkdir($path) ){
+            if (!file_exists($path)) {
+                if (!@mkdir($path)) {
                     throw new OscarException("Erreur de configuration PCRU : Impossible de créer le dossier d'envoi");
                 }
             }
 
-            if( !is_dir($path) ){
+            if (!is_dir($path)) {
                 throw new OscarException("Erreur de configuration PCRU : Le dossier d'envoi doit être un dossier");
             }
 
-            if( !is_writable($path) ){
-                throw new OscarException("Erreur de configuration PCRU : Le dossier d'envoi doit être accessible en écriture");
+            if (!is_writable($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier d'envoi doit être accessible en écriture"
+                );
             }
 
             $pcru_pool = $path;
@@ -549,7 +574,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $pcru_pool;
     }
 
-    public function getPcruDirectoryForUploadEffective() :string
+    public function getPcruDirectoryForUploadEffective(): string
     {
         return $this->getPcruRootDirectory()
             . DIRECTORY_SEPARATOR

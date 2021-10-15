@@ -20,6 +20,8 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
+use Oscar\Entity\RecallException;
+use Oscar\Entity\RecallExceptionRepository;
 use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
@@ -1052,19 +1054,20 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
      *
-     * @return array
+     * @return int[]
      */
-    public function getDeclarersIds()
+    public function getDeclarersIds(): array
     {
-        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
-            ->from(Person::class, 'p')
-            ->innerJoin('p.workPackages', 'wp')
-            ->getQuery()
-            ->getResult(Query::HYDRATE_ARRAY);
+        return $this->getPersonRepository()->getIdsDeclarers();
+    }
 
-        $declarersIds = array_map('current', $persons);
-
-        return $declarersIds;
+    /**
+     * @param string $periodStr
+     * @return int[]
+     */
+    public function getDeclarersIdsPeriod(string $periodStr): array
+    {
+        return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
     }
 
     /**
@@ -1466,6 +1469,36 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
 
+    public function getDeclarersWhitelist()
+    {
+        /** @var RecallExceptionRepository $recallExceptions */
+        $recallExceptions = $this->getEntityManager()->getRepository(RecallException::class);
+
+        return $recallExceptions->getWhitelist();
+    }
+
+    /**
+     * @param Person[] $persons
+     * @param Person $adder
+     */
+    public function addDeclarersToWhitelist(array $persons, Person $adder): void
+    {
+        /** @var RecallExceptionRepository $recallExceptions */
+        $recallExceptions = $this->getEntityManager()->getRepository(RecallException::class);
+
+        $included = $recallExceptions->getIncludedPersonsIds();
+        foreach ($persons as $person) {
+            if (!in_array($person->getId(), $included)) {
+                $include = new RecallException();
+                $include->setPerson($person)
+                    ->setType(RecallException::TYPE_INCLUDED);
+                $this->getEntityManager()->persist($include);
+            }
+        }
+        $this->getEntityManager()->flush();
+    }
+
+
 
 
 
@@ -1807,5 +1840,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function getOrganizationService()
     {
         return $this->getServiceContainer()->get(OrganizationService::class);
+    }
+
+    /**
+     * @return MailingService
+     */
+    public function getMailingService()
+    {
+        return $this->getServiceContainer()->get(MailingService::class);
     }
 }
