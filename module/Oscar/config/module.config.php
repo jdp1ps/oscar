@@ -51,6 +51,7 @@ return array(
                         'connectorsHome',
                         'connectorConfigure',
                         'contratTypePcru',
+                        'declarersList',
                         'discipline', // OK
                         'documentSections',
                         'index',

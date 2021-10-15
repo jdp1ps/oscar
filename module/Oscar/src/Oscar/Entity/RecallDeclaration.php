@@ -67,6 +67,64 @@ class RecallDeclaration
     private $history;
 
     /**
+     * Historique des envois.
+     *
+     * @ORM\Column(type="json",nullable=true,options={"jsonb"=true})
+     */
+    private ?array $shipments = null;
+
+
+
+    /**
+     * Ajout d'une trace d'envoi.
+     *
+     * @param string $message
+     * @param \DateTime|null $dateSend
+     * @return $this
+     */
+    public function logShipments( string $message = "Relance envoyée", ?\DateTime $dateSend = null ) :self
+    {
+        if( $dateSend == null ){
+            $dateSend = new \DateTime();
+        }
+        $this->shipments[] = sprintf('%s\t%s', $dateSend->format('Y-m-d H:i:s'), $message);
+        return $this;
+    }
+
+    public function getRepport() :array
+    {
+        return [
+            'lastSend' => $this->getLastSend()->format('Y-m-d H:i:s'),
+            'recalls' => $this->getNbrShipments(),
+            'logs' => $this->getShipmentsLogs(),
+            'period' => $this->getPeriod()
+        ];
+    }
+
+    public function getShipments() :array
+    {
+        if( $this->shipments == null ){
+            $this->shipments = [];
+        }
+        return $this->shipments;
+    }
+
+    public function getNbrShipments() :int
+    {
+        return count($this->getShipments());
+    }
+
+    public function getShipmentsLogs() :string
+    {
+        return implode($this->getShipments(), "\n");
+    }
+
+    public function getPeriod() :string
+    {
+        return sprintf('%s-%s', $this->getPeriodYear(), ($this->getPeriodMonth() < 10 ? '0' : '').$this->getPeriodMonth());
+    }
+
+    /**
      * @return mixed
      */
     public function getId()

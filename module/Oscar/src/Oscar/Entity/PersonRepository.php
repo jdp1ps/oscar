@@ -7,6 +7,7 @@
 namespace Oscar\Entity;
 
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
@@ -14,6 +15,7 @@ use mysql_xdevapi\Exception;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
+use Oscar\Utils\DateTimeUtils;
 
 /**
  * Class ProjectGrantRepository
@@ -157,7 +159,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->setParameter('ids', $ids)
             ->getQuery()
             ->getResult();
-
     }
 
     public function getSubordinatesIds($referentId)
@@ -170,7 +171,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->getQuery()
             ->getResult();
         return array_map('current', $result);
-
     }
 
     /**
@@ -183,9 +183,15 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $qb = $this->createQueryBuilder('p');
         $persons = $qb
             ->select('p')
-            ->innerJoin(Authentification::class, 'a', Join::WITH, $qb->expr()->eq(
-                $normalize ? 'lower(p.ladapLogin)' : 'p.ladapLogin',
-                $normalize ? 'lower(a.username)' : 'a.username'))
+            ->innerJoin(
+                Authentification::class,
+                'a',
+                Join::WITH,
+                $qb->expr()->eq(
+                    $normalize ? 'lower(p.ladapLogin)' : 'p.ladapLogin',
+                    $normalize ? 'lower(a.username)' : 'a.username'
+                )
+            )
             ->innerJoin(NotificationPerson::class, 'n', Join::WITH, $qb->expr()->eq('p.id', 'n.person'))
             ->where('n.read IS NULL')
             ->getQuery()
@@ -363,7 +369,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     public function getRolesLdapUsed()
     {
         $query = $this->getEntityManager()->createQuery(
-            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM ' . Role::class . ' r WHERE r.ldapFilter IS NOT NULL');
+            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM ' . Role::class . ' r WHERE r.ldapFilter IS NOT NULL'
+        );
         $filtersUsed = [];
         foreach ($query->getResult() as $row) {
             $ldapFilter = preg_replace('/\(memberOf=(.*)\)/i', '$1', $row['ldapFilter']);
@@ -378,7 +385,42 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ];
         }
         return $filtersUsed;
+    }
 
+    /**
+     * Retourne le liste des déclarants (pour la période si spécifiée).
+     *
+     * @param string|null $periodA (période, sous la forme YYYY-MM)
+     * @return array
+     */
+    public function getIdsDeclarers(?string $period = null): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT(p.id) id')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wpp')
+            ->groupBy('p.id');
+
+        $parametersQuery = [];
+
+        // Traitement de la clause sur la période si besoin
+        if ($period !== null) {
+            // Filtrer sur la période
+            $extract = DateTimeUtils::periodBounds($period);
+            $start = $extract['start'];
+            $end = $extract['end'];
+            $qb->innerJoin('wpp.workPackage', 'wp')
+                ->innerJoin('wp.activity', 'a')
+                ->where('a.dateStart < :periodEnd AND a.dateEnd > :periodStart');
+            $parametersQuery = [
+                'periodEnd' => $end,
+                'periodStart' => $start,
+            ];
+        }
+        $qb->setParameters($parametersQuery);
+
+        $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        return array_map('current', $results);
     }
 
     public function getObjectByConnectorID($connectorName, $connectorID)

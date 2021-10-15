@@ -141,6 +141,44 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return [];
     }
 
+    public function declarersListAction()
+    {
+        if( $this->getRequest()->isPost() ){
+            $action = $this->getRequest()->getPost('action');
+            switch ($action) {
+                case 'disabled-whitelist' :
+                    $this->getOscarConfigurationService()->setUseDeclarerWhiteList(false);
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+                case 'enabled-whitelist' :
+                    $this->getOscarConfigurationService()->setUseDeclarerWhiteList(true);
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
+                    case 'add-to-whitelist' :
+                        $personIds = $this->params()->fromPost('persons');
+                        $persons = $this->getProjectGrantService()->getPersonService()->getPersonsByIds($personIds);
+                        $adder = $this->getCurrentPerson();
+                        $this->getProjectGrantService()->getPersonService()->addDeclarersToWhitelist(
+                            $persons,
+                            $adder
+                        );
+                        $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
+                default:
+                    throw new OscarException("Action inconnue");
+            }
+        }
+
+        $useWhitelist = $this->getOscarConfigurationService()->useDeclarersWhiteList();
+
+        return [
+            "useWhiteList" => $useWhitelist,
+            "whitelist" => $useWhitelist ? $this->getProjectGrantService()->getPersonService()->getDeclarersWhitelist() : null,
+        ];
+    }
+
     public function oscarWorkerStatusAction()
     {
 
