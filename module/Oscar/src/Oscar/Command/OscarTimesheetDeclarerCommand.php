@@ -89,11 +89,6 @@ class OscarTimesheetDeclarerCommand extends OscarCommandAbstract
         return $this->getServicemanager()->get(PersonService::class);
     }
 
-//    public function declarerPeriod( InputInterface $input, OutputInterface $output, $declarerId, $period ){
-//        $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($this->getPersonService()->getPerson($declarerId), $period);
-//        echo "Non-disponible";
-//    }
-
     public function declarer(InputInterface $input, OutputInterface $output, $declarerId)
     {
         $io = new SymfonyStyle($input, $output);

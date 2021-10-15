@@ -43,18 +43,32 @@
         <article class="card">
             <h3 class="card-title">
                 <strong>
-                    <i class="icon-cog"></i>
-                    Messages
+                    <i class="icon-calendar"></i>
+                    Feuille de temps
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
-                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
-
             </h3>
+            <ul>
+                <li>
+                    <strong>Messages de relance</strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                </li>
+                <li>
+                    <strong>Régles de relance</strong>
+                    <small>Liste blanche et liste noire</small>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/listdeclarers') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                </li>
+            </ul>
             <p>Messages et formules</p>
         </article>
+
 
         <article class="card">
             <h3 class="card-title">

@@ -1500,16 +1500,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Liste des personnes dans la liste noire
-     *
-     * @return RecallException[]
-     */
-    public function getDeclarersBlacklist()
-    {
-        return $this->getRecallExceptionRepository()->getBlacklist();
-    }
-
-    /**
      * Ajout d'une personne dans la liste blanche.
      *
      * @param Person[] $persons
@@ -1528,6 +1518,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * Liste des personnes dans la liste noire
+     *
+     * @return RecallException[]
+     */
+    public function getDeclarersBlacklist()
+    {
+        return $this->getRecallExceptionRepository()->getBlacklist();
+    }
+
+
 
     /**
      * Ajout d'une personne dans la liste noire.

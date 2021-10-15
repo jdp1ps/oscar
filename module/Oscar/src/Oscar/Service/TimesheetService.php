@@ -2930,7 +2930,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         } catch (\Exception $e) {
             throw new OscarException(
-                "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period"
+                "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period : " . $e->getMessage()
             );
         }
 
