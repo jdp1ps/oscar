@@ -41,7 +41,7 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
      * @param IConnector $connector Connector qui va consommer l'accès aux données.
      * @param array $options tableau d'options avec url.
      */
-    public function __construct(IConnector $connector, $options)
+    public function __construct(IConnector $connector, $options = [])
     {
         $this->connector = $connector;
         if( array_key_exists('url', $options) )
