@@ -7,11 +7,115 @@
  */
 $settings = array(
     'local' => [
+        'order' => 2,
+        'enabled' => true,
+        'description' => "Utilisez ce formulaire si vous possédez un compte LDAP établissement ou un compte local dédié à l'application.",
+
         /**
-         * Affichage ou non du formulaire d'authentification avec un compte local.
+         * Mode d'authentification à l'aide d'un compte dans la BDD de l'application.
+         */
+        'db' => [
+            'enabled' => true, // doit être activé pour que l'usurpation fonctionne (cf. Authentication/Storage/Db::read()) :-/
+        ],
+
+        /**
+         * Mode d'authentification à l'aide d'un compte LDAP.
+         */
+        'ldap' => [
+            'enabled' => true,
+        ],
+    ],
+
+    /**
+     * Authentification via la fédération d'identité (Shibboleth).
+     */
+    'shib' => [
+        'order' => 4,
+        'enabled' => false,
+        'description' =>
+            "Cliquez sur le bouton ci-dessous pour accéder à l'authentification via la fédération d'identité. " .
+            "<strong>NB: Vous devrez utiliser votre compte " .
+            "&laquo; <a href='http://vie-etudiante.unicaen.fr/vie-numerique/etupass/'>etupass</a> &raquo; " .
+            "pour vous authentifier...</strong>",
+
+        /**
+         * URL de déconnexion.
+         */
+        'logout_url' => '/Shibboleth.sso/Logout?return=', // NB: '?return=' semble obligatoire!
+
+        /**
+         * Simulation d'authentification d'un utilisateur.
+         */
+        //'simulate' => [
+        //    'eppn'        => 'eppn@domain.fr',
+        //    'supannEmpId' => '00012345',
+        //],
+
+        /**
+         * Alias éventuels des clés renseignées par Shibboleth dans la variable superglobale $_SERVER
+         * une fois l'authentification réussie.
+         */
+        'aliases' => [
+            'eppn'                   => 'HTTP_EPPN',
+            'mail'                   => 'HTTP_MAIL',
+            'eduPersonPrincipalName' => 'HTTP_EPPN',
+            'supannEtuId'            => 'HTTP_SUPANNETUID',
+            'supannEmpId'            => 'HTTP_SUPANNEMPID',
+            'supannCivilite'         => 'HTTP_SUPANNCIVILITE',
+            'displayName'            => 'HTTP_DISPLAYNAME',
+            'sn'                     => 'HTTP_SN',
+            'givenName'              => 'HTTP_GIVENNAME',
+        ],
+
+        /**
+         * Clés dont la présence sera requise par l'application dans la variable superglobale $_SERVER
+         * une fois l'authentification réussie.
+         */
+        //'required_attributes' => [
+        //    'eppn',
+        //    'mail',
+        //    'eduPersonPrincipalName',
+        //    'supannCivilite',
+        //    'displayName',
+        //    'sn|surname', // i.e. 'sn' ou 'surname'
+        //    'givenName',
+        //    'supannEtuId|supannEmpId',
+        //],
+    ],
+
+    'cas' => [
+        /**
+         * Ordre d'affichage du formulaire de connexion.
+         */
+        'order' => 1,
+
+        /**
+         * Activation ou non de ce mode d'authentification.
          */
         'enabled' => false,
+
+        /**
+         * Description facultative de ce mode d'authentification qui apparaîtra sur la page de connexion.
+         */
+        // 'description' => "Cliquez sur le bouton ci-dessous pour accéder à l'authentification centralisée.",
+
+        /**
+         * Infos de connexion au serveur CAS.
+         */
+        'connection' => [
+            'default' => [
+                'params' => [
+                    'hostname' => 'host.domain.fr',
+                    'port'     => 443,
+                    'version'  => "2.0",
+                    'uri'      => "",
+                    'debug'    => false,
+                ],
+            ],
+        ]
     ],
+
+
     /**
      * Flag indiquant si l'utilisateur authenitifié avec succès via l'annuaire LDAP doit
      * être enregistré/mis à jour dans la table des utilisateurs de l'appli.
