@@ -3,8 +3,7 @@
     <div class="row">
         <div class="col-md-6">
             <h2>Liste blanche</h2>
-            <?php
-            if ($useWhiteList): ?>
+            <?php if( $useWhiteList ):?>
                 <form action="" method="post">
                     <div class="alert alert-warning">
                         <div><em>Whitelist</em> : <strong>ACTIVE</strong></div>
@@ -12,10 +11,9 @@
                             Le système de rappel des déclarants est en mode <em>Whitelist</em>,
                             seul les déclarants identifiés en liste blanche seront notifiés par mail
                             en cas de défaut de déclaration. <br>
-                            Il y'a pour le moment <strong><?= count($whitelist) ?> personne(s) en
-                                <em>whitelist</em></strong></small>
-                    </div>
-                    <input type="hidden" name="action" value="disabled-whitelist"/>
+                            Il y'a pour le moment <strong><?= count($whitelist) ?> personne(s) en <em>whitelist</em></strong></small>
+                        </div>
+                    <input type="hidden" name="action" value="disabled-whitelist" />
                     <button type="submit" class="btn btn-danger">
                         <strong>Désactiver la whitelist</strong>
 
@@ -24,53 +22,30 @@
                 <hr>
                 <section>
 
-                    <?php
-                    if (count($whitelist) == 0): ?>
+                    <?php if(count($whitelist) == 0):?>
                         <div class="alert alert-warning">
                             Aucun déclarant
                         </div>
-                    <?php
-                    else: ?>
-                        <?php
-                        foreach ($whitelist as $exception): ?>
-                            <div class="card">
-                                <h3 class="card-title">
-                                    <div>
-                                        <?= $exception->getPerson() ?> <small>(<?= $exception->getPerson(
-                                            )->getLdapAffectation() ?>)</small><br>
-                                        <small><?= $exception->getPerson()->getEmail() ?></small>
-                                    </div>
-                                    <form action="" method="post" class="form-inline right">
-                                        <input type="hidden" name="action" value="remove-from-whitelist"/>
-                                        <input type="hidden" name="personid"
-                                               value="<?= $exception->getPerson()->getId() ?>"/>
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="icon-minus-circled"></i>
-                                            Retirer
-                                        </button>
-                                    </form>
-                                </h3>
-                            </div>
-                        <?php
-                        endforeach; ?>
-                    <?php
-                    endif; ?>
+                    <?php else: ?>
+                        <?php foreach ($whitelist as $exception): ?>
+                        <article class="card xs">
+                            <h3 class="card-title"><?= $exception->getPerson() ?></h3>
+                        </article>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </section>
 
                 <form action="" method="post">
-                    <input type="hidden" name="action" value="add-to-whitelist"/>
+                    <input type="hidden" name="action" value="add-to-whitelist" />
 
-                    <select name="persons[]" multiple="multiple" data-url="<?= $this->url('person/search') ?>"
-                            class="select2"></select>
+                    <select name="persons[]" multiple="multiple" data-url="<?= $this->url('person/search') ?>" class="select2"></select>
                     <button type="submit" class="btn btn-success">
                         <i class="icon-plus-circled"></i>
-                        Ajouter à la liste blanche
-                    </button>
+                        Ajouter à la liste blanche</button>
 
                 </form>
 
-            <?php
-            else: ?>
+            <?php else: ?>
                 <form action="" method="post">
                     <div class="alert alert-success">
                         <div><em>Whitelist</em> : <strong>INACTIVE</strong></div>
@@ -78,55 +53,28 @@
                             Le système de rappel des déclarants est <strong>actif</strong>
                         </small>
                     </div>
-                    <input type="hidden" name="action" value="enabled-whitelist"/>
+                    <input type="hidden" name="action" value="enabled-whitelist" />
                     <button type="submit" class="btn btn-success">
                         <strong>Activer la whitelist</strong>
 
                     </button>
                 </form>
-            <?php
-            endif; ?>
+            <?php endif; ?>
         </div>
         <div class="col-md-6">
             <h2>Liste noire</h2>
             <div class="alert alert-danger">
-                Les personnes listées ci-dessous ne seront jamais notifiées par email dans le cadre des déclarations de
-                temps.
+                Les personnes listées ci-dessous ne seront jamais notifiées par email dans le cadre des déclarations de temps.
             </div>
 
-            <?php
-            foreach ($blacklist as $exception): ?>
-                <article class="card xs">
-                    <h3 class="card-title">
-                        <div>
-                            <?= $exception->getPerson() ?> <small>(<?= $exception->getPerson()->getLdapAffectation() ?>
-                                )</small><br>
-                            <small><?= $exception->getPerson()->getEmail() ?></small>
-                        </div>
-                        <form action="" method="post" class="form-inline right">
-                            <input type="hidden" name="action" value="remove-from-blacklist"/>
-                            <input type="hidden" name="personid" value="<?= $exception->getPerson()->getId() ?>"/>
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="icon-minus-circled"></i>
-                                Retirer
-                            </button>
-                        </form>
-                    </h3>
-                </article>
-            <?php
-            endforeach; ?>
-
-
             <form action="" method="post">
-                <input type="hidden" name="action" value="add-to-blacklist"/>
+                <input type="hidden" name="action" value="add-to-blacklist" />
 
 
-                <select id="blacklisted" name="persons[]" multiple="multiple"
-                        data-url="<?= $this->url('person/search') ?>" class="select2"></select>
+                <select name="persons[]" multiple="multiple" data-url="<?= $this->url('person/search') ?>" class="select2"></select>
                 <button type="submit" class="btn btn-danger">
                     <i class="icon-plus-circled"></i>
-                    Ajouter à la liste noire
-                </button>
+                    Ajouter à la liste noire</button>
 
             </form>
 
@@ -134,18 +82,17 @@
     </div>
 </div>
 <link rel="stylesheet" type="text/css"
-      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>"/>
+      href="<?= $this->basePath() . '/js/vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css' ?>" />
 <style>
-    .select2-close-mask {
+    .select2-close-mask{
         z-index: 2099;
     }
-
-    .select2-dropdown {
+    .select2-dropdown{
         z-index: 3051;
     }
 </style>
 <script>
-    (function () {
+    (function(){
         console.log('SCRIPT EXEC');
         /**
          * Fonction de mise en forme du choix proposé dans l'auto-compléteur.
@@ -173,12 +120,11 @@
             return repo.label || repo.text;
         };
 
-        Initer.ready(function () {
+        Initer.ready(function(){
             require(['select2'], function () {
-                $.fn.modal.Constructor.prototype.enforceFocus = function () {
-                };
+                $.fn.modal.Constructor.prototype.enforceFocus = function() {};
 
-                if ($('.select2').length === 0) {
+                if( $('.select2').length === 0 ){
                     return;
                 }
 
@@ -210,7 +156,7 @@
                     },
                     templateResult: formatRepo, // omitted for brevity, see the source of this page
                     templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                }).on('select2:select', function (e) {
+                }).on('select2:select', function(e){
                     $('[name="person"]').val(e.target.value);
                 })
 

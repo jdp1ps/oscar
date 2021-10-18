@@ -1054,20 +1054,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     /**
      * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
      *
-     * @return int[]
+     * @return array
      */
-    public function getDeclarersIds(): array
+    public function getDeclarersIds()
     {
-        return $this->getPersonRepository()->getIdsDeclarers();
-    }
+        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wp')
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
 
-    /**
-     * @param string $periodStr
-     * @return int[]
-     */
-    public function getDeclarersIdsPeriod(string $periodStr): array
-    {
-        return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
+        $declarersIds = array_map('current', $persons);
+
+        return $declarersIds;
     }
 
     /**
@@ -1500,24 +1499,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Liste des personnes dans la liste noire
-     *
-     * @return RecallException[]
-     */
-    public function getDeclarersBlacklist()
-    {
-        return $this->getRecallExceptionRepository()->getBlacklist();
-    }
-
-    /**
-     * Ajout d'une personne dans la liste blanche.
-     *
      * @param Person[] $persons
      * @param Person $adder
      */
     public function addDeclarersToWhitelist(array $persons, Person $adder): void
     {
-        $included = $this->getRecallExceptionRepository()->getIncludedPersonsIds();
+        /** @var RecallExceptionRepository $recallExceptions */
+        $recallExceptions = $this->getEntityManager()->getRepository(RecallException::class);
+
+        $included = $recallExceptions->getIncludedPersonsIds();
         foreach ($persons as $person) {
             if (!in_array($person->getId(), $included)) {
                 $include = new RecallException();
@@ -1528,6 +1518,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
         $this->getEntityManager()->flush();
     }
+    /**
+     * Liste des personnes dans la liste noire
+     *
+     * @return RecallException[]
+     */
+    public function getDeclarersBlacklist()
+    {
+        return $this->getRecallExceptionRepository()->getBlacklist();
+    }
+
 
     /**
      * Ajout d'une personne dans la liste noire.
@@ -1910,13 +1910,5 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function getOrganizationService()
     {
         return $this->getServiceContainer()->get(OrganizationService::class);
-    }
-
-    /**
-     * @return MailingService
-     */
-    public function getMailingService()
-    {
-        return $this->getServiceContainer()->get(MailingService::class);
     }
 }
