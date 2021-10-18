@@ -155,15 +155,45 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->redirect()->toRoute('administration/listdeclarers');
                     break;
 
-                    case 'add-to-whitelist' :
-                        $personIds = $this->params()->fromPost('persons');
+                case 'add-to-whitelist' :
+                    $personIds = $this->params()->fromPost('persons');
+                    $persons = $this->getProjectGrantService()->getPersonService()->getPersonsByIds($personIds);
+                    $adder = $this->getCurrentPerson();
+                    $this->getProjectGrantService()->getPersonService()->addDeclarersToWhitelist(
+                        $persons,
+                        $adder
+                    );
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
+                case 'add-to-blacklist' :
+                    $personIds = $this->params()->fromPost('persons');
+                    if( !$personIds ){
+                        $this->flashMessenger()->addWarningMessage(
+                            "Rien à ajouter"
+                        );
+                    }
+                    else {
                         $persons = $this->getProjectGrantService()->getPersonService()->getPersonsByIds($personIds);
                         $adder = $this->getCurrentPerson();
-                        $this->getProjectGrantService()->getPersonService()->addDeclarersToWhitelist(
+                        $this->getProjectGrantService()->getPersonService()->addDeclarersToBlacklist(
                             $persons,
                             $adder
                         );
                         $this->redirect()->toRoute('administration/listdeclarers');
+                    }
+                    break;
+
+                case 'remove-from-blacklist' :
+                    $personId = $this->params()->fromPost('personid');
+                    $persons = $this->getProjectGrantService()->getPersonService()->removeDeclarersFromBlacklist($personId);
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
+                case 'remove-from-whitelist' :
+                    $personId = $this->params()->fromPost('personid');
+                    $persons = $this->getProjectGrantService()->getPersonService()->removeDeclarersFromWhitelist($personId);
+                    $this->redirect()->toRoute('administration/listdeclarers');
                     break;
 
                 default:
@@ -176,6 +206,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return [
             "useWhiteList" => $useWhitelist,
             "whitelist" => $useWhitelist ? $this->getProjectGrantService()->getPersonService()->getDeclarersWhitelist() : null,
+            "blacklist" => $this->getProjectGrantService()->getPersonService()->getDeclarersBlacklist()
         ];
     }
 
