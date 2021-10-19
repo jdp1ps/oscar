@@ -197,13 +197,19 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         }
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     * @throws OscarException
+     */
     public function saveEditableConfKey($key, $value)
     {
         $conf = $this->getEditableConfRoot();
-        error_log("Save edit : " . print_r($conf, true));
         $conf[$key] = $value;
         $writer = new Dumper();
         file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
+        return $this;
     }
 
     public function getEditableConfKey($key, $default = null)
@@ -288,6 +294,26 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getDeclarersRelanceJour2()
     {
         return $this->getEditableConfKey('declarersRelanceJour2', 5);
+    }
+
+    public function getDeclarersRelanceConflitMessage() :string
+    {
+        return $this->getEditableConfKey('declarersRelanceConflitMessage', '');
+    }
+
+    public function getDeclarersRelanceConflitJour() :int
+    {
+        return $this->getEditableConfKey('declarersRelanceConflitJour', 1);
+    }
+
+    public function setDeclarersRelanceConflitMessage( string $message ) :self
+    {
+        return $this->saveEditableConfKey('declarersRelanceConflitMessage', $message);
+    }
+
+    public function setDeclarersRelanceConflitJour( int $days ) :self
+    {
+        return $this->saveEditableConfKey('declarersRelanceConflitJour', $days);
     }
 
     public function setDeclarersRelanceJour2($value)
