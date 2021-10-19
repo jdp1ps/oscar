@@ -69,12 +69,12 @@ class OscarTimesheetDeclarerRecallCommand extends OscarAdvancedCommandAbstract
                 null,
                 InputOption::VALUE_OPTIONAL,
                 "Forcer l'envoi du mail même si ça n'est pas necessaire",
-                null
+                false
             )
             ->addArgument(
                 self::ARG_PERSONID,
                 InputArgument::OPTIONAL,
-                "ID du déclarant (Utiliser 'all' pour appliquer à tous les déclarants)"
+                "ID du déclarant"
             );
     }
 
@@ -87,6 +87,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarAdvancedCommandAbstract
 
         /// OPTIONS and PARAMETERS
         $processDate = $input->getOption(self::OPT_PROCESSDATE);
+        $processDate = new \DateTime($processDate);
 
         $force = $input->getOption(self::OPTION_FORCE) === null;
 
@@ -108,15 +109,7 @@ class OscarTimesheetDeclarerRecallCommand extends OscarAdvancedCommandAbstract
             $periodText = " (Pour la période $periodlabel)";
         }
 
-        $declarersRecalled = [];
-
-        if( $personId == "all" ){
-            $declarersIds = $period == null ?
-                    $this->getPersonService()->getDeclarersIds() :
-                    $this->getPersonService()->getDeclarersIdsPeriod($period);
-        }
-
-        elseif ($personId == null) {
+        if ($personId == null) {
             $this->getIO()->title("Liste des déclarants $periodText");
 
             $declarers = $this->getPersonService()->getPersonsByIds(
@@ -135,49 +128,42 @@ class OscarTimesheetDeclarerRecallCommand extends OscarAdvancedCommandAbstract
                 ];
             }
             $this->getIO()->table($headers, $rows);
-            $this->getIO()->comment("Vous pouvez utiliser l'ID de la personne en fin de commande ou 'all' pour appliquer à tous les déclarants");
-            return 0;
+            $this->getIO()->comment("Vous pouvez utiliser l'ID de la personne en fin de commande");
         } else {
-            $declarersIds = [$personId];
-        }
+            // Déclarant
+            $declarer = $this->getPersonService()->getPersonById($personId, true);
 
-        if( count($declarersIds) > 0 ) {
-            foreach ($declarersIds as $idDeclarer) {
-                // Déclarant
-                $declarer = $this->getPersonService()->getPersonById($idDeclarer, true);
+            if (!$period) {
+                $periods = $this->getTimesheetService()->getPeriodsPerson($declarer);
+                $rows = [];
+                foreach ($periods as $period) {
+                    $rows[] = [$period, DateTimeUtils::periodBounds($period)['periodLabel']];
+                }
+                $this->getIO()->title("Périodes pour la personne $declarer");
+                $headers = ["Code", "Période"];
+                $this->getIO()->table($headers, $rows);
+                $this->getIO()->comment("Utiliser --period=CODE_PERIOD pour déclencher le rappel");
+            } else {
+                $this->getIO()->title("Rappel pour $declarer $periodText");
+                if ($this->getTimesheetService()->isDeclarerAtPeriod($declarer, $period)) {
+                    $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period, $processDate, $force);
 
-                if (!$period) {
-                    $periods = $this->getTimesheetService()->getPeriodsPerson($declarer);
-                    $rows = [];
-                    foreach ($periods as $period) {
-                        $rows[] = [$period, DateTimeUtils::periodBounds($period)['periodLabel']];
-                    }
-                    $this->getIO()->title("Périodes pour la personne $declarer");
-                    $headers = ["Code", "Période"];
-                    $this->getIO()->table($headers, $rows);
-                    $this->getIO()->comment("Utiliser --period=CODE_PERIOD pour déclencher le rappel");
+                    $this->getIO()->writeln(sprintf("Infos : <bold>%s</bold>", $result['recall_info']));
+                    $this->getIO()->writeln(sprintf("Date du traitement : <bold>%s</bold>", $processDate->format('Y-m-d H:i:s')));
+                    $this->getIO()->writeln(sprintf("Temps MIN/MAX attendu : <bold>%s/%s</bold>", $result['min'], $result['max']));
+                    $this->getIO()->writeln(sprintf("Temps DELCARE/ATTENDU : <bold>%s</bold> / <bold>%s</bold>", $result['total'], $result['needed']));
+                    $this->getIO()->writeln(sprintf("Mail envoyé : <bold>%s</bold>", $result['mailSend'] ? 'OUI' : 'NON'));
+                    $this->getIO()->writeln(sprintf("Jour écoulé depuis le dernier envoi : <bold>%s</bold>", $result['since_last']));
+                    $this->getIO()->writeln(sprintf("Jours entre chaque envoi : <bold>%s</bold>", $result['days_beetween']));
+                    $this->getIO()->writeln(sprintf("Conflit : <bold>%s</bold>", $result['hasConflict'] ? 'OUI' : 'non'));
+                    $this->getIO()->writeln(sprintf("Dernière relance envoyée : <bold>%s</bold>", $result['lastSend']));
+                    $this->getIO()->writeln(sprintf("Relance envoyées pour cette période : <bold>%s</bold>", $result['recalls']));
+
                 } else {
-                    $this->getIO()->title("Rappel pour $declarer $periodText");
-                    if ($this->getTimesheetService()->isDeclarerAtPeriod($declarer, $period)) {
-                        $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period, null, $force);
-
-                        $this->getIO()->writeln(sprintf("Infos : <bold>%s</bold>", $result['recall_info']));
-                        $this->getIO()->writeln(sprintf("Temps MIN/MAX attendu : <bold>%s/%s</bold>", $result['min'], $result['max']));
-                        $this->getIO()->writeln(sprintf("Temps DELCARE/ATTENDU : <bold>%s</bold> / <bold>%s</bold>", $result['total'], $result['needed']));
-                        $this->getIO()->writeln(sprintf("Mail envoyé : <bold>%s</bold>", $result['mailSend'] ? 'OUI' : 'NON'));
-                        $this->getIO()->writeln(sprintf("Conflit : <bold>%s</bold>", $result['hasConflict'] ? 'OUI' : 'non'));
-                        $this->getIO()->writeln(sprintf("Dernière relance envoyée : <bold>%s</bold>", $result['lastSend']));
-                        $this->getIO()->writeln(sprintf("Relance envoyées pour cette période : <bold>%s</bold>", $result['recalls']));
-
-                    } else {
-                        $this->getIO()->warning("'$declarer' n'est pas déclarant pour la période '$periodlabel'");
-                    }
+                    $this->getIO()->warning("'$declarer' n'est pas déclarant pour la période '$periodlabel'");
                 }
             }
-        } else {
-            $this->getIO()->error("Aucun déclarant");
         }
-
 
         return 1;
     }
