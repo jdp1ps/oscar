@@ -2778,7 +2778,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->getEntityManager()->getRepository(RecallDeclaration::class);
     }
 
-    public function recallProcess($declarerId, $period, $processDate = null, $force = false)
+    /**
+     * Procédure de rappel des déclarants.
+     *
+     * @param $declarerId
+     * @param $period
+     * @param null $processDate
+     * @param false $force
+     * @return array
+     * @throws ConnectorException
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function recallProcess($declarerId, $period, $processDate = null, $force = false) :array
     {
         // Récupération de la date de rappel référente
         if ($processDate == null) {
