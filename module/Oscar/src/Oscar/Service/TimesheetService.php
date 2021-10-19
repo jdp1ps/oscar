@@ -2821,6 +2821,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         /** @var RecallDeclarationRepository $recallDeclarationRepository */
         $recallDeclarationRepository = $this->getRecallDeclarationRepository();
 
+        $recallSend = null;
+
         // Récupération de l'historique des rappels
         $recalls = $recallDeclarationRepository->getRecallDeclarationsPersonPeriod(
             $declarerId,
@@ -2833,13 +2835,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $result['since_last'] = 0;
         $result['days_beetween'] = '#';
 
-        if (count($recalls) == 0) {
-            $recallSend = new RecallDeclaration();
-            $this->getEntityManager()->persist($recallSend);
-            $recallSend->setStartProcess($processDate);
+        if (count($recalls) != 0) {
+            $recallSend = $recalls[0];
         }
         else {
-            $recallSend = $recalls[0];
+            $this->getLoggerService()->debug("Maj du RAPPEL");
         }
 
         ////////////////////////////////////////////////////////////////////////////////////
@@ -2905,9 +2905,25 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $message = $this->getOscarConfigurationService()->getDeclarersRelanceConflitMessage();
         }
 
+        $result['blocked'] = false;
+        // Test Liste
+        if( !$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer) ){
+            $result['recall_info'] = "Restriction par liste activé";
+            $result['ignoreForced'] = true;
+            $result['needSend'] = false;
+            $result['blocked'] = true;
+        }
+
         if ($result['needSend'] || ($force === true && $result['ignoreForced'] == false)) {
 
             $result['recall_info'] = "Mail envoyé" . ($force ? ' (forcé)' : '');
+
+            if( $recallSend == null ){
+                $recallSend = new RecallDeclaration();
+                $this->getEntityManager()->persist($recallSend);
+                $recallSend->setStartProcess($processDate);
+            }
+
             $repport = $this->sendMailRecallDeclarer(
                 $declarer,
                 $periodInfos->getPeriodCode(),
@@ -2946,6 +2962,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $periodInfos = PeriodInfos::getPeriodInfosObj($period);
 
+
         // Replace
         $find = ["{PERSON}", "{PERIOD}"];
         $replace = ["$declarer", $periodInfos->getPeriodLabel()];
@@ -2959,8 +2976,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         try {
             $this->getPersonService()->getMailingService()->send($message);
-
             // Enregistrement du rappel
+
             $recallDeclaration->setContext('declarer')
                 ->logShipments("Envois d'un rappel", $processDate, $forced)
                 ->setLastSend($processDate)

@@ -8,7 +8,7 @@ class PeriodInfos
     private int $month;
     private int $year;
 
-    private string $_label;
+    private string $_label='';
     private string $_code;
 
     /**
@@ -30,6 +30,38 @@ class PeriodInfos
     public function getMonth(): int
     {
         return $this->month;
+    }
+
+    /**
+     * Décrémente d'un mois.
+     *
+     * @return $this
+     */
+    public function prevMonth() :self
+    {
+        $this->month--;
+        if( $this->month == 0 ){
+            $this->month = 12;
+            $this->year--;
+        }
+        $this->_label = '';
+        return $this;
+    }
+
+    /**
+     * Incremente d'un mois.
+     *
+     * @return $this
+     */
+    public function nextMonth() :self
+    {
+        $this->month++;
+        if( $this->month > 12 ){
+            $this->month = 1;
+            $this->year++;
+        }
+        $this->_label = '';
+        return $this;
     }
 
     /**

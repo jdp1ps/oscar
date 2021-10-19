@@ -1050,7 +1050,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         );
     }
 
-
     /**
      * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
      *
