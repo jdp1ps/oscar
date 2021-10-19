@@ -4,6 +4,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Utils\PeriodInfos;
 
 /**
  * Cette classe référence les rôles GLOBAUX sur l'application.
@@ -25,46 +26,46 @@ class RecallDeclaration
      * @var integer
      * @ORM\Column(type="integer")
      */
-    private $periodYear;
+    private int $periodYear;
 
     /**
      * Mois de référence
      * @var integer
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $periodMonth;
+    private int $periodMonth;
 
 
     /**
      * @var Person
      * @ORM\ManyToOne(targetEntity="Person")
      */
-    private $person;
+    private Person $person;
 
     /**
      * @var string
      * @ORM\Column(type="string")
      */
-    private $context = "declarer";
+    private string $context = "declarer";
 
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime")
      *
      */
-    private $startProcess;
+    private \DateTime $startProcess;
 
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime")
      */
-    private $lastSend;
+    private \DateTime $lastSend;
 
     /**
      * @var string
      * @ORM\Column(type="text")
      */
-    private $history;
+    private string $history = "";
 
     /**
      * Historique des envois.
