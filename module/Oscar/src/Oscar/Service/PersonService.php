@@ -1911,4 +1911,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         return $this->getServiceContainer()->get(OrganizationService::class);
     }
+
+    /**
+     * @return MailingService
+     */
+    public function getMailingService()
+    {
+        return $this->getServiceContainer()->get(MailingService::class);
+    }
 }
