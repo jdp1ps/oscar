@@ -55,6 +55,9 @@ abstract class OscarCommandAbstract extends Command
         $outputStyle = new OutputFormatterStyle('cyan', 'default', ['bold']);
         $output->getFormatter()->setStyle('id', $outputStyle);
 
+        $outputStyle = new OutputFormatterStyle('red', 'default', ['bold']);
+        $output->getFormatter()->setStyle('red', $outputStyle);
+
         $outputStyle = new OutputFormatterStyle('blue', 'default', ['underscore']);
         $output->getFormatter()->setStyle('link', $outputStyle);
 

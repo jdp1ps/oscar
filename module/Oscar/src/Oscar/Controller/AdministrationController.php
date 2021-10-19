@@ -168,6 +168,39 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->redirect()->toRoute('administration/listdeclarers');
                     break;
 
+                case 'add-to-blacklist' :
+                    $personIds = $this->params()->fromPost('persons');
+                    if (!$personIds) {
+                        $this->flashMessenger()->addWarningMessage(
+                            "Rien à ajouter"
+                        );
+                    } else {
+                        $persons = $this->getProjectGrantService()->getPersonService()->getPersonsByIds($personIds);
+                        $adder = $this->getCurrentPerson();
+                        $this->getProjectGrantService()->getPersonService()->addDeclarersToBlacklist(
+                            $persons,
+                            $adder
+                        );
+                        $this->redirect()->toRoute('administration/listdeclarers');
+                    }
+                    break;
+
+                case 'remove-from-blacklist' :
+                    $personId = $this->params()->fromPost('personid');
+                    $persons = $this->getProjectGrantService()->getPersonService()->removeDeclarersFromBlacklist(
+                        $personId
+                    );
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
+                case 'remove-from-whitelist' :
+                    $personId = $this->params()->fromPost('personid');
+                    $persons = $this->getProjectGrantService()->getPersonService()->removeDeclarersFromWhitelist(
+                        $personId
+                    );
+                    $this->redirect()->toRoute('administration/listdeclarers');
+                    break;
+
                 default:
                     throw new OscarException("Action inconnue");
             }
@@ -179,6 +212,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             "useWhiteList" => $useWhitelist,
             "whitelist" => $useWhitelist ? $this->getProjectGrantService()->getPersonService()->getDeclarersWhitelist(
             ) : null,
+            "blacklist" => $this->getProjectGrantService()->getPersonService()->getDeclarersBlacklist()
         ];
     }
 

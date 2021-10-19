@@ -143,6 +143,7 @@ class RecallDeclaration
 
     /**
      * @param int $periodYear
+     * @return $this
      */
     public function setPeriodYear(int $periodYear): self
     {

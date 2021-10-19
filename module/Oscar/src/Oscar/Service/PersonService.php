@@ -1050,23 +1050,23 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         );
     }
 
-
     /**
      * Retourne la liste des identifiants des personnes qui déclarent des feuilles de temps.
      *
-     * @return array
+     * @return int[]
      */
-    public function getDeclarersIds()
+    public function getDeclarersIds(): array
     {
-        $persons = $this->getEntityManager()->createQueryBuilder()->select('DISTINCT(p.id)')
-            ->from(Person::class, 'p')
-            ->innerJoin('p.workPackages', 'wp')
-            ->getQuery()
-            ->getResult(Query::HYDRATE_ARRAY);
+        return $this->getPersonRepository()->getIdsDeclarers();
+    }
 
-        $declarersIds = array_map('current', $persons);
-
-        return $declarersIds;
+    /**
+     * @param string $periodStr
+     * @return int[]
+     */
+    public function getDeclarersIdsPeriod(string $periodStr): array
+    {
+        return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
     }
 
     /**
