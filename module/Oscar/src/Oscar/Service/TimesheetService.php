@@ -2587,6 +2587,37 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $periods;
     }
 
+    public function getPeriodsValidator( Person $validator ) :array
+    {
+        $qb = $this->getEntityManager()->createQuery(
+          "SELECT DISTINCT vp.id, vp.year, vp.month, vp.object, 
+                    vp.validationActivityById,
+                    vp.validationSciById,
+                    vp.validationAdmById
+       
+           FROM " . ValidationPeriod::class . " vp 
+           LEFT JOIN vp.validatorsPrj prj 
+           LEFT JOIN vp.validatorsSci sci 
+           LEFT JOIN vp.validatorsAdm adm 
+           WHERE prj.id = :validator OR sci.id = :validator OR adm.id = :validator
+           "
+        );
+
+        $r = $qb->setParameter('validator', $validator->getId())->getArrayResult();
+        $periods = [];
+        foreach ($r as $row) {
+            $period = sprintf('%s-%s', $row['year'], ($row['month'] < 10 ? '0':'').$row['month']);
+            if( !in_array($period, $periods) ){
+                $periods[] = $period;
+            }
+        }
+        var_dump($periods);
+        die();
+
+
+        return [];
+    }
+
     public function getPersonPeriodsTimesheetTotals(Person $declarer)
     {
         return $this->getTimesheetRepository()->getTimesheetTotalByPeriodPerson($declarer->getId());

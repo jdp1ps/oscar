@@ -16,6 +16,7 @@ use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\PeriodInfos;
 
 /**
  * Class ProjectGrantRepository
@@ -387,8 +388,73 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return $filtersUsed;
     }
 
+    public function getIdsValidatorsProject(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsPrj', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP1);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+    public function getIdsValidatorsSci(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsSci', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP2);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+    public function getIdsValidatorsAdm(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsAdm', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP3);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+
+    public function getIdsValidators($hasValidating = true, $period = ""): array
+    {
+        $year = -1;
+        $month = -1;
+        if ($period != "") {
+            $periodInfos = PeriodInfos::getPeriodInfosObj($period);
+            $year = $periodInfos->getYear();
+            $month = $periodInfos->getMonth();
+        }
+
+        $prj = $this->getIdsValidatorsProject($hasValidating, $year, $month);
+        $sci = $this->getIdsValidatorsSci($hasValidating, $year, $month);
+        $adm = $this->getIdsValidatorsAdm($hasValidating, $year, $month);
+
+        $ids = array_unique(array_merge($sci, $adm, $prj));
+
+        return $ids;
+    }
+
     /**
-     * Retourne le liste des déclarants (pour la période si spécifiée).
+     * Retourne le liste des person.id des déclarants (pour la période si spécifiée).
      *
      * @param string|null $periodA (période, sous la forme YYYY-MM)
      * @return array
@@ -421,6 +487,32 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
         $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
         return array_map('current', $results);
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Requête de base pour obtenir les PersonID des validateurs identifiés dans les procédures de validation.
+     *
+     * @param int $year Année ou -1 pour ignorer
+     * @param int $month Mois (1=Janvier, 2=février, etc..  ou -1 pour ignorer)
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function getBaseQueryValidator(int $year = -1, int $month = -1)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder('vp')
+            ->select('DISTINCT(p.id)')
+            ->from(ValidationPeriod::class, 'vp');
+
+        if ($year > -1) {
+            $qb->andWhere('vp.year = :year')
+                ->setParameter('year', $year);
+        }
+
+        if ($month > -1) {
+            $qb->andWhere('vp.month = :month')
+                ->setParameter('month', $month);
+        }
+        return $qb;
     }
 
     public function getObjectByConnectorID($connectorName, $connectorID)
