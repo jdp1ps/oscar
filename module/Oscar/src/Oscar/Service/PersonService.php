@@ -50,6 +50,7 @@ use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
+use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use UnicaenApp\Mapper\Ldap\People;
@@ -1465,6 +1466,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ->from(Person::class, 'p');
 
         return $queryBuilder;
+    }
+
+    public function getValidatorsIds()
+    {
+        return $this->getPersonRepository()->getIdsValidators();
+    }
+
+    public function getValidatorsIdsPeriod(string $period)
+    {
+        $periodInfo = PeriodInfos::getPeriodInfosObj($period);
+        return $this->getPersonRepository()->getIdsValidators(true, $periodInfo->getPeriodCode());
     }
 
     /**

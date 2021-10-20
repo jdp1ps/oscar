@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Utils;
 
 use Oscar\Exception\OscarException;
@@ -8,8 +9,11 @@ class PeriodInfos
     private int $month;
     private int $year;
 
-    private string $_label='';
+    private string $_label;
     private string $_code;
+    private ?int $_totalDays = null;
+    private ?\DateTime $_start = null;
+    private ?\DateTime $_end = null;
 
     /**
      * PeriodInfos constructor.
@@ -37,14 +41,14 @@ class PeriodInfos
      *
      * @return $this
      */
-    public function prevMonth() :self
+    public function prevMonth(): self
     {
         $this->month--;
-        if( $this->month == 0 ){
+        if ($this->month == 0) {
             $this->month = 12;
             $this->year--;
         }
-        $this->_label = '';
+        $this->resetCache();
         return $this;
     }
 
@@ -53,15 +57,26 @@ class PeriodInfos
      *
      * @return $this
      */
-    public function nextMonth() :self
+    public function nextMonth(): self
     {
         $this->month++;
-        if( $this->month > 12 ){
+        if ($this->month > 12) {
             $this->month = 1;
             $this->year++;
         }
-        $this->_label = '';
+        $this->resetCache();
         return $this;
+    }
+
+    /**
+     * Reset cached datas
+     */
+    protected function resetCache(): void
+    {
+        $this->_totalDays = null;
+        $this->_start = null;
+        $this->_end = null;
+        $this->_label = '';
     }
 
     /**
@@ -72,6 +87,10 @@ class PeriodInfos
         return $this->year;
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getPeriodLabel(): string
     {
         if (!$this->_label) {
@@ -89,6 +108,11 @@ class PeriodInfos
         return $this->_label;
     }
 
+    /**
+     * Retourne le code de la période sous la forme YYYY-MM
+     *
+     * @return string
+     */
     public function getPeriodCode(): string
     {
         return sprintf('%s-%s', $this->getYear(), ($this->getMonth() < 10 ? '0' : '') . $this->getMonth());
@@ -103,6 +127,42 @@ class PeriodInfos
             'month' => $this->getMonth(),
             'year' => $this->getYear()
         ];
+    }
+
+    /**
+     * Retourne le premier jour de la période.
+     *
+     * @return \DateTime
+     * @throws \Exception
+     */
+    public function getStart(): \DateTime
+    {
+        if ($this->_start == null) {
+            $this->_start = new \DateTime(sprintf('%s-01 00:00:00', $this->getPeriodCode()));
+        }
+        return $this->_start;
+    }
+
+    /**
+     * Retourne le dernier jour de la période.
+     *
+     * @return \DateTime
+     * @throws \Exception
+     */
+    public function getEnd(): \DateTime
+    {
+        if ($this->_end == null) {
+            $this->_end = new \DateTime(sprintf('%s-%s 23:59:59', $this->getPeriodCode(), $this->getTotalDays()));
+        }
+        return $this->_end;
+    }
+
+    public function getTotalDays(): int
+    {
+        if (!$this->_totalDays) {
+            $this->_totalDays = cal_days_in_month(CAL_GREGORIAN, $this->getMonth(), $this->getYear());
+        }
+        return $this->_totalDays;
     }
 
     public static function getPeriodInfosObj(string $str): PeriodInfos
