@@ -41,6 +41,8 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
     {
         $this
             ->setDescription("Relance automatique des feuilles de temps")
+            ->addOption("purge", null, InputOption::VALUE_OPTIONAL, "Suppression des données (dev)", false)
+            ->addOption("processdate", null, InputOption::VALUE_OPTIONAL, "Date d'execution", false)
         ;
     }
 
@@ -48,13 +50,31 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
     {
         parent::execute($input, $output);
 
-        $period = PeriodInfos::getPeriodInfosObj(date('Y-m'))->prevMonth();
+        $processArg = $input->getOption('processdate');
+
+        $purge = $input->getOption('purge');
+        if( $purge === null ){
+            if($this->ask("Reset complet des procédures de rappel ?")){
+                $recalls = $this->getOrganizationService()->getEntityManager()->getRepository(RecallDeclaration::class)->findAll();
+                foreach ($recalls as $r) {
+                    $this->getOrganizationService()->getEntityManager()->remove($r);
+                }
+                $this->getOrganizationService()->getEntityManager()->flush();
+                die();
+            }
+        }
+
+        if( !$processArg ){
+            $processDate = new \DateTime();
+            $period = PeriodInfos::getPeriodInfosObj(date('Y-m'))->prevMonth();
+        } else {
+            $processDate = new \DateTime($processArg);
+            $period = PeriodInfos::getPeriodInfosObj($processDate->format('Y-m'));
+        }
+
         $force = false;
 
-        // Date de déclenchement de la procédure
-        $processDate = new \DateTime();
-
-        $this->getIO()->title("Relance pour " . $period->getPeriodLabel());
+        $this->getIO()->title("Relance pour les déclarants " . $period->getPeriodLabel());
 
         $declarers = $this->getPersonService()->getPersonsByIds(
                 $this->getPersonService()->getDeclarersIdsPeriod($period->getPeriodCode())
@@ -74,6 +94,33 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
             $snd = $snd ." ". $result['recall_info'];
             $this->getIO()->writeln(" - <bold>$declarer</bold> : $snd");
         }
+
+        $this->getIO()->title("Relance pour les validateurs " . $period->getPeriodLabel());
+
+        $validators = $this->getPersonService()->getPersonsByIds(
+            $this->getPersonService()->getValidatorsIdsPeriod($period->getPeriodCode())
+        );
+
+        foreach ($validators as $validator) {
+            $result = $this->getTimesheetService()->recallValidatorProcess(
+                $validator->getId(),
+                $period->getYear(),
+                $period->getMonth(),
+                $force);
+
+            if( $result['mailSend'] ){
+                $snd = "<green>Mail envoyé</green>";
+            } else {
+                if( $result['blocked'] ){
+                    $snd = "<red>Bloqué</red>";
+                } else {
+                    $snd = "<none>Pas d'envoi</none>";
+                }
+            }
+            $snd = $snd ." ". $result['recall_info'];
+            $this->getIO()->writeln(" - <bold>$validator</bold> : $snd");
+        }
+
 
         return 0;
     }
