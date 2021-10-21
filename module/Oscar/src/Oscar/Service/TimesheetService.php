@@ -2587,10 +2587,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $periods;
     }
 
-    public function getPeriodsValidator( Person $validator ) :array
+    public function getPeriodsValidator(Person $validator): array
     {
         $qb = $this->getEntityManager()->createQuery(
-          "SELECT DISTINCT vp.id, vp.year, vp.month, vp.object, 
+            "SELECT DISTINCT vp.id, vp.year, vp.month, vp.object, 
                     vp.validationActivityById,
                     vp.validationSciById,
                     vp.validationAdmById
@@ -2606,8 +2606,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $r = $qb->setParameter('validator', $validator->getId())->getArrayResult();
         $periods = [];
         foreach ($r as $row) {
-            $period = sprintf('%s-%s', $row['year'], ($row['month'] < 10 ? '0':'').$row['month']);
-            if( !in_array($period, $periods) ){
+            $period = sprintf('%s-%s', $row['year'], ($row['month'] < 10 ? '0' : '') . $row['month']);
+            if (!in_array($period, $periods)) {
                 $periods[] = $period;
             }
         }
@@ -2812,6 +2812,104 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
     /**
+     * Procédure de rappel des validateurs.
+     *
+     * @param int $validatorId
+     * @param int $year
+     * @param int $month
+     * @param bool $force
+     * @return array
+     * @throws OscarException
+     */
+    public function recallValidatorProcess(int $validatorId, int $year, int $month, bool $force = false): array
+    {
+        $result = [];
+        $validator = $this->getPersonService()->getPersonById($validatorId, true);
+        $result['validator'] = "$validator";
+        $result['recall_info'] = "Rien n'a été fait";
+        $result['mailSend'] = false;
+        $result['blocked'] = false;
+
+        if ($this->isValidatorHasToValidate($validator, $year, $month)) {
+            // Récupération du message
+            $message = $this->getOscarConfigurationService()->getvalidatorsRelance1();
+
+            /** @var RecallDeclarationRepository $recallDeclarationRepository */
+            $recallDeclarationRepository = $this->getRecallDeclarationRepository();
+
+            $recallSend = null;
+
+            // Récupération de l'historique des rappels
+            $recalls = $recallDeclarationRepository->getRecallValidationPerson(
+                $validatorId,
+                $year,
+                $month
+            );
+
+            $result['lastSend'] = "Aucun";
+            $result['recalls'] = 0;
+            $result['since_last'] = 0;
+            $result['days_beetween'] = '#';
+            $result['needSend'] = false;
+            $result['ignoreForce'] = false;
+            $processDate = new \DateTime();
+
+            if (count($recalls) == 1) {
+                /** @var RecallDeclaration $recallSend */
+                $recallSend = $recalls[0];
+
+                $daysBetweenRecalls = $this->getOscarConfigurationService()->getvalidatorsRelanceJour1();
+                $lastSend = $recallSend->getLastSend();
+
+                /** @var \DateInterval $interval */
+                $interval = $lastSend->diff($processDate);
+                $result['since_last'] = $effectifDaysSinceLastSend = $interval->days;
+
+                if ($effectifDaysSinceLastSend >= $daysBetweenRecalls) {
+                    $result['needSend'] = true;
+                    $result['recall_info'] = "Relance";
+                } else {
+                    $result['needSend'] = false;
+                    $result['recall_info'] = "Pas de relance (delai avant relance)";
+                }
+            } else {
+                if (count($recalls) == 0) {
+                    $result['needSend'] = true;
+                } else {
+                    throw new OscarException("Doublon dans le système de rappel");
+                }
+            }
+
+
+            // Envoi du mail
+            if ($result['needSend'] || ($force == true && $result['ignoreForce'] == true)) {
+                if (!$recallSend) {
+                    $recallSend = new RecallDeclaration();
+                    $recallSend->setPeriodMonth($month)
+                        ->setPeriodYear($year)
+                        ->setStartProcess($processDate);
+                    $this->getEntityManager()->persist($recallSend);
+                }
+
+                $repport = $this->sendMailRecallValidator(
+                    $validator,
+                    sprintf("%s-%s", $year, $month),
+                    $message,
+                    $recallSend,
+                    $processDate,
+                    $force
+                );
+                $result['mailSend'] = true;
+                return array_merge($result, $repport);
+            }
+        } else {
+            $result['recall_info'] = "Rien a valider";
+        }
+
+        return $result;
+    }
+
+    /**
      * Procédure de rappel des déclarants.
      *
      * @param $declarerId
@@ -2868,8 +2966,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         if (count($recalls) != 0) {
             $recallSend = $recalls[0];
-        }
-        else {
+        } else {
             $this->getLoggerService()->debug("Maj du RAPPEL");
         }
 
@@ -2887,26 +2984,27 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             // On test si le jour d'envois est valide (Valeur de J1)
             $processDay = (int)$processDate->format('d');
 
-            if( $result['hasConflict'] ){
+            if ($result['hasConflict']) {
                 $result['sending'] = true;
                 $result['recall_info'] = "Premier envoi (conflit)";
-            }
-            else if ($declarerFirstDay <= $processDay) {
-                $result['sending'] = true;
-                $result['recall_info'] = "Premier envoi";
             } else {
-                $result['sending'] = false;
-                $result['recall_info'] = "Le jour de relance n'est pas encore atteint";
+                if ($declarerFirstDay <= $processDay) {
+                    $result['sending'] = true;
+                    $result['recall_info'] = "Premier envoi";
+                } else {
+                    $result['sending'] = false;
+                    $result['recall_info'] = "Le jour de relance n'est pas encore atteint";
+                }
             }
         } // Au-delà du premier rappel
         elseif (count($recalls) == 1) {
-
             $result['lastSend'] = $recallSend->getLastSend()->format('Y-m-d H:i:s');
             $result['recalls'] = $recallSend->getNbrShipments();
 
             // Date d'envois
             $lastSend = $recallSend->getLastSend();
             $daySend = (int)$lastSend->format('d');
+
             $dayBeetweenSends = $result['hasConflict'] ?
                 $this->getOscarConfigurationService()->getDeclarersRelanceConflitJour() :
                 $this->getOscarConfigurationService()->getDeclarersRelanceJour2();
@@ -2938,7 +3036,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $result['blocked'] = false;
         // Test Liste
-        if( !$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer) ){
+        if (!$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer)) {
             $result['recall_info'] = "Restriction par liste activé";
             $result['ignoreForced'] = true;
             $result['needSend'] = false;
@@ -2946,10 +3044,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         if ($result['needSend'] || ($force === true && $result['ignoreForced'] == false)) {
-
             $result['recall_info'] = "Mail envoyé" . ($force ? ' (forcé)' : '');
 
-            if( $recallSend == null ){
+            if ($recallSend == null) {
                 $recallSend = new RecallDeclaration();
                 $this->getEntityManager()->persist($recallSend);
                 $recallSend->setStartProcess($processDate);
@@ -2986,8 +3083,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ?\DateTime $processDate = null,
         $forced = false
     ): array {
-
-        if( $processDate == null ){
+        if ($processDate == null) {
             $processDate = new \DateTime();
         }
 
@@ -3020,9 +3116,69 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             return $recallDeclaration->getRepport();
         } catch (\Exception $e) {
-
             throw new OscarException(
-                "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period : " . $e->getMessage()
+                "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period : " . $e->getMessage(
+                )
+            );
+        }
+    }
+
+    /**
+     * Forge le mail de relance et enregistre l'envoi dans l'historique des rappels.
+     *
+     * @param Person $validator
+     * @param string $period
+     * @param string $messageTemplate
+     * @param RecallDeclaration $recallDeclaration
+     * @param \DateTime|null $processDate
+     * @param false $forced
+     * @return array
+     * @throws OscarException
+     */
+    public function sendMailRecallValidator(
+        Person $validator,
+        string $period,
+        string $messageTemplate,
+        RecallDeclaration $recallDeclaration,
+        ?\DateTime $processDate = null,
+        $forced = false
+    ): array {
+        if ($processDate == null) {
+            $processDate = new \DateTime();
+        }
+
+        $periodInfos = PeriodInfos::getPeriodInfosObj($period);
+
+
+        // Replace
+        $find = ["{PERSON}", "{PERIOD}"];
+        $replace = ["$validator", $periodInfos->getPeriodLabel()];
+        $body = str_ireplace($find, $replace, $messageTemplate);
+
+        $message = $this->getPersonService()->getMailingService()->newMessage(
+            "[OSCAR] Feuille de temps à valider pour " . $periodInfos->getPeriodLabel()
+        );
+        $message->setTo($validator->getEmail());
+        $message->setBody($body);
+
+        try {
+            $this->getPersonService()->getMailingService()->send($message);
+            // Enregistrement du rappel
+
+            $recallDeclaration->setContext(RecallDeclaration::CONTEXT_VALIDATOR)
+                ->logShipments("Envois d'un rappel", $processDate, $forced)
+                ->setLastSend($processDate)
+                ->setPeriodMonth($periodInfos->getMonth())
+                ->setPeriodYear($periodInfos->getYear())
+                ->setPerson($validator);
+
+            $this->getEntityManager()->flush($recallDeclaration);
+
+            return $recallDeclaration->getRepport();
+        } catch (\Exception $e) {
+            throw new OscarException(
+                "Un problème est survenu lors de la procédure de rappel de validation pour $validator pour la période $period : " . $e->getMessage(
+                )
             );
         }
     }
@@ -4500,7 +4656,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         );
     }
 
-
+    /**
+     * @param Person $person
+     * @return bool
+     */
     public function isValidator(Person $person)
     {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
@@ -4510,6 +4669,40 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->leftJoin('vp.validatorsAdm', 'vadm')
             ->where('vprj = :person OR vsci = :person OR vadm = :person')
             ->setParameter('person', $person);
+
+        return count($query->getQuery()->getResult()) > 0;
+    }
+
+    public function isValidatorHasToValidate(Person $person, ?int $year = null, ?int $month = null)
+    {
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
+            ->createQueryBuilder('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where(
+                '
+                    (vprj = :person AND vp.status = :status_prj) 
+                    OR (vsci = :person AND vp.status = :status_sci) 
+                    OR (vadm = :person AND vp.status = :status_adm)
+                                '
+            )
+            ->setParameters(
+                [
+                    'person' => $person,
+                    'status_prj' => ValidationPeriod::STATUS_STEP1,
+                    'status_sci' => ValidationPeriod::STATUS_STEP2,
+                    'status_adm' => ValidationPeriod::STATUS_STEP3,
+                ]
+            );
+
+        if ($year) {
+            $query->andWhere('vp.year = :year')->setParameter('year', $year);
+        }
+
+        if ($month) {
+            $query->andWhere('vp.month = :month')->setParameter('month', $month);
+        }
 
         return count($query->getQuery()->getResult()) > 0;
     }

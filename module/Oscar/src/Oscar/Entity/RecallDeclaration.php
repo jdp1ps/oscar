@@ -4,7 +4,6 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Oscar\Utils\PeriodInfos;
 
 /**
  * Cette classe référence les rôles GLOBAUX sur l'application.
@@ -14,6 +13,10 @@ use Oscar\Utils\PeriodInfos;
  */
 class RecallDeclaration
 {
+
+    const CONTEXT_DECLARER = 'declarer';
+    const CONTEXT_VALIDATOR = 'validator';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")

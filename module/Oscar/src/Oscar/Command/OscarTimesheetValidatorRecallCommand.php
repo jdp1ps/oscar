@@ -36,7 +36,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use UnicaenApp\Service\Mailer\MailerService;
 use Zend\Validator\Date;
 
-class OscarTimesheetValidatorrRecallCommand extends OscarAdvancedCommandAbstract
+class OscarTimesheetValidatorRecallCommand extends OscarAdvancedCommandAbstract
 {
     protected static $defaultName = 'timesheets:validator-recall';
 

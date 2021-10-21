@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
+abstract class  OscarAdvancedCommandAbstract extends OscarCommandAbstract
 {
     const OPTION_FORCE = 'force';
     const OPTION_VERBOSE = 'verbose';
@@ -69,7 +69,10 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
 
     protected function isForce(): bool
     {
-        return $this->input->getOption(self::OPTION_FORCE) === null;
+        if ($this->input->hasOption(self::OPTION_FORCE)) {
+            return $this->input->getOption(self::OPTION_FORCE) === null;
+        }
+        return false;
     }
 
     protected function isQuiet(): bool
@@ -86,7 +89,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
      */
     protected function ask(string $question): bool
     {
-        if( $this->isInteractive() ){
+        if ($this->isInteractive()) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion($question, false);
             return $helper->ask($this->input, $this->output, $question);
@@ -95,24 +98,24 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
         }
     }
 
-    protected function info(string $message) :void
+    protected function info(string $message): void
     {
         $this->logVerbosity($message, OutputInterface::VERBOSITY_VERBOSE);
     }
 
-    protected function notice(string $message) :void
+    protected function notice(string $message): void
     {
         $this->logVerbosity($message, OutputInterface::VERBOSITY_NORMAL);
     }
 
-    protected function debug(string $message) :void
+    protected function debug(string $message): void
     {
         $this->logVerbosity($message, OutputInterface::VERBOSITY_VERY_VERBOSE);
     }
 
-    protected function logVerbosity( string $message, int $verbosity ) :void
+    protected function logVerbosity(string $message, int $verbosity): void
     {
-        if( $this->getIO()->getVerbosity() >= $verbosity ){
+        if ($this->getIO()->getVerbosity() >= $verbosity) {
             $this->getIO()->writeln($message);
         }
         switch ($verbosity) {
@@ -137,7 +140,7 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
     protected function finalFatalError(\Exception $e): int
     {
         $this->getLoggerService()->error("CMD error : " . $e->getMessage());
-        if( !$this->getIO()->isQuiet() ) {
+        if (!$this->getIO()->isQuiet()) {
             $this->getIO()->error($e->getMessage());
         }
         return E_ERROR;
@@ -149,10 +152,10 @@ abstract class OscarAdvancedCommandAbstract extends OscarCommandAbstract
      * @param string $message
      * @return int
      */
-    protected function finalSuccess( string $message ):int
+    protected function finalSuccess(string $message): int
     {
         $this->getLoggerService()->notice("CMD success : " . $message);
-        if( !$this->io->isQuiet() ){
+        if (!$this->io->isQuiet()) {
             $this->getIO()->success($message);
         }
         return 0;
