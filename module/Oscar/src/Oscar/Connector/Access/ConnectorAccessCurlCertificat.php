@@ -126,7 +126,7 @@ class ConnectorAccessCurlCertificat implements IConnectorAccess
 
     public function getConnector(): IConnector
     {
-        return $this->getConnector();
+        return $this->connector;
     }
 
     public function getDataSingle($remoteId, $params = null)

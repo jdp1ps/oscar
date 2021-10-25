@@ -22,7 +22,6 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
     /**
      * ConnectorAccessCurlHttp constructor.
      * @param IConnector $connector Connector qui va consommer l'accès aux données.
-     * @param string $url Nom du paramètre contenant d'URL.
      */
     public function __construct(IConnector $connector)
     {

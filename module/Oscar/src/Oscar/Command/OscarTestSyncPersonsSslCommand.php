@@ -56,11 +56,14 @@ class OscarTestSyncPersonsSslCommand extends OscarCommandAbstract
         $io->section("Connector infos : ");
         $io->writeln("Connecteur : $connectorName");
 
-        $getApiRequest = new ConnectorAccessCurlCertificat($connector, ['url'=>$urlArgument.$uidArgument]);
-        $results = $getApiRequest->getDatas();
+        $getApiRequest = new ConnectorAccessCurlCertificat($connector);
+        $results = $getApiRequest->getDatas($urlArgument.$uidArgument);
+
         if ($uidArgument != ""){
+            $io->writeln("Argument passé : " . $uidArgument);
             dump($results);
         }else{
+            $io->writeln("Aucun argument passé résultat full API !");
             var_dump($results);
         }
     }
