@@ -209,7 +209,8 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "tva" => null,
                 "currency" => null,
                 "assietteSubventionnable" => null,
-                "financialImpact" => null
+                "financialImpact" => null,
+                "disciplines" => []
             ];
 
             foreach ($datas as $index => $value) {
@@ -313,7 +314,11 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 else if( $key == "status" ){
                     $json['status'] = $value;
                 }
-
+                else if( $key == "disciplines" ){
+                    if( !in_array($value, $json['disciplines']) ){
+                        $json['disciplines'][] = $value;
+                    }
+                }
                 else if ($key == "datePFI") {
                     $json['datepfi'] = $value;
                 } else if ($key == "type") {

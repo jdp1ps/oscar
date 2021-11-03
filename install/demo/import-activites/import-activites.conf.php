@@ -44,5 +44,6 @@ return [
     27  => "financialImpact",
     28  => "currency",
     29  => "assietteSubventionnable",
-    30  => "status"
+    30  => "status",
+    32  => "disciplines"
 ];
