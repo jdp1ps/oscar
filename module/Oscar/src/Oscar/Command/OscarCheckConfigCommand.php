@@ -224,32 +224,41 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         }
         $io->writeln("<green>OK</green>");
 
+        $logPath = $oscarConfig->getLoggerFilePath();
+        $io->write(" - Fichier de LOG (<bold>$logPath</bold>) :  ");
+        if( !is_writable($logPath) ){
+            $io->error("Le fichier de log n'est pas éditable");
+            return;
+        }
+        $io->writeln("<green>OK</green>");
+
 
 
         $config = new ConfigurationParser($this->getServicemanager()->get(OscarConfigurationService::class)->getConfigArray());
         $em = $this->getServicemanager()->get(EntityManager::class);
 
         try {
-            $io->write(" * Accès à la base de données ");
+            $io->write(" - Accès à la base de données ");
             $io->write($config->getConfiguration('doctrine.connection.orm_default.params.host'));
             $io->write(" ... ");
 
             if ($em->getConnection()->isConnected()) {
-                $io->writeln("OK");
+                $io->writeln("<green>OK</green>");
             }
 
             $validator = new SchemaValidator($em);
             $errors = $validator->validateMapping();
 
-            $io->write(" * Modèle de donnée ");
+            $io->write(" - Modèle de donnée ");
             if (count($errors) > 0) {
                 $io->warning("Obsolète");
                 foreach( $errors as $error ){
                     $io->error(" - " . $error . " - " . print_r($error));
                 }
                 $io->error("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
+                return;
             } else {
-                $io->success("OK");
+                $io->writeln("<green>OK</green>");
             }
 
         } catch (\Exception $e ){
@@ -286,19 +295,19 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $io->section(" ### Configuration du mailer : ");
 
             $urlAbsolute = $config->getConfiguration('oscar.urlAbsolute');
-            $io->write(" * URL absolue : ");
+            $io->write(" - URL absolue (Utilisée pour forger les liens) : ");
             if( $urlAbsolute == "http://localhost:8080" ){
-                $io->write('<bold> !DEV! ' . $urlAbsolute .'</bold>');
+                $io->writeln('<id> !DEV! ' . $urlAbsolute .'</id>');
             } else {
-                $io->write($urlAbsolute);
+                $io->writeln($urlAbsolute);
             }
 
-            $io->write(" * Transport : ");
+            $io->write(" - Transport : ");
             $typeTransport = $config->getConfiguration('oscar.mailer.transport.type');
             $typeTransportValid = in_array($typeTransport, ['sendmail', 'smtp', 'file']);
 
             if( $typeTransportValid ){
-                $io->writeln($typeTransport);
+                $io->writeln("<green>$typeTransport</green>");
                 switch ($typeTransport) {
                     case 'sendmail' :
                         $io->writeln("Attention, l'utilisation de SENDMAIL n'est pas testée dans cette version");
