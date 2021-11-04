@@ -62,12 +62,12 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
 
         if (!is_file($realpath)) {
-            throw new OscarException(sprintf("Le chemin '%s' n'est pas un fichier... faites un effort.",
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas un fichier...",
                 $realpath));
         }
 
         if (!is_readable($realpath)) {
-            throw new OscarException(sprintf("Le chemin '%s' n'est pas lisible....",
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas lisible...",
                 $realpath));
         }
 
@@ -84,8 +84,6 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Conversion CSV > JSON des activités");
-
         ///////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////// SERVICES
         /** @var OscarConfigurationService $oscarConfig */
@@ -100,6 +98,15 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
         // Fichiers
         try {
+
+            $optFichier = $input->getOption('fichier');
+            $optConfig = $input->getOption('config');
+
+            if( !$optConfig || !$optFichier ){
+                $io->error("Les options --fichier <SOURCE CSV> et --config <FICHIER PHP> sont requises");
+                return 0;
+            }
+
             $sourceFilePath = $this->getReadablePath($input->getOption('fichier'));
             $configurationFilePath = $this->getReadablePath($input->getOption('config'));
             $skip = $input->getOption('skip');

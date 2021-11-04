@@ -443,8 +443,8 @@ class ConnectorActivityJSON implements ConnectorInterface
             // Projet de l'activité
             $projectAcronym = $data->acronym;
 
-            if ($data->project || $data->projectlabel) {
-                $projectLabel = $data->project ?: $data->projectlabel;
+            if ($data->projectlabel) {
+                $projectLabel = $data->projectlabel;
             }
 
 
@@ -491,7 +491,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                 $status = Activity::STATUS_ERROR_STATUS;
             }
 
-
             $activity
                 ->setLabel($this->getPropertyObject($data, 'label'))
                 ->setDescription($this->getPropertyObject($data, 'description', false))
@@ -506,7 +505,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setStatus($status)
                 ->setAmount(((double)$data->amount));
 
-            if ($data->datestart) {
+            if (property_exists($data, 'datestart') ){
                 try {
                     $dateStart = new \DateTime($data->datestart);
                 } catch (\Exception $e) {
