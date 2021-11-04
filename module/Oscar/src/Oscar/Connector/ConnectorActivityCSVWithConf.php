@@ -116,7 +116,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             case "project":
                 return new FieldImportProjectStrategy($this->entityManager);
             case "persons":
-                return NEW FieldImportPersonStrategy($this->entityManager, $split[1]);
+                return new FieldImportPersonStrategy($this->entityManager, $split[1]);
             case "organizations":
                 return new FieldImportOrganizationStrategy($this->entityManager, $split[1]);
             case "payments":
@@ -131,12 +131,14 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
     protected function getHandler($index)
     {
         // Si la clef n'existe pas dans la conf on ne fait rien
-        if (!array_key_exists($index, $this->config))
+        if (!array_key_exists($index, $this->config)) {
             return;
+        }
 
         // Si la clef existe mais que la valeur de conf est vide on passe
-        if (!$this->config[$index])
+        if (!$this->config[$index]) {
             return;
+        }
 
         // Si la clef est une chaîne, on détermine si c'est un appel de setter
         // simple ou un mécanisme plus "avancé"
@@ -146,7 +148,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
         // Chaîne
         if (is_string($key)) {
-
             // Chaîne : setter avancé
             if (stripos($key, '.') > 0) {
                 return $this->getHandlerByKey($key);
@@ -182,7 +183,9 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
             $values = explode($separator, $value);
             foreach ($values as $v) {
                 $extracted = trim($v);
-                if ($extracted != "") $out[] = trim($v);
+                if ($extracted != "") {
+                    $out[] = trim($v);
+                }
             }
         }
         return $out;
@@ -198,7 +201,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
 
         $i = 1;
         while ($datas = fgetcsv($this->csvDatas)) {
-
             $json = [
                 "uid" => 'LN-' . ($i++),
                 "organizations" => [],
@@ -210,7 +212,14 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "currency" => null,
                 "assietteSubventionnable" => null,
                 "financialImpact" => null,
-                "disciplines" => []
+                "disciplines" => [],
+                "datepfi" => null,
+                "datestart" => null,
+                "dateend" => null,
+                "amount" => null,
+                "datePFI" => null,
+                "datesigned" => null,
+                "pfi" => null,
             ];
 
             foreach ($datas as $index => $value) {
@@ -240,6 +249,7 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                     $separator = $this->config[$index]['separator'];
                 }
 
+                // ORGANIZATIONS
                 if (preg_match("/organizations\.(.*)/", $key, $matches)) {
                     $role = $matches[1];
 
@@ -248,9 +258,13 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         $json['organizations'][$role] = [];
                     }
                     if (!in_array($value, $json['organizations'][$role])) {
-                        $json['organizations'][$role] = array_merge($json['organizations'][$role], $this->extractArrayString($value, $separator));
+                        $json['organizations'][$role] = array_merge(
+                            $json['organizations'][$role],
+                            $this->extractArrayString($value, $separator)
+                        );
                     }
-                } else if (preg_match("/persons\.(.*)/", $key, $matches)) {
+                } // PERSONS
+                elseif (preg_match("/persons\.(.*)/", $key, $matches)) {
                     $role = $matches[1];
 
                     // Création de la clef si besoin
@@ -258,15 +272,19 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         $json['persons'][$role] = [];
                     }
                     if (!in_array($value, $json['persons'][$role])) {
-                        $json['persons'][$role] = array_merge($json['persons'][$role], $this->extractArrayString($value, $separator));
+                        $json['persons'][$role] = array_merge(
+                            $json['persons'][$role],
+                            $this->extractArrayString($value, $separator)
+                        );
                     }
-                } else if (preg_match("/milestones\.(.*)/", $key, $matches)) {
+                } // JALONS
+                elseif (preg_match("/milestones\.(.*)/", $key, $matches)) {
                     $json['milestones'][] = [
                         "type" => $matches[1],
                         "date" => $value
                     ];
-                } else if (preg_match("/payments\.([\-.\d]*)/", $key, $matches)) {
-
+                } // VERSEMENTS
+                elseif (preg_match("/payments\.([\-.\d]*)/", $key, $matches)) {
                     $datesPos = explode('.', $matches[1]);
 
                     // Calcule des positions pour les données
@@ -287,59 +305,64 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                         "date" => $paymentDatePayment,
                         "predicted" => $paymentDatePredicted,
                     ];
-                }
-
-                // PFI
-                else if ($key == "currency") {
+                } // PFI
+                elseif ($key == "currency") {
                     $json['currency'] = $value;
-                }
-
-                else if ($key == "tva") {
+                } // TVA
+                elseif ($key == "tva") {
                     $json['tva'] = floatval(str_replace(',', '.', $value));
-                }
-
-                else if ($key == "assietteSubventionnable") {
+                } // assietteSubventionnable
+                elseif ($key == "assietteSubventionnable") {
                     $json['assietteSubventionnable'] = (float)$value;
-                }
-
-                else if ($key == "financialImpact") {
+                } // financialImpact
+                elseif ($key == "financialImpact") {
                     $json['financialImpact'] = $value;
-                }
-
-                // PFI
-                else if ($key == "PFI") {
+                } // PFI
+                elseif ($key == "PFI") {
                     $json['pfi'] = $value;
-                }
-
-                else if( $key == "status" ){
+                } // Status
+                elseif ($key == "status") {
                     $json['status'] = $value;
-                }
-                else if( $key == "disciplines" ){
-                    if( !in_array($value, $json['disciplines']) ){
-                        $json['disciplines'][] = $value;
+                } // Disciplines
+                elseif ($key == "disciplines") {
+                    $findDisciplines = explode('#', $value);
+                    foreach ($findDisciplines as $discipline) {
+                        if (!in_array($discipline, $json['disciplines'])) {
+                            $json['disciplines'][] = $discipline;
+                        }
                     }
-                }
-                else if ($key == "datePFI") {
+                } // datePFI
+                elseif ($key == "datePFI") {
                     $json['datepfi'] = $value;
-                } else if ($key == "type") {
+                } // Type
+                elseif ($key == "type") {
                     $json['type'] = $value;
-                } else if ($key == "amount") {
+                } // Type
+                elseif ($key == "amount") {
                     $json['amount'] = doubleval($value);
-                } else if ($key == "dateStart") {
+                } // dateStart
+                elseif ($key == "dateStart") {
                     $json['datestart'] = $value;
-                } else if ($key == "dateEnd") {
+                } // dateEnd
+                elseif ($key == "dateEnd") {
                     $json['dateend'] = $value;
-                } else if ($key == "dateSigned") {
+                } // dateSigned
+                elseif ($key == "dateSigned") {
                     $json['datesigned'] = $value;
-                } else if ($key == "label") {
+                } // label
+                elseif ($key == "label") {
                     $json['label'] = $value;
-                } else if ($key == "description") {
+                } // description
+                elseif ($key == "description") {
                     $json['description'] = $value;
-                } else if ($key == "uid") {
+                } // uid
+                elseif ($key == "uid") {
                     $json['uid'] = $value;
-                } else if ($key == "project.acronym") {
+                } // project
+                elseif ($key == "project.acronym") {
                     $json['acronym'] = $value;
-                } else if ($key == "project.label") {
+                } // project
+                elseif ($key == "project.label") {
                     $json['projectlabel'] = $value;
                 } else {
                     throw new OscarException("La clef '$key' n'est pas géré dans la configuration");
@@ -363,9 +386,13 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
      */
     protected function getCheckedDateString($string)
     {
-        if ($string == "") return "";
+        if ($string == "") {
+            return "";
+        }
         if (!preg_match('/(\d{4})-(\d{2})-(\d{2})/', $string)) {
-            throw new OscarException("Format de date '$string' inattendu, assurez vous que la forme ISO YYYY-MM-JJ est respectée.");
+            throw new OscarException(
+                "Format de date '$string' inattendu, assurez vous que la forme ISO YYYY-MM-JJ est respectée."
+            );
         }
         $date = new \DateTime($string);
         return $date->format('Y-m-d');

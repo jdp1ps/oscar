@@ -86,7 +86,11 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
         "John Doe",
         "Marcel Grossmann"
       ]
-    }
+    },
+    "disciplines": [
+      "Physique",
+      "Chimie"
+    ]
   }
 ]
 ```
@@ -119,6 +123,7 @@ organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion d
 persons         | Object    | Oui       | Non    | Voir détails dans [Gestion des personnes](#persons)
 milestones      | Array     | Oui       | Non    | Voir détails dans [Gestion des jalons](#milestones)
 payments        | Array     | Oui       | Non    | Voir détails dans [Gestion des versements](#payments)
+disciplines        | Array     | Oui       | Non    | Voir détails dans [Gestion des disciplines](#disciplines)
 
 
 ```json
@@ -329,11 +334,16 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 > Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagués comme prévisionnels.
 
 
+<a id="disciplines"></a>
+### La clef disciplines (array de string)
+
+La clef `disciplines` permet de spécifier une ou plusieurs disciplines a associer à l'activité. Le séparateur `#` dans la source CSV permet de gérer plusieurs disciplines : La valeur `Physique#Chimie` donnera `["Physique","Chimie"]. 
+
+> Si la discipline est manquante, elle sera créée.
+
 ## La clef TVA (float, ex: 19.6)
 
 La valeur doit correspondre à un taux présent dans la base de données (table `tva`)
-
-
 
 
 ## Currency (string, ex: €)
@@ -402,7 +412,8 @@ return [
     27  => "financialImpact",
     28  => "currency",
     29  => "assietteSubventionnable",
-    30  => "status"
+    30  => "status",
+    31 => "disciplines"
 ];
 ```
 
@@ -528,7 +539,7 @@ On obtiendra en JSON :
 
 ### payments.POSITIONS
 
-La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective souf la forme `payments.PREVU.EFFECTIF`.
+La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective sous la forme `payments.PREVU.EFFECTIF`.
 
 #### Exemple 1
 
