@@ -68,7 +68,7 @@ class RecallDeclaration
      * @var string
      * @ORM\Column(type="text",nullable=true)
      */
-    private string $history = "";
+    private ?string $history = null;
 
     /**
      * Historique des envois.

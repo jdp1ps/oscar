@@ -2821,7 +2821,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return array
      * @throws OscarException
      */
-    public function recallValidatorProcess(int $validatorId, int $year, int $month, bool $force = false): array
+    public function recallValidatorProcess(int $validatorId, int $year, int $month, \DateTime $processDate, bool $force = false): array
     {
         $result = [];
         $validator = $this->getPersonService()->getPersonById($validatorId, true);
@@ -2852,7 +2852,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $result['days_beetween'] = '#';
             $result['needSend'] = false;
             $result['ignoreForce'] = false;
-            $processDate = new \DateTime();
 
             if (count($recalls) == 1) {
                 /** @var RecallDeclaration $recallSend */
@@ -2860,6 +2859,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
                 $daysBetweenRecalls = $this->getOscarConfigurationService()->getvalidatorsRelanceJour1();
                 $lastSend = $recallSend->getLastSend();
+                $infos = "Relancé le " . $lastSend->format('Y-m-d');
 
                 /** @var \DateInterval $interval */
                 $interval = $lastSend->diff($processDate);
@@ -2870,7 +2870,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $result['recall_info'] = "Relance";
                 } else {
                     $result['needSend'] = false;
-                    $result['recall_info'] = "Pas de relance (delai avant relance)";
+                    $result['recall_info'] = "Pas de relance (Dernier envoi $infos)";
                 }
             } else {
                 if (count($recalls) == 0) {
@@ -2900,10 +2900,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $force
                 );
                 $result['mailSend'] = true;
+                $result['recall_info'] = "Fait";
                 return array_merge($result, $repport);
             }
         } else {
-            $result['recall_info'] = "Rien a valider";
+            $result['recall_info'] = "Rien a valider pour cette période";
         }
 
         return $result;

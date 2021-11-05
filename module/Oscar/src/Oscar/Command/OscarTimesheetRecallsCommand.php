@@ -54,13 +54,15 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
 
         $purge = $input->getOption('purge');
         if( $purge === null ){
-            if($this->ask("Reset complet des procédures de rappel ?")){
-                $recalls = $this->getOrganizationService()->getEntityManager()->getRepository(RecallDeclaration::class)->findAll();
+            $recalls = $this->getOrganizationService()->getEntityManager()->getRepository(RecallDeclaration::class)->findAll();
+            if($this->ask("Reset complet des procédures de rappel ? (y)")){
                 foreach ($recalls as $r) {
                     $this->getOrganizationService()->getEntityManager()->remove($r);
                 }
                 $this->getOrganizationService()->getEntityManager()->flush();
                 die();
+            } else {
+                $this->getIO()->writeln("Annulé");
             }
         }
 
@@ -106,6 +108,7 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
                 $validator->getId(),
                 $period->getYear(),
                 $period->getMonth(),
+                $processDate,
                 $force);
 
             if( $result['mailSend'] ){
