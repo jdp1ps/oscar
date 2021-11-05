@@ -84,6 +84,9 @@ data/templates/timesheet_person_month.html.php
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 
+# PHPUnit
+tests/.phpunit.result.cache
+
 # Residus
 public/js/oscar/dist/index.html
 

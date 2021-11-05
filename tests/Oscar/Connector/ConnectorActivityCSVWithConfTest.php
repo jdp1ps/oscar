@@ -34,7 +34,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(26, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
+        $this->assertEquals(27, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
     }
 
 
