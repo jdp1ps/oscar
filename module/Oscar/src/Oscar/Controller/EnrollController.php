@@ -984,7 +984,16 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
     // Fin des rôles
     public function organizationPersonCloseAction(){
-        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT, $this->getActivityEntity());
+        $organizationPersonId = $this->params()->fromRoute('idenroll');
+        /** @var OrganizationPerson $organizationPerson */
+        $organizationPerson = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find($organizationPersonId);
+
+        $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT);
+
+        $dateClose = new \DateTime($this->params()->fromPost('at'));
+        $organizationPerson->setDateEnd($dateClose);
+        $this->getEntityManager()->flush();
+        $this->redirect()->toRoute('organization/show', ['id' => $organizationPerson->getOrganization()->getId()]);
         return $this->closeEnroll(OrganizationPerson::class);
     }
 }
