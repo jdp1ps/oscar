@@ -22,7 +22,19 @@ class RecallExceptionRepository extends EntityRepository
         $qb = $this->getBaseIncludeQueryBuilder()
             ->select('p.id');
 
-        $r = $qb->getQuery()->setParameter('include', RecallException::TYPE_INCLUDED)->getArrayResult();
+        $r = $qb->getQuery()->getArrayResult();
+        return array_map('current', $r);
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getExcludedPersonsIds(): array
+    {
+        $qb = $this->getBaseExcludeQueryBuilder()
+            ->select('p.id');
+
+        $r = $qb->getQuery()->getArrayResult();
         return array_map('current', $r);
     }
 

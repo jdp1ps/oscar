@@ -124,7 +124,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 } catch (\Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
-
             }
         );
     }
@@ -140,14 +139,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_VISUALISATION);
         if ($this->isAjax()) {
-
         }
         return [];
     }
 
     public function declarersListAction()
     {
-        if( $this->getRequest()->isPost() ){
+        if ($this->getRequest()->isPost()) {
             $action = $this->getRequest()->getPost('action');
             switch ($action) {
                 case 'disabled-whitelist' :
@@ -487,7 +485,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 default:
                     return $this->getResponseBadRequest("Erreur d'API");
             }
-
         }
         return [];
     }
@@ -1506,7 +1503,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getResponseOk("Informations PCRU modifiées");
             }
         }
-
 
 
         return [];

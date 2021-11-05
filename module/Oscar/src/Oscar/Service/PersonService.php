@@ -1511,14 +1511,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Ajout d'une personne dans la liste blanche.
-     *
      * @param Person[] $persons
      * @param Person $adder
      */
     public function addDeclarersToWhitelist(array $persons, Person $adder): void
     {
-        $included = $this->getRecallExceptionRepository()->getIncludedPersonsIds();
+        /** @var RecallExceptionRepository $recallExceptions */
+        $recallExceptions = $this->getEntityManager()->getRepository(RecallException::class);
+
+        $included = $recallExceptions->getIncludedPersonsIds();
         foreach ($persons as $person) {
             if (!in_array($person->getId(), $included)) {
                 $include = new RecallException();
@@ -1529,7 +1530,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
         $this->getEntityManager()->flush();
     }
-
     /**
      * Liste des personnes dans la liste noire
      *
@@ -1539,7 +1539,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         return $this->getRecallExceptionRepository()->getBlacklist();
     }
-
 
 
     /**
