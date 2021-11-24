@@ -10,6 +10,8 @@ namespace Oscar\Entity;
 use BjyAuthorize\Provider\Role\ProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use UnicaenAuth\Entity\Db\AbstractRole;
+use UnicaenAuth\Entity\Db\AbstractUser;
 use ZfcUser\Entity\UserInterface;
 
 
@@ -82,6 +84,27 @@ class Authentification implements UserInterface, ProviderInterface
      * @ORM\Column(type="string", nullable=true)
      */
     protected $secret;
+
+
+    protected $lastRole;
+    /**
+     * @return AbstractRole|null
+     */
+    public function getLastRole()
+    {
+        return $this->lastRole;
+    }
+
+    /**
+     * @param AbstractRole|null $lastRole
+     * @return self
+     */
+    public function setLastRole(AbstractRole $lastRole = null)
+    {
+        $this->lastRole = $lastRole;
+
+        return $this;
+    }
 
     /**
      * Initialies the roles variable.
