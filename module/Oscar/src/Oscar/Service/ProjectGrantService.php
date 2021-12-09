@@ -1168,6 +1168,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         $newActivity->setProject($source->getProject())
             ->setType($source->getType())
+            ->setPcruPoleCompetitivite($source->getPcruPoleCompetitivite())
+            ->setPcruSourceFinancement($source->getPcruSourceFinancement())
+            ->setPcruValidPoleCompetitivite($source->isPcruValidPoleCompetitivite())
             ->setTva($source->getTva())
             ->setCurrency($source->getCurrency())
             ->setLabel('Copie de ' . $source->getLabel())
