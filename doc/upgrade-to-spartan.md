@@ -29,6 +29,8 @@ apt -y autoremove
 
 ### Installation de PHP7.4
 
+> Pour éviter les problèmes de compatibilité, il est fortement recommandé de supprimer les anciennes version de php avec `apt remove`
+
 Installation des paquets PHP
 
 ```bash
@@ -39,7 +41,7 @@ apt install php7.4 \
  php7.4-curl \
  php7.4-dom \
  php7.4-gd \
- php7.4-gearman \
+ gearman-php \
  php7.4-intl \
  php7.4-ldap \
  php7.4-mbstring \
@@ -48,9 +50,10 @@ apt install php7.4 \
  php7.4-zip
 ```
 
+
 ### Passage PHP7.3 > PHP7.3
 
-Il faut ensuite configurer l'utilisation de PHP pour l'utilisation en ligne de commande (**cli**) et *Apache* :
+> Si vous conservez d'ancienne versions de PHP, Il faut configurer l'utilisation de PHP pour l'utilisation en ligne de commande (**cli**) et *Apache* :
 
 #### Pour PHP-CLI
 
@@ -83,6 +86,10 @@ systemctl restart apache2
 a2enmod php7.4
 systemctl restart apache2
 ```
+
+#### OCI
+
+Le module PHP *OCI8* assure la connexion entre Oscar et SIFAC, pour l'installer, suivez la procédure suivante : [Installation OCI8 pour PHP7.4](./install-oracle-pp.md)
 
 #### Vérifier
 
@@ -138,6 +145,8 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 # Mise à jour des privilèges
 php bin/oscar.php check:privileges
 ```
+
+> Il est possible de Github vous demande de générer un *token* d'accès (à créer depuis github.com)
 
 ### Mise à jour de la configuration LDAP
 
