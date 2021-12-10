@@ -1,0 +1,74 @@
+[program:general_worker]
+command=php /var/OscarApp/bin/oscar-worker.php
+numprocs=1
+process_name=%(program_name)s_%(process_num)02d
+directory=/var/OscarApp/bin
+autostart=true
+autorestart=true
+stdout_logfile=/var/OscarApp/logs/worker.log
+stdout_logfile_maxbytes=1MB
+stderr_logfile=/var/OscarApp/logs/worker.log
+stderr_logfile_maxbytes=1MB
+
+[program:apache2]
+command=/etc/init.d/apache2 start
+autostart=true
+autorestart=true
+# command=/usr/sbin/apache2 -DFOREGROUND
+# process_name = %(program_name)s_%(process_num)02d
+# numprocs=1
+# directory=/tmp
+# startsecs=10
+# startretries=3
+# exitcodes=0
+# stopsignal=TERM
+# stopwaitsecs=10
+# stdout_logfile=/var/OscarApp/logs/supervisor_apache.log
+# stdout_logfile_maxbytes=1MB
+# stdout_logfile_backups=10
+# stdout_capture_maxbytes=1MB
+# stderr_logfile=/var/OscarApp/logs/supervisor_apache.log
+# stderr_logfile_maxbytes=1MB
+# stderr_logfile_backups=10
+# stderr_capture_maxbytes=1MB
+
+#[inet_http_server]
+#port      = localhost:9001
+#username  = oscar
+#password  = oscarSupervisor
+
+[program:update_oscar_schema]
+command=php /var/OscarApp/vendor/doctrine/doctrine-module/bin/doctrine-module.php orm:schema-tool:update --force
+#autostart=true
+#autorestart=false
+stdout_logfile=/var/OscarApp/logs/supervisor_update_oscar_schema_stout.log
+stdout_logfile_maxbytes=1MB
+stderr_logfile=/var/OscarApp/logs/supervisor_update_oscar_schema_errors.log
+stderr_logfile_maxbytes=1MB
+
+[program:changeChmod]
+command=chmod -R 777 /var/OscarApp/data
+
+#[program:inotify]
+#command=php /var/www/html/app/controllers/start_inotify.php
+#numprocs=1
+#process_name=%(program_name)s_%(process_num)02d
+#directory=/var/www/html/app/controllers
+#autostart=true
+#autorestart=true
+#stdout_logfile=/var/www/html/app/controllers/kde.log
+#stdout_logfile_maxbytes=1MB
+#stderr_logfile=/var/www/html/app/controllers/kde.log
+#stderr_logfile_maxbytes=1MB
+
+#[program:parse_worker]
+#command=php /var/www/html/app/controllers/parse_worker.php
+#numprocs=6
+#process_name=%(program_name)s_%(process_num)02d
+#directory=/var/www/html/app/controllers
+#autostart=true
+#autorestart=true
+#stdout_logfile=/var/www/html/app/controllers/kde.log
+#stdout_logfile_maxbytes=1MB
+#stderr_logfile=/var/www/html/app/controllers/kde.log
+#stderr_logfile_maxbytes=1MB

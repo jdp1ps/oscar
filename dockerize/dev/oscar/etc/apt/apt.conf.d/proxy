@@ -1,0 +1,2 @@
+Acquire::http::proxy "http://proxy.unicaen.fr:3128";
+Acquire::https::proxy "http://proxy.unicaen.fr:3128";
