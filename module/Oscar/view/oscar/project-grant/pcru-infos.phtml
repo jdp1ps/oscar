@@ -17,6 +17,7 @@
 
     <?php
 
+
     if (count($errors)): ?>
         <div class="alert alert-danger">
             <p><strong>Cette activité ne peut pas être envoyée à PCRU</strong>, certaines informations sont manquantes /
@@ -30,6 +31,15 @@
             </ul>
         </div>
     <?php
+
+        if( $validations['document_signed'] == 'error' ){
+            ?>
+            <p class="alert-danger alert">
+                <i class="icon-attention-1"></i>
+                Oscar n'est pas parvenu à trouver le document du contrat (document de type : <strong><?php echo $contratSignedType ?></strong>).
+            </p>
+            <?php
+        }
     endif; ?>
 
     <?php

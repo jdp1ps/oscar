@@ -451,8 +451,12 @@ class ActivityPcruInfos
         if( $datas['Reference'] )
             $out['Reference'] = self::VALIDATION_VALID;
 
-        if( $this->getDocumentPath() ){
+
+        if( $this->getDocumentId() ){
             $out['document_signed'] = self::VALIDATION_VALID;
+            $out['contrat_signed'] = self::VALIDATION_VALID;
+        } else {
+            $this->addError("Le document du contrat est indisponible");
         }
 
         foreach ($out as $champ=>$state) {

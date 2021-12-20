@@ -263,6 +263,14 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     }
 
+    /**
+     * Suppression d'un contrat en attente.
+     *
+     * @param int $idActivityPcruInfo
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function removeWaiting( int $idActivityPcruInfo ):void
     {
         // Récupération du PCRUInfo et vérifier l'état
@@ -400,6 +408,21 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
     }
 
+    public function getContratPath( Activity $activity ) :string
+    {
+
+    }
+
+    /**
+     * Retourne le type de document utilisé pour désigner les contrat définitif signé.
+     *
+     * @return string
+     */
+    public function getContractSignedType() :string
+    {
+
+    }
+
 
     /**
      * Affichage des donnèes PCRU :
@@ -433,9 +456,10 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         $headers = ActivityPcruInfoFromActivityFactory::getHeaders();
         $datas = $pcruInfos->toArray();
+
         $validation = $pcruInfos->validation();
-        $documentPath = $this->getOscarConfigurationService()->getDocumentDropLocation(
-            ) . '/' . $pcruInfos->getDocumentPath();
+        $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());
+
 
         return [
             'validations' => $validation,
@@ -448,6 +472,14 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             'status' => $pcruInfos->getStatus(),
             'preview' => $preview
         ];
+    }
+
+    public function getDocumentPath( $documentId ) :string
+    {
+        $baseLocation = $this->getOscarConfigurationService()->getDocumentDropLocation();
+        /** @var ContractDocument $document */
+        $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($documentId);
+        return $baseLocation . $document->getPath();
     }
 
 

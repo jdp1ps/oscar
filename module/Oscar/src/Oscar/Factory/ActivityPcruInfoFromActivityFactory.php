@@ -35,6 +35,13 @@ class ActivityPcruInfoFromActivityFactory
     }
 
 
+    /**
+     * Création des données PCRU à partir des données de l'activité.
+     *
+     * @param Activity $activity
+     * @return ActivityPcruInfos
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function createNew(Activity $activity): ActivityPcruInfos
     {
         // Données PCRU
@@ -92,7 +99,7 @@ class ActivityPcruInfoFromActivityFactory
 
         // Document signé
         $typeDocumentSigne = $this->oscarConfigurationService
-            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");;
+            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
         $documentSigned = null;
         $documentId = null;
 

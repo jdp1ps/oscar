@@ -2958,7 +2958,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         } elseif ($methods == "POST") {
             $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_UPLOAD);
             $action = $this->params()->fromPost('action');
-            if( $action == 'upload' ){
+            if ($action == 'upload') {
                 $this->getProjectGrantService()->getPCRUService()->upload();
                 $this->redirect()->toRoute('contract/pcru-list');
             }
@@ -2987,13 +2987,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Accès
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
 
-        if( $this->params()->fromQuery("a") == "reset" ){
+        if ($this->params()->fromQuery("a") == "reset") {
             $this->getProjectGrantService()->getPCRUService()->resetTmpPcruInfos($activity);
             $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
         }
 
-        if( $this->params()->fromQuery("a") == "activate" ){
-
+        if ($this->params()->fromQuery("a") == "activate") {
             // Formulaire
             $form = new ActivityInfosPcruForm($this->getProjectGrantService(), $activity);
             $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
@@ -3001,15 +3000,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->init();
             $form->bind($pcruInfos);
 
-            if( $this->getRequest()->getMethod() == "POST" ){
+            if ($this->getRequest()->getMethod() == "POST") {
                 $posted = $this->getRequest()->getPost();
                 $form->setData($posted);
-                if( $form->isValid() ){
-
+                if ($form->isValid()) {
                     $this->getProjectGrantService()->getPCRUService()->activateActivity($activity, $pcruInfos);
-                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId() ]);
+                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
                 } else {
-
                 }
             }
 
@@ -3021,9 +3018,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $view;
         }
 
-        if( $this->params()->fromQuery("a") == "edit" ){
-
-
+        if ($this->params()->fromQuery("a") == "edit") {
             // Formulaire
             $form = new ActivityInfosPcruForm($this->getProjectGrantService(), $activity);
             $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
@@ -3031,15 +3026,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->init();
             $form->bind($pcruInfos);
 
-            if( $this->getRequest()->getMethod() == "POST" ){
-
+            if ($this->getRequest()->getMethod() == "POST") {
                 $posted = $this->getRequest()->getPost();
                 $form->setData($posted);
-                if( $form->isValid() ){
+                if ($form->isValid()) {
                     $this->getProjectGrantService()->getPCRUService()->updatePcruInfos($activity, $pcruInfos);
-                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId() ]);
+                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
                 } else {
-
                 }
             }
 
@@ -3052,20 +3045,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $view;
         }
 
-
-
         $method = $this->getHttpXMethod();
 
         if ($method == 'POST') {
-
             $action = $this->params()->fromPost('action');
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU_ACTIVATE, $activity);
             switch ($action) {
-
                 case 'remove-waiting';
                     $idActivityPcruInfo = intval($this->params()->fromPost('activitypcruinfo_id'));
                     $this->getProjectGrantService()->getPCRUService()->removeWaiting($idActivityPcruInfo);
-                    $this->redirect()->toRoute('contract/show', ['id'=>$activity->getId()]);
+                    $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
 
                 case 'add-pool':
                     $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
@@ -3075,18 +3064,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $this->getProjectGrantService()->getPCRUService()->downloadOne($activity);
                     break;
             }
-            return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId() ]);
+            return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
         }
 
         $return = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+        $return['contratSignedType'] = $this->getOscarConfigurationService()
+            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
 
         /** @var ActivityPcruInfos $pcruInfos */
         $pcruInfos = $return['infos'];
 
-        if( $pcruInfos->isWaiting() ){
+        if ($pcruInfos->isWaiting()) {
             $return['deletable'] = true;
             $return['activitypcruinfo_id'] = $pcruInfos->getId();
-
         }
 
         $return['poolopen'] = $this->getProjectGrantService()->getPCRUService()->isPoolOpen();
