@@ -59,6 +59,7 @@ class ActivityPcruInfoFromActivityFactory
         // Donnèes trouvées
         $codeUniteLabintel = "";
         $sigleUnit = "";
+        $idPartenairePrincipal = "";
 
         // Récupération des laboratoires
         $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
@@ -80,7 +81,11 @@ class ActivityPcruInfoFromActivityFactory
         /** @var ActivityOrganization $partner */
         foreach ($activity->getOrganizationsWithRole($rolePartnerToFind) as $partner) {
             if( $partner->getOrganization()->getCodePcru() ){
-                $partners[] = $partner->getOrganization()->getCodePcru();
+                if( $idPartenairePrincipal == "" ){
+                    $idPartenairePrincipal = $partner->getOrganization()->getCodePcru();
+                } else {
+                    $partners[] = $partner->getOrganization()->getCodePcru();
+                }
             }
         }
         if( $codeUniteLabintel == "" ){
@@ -141,6 +146,7 @@ class ActivityPcruInfoFromActivityFactory
             ->setNumContratTutelleGestionnaire($activity->getOscarNum())
             ->setValidePoleCompetivite($activity->isPcruPolePoleCompetitiviteStr())
             ->setSourceFinancement($activity->getPcruSourceFinancementStr())
+            ->setIdPartenairePrincipal($idPartenairePrincipal)
             ->setResponsableScientifique($responsable)
             ->setCodeUniteLabintel($codeUniteLabintel)
             ->setTypeContrat($pcruType)

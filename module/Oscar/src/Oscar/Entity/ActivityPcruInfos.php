@@ -3,6 +3,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToOne as OneToOne;
 use Oscar\Utils\DateTimeUtils;
@@ -300,8 +301,12 @@ class ActivityPcruInfos
         return $this->getStatus() == self::STATUS_FILE_READY;
     }
 
-    public function toArray() :array
+    public function toArray(?EntityManager $entityManager = null) :array
     {
+        $partenairePrincipal = "";
+        if( $this->getIdPartenairePrincipal() && $entityManager ){
+            $partenairePrincipal = $entityManager->getRepository(Organization::class)->getOrganizationByCodePCRU($this->getIdPartenairePrincipal());
+        }
         $out = [];
         $out['Objet'] = $this->getObjet();
         $out['CodeUniteLabintel'] = $this->getCodeUniteLabintel();
@@ -315,7 +320,7 @@ class ActivityPcruInfos
         $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
         $out['CoordinateurConsortium'] = $this->isCoordinateurConsortium() ? 'True' : 'False';
         $out['Partenaires'] = $this->getPartenaires();
-        $out['PartenairePrincipal'] = "Part inconnu"; // TODO
+        $out['PartenairePrincipal'] = $partenairePrincipal;
         $out['IdPartenairePrincipal'] = $this->getIdPartenairePrincipal();
         $out['SourceFinancement'] = $this->getSourceFinancement() ? $this->getSourceFinancement()->getLabel() : "";
         $out['LieuExecution'] = $this->getLieuExecution();

@@ -157,4 +157,6 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
         return $qb->getSingleResult();
     }
+
+
 }

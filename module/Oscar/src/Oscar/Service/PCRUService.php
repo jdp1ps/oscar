@@ -83,7 +83,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $this->getOscarConfigurationService()->getPcruPartenaireFile($withPath);
     }
 
-    public function getParenairesHeaders() :array
+    public function getParenairesHeaders(): array
     {
         return [
             "LibelleCourt",
@@ -100,7 +100,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         ];
     }
 
-    public function getPartenaireData( Organization $organization ) :array
+    public function getPartenaireData(Organization $organization): array
     {
         return [
             $organization->getShortName(),
@@ -117,7 +117,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         ];
     }
 
-    public function getOrganizationByCodePCRU( $codePcru ): ?Organization
+    public function getOrganizationByCodePCRU($codePcru): ?Organization
     {
         return $this->getEntityManager()->getRepository(Organization::class)->getOrganizationByCodePCRU($codePcru);
     }
@@ -150,15 +150,20 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException("Le module PCR n'est pas activé");
         }
 
-        if( $pcruInfos == null ) {
-            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        if ($pcruInfos == null) {
+            $factory = new ActivityPcruInfoFromActivityFactory(
+                $this->getOscarConfigurationService(),
+                $this->getEntityManager()
+            );
             $pcruInfos = $factory->createNew($activity);
         }
 
         // Contrôle des informations
         $validation = $pcruInfos->validation();
         if (count($pcruInfos->getError()) > 0) {
-            throw new OscarException("Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées");
+            throw new OscarException(
+                "Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées"
+            );
         }
 
         try {
@@ -180,13 +185,15 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException("Le module PCR n'est pas activé");
         }
 
-        if( $pcruInfos == null ) {
-            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+        if ($pcruInfos == null) {
+            $factory = new ActivityPcruInfoFromActivityFactory(
+                $this->getOscarConfigurationService(),
+                $this->getEntityManager()
+            );
             $pcruInfos = $factory->createNew($activity);
         }
 
         try {
-
             $pcruInfos->setStatus(ActivityPcruInfos::STATUS_DRAFT);
             $pcruInfos->validation();
 
@@ -226,7 +233,10 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
 
         if (!$pcruInfos) {
-            $factory = new ActivityPcruInfoFromActivityFactory($this->getOscarConfigurationService(), $this->getEntityManager());
+            $factory = new ActivityPcruInfoFromActivityFactory(
+                $this->getOscarConfigurationService(),
+                $this->getEntityManager()
+            );
             $pcruInfos = $factory->createNew($activity);
         }
 
@@ -243,8 +253,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarPCRUException("Impossible de créer l'archive");
         }
         $zip->addFile($csvtmp, 'contrats.csv');
-        if( file_exists($orgtmp) )
+        if (file_exists($orgtmp)) {
             $zip->addFile($orgtmp, 'partenaires.csv');
+        }
         $zip->addFile($pdftmp, $num . '.pdf');
         $zip->close();
 
@@ -260,7 +271,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         unlink($pdftmp);
         unlink($ziptmp);
         exit;
-
     }
 
     /**
@@ -271,7 +281,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function removeWaiting( int $idActivityPcruInfo ):void
+    public function removeWaiting(int $idActivityPcruInfo): void
     {
         // Récupération du PCRUInfo et vérifier l'état
         /** @var ActivityPcruInfos $pcruInfo */
@@ -279,12 +289,14 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         $this->getLoggerService()->debug("Suppression PCRU (en attente)");
 
-        if( $pcruInfo == null ){
+        if ($pcruInfo == null) {
             throw new OscarException("Informations PCRU introuvable (id = $idActivityPcruInfo)");
         }
 
-        if( !$pcruInfo->isWaiting() ){
-            throw new OscarException("Impossible de réinitialiser des informations PCRU qui ne sont pas en attente d'envoi");
+        if (!$pcruInfo->isWaiting()) {
+            throw new OscarException(
+                "Impossible de réinitialiser des informations PCRU qui ne sont pas en attente d'envoi"
+            );
         }
 
         // Retirer du CSV
@@ -352,7 +364,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $csvFile->writeContratsPDF();
         $pcruInfos->setStatus(ActivityPcruInfos::STATUS_FILE_READY);
         $this->getEntityManager()->flush($pcruInfos);
-
     }
 
     private $_logpool;
@@ -399,18 +410,17 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $this->getActivityPCRUInfoRepository()->findOneBy(['numContratTutelleGestionnaire' => $numOscar]);
     }
 
-    public function resetTmpPcruInfos(Activity $activity) :void
+    public function resetTmpPcruInfos(Activity $activity): void
     {
         $pcruInfos = $this->getPcruInfosActivity($activity);
-        if( $pcruInfos ){
+        if ($pcruInfos) {
             $this->getEntityManager()->remove($pcruInfos);
             $this->getEntityManager()->flush();
         }
     }
 
-    public function getContratPath( Activity $activity ) :string
+    public function getContratPath(Activity $activity): string
     {
-
     }
 
     /**
@@ -418,9 +428,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      *
      * @return string
      */
-    public function getContractSignedType() :string
+    public function getContractSignedType(): string
     {
-
     }
 
 
@@ -455,7 +464,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
 
         $headers = ActivityPcruInfoFromActivityFactory::getHeaders();
-        $datas = $pcruInfos->toArray();
+        $datas = $pcruInfos->toArray($this->getEntityManager());
 
         $validation = $pcruInfos->validation();
         $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());
@@ -474,7 +483,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         ];
     }
 
-    public function getDocumentPath( $documentId ) :string
+    public function getDocumentPath($documentId): string
     {
         $baseLocation = $this->getOscarConfigurationService()->getDocumentDropLocation();
         /** @var ContractDocument $document */
@@ -500,10 +509,11 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $buffer = tmpfile();
         $tmpfile_path = stream_get_meta_data($buffer)['uri'];
 
-        if ($withHeader == true)
+        if ($withHeader == true) {
             fputcsv($buffer, array_keys($this->getDataFactory()->getHeaders()), ';');
+        }
 
-        fputcsv($buffer, $infos->toArray(), ";");
+        fputcsv($buffer, $infos->toArray($this->getEntityManager()), ";");
 
         $content = file_get_contents($tmpfile_path);
 
@@ -518,13 +528,13 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      * @param Activity $activity
      * @return array
      */
-    public function getActivityPartenaires(Activity $activity) :array
+    public function getActivityPartenaires(Activity $activity): array
     {
         $out = [];
         $out[""] = "Aucun";
         /** @var ActivityOrganization $org */
         foreach ($activity->getOrganizationsDeep() as $org) {
-            if( $org->getOrganization()->getCodePcru() ){
+            if ($org->getOrganization()->getCodePcru()) {
                 $out[$org->getOrganization()->getCodePcru()] = $org->getOrganization()->__toString();
             }
         }
@@ -538,14 +548,18 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      * @param Activity $activity
      * @return array
      */
-    public function getResponsableScientifiques(Activity $activity) :array
+    public function getResponsableScientifiques(Activity $activity): array
     {
-        $roleStr = $this->getOscarConfigurationService()->getOptionalConfiguration('pcru_responsablescientifique', 'Responsable scientifique');
+        $roleStr = $this->getOscarConfigurationService()->getOptionalConfiguration(
+            'pcru_responsablescientifique',
+            'Responsable scientifique'
+        );
         $out = [];
         /** @var ActivityPerson $per */
         foreach ($activity->getPersonsDeep() as $per) {
-            if( $per->getRoleObj()->getRoleId() == $roleStr )
+            if ($per->getRoleObj()->getRoleId() == $roleStr) {
                 $out[$per->getPerson()->getFullname()] = $per->getPerson()->getFullname();
+            }
         }
 
         return $out;
@@ -564,21 +578,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             );
         }
         return $factory;
-    }
-
-
-    public function getDatasFromActivity(Activity $activity, $format = 'array')
-    {
-        $factory = $this->getDataFactory();
-        $pcruInfos = $factory->createNew($activity);
-        if ($format == 'array') {
-            return $pcruInfos->toArray();
-        } elseif ($format == 'object') {
-            return $pcruInfos;
-        } else {
-            throw new OscarException("Impossible de générer les données PCRU pour l'activité '$activity'");
-        }
-
     }
 
     protected function getPCRUDepotStrategy()
@@ -603,7 +602,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
     {
         static $conn;
         if ($conn == null) {
-
             // Configuration FTP
             $config = $this->getConfiguration();
 
@@ -630,7 +628,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $config = $this->getConfiguration();
         $conn = $this->getFtpAccess();
         if (ftp_login($conn, $config['user'], $config['pass'])) {
-
         } else {
             throw new OscarException("Echec de l'authentification");
         }
@@ -650,7 +647,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $path = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
 
         if ($handle = opendir($path)) {
-
             while (false !== ($entry = readdir($handle))) {
                 if ($entry == '.' || $entry == '..') {
                     continue;
@@ -879,7 +875,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
     public function allReadyToGo()
     {
-
     }
 
     /**
