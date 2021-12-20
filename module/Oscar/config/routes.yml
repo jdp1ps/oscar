@@ -1662,7 +1662,7 @@ administration:
             options:
                 route: /documents-sections
                 defaults:
-                    action: documentSection
+                    action: documentSections
 
         contrat-type-pcru:
             type: segment
