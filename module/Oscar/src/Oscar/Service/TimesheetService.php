@@ -3809,6 +3809,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
 
         $validationsDone = [];
+        echo "<pre>";
 
         $declarations = [
             'activities' => [],
@@ -3827,6 +3828,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $validationId = $timesheet->getValidationPeriod()->getId();
                 if (!in_array($validationId, $validationsDone)) {
                     $validationsDone[] = $validationId;
+                    echo "Prj:" . $timesheet->getValidationPeriod()->getValidationActivityBy() . "<br>";
+                    echo "Sci:" . $timesheet->getValidationPeriod()->getValidationSciBy() . "<br>";
+                    echo "Adm:" . $timesheet->getValidationPeriod()->getValidationAdmBy() . "<br>";
+                    //var_dump($timesheet->getValidationPeriod());
+                    die();
                     $commentaires .= $timesheet->getValidationPeriod()->getComment() . "\n";
                 }
             }
@@ -3947,6 +3953,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             $totalPeriod += $timesheet->getDuration();
         }
+
+        var_dump($validationsDone);
+
+        die();
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
