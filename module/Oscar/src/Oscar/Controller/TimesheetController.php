@@ -1151,6 +1151,9 @@ class TimesheetController extends AbstractOscarController
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
                     $this->getViewRenderer()
                 );
+                echo "<pre>";
+                var_dump($datas);
+                die();
                 $formatter->render($datas);
                 $html = $formatter->render($datas);
                 die($html);
