@@ -150,10 +150,14 @@ class DateTimeUtils {
 
     public static function toDatetime( $value )
     {
-        if( $value == null ){
+        if( $value == null /*|| $value == 'null'*/ ){
             return null;
         } else {
-            return new \DateTime($value);
+            try {
+                return new \DateTime($value);
+            } catch (\Exception $e) {
+                return null;
+            }
         }
     }
 
