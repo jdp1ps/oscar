@@ -1254,14 +1254,9 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsPrj()
+    public function getValidatorsPrj(): ArrayCollection
     {
         return $this->validatorsPrj;
-    }
-
-    public function hasValidatorsPrj() :bool
-    {
-        return count($this->getValidatorsPrj()) > 0;
     }
 
     /**
@@ -1276,14 +1271,9 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsSci()
+    public function getValidatorsSci(): ArrayCollection
     {
         return $this->validatorsSci;
-    }
-
-    public function hasValidatorsSci() :bool
-    {
-        return count($this->getValidatorsSci()) > 0;
     }
 
     /**
@@ -1298,14 +1288,9 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsAdm()
+    public function getValidatorsAdm(): ArrayCollection
     {
         return $this->validatorsAdm;
-    }
-
-    public function hasValidatorsAdm() :bool
-    {
-        return count($this->getValidatorsAdm()) > 0;
     }
 
     /**
@@ -1315,6 +1300,21 @@ class Activity implements ResourceInterface
     {
         $this->validatorsAdm = $validatorsAdm;
         return $this;
+    }
+
+    public function hasValidatorsPrj() :bool
+    {
+        return count($this->getValidatorsPrj()) > 0;
+    }
+
+    public function hasValidatorsSci() :bool
+    {
+        return count($this->getValidatorsSci()) > 0;
+    }
+
+    public function hasValidatorsAdm() :bool
+    {
+        return count($this->getValidatorsAdm()) > 0;
     }
 
     /**
@@ -1418,7 +1418,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return Discipline[]
+     * @return self
      */
     public function setDisciplines($disciplines)
     {
@@ -2556,37 +2556,23 @@ class Activity implements ResourceInterface
         return false;
     }
 
-    /**
-     * La feuille de temps est éligible aux feuilles de temps.
-     *
-     * @return bool
-     */
-    public function isTimesheetAllowed() :bool
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private $tmpOrganizationsWithRoleForm = [];
+
+    public function setOrganizationsWithRoleForm($formName, $formValue)
     {
-        return count($this->getNoTimesheetReason()) == 0;
+        var_dump($formName);
+        var_dump($formValue);
     }
 
-    private $_noTimesheetReason;
-
-    /**
-     * Retourne la liste des raisons d'inégibilité aux feuilles de temps.
-     *
-     * @return array
-     */
-    public function getNoTimesheetReason() :array
+    public function getOrganizationsWithRoleForm($formName)
     {
-        if( $this->_noTimesheetReason == null ){
-            $this->_noTimesheetReason = [];
-            if( !$this->getProject() ) {
-                $reasons[] = "L'activité n'a pas de projet";
-            } elseif (!$this->getProject()->getAcronym()) {
-                $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
-            }
-
-            if( !$this->getDateStart() || !$this->getDateEnd() ) {
-                $reasons[] = "L'activité n'a pas de date de début/fin";
-            }
+        if (array_key_exists($formName)) {
+            return $this->tmpOrganizationsWithRoleForm[$formName];
+        } else {
+            return '';
         }
-        return $this->_noTimesheetReason;
     }
+
 }
