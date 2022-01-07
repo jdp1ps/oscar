@@ -22,6 +22,12 @@ $durationRounded = function( $duration ) {
     }
     return sprintf('%s:%s', $heures, $minutes);
 };
+
+$renderDate = function( $str ){
+    setlocale(LC_ALL, 'fr_FR');
+    $date = new DateTime($str);
+    return $date->format("F Y m d");
+}
 ?>
 <body>
 <div class="container-fluid wrapper-page">
@@ -306,16 +312,43 @@ $durationRounded = function( $duration ) {
     <tr>
         <td colspan="<?= $width ?>">&nbsp;</td>
     </tr>
-
     <tr>
-        <td>&nbsp;</td>
-        <td colspan="<?= ($col) ?>" class="valueLabel">Signature de l'agent : </td>
-        <td>&nbsp;</td>
-        <td colspan="<?= ($col) ?>" class="valueLabel">Validation scientifique : </td>
-        <td>&nbsp;</td>
-        <td colspan="<?= $col ?>" class="valueLabel">Validation administrative :</td>
-        <td>&nbsp;</td>
+        <td colspan="<?= $width ?>">
+            <table>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>Agent : <br>
+                        <strong><?= $person ?></strong>
+                    </td>
+                    <td>Validation projet : <br>
+                        <?php foreach ($validations['validators']['prj'] as $validatorInfos) :?>
+                            <strong><?= $validatorInfos['person'] ?></strong>
+                            <em>(<?= $validatorInfos['human_date'] ?>)</em>
+                            <br><br>
+                        <?php endforeach; ?>
+                    </td>
+                    <td>
+                        Validation scientifique : <br>
+                        <?php foreach ($validations['validators']['sci'] as $validatorInfos) :?>
+                            <strong><?= $validatorInfos['person'] ?></strong>
+                            <em>(<?= $validatorInfos['human_date'] ?>)</em>
+                            <br><br>
+                        <?php endforeach; ?>
+                    </td>
+                    <td>
+                        Validation administrative : <br>
+                        <?php foreach ($validations['validators']['adm'] as $validatorInfos) :?>
+                            <strong><?= $validatorInfos['person'] ?></strong>
+                            <em>(<?= $validatorInfos['human_date'] ?>)</em>
+                            <br><br>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+            </table>
+        </td>
     </tr>
+
+
     <tr>
         <td>&nbsp;</td>
         <td colspan="<?= ($col) ?>" class="value" style="height: 2em">&nbsp;</td>

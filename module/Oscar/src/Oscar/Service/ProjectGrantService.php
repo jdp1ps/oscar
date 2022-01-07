@@ -639,7 +639,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         $period = DateTimeUtils::periodBounds($periodStr);
         $date = new \DateTime($period['end']);
-        return $this->getActivityRepository()->getActivitiesPersonDate($personId, $date);
+        return $this->getActivityRepository()->getActivitiesPersonDate((int)$personId, $date);
     }
 
     public function getDistinctNumberKeyUnreferenced()

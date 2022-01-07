@@ -40,7 +40,6 @@ class ValidationPeriod
     /**
      * Personnes
      *
-     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Person")
      * @ORM\JoinTable(name="validationperiod_prj")
      */
@@ -49,7 +48,6 @@ class ValidationPeriod
     /**
      * Personnes
      *
-     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Person")
      * @ORM\JoinTable(name="validationperiod_sci")
      */
@@ -58,33 +56,34 @@ class ValidationPeriod
     /**
      * Personnes
      *
-     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Person")
      * @ORM\JoinTable(name="validationperiod_adm")
      */
     protected $validatorsAdm;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
-    private $id;
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $object;
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $objectGroup;
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private $object_id;
+    private int $id;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private string $object;
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private string $objectGroup;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private int $object_id;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Validation niveau activité
@@ -92,28 +91,30 @@ class ValidationPeriod
      * @var
      * @ORM\ManyToOne(targetEntity="Person")
      */
-    private $declarer;
+    private Person $declarer;
+
     /**
      * Mois
      *
      * @var integer
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $month;
+    private int $month;
+
     /**
      * Année
      *
      * @var integer
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $year;
+    private int $year;
+
     /**
      * Date d'envoi.
      *
-     * @var datetime
      * @ORM\Column(type="date", nullable=true)
      */
-    private $dateSend;
+    private ?\DateTime $dateSend;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,13 +126,14 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $log;
+
     /**
      * Date de la validation projet.
      *
-     * @var datetime
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationActivityAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -139,6 +141,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationActivityBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -157,6 +160,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationActivityMessage;
+
     /**
      * Date de la validation.
      *
@@ -164,6 +168,7 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationSciAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -171,6 +176,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationSciBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -178,7 +184,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $validationSciById;
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Rejet niveau activité
@@ -189,6 +194,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationSciMessage;
+
     /**
      * Date de la validation.
      *
@@ -196,6 +202,7 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $validationAdmAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -203,6 +210,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $validationAdmBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -210,7 +218,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $validationAdmById;
-
 
     /// Rejet scientifique hiérarchique
     /**
@@ -220,6 +227,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $validationAdmMessage;
+
     /**
      * Date de la validation projet.
      *
@@ -227,6 +235,7 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectActivityAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -234,6 +243,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectActivityBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -241,7 +251,6 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectActivityById;
-
 
     // Rejet administratif
     /**
@@ -251,6 +260,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectActivityMessage;
+
     /**
      * Date de la reject.
      *
@@ -258,6 +268,7 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectSciAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -265,6 +276,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectSciBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -272,6 +284,7 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectSciById;
+
     /**
      * Message
      *
@@ -279,6 +292,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectSciMessage;
+
     /**
      * Date du rejet.
      *
@@ -286,6 +300,7 @@ class ValidationPeriod
      * @ORM\Column(type="date", nullable=true)
      */
     private $rejectAdmAt;
+
     /**
      * Intitulé du valideur.
      *
@@ -293,6 +308,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=true)
      */
     private $rejectAdmBy;
+
     /**
      * Identifiant du valideur (Person).
      *
@@ -300,6 +316,7 @@ class ValidationPeriod
      * @ORM\Column(type="integer", nullable=true)
      */
     private $rejectAdmById;
+
     /**
      * Message
      *
@@ -307,6 +324,7 @@ class ValidationPeriod
      * @ORM\Column(type="text", nullable=true)
      */
     private $rejectAdmMessage;
+
     /**
      * Schedule
      *
@@ -361,6 +379,7 @@ class ValidationPeriod
 
     /**
      * @param string $comment
+     * @return ValidationPeriod
      */
     public function setComment($comment)
     {
@@ -596,12 +615,22 @@ class ValidationPeriod
         }
     }
 
-    public function isValidable(){
+    public function isValidable()
+    {
         return
             $this->getStatus() == self::STATUS_STEP1 ||
             $this->getStatus() == self::STATUS_STEP2 ||
             $this->getStatus() == self::STATUS_STEP3;
+    }
 
+    /**
+     * Retourne TRUE si la validation est terminée.
+     *
+     * @return bool
+     */
+    public function isValid(): bool
+    {
+        return $this->getStatus() == self::STATUS_VALID;
     }
 
     /**
@@ -714,9 +743,11 @@ class ValidationPeriod
         return $this;
     }
 
-    public function reject(Person $validateur, $message, $date=null) {
-
-        if( $date == null ) $date = new \DateTime();
+    public function reject(Person $validateur, $message, $date = null)
+    {
+        if ($date == null) {
+            $date = new \DateTime();
+        }
 
         switch ($this->getStatus()) {
             case ValidationPeriod::STATUS_STEP1:
@@ -799,7 +830,7 @@ class ValidationPeriod
     /**
      * @return bool
      */
-    public function requireValidation()
+    public function requireValidation(): bool
     {
         return $this->getStatus() == self::STATUS_STEP1 ||
             $this->getStatus() == self::STATUS_STEP2 ||
@@ -812,7 +843,6 @@ class ValidationPeriod
      */
     public function getCurrentValidators()
     {
-
         if ($this->getStatus() == self::STATUS_STEP1) {
             return $this->getValidatorsPrj();
         } elseif ($this->getStatus() == self::STATUS_STEP2) {
@@ -849,7 +879,9 @@ class ValidationPeriod
 
             'status' => $this->getStatus(),
 
-            'validationactivity_at' => $this->getValidationActivityAt() ? $this->getValidationActivityAt()->format('Y-m-d') : null,
+            'validationactivity_at' => $this->getValidationActivityAt() ? $this->getValidationActivityAt()->format(
+                'Y-m-d'
+            ) : null,
             'validationactivity_by' => $this->getValidationActivityBy(),
 
             'validationsci_by' => $this->getValidationSciBy(),
@@ -1289,7 +1321,8 @@ class ValidationPeriod
         return $this;
     }
 
-    public function removeValidatorAdm( Person $person ){
+    public function removeValidatorAdm(Person $person)
+    {
         if (!$this->getValidatorsAdm()->contains($person)) {
             $this->getValidatorsAdm()->removeElement($person);
         }
@@ -1335,7 +1368,6 @@ class ValidationPeriod
 
     public function toJson()
     {
-
         $validateursPrj = [];
         $validateursSci = [];
         $validateursAdm = [];
@@ -1393,7 +1425,16 @@ class ValidationPeriod
 
     public function __toString()
     {
-        return sprintf('[ValidationPeriod:%s] %s-%s %s:%s=%s, pid=%s', $this->getId(), $this->getYear(), $this->getMonth(), $this->getObjectGroup(), $this->getObject(), $this->getObjectId(), $this->getDeclarer());
+        return sprintf(
+            '[ValidationPeriod:%s] %s-%s %s:%s=%s, pid=%s',
+            $this->getId(),
+            $this->getYear(),
+            $this->getMonth(),
+            $this->getObjectGroup(),
+            $this->getObject(),
+            $this->getObjectId(),
+            $this->getDeclarer()
+        );
     }
 
     /**
