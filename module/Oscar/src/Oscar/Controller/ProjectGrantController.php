@@ -2971,6 +2971,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function timesheetAction()
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+        return [
+            'activity' => $activity,
+            'timesheetAllow' => $activity->isTimesheetAllowed()
+        ];
+    }
+
     /**
      * Gestion/récapitulatif des informations PCRU
      *

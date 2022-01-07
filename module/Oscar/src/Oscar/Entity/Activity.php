@@ -338,6 +338,27 @@ class Activity implements ResourceInterface
     protected $persons;
 
     /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_prj")
+     */
+    private $validatorsPrj;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_sci")
+     */
+    private $validatorsSci;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_adm")
+     */
+    private $validatorsAdm;
+
+    /**
      * Liste des jalons (dates clefs).
      *
      * @var ArrayCollection
@@ -1225,6 +1246,60 @@ class Activity implements ResourceInterface
         $this->disciplines = new ArrayCollection();
         $this->estimatedSpentLines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+        $this->validatorsPrj = new ArrayCollection();
+        $this->validatorsSci = new ArrayCollection();
+        $this->validatorsAdm = new ArrayCollection();
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsPrj(): ArrayCollection
+    {
+        return $this->validatorsPrj;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsPrj
+     */
+    public function setValidatorsPrj(ArrayCollection $validatorsPrj): self
+    {
+        $this->validatorsPrj = $validatorsPrj;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsSci(): ArrayCollection
+    {
+        return $this->validatorsSci;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsSci
+     */
+    public function setValidatorsSci(ArrayCollection $validatorsSci): self
+    {
+        $this->validatorsSci = $validatorsSci;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsAdm(): ArrayCollection
+    {
+        return $this->validatorsAdm;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsAdm
+     */
+    public function setValidatorsAdm(ArrayCollection $validatorsAdm): self
+    {
+        $this->validatorsAdm = $validatorsAdm;
+        return $this;
     }
 
     /**
@@ -2464,6 +2539,33 @@ class Activity implements ResourceInterface
             }
         }
         return false;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isTimesheetAllowed() :bool
+    {
+        return count($this->getNoTimesheetReason()) == 0;
+    }
+
+    private $_noTimesheetReason;
+    public function getNoTimesheetReason() :array
+    {
+        if( $this->_noTimesheetReason == null ){
+            $this->_noTimesheetReason = [];
+            if( !$this->getProject() ) {
+                $reasons[] = "L'activité n'a pas de projet";
+            } elseif (!$this->getProject()->getAcronym()) {
+                $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
+            }
+
+            if( !$this->getDateStart() || !$this->getDateEnd() ) {
+                $reasons[] = "L'activité n'a pas de date de début/fin";
+            }
+        }
+        return $this->_noTimesheetReason;
     }
 
 
