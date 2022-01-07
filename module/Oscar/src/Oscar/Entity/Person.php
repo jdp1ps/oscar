@@ -155,6 +155,24 @@ class Person implements ResourceInterface
     protected $timesheets;
 
     /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsPrj")
+     */
+    protected $validatorActivitiesPrj;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsSci")
+     */
+    protected $validatorActivitiesSci;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsAdm")
+     */
+    protected $validatorActivitiesAdm;
+
+    /**
      * @ORM\ManyToMany(targetEntity="Person", inversedBy="timesheetsFor")
      * @ORM\JoinTable(name="timesheetsBy",
      *      joinColumns={@ORM\JoinColumn(name="person_id", referencedColumnName="id")},
@@ -201,6 +219,9 @@ class Person implements ResourceInterface
         $this->timesheets = new ArrayCollection();
         $this->timesheetsBy = new ArrayCollection();
         $this->timesheetsFor = new ArrayCollection();
+        $this->validatorActivitiesPrj = new ArrayCollection();
+        $this->validatorActivitiesSci = new ArrayCollection();
+        $this->validatorActivitiesAdm = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
     }
