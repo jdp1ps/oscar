@@ -835,8 +835,6 @@ class TimesheetController extends AbstractOscarController
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
-        die();
-
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));
         $year = $this->params()->fromQuery('year', date('Y'));
@@ -924,8 +922,6 @@ class TimesheetController extends AbstractOscarController
                 }
             }
 
-            var_dump($timePerson);
-
             foreach ($timePerson['otherWP'] as $codeOther=>$dataOther) {
                 $total = $dataOther['total'];
                 $totalOthers[$codeOther] += $total;
@@ -933,8 +929,6 @@ class TimesheetController extends AbstractOscarController
                 $totalPersons[$personId] += $total;
             }
         }
-
-        var_dump($projects);
 
         echo "<table border='1'>";
         /*
@@ -999,10 +993,6 @@ class TimesheetController extends AbstractOscarController
 
 
         echo "</table>";
-        var_dump($lots);
-//        var_dump($lots);
-//        var_dump($projects);
-//        var_dump($others);
         die("Synthèse activité " . $activity);
     }
 
@@ -1035,7 +1025,6 @@ class TimesheetController extends AbstractOscarController
         // TODO Tester que la période demandée est cohérente
         $datas = $this->getTimesheetService()->getDatasActivityDates($activity, $periodDebut, $periodFin);
 
-        var_dump($datas);
         die("Synthèse entre $periodDebut et $periodFin");
     }
 
@@ -1151,9 +1140,6 @@ class TimesheetController extends AbstractOscarController
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
                     $this->getViewRenderer()
                 );
-                echo "<pre>";
-                var_dump($datas);
-                die();
                 $formatter->render($datas);
                 $html = $formatter->render($datas);
                 die($html);
@@ -1485,8 +1471,6 @@ class TimesheetController extends AbstractOscarController
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($person);
-
-//        var_dump($correspondances); die();
 
         return [
             'exists' => $resume,

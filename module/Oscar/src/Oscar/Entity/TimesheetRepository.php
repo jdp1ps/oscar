@@ -18,6 +18,37 @@ use Doctrine\ORM\QueryBuilder;
 class TimesheetRepository extends EntityRepository
 {
 
+    protected function getQueryBuilderBase()
+    {
+        return $this->createQueryBuilder('t')
+            ->orderBy('t.activity, t.dateFrom');
+    }
+
+
+    /**
+     * Retourne la liste des créneaux de la personne (ID).
+     *
+     * @param int $personId
+     * @param bool $validatedOnly
+     * @param int|null $activityId
+     * @return int|mixed|string
+     */
+    public function getForPerson( int $personId, bool $validatedOnly = false, ?int $activityId = null )
+    {
+        $qb = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where('t.person = :person')
+            ->orderBy('t.activity, t.dateFrom')
+            ->setParameter('person', $personId);
+
+        if ($activityId != null) {
+            $qb->andWhere('t.activity = :activity')
+                ->setParameter('activity', $activityId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 
     /**
      * @param $uid
@@ -30,6 +61,19 @@ class TimesheetRepository extends EntityRepository
             ->setParameter('uid', $uid)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param int $personId
+     * @return int|mixed|string
+     */
+    public function getTimesheetsPerson(int $personId)
+    {
+          return $this->createQueryBuilder('t')
+              ->where('t.person = :person')
+              ->setParameter('person', $personId)
+              ->getQuery()
+              ->getResult();
     }
 
     /**
