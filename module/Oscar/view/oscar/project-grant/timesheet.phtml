@@ -3,4 +3,33 @@
         Feuille de temps pour
         <strong><?= $activity ?></strong>
     </h1>
+
+    <?php if($activity->isTimesheetAllowed()): ?>
+    <section>
+        <div id="validators"></div>
+        <script>
+            require(['vue', 'vue-resource', 'activityvalidator'], function(Vue, VueResource, ActivityValidator){
+                console.log("ActivityValidator", ActivityValidator);
+                Vue.use(VueResource);
+                new Vue({
+                    el: '#validators',
+                    render: function(h){
+                        return h(ActivityValidator);
+                    }
+                });
+            })
+        </script>
+    </section>
+    <?php else: ?>
+    <section>
+        <div class="alert alert-danger">
+            <p>Vous ne pouvez pas gérer les feuilles de temps de cette activité : </p>
+            <ul>
+                <?php foreach ($activity->getNoTimesheetReason() as $message): ?>
+                <li><?= $message ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </section>
+    <?php endif; ?>
 </div>

@@ -1254,7 +1254,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsPrj(): ArrayCollection
+    public function getValidatorsPrj()
     {
         return $this->validatorsPrj;
     }
@@ -1271,7 +1271,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsSci(): ArrayCollection
+    public function getValidatorsSci()
     {
         return $this->validatorsSci;
     }
@@ -1288,7 +1288,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsAdm(): ArrayCollection
+    public function getValidatorsAdm()
     {
         return $this->validatorsAdm;
     }
@@ -2541,8 +2541,9 @@ class Activity implements ResourceInterface
         return false;
     }
 
-
     /**
+     * La feuille de temps est éligible aux feuilles de temps.
+     *
      * @return bool
      */
     public function isTimesheetAllowed() :bool
@@ -2551,6 +2552,12 @@ class Activity implements ResourceInterface
     }
 
     private $_noTimesheetReason;
+
+    /**
+     * Retourne la liste des raisons d'inégibilité aux feuilles de temps.
+     *
+     * @return array
+     */
     public function getNoTimesheetReason() :array
     {
         if( $this->_noTimesheetReason == null ){
@@ -2567,24 +2574,4 @@ class Activity implements ResourceInterface
         }
         return $this->_noTimesheetReason;
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private $tmpOrganizationsWithRoleForm = [];
-
-    public function setOrganizationsWithRoleForm($formName, $formValue)
-    {
-        var_dump($formName);
-        var_dump($formValue);
-    }
-
-    public function getOrganizationsWithRoleForm($formName)
-    {
-        if (array_key_exists($formName)) {
-            return $this->tmpOrganizationsWithRoleForm[$formName];
-        } else {
-            return '';
-        }
-    }
-
 }

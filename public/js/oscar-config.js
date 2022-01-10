@@ -112,7 +112,8 @@ requirejs.config({
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
         "contrattypepcru": "oscar/dist/ContratTypePCRU.umd.min",
         "createprocessuspcru": "oscar/dist/CreateProcessusPCRU.umd.min",
-        "timesheetsynthesismenu": "oscar/dist/ActivityTimesheetSynthesisMenu.umd.min"
+        "timesheetsynthesismenu": "oscar/dist/ActivityTimesheetSynthesisMenu.umd.min",
+        "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
     },
     shim: {
         "bootstrap": {

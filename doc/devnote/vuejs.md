@@ -2,6 +2,16 @@
 
 Procédure de création d'un composant d'interface VUEJS dans Oscar.
 
+## Prérequis
+
+ - *Node v10.24.1* (**lts/dubnium**)
+
+> Vous pouvez installer **NVM** pour faire cohabiter plusieurs version de NodeJS sur votre système.
+
+
+## Sources (VUE)
+
+Les sources sont rangées dans le dossier `./front/`
 
 ## Fichier VUE
 

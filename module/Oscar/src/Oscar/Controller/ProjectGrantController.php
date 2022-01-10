@@ -2978,6 +2978,35 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
+        if( $this->isAjax() ){
+            if( $this->getRequest()->isDelete() ){
+                $person_id = $this->getRequest()->getQuery()->get('p');
+                $where = $this->getRequest()->getQuery()->get('w');
+                try {
+                    $this->getTimesheetService()->removeValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            if( $this->getRequest()->isPost() ){
+                //
+                $person_id = $this->getRequest()->getPost()->get('person_id');
+                $where = $this->getRequest()->getPost()->get('where');
+                try {
+                    $this->getTimesheetService()->addValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+
+            $datas = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
+            $response = $this->baseJsonResponse();
+            $response['validators'] = $datas;
+            return $this->jsonOutput($response);
+        }
+
         return [
             'activity' => $activity,
             'timesheetAllow' => $activity->isTimesheetAllowed()

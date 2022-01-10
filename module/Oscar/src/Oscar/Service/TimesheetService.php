@@ -4413,6 +4413,132 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $query;
     }
 
+    /**
+     * Aggrégation des données sur les validators désignés.
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getDatasValidatorsActivity( Activity $activity ):array
+    {
+        $output = [
+            'activity_id' => $activity->getId(),
+            'activity' => $activity->getLabel(),
+            'validators_prj' => [],
+            'validators_sci' => [],
+            'validators_adm' => []
+        ];
+
+        /** @var Person $person */
+        foreach ($activity->getValidatorsPrj() as $person) {
+            $output['validators_prj'][] = [
+                'person' => $person->getDisplayName(),
+                'mail' => $person->getEmail(),
+                'person_id' => $person->getId()
+            ];
+        }
+
+        /** @var Person $person */
+        foreach ($activity->getValidatorsSci() as $person) {
+            $output['validators_sci'][] = [
+                'person' => $person->getDisplayName(),
+                'mail' => $person->getEmail(),
+                'person_id' => $person->getId()
+            ];
+        }
+
+        /** @var Person $person */
+        foreach ($activity->getValidatorsAdm() as $person) {
+            $output['validators_adm'][] = [
+                'person' => $person->getDisplayName(),
+                'mail' => $person->getEmail(),
+                'person_id' => $person->getId()
+            ];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Ajout d'un validateur désigné à une activité de recherche.
+     *
+     * @param $personId
+     * @param $activityId
+     * @param $where
+     * @return bool
+     * @throws OscarException
+     */
+    public function addValidatorActivity( $personId, $activityId, $where )
+    {
+        try {
+            $person = $this->getPersonService()->getPersonById($personId, true);
+            $activity = $this->getActivityService()->getActivityById($activityId, true);
+            switch ($where) {
+                case 'prj':
+                    if( !$activity->getValidatorsPrj()->contains($person) ){
+                        $activity->getValidatorsPrj()->add($person);
+                    }
+                    break;
+                case 'sci':
+                    if( !$activity->getValidatorsSci()->contains($person) ){
+                        $activity->getValidatorsSci()->add($person);
+                    }
+                    break;
+                case 'adm':
+                    if( !$activity->getValidatorsAdm()->contains($person) ){
+                        $activity->getValidatorsAdm()->add($person);
+                    }
+                    break;
+                default:
+                    throw new OscarException("Mauvaise condition 'where'");
+            }
+            $this->getEntityManager()->flush($activity);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible d'affecter le validateur : " . $e->getMessage());
+        }
+        return true;
+    }
+
+    /**
+     * Ajout d'un validateur désigné à une activité de recherche.
+     *
+     * @param $personId
+     * @param $activityId
+     * @param $where
+     * @return bool
+     * @throws OscarException
+     */
+    public function removeValidatorActivity( $personId, $activityId, $where )
+    {
+        try {
+            $person = $this->getPersonService()->getPersonById($personId, true);
+            $activity = $this->getActivityService()->getActivityById($activityId, true);
+            switch ($where) {
+                case 'prj':
+                    if( $activity->getValidatorsPrj()->contains($person) ){
+                        $activity->getValidatorsPrj()->removeElement($person);
+                    }
+                    break;
+                case 'sci':
+                    if( $activity->getValidatorsSci()->contains($person) ){
+                        $activity->getValidatorsSci()->removeElement($person);
+                    }
+                    break;
+                case 'adm':
+                    if( $activity->getValidatorsAdm()->contains($person) ){
+                        $activity->getValidatorsAdm()->removeElement($person);
+                    }
+                    break;
+                default:
+                    throw new OscarException("Mauvaise condition 'where'");
+            }
+            $this->getEntityManager()->flush($activity);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de supprimer le validateur : " . $e->getMessage());
+        }
+        return true;
+    }
+
     public function setTimesheetToSend(TimeSheet &$timeSheet)
     {
         $timeSheet->setStatus(TimeSheet::STATUS_TOVALIDATE)
