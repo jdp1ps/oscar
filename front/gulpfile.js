@@ -106,6 +106,16 @@ exports.activityTimesheetSynthesisMenuWatch = function(cb){
     watch(pathModuleSrc + "ActivityTimesheetSynthesisMenu.vue", activityTimesheetSynthesisMenu);
 }
 
+//// 2.7 Ecran des validateurs
+function activityValidator(cb) {
+    compile("ActivityValidator");
+    cb();
+}
+exports.activityValidator = activityValidator;
+exports.activityValidatorWatch = function(cb){
+    watch(pathModuleSrc + "ActivityValidator.vue", activityValidator);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
@@ -137,7 +147,14 @@ exports.componentRNSRFieldWatch = function(cb){ watch('./src/components/RNSRFiel
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC', 'componentRNSRField', 'createProcessusPCRU'];
+let commands = [
+    'activityDocument',
+    'activityValidator',
+    'administrationPcru',
+    'administrationPcruPC',
+    'componentRNSRField',
+    'createProcessusPCRU'
+];
 
 function defaultTask(cb) {
     console.log("Usage : ");
