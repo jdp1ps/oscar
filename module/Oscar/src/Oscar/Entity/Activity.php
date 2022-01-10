@@ -1254,7 +1254,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsPrj(): ArrayCollection
+    public function getValidatorsPrj()
     {
         return $this->validatorsPrj;
     }
@@ -1271,7 +1271,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsSci(): ArrayCollection
+    public function getValidatorsSci()
     {
         return $this->validatorsSci;
     }
@@ -1288,7 +1288,7 @@ class Activity implements ResourceInterface
     /**
      * @return ArrayCollection
      */
-    public function getValidatorsAdm(): ArrayCollection
+    public function getValidatorsAdm()
     {
         return $this->validatorsAdm;
     }
@@ -2575,4 +2575,37 @@ class Activity implements ResourceInterface
         }
     }
 
+    /**
+     * La feuille de temps est éligible aux feuilles de temps.
+     *
+     * @return bool
+     */
+    public function isTimesheetAllowed() :bool
+    {
+        return count($this->getNoTimesheetReason()) == 0;
+    }
+
+    private $_noTimesheetReason;
+
+    /**
+     * Retourne la liste des raisons d'inégibilité aux feuilles de temps.
+     *
+     * @return array
+     */
+    public function getNoTimesheetReason() :array
+    {
+        if( $this->_noTimesheetReason == null ){
+            $this->_noTimesheetReason = [];
+            if( !$this->getProject() ) {
+                $reasons[] = "L'activité n'a pas de projet";
+            } elseif (!$this->getProject()->getAcronym()) {
+                $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
+            }
+
+            if( !$this->getDateStart() || !$this->getDateEnd() ) {
+                $reasons[] = "L'activité n'a pas de date de début/fin";
+            }
+        }
+        return $this->_noTimesheetReason;
+    }
 }

@@ -2547,7 +2547,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getPeriodValidation(Person $person, $month, $year)
     {
-        $query = $this->getValidationPeriodRepository()
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
             ->setParameters(
@@ -4075,7 +4075,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $globalState = max($globalState, array_search($vp->getStatus(), $states));
 
                 // Récupération des validateurs
-                if ($vp->getValidationActivityById() > 0) {
+                if( $vp->getValidationActivityById() > 0 ){
                     $validators['prj'][$vp->getValidationActivityById()] = [
                         'person' => $vp->getValidationActivityBy(),
                         'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
@@ -4083,7 +4083,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if ($vp->getValidationSciById() > 0) {
+                if( $vp->getValidationSciById() > 0 ){
                     $validators['sci'][$vp->getValidationSciById()] = [
                         'person' => $vp->getValidationSciBy(),
                         'date' => $vp->getValidationSciAt()->format('Y-m-d'),
@@ -4091,7 +4091,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if ($vp->getValidationAdmById() > 0) {
+                if( $vp->getValidationAdmById() > 0 ){
                     $validators['adm'][$vp->getValidationAdmById()] = [
                         'person' => $vp->getValidationAdmBy(),
                         'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
@@ -4952,15 +4952,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         );
     }
 
-    /**
-     * @param Activity $activity
-     * @return array
-     */
-    public function getValidationsActivity(Activity $activity): array
-    {
-        return $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
-    }
-
     public function getValidationPeriodsState(int $year, int $month, Person $person)
     {
         $validationPeriods = $this->getValidationPeriods($year, $month, $person);
@@ -5082,54 +5073,24 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $this->getEntityManager()->flush($timesheets);
     }
 
-    /**
-     * Retourne les validateurs PRJ (étape 1) pour l'activité.
-     *
-     * @param Activity $activity
-     * @return array|\Doctrine\Common\Collections\ArrayCollection
-     * @throws OscarException
-     */
-    public function getValidatorsPrj(Activity $activity, $forceDefault = false)
+    public function getValidatorsPrj(Activity $activity)
     {
-        if ($activity->hasValidatorsPrj() && !$forceDefault) {
-            return $activity->getValidatorsPrj();
-        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
             $activity
         );
     }
 
-    /**
-     * Retourne les validateurs SCI (étape 2) pour l'activité.
-     *
-     * @param Activity $activity
-     * @return array|\Doctrine\Common\Collections\ArrayCollection
-     * @throws OscarException
-     */
     public function getValidatorsSci(Activity $activity)
     {
-        if ($activity->hasValidatorsSci()) {
-            return $activity->getValidatorsSci();
-        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
             $activity
         );
     }
 
-    /**
-     * Retourne les validateurs ADM (étape 3) pour l'activité.
-     *
-     * @param Activity $activity
-     * @return array|\Doctrine\Common\Collections\ArrayCollection
-     * @throws OscarException
-     */
     public function getValidatorsAdm(Activity $activity)
     {
-        if ($activity->hasValidatorsAdm()) {
-            return $activity->getValidatorsAdm();
-        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
             $activity
@@ -5153,14 +5114,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return count($query->getQuery()->getResult()) > 0;
     }
 
-    /**
-     * La personne (Person) est un validateur qui a des déclarations de temps à valider [pour la période].
-     *
-     * @param Person $person
-     * @param int|null $year
-     * @param int|null $month
-     * @return bool
-     */
     public function isValidatorHasToValidate(Person $person, ?int $year = null, ?int $month = null)
     {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
@@ -5207,12 +5160,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->createQueryBuilder('vp')
             //->leftJoin('vp.validatorsPrj', 'vprj')
             //->leftJoin('vp.validatorsSci', 'vsci')
-            ->leftJoin('vp.validatorsAdm', 'vsci');
+            ->leftJoin('vp.validatorsAdm', 'vsci')
+        ;
 //            ->leftJoin('vp.validatorsPrj', 'vprj')
 //            //->leftJoin('vp.validatorsSci', 'vsci')
 //            ->leftJoin('vp.validatorsAdm', 'vadm')
 //            ->where('vp.validatorsPrj = :person OR vp.validatorsSci = :person OR vp.validatorsAdm = :person')
-        //->setParameter('person', $person);
+            //->setParameter('person', $person);
 
         $validations = [];
 

@@ -212,12 +212,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityValidator.vue?vue&type=template&id=4beca460&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"validators"},[(_vm.mode == 'select-person')?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content",staticStyle:{"overflow":"visible"}},[_c('div',{staticClass:"overlay-closer",on:{"click":function($event){_vm.mode = ''}}},[_vm._v(" x ")]),_c('h3',[_vm._v("Choisissez une personne : ")]),_c('personselector',{on:{"change":_vm.handlerPersonSelect}})],1)]):_vm._e(),_c('div',{staticClass:"row"},[_c('div',{staticClass:"col-md-8"},[_c('div',{},[_vm._m(0),_c('section',{staticClass:"workpackages"},_vm._l((_vm.workpackages),function(wp){return _c('div',{staticClass:"card xs workpackage"},[_c('h3',[_c('i',{staticClass:"icon-archive"}),_c('code',[_vm._v("["+_vm._s(wp.code)+"]")]),_c('em',[_vm._v(_vm._s(wp.label))])]),(wp.description)?_c('p',[_vm._v(_vm._s(wp.description))]):_vm._e(),(wp.persons)?_c('section',{staticClass:"declarers"},[_c('h5',[_vm._v("Déclarants")]),_vm._l((wp.persons),function(d){return _c('article',{staticClass:"personcard",attrs:{"class":"personcard"}},[_c('h5',{staticClass:"personcard-header"},[_c('img',{staticClass:"personcard-gravatar",attrs:{"src":'//www.gravatar.com/avatar/' + d.person.mailMd5 +'?s=40',"alt":""}}),_c('div',{staticClass:"personcard-infos"},[_c('strong',[_vm._v(_vm._s(d.person.displayname))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(" "+_vm._s(d.person.mail)+" ")])])])])})],2):_c('div',{staticClass:"alert-warning alert"},[_vm._v(" Aucun déclarant indentifié pour ce lot de travail ")])])}),0)]),_c('div',{staticClass:"validators"},[_vm._m(1),_c('section',{staticClass:"row"},[_c('div',{staticClass:"col-md-4"},[_vm._m(2),_c('validatorslist',{attrs:{"level":"prj","fixed":_vm.validatorsPrj,"inherits":_vm.validatorsPrjDefault},on:{"addperson":function($event){return _vm.handlerAddPerson($event)},"removeperson":function($event){return _vm.handlerRemove($event.person_id, $event.level)}}})],1),_c('div',{staticClass:"col-md-4"},[_vm._m(3),_c('validatorslist',{attrs:{"level":"sci","fixed":_vm.validatorsSci,"inherits":_vm.validatorsSciDefault},on:{"addperson":function($event){return _vm.handlerAddPerson($event)},"removeperson":function($event){return _vm.handlerRemove($event.person_id, $event.level)}}})],1),_c('div',{staticClass:"col-md-4"},[_vm._m(4),_c('validatorslist',{attrs:{"level":"adm","fixed":_vm.validatorsAdm,"inherits":_vm.validatorsAdmDefault},on:{"addperson":function($event){return _vm.handlerAddPerson($event)},"removeperson":function($event){return _vm.handlerRemove($event.person_id, $event.level)}}})],1)])])]),_c('div',{staticClass:"col-md-4"},[_c('section',{staticClass:"members"},[_vm._m(5),_vm._l((_vm.members),function(p){return _c('article',{staticClass:"personcard card"},[_c('h5',{staticClass:"personcard-header"},[_c('img',{staticClass:"personcard-gravatar",attrs:{"src":'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40',"alt":""}}),_c('div',{staticClass:"personcard-infos"},[_c('strong',[_vm._v(_vm._s(p.person))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(" "+_vm._s(p.mail)+" ")]),_c('br'),_vm._v(" Rôle(s) : "),_c('strong',[_vm._v(_vm._s(p.roles.join(', ')))])])])])})],2),_c('section',{staticClass:"validations"},[_vm._m(6),_vm._l((_vm.validations),function(v){return _c('article',{staticClass:"card",class:'status-'+v.status},[_c('h5',[_c('i',{class:'icon-'+v.status}),_vm._v(" "+_vm._s(v.period)+" | "),_c('strong',[_vm._v(_vm._s(v.declarer))])]),_c('div',{staticClass:"row text-small"},[_c('div',{staticClass:"col-md-4"},[(v.validatedPrjBy)?_c('div',{staticClass:"text-success"},[_c('i',{staticClass:"icon-cube"}),_vm._v(" "+_vm._s(v.validatedPrjBy)+" ")]):_c('div',[(v.status == 'send-prj')?_c('div',[_c('i',{staticClass:"text-info icon-cube"}),_vm._v(" A faire ")]):_c('div',[_c('i',{staticClass:"icon-hourglass-3"}),_vm._v(" En attente ")]),_vm._l((v.validatorsPrj),function(p){return _c('div',[_vm._v(_vm._s(p.person))])})],2)]),_c('div',{staticClass:"col-md-4"},[(v.validatedSciBy)?_c('div',{staticClass:"text-success"},[_c('i',{staticClass:"icon-beaker"}),_vm._v(" "+_vm._s(v.validatedPrjBy)+" ")]):_c('div',[(v.status == 'send-sci')?_c('div',[_c('i',{staticClass:"text-info icon-beaker"}),_vm._v(" A faire ")]):_c('div',[_c('i',{staticClass:"icon-hourglass-3"}),_vm._v(" En attente ")]),_vm._l((v.validatorsSci),function(p){return _c('div',[_vm._v(_vm._s(p.person))])})],2)]),_c('div',{staticClass:"col-md-4"},[(v.validatedAdmBy)?_c('div',{staticClass:"text-success"},[_c('i',{staticClass:"icon-book"}),_vm._v(" "+_vm._s(v.validatedPrjBy)+" ")]):_c('div',[(v.status == 'send-adm')?_c('div',[_c('i',{staticClass:"icon-book text-info"}),_vm._v(" A faire ")]):_c('div',[_c('i',{staticClass:"icon-hourglass-3"}),_vm._v(" En attente ")]),_vm._l((v.validatorsAdm),function(p){return _c('div',[_vm._v(_vm._s(p.person))])})],2)])])])})],2)])]),_c('nav',[_c('button',{staticClass:"btn btn-default",on:{"click":_vm.fetch}},[_c('i',{staticClass:"icon-rewind-outline"}),_vm._v(" FETCH ")])])])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_c('i',{staticClass:"icon-archive"}),_vm._v(" Lots de travail ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_c('i',{staticClass:"icon-users"}),_vm._v(" Validateurs ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h3',[_c('i',{staticClass:"icon-cube"}),_vm._v(" Validation projet ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h3',[_c('i',{staticClass:"icon-beaker"}),_vm._v(" Validation scientifique ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h3',[_c('i',{staticClass:"icon-book"}),_vm._v(" Validation administrative ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_c('i',{staticClass:"icon-users"}),_vm._v(" Membres identifiés ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_c('i',{staticClass:"icon-calendar"}),_vm._v(" Validations ")])}]
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityValidator.vue?vue&type=template&id=262e0410&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"validators"},[(_vm.mode == 'select-person')?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content",staticStyle:{"overflow":"visible"}},[_c('h3',[_vm._v("Choisissez une personne : ")]),_c('personselector',{on:{"change":_vm.handlerPersonSelect}})],1)]):_vm._e(),_c('section',{staticClass:"row"},[_c('div',{staticClass:"col-md-4"},[_vm._m(0),_c('section',{staticClass:"persons"},_vm._l((_vm.validatorsPrj),function(p){return _c('article',{staticClass:"card"},[_c('h4',[_c('strong',[_vm._v(_vm._s(p.person))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(p.mail))])]),_c('nav',[_c('button',{staticClass:"btn btn-danger xs btn-xs",on:{"click":function($event){return _vm.handlerRemove(p.person_id, 'prj')}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")])])])}),0),_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){return _vm.handlerAddPerson('prj')}}},[_c('i',{staticClass:"icon-user"}),_vm._v(" Ajouter ")])]),_c('div',{staticClass:"col-md-4"},[_vm._m(1),_c('section',{staticClass:"persons"},_vm._l((_vm.validatorsSci),function(p){return _c('article',{staticClass:"card"},[_c('h4',[_c('strong',[_vm._v(_vm._s(p.person))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(p.mail))])]),_c('nav',[_c('button',{staticClass:"btn btn-danger xs btn-xs",on:{"click":function($event){return _vm.handlerRemove(p.person_id, 'sci')}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")])])])}),0),_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){return _vm.handlerAddPerson('sci')}}},[_c('i',{staticClass:"icon-user"}),_vm._v(" Ajouter ")])]),_c('div',{staticClass:"col-md-4"},[_vm._m(2),_c('section',{staticClass:"persons"},_vm._l((_vm.validatorsAdm),function(p){return _c('article',{staticClass:"card"},[_c('h4',[_c('strong',[_vm._v(_vm._s(p.person))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(p.mail))])]),_c('nav',[_c('button',{staticClass:"btn btn-danger xs btn-xs",on:{"click":function($event){return _vm.handlerRemove(p.person_id, 'adm')}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")])])])}),0),_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){return _vm.handlerAddPerson('adm')}}},[_c('i',{staticClass:"icon-user"}),_vm._v(" Ajouter ")])])]),_c('nav',[_c('button',{staticClass:"btn btn-default",on:{"click":_vm.fetch}},[_c('i',{staticClass:"icon-rewind-outline"}),_vm._v(" FETCH ")])])])}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h1',[_c('i',{staticClass:"icon-cube"}),_vm._v(" Validation projet "),_c('hr')])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h1',[_c('i',{staticClass:"icon-beaker"}),_vm._v(" Validation scientifique ")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h1',[_c('i',{staticClass:"icon-book"}),_vm._v(" Validation administrative ")])}]
 
 
-// CONCATENATED MODULE: ./src/ActivityValidator.vue?vue&type=template&id=4beca460&
+// CONCATENATED MODULE: ./src/ActivityValidator.vue?vue&type=template&id=262e0410&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=template&id=638ea58c&
 var PersonAutoCompletervue_type_template_id_638ea58c_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.expression),expression:"expression"}],attrs:{"type":"text"},domProps:{"value":(_vm.expression)},on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();return _vm.search.apply(null, arguments)},"input":function($event){if($event.target.composing){ return; }_vm.expression=$event.target.value}}}),_c('span',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}]},[_c('i',{staticClass:"icon-spinner animate-spin"})]),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.persons.length > 0 && _vm.showSelector),expression:"persons.length > 0 && showSelector"}],staticClass:"choose",staticStyle:{"position":"absolute","z-index":"3000","max-height":"400px","overflow":"hidden","overflow-y":"scroll"}},_vm._l((_vm.persons),function(c){return _c('div',{key:c.id,staticClass:"choice",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerSelectPerson(c)}}},[_c('div',{staticStyle:{"display":"block","width":"50px","height":"50px"}},[_c('img',{staticStyle:{"width":"100%"},attrs:{"src":'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50',"alt":c.displayname}})]),_c('div',{staticClass:"infos"},[_c('strong',{staticStyle:{"font-weight":"700","font-size":"1.1em","padding-left":"0"}},[_vm._v(_vm._s(c.displayname))]),_c('br'),_c('span',{staticStyle:{"font-weight":"100","font-size":".8em","padding-left":"0"}},[_c('i',{staticClass:"icon-location"}),_vm._v(" "+_vm._s(c.affectation)+" "),(c.ucbnSiteLocalisation)?_c('span',[_vm._v(" ~ "+_vm._s(c.ucbnSiteLocalisation))]):_vm._e()]),_c('br'),_c('em',{staticStyle:{"font-weight":"100","font-size":".8em"}},[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(c.email))])])])}),0)])}
@@ -437,217 +437,7 @@ var component = normalizeComponent(
 )
 
 /* harmony default export */ var PersonAutoCompleter = (component.exports);
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/ValidatorsList.vue?vue&type=template&id=7bbac429&
-var ValidatorsListvue_type_template_id_7bbac429_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticClass:"validators-list"},[(_vm.fixed.length == 0)?_c('div',{staticClass:"alert alert-warning"},[(_vm.inherits.length == 0)?_c('div',{staticClass:"alert alert-danger"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Personne n'a été trouvé pour la validation, les déclarations ne seront jamais validées ")]):_c('div',[_vm._m(0),_c('ul',_vm._l((_vm.inherits),function(v){return _c('li',[_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(" "+_vm._s(v.person)+" ")])])}),0)])]):_c('section',{staticClass:"persons"},_vm._l((_vm.fixed),function(p){return _c('article',{staticClass:"personcard card"},[_c('h5',{staticClass:"personcard-header"},[_c('img',{staticClass:"personcard-gravatar",attrs:{"src":'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40',"alt":""}}),_c('div',{staticClass:"personcard-infos"},[_c('strong',[_vm._v(_vm._s(p.person))]),_c('br'),_c('small',[_c('i',{staticClass:"icon-mail"}),_vm._v(" "+_vm._s(p.mail)+" ")])])]),_c('nav',{staticClass:"buttons text-center"},[_c('button',{staticClass:"btn btn-danger btn-xs xs",on:{"click":function($event){return _vm.$emit('removeperson', { person_id: p.person_id, level: _vm.level })}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")])])])}),0),_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){return _vm.$emit('addperson', _vm.level)}}},[_c('i',{staticClass:"icon-user"}),_vm._v(" Ajouter ")])])}
-var ValidatorsListvue_type_template_id_7bbac429_staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('p',[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Aucun validateur désignés. Les personnes suivantes seront sollicitées automatiquement : ")])}]
-
-
-// CONCATENATED MODULE: ./src/components/ValidatorsList.vue?vue&type=template&id=7bbac429&
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/ValidatorsList.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var ValidatorsListvue_type_script_lang_js_ = ({
-  props: {
-    fixed: {
-      type: Array,
-      required: true
-    },
-    inherits: {
-      type: Array,
-      required: true
-    },
-    level: {
-      type: String,
-      required: true
-    }
-  }
-});
-
-// CONCATENATED MODULE: ./src/components/ValidatorsList.vue?vue&type=script&lang=js&
- /* harmony default export */ var components_ValidatorsListvue_type_script_lang_js_ = (ValidatorsListvue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./src/components/ValidatorsList.vue
-
-
-
-
-
-/* normalize component */
-
-var ValidatorsList_component = normalizeComponent(
-  components_ValidatorsListvue_type_script_lang_js_,
-  ValidatorsListvue_type_template_id_7bbac429_render,
-  ValidatorsListvue_type_template_id_7bbac429_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* harmony default export */ var ValidatorsList = (ValidatorsList_component.exports);
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityValidator.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -763,12 +553,10 @@ const WHERE_ADM = 'adm';
 
 
 
-
 /* harmony default export */ var ActivityValidatorvue_type_script_lang_js_ = ({
 
   components: {
-    'personselector': PersonAutoCompleter,
-    'validatorslist': ValidatorsList
+    'personselector': PersonAutoCompleter
   },
 
   props: {
@@ -780,15 +568,8 @@ const WHERE_ADM = 'adm';
   data() {
     return {
       validatorsPrj: [],
-      validatorsPrjDefault: [],
       validatorsSci: [],
-      validatorsSciDefault: [],
       validatorsAdm: [],
-      validatorsAdmDefault: [],
-      workpackages: [],
-      declarers: [],
-      validations: [],
-      members: [],
       where: null,
       mode: ""
     }
@@ -796,25 +577,24 @@ const WHERE_ADM = 'adm';
 
   methods: {
 
-    handlerSuccess() {
+    handlerSuccess(){
       console.log('handlerSuccess', arguments);
     },
 
-    handlerPersonSelect(person) {
+    handlerPersonSelect(person){
       console.log('handlerPersonSelect', arguments);
       this.addPerson(person, this.where);
       this.mode = "";
       this.where = null;
     },
 
-    handlerAddPerson(where) {
-      console.log("handlerAddPerson(",where,")");
+    handlerAddPerson(where){
       this.where = where;
       this.mode = 'select-person';
     },
 
-    handlerRemove(personId, where) {
-      this.$http.delete(this.url + '?p=' + personId + '&w=' + where).then(
+    handlerRemove(personId, where){
+      this.$http.delete(this.url+'?p='+personId+'&w='+where).then(
           ok => {
             this.fetch();
           },
@@ -825,7 +605,7 @@ const WHERE_ADM = 'adm';
     },
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    addPerson(person, where) {
+    addPerson(person, where){
       let send = new FormData();
       send.append('person_id', person.id);
       send.append('where', where);
@@ -837,20 +617,17 @@ const WHERE_ADM = 'adm';
             console.log(ko);
           }
       )
+
+      console.log(send);
     },
 
     fetch() {
       this.$http.get(this.url).then(
           ok => {
+            console.log(ok);
             this.validatorsPrj = ok.data.validators.validators_prj;
-            this.validatorsPrjDefault = ok.data.validators.validators_prj_default;
             this.validatorsSci = ok.data.validators.validators_sci;
-            this.validatorsSciDefault = ok.data.validators.validators_sci_default;
             this.validatorsAdm = ok.data.validators.validators_adm;
-            this.validatorsAdmDefault = ok.data.validators.validators_adm_default;
-            this.workpackages = ok.data.workpackages;
-            this.members = ok.data.members;
-            this.validations = ok.data.validations;
           },
           ko => {
             console.log(ko);
