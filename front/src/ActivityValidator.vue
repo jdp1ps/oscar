@@ -66,14 +66,30 @@
                 <i class="icon-cube"></i>
                 Validation projet
               </h3>
-              <validatorslist
-                  level="prj"
-                  :fixed="validatorsPrj"
-                  :inherits="validatorsPrjDefault"
-                  @addperson="handlerAddPerson($event)"
-                  @removeperson="handlerRemove($event.person_id, $event.level)"
-              />
-
+              <section class="persons">
+                <article class="personcard card" v-for="p in validatorsPrj">
+                  <h5 class="personcard-header">
+                    <img :src="'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40'" alt="" class="personcard-gravatar">
+                    <div class="personcard-infos">
+                      <strong>{{ p.person }}</strong><br>
+                      <small>
+                        <i class="icon-mail"></i>
+                        {{ p.mail }}
+                      </small>
+                    </div>
+                  </h5>
+                  <nav class="buttons text-center">
+                    <button class="btn btn-danger btn-xs xs" @click="handlerRemove(p.person_id, 'prj')">
+                      <i class="icon-trash"></i>
+                      Supprimer
+                    </button>
+                  </nav>
+                </article>
+              </section>
+              <button @click="handlerAddPerson('prj')" class="btn btn-primary">
+                <i class="icon-user"></i>
+                Ajouter
+              </button>
             </div>
 
             <div class="col-md-4">
@@ -81,13 +97,30 @@
                 <i class="icon-beaker"></i>
                 Validation scientifique
               </h3>
-              <validatorslist
-                  level="sci"
-                  :fixed="validatorsSci"
-                  :inherits="validatorsSciDefault"
-                  @addperson="handlerAddPerson($event)"
-                  @removeperson="handlerRemove($event.person_id, $event.level)"
-              />
+              <section class="persons">
+                <article class="personcard card" v-for="p in validatorsSci">
+                  <h5 class="personcard-header">
+                    <img :src="'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40'" alt="" class="personcard-gravatar">
+                    <div class="personcard-infos">
+                      <strong>{{ p.person }}</strong><br>
+                      <small>
+                        <i class="icon-mail"></i>
+                        {{ p.mail }}
+                      </small>
+                    </div>
+                  </h5>
+                  <nav class="buttons text-center">
+                    <button class="btn btn-danger btn-xs xs" @click="handlerRemove(p.person_id, 'sci')">
+                      <i class="icon-trash"></i>
+                      Supprimer
+                    </button>
+                  </nav>
+                </article>
+              </section>
+              <button @click="handlerAddPerson('sci')" class="btn btn-primary">
+                <i class="icon-user"></i>
+                Ajouter
+              </button>
             </div>
 
             <div class="col-md-4">
@@ -95,13 +128,30 @@
                 <i class="icon-book"></i>
                 Validation administrative
               </h3>
-              <validatorslist
-                  level="adm"
-                  :fixed="validatorsAdm"
-                  :inherits="validatorsAdmDefault"
-                  @addperson="handlerAddPerson($event)"
-                  @removeperson="handlerRemove($event.person_id, $event.level)"
-              />
+              <section class="persons">
+                <article class="personcard card" v-for="p in validatorsAdm">
+                  <h5 class="personcard-header">
+                    <img :src="'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40'" alt="" class="personcard-gravatar">
+                    <div class="personcard-infos">
+                      <strong>{{ p.person }}</strong><br>
+                      <small>
+                        <i class="icon-mail"></i>
+                        {{ p.mail }}
+                      </small>
+                    </div>
+                  </h5>
+                  <nav class="buttons text-center">
+                    <button class="btn btn-danger btn-xs xs" @click="handlerRemove(p.person_id, 'adm')">
+                      <i class="icon-trash"></i>
+                      Supprimer
+                    </button>
+                  </nav>
+                </article>
+              </section>
+
+              <a @click="handlerAddPerson('adm')" class="personcard button">
+                Ajouter un validateur administratif
+              </a>
             </div>
 
           </section>
@@ -140,55 +190,23 @@
               <i :class="'icon-'+v.status"></i>
               {{ v.period }} | <strong>{{ v.declarer }}</strong>
             </h5>
+            <div>
+              <small>
+                <i class="icon-cube"></i>
+                {{ v.validatedPrjBy }}
+              </small>
 
-            <div class="row text-small">
-              <div class="col-md-4">
-                <div v-if="v.validatedPrjBy" class="text-success">
-                  <i class="icon-cube"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-prj'">
-                    <i class="text-info icon-cube"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsPrj">{{ p.person }}</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div v-if="v.validatedSciBy" class="text-success">
-                  <i class="icon-beaker"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-sci'">
-                    <i class="text-info icon-beaker"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsSci">{{ p.person }}</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div v-if="v.validatedAdmBy" class="text-success">
-                  <i class="icon-book"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-adm'">
-                    <i class="icon-book text-info"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsAdm">{{ p.person }}</div>
-                </div>
-              </div>
+              <small>
+                <i class="icon-beaker"></i>
+                {{ v.validatedSciBy }}
+              </small>
+
+              <small>
+                <i class="icon-book"></i>
+                {{ v.validatedAdmBy }}
+              </small>
+
             </div>
-
           </article>
 
         </section>
@@ -225,13 +243,11 @@ const WHERE_SCI = 'sci';
 const WHERE_ADM = 'adm';
 
 import PersonSelector from './components/PersonAutoCompleter'
-import ValidatorsList from './components/ValidatorsList'
 
 export default {
 
   components: {
-    'personselector': PersonSelector,
-    'validatorslist': ValidatorsList
+    'personselector': PersonSelector
   },
 
   props: {
@@ -243,11 +259,8 @@ export default {
   data() {
     return {
       validatorsPrj: [],
-      validatorsPrjDefault: [],
       validatorsSci: [],
-      validatorsSciDefault: [],
       validatorsAdm: [],
-      validatorsAdmDefault: [],
       workpackages: [],
       declarers: [],
       validations: [],
@@ -271,7 +284,6 @@ export default {
     },
 
     handlerAddPerson(where) {
-      console.log("handlerAddPerson(",where,")");
       this.where = where;
       this.mode = 'select-person';
     },
@@ -306,11 +318,8 @@ export default {
       this.$http.get(this.url).then(
           ok => {
             this.validatorsPrj = ok.data.validators.validators_prj;
-            this.validatorsPrjDefault = ok.data.validators.validators_prj_default;
             this.validatorsSci = ok.data.validators.validators_sci;
-            this.validatorsSciDefault = ok.data.validators.validators_sci_default;
             this.validatorsAdm = ok.data.validators.validators_adm;
-            this.validatorsAdmDefault = ok.data.validators.validators_adm_default;
             this.workpackages = ok.data.workpackages;
             this.members = ok.data.members;
             this.validations = ok.data.validations;
