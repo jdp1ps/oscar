@@ -1395,6 +1395,13 @@ class ValidationPeriod
 
         return [
             'id' => $this->getId(),
+            'year' => $this->getYear(),
+            'month' => $this->getMonth(),
+            'period' => sprintf('%s-%s', $this->getYear(), $this->getMonth()),
+            'declarer' => (string)$this->getDeclarer(),
+            'declarer_id' => $this->getDeclarer()->getId(),
+            'declarer_mail' => $this->getDeclarer()->getEmail(),
+            'declarer_mailmd5' => md5($this->getDeclarer()->getEmail()),
             'status' => $this->getStatus(),
             'object' => $this->getObject(),
             'objectgroup' => $this->getObjectGroup(),
@@ -1403,6 +1410,9 @@ class ValidationPeriod
             'validateursPrj' => $validateursPrj,
             'validateursSci' => $validateursSci,
             'validateursAdm' => $validateursAdm,
+            'validatedPrjBy' => $this->getValidationActivityBy(),
+            'validatedSciBy' => $this->getValidationSciBy(),
+            'validatedAdmBy' => $this->getValidationAdmBy(),
         ];
     }
 

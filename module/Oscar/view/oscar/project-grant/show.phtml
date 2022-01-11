@@ -414,10 +414,9 @@
             <?php
             endif; ?>
         </div>
+
         <div class="col-md-4">
-
             <?php
-
             // -------------------------------------------------------------------------------------------------- PCRU
             if ($pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity)):?>
                 <div id="pcru-infos">
@@ -450,8 +449,16 @@
                     <?php
                     endif; ?>
                 </div>
-            <?php
-            endif; ?>
+            <?php endif; ?>
+
+            <?php if( $entity->isTimesheetAllowed() ): ?>
+            <a  href="<?=  $this->url('contract/timesheet', ['id' => $entity->getId()]) ?>"
+                class="btn btn-primary">
+                <i class="icon-calendar"></i>
+                Feuilles de temps
+            </a>
+            <?php endif; ?>
+
             <?php
             // -------------------------------------------------------------------------------------------------- JALONS
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_MILESTONE_SHOW, $entity)): ?>
@@ -490,18 +497,17 @@
 
                     })
                 </script>
-            <?php
-            endif; ?>
+            <?php endif; ?>
 
             <?php
+            ////////////////////////////////////////////////////////////////////// BOUTON NOTIFICATIONS
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity)): ?>
                 <a href="<?= $this->url('contract/notifications', ['id' => $entity->getId()]) ?>"
                    class="btn btn-default">
                     <i class="icon-bell"></i>
                     Voir les notifications planifiées
                 </a>
-            <?php
-            endif; ?>
+            <?php endif; ?>
 
 
             <?php
@@ -629,14 +635,15 @@
             <?php
             else: ?>
                 <h2><i class="icon-calendar"></i> Feuilles de temps</h2>
-            <?php
-            if (!$entity->getProject()): ?>
-                <div class="alert alert-danger">
-                    <i class="icon-attention-1"></i>
-                    Cette activité doit être associée à un projet pour garantir le fonctionnement des feuilles de temps.
-                </div>
-            <?php
-            endif; ?>
+                <?php
+                if (!$entity->getProject()): ?>
+                    <div class="alert alert-danger">
+                        <i class="icon-attention-1"></i>
+                        Cette activité doit être associée à un projet pour garantir le fonctionnement des feuilles de
+                        temps.
+                    </div>
+                <?php
+                endif; ?>
                 <h3>Validateurs</h3>
                 <div class="row">
                     <div class="col-md-4">
@@ -699,59 +706,61 @@
                 </div>
 
                 <h3>Synthèse de déclarations</h3>
-               <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>" class="btn btn-primary btn-large">
-                   <i class="icon-calendar"></i>
-                   Synthèse pour cette activité
-               </a>
+                <a href="<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId() ?>"
+                   class="btn btn-primary btn-large">
+                    <i class="icon-calendar"></i>
+                    Synthèse pour cette activité
+                </a>
 
-            <?php
-            /**** V2.0
-                <div id="synthesis-timesheet">FEUILLE de TEMPS</div>
-                <script>
-                    require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
-                        Vue.use(VueResource);
-                        Vue.http.options.emulateJSON = true;
-                        Vue.http.options.emulateHTTP = true;
-
-                        new Vue({
-                            render: function (h) {
-                                return h(ActivityTimesheetSynthesisMenu, {
-                                    props: {
-                                        url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId(
-                                        ) ?>'
-                                    }
-                                })
-                            },
-                            el: '#synthesis-timesheet'
-                        }).$mount()
-                    })
-                </script>
-            /****/ ?>
+                <?php
+                /**** V2.0
+                 * <div id="synthesis-timesheet">FEUILLE de TEMPS</div>
+                 * <script>
+                 * require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
+                 * Vue.use(VueResource);
+                 * Vue.http.options.emulateJSON = true;
+                 * Vue.http.options.emulateHTTP = true;
+                 *
+                 * new Vue({
+                 * render: function (h) {
+                 * return h(ActivityTimesheetSynthesisMenu, {
+                 * props: {
+                 * url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=<?= $entity->getId(
+                 * ) ?>'
+                 * }
+                 * })
+                 * },
+                 * el: '#synthesis-timesheet'
+                 * }).$mount()
+                 * })
+                 * </script>
+                 * /****/ ?>
 
                 <h3>Déclarants</h3>
-            <?php
-            $declarers = [];
-            foreach ($entity->getPersonsDeep() as $personActivity): ?>
-            <?php
-            if ($entity->hasDeclarant($personActivity->getPerson())):
-            $declarers[] = $personActivity->getPerson()->toJson();
-            $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
-            ?>
-
-                <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $personActivity->getPerson()->getId() ?>"
-                   class="btn <?= $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
-                    <i class="icon-calendar"></i>
-                    <?= $personActivity->getPerson() ?>
+                <?php
+                $declarers = [];
+                foreach ($entity->getPersonsDeep() as $personActivity): ?>
                     <?php
-                    if (!$hasDeclaration): ?>
-                        <small>(N'a encore rien déclaré)</small>
+                    if ($entity->hasDeclarant($personActivity->getPerson())):
+                        $declarers[] = $personActivity->getPerson()->toJson();
+                        $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($entity);
+                        ?>
+
+                        <a href="<?= $this->url('timesheet/resume') ?>?person_id=<?= $personActivity->getPerson(
+                        )->getId() ?>"
+                           class="btn <?= $hasDeclaration ? 'btn-primary' : 'btn-default disabled' ?>">
+                            <i class="icon-calendar"></i>
+                            <?= $personActivity->getPerson() ?>
+                            <?php
+                            if (!$hasDeclaration): ?>
+                                <small>(N'a encore rien déclaré)</small>
+                            <?php
+                            endif; ?>
+                        </a>
                     <?php
                     endif; ?>
-                </a>
-            <?php
-            endif; ?>
-            <?php
-            endforeach; ?>
+                <?php
+                endforeach; ?>
             <?php
             endif; ?>
         </section>
