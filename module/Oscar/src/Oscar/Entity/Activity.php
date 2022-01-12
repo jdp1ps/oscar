@@ -1259,6 +1259,11 @@ class Activity implements ResourceInterface
         return $this->validatorsPrj;
     }
 
+    public function hasValidatorsPrj() :bool
+    {
+        return count($this->getValidatorsPrj()) > 0;
+    }
+
     /**
      * @param ArrayCollection $validatorsPrj
      */
@@ -1276,6 +1281,11 @@ class Activity implements ResourceInterface
         return $this->validatorsSci;
     }
 
+    public function hasValidatorsSci() :bool
+    {
+        return count($this->getValidatorsSci()) > 0;
+    }
+
     /**
      * @param ArrayCollection $validatorsSci
      */
@@ -1291,6 +1301,11 @@ class Activity implements ResourceInterface
     public function getValidatorsAdm()
     {
         return $this->validatorsAdm;
+    }
+
+    public function hasValidatorsAdm() :bool
+    {
+        return count($this->getValidatorsAdm()) > 0;
     }
 
     /**
