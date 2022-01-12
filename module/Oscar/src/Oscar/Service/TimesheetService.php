@@ -4840,24 +4840,54 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $this->getEntityManager()->flush($timesheets);
     }
 
+    /**
+     * Retourne les validateurs PRJ (étape 1) pour l'activité.
+     *
+     * @param Activity $activity
+     * @return array|\Doctrine\Common\Collections\ArrayCollection
+     * @throws OscarException
+     */
     public function getValidatorsPrj(Activity $activity)
     {
+        if( $activity->hasValidatorsPrj() ){
+            return $activity->getValidatorsPrj();
+        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
             $activity
         );
     }
 
+    /**
+     * Retourne les validateurs SCI (étape 2) pour l'activité.
+     *
+     * @param Activity $activity
+     * @return array|\Doctrine\Common\Collections\ArrayCollection
+     * @throws OscarException
+     */
     public function getValidatorsSci(Activity $activity)
     {
+        if( $activity->hasValidatorsSci() ){
+            return $activity->getValidatorsSci();
+        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
             $activity
         );
     }
 
+    /**
+     * Retourne les validateurs ADM (étape 3) pour l'activité.
+     *
+     * @param Activity $activity
+     * @return array|\Doctrine\Common\Collections\ArrayCollection
+     * @throws OscarException
+     */
     public function getValidatorsAdm(Activity $activity)
     {
+        if( $activity->hasValidatorsAdm() ){
+            return $activity->getValidatorsAdm();
+        }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
             Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
             $activity
@@ -4881,6 +4911,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return count($query->getQuery()->getResult()) > 0;
     }
 
+    /**
+     * La personne (Person) est un validateur qui a des déclarations de temps à valider [pour la période].
+     *
+     * @param Person $person
+     * @param int|null $year
+     * @param int|null $month
+     * @return bool
+     */
     public function isValidatorHasToValidate(Person $person, ?int $year = null, ?int $month = null)
     {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
