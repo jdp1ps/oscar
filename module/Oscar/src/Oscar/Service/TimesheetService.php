@@ -4570,6 +4570,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $members;
     }
 
+
+
     public function getDatasActivityValidations(Activity $activity): array
     {
         $output = [];
@@ -4616,18 +4618,22 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         try {
             $person = $this->getPersonService()->getPersonById($personId, true);
             $activity = $this->getActivityService()->getActivityById($activityId, true);
+
             switch ($where) {
                 case 'prj':
+                    $step = ValidationPeriod::STATUS_STEP1;
                     if (!$activity->getValidatorsPrj()->contains($person)) {
                         $activity->getValidatorsPrj()->add($person);
                     }
                     break;
                 case 'sci':
+                    $step = ValidationPeriod::STATUS_STEP2;
                     if (!$activity->getValidatorsSci()->contains($person)) {
                         $activity->getValidatorsSci()->add($person);
                     }
                     break;
                 case 'adm':
+                    $step = ValidationPeriod::STATUS_STEP3;
                     if (!$activity->getValidatorsAdm()->contains($person)) {
                         $activity->getValidatorsAdm()->add($person);
                     }
@@ -4635,12 +4641,156 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 default:
                     throw new OscarException("Mauvaise condition 'where'");
             }
-            // @todo Mettre à jour les validations en cours éligible
             $this->getEntityManager()->flush($activity);
+
+            $this->getValidationPeriodsUpdateAddValidator($activity, $person, $step);
+
         } catch (\Exception $e) {
             throw new OscarException("Impossible d'affecter le validateur : " . $e->getMessage());
         }
         return true;
+    }
+
+    public function getValidationPeriodsUpdateRemoveValidator(Activity $activity, Person $person, $step) {
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
+        $status = [];
+        // status à mettre à jour
+        switch( $step ){
+            case ValidationPeriod::STATUS_STEP1:
+                $status = [ValidationPeriod::STATUS_STEP1];
+                break;
+            case ValidationPeriod::STATUS_STEP2:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2];
+                break;
+            case ValidationPeriod::STATUS_STEP3:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3];
+                break;
+
+        }
+        $status[] = ValidationPeriod::STATUS_CONFLICT;
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validations as $validationPeriod){
+            if( !in_array($validationPeriod->getStatus(), $status) ) {
+                $this->getLoggerService()->info("Mauvais status $validationPeriod");
+                continue;
+            }
+            try {
+                switch( $step ){
+                    case ValidationPeriod::STATUS_STEP1:
+                        $validationPeriod->getValidatorsPrj()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsPrj()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_PRJ);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsPrj()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsPrjDefault(true);
+                        }
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP2:
+                        $validationPeriod->getValidatorsSci()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsSci()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_SCI);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsSci()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsSciDefault(true);
+                        }
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP3:
+                        $validationPeriod->getValidatorsAdm()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsAdm()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_ADM);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsAdm()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsAdmDefault(true);
+                        }
+                        break;
+                }
+                $this->getLoggerService()->info("$person remove to validation $step on $validationPeriod");
+                $this->getEntityManager()->flush($validationPeriod);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                throw new OscarException("Impossible d'ajouter $person comme validateur $step dans $validationPeriod");
+            }
+        }
+    }
+
+    public function getValidationPeriodsUpdateAddValidator(Activity $activity, Person $person, $step) {
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
+        $status = [];
+        // status à mettre à jour
+        switch( $step ){
+            case ValidationPeriod::STATUS_STEP1:
+                $status = [ValidationPeriod::STATUS_STEP1];
+                break;
+            case ValidationPeriod::STATUS_STEP2:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2];
+                break;
+            case ValidationPeriod::STATUS_STEP3:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3];
+                break;
+
+        }
+        $status[] = ValidationPeriod::STATUS_CONFLICT;
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validations as $validationPeriod){
+            if( !in_array($validationPeriod->getStatus(), $status) ) {
+                $this->getLoggerService()->info("Mauvais status $validationPeriod");
+                continue;
+            }
+            try {
+                switch( $step ){
+                    case ValidationPeriod::STATUS_STEP1:
+                        if( $validationPeriod->isValidatorsPrjDefault() ){
+                            foreach ($validationPeriod->getValidatorsPrj() as $validator) {
+                                $validationPeriod->getValidatorsPrj()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsPrjDefault(false)
+                            ->addValidatorPrj($person);
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP2:
+                        if( $validationPeriod->isValidatorsSciDefault() ){
+                            foreach ($validationPeriod->getValidatorsSci() as $validator) {
+                                $validationPeriod->getValidatorsSci()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsSciDefault(false)
+                            ->addValidatorSci($person);
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP3:
+                        if( $validationPeriod->isValidatorsAdmDefault() ){
+                            foreach ($validationPeriod->getValidatorsAdm() as $validator) {
+                                $validationPeriod->getValidatorsAdm()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsAdmDefault(false)
+                            ->addValidatorAdm($person);
+                        break;
+                }
+                $this->getLoggerService()->info("$person added to validation $step on $validationPeriod");
+                $this->getEntityManager()->flush($validationPeriod);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                throw new OscarException("Impossible d'ajouter $person comme validateur $step dans $validationPeriod");
+            }
+        }
     }
 
     /**
@@ -4654,21 +4804,25 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function removeValidatorActivity($personId, $activityId, $where)
     {
+        $step = $where;
         try {
             $person = $this->getPersonService()->getPersonById($personId, true);
             $activity = $this->getActivityService()->getActivityById($activityId, true);
             switch ($where) {
                 case 'prj':
+                    $step = ValidationPeriod::STATUS_STEP1;
                     if ($activity->getValidatorsPrj()->contains($person)) {
                         $activity->getValidatorsPrj()->removeElement($person);
                     }
                     break;
                 case 'sci':
+                    $step = ValidationPeriod::STATUS_STEP2;
                     if ($activity->getValidatorsSci()->contains($person)) {
                         $activity->getValidatorsSci()->removeElement($person);
                     }
                     break;
                 case 'adm':
+                    $step = ValidationPeriod::STATUS_STEP3;
                     if ($activity->getValidatorsAdm()->contains($person)) {
                         $activity->getValidatorsAdm()->removeElement($person);
                     }
@@ -4678,6 +4832,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
             // @todo Mettre à jour les validations en cours éligible
             $this->getEntityManager()->flush($activity);
+
+            $this->getValidationPeriodsUpdateRemoveValidator($activity, $person, $step);
         } catch (\Exception $e) {
             throw new OscarException("Impossible de supprimer le validateur : " . $e->getMessage());
         }
