@@ -26,6 +26,8 @@ use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
+use Oscar\Formatter\person\IPersonFormatter;
+use Oscar\Formatter\person\PersonToJsonBasic;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
@@ -2545,7 +2547,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getPeriodValidation(Person $person, $month, $year)
     {
-
         $query = $this->getValidationPeriodRepository()
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
@@ -4074,7 +4075,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $globalState = max($globalState, array_search($vp->getStatus(), $states));
 
                 // Récupération des validateurs
-                if( $vp->getValidationActivityById() > 0 ){
+                if ($vp->getValidationActivityById() > 0) {
                     $validators['prj'][$vp->getValidationActivityById()] = [
                         'person' => $vp->getValidationActivityBy(),
                         'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
@@ -4082,7 +4083,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if( $vp->getValidationSciById() > 0 ){
+                if ($vp->getValidationSciById() > 0) {
                     $validators['sci'][$vp->getValidationSciById()] = [
                         'person' => $vp->getValidationSciBy(),
                         'date' => $vp->getValidationSciAt()->format('Y-m-d'),
@@ -4090,7 +4091,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if( $vp->getValidationAdmById() > 0 ){
+                if ($vp->getValidationAdmById() > 0) {
                     $validators['adm'][$vp->getValidationAdmById()] = [
                         'person' => $vp->getValidationAdmBy(),
                         'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
@@ -4414,51 +4415,132 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $query;
     }
 
+    const TIMESHEET_LEVEL_PRJ = 'prj';
+    const TIMESHEET_LEVEL_SCI = 'sci';
+    const TIMESHEET_LEVEL_ADM = 'adm';
+
+    public function getValidatorsPrjFixed(Activity $activity, ?IPersonFormatter $format = null): array
+    {
+        $validators = $activity->getValidatorsPrj();
+        if ($format != null) {
+            $out = [];
+            foreach ($validators as $person) {
+                $out[] = $format->format($person);
+            }
+            return $out;
+        }
+        return $validators;
+    }
+
+    /**
+     * Retourne les validateurs nommés sur une activité de recherche.
+     *
+     * @param Activity $activity
+     * @param string $level
+     * @param IPersonFormatter|null $formatter
+     * @return array
+     * @throws OscarException
+     */
+    protected function getValidatorsActivityFixed(
+        Activity $activity,
+        string $level,
+        ?IPersonFormatter $formatter = null
+    ): array {
+        switch ($level) {
+            case self::TIMESHEET_LEVEL_PRJ:
+                $validators = $activity->getValidatorsPrj();
+                break;
+            case self::TIMESHEET_LEVEL_SCI:
+                $validators = $activity->getValidatorsSci();
+                break;
+            case self::TIMESHEET_LEVEL_ADM:
+                $validators = $activity->getValidatorsAdm();
+                break;
+            default:
+                throw new OscarException("Timesheet level inconnu '$level'");
+        }
+        if ($formatter === null) {
+            return $validators;
+        } else {
+            $out = [];
+            foreach ($validators as $person) {
+                $dt = $formatter->format($person);
+                $dt['fixed'] = true;
+                $out[] = $dt;
+            }
+            return $out;
+        }
+    }
+
+    /**
+     * Retourne les validateurs calculés (en fonction des privilèges).
+     *
+     * @param Activity $activity
+     * @param string $level
+     * @param IPersonFormatter|null $formatter
+     * @return array
+     * @throws OscarException
+     */
+    protected function getValidatorsActivityInherit(
+        Activity $activity,
+        string $level,
+        ?IPersonFormatter $formatter = null
+    ): array {
+        switch ($level) {
+            case self::TIMESHEET_LEVEL_PRJ:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                    $activity
+                );
+                break;
+            case self::TIMESHEET_LEVEL_SCI:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                    $activity
+                );
+                break;
+            case self::TIMESHEET_LEVEL_ADM:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                    $activity
+                );
+                break;
+            default:
+                throw new OscarException("Timesheet level inconnu '$level'");
+        }
+        if ($formatter === null) {
+            return $validators;
+        } else {
+            $out = [];
+            foreach ($validators as $person) {
+                $dt = $formatter->format($person);
+                $dt['fixed'] = false;
+                $out[] = $dt;
+            }
+            return $out;
+        }
+    }
+
+
     /**
      * Aggrégation des données sur les validators désignés.
      *
      * @param Activity $activity
      * @return array
      */
-    public function getDatasValidatorsActivity( Activity $activity ):array
+    public function getDatasValidatorsActivity(Activity $activity): array
     {
+        $formatPerson = new PersonToJsonBasic();
         $output = [
             'activity_id' => $activity->getId(),
             'activity' => $activity->getLabel(),
-            'validators_prj' => [],
-            'validators_sci' => [],
-            'validators_adm' => []
+            'validators_prj_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_PRJ, $formatPerson),
+            'validators_sci_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_SCI, $formatPerson),
+            'validators_adm_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_ADM, $formatPerson),
+            'validators_prj' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_PRJ, $formatPerson),
+            'validators_sci' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_SCI, $formatPerson),
+            'validators_adm' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_ADM, $formatPerson),
         ];
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsPrj() as $person) {
-            $output['validators_prj'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsSci() as $person) {
-            $output['validators_sci'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsAdm() as $person) {
-            $output['validators_adm'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
 
         return $output;
     }
@@ -4469,11 +4551,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getDatasActivityMembers( Activity $activity ): array {
+    public function getDatasActivityMembers(Activity $activity): array
+    {
         $members = [];
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
-            if( !array_key_exists($personActivity->getId(), $members) ){
+            if (!array_key_exists($personActivity->getId(), $members)) {
                 $members[$personActivity->getPerson()->getId()] = [
                     'person' => (string)$personActivity->getPerson(),
                     'mail' => $personActivity->getPerson()->getEmail(),
@@ -4487,13 +4570,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $members;
     }
 
-    public function getDatasActivityValidations( Activity $activity ):array {
+    public function getDatasActivityValidations(Activity $activity): array
+    {
         $output = [];
 
         $validations = $this->getValidationsActivity($activity);
 
         /** @var ValidationPeriod $validation */
-        foreach ($validations as $validation){
+        foreach ($validations as $validation) {
             $output[] = $validation->toJson();
         }
 
@@ -4506,7 +4590,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getDatasActivityWorkpackages( Activity $activity ):array
+    public function getDatasActivityWorkpackages(Activity $activity): array
     {
         $output = [];
 
@@ -4527,30 +4611,31 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return bool
      * @throws OscarException
      */
-    public function addValidatorActivity( $personId, $activityId, $where )
+    public function addValidatorActivity($personId, $activityId, $where)
     {
         try {
             $person = $this->getPersonService()->getPersonById($personId, true);
             $activity = $this->getActivityService()->getActivityById($activityId, true);
             switch ($where) {
                 case 'prj':
-                    if( !$activity->getValidatorsPrj()->contains($person) ){
+                    if (!$activity->getValidatorsPrj()->contains($person)) {
                         $activity->getValidatorsPrj()->add($person);
                     }
                     break;
                 case 'sci':
-                    if( !$activity->getValidatorsSci()->contains($person) ){
+                    if (!$activity->getValidatorsSci()->contains($person)) {
                         $activity->getValidatorsSci()->add($person);
                     }
                     break;
                 case 'adm':
-                    if( !$activity->getValidatorsAdm()->contains($person) ){
+                    if (!$activity->getValidatorsAdm()->contains($person)) {
                         $activity->getValidatorsAdm()->add($person);
                     }
                     break;
                 default:
                     throw new OscarException("Mauvaise condition 'where'");
             }
+            // @todo Mettre à jour les validations en cours éligible
             $this->getEntityManager()->flush($activity);
         } catch (\Exception $e) {
             throw new OscarException("Impossible d'affecter le validateur : " . $e->getMessage());
@@ -4567,30 +4652,31 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return bool
      * @throws OscarException
      */
-    public function removeValidatorActivity( $personId, $activityId, $where )
+    public function removeValidatorActivity($personId, $activityId, $where)
     {
         try {
             $person = $this->getPersonService()->getPersonById($personId, true);
             $activity = $this->getActivityService()->getActivityById($activityId, true);
             switch ($where) {
                 case 'prj':
-                    if( $activity->getValidatorsPrj()->contains($person) ){
+                    if ($activity->getValidatorsPrj()->contains($person)) {
                         $activity->getValidatorsPrj()->removeElement($person);
                     }
                     break;
                 case 'sci':
-                    if( $activity->getValidatorsSci()->contains($person) ){
+                    if ($activity->getValidatorsSci()->contains($person)) {
                         $activity->getValidatorsSci()->removeElement($person);
                     }
                     break;
                 case 'adm':
-                    if( $activity->getValidatorsAdm()->contains($person) ){
+                    if ($activity->getValidatorsAdm()->contains($person)) {
                         $activity->getValidatorsAdm()->removeElement($person);
                     }
                     break;
                 default:
                     throw new OscarException("Mauvaise condition 'where'");
             }
+            // @todo Mettre à jour les validations en cours éligible
             $this->getEntityManager()->flush($activity);
         } catch (\Exception $e) {
             throw new OscarException("Impossible de supprimer le validateur : " . $e->getMessage());
@@ -4714,7 +4800,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getValidationsActivity( Activity $activity ) :array
+    public function getValidationsActivity(Activity $activity): array
     {
         return $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
     }
@@ -4847,9 +4933,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return array|\Doctrine\Common\Collections\ArrayCollection
      * @throws OscarException
      */
-    public function getValidatorsPrj(Activity $activity)
+    public function getValidatorsPrj(Activity $activity, $forceDefault = false)
     {
-        if( $activity->hasValidatorsPrj() ){
+        if ($activity->hasValidatorsPrj() && !$forceDefault) {
             return $activity->getValidatorsPrj();
         }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
@@ -4867,7 +4953,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getValidatorsSci(Activity $activity)
     {
-        if( $activity->hasValidatorsSci() ){
+        if ($activity->hasValidatorsSci()) {
             return $activity->getValidatorsSci();
         }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
@@ -4885,7 +4971,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getValidatorsAdm(Activity $activity)
     {
-        if( $activity->hasValidatorsAdm() ){
+        if ($activity->hasValidatorsAdm()) {
             return $activity->getValidatorsAdm();
         }
         return $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
@@ -4965,13 +5051,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->createQueryBuilder('vp')
             //->leftJoin('vp.validatorsPrj', 'vprj')
             //->leftJoin('vp.validatorsSci', 'vsci')
-            ->leftJoin('vp.validatorsAdm', 'vsci')
-        ;
+            ->leftJoin('vp.validatorsAdm', 'vsci');
 //            ->leftJoin('vp.validatorsPrj', 'vprj')
 //            //->leftJoin('vp.validatorsSci', 'vsci')
 //            ->leftJoin('vp.validatorsAdm', 'vadm')
 //            ->where('vp.validatorsPrj = :person OR vp.validatorsSci = :person OR vp.validatorsAdm = :person')
-            //->setParameter('person', $person);
+        //->setParameter('person', $person);
 
         $validations = [];
 
