@@ -19,17 +19,19 @@ class ConnectorPersonJSON implements ConnectorInterface
     private $jsonDatas;
     private $connectorPersonHydrator;
     private $entityManager;
+    private $connectorName;
 
     /**
      * ConnectorAuthentificationJSON constructor.
      * @param array $jsonData
      * @param EntityManager $entityManager
      */
-    public function __construct( array $jsonData, EntityManager $entityManager )
+    public function __construct( array $jsonData, EntityManager $entityManager , $connectorName = 'json' )
     {
         $this->jsonDatas = $jsonData;
         $this->entityManager = $entityManager;
         $this->connectorPersonHydrator = new ConnectorPersonHydrator($entityManager);
+        $this->connectorName = $connectorName;
     }
 
     protected function checkData( $data ){
@@ -63,7 +65,7 @@ class ConnectorPersonJSON implements ConnectorInterface
                 $this->entityManager->persist($person);
             }
 
-            $this->connectorPersonHydrator->hydratePerson($person, $data, 'json');
+            $this->connectorPersonHydrator->hydratePerson($person, $data, $this->connectorName);
             $repport->addRepport($this->connectorPersonHydrator->getRepport());
 
             if( $this->connectorPersonHydrator->isSuspect() ){

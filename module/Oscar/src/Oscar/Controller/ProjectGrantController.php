@@ -2979,6 +2979,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
         if( $this->isAjax() ){
+
             if( $this->getRequest()->isDelete() ){
                 $person_id = $this->getRequest()->getQuery()->get('p');
                 $where = $this->getRequest()->getQuery()->get('w');
@@ -3000,11 +3001,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
             }
 
-
-            $datas = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
             $response = $this->baseJsonResponse();
             $response['workpackages'] = $this->getTimesheetService()->getDatasActivityWorkpackages($activity);
-            $response['validators'] = $datas;
+            $response['validators'] = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
             $response['members'] = $this->getTimesheetService()->getDatasActivityMembers($activity);
             $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
             return $this->jsonOutput($response);
