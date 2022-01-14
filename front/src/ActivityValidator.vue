@@ -140,23 +140,55 @@
               <i :class="'icon-'+v.status"></i>
               {{ v.period }} | <strong>{{ v.declarer }}</strong>
             </h5>
-            <div>
-              <small>
-                <i class="icon-cube"></i>
-                {{ v.validatedPrjBy }}
-              </small>
 
-              <small>
-                <i class="icon-beaker"></i>
-                {{ v.validatedSciBy }}
-              </small>
-
-              <small>
-                <i class="icon-book"></i>
-                {{ v.validatedAdmBy }}
-              </small>
-
+            <div class="row text-small">
+              <div class="col-md-4">
+                <div v-if="v.validatedPrjBy" class="text-success">
+                  <i class="icon-cube"></i>
+                  {{ v.validatedPrjBy }}
+                </div>
+                <div v-else>
+                  <div v-if="v.status == 'send-prj'">
+                    <i class="text-info icon-cube"></i> A faire
+                  </div>
+                  <div v-else>
+                    <i class="icon-hourglass-3"></i> En attente
+                  </div>
+                  <div v-for="p in v.validatorsPrj">{{ p.person }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div v-if="v.validatedSciBy" class="text-success">
+                  <i class="icon-beaker"></i>
+                  {{ v.validatedPrjBy }}
+                </div>
+                <div v-else>
+                  <div v-if="v.status == 'send-sci'">
+                    <i class="text-info icon-beaker"></i> A faire
+                  </div>
+                  <div v-else>
+                    <i class="icon-hourglass-3"></i> En attente
+                  </div>
+                  <div v-for="p in v.validatorsSci">{{ p.person }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div v-if="v.validatedAdmBy" class="text-success">
+                  <i class="icon-book"></i>
+                  {{ v.validatedPrjBy }}
+                </div>
+                <div v-else>
+                  <div v-if="v.status == 'send-adm'">
+                    <i class="icon-book text-info"></i> A faire
+                  </div>
+                  <div v-else>
+                    <i class="icon-hourglass-3"></i> En attente
+                  </div>
+                  <div v-for="p in v.validatorsAdm">{{ p.person }}</div>
+                </div>
+              </div>
             </div>
+
           </article>
 
         </section>
