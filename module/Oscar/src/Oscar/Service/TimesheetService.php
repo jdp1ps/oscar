@@ -2547,7 +2547,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getPeriodValidation(Person $person, $month, $year)
     {
-
         $query = $this->getValidationPeriodRepository()
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
@@ -4437,6 +4436,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $output['validators_prj'][] = [
                 'person' => $person->getDisplayName(),
                 'mail' => $person->getEmail(),
+                'mailMd5' => md5($person->getEmail()),
                 'person_id' => $person->getId()
             ];
         }
@@ -4446,6 +4446,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $output['validators_sci'][] = [
                 'person' => $person->getDisplayName(),
                 'mail' => $person->getEmail(),
+                'mailMd5' => md5($person->getEmail()),
                 'person_id' => $person->getId()
             ];
         }
@@ -4455,8 +4456,64 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $output['validators_adm'][] = [
                 'person' => $person->getDisplayName(),
                 'mail' => $person->getEmail(),
+                'mailMd5' => md5($person->getEmail()),
                 'person_id' => $person->getId()
             ];
+        }
+
+        return $output;
+    }
+
+    /**
+     * Liste des membres d'une activité.
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getDatasActivityMembers( Activity $activity ): array {
+        $members = [];
+        /** @var ActivityPerson $personActivity */
+        foreach ($activity->getPersonsDeep() as $personActivity) {
+            if( !array_key_exists($personActivity->getId(), $members) ){
+                $members[$personActivity->getPerson()->getId()] = [
+                    'person' => (string)$personActivity->getPerson(),
+                    'mail' => $personActivity->getPerson()->getEmail(),
+                    'mailMd5' => md5($personActivity->getPerson()->getEmail()),
+                    'person_id' => $personActivity->getId(),
+                    'roles' => []
+                ];
+            }
+            $members[$personActivity->getPerson()->getId()]['roles'][] = $personActivity->getRoleObj()->getRoleId();
+        }
+        return $members;
+    }
+
+    public function getDatasActivityValidations( Activity $activity ):array {
+        $output = [];
+
+        $validations = $this->getValidationsActivity($activity);
+
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation){
+            $output[] = $validation->toJson();
+        }
+
+        return $output;
+    }
+
+    /**
+     * Retourne les données d'affichage des lots de travail.
+     *
+     * @param Activity $activity
+     * @return array
+     */
+    public function getDatasActivityWorkpackages( Activity $activity ):array
+    {
+        $output = [];
+
+        /** @var WorkPackage $workPackage */
+        foreach ($activity->getWorkPackages() as $workPackage) {
+            $output[$workPackage->getId()] = $workPackage->toArray();
         }
 
         return $output;
@@ -4652,6 +4709,15 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $person->getId(),
             sprintf("%s-%s", $year, $month)
         );
+    }
+
+    /**
+     * @param Activity $activity
+     * @return array
+     */
+    public function getValidationsActivity( Activity $activity ) :array
+    {
+        return $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
     }
 
     public function getValidationPeriodsState(int $year, int $month, Person $person)
