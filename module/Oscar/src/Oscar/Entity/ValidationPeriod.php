@@ -46,6 +46,13 @@ class ValidationPeriod
     protected $validatorsPrj;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default":1})
+     *
+     */
+    protected $validatorsPrjDefault = true;
+
+    /**
      * Personnes
      *
      * @ORM\ManyToMany(targetEntity="Person")
@@ -54,12 +61,26 @@ class ValidationPeriod
     protected $validatorsSci;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default":1})
+     *
+     */
+    protected $validatorsSciDefault = true;
+
+    /**
      * Personnes
      *
      * @ORM\ManyToMany(targetEntity="Person")
      * @ORM\JoinTable(name="validationperiod_adm")
      */
     protected $validatorsAdm;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default":1})
+     *
+     */
+    protected $validatorsAdmDefault = true;
 
     /**
      * @ORM\Id
@@ -73,6 +94,7 @@ class ValidationPeriod
      * @ORM\Column(type="string", nullable=false)
      */
     private string $object;
+
     /**
      * @var string
      * @ORM\Column(type="string", nullable=false)
@@ -367,6 +389,57 @@ class ValidationPeriod
         $this->validatorsSci = new ArrayCollection();
         $this->validatorsAdm = new ArrayCollection();
         $this->timesheets = new ArrayCollection();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidatorsPrjDefault(): bool
+    {
+        return $this->validatorsPrjDefault;
+    }
+
+    /**
+     * @param bool $validatorsPrjDefault
+     */
+    public function setValidatorsPrjDefault(bool $validatorsPrjDefault): self
+    {
+        $this->validatorsPrjDefault = $validatorsPrjDefault;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidatorsSciDefault(): bool
+    {
+        return $this->validatorsSciDefault;
+    }
+
+    /**
+     * @param bool $validatorsSciDefault
+     */
+    public function setValidatorsSciDefault(bool $validatorsSciDefault): self
+    {
+        $this->validatorsSciDefault = $validatorsSciDefault;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidatorsAdmDefault(): bool
+    {
+        return $this->validatorsAdmDefault;
+    }
+
+    /**
+     * @param bool $validatorsAdmDefault
+     */
+    public function setValidatorsAdmDefault(bool $validatorsAdmDefault): self
+    {
+        $this->validatorsAdmDefault = $validatorsAdmDefault;
+        return $this;
     }
 
     /**
@@ -1407,9 +1480,9 @@ class ValidationPeriod
             'objectgroup' => $this->getObjectGroup(),
             'objectid' => $this->getObjectId(),
             'datesend' => $this->getDateSend()->format('Y-m-d'),
-            'validateursPrj' => $validateursPrj,
-            'validateursSci' => $validateursSci,
-            'validateursAdm' => $validateursAdm,
+            'validatorsPrj' => $validateursPrj,
+            'validatorsSci' => $validateursSci,
+            'validatorsAdm' => $validateursAdm,
             'validatedPrjBy' => $this->getValidationActivityBy(),
             'validatedSciBy' => $this->getValidationSciBy(),
             'validatedAdmBy' => $this->getValidationAdmBy(),
