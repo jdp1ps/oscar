@@ -70,7 +70,7 @@ class ActivityRepository extends EntityRepository
             ->innerJoin('a.persons', 'ap')
             ->leftJoin('a.project', 'p')
             ->leftJoin('p.members', 'pp')
-            ->where('(ap.person = :personId  OR pp.person = :personId) AND (a.dateStart < :date AND a.dateEnd > :date)')
+            ->where('(ap.person = :personId  OR pp.person = :personId) AND (a.dateStart < :date AND a.dateEnd >= :date)')
             ->setParameters(
                 [
                     'personId' => "$personId",
