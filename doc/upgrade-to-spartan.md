@@ -2,6 +2,8 @@
 
 ## Passage à Debian 11 "Bullseye"
 
+La procédure de mise à jour proposée ici a été appliquée sur les instances Unicaen avec succès. Elle peut ne pas correspondre exactement à votre système.
+
 ### MISE à JOUR DEBIAN 10 > 11
 
 Commencez par mettre à jour le système.
