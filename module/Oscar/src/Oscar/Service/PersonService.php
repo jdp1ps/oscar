@@ -519,41 +519,46 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         $log("Notifications des inscrits à '$cron'");
 
+        $authPersonNormalize = $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false);
+
+        /** @var AuthentificationRepository $authentificationRepository */
+        $authentificationRepository = $this->getEntityManager()->getRepository(Authentification::class);
+
         // Liste des personnes ayant des notifications non-lues
-        $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification(
-            $this->getOscarConfigurationService()->getConfiguration('authPersonNormalize', false)
-        );
+        $persons = $this->getRepository()->getPersonsWithUnreadNotificationsAndAuthentification($authPersonNormalize);
 
         $log(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
         /** @var Person $person */
         foreach ($persons as $person) {
-            /** @var Authentification $auth */
-            $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(
-                ['username' => $person->getLadapLogin()]
-            );
-            $settings = $auth->getSettings();
+            try {
+                /** @var Authentification $auth */
+                $auth = $authentificationRepository->getAuthentificationPerson($person, $authPersonNormalize);
+                $settings = $auth->getSettings();
 
-            if (!$settings) {
-                $settings = [];
-            }
+                if (!$settings) {
+                    $settings = [];
+                }
 
-            if (!array_key_exists('frequency', $settings)) {
-                $settings['frequency'] = [];
-            }
+                if (!array_key_exists('frequency', $settings)) {
+                    $settings['frequency'] = [];
+                }
 
-            $settings['frequency'] = array_merge(
-                $settings['frequency'],
-                $this->getOscarConfigurationService()->getConfiguration(
-                    'notifications.fixed'
-                )
-            );
+                $settings['frequency'] = array_merge(
+                    $settings['frequency'],
+                    $this->getOscarConfigurationService()->getConfiguration(
+                        'notifications.fixed'
+                    )
+                );
 
-            if (in_array($cron, $settings['frequency'])) {
-                $log(sprintf('Envoi de mail pour %s', $person));
-                $this->mailNotificationsPerson($person);
-            } else {
-                $log(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
+                if (in_array($cron, $settings['frequency'])) {
+                    $log(sprintf('Envoi de mail pour %s', $person));
+                    $this->mailNotificationsPerson($person);
+                } else {
+                    $log(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
+                }
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error("Impossible de récupérer l'authentification d'un personne.");
             }
         }
     }

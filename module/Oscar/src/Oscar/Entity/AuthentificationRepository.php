@@ -16,7 +16,10 @@ class AuthentificationRepository extends EntityRepository
     /**
      * @return Authentification
      */
-    public function getAuthentificationByUsername( $username ){
+    public function getAuthentificationByUsername( $username, $normalize=false ){
+        if( $normalize ){
+            $username = strtolower($username);
+        }
         return $this->createQueryBuilder('a')
             ->where('a.username = :username')
             ->setParameter('username', $username)
