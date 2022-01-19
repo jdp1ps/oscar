@@ -467,7 +467,10 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $datas = $pcruInfos->toArray($this->getEntityManager());
 
         $validation = $pcruInfos->validation();
-        $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());
+        $documentPath = "";
+        if( $pcruInfos->getDocumentId() ){
+            $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());
+        }
 
 
         return [
