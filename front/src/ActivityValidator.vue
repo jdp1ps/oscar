@@ -12,54 +12,16 @@
 
     <div class="row">
       <div class="col-md-8">
-        <div class="">
-          <h2>
-            <i class="icon-archive"></i>
-            Lots de travail
-          </h2>
-          <section class="workpackages">
-            <div class="card xs workpackage" v-for="wp in workpackages">
-              <h3>
-                <i class="icon-archive"></i>
-                <code>[{{ wp.code }}]</code>
-                <em>{{ wp.label }}</em>
-              </h3>
-              <p v-if="wp.description">{{ wp.description }}</p>
-              <section class="declarers" v-if="wp.persons">
-                <h5>Déclarants</h5>
-                <article class="declarer" v-for="d in wp.persons" class="personcard">
-                  <h5 class="personcard-header">
-                    <img :src="'//www.gravatar.com/avatar/' + d.person.mailMd5 +'?s=40'" alt=""
-                         class="personcard-gravatar">
-                    <div class="personcard-infos">
-                      <strong>{{ d.person.displayname }}</strong><br>
-                      <small>
-                        <i class="icon-mail"></i>
-                        {{ d.person.mail }}
-                    </div>
-                  </h5>
-                </article>
-              </section>
-              <div class="alert-warning alert" v-else>
-                Aucun déclarant indentifié pour ce lot de travail
-              </div>
-              <!--
-              <div class="personcard card button">
-                Ajouter un déclarant
-              </div>
-              -->
-            </div>
-
-          </section>
-
-        </div>
-        <!-- <pre>{{ workpackages }}</pre> -->
 
         <div class="validators">
           <h2>
-            <i class="icon-users"></i>
+            <i class="icon-user-md"></i>
             Validateurs
           </h2>
+          <p class="alert alert-info">
+            <i class="icon-info-circled"></i>
+            Les validateurs sont les personnes chargées de valider les créneaux <strong>pour cette activité uniquement</strong>. A noter que les déclarations <i>Hors-Lots</i> (Congès, enseignement) doivent être validées par le <strong>N+1</strong> (visible depuis la fiche personne du déclarant).
+          </p>
           <section class="row">
             <div class="col-md-4">
               <h3>
@@ -258,6 +220,10 @@ export default {
   },
 
   methods: {
+
+    handlerAddWorkpackage() {
+      console.log("Ajout d'un lot de travail");
+    },
 
     handlerSuccess() {
       console.log('handlerSuccess', arguments);

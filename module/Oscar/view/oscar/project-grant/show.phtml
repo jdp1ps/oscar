@@ -790,20 +790,21 @@
             <?php
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $entity)): ?>
                 <script>
-                    require(['vue', 'vue-resource', 'bootbox', 'Workpackage'], function (Vue, VueResource, Bootbox, Workpackage) {
+                    require(['vue', 'vue-resource', 'bootbox', 'workpackageui'], function (Vue, VueResource, Bootbox, Workpackage) {
+
                         Vue.use(VueResource);
 
-                        Vue.http.options.emulateJSON = true;
-                        Vue.http.options.emulateHTTP = true;
+                         Vue.http.options.emulateJSON = true;
+                         Vue.http.options.emulateHTTP = true;
 
-                        Vue.filter('heures', function (v) {
-                            var heures = parseInt(v);
-                            var minutes = Math.round((parseFloat(v) - heures) * 60);
-                            if (minutes == 0) minutes = '';
-                            else if (minutes < 10) minutes = ':0' + minutes;
-                            else minutes = ':' + minutes
-                            return heures + minutes;
-                        });
+                         Vue.filter('heures', function (v) {
+                             var heures = parseInt(v);
+                             var minutes = Math.round((parseFloat(v) - heures) * 60);
+                             if (minutes == 0) minutes = '';
+                             else if (minutes < 10) minutes = ':0' + minutes;
+                             else minutes = ':' + minutes
+                             return heures + minutes;
+                         });
 
                         // Transmission du jeton
                         Vue.http.interceptors.push((request, next) => {
@@ -814,7 +815,7 @@
 
                         new Vue({
                             render: function (h) {
-                                return h(Workpackage.default, {
+                                return h(Workpackage, {
                                     props: {
                                         url: '<?= $this->url(
                                             'workpackage/rest',
@@ -828,7 +829,7 @@
                                 })
                             },
                             el: '#workpackages'
-                        })
+                        }).$mount()
                     });
                 </script>
             <?php

@@ -116,6 +116,20 @@ exports.activityValidatorWatch = function(cb){
     watch(pathModuleSrc + "ActivityValidator.vue", activityValidator);
 }
 
+//// 2.8 Lots de travail
+function workpackageUI(cb) {
+    compile("WorkpackageUI");
+    cb();
+}
+exports.workpackageUI = workpackageUI;
+exports.workpackageUIWatch = function(cb){
+    watch([
+        pathModuleSrc + "WorkpackageUI.vue",
+        pathModuleSrc + "components/Workpackage.vue",
+        pathModuleSrc + "components/WorkpackagePerson.vue"
+    ], workpackageUI);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
@@ -153,7 +167,8 @@ let commands = [
     'administrationPcru',
     'administrationPcruPC',
     'componentRNSRField',
-    'createProcessusPCRU'
+    'createProcessusPCRU',
+    'workpackageUI',
 ];
 
 function defaultTask(cb) {
