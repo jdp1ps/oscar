@@ -12,7 +12,6 @@
 
     <div class="row">
       <div class="col-md-8">
-
         <div class="validators">
           <h2>
             <i class="icon-user-md"></i>
@@ -90,81 +89,70 @@
             </h5>
           </article>
         </section>
-
-        <section class="validations">
-          <h2>
-            <i class="icon-calendar"></i>
-            Validations
-          </h2>
-
-          <article class="card" :class="'status-'+v.status" v-for="v in validations">
-            <h5>
-              <i :class="'icon-'+v.status"></i>
-              {{ v.period }} | <strong>{{ v.declarer }}</strong>
-            </h5>
-
-            <div class="row text-small">
-              <div class="col-md-4">
-                <div v-if="v.validatedPrjBy" class="text-success">
-                  <i class="icon-cube"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-prj'">
-                    <i class="text-info icon-cube"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsPrj">{{ p.person }}</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div v-if="v.validatedSciBy" class="text-success">
-                  <i class="icon-beaker"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-sci'">
-                    <i class="text-info icon-beaker"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsSci">{{ p.person }}</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div v-if="v.validatedAdmBy" class="text-success">
-                  <i class="icon-book"></i>
-                  {{ v.validatedPrjBy }}
-                </div>
-                <div v-else>
-                  <div v-if="v.status == 'send-adm'">
-                    <i class="icon-book text-info"></i> A faire
-                  </div>
-                  <div v-else>
-                    <i class="icon-hourglass-3"></i> En attente
-                  </div>
-                  <div v-for="p in v.validatorsAdm">{{ p.person }}</div>
-                </div>
-              </div>
-            </div>
-
-          </article>
-
-        </section>
-
       </div>
     </div>
 
+    <section class="validations">
+      <h2>
+        <i class="icon-calendar"></i>
+        Validations
+      </h2>
 
-    <nav>
-      <button class="btn btn-default" @click="fetch">
-        <i class="icon-rewind-outline"></i>
-        FETCH
-      </button>
-    </nav>
+      <article class="card" :class="'status-'+v.status" v-for="v in validations">
+        <h5>
+          <i :class="'icon-'+v.status"></i>
+          {{ v.period }} | <strong>{{ v.declarer }}</strong>
+        </h5>
+
+        <div class="row text-small">
+          <div class="col-md-4">
+            <div v-if="v.validatedPrjBy" class="cartouche success">
+              <i class="icon-cube"></i>
+              {{ v.validatedPrjBy }}
+            </div>
+            <div v-else class="validators-todo">
+              <div v-if="v.status == 'send-prj'">
+                <i class="text-info icon-cube"></i> A faire
+              </div>
+              <div v-else class="validators-todo">
+                <i class="icon-hourglass-3"></i> En attente
+              </div>
+              <span v-for="p in v.validatorsPrj">{{ p.person }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div v-if="v.validatedSciBy" class="cartouche success">
+              <i class="icon-beaker"></i>
+              {{ v.validatedPrjBy }}
+            </div>
+            <div v-else class="validators-todo">
+              <div v-if="v.status == 'send-sci'">
+                <i class="text-info icon-beaker"></i> A faire
+              </div>
+              <div v-else class="validators-todo">
+                <i class="icon-hourglass-3"></i> En attente
+              </div>
+              <span v-for="p in v.validatorsSci">{{ p.person }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div v-if="v.validatedAdmBy" class="cartouche success">
+              <i class="icon-book"></i>
+              {{ v.validatedPrjBy }}
+            </div>
+            <div v-else class="validators-todo">
+              <div v-if="v.status == 'send-adm'">
+                <i class="icon-book text-info"></i> A faire
+              </div>
+              <div v-else class="validators-todo">
+                <i class="icon-hourglass-3"></i> En attente
+              </div>
+              <span v-for="p in v.validatorsAdm">{{ p.person }}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
   </div>
 </template>
 <script>
