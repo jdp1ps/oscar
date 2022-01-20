@@ -2,11 +2,11 @@
 
 ## Passage à Debian 11 "Bullseye"
 
-La procédure de mise à jour proposée ici a été appliquée sur les instances Unicaen avec succès. Elle peut ne pas correspondre exactement à votre système.
+>La procédure de mise à jour proposée ici a été appliquée sur les instances Unicaen avec succès. Elle peut ne pas correspondre exactement à votre système.
 
 ### MISE à JOUR DEBIAN 10 > 11
 
-Commencez par mettre à jour le système.
+Commencez par mettre à jour le système (Passage à la version **DEBIAN 11 "Bullsyes"**). 
 
 ```bash
 # Sources en Bullseye
@@ -237,7 +237,7 @@ oct. 11 10:43:46 woscar-pp php[378252]: [worker] Hello with 1
 Les logs Oscar ont également été enrichies, les interactions entre Oscar et Gearman y sont visibles : 
 
 ```bash
-tail -f logs.oscar.log
+tail -f logs/oscar.log
 ```
 
 Vous devrier pouvoir y observer l'échange entre Oscar > Gearman > Command oscar
