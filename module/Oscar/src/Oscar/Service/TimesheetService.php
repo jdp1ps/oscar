@@ -1462,12 +1462,24 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $configApp;
     }
 
-    public function getDatasDeclarersSynthesis($personIds)
+    public function getDatasActivity( Activity $activity, ?string $periodStart, ?string $periodEnd ):array
     {
-        return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds);
+        $output = [];
+
+        return $output;
     }
 
-    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd)
+
+    public function getDatasDeclarersSynthesis($personIds, ?string $periodFrom = null, ?string $periodTo = null) :array
+    {
+        $periods = null;
+        if( $periodFrom && $periodTo ){
+            $periods = DateTimeUtils::allperiodsBetweenTwo($periodFrom, $periodTo);
+        }
+        return $this->getTimesheetRepository()->getDatasDeclarerSynthesis($personIds, $periods);
+    }
+
+    public function getDatasValidationPersonsPeriod($personsIds, $yearStart, $yearEnd) :array
     {
         $datas = [];
 
@@ -1478,9 +1490,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $yearStart,
             $yearEnd
         );
-
-        $this->getLoggerService()->debug("Validations : " . count($validations));
-
 
         foreach ($validations as $validation) {
             $declarerId = $validation['declarer_id'];
@@ -1494,9 +1503,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $objectgroup = $validation['objectgroup'];
             $object_id = $validation['object_id'];
             $dateSend = $validation['datesend'];
-
-            $this->getLoggerService()->debug("Validation $objectgroup > $object > $object_id : $period");
-
 
             if (!array_key_exists($period, $datas)) {
                 $datas[$period] = [];
@@ -1585,13 +1591,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $toc .= '</ul>';
 
         $html = $templateOpen;
-        // $html .= $toc;
         $html .= $pages;
         $html .= $close;
 
-        $this->getOscarConfigurationService()->getHtmlToPdfMethod()->setOrientation(
-            IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE
-        )->convert($html, 'test.pdf');
+        $this->getOscarConfigurationService()
+            ->getHtmlToPdfMethod()
+            ->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)
+            ->convert($html, 'Synthèse-des-feuilles-de-temps.pdf');
         die();
     }
 

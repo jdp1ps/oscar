@@ -330,7 +330,6 @@ class ValidationPeriodRepository extends EntityRepository
     }
 
     public function getDatasValidationPersonsPeriod($personsIds, $start, $end){
-        // SELECT CONCAT(year, '-', month) as period, * FROM validationperiod WHERE CONCAT(year, '-', month) > '2018-8';
 
         $rsm = new ResultSetMapping();
         $result = $this->getEntityManager()->getConnection()->fetchAll("SELECT CONCAT(v.year, '-', v.month) as period, * 
