@@ -37,10 +37,57 @@
     <h1>
         Feuille de temps pour
         <strong><?= $activity ?></strong>
+        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="btn btn-default">
+            <i class="icon-cube"></i>
+            Revenir sur la fiche
+        </a>
     </h1>
 
     <?php if($activity->isTimesheetAllowed()): ?>
     <section>
+        <h2>
+            <i class="icon-archive"></i>
+            Lots de travail
+        </h2>
+        <div id="workpackages"></div>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $activity)): ?>
+            <script>
+                require(['vue', 'vue-resource', 'bootbox', 'workpackageui'], function (Vue, VueResource, Bootbox, Workpackage) {
+
+                    Vue.use(VueResource);
+
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+
+                    Vue.filter('heures', function (v) {
+                        var heures = parseInt(v);
+                        var minutes = Math.round((parseFloat(v) - heures) * 60);
+                        if (minutes == 0) minutes = '';
+                        else if (minutes < 10) minutes = ':0' + minutes;
+                        else minutes = ':' + minutes
+                        return heures + minutes;
+                    });
+
+                    new Vue({
+                        render: function (h) {
+                            return h(Workpackage, {
+                                props: {
+                                    url: '<?= $this->url(
+                                        'workpackage/rest',
+                                        ['idactivity' => $activity->getId()]
+                                    ) ?>',
+                                    isValidateur: true,
+                                    editable: true,
+                                    Bootbox: Bootbox,
+                                }
+                            })
+                        },
+                        el: '#workpackages'
+                    }).$mount()
+                });
+            </script>
+        <?php endif; ?>
         <div id="validators"></div>
         <script>
             require(['vue', 'vue-resource', 'activityvalidator'], function(Vue, VueResource, ActivityValidator){
