@@ -2553,7 +2553,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      */
     public function getPeriodValidation(Person $person, $month, $year)
     {
-        $query = $this->getValidationPeriodRepository()
+        $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('v')
             ->where('v.month = :month AND v.year = :year AND v.declarer = :personId')
             ->setParameters(
@@ -4081,7 +4081,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $globalState = max($globalState, array_search($vp->getStatus(), $states));
 
                 // Récupération des validateurs
-                if( $vp->getValidationActivityById() > 0 ){
+                if ($vp->getValidationActivityById() > 0) {
                     $validators['prj'][$vp->getValidationActivityById()] = [
                         'person' => $vp->getValidationActivityBy(),
                         'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
@@ -4089,7 +4089,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if( $vp->getValidationSciById() > 0 ){
+                if ($vp->getValidationSciById() > 0) {
                     $validators['sci'][$vp->getValidationSciById()] = [
                         'person' => $vp->getValidationSciBy(),
                         'date' => $vp->getValidationSciAt()->format('Y-m-d'),
@@ -4097,7 +4097,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     ];
                 }
 
-                if( $vp->getValidationAdmById() > 0 ){
+                if ($vp->getValidationAdmById() > 0) {
                     $validators['adm'][$vp->getValidationAdmById()] = [
                         'person' => $vp->getValidationAdmBy(),
                         'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
@@ -4421,51 +4421,132 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $query;
     }
 
+    const TIMESHEET_LEVEL_PRJ = 'prj';
+    const TIMESHEET_LEVEL_SCI = 'sci';
+    const TIMESHEET_LEVEL_ADM = 'adm';
+
+    public function getValidatorsPrjFixed(Activity $activity, ?IPersonFormatter $format = null): array
+    {
+        $validators = $activity->getValidatorsPrj();
+        if ($format != null) {
+            $out = [];
+            foreach ($validators as $person) {
+                $out[] = $format->format($person);
+            }
+            return $out;
+        }
+        return $validators;
+    }
+
+    /**
+     * Retourne les validateurs nommés sur une activité de recherche.
+     *
+     * @param Activity $activity
+     * @param string $level
+     * @param IPersonFormatter|null $formatter
+     * @return array
+     * @throws OscarException
+     */
+    protected function getValidatorsActivityFixed(
+        Activity $activity,
+        string $level,
+        ?IPersonFormatter $formatter = null
+    ): array {
+        switch ($level) {
+            case self::TIMESHEET_LEVEL_PRJ:
+                $validators = $activity->getValidatorsPrj();
+                break;
+            case self::TIMESHEET_LEVEL_SCI:
+                $validators = $activity->getValidatorsSci();
+                break;
+            case self::TIMESHEET_LEVEL_ADM:
+                $validators = $activity->getValidatorsAdm();
+                break;
+            default:
+                throw new OscarException("Timesheet level inconnu '$level'");
+        }
+        if ($formatter === null) {
+            return $validators;
+        } else {
+            $out = [];
+            foreach ($validators as $person) {
+                $dt = $formatter->format($person);
+                $dt['fixed'] = true;
+                $out[] = $dt;
+            }
+            return $out;
+        }
+    }
+
+    /**
+     * Retourne les validateurs calculés (en fonction des privilèges).
+     *
+     * @param Activity $activity
+     * @param string $level
+     * @param IPersonFormatter|null $formatter
+     * @return array
+     * @throws OscarException
+     */
+    protected function getValidatorsActivityInherit(
+        Activity $activity,
+        string $level,
+        ?IPersonFormatter $formatter = null
+    ): array {
+        switch ($level) {
+            case self::TIMESHEET_LEVEL_PRJ:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                    $activity
+                );
+                break;
+            case self::TIMESHEET_LEVEL_SCI:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                    $activity
+                );
+                break;
+            case self::TIMESHEET_LEVEL_ADM:
+                $validators = $this->getPersonService()->getAllPersonsWithPrivilegeInActivity(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                    $activity
+                );
+                break;
+            default:
+                throw new OscarException("Timesheet level inconnu '$level'");
+        }
+        if ($formatter === null) {
+            return $validators;
+        } else {
+            $out = [];
+            foreach ($validators as $person) {
+                $dt = $formatter->format($person);
+                $dt['fixed'] = false;
+                $out[] = $dt;
+            }
+            return $out;
+        }
+    }
+
+
     /**
      * Aggrégation des données sur les validators désignés.
      *
      * @param Activity $activity
      * @return array
      */
-    public function getDatasValidatorsActivity( Activity $activity ):array
+    public function getDatasValidatorsActivity(Activity $activity): array
     {
+        $formatPerson = new PersonToJsonBasic();
         $output = [
             'activity_id' => $activity->getId(),
             'activity' => $activity->getLabel(),
-            'validators_prj' => [],
-            'validators_sci' => [],
-            'validators_adm' => []
+            'validators_prj_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_PRJ, $formatPerson),
+            'validators_sci_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_SCI, $formatPerson),
+            'validators_adm_default' => $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_ADM, $formatPerson),
+            'validators_prj' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_PRJ, $formatPerson),
+            'validators_sci' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_SCI, $formatPerson),
+            'validators_adm' => $this->getValidatorsActivityFixed($activity, self::TIMESHEET_LEVEL_ADM, $formatPerson),
         ];
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsPrj() as $person) {
-            $output['validators_prj'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsSci() as $person) {
-            $output['validators_sci'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
-
-        /** @var Person $person */
-        foreach ($activity->getValidatorsAdm() as $person) {
-            $output['validators_adm'][] = [
-                'person' => $person->getDisplayName(),
-                'mail' => $person->getEmail(),
-                'mailMd5' => md5($person->getEmail()),
-                'person_id' => $person->getId()
-            ];
-        }
 
         return $output;
     }
@@ -4476,11 +4557,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getDatasActivityMembers( Activity $activity ): array {
+    public function getDatasActivityMembers(Activity $activity): array
+    {
         $members = [];
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
-            if( !array_key_exists($personActivity->getId(), $members) ){
+            if (!array_key_exists($personActivity->getId(), $members)) {
                 $members[$personActivity->getPerson()->getId()] = [
                     'person' => (string)$personActivity->getPerson(),
                     'mail' => $personActivity->getPerson()->getEmail(),
@@ -4494,13 +4576,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $members;
     }
 
-    public function getDatasActivityValidations( Activity $activity ):array {
+
+
+    public function getDatasActivityValidations(Activity $activity): array
+    {
         $output = [];
 
         $validations = $this->getValidationsActivity($activity);
 
         /** @var ValidationPeriod $validation */
-        foreach ($validations as $validation){
+        foreach ($validations as $validation) {
             $output[] = $validation->toJson();
         }
 
@@ -4572,6 +4657,148 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return true;
     }
 
+    public function getValidationPeriodsUpdateRemoveValidator(Activity $activity, Person $person, $step) {
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
+        $status = [];
+        // status à mettre à jour
+        switch( $step ){
+            case ValidationPeriod::STATUS_STEP1:
+                $status = [ValidationPeriod::STATUS_STEP1];
+                break;
+            case ValidationPeriod::STATUS_STEP2:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2];
+                break;
+            case ValidationPeriod::STATUS_STEP3:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3];
+                break;
+
+        }
+        $status[] = ValidationPeriod::STATUS_CONFLICT;
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validations as $validationPeriod){
+            if( !in_array($validationPeriod->getStatus(), $status) ) {
+                $this->getLoggerService()->info("Mauvais status $validationPeriod");
+                continue;
+            }
+            try {
+                switch( $step ){
+                    case ValidationPeriod::STATUS_STEP1:
+                        $validationPeriod->getValidatorsPrj()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsPrj()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_PRJ);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsPrj()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsPrjDefault(true);
+                        }
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP2:
+                        $validationPeriod->getValidatorsSci()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsSci()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_SCI);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsSci()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsSciDefault(true);
+                        }
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP3:
+                        $validationPeriod->getValidatorsAdm()->removeElement($person);
+                        $this->getEntityManager()->flush($validationPeriod);
+
+                        if( $validationPeriod->getValidatorsAdm()->count() == 0 ){
+                            $this->getLoggerService()->info("Aucun validateur, on remets ceux par défaut");
+                            $default = $this->getValidatorsActivityInherit($activity, self::TIMESHEET_LEVEL_ADM);
+                            foreach ($default as $validator) {
+                                $validationPeriod->getValidatorsAdm()->add($validator);
+                            }
+                            $validationPeriod->setValidatorsAdmDefault(true);
+                        }
+                        break;
+                }
+                $this->getLoggerService()->info("$person remove to validation $step on $validationPeriod");
+                $this->getEntityManager()->flush($validationPeriod);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                throw new OscarException("Impossible d'ajouter $person comme validateur $step dans $validationPeriod");
+            }
+        }
+    }
+
+    public function getValidationPeriodsUpdateAddValidator(Activity $activity, Person $person, $step) {
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
+        $status = [];
+        // status à mettre à jour
+        switch( $step ){
+            case ValidationPeriod::STATUS_STEP1:
+                $status = [ValidationPeriod::STATUS_STEP1];
+                break;
+            case ValidationPeriod::STATUS_STEP2:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2];
+                break;
+            case ValidationPeriod::STATUS_STEP3:
+                $status = [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3];
+                break;
+
+        }
+        $status[] = ValidationPeriod::STATUS_CONFLICT;
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validations as $validationPeriod){
+            if( !in_array($validationPeriod->getStatus(), $status) ) {
+                $this->getLoggerService()->info("Mauvais status $validationPeriod");
+                continue;
+            }
+            try {
+                switch( $step ){
+                    case ValidationPeriod::STATUS_STEP1:
+                        if( $validationPeriod->isValidatorsPrjDefault() ){
+                            foreach ($validationPeriod->getValidatorsPrj() as $validator) {
+                                $validationPeriod->getValidatorsPrj()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsPrjDefault(false)
+                            ->addValidatorPrj($person);
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP2:
+                        if( $validationPeriod->isValidatorsSciDefault() ){
+                            foreach ($validationPeriod->getValidatorsSci() as $validator) {
+                                $validationPeriod->getValidatorsSci()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsSciDefault(false)
+                            ->addValidatorSci($person);
+                        break;
+
+                    case ValidationPeriod::STATUS_STEP3:
+                        if( $validationPeriod->isValidatorsAdmDefault() ){
+                            foreach ($validationPeriod->getValidatorsAdm() as $validator) {
+                                $validationPeriod->getValidatorsAdm()->removeElement($validator);
+                            }
+                        }
+                        $validationPeriod->setValidatorsAdmDefault(false)
+                            ->addValidatorAdm($person);
+                        break;
+                }
+                $this->getLoggerService()->info("$person added to validation $step on $validationPeriod");
+                $this->getEntityManager()->flush($validationPeriod);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                throw new OscarException("Impossible d'ajouter $person comme validateur $step dans $validationPeriod");
+            }
+        }
+    }
+
     /**
      * Ajout d'un validateur désigné à une activité de recherche.
      *
@@ -4581,7 +4808,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return bool
      * @throws OscarException
      */
-    public function removeValidatorActivity( $personId, $activityId, $where )
+    public function removeValidatorActivity($personId, $activityId, $where)
     {
         $step = $where;
         try {
@@ -4609,6 +4836,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 default:
                     throw new OscarException("Mauvaise condition 'where'");
             }
+            // @todo Mettre à jour les validations en cours éligible
             $this->getEntityManager()->flush($activity);
 
             $this->getValidationPeriodsUpdateRemoveValidator($activity, $person, $step);
@@ -4734,7 +4962,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getValidationsActivity( Activity $activity ) :array
+    public function getValidationsActivity(Activity $activity): array
     {
         return $this->getValidationPeriodRepository()->getValidationPeriodsByActivityId($activity->getId());
     }

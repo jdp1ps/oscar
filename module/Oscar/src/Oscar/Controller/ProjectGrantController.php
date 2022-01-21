@@ -3001,10 +3001,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
             }
 
-            $datas = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
             $response = $this->baseJsonResponse();
             $response['workpackages'] = $this->getTimesheetService()->getDatasActivityWorkpackages($activity);
-            $response['validators'] = $datas;
+            $response['validators'] = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
             $response['members'] = $this->getTimesheetService()->getDatasActivityMembers($activity);
             $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
             return $this->jsonOutput($response);

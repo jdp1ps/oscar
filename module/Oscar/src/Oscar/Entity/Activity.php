@@ -1317,21 +1317,6 @@ class Activity implements ResourceInterface
         return $this;
     }
 
-    public function hasValidatorsPrj() :bool
-    {
-        return count($this->getValidatorsPrj()) > 0;
-    }
-
-    public function hasValidatorsSci() :bool
-    {
-        return count($this->getValidatorsSci()) > 0;
-    }
-
-    public function hasValidatorsAdm() :bool
-    {
-        return count($this->getValidatorsAdm()) > 0;
-    }
-
     /**
      * @return ArrayCollection
      */
@@ -2569,25 +2554,6 @@ class Activity implements ResourceInterface
             }
         }
         return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private $tmpOrganizationsWithRoleForm = [];
-
-    public function setOrganizationsWithRoleForm($formName, $formValue)
-    {
-        var_dump($formName);
-        var_dump($formValue);
-    }
-
-    public function getOrganizationsWithRoleForm($formName)
-    {
-        if (array_key_exists($formName)) {
-            return $this->tmpOrganizationsWithRoleForm[$formName];
-        } else {
-            return '';
-        }
     }
 
     /**
