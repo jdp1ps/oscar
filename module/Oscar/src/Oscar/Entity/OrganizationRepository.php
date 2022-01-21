@@ -16,6 +16,35 @@ use Oscar\Import\Data\DataExtractorOrganization;
 
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
+    /**
+     * Retourne la liste des organizations de la personnes.
+     *
+     * @param int $personId ID de la personne
+     * @param bool $principal Uniquement les rôles marqués comme "principal"
+     * @param mixed $date True = Date du jour, False = ignoré, Datetime = à la date donnée
+     * @return Organization[]
+     */
+    public function getOrganizationsPerson( int $personId, bool $principal = false, $date = false ) :array
+    {
+        $qb = $this->createQueryBuilder('o')
+            ->innerJoin('o.persons', 'op')
+            ->where('op.person = :person')
+            ->setParameter('person', $personId);
+
+        if ($date !== false) {
+            $date = $date === true ? new \DateTime() : $date;
+            $qb->andWhere('op.dateStart IS NULL OR op.dateStart <= :date');
+            $qb->andWhere('op.dateEnd >= :date OR op.dateEnd IS NULL');
+            $qb->setParameter('date', $date);
+        }
+
+        if ($principal === true) {
+            $qb->innerJoin('op.roleObj', 'r')
+                ->andWhere('r.principal = true');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 
     /**
      * Retourne les IDS des organisations où la personne est impliquée avec un rôle principale.

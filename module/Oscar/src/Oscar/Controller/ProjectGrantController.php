@@ -463,7 +463,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             if ($dlFile) {
                 $fileInfo = $demande->getFileInfosByFile($dlFile);
-                $filepath = $this->getOscarConfigurationService()->getCOnfiguration(
+                $filepath = $this->getOscarConfigurationService()->getConfiguration(
                         'paths.document_request'
                     ) . '/' . $fileInfo['file'];
                 $filename = $fileInfo['name'];
@@ -482,7 +482,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 foreach ($files as $file) {
                     if ($file['file'] == $rdlFile) {
                         @unlink(
-                            $this->getOscarConfigurationService()->getCOnfiguration(
+                            $this->getOscarConfigurationService()->getConfiguration(
                                 'paths.document_request'
                             ) . '/' . $file['file']
                         );

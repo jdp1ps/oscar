@@ -12,15 +12,10 @@ namespace Oscar\Controller;
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\AbstractQuery;
-use Doctrine\ORM\Query;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Elasticsearch\Common\Exceptions\Unauthorized401Exception;
-use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\Authentification;
-use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
-use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
@@ -29,18 +24,13 @@ use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\ProjectMember;
-use Oscar\Entity\Referent;
 use Oscar\Entity\Role;
-use Oscar\Entity\TimeSheet;
 use Oscar\Entity\ValidationPeriod;
-use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
-use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
-use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
@@ -64,38 +54,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 {
     use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseUserParametersServiceTrait;
 
-    /** @var ActivityRequestService */
-    private $activityRequestService;
-
-    /**
-     * @return ActivityRequestService
-     */
-    public function getActivityRequestService(): ActivityRequestService
-    {
-        return $this->activityRequestService;
-    }
-
-    /**
-     * @param ActivityRequestService $activityRequestService
-     */
-    public function setActivityRequestService(ActivityRequestService $activityRequestService): void
-    {
-        $this->activityRequestService = $activityRequestService;
-    }
-
-    /**
-     * Liste des personnes issue de Ldap.
-     *
-     * @return JsonModel
-     *
-     * @deprecated
-     */
-    public function apiLdapAction()
-    {
-        $this->getResponseDeprecated();
-    }
-
-    public function deleteAction()
+    public function deleteAction() :array
     {
         $method = $this->getHttpXMethod();
         $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
@@ -103,6 +62,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             if ($method != 'POST') {
                 return $this->getResponseBadRequest("Opération non-authorisée");
             }
+
+            // TODO Mettre ça dans PersonService
+
             $person = $this->getPersonService()->getPersonById($this->params()->fromRoute('id'), true);
 
             // Test de déclaration
@@ -147,26 +109,17 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         }
     }
 
-    public function accessAction()
+    /**
+     * Visualisation des privilèges d'une personne.
+     *
+     * @return array
+     */
+    public function accessAction() :array
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
-        $privilegesDT = $this->getEntityManager()->getRepository(Privilege::class)->findBy([], ['root' => 'DESC']);
+        $privileges = $this->getOscarUserContextService()->getPrivilegesDatasArray();
 
-        $privileges = [];
-        /** @var Privilege $privilege */
-        foreach ($privilegesDT as $privilege) {
-            $p = [
-                'id' => $privilege->getId(),
-                'label' => $privilege->getLibelle(),
-                'category' => $privilege->getCategorie()->getLibelle(),
-                'spot' => $privilege->getSpot(),
-                'roleIds' => $privilege->getRoleIds(),
-                'root' => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
-                'enabled' => false
-            ];
-            $privileges[$privilege->getId()] = $p;
-        }
         $rolesApplication = [];
         try {
             $roles = $this->getPersonService()->getRolesApplication($person);
@@ -875,14 +828,12 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         }
 
         if ($person && $person->getLadapLogin()) {
-            $auth = $this->getEntityManager()
-                ->getRepository('Oscar\Entity\Authentification')
-                ->findOneBy(['username' => $person->getLadapLogin()]);
-            if ($auth) {
-                /** @var ActivityLogRepository $activityRepo */
-                $activityRepo = $this->getEntityManager()->getRepository(LogActivity::class);
-
+            $auth = null;
+            try {
+                $auth = $this->getPersonService()->getPersonAuthentification($person);
                 $traces = $this->getActivityLogService()->getAuthentificationActivities($auth->getId(), 20);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->warning($e->getMessage());
             }
         }
 
@@ -919,7 +870,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'declarationsToDo' => $declarations,
             'subordinates' => $subordinates,
             'validations' => $validations,
-            'authentification' => $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(['username' => $person->getLadapLogin()]),
+            'authentification' => $auth,
             'auth' => $auth,
             'allowTimesheet' => $allowTimesheet,
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
@@ -1102,7 +1053,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
     public function newAction()
     {
         $person = new Person();
-        $form = new \Oscar\Form\PersonForm();
+        $form = new PersonForm();
         $form->init();
         $form->bind($person);
 
@@ -1133,5 +1084,29 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $view->setTemplate('/oscar/person/form');
 
         return $view;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// SERVICES
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /** @var ActivityRequestService */
+    private ActivityRequestService $activityRequestService;
+
+    /**
+     * @return ActivityRequestService
+     */
+    public function getActivityRequestService(): ActivityRequestService
+    {
+        return $this->activityRequestService;
+    }
+
+    /**
+     * @param ActivityRequestService $activityRequestService
+     */
+    public function setActivityRequestService(ActivityRequestService $activityRequestService): void
+    {
+        $this->activityRequestService = $activityRequestService;
     }
 }

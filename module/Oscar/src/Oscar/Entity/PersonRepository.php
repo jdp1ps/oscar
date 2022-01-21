@@ -49,12 +49,16 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->execute();
     }
 
+    /**
+     * @param array $ids
+     * @return Person[]
+     */
     public function getPersonsByIds(array $ids)
     {
         $qb = $this->getBaseQuery()
             ->where('p.id IN (:ids)')
             ->setParameter('ids', $ids);
-        return $qb->getQuery()->execute();
+        return $qb->getQuery()->getResult();
     }
 
 

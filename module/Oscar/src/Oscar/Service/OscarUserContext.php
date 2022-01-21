@@ -1242,7 +1242,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 return true;
             }
 
-
             // Puis si besoin, les rôles hérités de l'application
             if ($ressource) {
                 // $this->getLoggerService()->info("hasPrivilege $privilege dans $ressource non global");
@@ -1319,5 +1318,33 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
 
         return $result;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// RECUPERATION des DONNEES (Général)
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @return array
+     */
+    public function getPrivilegesDatasArray() :array
+    {
+        $output = [];
+        $privileges = $this->getEntityManager()->getRepository(Privilege::class)->findBy([], ['root' => 'DESC']);
+        /** @var Privilege $privilege */
+        foreach ($privileges as $privilege) {
+            $p = [
+                'id' => $privilege->getId(),
+                'label' => $privilege->getLibelle(),
+                'category' => $privilege->getCategorie()->getLibelle(),
+                'spot' => $privilege->getSpot(),
+                'roleIds' => $privilege->getRoleIds(),
+                'root' => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
+                'enabled' => false
+            ];
+            $output[$privilege->getId()] = $p;
+        }
+        return $output;
     }
 }

@@ -31,6 +31,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const document_use_version_in_name = 'document_use_version_in_name';
     const document_location = 'document_location';
     const declarers_white_list = 'declarers_white_list';
+    const auth_person_normalize = 'authPersonNormalize';
 
 
     const theme = 'theme';
@@ -512,6 +513,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getAutoUpdateSpent()
     {
         return $this->getOptionalConfiguration("autorefreshspents", false);
+    }
+
+    public function getAuthPersonNormalize() :bool
+    {
+        return $this->getConfiguration(self::auth_person_normalize, false);
     }
 
     /**

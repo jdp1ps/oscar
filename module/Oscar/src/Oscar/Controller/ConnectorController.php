@@ -45,7 +45,7 @@ class ConnectorController extends AbstractOscarController implements UseOscarUse
             return $this->getResponseBadRequest('Connecteur indisponible');
         } else {
             $personService = $this->getPersonService();
-            $persons = $personService->getRepository()->getPersonsByConnectorID($connectorName, $personId);
+            $persons = $personService->getPersonRepository()->getPersonsByConnectorID($connectorName, $personId);
 
             if( count($persons) == 1 ){
                 $person = $persons[0];
