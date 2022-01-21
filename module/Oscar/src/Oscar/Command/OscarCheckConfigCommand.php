@@ -73,12 +73,16 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         $connectors = $config->getConfiguration('connectors.person');
 
         foreach ($connectors as $key=>$params) {
-            $io->text(sprintf("Configuration : <bold>%s</bold>", $key));
+            $io->text("-------------------------------------------------------");
+            $io->text(sprintf("# Configuration : <bold>%s</bold>", $key));
 
             // Class
             $io->text(sprintf("class: <bold>%s</bold>", $params['class']));
+            $io->text("---");
+
 
             // Options du connecteur
+
             $fileYml = $params['params'];
 
             /** @var AbstractConnectorOscar $class */
@@ -101,6 +105,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 }
                 $io->newLine();
             }
+            $io->text("-------------------------------------------------------");
         }
     }
 
@@ -388,6 +393,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         try {
             $this->checkConnectorPerson($input,$output);
         } catch ( OscarException $e ){
+            echo $e->getTraceAsString();
             $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
 

@@ -57,7 +57,7 @@ class ConnectorAccessCurlHttpBasicAuth implements IConnectorAccess
             $error .= "CODE $httpcode. ";
 
             if( $httpcode == 401 ){
-                $error = "Accès à l'API non-autorisé. ";
+                $error = "L'API distante a retournée une erreur : Accès non-autorisé. ";
             }
             throw new \Exception($error);
         }

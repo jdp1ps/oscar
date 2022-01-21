@@ -1,4 +1,4 @@
-# Données
+# Connectors OSCAR
 
 *Oscar* dispose de mécanismes pour gérer et synchroniser les données tiers.
 
@@ -18,11 +18,131 @@ Une note pour scinder ce type de certificat sous environnement linux via openssl
 Il est possible de développer ces propres services si les informations sont réparties de façon plus spécifique dans le SI.
 
 
+## Configuration
+
+Les connecteurs (*persons* ou *organizations*) sont déclarés dans le fichier de configuration `config/autoload/local.php` : 
+
+```php
+<?php
+// /config/autoload/local.php
+return array(
+    'oscar' => [
+        'connectors' => [
+            // -------------------------------- Synchronisation des structures
+            'organization' => [
+                'rest' => [
+                    'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
+                    'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+                    'editable'  => false
+                ]
+            ],
+            
+            // -------------------------------- Synchronisation des personnes
+            'person' => [
+                 'rest' => [
+                    'class'     => \Oscar\Connector\ConnectorPersonREST::class,
+                    'params'    => APP_DIR . '/config/connectors/organization_rest.yml',
+                    'editable'  => false
+                ]
+            ]
+        ],
+    ]
+);
+```
+Si votre copie de Oscar n'utilise pas les connectors pour synchroniser des données, vous devez renseigner les différents connectors avec des tableaux vides : 
+
+```php
+<?php
+// /config/autoload/local.php
+return array(
+    'oscar' => [
+        'connectors' => [
+            'organization' => [],
+            'person' => []
+        ],
+    ]
+);
+```
+
+> Pour information, la clef `class` permet de choisir une classe à utiliser pour traiter les données. Cette class implémente l'interface `IConnectorPerson`, il est possible d'implémenter vos propres connectors si besoin.
+
+### Configuration des connecteurs
+
+Les connecteurs sont configurés dans des fichier *YAML* qui vont permettre de configurer les connecteurs. Le connecteur par défaut est HTTP basic, d'autres méthode de récupération des informations existent : 
+
+ - HTTP basic (par défaut)
+ - HTTP certificat SSL
+ - HTTP Token
+
+
+#### HTTP basic
+
+le fichier `/config/connectors/person_rest.yml` contient les URL utilisées par le connecteur pour obtenir les données :
+
+```yml
+# Emplacement du service REST fournissant la liste des personnes
+url_persons: 'https://rest.service.tdl/api/persons'
+
+# Emplacement du service REST fournissant les données pour une personne
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+url_person: 'https://rest.service.tld/api/person/%s'
+```
+
+#### HTTP Certificat SSL
+Dans le cadre d'une connexion vers une api avec certificat il faudra compléter les éléments suivants avec vos informations
+
+Ajouter et, ou compléter la clef acces_strategy avec le path vers la class dédié à la connexion avec certificat
+
+Compléter les path(s) vers vos fichiers :certificat et clef de certificat, ainsi que le mot de pass pour ces éléments
+
+```yml
+# Emplacement du service REST
+# ...
+# ...
+# Accès spécifique
+access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
+# Clef certificat .pem
+file_certificat_ssl_key: config/connectors/key.pem
+# Client certificat .pem
+file_certificat_cert: config/connectors/client.pem
+# Pass certificat .pem
+file_certificat_pass: VOTREPASSCERTIFICAT
+```
+
+#### HTTP Token
+
+Authentification par token (Matthieu MARC)
+
+```yml
+# Emplacement du service REST fournissant la liste des personnes
+# ...
+# ...
+# Accès spécifique
+access_strategy: Oscar\Connector\Access\ConnectorAccessCurlHttpTokenAuth
+token: 1234567890abcdef
+
+# method [POST | GET]
+# optionnel ( default : POST )
+# Méthode de transmission des données
+method: POST
+
+# force_unsecure_http : [true | false]
+# optionnel ( default : false )
+# Autorise les transmitions non sécirisées (non-HTTPS) 
+force_unsecure_http: false
+```
+
+#### Tester la configuration du connecteur
+
+Vous pouvez utiliser la commande `php bin/oscar.php check:config` pour vérifier que votre connecteur est correctement configuré (la commande va executer une requête d'accès HTTP automatiquement sur l'URL "liste").
+
+
 ## Connector PERSONS
 
 Données utilisées dans l'application pour les personnes qui participent aux activités de recherche.
 
-Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes sont des données distinctes, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications. Cette relation est établie côté Oscar via les champs **ldapLogin** dans **Person** et **username** dans **Authentification**.
+Note : Attention, dans Oscar, les comptes pour s'authentifier et les personnes **sont des données distinctes**, une personne peut être présente dans Oscar sans pour autant avoir de compte pour s'authentifier dessus. Par contre, il existe une relation facultative entre les personnes et les authentifications. Cette relation est établie côté Oscar via les champs **ldapLogin** dans **Person** et **username** dans **Authentification**.
 
 La configuration suivante dans le fichier `/config/autoload/local.php` permet d'activer le connecteur REST pour les personnes.
 
@@ -45,55 +165,8 @@ return array(
 );
 ```
 
-Si votre copie de Oscar n'utilise pas les connectors pour synchroniser des données, vous devez renseigner les différents connectors avec des tableaux vides : 
 
-```php
-<?php
-return array(
-    'oscar' => [
-        'connectors' => [
-            'organization' => [],
-            'person' => []
-        ],
-    ]
-);
-```
-
-Pour information, la clef `class` permet de choisir une classe à utiliser pour traiter les données. Cette class implémente l'interface `IConnectorPerson`, il est possible d'implémenter vos propres connectors si besoin.
-
-le fichier `/config/connectors/person_rest.yml` contient les URL utilisées par le connecteur pour obtenir les données :
-
-```yml
-# Emplacement du service REST fournissant la liste des personnes
-url_persons: 'https://rest.service.tdl/api/persons'
-
-# Emplacement du service REST fournissant les données pour une personne
-# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
-# le service REST.
-url_person: 'https://rest.service.tld/api/person/%s'
-```
-
-Dans le cadre d'une connexion vers une api avec certificat il faudra compléter les éléments suivants avec vos informations
-
-Ajouter et, ou compléter la clef acces_strategy avec le path vers la class dédié à la connexion avec certificat
-
-Compléter les path(s) vers vos fichiers :certificat et clef de certificat, ainsi que le mot de pass pour ces éléments
-
-```yml
-# Emplacement du service REST fournissant la liste des personnes
-# ...
-# ...
-# Accès spécifique
-access_strategy:  Oscar\Connector\Access\ConnectorAccessCurlCertificat
-# Clef certificat .pem
-file_certificat_ssl_key: config/connectors/key.pem
-# Client certificat .pem
-file_certificat_cert: config/connectors/client.pem
-# Pass certificat .pem
-file_certificat_pass: VOTREPASSCERTIFICAT
-```
-
-
+#### Format des données
 Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour la liste un tableau d'objet, pour l'accès unitaire un objet simple sous la forme :
 
 **Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `persons` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
