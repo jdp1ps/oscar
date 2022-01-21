@@ -231,7 +231,7 @@ export default {
     },
 
     handlerRemove(personId, where) {
-      this.$http.delete(this.url + '?p=' + personId + '&w=' + where).then(
+      this.$http.delete(this.url + '?a=d&p=' + personId + '&w=' + where).then(
           ok => {
             this.fetch();
           },

@@ -2980,7 +2980,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $this->isAjax() ){
 
-            if( $this->getRequest()->isDelete() ){
+            $action = $this->getRequest()->getQuery()->get('a', null);
+
+            if( $this->getRequest()->isDelete() || $action == 'd' ){
                 $person_id = $this->getRequest()->getQuery()->get('p');
                 $where = $this->getRequest()->getQuery()->get('w');
                 try {
@@ -2990,7 +2992,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
             }
 
-            if( $this->getRequest()->isPost() ){
+            if( $this->getRequest()->isPost() && $action != 'd' ){
                 //
                 $person_id = $this->getRequest()->getPost()->get('person_id');
                 $where = $this->getRequest()->getPost()->get('where');
