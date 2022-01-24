@@ -50,6 +50,11 @@ h2.tv-serie-label { border-bottom: none; }
                     </abbr>
                 <?php endif; ?>
                 <?= $project->getLabel() ?>
+
+                <div class="budget montant">
+                    <small><em>Montant</em></small><br>
+                    <strong><?= $this->currency($project->getAmount()) ?></strong>
+                </div>
             </h1>
         </header>
 
