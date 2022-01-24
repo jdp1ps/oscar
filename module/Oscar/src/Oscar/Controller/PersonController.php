@@ -28,6 +28,7 @@ use Oscar\Entity\Role;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
+use Oscar\Form\PersonForm;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -1001,7 +1002,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
     {
         $id = $this->params()->fromRoute('id');
         $person = $this->getPersonService()->getPerson($id);
-        $form = new \Oscar\Form\PersonForm();
+        $form = new PersonForm();
 
         try {
             $connectors = $this->getOscarConfigurationService()->getConfiguration('connectors.person');
