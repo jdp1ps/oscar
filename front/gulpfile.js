@@ -106,6 +106,30 @@ exports.activityTimesheetSynthesisMenuWatch = function(cb){
     watch(pathModuleSrc + "ActivityTimesheetSynthesisMenu.vue", activityTimesheetSynthesisMenu);
 }
 
+//// 2.7 Ecran des validateurs
+function activityValidator(cb) {
+    compile("ActivityValidator");
+    cb();
+}
+exports.activityValidator = activityValidator;
+exports.activityValidatorWatch = function(cb){
+    watch(pathModuleSrc + "ActivityValidator.vue", activityValidator);
+}
+
+//// 2.8 Lots de travail
+function workpackageUI(cb) {
+    compile("WorkpackageUI");
+    cb();
+}
+exports.workpackageUI = workpackageUI;
+exports.workpackageUIWatch = function(cb){
+    watch([
+        pathModuleSrc + "WorkpackageUI.vue",
+        pathModuleSrc + "components/Workpackage.vue",
+        pathModuleSrc + "components/WorkpackagePerson.vue"
+    ], workpackageUI);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
@@ -137,7 +161,15 @@ exports.componentRNSRFieldWatch = function(cb){ watch('./src/components/RNSRFiel
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-let commands = ['activityDocument', 'administrationPcru', 'administrationPcruPC', 'componentRNSRField', 'createProcessusPCRU'];
+let commands = [
+    'activityDocument',
+    'activityValidator',
+    'administrationPcru',
+    'administrationPcruPC',
+    'componentRNSRField',
+    'createProcessusPCRU',
+    'workpackageUI',
+];
 
 function defaultTask(cb) {
     console.log("Usage : ");

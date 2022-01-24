@@ -2971,6 +2971,52 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function timesheetAction()
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+        if( $this->isAjax() ){
+
+            $action = $this->getRequest()->getQuery()->get('a', null);
+
+            if( $this->getRequest()->isDelete() || $action == 'd' ){
+                $person_id = $this->getRequest()->getQuery()->get('p');
+                $where = $this->getRequest()->getQuery()->get('w');
+                try {
+                    $this->getTimesheetService()->removeValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            if( $this->getRequest()->isPost() && $action != 'd' ){
+                //
+                $person_id = $this->getRequest()->getPost()->get('person_id');
+                $where = $this->getRequest()->getPost()->get('where');
+                try {
+                    $this->getTimesheetService()->addValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            $response = $this->baseJsonResponse();
+            $response['workpackages'] = $this->getTimesheetService()->getDatasActivityWorkpackages($activity);
+            $response['validators'] = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
+            $response['members'] = $this->getTimesheetService()->getDatasActivityMembers($activity);
+            $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
+            return $this->jsonOutput($response);
+        }
+
+        return [
+            'activity' => $activity,
+            'timesheetAllow' => $activity->isTimesheetAllowed()
+        ];
+    }
+
     /**
      * Gestion/récapitulatif des informations PCRU
      *

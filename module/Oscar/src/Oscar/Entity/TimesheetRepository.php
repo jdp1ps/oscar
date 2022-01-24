@@ -134,15 +134,34 @@ class TimesheetRepository extends EntityRepository
             ->getResult();
     }
 
-    public function getDatasDeclarerSynthesis($personIds)
+    /**
+     * Retourne la synthèse des déclarations de temps pour les personnes int[] (liste des ID des personnes)
+     * pour les périodes string[] (tableaux de chaînes sous la forme YYYY-MM).
+     *
+     * @param $personIds
+     * @param null $periods
+     * @return mixed[]
+     */
+    public function getDatasDeclarerSynthesis($personIds, $periods = null)
     {
-        $result = $this->getEntityManager()->getConnection()->fetchAll(
-            "SELECT p.id as person_id, CONCAT(p.firstname, ' ', p.lastname) as displayname, to_char(t.datefrom, 'YYYY-MM') as period, t.activity_id, COALESCE(pr.acronym, t.label) as context, CASE WHEN t.activity_id > 0 THEN 'wp' ELSE 'other' END as type, SUM(EXTRACT(EPOCH from dateto - datefrom) / 3600) as duration FROM timesheet t INNER JOIN person p ON p.id = t.person_id LEFT JOIN activity a ON t.activity_id = a.id LEFT JOIN project pr ON pr.id = a.project_id WHERE p.id IN(" . implode(
-                ',',
-                $personIds
-            ) . ") GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period"
-        );
-        return $result;
+        $sql = "SELECT p.id as person_id, 
+                    CONCAT(p.firstname, ' ', p.lastname) as displayname, 
+                    to_char(t.datefrom, 'YYYY-MM') as period, t.activity_id, 
+                    COALESCE(pr.acronym, t.label) as context, 
+                    CASE WHEN t.activity_id > 0 THEN 'wp' ELSE 'other' END as type, 
+                    SUM(EXTRACT(EPOCH from dateto - datefrom) / 3600) as duration 
+                FROM timesheet t 
+                INNER JOIN person p ON p.id = t.person_id 
+                LEFT JOIN activity a ON t.activity_id = a.id 
+                LEFT JOIN project pr ON pr.id = a.project_id 
+                WHERE p.id IN(".implode(',', $personIds).")";
+
+        if( $periods ){
+            $sql .= "AND to_char(t.datefrom, 'YYYY-MM') IN('" . implode("','", $periods) . "') ";
+        }
+        $sql .= "GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period";
+
+        return $this->getEntityManager()->getConnection()->fetchAll($sql);
     }
 
     public function getPersonPeriodSynthesis($personIds, $period)

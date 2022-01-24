@@ -85,7 +85,7 @@ requirejs.config({
         "Tva": "oscar/dist/Tva",
         "ActivityRequest": "oscar/dist/ActivityRequest",
         "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin",
-        "Workpackage": "oscar/dist/WorkpackageUI",
+        "ConfigStringList": "oscar/dist/ConfigStringList",
         "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
         "ActivityGant": "oscar/dist/ActivityGant",
@@ -112,7 +112,9 @@ requirejs.config({
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
         "contrattypepcru": "oscar/dist/ContratTypePCRU.umd.min",
         "createprocessuspcru": "oscar/dist/CreateProcessusPCRU.umd.min",
-        "timesheetsynthesismenu": "oscar/dist/ActivityTimesheetSynthesisMenu.umd.min"
+        "timesheetsynthesismenu": "oscar/dist/ActivityTimesheetSynthesisMenu.umd.min",
+        "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
+        "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
     },
     shim: {
         "bootstrap": {

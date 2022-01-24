@@ -1,0 +1,124 @@
+<style>
+    .personcard {
+        border: thin #dddddd solid;
+        padding: 2px;
+    }
+    .personcard .personcard-header{
+        display: flex;
+        margin: 0;
+    }
+    .personcard .personcard-gravatar{
+        display: block;
+        max-width: 40px;
+        float: left;
+    }
+    .personcard .personcard-infos{
+        padding-left: .33em;
+    }
+    .personcard .personcard-infos .icon-mail{
+        opacity: .5;
+    }
+
+    .personcard.button {
+        background: #eee;
+        vertical-align: center;
+        text-align: center;
+        padding: 1em;
+        cursor: pointer;
+        margin: 1em 0;
+    }
+    .personcard.button:hover {
+        background: #0b97c4;
+        vertical-align: center;
+        text-align: center;
+    }
+
+    .validators-todo span:after {
+        content: ', ';
+    }
+    .validators-todo span:last-child:after {
+        content: '';
+    }
+</style>
+<div class="container">
+    <h1>
+        Feuille de temps pour
+        <strong><?= $activity ?></strong>
+        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="btn btn-default">
+            <i class="icon-cube"></i>
+            Revenir sur la fiche
+        </a>
+    </h1>
+
+    <?php if($activity->isTimesheetAllowed()): ?>
+    <section>
+        <h2>
+            <i class="icon-archive"></i>
+            Lots de travail
+        </h2>
+        <div id="workpackages"></div>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_WORKPACKAGE_SHOW, $activity)): ?>
+            <script>
+                require(['vue', 'vue-resource', 'bootbox', 'workpackageui'], function (Vue, VueResource, Bootbox, Workpackage) {
+
+                    Vue.use(VueResource);
+
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+
+                    Vue.filter('heures', function (v) {
+                        var heures = parseInt(v);
+                        var minutes = Math.round((parseFloat(v) - heures) * 60);
+                        if (minutes == 0) minutes = '';
+                        else if (minutes < 10) minutes = ':0' + minutes;
+                        else minutes = ':' + minutes
+                        return heures + minutes;
+                    });
+
+                    new Vue({
+                        render: function (h) {
+                            return h(Workpackage, {
+                                props: {
+                                    url: '<?= $this->url(
+                                        'workpackage/rest',
+                                        ['idactivity' => $activity->getId()]
+                                    ) ?>',
+                                    isValidateur: true,
+                                    editable: true,
+                                    Bootbox: Bootbox,
+                                }
+                            })
+                        },
+                        el: '#workpackages'
+                    }).$mount()
+                });
+            </script>
+        <?php endif; ?>
+        <div id="validators"></div>
+        <script>
+            require(['vue', 'vue-resource', 'activityvalidator'], function(Vue, VueResource, ActivityValidator){
+                console.log("ActivityValidator", ActivityValidator);
+                Vue.use(VueResource);
+                new Vue({
+                    el: '#validators',
+                    render: function(h){
+                        return h(ActivityValidator);
+                    }
+                });
+            })
+        </script>
+    </section>
+    <?php else: ?>
+    <section>
+        <div class="alert alert-danger">
+            <p>Vous ne pouvez pas gérer les feuilles de temps de cette activité : </p>
+            <ul>
+                <?php foreach ($activity->getNoTimesheetReason() as $message): ?>
+                <li><?= $message ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </section>
+    <?php endif; ?>
+</div>

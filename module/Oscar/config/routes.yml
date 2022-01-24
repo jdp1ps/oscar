@@ -856,6 +856,12 @@ contract:
                 route: /debug
                 defaults:
                     action: debug
+        timesheet:
+            type: segment
+            options:
+                route: /feuille-de-temps/:id
+                defaults:
+                    action: timesheet
 
         advancedsearch:
             type: segment

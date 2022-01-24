@@ -338,6 +338,27 @@ class Activity implements ResourceInterface
     protected $persons;
 
     /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_prj")
+     */
+    private $validatorsPrj;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_sci")
+     */
+    private $validatorsSci;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\JoinTable (name="person_activity_validator_adm")
+     */
+    private $validatorsAdm;
+
+    /**
      * Liste des jalons (dates clefs).
      *
      * @var ArrayCollection
@@ -1225,6 +1246,75 @@ class Activity implements ResourceInterface
         $this->disciplines = new ArrayCollection();
         $this->estimatedSpentLines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+        $this->validatorsPrj = new ArrayCollection();
+        $this->validatorsSci = new ArrayCollection();
+        $this->validatorsAdm = new ArrayCollection();
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsPrj()
+    {
+        return $this->validatorsPrj;
+    }
+
+    public function hasValidatorsPrj() :bool
+    {
+        return count($this->getValidatorsPrj()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsPrj
+     */
+    public function setValidatorsPrj(ArrayCollection $validatorsPrj): self
+    {
+        $this->validatorsPrj = $validatorsPrj;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsSci()
+    {
+        return $this->validatorsSci;
+    }
+
+    public function hasValidatorsSci() :bool
+    {
+        return count($this->getValidatorsSci()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsSci
+     */
+    public function setValidatorsSci(ArrayCollection $validatorsSci): self
+    {
+        $this->validatorsSci = $validatorsSci;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsAdm()
+    {
+        return $this->validatorsAdm;
+    }
+
+    public function hasValidatorsAdm() :bool
+    {
+        return count($this->getValidatorsAdm()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsAdm
+     */
+    public function setValidatorsAdm(ArrayCollection $validatorsAdm): self
+    {
+        $this->validatorsAdm = $validatorsAdm;
+        return $this;
     }
 
     /**
@@ -1328,7 +1418,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return Discipline[]
+     * @return self
      */
     public function setDisciplines($disciplines)
     {
@@ -2466,23 +2556,37 @@ class Activity implements ResourceInterface
         return false;
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private $tmpOrganizationsWithRoleForm = [];
-
-    public function setOrganizationsWithRoleForm($formName, $formValue)
+    /**
+     * La feuille de temps est éligible aux feuilles de temps.
+     *
+     * @return bool
+     */
+    public function isTimesheetAllowed() :bool
     {
-        var_dump($formName);
-        var_dump($formValue);
+        return count($this->getNoTimesheetReason()) == 0;
     }
 
-    public function getOrganizationsWithRoleForm($formName)
+    private $_noTimesheetReason;
+
+    /**
+     * Retourne la liste des raisons d'inégibilité aux feuilles de temps.
+     *
+     * @return array
+     */
+    public function getNoTimesheetReason() :array
     {
-        if (array_key_exists($formName)) {
-            return $this->tmpOrganizationsWithRoleForm[$formName];
-        } else {
-            return '';
+        if( $this->_noTimesheetReason == null ){
+            $this->_noTimesheetReason = [];
+            if( !$this->getProject() ) {
+                $reasons[] = "L'activité n'a pas de projet";
+            } elseif (!$this->getProject()->getAcronym()) {
+                $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
+            }
+
+            if( !$this->getDateStart() || !$this->getDateEnd() ) {
+                $reasons[] = "L'activité n'a pas de date de début/fin";
+            }
         }
+        return $this->_noTimesheetReason;
     }
-
 }
