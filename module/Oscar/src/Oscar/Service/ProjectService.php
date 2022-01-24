@@ -600,7 +600,11 @@ class ProjectService implements UseServiceContainer
         );
 
         foreach ($projet->getOrganisationsDeep() as $organizationProject) {
-            $output['organizations'][] = $organizationProjectFormatter->format($organizationProject);
+            try {
+                $output['organizations'][] = $organizationProjectFormatter->format($organizationProject);
+            } catch (\Exception $exception) {
+                $this->getLogger()->error($exception->getMessage());
+            }
         }
 
         return $output;

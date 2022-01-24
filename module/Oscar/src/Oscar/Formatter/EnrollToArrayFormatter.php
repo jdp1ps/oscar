@@ -44,6 +44,12 @@ class EnrollToArrayFormatter
         $showEnrolledPrivilege = $this->getShowEnrolledPrivilege($affectation);
         $context = $this->getContext($affectation);
 
+        if( $affectation->getRoleObj() == null ){
+            throw new OscarException(sprintf("%s n'a pas d'objet rôle sur %s.",
+                                             $affectation->getEnrolled(),
+                                             $affectation->getEnroller()));
+        }
+
         $output['id'] = $affectation->getId();
         $output['enrolledLabel'] = $affectation->getEnrolled()->__toString();
         $output['enrolled'] = $affectation->getEnrolled()->getId();
@@ -59,22 +65,6 @@ class EnrollToArrayFormatter
             $output['urlEdit'] = $this->url->fromRoute($this->getConf($affectation)->edit, ['idenroll' => $affectation->getId()]);
             $output['urlDelete'] = $this->url->fromRoute($this->getConf($affectation)->delete, ['idenroll' => $affectation->getId()]);
         }
-
-
-//        if( $context == self::CONTEXT_PROJECT ){
-//            if( $this->oscarUserContext->hasPrivileges($manageEnrollPrivilege, $affectation->getEnroller()) ){
-//                $manage = true;
-//                $output['urlEdit'] = $this->url->fromRoute('personproject/edit', ['idenroll' => $affectation->getId()]);
-//                $output['urlDelete'] = $this->url->fromRoute('personproject/delete', ['idenroll' => $affectation->getId()]);
-//            }
-//        }
-//        if( $context == self::CONTEXT_ACTIVITY ){
-//            if( $this->oscarUserContext->hasPrivileges($manageEnrollPrivilege, $affectation->getEnroller()) ){
-//                $manage = true;
-//                $output['urlEdit'] = $this->url->fromRoute('personactivity/edit', ['idenroll' => $affectation->getId()]);
-//                $output['urlDelete'] = $this->url->fromRoute('personactivity/delete', ['idenroll' => $affectation->getId()]);
-//            }
-//        }
 
         $output['manage'] = $manage;
 
