@@ -26,12 +26,9 @@ class OscarNotificationsMailsPersonsCommand extends OscarCommandAbstract
     {
         $this->addOutputStyle($output);
 
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
-
         $io = new SymfonyStyle($input, $output);
 
-        /** @var PersonService $oscarConfig */
+        /** @var PersonService $personService */
         $personService = $this->getServicemanager()->get(PersonService::class);
 
         $personService->mailPersonsWithUnreadNotification(null, $io);

@@ -486,9 +486,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         $authPersonNormalize = $this->getOscarConfigurationService()->getAuthPersonNormalize();
 
-        /** @var AuthentificationRepository $authentificationRepository */
-        $authentificationRepository = $this->getEntityManager()->getRepository(Authentification::class);
-
         // Liste des personnes ayant des notifications non-lues
         $persons = $this->getPersonRepository()->getPersonsWithUnreadNotificationsAndAuthentification($authPersonNormalize);
 
@@ -498,7 +495,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         foreach ($persons as $person) {
             try {
                 /** @var Authentification $auth */
-                $auth = $authentificationRepository->getAuthentificationPerson($person, $authPersonNormalize);
+                $auth = $this->getPersonAuthentification($person);
                 $settings = $auth->getSettings();
 
                 if (!$settings) {
@@ -1924,11 +1921,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $this->getEntityManager()->getRepository(Authentification::class);
     }
 
+    /**
+     * @return OrganizationRepository
+     */
     public function getOrganizationRepository()
     {
         return $this->getEntityManager()->getRepository(Organization::class);
     }
 
+    /**
+     * @return RoleRepository
+     */
     public function getRoleRepository(): RoleRepository
     {
         return $this->getEntityManager()->getRepository(Role::class);

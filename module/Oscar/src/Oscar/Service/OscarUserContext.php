@@ -318,7 +318,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getAuthentification()
     {
         if ($this->getUserContext()->getDbUser()) {
-            return $this->getEntityManager()->getRepository(Authentification::class)->find($this->getDbUser()->getId());
+            return $this->getAuthentificationRepository()->find($this->getDbUser()->getId());
         }
         return null;
     }
