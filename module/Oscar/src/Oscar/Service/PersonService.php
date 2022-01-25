@@ -841,7 +841,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         /** @var AuthentificationRepository $repo */
         $repo = $this->getEntityManager()->getRepository(Authentification::class);
 
-        return $repo->getAuthentificationPerson($person);
+        return $repo->getAuthentificationPerson(
+            $person,
+            $this->getOscarConfigurationService()->getAuthPersonNormalize());
     }
 
     /**

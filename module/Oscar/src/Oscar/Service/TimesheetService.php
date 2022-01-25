@@ -1381,9 +1381,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 }
 
                 /** @var Authentification $auth */
-                $auth = $this->getEntityManager()->getRepository(Authentification::class)->findOneBy(
-                    ['username' => $person->getLadapLogin()]
-                );
+                $auth = $this->getPersonService()->getPersonAuthentification($person);
                 if (!$auth) {
                     throw new \Exception("La personne '$person' n'a pas de compte actif sur Oscar.");
                 }
