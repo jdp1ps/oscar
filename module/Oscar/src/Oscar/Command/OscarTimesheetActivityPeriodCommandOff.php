@@ -33,7 +33,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Zend\Validator\Date;
 
-class OscarTimesheetActivityPeriodCommand extends OscarCommandAbstract
+class OscarTimesheetActivityPeriodCommandOff extends OscarCommandAbstract
 {
     protected static $defaultName = 'timesheets:activity-period-infos';
 

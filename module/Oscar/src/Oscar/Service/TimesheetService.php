@@ -2835,8 +2835,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         int $year,
         int $month,
         \DateTime $processDate,
-        bool $force = false
+        bool $force = false,
+        bool $preview = false
     ): array {
+
         $result = [];
         $validator = $this->getPersonService()->getPersonById($validatorId, true);
         $result['validator'] = "$validator";
@@ -2894,31 +2896,49 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 }
             }
 
+            // Test Liste
+            if (!$this->getPersonService()->declarerCanReceiveTimesheetMail($validator)) {
+                $result['recall_info'] = "Restriction par liste activé";
+                $result['ignoreForced'] = true;
+                $result['needSend'] = false;
+                $result['blocked'] = true;
+            }
 
             // Envoi du mail
             if ($result['needSend'] || ($force == true && $result['ignoreForce'] == true)) {
-                if (!$recallSend) {
-                    $recallSend = new RecallDeclaration();
-                    $recallSend->setPeriodMonth($month)
-                        ->setPeriodYear($year)
-                        ->setStartProcess($processDate);
-                    $this->getEntityManager()->persist($recallSend);
+
+                if( $preview == true ){
+                    $result['mailSend'] = true;
+                    $result['recall_info'] = "!Mail non-envoyé!";
+                } else {
+                    if (!$recallSend) {
+                        $recallSend = new RecallDeclaration();
+                        $recallSend->setPeriodMonth($month)
+                            ->setPeriodYear($year)
+                            ->setStartProcess($processDate);
+                        $this->getEntityManager()->persist($recallSend);
+                    }
+
+                    $repport = $this->sendMailRecallValidator(
+                        $validator,
+                        sprintf("%s-%s", $year, $month),
+                        $message,
+                        $recallSend,
+                        $processDate,
+                        $force
+                    );
+                    $result['mailSend'] = true;
+                    $result['recall_info'] = "Fait";
+                    return array_merge($result, $repport);
                 }
 
-                $repport = $this->sendMailRecallValidator(
-                    $validator,
-                    sprintf("%s-%s", $year, $month),
-                    $message,
-                    $recallSend,
-                    $processDate,
-                    $force
-                );
-                $result['mailSend'] = true;
-                $result['recall_info'] = "Fait";
-                return array_merge($result, $repport);
             }
         } else {
             $result['recall_info'] = "Rien a valider pour cette période";
+        }
+
+        if( $preview == true ){
+            $result['recall_info'] .= " (SIMULATION)";
         }
 
         return $result;
@@ -2936,7 +2956,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @throws OscarException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function recallProcess($declarerId, $period, $processDate = null, $force = false): array
+    public function recallProcess($declarerId, $period, $processDate = null, $force = false, $preview=false): array
     {
         // Récupération de la date de rappel référente
         if ($processDate == null) {
@@ -3050,6 +3070,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         $result['blocked'] = false;
+
         // Test Liste
         if (!$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer)) {
             $result['recall_info'] = "Restriction par liste activé";
@@ -3061,22 +3082,32 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         if ($result['needSend'] || ($force === true && $result['ignoreForced'] == false)) {
             $result['recall_info'] = "Mail envoyé" . ($force ? ' (forcé)' : '');
 
-            if ($recallSend == null) {
-                $recallSend = new RecallDeclaration();
-                $this->getEntityManager()->persist($recallSend);
-                $recallSend->setStartProcess($processDate);
+            if( $preview == true ){
+                $result['recall_info'] = "!Mail non-envoyé!" . ($force ? ' (forcé)' : '');
+                $result['mailSend'] = true;
+            } else {
+                if ($recallSend == null) {
+                    $recallSend = new RecallDeclaration();
+                    $this->getEntityManager()->persist($recallSend);
+                    $recallSend->setStartProcess($processDate);
+                }
+
+                $repport = $this->sendMailRecallDeclarer(
+                    $declarer,
+                    $periodInfos->getPeriodCode(),
+                    $message,
+                    $recallSend,
+                    $processDate,
+                    $force
+                );
+                $result['mailSend'] = true;
+                $result = array_merge($result, $repport);
             }
 
-            $repport = $this->sendMailRecallDeclarer(
-                $declarer,
-                $periodInfos->getPeriodCode(),
-                $message,
-                $recallSend,
-                $processDate,
-                $force
-            );
-            $result['mailSend'] = true;
-            return array_merge($result, $repport);
+        }
+
+        if( $preview == true ){
+            $result['recall_info'] .= " (SIMULATION)";
         }
 
         return $result;

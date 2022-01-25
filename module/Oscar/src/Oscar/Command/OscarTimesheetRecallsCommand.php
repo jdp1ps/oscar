@@ -42,6 +42,7 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
         $this
             ->setDescription("Relance automatique des feuilles de temps")
             ->addOption("purge", null, InputOption::VALUE_OPTIONAL, "Suppression des données (dev)", false)
+            ->addOption("preview", null, InputOption::VALUE_OPTIONAL, "Aperçu (affiche les personnes concernées)", false)
             ->addOption("processdate", null, InputOption::VALUE_OPTIONAL, "Date d'execution", false)
         ;
     }
@@ -53,6 +54,8 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
         $processArg = $input->getOption('processdate');
 
         $purge = $input->getOption('purge');
+        $preview = $input->getOption('preview') !== false;
+
         if( $purge === null ){
             $recalls = $this->getOrganizationService()->getEntityManager()->getRepository(RecallDeclaration::class)->findAll();
             if($this->ask("Reset complet des procédures de rappel ? (y)")){
@@ -83,7 +86,8 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
         );
 
         foreach ($declarers as $declarer) {
-            $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period->getPeriodCode(), $processDate, $force);
+
+            $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period->getPeriodCode(), $processDate, $force, $preview);
             if( $result['mailSend'] ){
                 $snd = "<green>Mail envoyé</green>";
             } else {
@@ -109,7 +113,9 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
                 $period->getYear(),
                 $period->getMonth(),
                 $processDate,
-                $force);
+                $force,
+                $preview
+            );
 
             if( $result['mailSend'] ){
                 $snd = "<green>Mail envoyé</green>";
