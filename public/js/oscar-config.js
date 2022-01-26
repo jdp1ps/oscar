@@ -77,7 +77,7 @@ requirejs.config({
         "DeclarersList" : "oscar/dist/DeclarersList",
         "ImportIcalUI" : "oscar/dist/ImportIcalUI",
         "PeriodSelector" : "oscar/dist/PeriodSelector",
-        "TimesheetDeclarationsList" : "oscar/dist/TimesheetDeclarationsList",
+        "TimesheetDeclarationsList" : "oscar/dist/TimesheetDeclarationsList.umd",
         "PersonSchedule" : "oscar/dist/PersonSchedule",
         "TimesheetPersonResume" : "oscar/dist/TimesheetPersonResume",
         "ResumeActivity" : "oscar/dist/ResumeActivity",

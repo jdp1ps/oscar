@@ -230,7 +230,7 @@
                                 <strong>Validation projet en attente</strong>
                                 par l'un des validateurs suivant :
                                 <ul>
-                                    <li v-for="p in selectedValidation.validateursPrj">
+                                    <li v-for="p in selectedValidation.validatorsPrj">
                                         <i class="icon-user"></i>{{ p.person }}
                                         <a class="link" @click.prevent.stop="handlerDelete('prj', p)"><i class="icon-trash"></i> Supprimer</a>
                                     </li>
@@ -253,7 +253,7 @@
                                 <strong>Validation scientifique en attente</strong>
                                 par l'un des validateurs suivant :
                                 <ul>
-                                    <li v-for="p in selectedValidation.validateursSci">
+                                    <li v-for="p in selectedValidation.validatorsSci">
                                         <i class="icon-user"></i>{{ p.person }}
                                         <a class="link" @click.prevent.stop="handlerDelete('sci', p)"><i class="icon-trash"></i> Supprimer</a>
                                     </li>
@@ -276,7 +276,7 @@
                             <strong>Validation administrative en attente</strong>
                             par l'un des validateurs suivant :
                             <ul>
-                                <li v-for="p in selectedValidation.validateursAdm">
+                                <li v-for="p in selectedValidation.validatorsAdm">
                                     <i class="icon-user"></i>{{ p.person }}
                                     <a class="link" @click.prevent.stop="handlerDelete('adm', p)"><i class="icon-trash"></i> Supprimer</a>
                                 </li>
@@ -293,9 +293,10 @@
 </template>
 <script>
     // nodejs node_modules/.bin/poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
-    import AjaxResolve from "./AjaxResolve";
-    import PersonAutoCompleter from "./PersonAutoCompleter";
-    import PersonSchedule from "./PersonSchedule";
+
+    import PersonAutoCompleter from "./components/PersonAutoCompleter";
+    import PersonSchedule from "./components/PersonSchedule";
+    import AjaxResolve from "./components/AjaxResolve";
 
 
 
@@ -417,7 +418,7 @@
                         this.fetch();
                     },
                     ko => {
-                        this.error = AjaxResolve.resolve("Impossible de modifier les horaires", ko);
+                        // this.error = AjaxResolve.resolve("Impossible de modifier les horaires", ko);
 
                     }
                 ).then(foo => {
@@ -464,13 +465,13 @@
 
                         switch( type ){
                             case "prj":
-                                this.selectedValidation.validateursPrj.splice(this.selectedValidation.validateursPrj.indexOf(person, 1));
+                                this.selectedValidation.validatorsPrj.splice(this.selectedValidation.validatorsPrj.indexOf(person, 1));
                                 break;
                             case "sci":
-                                this.selectedValidation.validateursSci.splice(this.selectedValidation.validateursSci.indexOf(person, 1));
+                                this.selectedValidation.validatorsSci.splice(this.selectedValidation.validatorsSci.indexOf(person, 1));
                                 break;
                             case "adm":
-                                this.selectedValidation.validateursAdm.splice(this.selectedValidation.validateursAdm.indexOf(person, 1));
+                                this.selectedValidation.validatorsAdm.splice(this.selectedValidation.validatorsAdm.indexOf(person, 1));
                                 break;
                         }
                     },
@@ -498,13 +499,13 @@
                     ok => {
                         switch( type ){
                             case "prj":
-                                this.selectedValidation.validateursPrj.push(ok.body);
+                                this.selectedValidation.validatorsPrj.push(ok.body);
                                 break;
                             case "sci":
-                                this.selectedValidation.validateursSci.push(ok.body);
+                                this.selectedValidation.validatorsSci.push(ok.body);
                                 break;
                             case "adm":
-                                this.selectedValidation.validateursAdm.push(ok.body);
+                                this.selectedValidation.validatorsAdm.push(ok.body);
                                 break;
                         }
                     },

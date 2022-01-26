@@ -130,6 +130,21 @@ exports.workpackageUIWatch = function(cb){
     ], workpackageUI);
 }
 
+//// 2.9 Liste des déclarations (Administration)
+function timesheetDeclarationsList(cb) {
+    compile("TimesheetDeclarationsList");
+    cb();
+}
+exports.timesheetDeclarationsList = timesheetDeclarationsList;
+exports.timesheetDeclarationsListWatch = function(cb){
+    watch([
+        pathModuleSrc + "TimesheetDeclarationsList.vue",
+        pathModuleSrc + "components/PersonSchedule.vue",
+        pathModuleSrc + "components/PersonAutoCompleter.vue",
+        pathModuleSrc + "components/AjaxResolve.js"
+    ], timesheetDeclarationsList);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
@@ -168,6 +183,7 @@ let commands = [
     'administrationPcruPC',
     'componentRNSRField',
     'createProcessusPCRU',
+    'timesheetDeclarationsList',
     'workpackageUI',
 ];
 

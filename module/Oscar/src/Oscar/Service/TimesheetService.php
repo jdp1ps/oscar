@@ -3140,7 +3140,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $body = str_ireplace($find, $replace, $messageTemplate);
 
         $message = $this->getPersonService()->getMailingService()->newMessage(
-            "[OSCAR] Déclaration de temps $declarer pour " . $periodInfos->getPeriodLabel()
+            "Déclaration de temps $declarer pour " . $periodInfos->getPeriodLabel()
         );
         $message->setTo($declarer->getEmail());
         $message->setBody($body);
@@ -3200,7 +3200,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $body = str_ireplace($find, $replace, $messageTemplate);
 
         $message = $this->getPersonService()->getMailingService()->newMessage(
-            "[OSCAR] Feuille de temps à valider pour " . $periodInfos->getPeriodLabel()
+            "Feuille de temps à valider pour " . $periodInfos->getPeriodLabel()
         );
         $message->setTo($validator->getEmail());
         $message->setBody($body);
