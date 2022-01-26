@@ -2278,7 +2278,6 @@ class Activity implements ResourceInterface
             'Fin',
             'Date de signature',
             'versement effectué',
-            'versement effectué',
             'versement prévu',
             'écart de paiement',
             'justificatif écart de paiement',
