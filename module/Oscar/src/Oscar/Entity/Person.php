@@ -156,19 +156,19 @@ class Person implements ResourceInterface
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsPrj")
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsPrj")
      */
     protected $validatorActivitiesPrj;
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsSci")
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsSci")
      */
     protected $validatorActivitiesSci;
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Activity", mappedBy="validatorsAdm")
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsAdm")
      */
     protected $validatorActivitiesAdm;
 

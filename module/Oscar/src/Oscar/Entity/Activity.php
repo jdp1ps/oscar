@@ -339,21 +339,21 @@ class Activity implements ResourceInterface
 
     /**
      * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesPrj")
      * @ORM\JoinTable (name="person_activity_validator_prj")
      */
     private $validatorsPrj;
 
     /**
      * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesSci")
      * @ORM\JoinTable (name="person_activity_validator_sci")
      */
     private $validatorsSci;
 
     /**
      * @var ArrayCollection
-     * @ORM\ManyToMany(targetEntity="Person")
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesAdm")
      * @ORM\JoinTable (name="person_activity_validator_adm")
      */
     private $validatorsAdm;
