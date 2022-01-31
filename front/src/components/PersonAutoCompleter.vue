@@ -2,8 +2,8 @@
   <div>
     <input type="text" v-model="expression" @keyup.enter.prevent="search"/>
     <span v-show="loading">
-            <i class="icon-spinner animate-spin"></i>
-        </span>
+      <i class="icon-spinner animate-spin"></i>
+    </span>
     <div class="choose"
          style="position: absolute; z-index: 3000; max-height: 400px; overflow: hidden; overflow-y: scroll"
          v-show="persons.length > 0 && showSelector">
@@ -22,7 +22,12 @@
         </div>
       </div>
     </div>
+    <div class="alert alert-danger" v-if="error">
+      <i class="icon-attention-1"></i>
+      {{ error }}
+    </div>
   </div>
+
 </template>
 <script>
 
@@ -37,7 +42,8 @@ export default {
       loading: false,
       selectedPerson: null,
       showSelector: true,
-      request: null
+      request: null,
+      error: ""
     }
   },
   watch: {
@@ -66,11 +72,18 @@ export default {
         }
       }).then(
           ok => {
+            console.log(ok);
             this.persons = ok.body.datas;
             this.showSelector = true;
           },
           ko => {
-            // OscarBus.message('Erreur de recherche sur la personne', 'error');
+            console.log(ko);
+            if( ko.status == 403 ){
+              this.error = "403 Unauthorized";
+            }
+            else if( ko.body ){
+              this.error = ko.body;
+            }
           }
       ).then(foo => {
         this.loading = false;

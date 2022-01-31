@@ -1,0 +1,17 @@
+[program:general_worker]
+command=php /var/OscarApp/oscar/bin/oscar-worker.php
+numprocs=1
+process_name=%(program_name)s_%(process_num)02d
+directory=/var/OscarApp/oscar/bin
+autostart=true
+autorestart=true
+stdout_logfile=/var/OscarApp/oscar/logs/worker.log
+stdout_logfile_maxbytes=1MB
+stderr_logfile=/var/OscarApp/oscar/logs/worker.log
+stderr_logfile_maxbytes=1MB
+
+[program:apache2]
+command=/etc/init.d/apache2 start
+
+[program:loadoscar]
+command=/usr/bin/php /var/OscarApp/oscar/bin/oscar.php auth:sync /var/OscarApp/install/demo/authentifications.json

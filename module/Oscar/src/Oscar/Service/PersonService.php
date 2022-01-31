@@ -248,6 +248,22 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
 
+    public function validatorReplace( Person $replaced, Person $replacer ): void
+    {
+        foreach ($replaced->getValidatorActivitiesPrj() as $activity) {
+            $activity->getValidatorsPrj()->add($replacer);
+            $activity->getValidatorsPrj()->removeElement($replaced);
+        }
+        foreach ($replaced->getValidatorActivitiesSci() as $activity) {
+            $activity->getValidatorsSci()->add($replacer);
+            $activity->getValidatorsSci()->removeElement($replaced);
+        }
+        foreach ($replaced->getValidatorActivitiesAdm() as $activity) {
+            $activity->getValidatorsAdm()->add($replacer);
+            $activity->getValidatorsAdm()->removeElement($replaced);
+        }
+        $this->getEntityManager()->flush();
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -290,10 +306,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return true;
     }
 
+    /**
+     * @param Person $declarer
+     * @param Person $referent
+     * @param false $flush
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false)
     {
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
+        $timesheetService = $this->getTimesheetService();
 
         // Mise à jour des déclarations en attentes
         $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($declarer, true);
@@ -338,8 +363,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $referent->setReferent($personNewReferent);
         }
 
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
+        $timesheetService = $this->getTimesheetService();
 
         // Mise à jour des déclarations en attentes
         $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
@@ -373,8 +397,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
 
             // Déclarations
-            /** @var TimesheetService $timesheetService */
-            $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
+            $timesheetService = $this->getTimesheetService();
 
             $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
             /** @var ValidationPeriod $validationPeriod */
@@ -1897,6 +1920,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     public function getProjectGrantService(): ProjectGrantService
     {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
+    }
+
+    /**
+     * @return TimesheetService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getTimesheetService() :TimesheetService
+    {
+        return $this->getServiceContainer()->get(TimesheetService::class);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

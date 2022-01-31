@@ -1,0 +1,67 @@
+version: "3"
+services:
+
+  # OSCAR (sources)
+  oscar_demo_spartan:
+    container_name: oscar_demo_spartan
+
+    depends_on:
+      - oscar_demo_elasticsearch_spartan
+      - oscar_demo_postgresql_spartan
+      - oscar_demo_gearman_spartan
+
+    build:
+        context: ./oscar/
+        dockerfile: Dockerfile
+    ports:
+      - 8085:80
+      - 9000:9000
+    networks:
+      - oscar_demo_network_spartan
+    tty: true
+    restart: unless-stopped
+#    entrypoint: "/usr/bin/php /var/OscarApp/oscar/vendor/bin/doctrine-module orm:schema-tool:update --force"
+
+  # ELASTIC DEARCH
+  oscar_demo_elasticsearch_spartan:
+    container_name: oscar_demo_elasticsearch_spartan
+    environment:
+      - discovery.type=single-node
+    build:
+        context: ./elasticsearch/
+        dockerfile: Dockerfile
+    networks:
+      - oscar_demo_network_spartan
+    tty: true
+    restart: "always"
+
+  # POSTGRESQL
+  oscar_demo_postgresql_spartan:
+    container_name: oscar_demo_postgresql_spartan
+    build:
+      context: ./postgresql/
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_PASSWORD: "azerty"
+      POSTGRES_USER: "oscar"
+      POSTGRES_DB: "oscar_dev"
+    networks:
+      - oscar_demo_network_spartan
+    tty: true
+    restart: "always"
+
+  # GEARMAN
+  oscar_demo_gearman_spartan:
+    container_name: oscar_demo_gearman_spartan
+    build:
+        context: ./gearman/
+        dockerfile: Dockerfile
+    networks:
+      - oscar_demo_network_spartan
+    tty: true
+    restart: "unless-stopped"
+
+# RéSEAU VIRUEL
+networks:
+  oscar_demo_network_spartan:
+    driver: bridge

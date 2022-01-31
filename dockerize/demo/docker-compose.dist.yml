@@ -1,0 +1,101 @@
+version: "3"
+services:
+
+  # OSCAR (sources)
+  oscar_dev_spartan:
+    container_name: oscar_dev_spartan
+    build:
+      context: ./oscar/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: "http://proxy.unicaen.fr:3128"
+        tag_version_oscar: "spartan"
+        service_oscar_name: oscar_dev_spartan
+        service_gearman_name: oscar_dev_gearman_spartan
+        service_elastic_search_name: oscar_dev_elasticsearch_spartan
+        CONFIG_TEST: "config/etc"
+    ports:
+      - 8085:80
+      - 9000:9000
+    volumes:
+      - /home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar:/var/OscarApp
+    networks:
+      - oscar_dev_network_spartan
+    tty: true
+    restart: unless-stopped
+
+  # ELASTIC DEARCH
+  oscar_dev_elasticsearch_spartan:
+    depends_on:
+      - oscar_dev_spartan
+    container_name: oscar_dev_elasticsearch_spartan
+    environment:
+      - discovery.type=single-node
+    build:
+      context: ./elasticsearch/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: "http://proxy.unicaen.fr:3128"
+        tag_version_oscar: "spartan"
+        service_oscar_name: oscar_dev_spartan
+        service_gearman_name: oscar_dev_gearman_spartan
+        service_elastic_search_name: oscar_dev_elasticsearch_spartan
+    networks:
+      - oscar_dev_network_spartan
+    tty: true
+    restart: "always"
+
+  # POSTGRESQL
+  oscar_dev_postgresql_spartan:
+    depends_on:
+      - oscar_dev_spartan
+    container_name: oscar_dev_postgresql_spartan
+    build:
+      context: ./postgresql/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: "http://proxy.unicaen.fr:3128"
+        pathdatas: "/home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar/dockerize/dev/build/database"
+    environment:
+      POSTGRES_PASSWORD: "azerty"
+      POSTGRES_USER: "oscar"
+      POSTGRES_DB: "oscar_dev"
+    networks:
+      - oscar_dev_network_spartan
+    tty: true
+    volumes:
+      - /home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar/dockerize/dev/build/database:/var/lib/postgresql/data
+    restart: "always"
+
+  # ADMINERDEV
+  oscar_dev_adminer_spartan:
+    container_name: oscar_dev_adminer_spartan
+    image: adminer
+    restart: "always"
+    ports:
+      - 8080:8080
+    networks:
+      - oscar_dev_network_spartan
+    tty: true
+
+  # GEARMAN
+  oscar_dev_gearman_spartan:
+    container_name: oscar_dev_gearman_spartan
+    build:
+      context: ./gearman/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: "http://proxy.unicaen.fr:3128"
+        tag_version_oscar: "spartan"
+        service_oscar_name: oscar_dev_spartan
+        service_gearman_name: oscar_dev_gearman_spartan
+        service_elastic_search_name: oscar_dev_elasticsearch_spartan
+    networks:
+      - oscar_dev_network_spartan
+    tty: true
+    restart: "unless-stopped"
+
+# RéSEAU VIRUEL
+networks:
+  oscar_dev_network_spartan:
+    driver: bridge
