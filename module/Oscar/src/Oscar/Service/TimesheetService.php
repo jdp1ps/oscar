@@ -4644,7 +4644,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      *
      * @param $personId
      * @param $activityId
-     * @param $where
+     * @param $where prj|sci|adm
      * @return bool
      * @throws OscarException
      */

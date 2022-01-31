@@ -112,6 +112,7 @@ RUN mkdir -p /tmp/install \
 RUN echo "extension=gearman.so" >> /etc/php/7.4/mods-available/gearman.ini
 RUN phpenmod -v ALL -s ALL gearman
 
+RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug
 
@@ -135,7 +136,7 @@ RUN a2enmod rewrite && a2enmod ssl
 
 #SUPERVISOR FICHIERS DE CONFIG POUR MULTIPLES SERVICES IN CONTAINER DOCKER
 COPY supervisor /etc/supervisor/conf.d/oscar.conf
-EXPOSE 80 9000
+EXPOSE 80 9000 9003
 
 #SUPERVISOR LA CLEF DU MULTIPLE SERVICES DANS UN CONTAINER DOCKER EN NO DAEMON
 CMD supervisord -n

@@ -694,6 +694,40 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function isValidator()
+    {
+        return
+            count($this->getValidatorActivitiesPrj()) > 0 ||
+            count($this->getValidatorActivitiesSci()) > 0 ||
+            count($this->getValidatorActivitiesAdm()) > 0;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesPrj()
+    {
+        return $this->validatorActivitiesPrj;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesSci()
+    {
+        return $this->validatorActivitiesSci;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesAdm()
+    {
+        return $this->validatorActivitiesAdm;
+    }
+
+
+
     /**
      * @return string
      */

@@ -145,6 +145,19 @@ exports.timesheetDeclarationsListWatch = function(cb){
     ], timesheetDeclarationsList);
 }
 
+//// 2.10 Remplacement/Renforcement d'une personne
+function replaceStrengthenPerson(cb) {
+    compile("ReplaceStrengthenPerson");
+    cb();
+}
+exports.replaceStrengthenPerson = replaceStrengthenPerson;
+exports.replaceStrengthenPersonWatch = function(cb){
+    watch([
+        pathModuleSrc + "ReplaceStrengthenPerson.vue",
+        pathModuleSrc + "components/PersonAutoCompleter.vue"
+    ], replaceStrengthenPerson);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 3. COMPOSANTS
 ///////////////////////// COMPOSANTS COMPILES
@@ -183,6 +196,7 @@ let commands = [
     'administrationPcruPC',
     'componentRNSRField',
     'createProcessusPCRU',
+    'replaceStrengthenPerson',
     'timesheetDeclarationsList',
     'workpackageUI',
 ];
