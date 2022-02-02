@@ -219,14 +219,19 @@ var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _
 
 // CONCATENATED MODULE: ./src/TimesheetDeclarationsList.vue?vue&type=template&id=1288d79d&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=template&id=638ea58c&
-var PersonAutoCompletervue_type_template_id_638ea58c_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.expression),expression:"expression"}],attrs:{"type":"text"},domProps:{"value":(_vm.expression)},on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();return _vm.search.apply(null, arguments)},"input":function($event){if($event.target.composing){ return; }_vm.expression=$event.target.value}}}),_c('span',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}]},[_c('i',{staticClass:"icon-spinner animate-spin"})]),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.persons.length > 0 && _vm.showSelector),expression:"persons.length > 0 && showSelector"}],staticClass:"choose",staticStyle:{"position":"absolute","z-index":"3000","max-height":"400px","overflow":"hidden","overflow-y":"scroll"}},_vm._l((_vm.persons),function(c){return _c('div',{key:c.id,staticClass:"choice",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerSelectPerson(c)}}},[_c('div',{staticStyle:{"display":"block","width":"50px","height":"50px"}},[_c('img',{staticStyle:{"width":"100%"},attrs:{"src":'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50',"alt":c.displayname}})]),_c('div',{staticClass:"infos"},[_c('strong',{staticStyle:{"font-weight":"700","font-size":"1.1em","padding-left":"0"}},[_vm._v(_vm._s(c.displayname))]),_c('br'),_c('span',{staticStyle:{"font-weight":"100","font-size":".8em","padding-left":"0"}},[_c('i',{staticClass:"icon-location"}),_vm._v(" "+_vm._s(c.affectation)+" "),(c.ucbnSiteLocalisation)?_c('span',[_vm._v(" ~ "+_vm._s(c.ucbnSiteLocalisation))]):_vm._e()]),_c('br'),_c('em',{staticStyle:{"font-weight":"100","font-size":".8em"}},[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(c.email))])])])}),0)])}
-var PersonAutoCompletervue_type_template_id_638ea58c_staticRenderFns = []
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=template&id=595e3162&
+var PersonAutoCompletervue_type_template_id_595e3162_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.expression),expression:"expression"}],attrs:{"type":"text"},domProps:{"value":(_vm.expression)},on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();return _vm.search.apply(null, arguments)},"input":function($event){if($event.target.composing){ return; }_vm.expression=$event.target.value}}}),_c('span',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}]},[_c('i',{staticClass:"icon-spinner animate-spin"})]),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.persons.length > 0 && _vm.showSelector),expression:"persons.length > 0 && showSelector"}],staticClass:"choose",staticStyle:{"position":"absolute","z-index":"3000","max-height":"400px","overflow":"hidden","overflow-y":"scroll"}},_vm._l((_vm.persons),function(c){return _c('div',{key:c.id,staticClass:"choice",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerSelectPerson(c)}}},[_c('div',{staticStyle:{"display":"block","width":"50px","height":"50px"}},[_c('img',{staticStyle:{"width":"100%"},attrs:{"src":'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50',"alt":c.displayname}})]),_c('div',{staticClass:"infos"},[_c('strong',{staticStyle:{"font-weight":"700","font-size":"1.1em","padding-left":"0"}},[_vm._v(_vm._s(c.displayname))]),_c('br'),_c('span',{staticStyle:{"font-weight":"100","font-size":".8em","padding-left":"0"}},[_c('i',{staticClass:"icon-location"}),_vm._v(" "+_vm._s(c.affectation)+" "),(c.ucbnSiteLocalisation)?_c('span',[_vm._v(" ~ "+_vm._s(c.ucbnSiteLocalisation))]):_vm._e()]),_c('br'),_c('em',{staticStyle:{"font-weight":"100","font-size":".8em"}},[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(c.email))])])])}),0),(_vm.error)?_c('div',{staticClass:"alert alert-danger"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "+_vm._s(_vm.error)+" ")]):_vm._e()])}
+var PersonAutoCompletervue_type_template_id_595e3162_staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/PersonAutoCompleter.vue?vue&type=template&id=638ea58c&
+// CONCATENATED MODULE: ./src/components/PersonAutoCompleter.vue?vue&type=template&id=595e3162&
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
 //
 //
 //
@@ -266,7 +271,8 @@ let tempo;
       loading: false,
       selectedPerson: null,
       showSelector: true,
-      request: null
+      request: null,
+      error: ""
     }
   },
   watch: {
@@ -295,11 +301,18 @@ let tempo;
         }
       }).then(
           ok => {
+            console.log(ok);
             this.persons = ok.body.datas;
             this.showSelector = true;
           },
           ko => {
-            // OscarBus.message('Erreur de recherche sur la personne', 'error');
+            console.log(ko);
+            if( ko.status == 403 ){
+              this.error = "403 Unauthorized";
+            }
+            else if( ko.body ){
+              this.error = ko.body;
+            }
           }
       ).then(foo => {
         this.loading = false;
@@ -427,8 +440,8 @@ function normalizeComponent (
 
 var component = normalizeComponent(
   components_PersonAutoCompletervue_type_script_lang_js_,
-  PersonAutoCompletervue_type_template_id_638ea58c_render,
-  PersonAutoCompletervue_type_template_id_638ea58c_staticRenderFns,
+  PersonAutoCompletervue_type_template_id_595e3162_render,
+  PersonAutoCompletervue_type_template_id_595e3162_staticRenderFns,
   false,
   null,
   null,

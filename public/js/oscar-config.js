@@ -115,7 +115,7 @@ requirejs.config({
         "timesheetsynthesismenu": "oscar/dist/ActivityTimesheetSynthesisMenu.umd.min",
         "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
         "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
-        "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd",
+        "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd.min",
     },
     shim: {
         "bootstrap": {

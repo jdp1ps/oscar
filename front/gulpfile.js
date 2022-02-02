@@ -187,6 +187,19 @@ exports.componentRNSRField = componentRNSRField;
 exports.componentRNSRFieldWatch = function(cb){ watch('./src/components/RNSRField.vue', componentRNSRField); }
 
 
+// //// GLOBALE
+// function replaceStrengthenPerson(cb) {
+//     compile("ReplaceStrengthenPerson");
+//     cb();
+// }
+// exports.replaceStrengthenPerson = replaceStrengthenPerson;
+// exports.replaceStrengthenPersonWatch = function(cb){
+//     watch([
+//         pathModuleSrc + "ReplaceStrengthenPerson.vue",
+//         pathModuleSrc + "components/PersonAutoCompleter.vue"
+//     ], replaceStrengthenPerson);
+// }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let commands = [

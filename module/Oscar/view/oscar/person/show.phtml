@@ -7,7 +7,32 @@
 
 /** @var \Oscar\Entity\Person $entity */
 ?>
+<style>
+    .card.disabled {
+        border-left-color: #ccc;
+        opacity: .5;
+    }
+    .columns {
+        columns: 3
+    }
 
+    .columns .card {
+        page-break-inside: avoid;
+        break-inside: avoid-column;
+        display: table;
+    }
+
+    .affectations .card.apply {
+        border: solid thin green;
+        border-left-width: 4px;
+    }
+    .affectations .card.applyable {
+        cursor: pointer;
+    }
+    .affectations .card.applyable:hover {
+        transform: scale(1.01);
+    }
+</style>
 <section class="container">
     <div class="row">
         <h1 class="">
@@ -17,6 +42,24 @@
             <span><?= $entity->getLdapAffectation() ?></span>
             <?php endif; ?>
         </h1>
+        <div id="replacer"></div>
+        <script>
+            require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
+                Vue.use(VueResource);
+                new Vue({
+                    el: "#replacer",
+                    render(h){
+                        return h(ReplaceStengthenPerson, {props: {
+                                urlReplace: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=replace",
+                                urlStrengthen: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=strengthen",
+                                person: <?= json_encode($entity->toArray()) ?>,
+                                affectations: <?= json_encode($affectations) ?>,
+                            }})
+                    }
+                })
+
+            });
+        </script>
         <p>
             <i class="icon-mail"></i> <?= $entity->getEmail() ?>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
@@ -459,23 +502,7 @@
                                 <?php endforeach; ?>
                             </section>
                         <?php endif; ?>
-                        <div id="replacer"></div>
-                        <script>
-                            require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
-                                Vue.use(VueResource);
-                                new Vue({
-                                    el: "#replacer",
-                                    render(h){
-                                        return h(ReplaceStengthenPerson, {props: {
-                                            urlReplace: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=replace",
-                                            urlStrengthen: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=strengthen",
-                                            person: "<?= $entity ?>"
-                                            }})
-                                    }
-                                })
 
-                            });
-                        </script>
                     <?php else: ?>
                     <div class="alert alert-info">
                         <?= $entity ?> n'est pas validateur <strong>désigné</strong> sur une activité de recherche

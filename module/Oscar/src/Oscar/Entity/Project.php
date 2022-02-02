@@ -165,9 +165,25 @@ class Project implements ResourceInterface
         return $end;
     }
 
-    public function getAmount() :?float
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
     {
-        if( $this->getActivities()->count() == 0 ){
+        foreach ($this->getActivities() as $activity) {
+            if ($activity->isActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getAmount(): ?float
+    {
+        if ($this->getActivities()->count() == 0) {
             return null;
         }
         $amount = 0.0;

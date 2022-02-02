@@ -663,49 +663,11 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     // TODO droits d'accès
 
                     try {
-                        $summary = $this->params()->fromPost('summary', null);
-                        if($summary != null) {
-                            $datas = json_decode($summary, true);
-                            $replacer = $this->getPersonService()->getPersonById($datas['replacer_id'], true);
-                            $this->getPersonService()->validatorReplace($person, $replacer);
-                            return $this->getResponseOk("done");
-                        } else {
-                            $replacerId = (int)$this->params()->fromPost('replacer_id');
-                            $replacer = $this->getPersonService()->getPersonById($replacerId, true);
-                            $summary = [
-                                "info" => sprintf("Remplacer %s par %s", $person, $replacer),
-                                "replacer_id" => $replacer->getId(),
-                                "prj" => [],
-                                "sci" => [],
-                                "adm" => []
-                            ];
-
-                            foreach ($person->getValidatorActivitiesPrj() as $activity) {
-                                $summary["prj"][] = [
-                                    "id" => $activity->getId(),
-                                    "label" => $activity->getFullLabel()
-                                ];
-                            }
-                            foreach ($person->getValidatorActivitiesSci() as $activity) {
-                                $summary["sci"][] = [
-                                    "id" => $activity->getId(),
-                                    "label" => $activity->getFullLabel()
-                                ];
-                            }
-                            foreach ($person->getValidatorActivitiesAdm() as $activity) {
-                                $summary["adm"][] = [
-                                    "id" => $activity->getId(),
-                                    "label" => $activity->getFullLabel()
-                                ];
-                            }
-
-                            $response = $this->baseJsonResponse();
-                            $response['summary'] = $summary;
-                            return $this->jsonOutput($response);
-                        }
-
+                        $out = $this->params()->fromPost('out', "VIDE");
+                        $this->getPersonService()->affectationsReplace($person, json_decode($out, true));
+                        return $this->getResponseOk("done");
                     } catch (\Exception $e) {
-                        return $this->getResponseInternalError("Impossible de remplacer $person : " . $e->getMessage());
+                        return $this->getResponseInternalError($e->getMessage());
                     }
 
                     break;
@@ -925,6 +887,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'validations' => $validations,
             'authentification' => $auth,
             'auth' => $auth,
+            'affectations' => $this->getPersonService()->getPersonAffectationsArray($person),
             'allowTimesheet' => $allowTimesheet,
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),

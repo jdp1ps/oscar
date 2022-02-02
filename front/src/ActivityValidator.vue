@@ -79,13 +79,15 @@
             <h5 class="personcard-header">
               <img :src="'//www.gravatar.com/avatar/' + p.mailMd5 +'?s=40'" alt="" class="personcard-gravatar">
               <div class="personcard-infos">
-                <strong>{{ p.person }}</strong><br>
+                <strong>{{ p.person }}</strong> <a :href="p.url_show" v-if="p.url_show">Fiche</a>
+                <br>
                 <small>
                   <i class="icon-mail"></i>
                   {{ p.mail }}
                 </small><br>
                 Rôle(s) : <strong>{{ p.roles.join(', ') }}</strong>
               </div>
+
             </h5>
           </article>
         </section>

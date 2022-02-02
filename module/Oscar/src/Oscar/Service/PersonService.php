@@ -247,8 +247,152 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $query->getQuery()->getResult();
     }
 
+    public function affectationsReplace(Person $fromPerson, array $rules) :void
+    {
+        $this->getLoggerService()->info(print_r($rules, true));
+        $replacer = $this->getPersonById($rules['replacer_id'], true);
 
-    public function validatorReplace( Person $replaced, Person $replacer ): void
+        foreach ($rules['projects'] as $projectId=>$projectDatas){
+            if( $projectDatas['apply'] ){
+                $project = $this->getProjectGrantService()->getProjectService()->getProject($projectId, true);
+                $this->getProjectGrantService()->getProjectService()->replacePerson($fromPerson, $replacer, $project);
+                $this->getLoggerService()->info("Replacer $fromPerson par $replacer dans $project");
+            }
+            $this->getLoggerService()->info("Replacer $fromPerson par $replacer");
+        }
+        $this->getLoggerService()->info("Replacer $fromPerson par $replacer");
+    }
+
+    /**
+     * @param Person $person
+     * @return array
+     */
+    public function getPersonAffectationsArray(Person $person): array
+    {
+        $output = $person->toArray();
+        $output['structures'] = [];
+        $output['affectations'] = [];
+        $output['activities'] = [];
+        $output['projects'] = [];
+        $output['validations'] = [
+            'prj' => [],
+            'sci' => [],
+            'adm' => [],
+        ];
+        $output['np1'] = [];
+
+        foreach ($person->getOrganizations() as $personOrganization) {
+            /** @var Organization $organization */
+            $organization = $personOrganization->getOrganization();
+
+            /** @var Role $role */
+            $role = $personOrganization->getRoleObj();
+
+            if (!array_key_exists($organization->getId(), $output['structures'])) {
+                $output['structures'][$organization->getId()] = [
+                    'label' => (string)$organization,
+                    'closed' => $organization->isClose(),
+                    'apply' => !$organization->isClose(),
+                    'roles' => []
+                ];
+            }
+            if (!in_array($role->getRoleId(), $output['structures'][$organization->getId()]['roles'])) {
+                $output['structures'][$organization->getId()]['roles'][] = $role->getRoleId();
+            }
+        }
+
+        /** @var ProjectMember $personProject */
+        foreach ($person->getProjectAffectations() as $personProject) {
+            $project = $personProject->getProject();
+
+            /** @var Role $role */
+            $role = $personProject->getRoleObj();
+
+            if (!array_key_exists($project->getId(), $output['projects'])) {
+                $output['projects'][$project->getId()] = [
+                    'acronym' => $project->getAcronym(),
+                    'label' => $project->getLabel(),
+                    'activities_count' => count($project->getActivities()),
+                    'active' => $project->isActive(),
+                    'apply' => $project->isActive(),
+                    'roles' => []
+                ];
+            }
+            if (!in_array($role->getRoleId(), $output['projects'][$project->getId()]['roles'])) {
+                $output['projects'][$project->getId()]['roles'][] = $role->getRoleId();
+            }
+        }
+
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getActivities() as $activityPerson) {
+            $activity = $activityPerson->getActivity();
+
+            /** @var Role $role */
+            $role = $activityPerson->getRoleObj();
+
+            if (!array_key_exists($activity->getId(), $output['activities'])) {
+                $output['activities'][$activity->getId()] = [
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'active' => $activity->isActive(),
+                    'apply' => $activity->isActive(),
+                    'status' => $activity->getStatus(),
+                    'status_text' => $activity->getStatusLabel(),
+                    'amount' => $activity->getAmount(),
+                    'roles' => []
+                ];
+            }
+            if (!in_array($role->getRoleId(), $output['activities'][$activity->getId()]['roles'])) {
+                $output['activities'][$activity->getId()]['roles'][] = $role->getRoleId();
+            }
+        }
+
+        // Validation PROJET
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getValidatorActivitiesPrj() as $activity) {
+            if (!array_key_exists($activity->getId(), $output['validations']['prj'])) {
+                $output['validations']['prj'][$activity->getId()] = [
+                    'id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'apply' => $activity->isActive()
+                ];
+            }
+        }
+
+        // Validation SCIENTIFIQUE
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getValidatorActivitiesSci() as $activity) {
+            if (!array_key_exists($activity->getId(), $output['validations']['sci'])) {
+                $output['validations']['sci'][$activity->getId()] = [
+                    'id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'apply' => $activity->isActive()
+                ];
+            }
+        }
+
+        // Validation ADMINISTRATIVE
+        /** @var ActivityPerson $activityPerson */
+        foreach ($person->getValidatorActivitiesAdm() as $activity) {
+            if (!array_key_exists($activity->getId(), $output['validations']['adm'])) {
+                $output['validations']['adm'][$activity->getId()] = [
+                    'id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'apply' => $activity->isActive()
+                ];
+            }
+        }
+
+        // TODO N+1 replacement
+
+        return $output;
+    }
+
+
+    public function validatorReplace(Person $replaced, Person $replacer): void
     {
         foreach ($replaced->getValidatorActivitiesPrj() as $activity) {
             $activity->getValidatorsPrj()->add($replacer);
@@ -510,7 +654,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $authPersonNormalize = $this->getOscarConfigurationService()->getAuthPersonNormalize();
 
         // Liste des personnes ayant des notifications non-lues
-        $persons = $this->getPersonRepository()->getPersonsWithUnreadNotificationsAndAuthentification($authPersonNormalize);
+        $persons = $this->getPersonRepository()->getPersonsWithUnreadNotificationsAndAuthentification(
+            $authPersonNormalize
+        );
 
         $log(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
 
@@ -863,7 +1009,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         return $repo->getAuthentificationPerson(
             $person,
-            $this->getOscarConfigurationService()->getAuthPersonNormalize());
+            $this->getOscarConfigurationService()->getAuthPersonNormalize()
+        );
     }
 
     /**
@@ -907,7 +1054,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 }
             }
         } catch (\Exception $e) {
-            $this->getLoggerService()->error("Impossible de charger les rôles applicatif pour $person : " . $e->getMessage());
+            $this->getLoggerService()->error(
+                "Impossible de charger les rôles applicatif pour $person : " . $e->getMessage()
+            );
         }
 
         return $inRoles;
@@ -1725,7 +1874,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
 
-
     /**
      * @param ActivityPerson $activityPerson
      * @throws \Doctrine\ORM\ORMException
@@ -1927,7 +2075,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getTimesheetService() :TimesheetService
+    public function getTimesheetService(): TimesheetService
     {
         return $this->getServiceContainer()->get(TimesheetService::class);
     }
@@ -1971,7 +2119,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
 
-        /**
+    /**
      * @return OscarUserContext
      */
     public function getOscarUserContext()
