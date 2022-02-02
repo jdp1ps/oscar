@@ -2026,7 +2026,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
     public function organizationsAction()
     {
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
+        $activityId = $this->params()->fromRoute('id');
+        $activity = $this->getActivityService()->getActivityById($activityId);
+
         $this->getOscarUserContextService()->check(
             Privileges::ACTIVITY_PERSON_SHOW,
             $activity
@@ -2055,6 +2057,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
          * @var ActivityOrganization $activityOrganization
          */
         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            // FIX (non idéale)
+            if( !$activityOrganization->getRoleObj() ){
+                $this->getLoggerService()->warning(
+                    sprintf(
+                        "L'organisation '%s' n'a pas d'objet rôle sur '%s'",
+                        $activityOrganization->getOrganization(),
+                        $activityOrganization->getEnroller()
+                    )
+                );
+                continue;
+            }
             $class = get_class($activityOrganization);
 
             if ($class == ActivityOrganization::class || get_class($activityOrganization) == $class) {
@@ -2071,6 +2084,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $classRoutes[$class] . '/delete',
                 ['idenroll' => $activityOrganization->getId()]
             ) : false;
+
             $urlEdit = $editableA ? $this->url()->fromRoute(
                 $classRoutes[$class] . '/edit',
                 ['idenroll' => $activityOrganization->getId()]
@@ -3009,7 +3023,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $response = $this->baseJsonResponse();
             $response['workpackages'] = $this->getTimesheetService()->getDatasActivityWorkpackages($activity);
             $response['validators'] = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
-            $response['members'] = $this->getTimesheetService()->getDatasActivityMembers($activity);
+            $response['members'] = $this->getTimesheetService()->getDatasActivityMembers(
+                $activity,
+                $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW),
+                $this->url()
+            );
             $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
             $response['validators_editable'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
 

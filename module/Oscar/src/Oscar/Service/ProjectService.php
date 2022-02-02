@@ -19,10 +19,12 @@ use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\ProjectRepository;
+use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\EnrollToArrayFormatter;
 use Oscar\Provider\Privileges;
@@ -45,6 +47,16 @@ class ProjectService implements UseServiceContainer
     public function getServiceLocator()
     {
         return $this->getServiceContainer();
+    }
+
+    /**
+     * @return PersonService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getPersonService() :PersonService
+    {
+        return $this->getServiceContainer()->get(PersonService::class);
     }
 
     /**
@@ -408,6 +420,34 @@ class ProjectService implements UseServiceContainer
         } catch (\Exception $e) {
             throw new OscarException(sprintf("Impossible de supprimer le projet %s : %s", $project, $e->getMessage()));
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    ///
+    ///
+    public function replacePerson( Person $from, Person $to, Project $project ):void
+    {
+        $date = new \DateTime();
+        try {
+
+            /** @var ProjectMember $projectMember */
+            foreach( $project->getPersons() as $projectMember ){
+                if( $projectMember->getPerson()->getId() == $from->getId() && $projectMember->isActive() ){
+                    $role = $projectMember->getRoleObj();
+                    $projectMember->setDateEnd($date);
+                    $this->addProjectPerson($project, $to, $role, $date, null);
+                    $this->getEntityManager()->flush();
+                }
+            }
+        } catch (\Exception $e) {
+          throw new OscarException(sprintf(_("Impossible de remplacer '%s' par '%s' dans le projet '%s'", $from, $to, $project)));
+        }
+    }
+
+    public function addProjectPerson( Project $project, Person $person, Role $role, ?\DateTime $start = null, ?\DateTime $end = null ):void
+    {
+        $this->getPersonService()->personProjectAdd($project, $person, $role, $start, $end);
     }
 
     public function removeProjectOrganization(ProjectPartner $projectPartner): void

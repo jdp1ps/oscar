@@ -231,6 +231,18 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $activity;
     }
 
+    /**
+     * @param int $id
+     * @param bool $throw
+     * @return Project|null
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getProjectById( int $id, bool $throw = true ) :?Project
+    {
+        return $this->getProjectService()->getProject($id, $throw);
+    }
+
     public function getActivityByOscarNum(string $oscarNum, $throw = true): ?Activity
     {
         $activity = $this->getActivityRepository()->findOneBy(['oscarNum' => $oscarNum]);

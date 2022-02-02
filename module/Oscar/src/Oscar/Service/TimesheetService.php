@@ -23,13 +23,11 @@ use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\ConnectorException;
-use Oscar\Exception\OscarCredentialException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Formatter\person\IPersonFormatter;
 use Oscar\Formatter\person\PersonToJsonBasic;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
-use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
@@ -50,18 +48,9 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
-use Oscar\Utils\ConfigurationMergable;
 use Oscar\Utils\DateTimeUtils;
-use Oscar\Utils\DateTimeUtilsTest;
 use Oscar\Utils\PeriodInfos;
-use Oscar\Utils\StringUtils;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\Db\Sql\Ddl\Constraint\ForeignKey;
-use Zend\Form\Element\Time;
-use Zend\Log\Logger;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Mvc\Controller\Plugin\Url;
 use Zend\View\Renderer\PhpRenderer;
 
 /**
@@ -4586,12 +4575,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getDatasActivityMembers(Activity $activity): array
+    public function getDatasActivityMembers(Activity $activity, bool $showlink = false, Url $urlHelper): array
     {
         $members = [];
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
             if (!array_key_exists($personActivity->getId(), $members)) {
+                $urlShow = "";
                 $members[$personActivity->getPerson()->getId()] = [
                     'person' => (string)$personActivity->getPerson(),
                     'mail' => $personActivity->getPerson()->getEmail(),
@@ -4599,6 +4589,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'person_id' => $personActivity->getId(),
                     'roles' => []
                 ];
+
+                if( $showlink ){
+                    $urlShow = $urlHelper->fromRoute('person/show', ['id' => $personActivity->getPerson()->getId()]);
+
+                }
+                $members[$personActivity->getPerson()->getId()]['url_show'] = $urlShow;
             }
             $members[$personActivity->getPerson()->getId()]['roles'][] = $personActivity->getRoleObj()->getRoleId();
         }
