@@ -173,17 +173,17 @@
         Nouveau
       </a>
     </nav>
-    <span class="cartouche" v-for="e in entities" :class="{'primary': e.rolePrincipal }">
-            <i v-if="e.context == 'activity'" class="icon-cube"></i>
-            <i v-else class="icon-cubes"></i>
-            <span class="text-clickable" @click="open(e.urlShow)" v-if="e.urlShow">{{ e.enrolledLabel }}</span>
-            <span v-else>{{ e.enrolledLabel }}</span>
-            <span class="addon">
-                {{ e.roleLabel }}
-                <i class="icon-pencil-1 icon-clickable" v-if="manage" @click="handlerEdit(e)"></i>
-                <i class="icon-trash icon-clickable" v-if="manage" @click="handlerDelete(e)"></i>
-            </span>
-        </span>
+    <span class="cartouche" v-for="e in entities" :class="{'primary': e.rolePrincipal, 'outofdate past': e.past }">
+      <i v-if="e.context == 'activity'" class="icon-cube"></i>
+      <i v-else class="icon-cubes"></i>
+      <span class="text-clickable" @click="open(e.urlShow)" v-if="e.urlShow">{{ e.enrolledLabel }}</span>
+      <span v-else>{{ e.enrolledLabel }}</span>
+      <span class="addon">
+        {{ e.roleLabel }}
+        <i class="icon-pencil-1 icon-clickable" v-if="manage" @click="handlerEdit(e)"></i>
+        <i class="icon-trash icon-clickable" v-if="manage" @click="handlerDelete(e)"></i>
+      </span>
+    </span>
   </div>
 </template>
 <script>
@@ -317,12 +317,9 @@ export default {
             }
             if (ok.body.persons) {
               this.entities = ok.body.persons;
-            }
-            else if (ok.body.organizations) {
+            } else if (ok.body.organizations) {
               this.entities = ok.body.organizations;
-            }
-
-            else {
+            } else {
               this.entities = ok.body;
             }
 
