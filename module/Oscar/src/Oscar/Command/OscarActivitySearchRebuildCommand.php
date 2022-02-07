@@ -9,11 +9,10 @@
 namespace Oscar\Command;
 
 use Exception;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class OscarActivitySearchReindexAllCommand extends OscarAdvancedCommandAbstract
+class OscarActivitySearchRebuildCommand extends OscarAdvancedCommandAbstract
 {
     protected static $defaultName = OscarCommandAbstract::COMMAND_ACTIVITY_SEARCH_REINDEX_ALL;
 
@@ -29,13 +28,8 @@ class OscarActivitySearchReindexAllCommand extends OscarAdvancedCommandAbstract
         parent::execute($input, $output);
 
         try {
-
-            if (!$this->ask("Réindexer toutes les activités ?")) {
-                return 0;
-            }
-
+            $this->getIO()->title("Reconstruction de l'index de recherche des activités");
             $this->getProjectGrantService()->searchIndex_rebuild();
-
             return $this->finalSuccess("Index de recherche mis à jour");
         } catch (Exception $e) {
             return $this->finalFatalError($e);
