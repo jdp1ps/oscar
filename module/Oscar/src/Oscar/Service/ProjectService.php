@@ -433,11 +433,17 @@ class ProjectService implements UseServiceContainer
 
             /** @var ProjectMember $projectMember */
             foreach( $project->getPersons() as $projectMember ){
-                if( $projectMember->getPerson()->getId() == $from->getId() && $projectMember->isActive() ){
-                    $role = $projectMember->getRoleObj();
-                    $projectMember->setDateEnd($date);
-                    $this->addProjectPerson($project, $to, $role, $date, null);
-                    $this->getEntityManager()->flush();
+                if( $projectMember->getPerson()->getId() == $from->getId() ){
+
+                    if ( $projectMember->isActive() ){
+                        $role = $projectMember->getRoleObj();
+                        $projectMember->setDateEnd($date);
+                        $this->addProjectPerson($project, $to, $role, $date, null);
+                        $this->getEntityManager()->flush();
+                        $this->getLogger()->info("Remplacement...");
+                    } else {
+                        $this->getLogger()->info("Non remplacé");
+                    }
                 }
             }
         } catch (\Exception $e) {

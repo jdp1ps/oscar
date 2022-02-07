@@ -1946,7 +1946,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Récupération de l'activités
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
 
-
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
 
         $out = [];
@@ -2010,6 +2009,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'context' => $context,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
+                'past' => $activityPerson->isPast(),
                 'enroller' => $idEnroller,
                 'enrollerLabel' => $activity->getLabel(),
                 'editable' => $editable,

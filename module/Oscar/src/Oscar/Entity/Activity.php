@@ -465,8 +465,6 @@ class Activity implements ResourceInterface
     }
 
 
-
-
     public function isActive()
     {
         return $this->getStatus() == self::STATUS_ACTIVE;
@@ -640,9 +638,9 @@ class Activity implements ResourceInterface
 
     public function getPcruMissings()
     {
-        if( $this->pcruMissings === null ){
+        if ($this->pcruMissings === null) {
             $missings = [];
-            if( !$this->getProject() ){
+            if (!$this->getProject()) {
                 $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
             } elseif (!$this->getAcronym()) {
                 $missings[] = _("Le projet de l'activité doit avoir un acronyme");
@@ -1259,7 +1257,7 @@ class Activity implements ResourceInterface
         return $this->validatorsPrj;
     }
 
-    public function hasValidatorsPrj() :bool
+    public function hasValidatorsPrj(): bool
     {
         return count($this->getValidatorsPrj()) > 0;
     }
@@ -1281,7 +1279,7 @@ class Activity implements ResourceInterface
         return $this->validatorsSci;
     }
 
-    public function hasValidatorsSci() :bool
+    public function hasValidatorsSci(): bool
     {
         return count($this->getValidatorsSci()) > 0;
     }
@@ -1303,7 +1301,7 @@ class Activity implements ResourceInterface
         return $this->validatorsAdm;
     }
 
-    public function hasValidatorsAdm() :bool
+    public function hasValidatorsAdm(): bool
     {
         return count($this->getValidatorsAdm()) > 0;
     }
@@ -1684,18 +1682,21 @@ class Activity implements ResourceInterface
         $this->getPersons()->add($activityPerson);
     }
 
-    public function hasPerson(
-        Person $person,
-        $role = null,
-        \DateTime $dateStart = null,
-        \DateTime $dateEnd = null,
-        $deep = true
+    /**
+     * @param Person $person
+     * @param Role|null $role
+     * @param \DateTime|null $dateStart
+     * @param \DateTime|null $dateEnd
+     * @param bool $deep
+     * @return bool
+     */
+    public function hasPerson( Person $person, ?Role $role = null, ?\DateTime $dateStart = null, ?\DateTime $dateEnd = null, bool $deep = true
     ) {
         $found = false;
         /** @var ActivityPerson $activityPerson */
         foreach ($this->persons as $activityPerson) {
             if ($person == $activityPerson->getPerson()) {
-                if ($role !== null && $activityPerson->getRole() !== $role) {
+                if ($role !== null && $activityPerson->getRoleObj() !== $role) {
                     continue;
                 } else {
                     $found = true;
@@ -2560,7 +2561,7 @@ class Activity implements ResourceInterface
      *
      * @return bool
      */
-    public function isTimesheetAllowed() :bool
+    public function isTimesheetAllowed(): bool
     {
         return count($this->getNoTimesheetReason()) == 0;
     }
@@ -2572,17 +2573,17 @@ class Activity implements ResourceInterface
      *
      * @return array
      */
-    public function getNoTimesheetReason() :array
+    public function getNoTimesheetReason(): array
     {
-        if( $this->_noTimesheetReason == null ){
+        if ($this->_noTimesheetReason == null) {
             $this->_noTimesheetReason = [];
-            if( !$this->getProject() ) {
+            if (!$this->getProject()) {
                 $reasons[] = "L'activité n'a pas de projet";
             } elseif (!$this->getProject()->getAcronym()) {
                 $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
             }
 
-            if( !$this->getDateStart() || !$this->getDateEnd() ) {
+            if (!$this->getDateStart() || !$this->getDateEnd()) {
                 $reasons[] = "L'activité n'a pas de date de début/fin";
             }
         }

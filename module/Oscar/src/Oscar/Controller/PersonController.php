@@ -51,11 +51,13 @@ use Zend\Http\Response;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
-class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService, UseProjectService, UseProjectGrantService, UseNotificationService, UseUserParametersService
+class PersonController extends AbstractOscarController implements UsePersonService, UseTimesheetService,
+                                                                  UseProjectService, UseProjectGrantService,
+                                                                  UseNotificationService, UseUserParametersService
 {
     use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseUserParametersServiceTrait;
 
-    public function deleteAction() :array
+    public function deleteAction(): array
     {
         $method = $this->getHttpXMethod();
         $this->getOscarUserContextService()->check(Privileges::PERSON_EDIT);
@@ -101,7 +103,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 $this->redirect()->toRoute('person/index');
             }
             $this->redirect()->toRoute('home');
-
         } catch (ForeignKeyConstraintViolationException $e) {
             $this->getLoggerService()->error($e->getMessage());
             throw new OscarException("Impossible de supprimer $person, elle est utilisée.");
@@ -115,7 +116,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
      *
      * @return array
      */
-    public function accessAction() :array
+    public function accessAction(): array
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         $person = $this->getPersonService()->getPerson($this->params()->fromRoute('id'));
@@ -127,7 +128,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             foreach ($roles as $role) {
                 $rolesApplication[] = $role->getId();
             }
-
         } catch (\Exception $e) {
         }
 
@@ -148,7 +148,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 ];
                 $rolesOrganisation[$organizationId]['roles'][$roleId] = $role;
             }
-
         }
 
         return [
@@ -161,7 +160,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
     public function personnelAction()
     {
-
         $access = $this->getOscarConfigurationService()->getConfiguration('listPersonnel');
 
         if ($access == 0) {
@@ -264,7 +262,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $person = $this->getPersonService()->getPerson($id);
         return [
             'person' => $person,
-            'notifications' => $this->getPersonService()->getNotificationService()->getAllNotificationsPerson($person->getId())
+            'notifications' => $this->getPersonService()->getNotificationService()->getAllNotificationsPerson(
+                $person->getId()
+            )
         ];
     }
 
@@ -285,7 +285,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
      */
     public function indexAction()
     {
-
         $allow = false;
         $justXHR = true;
 
@@ -294,15 +293,20 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $allow = true;
             $justXHR = false;
         } else {
-            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]);
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
+                [Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]
+            );
         }
 
         if (!$allow) {
-            $this->getLoggerService()->info("Accès non authorisé à la recherche des personnes pour " . $this->getCurrentPerson());
-            if ($justXHR)
+            $this->getLoggerService()->info(
+                "Accès non authorisé à la recherche des personnes pour " . $this->getCurrentPerson()
+            );
+            if ($justXHR) {
                 return $this->getResponseUnauthorized();
-            else
+            } else {
                 throw new UnAuthorizedException();
+            }
         }
 
         // Donnèes GET
@@ -340,13 +344,18 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         }
 
         try {
-            $datas = $this->getPersonService()->getPersonsSearchPaged($search, $page, [
-                'filter_roles' => $filterRoles,
-                'order_by' => $orderBy,
-                'leader' => $leader,
-                'declarers' => $declarers,
-                'np1' => $np1
-            ], $limit);
+            $datas = $this->getPersonService()->getPersonsSearchPaged(
+                $search,
+                $page,
+                [
+                    'filter_roles' => $filterRoles,
+                    'order_by' => $orderBy,
+                    'leader' => $leader,
+                    'declarers' => $declarers,
+                    'np1' => $np1
+                ],
+                $limit
+            );
         } catch (BadRequest400Exception $e) {
             $error = "Expression de recherche incorrecte.";
             throw $e;
@@ -376,7 +385,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         /// Export CSV
         ///
         if ($format == "csv") {
-
             if ($justXHR == true) {
                 throw new UnAuthorizedException();
             }
@@ -386,27 +394,33 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $filename = uniqid($baseFileName) . '.csv';
             $handler = fopen('/tmp/' . $filename, 'w');
 
-            fputcsv($handler, [
-                'ID Oscar',
-                'Prénom',
-                'Nom',
-                'Courriel',
-                'Téléphone',
-                'Affectation',
-                'Localisation'
-            ]);
+            fputcsv(
+                $handler,
+                [
+                    'ID Oscar',
+                    'Prénom',
+                    'Nom',
+                    'Courriel',
+                    'Téléphone',
+                    'Affectation',
+                    'Localisation'
+                ]
+            );
 
             /** @var Person $person */
             foreach ($datas->getQueryBuilder()->getQuery()->getResult() as $person) {
-                fputcsv($handler, [
-                    $person->getId(),
-                    $person->getFirstname(),
-                    $person->getLastname(),
-                    $person->getEmail(),
-                    $person->getPhone(),
-                    $person->getLdapAffectation(),
-                    $person->getLdapSiteLocation()
-                ]);
+                fputcsv(
+                    $handler,
+                    [
+                        $person->getId(),
+                        $person->getFirstname(),
+                        $person->getLastname(),
+                        $person->getEmail(),
+                        $person->getPhone(),
+                        $person->getLdapAffectation(),
+                        $person->getLdapSiteLocation()
+                    ]
+                );
             }
 
             fclose($handler);
@@ -448,8 +462,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_PERSON_MANAGE) &&
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_PERSON_MANAGE) &&
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT)
-        )
+        ) {
             return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des personnes");
+        }
 
         $search = $this->params()->fromQuery('q', '');
 
@@ -504,9 +519,17 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $personId = (int)$this->params()->fromRoute('id');
         $person = $this->getPersonService()->getPerson($personId);
         if ($person && $this->getPersonService()->syncLdap($person)) {
-            $this->getActivityLogService()->addUserInfo(sprintf("a synchronisé la fiche %s", $person->log()), $this->getDefaultContext(), $personId);
-            $this->flashMessenger()->addSuccessMessage(sprintf("La personne '%s' a bien été synchronisé avec LDap.",
-                $person));
+            $this->getActivityLogService()->addUserInfo(
+                sprintf("a synchronisé la fiche %s", $person->log()),
+                $this->getDefaultContext(),
+                $personId
+            );
+            $this->flashMessenger()->addSuccessMessage(
+                sprintf(
+                    "La personne '%s' a bien été synchronisé avec LDap.",
+                    $person
+                )
+            );
             return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
         }
         die("DONE");
@@ -560,7 +583,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
      */
     public function declarersAction()
     {
-
         $format = $this->params()->fromQuery('f', null);
         $period = $this->params()->fromQuery('period', date('Y-m'));
 
@@ -574,17 +596,31 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                         return $this->getResponseNotImplemented("Fonctionnalité à venir");
                     } else {
                         $output = $this->baseJsonResponse();
-                        $period = DateTimeUtils::extractPeriodDatasFromString($this->params()->fromQuery('period', date('Y-m')));
+                        $period = DateTimeUtils::extractPeriodDatasFromString(
+                            $this->params()->fromQuery('period', date('Y-m'))
+                        );
                         $output['period'] = $period;
                         $declarers = [];
                         try {
-                            foreach ($this->getTimesheetService()->getDeclarersAtPeriod($period['periodCode']) as $declarer) {
+                            foreach (
+                                $this->getTimesheetService()->getDeclarersAtPeriod(
+                                    $period['periodCode']
+                                ) as $declarer
+                            ) {
                                 $entry = $declarer;
                                 if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)) {
-                                    $entry['url_person'] = $this->url()->fromRoute('person/show', ['id' => $declarer['id']]);
+                                    $entry['url_person'] = $this->url()->fromRoute(
+                                        'person/show',
+                                        ['id' => $declarer['id']]
+                                    );
                                 }
-                                $entry['url_details'] = $this->url()->fromRoute('timesheet/synthesis') . '?format=json&person_id=' . $declarer['id'] . '&period=' . $period['periodCode'];
-                                $entry['details'] = $this->getTimesheetService()->personDeclarationState($declarer['id'], $period['periodCode']);
+                                $entry['url_details'] = $this->url()->fromRoute(
+                                        'timesheet/synthesis'
+                                    ) . '?format=json&person_id=' . $declarer['id'] . '&period=' . $period['periodCode'];
+                                $entry['details'] = $this->getTimesheetService()->personDeclarationState(
+                                    $declarer['id'],
+                                    $period['periodCode']
+                                );
                                 $declarers[] = $entry;
                             }
                             $output['declarers'] = $declarers;
@@ -622,7 +658,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         $timesheetService = $this->getTimesheetService();
         $hasTimesheets = $timesheetService->getPersonHasTimesheets($person->getId());
 
-        if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) {
+        if ($this->getOscarUserContextService()->hasPrivileges(
+                Privileges::PERSON_FEED_TIMESHEET
+            ) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) {
             $allowTimesheet = true;
             $validations = $timesheetService->getValidationsPeriodPerson($person);
         }
@@ -638,10 +676,15 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             if (!in_array($person->getId(), $subordinatesIds)) {
                 /** @var OrganizationRepository $organizationRepository */
                 $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
-                $organizationIds = $organizationRepository->getOrganizationsIdsForPerson($this->getCurrentPerson()->getId(), true);
+                $organizationIds = $organizationRepository->getOrganizationsIdsForPerson(
+                    $this->getCurrentPerson()->getId(),
+                    true
+                );
                 $coworkerIds = $this->getPersonService()->getCoWorkerIds($this->getCurrentPerson()->getId());
 
-                if (!(in_array($id, $coworkerIds) || $this->getCurrentPerson()->getTimesheetsFor()->contains($person))) {
+                if (!(in_array($id, $coworkerIds) || $this->getCurrentPerson()->getTimesheetsFor()->contains(
+                        $person
+                    ))) {
                     throw new Unauthorized401Exception("Vous n'avez pas accès à la fiche de cette personne");
                 }
             }
@@ -655,7 +698,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
 
         if ($this->isAjax()) {
             $action = $this->params()->fromQuery('a');
-
 
             switch ($action) {
                 // Remplacement
@@ -707,11 +749,11 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
                                 $this->getLoggerService()->info(print_r($custom, true));
-
                             }
-
                         } catch (\Exception $e) {
-                            return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
+                            return $this->getResponseInternalError(
+                                "Impossible d'enregistrer les paramètres : " . $e->getMessage()
+                            );
                         }
                         return $this->getResponseOk();
                     }
@@ -747,22 +789,27 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             if (in_array($action, ['addusurpation', 'removeusurpation'])) {
                 $person_id = $this->params()->fromPost('person_id', null);
                 if (!$person_id) {
-                    throw new OscarException("Impossible de gérer la délagation des feuilles de temps, l'identifiant de la personne manquant");
+                    throw new OscarException(
+                        "Impossible de gérer la délagation des feuilles de temps, l'identifiant de la personne manquant"
+                    );
                 }
                 $other = $this->getPersonService()->getPersonById($person_id);
 
                 if (!$other) {
-                    throw new OscarException("Impossible de gérer la délagation des feuilles de temps, la personne n'a pas été trouvée.");
+                    throw new OscarException(
+                        "Impossible de gérer la délagation des feuilles de temps, la personne n'a pas été trouvée."
+                    );
                 }
 
                 if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET)) {
-
                     switch ($action) {
                         case 'addusurpation' :
                             try {
                                 $person->addTimesheetUsurpation($other);
                                 $this->getEntityManager()->flush($person);
-                                $this->flashMessenger()->addSuccessMessage("$other est maintenant autorisé à remplir les feuilles de temps de $person");
+                                $this->flashMessenger()->addSuccessMessage(
+                                    "$other est maintenant autorisé à remplir les feuilles de temps de $person"
+                                );
                                 return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
                             } catch (\Exception $exception) {
                                 return $this->getResponseInternalError($exception->getMessage());
@@ -772,7 +819,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                             try {
                                 $person->removeTimesheetUsurpation($other);
                                 $this->getEntityManager()->flush([$person, $other]);
-                                $this->flashMessenger()->addSuccessMessage(sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person));
+                                $this->flashMessenger()->addSuccessMessage(
+                                    sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person)
+                                );
                                 return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
                             } catch (\Exception $exception) {
                                 return $this->getResponseInternalError($exception->getMessage());
@@ -782,9 +831,10 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                             throw new OscarException("Opération inconnue");
                     }
                 } else {
-                    return $this->getResponseUnauthorized("Vous n'avez pas le droit de déléguer la déclaration d'une personne à une autre.");
+                    return $this->getResponseUnauthorized(
+                        "Vous n'avez pas le droit de déléguer la déclaration d'une personne à une autre."
+                    );
                 }
-
             }
             if (!$manageHierarchie) {
                 return $this->getResponseUnauthorized();
@@ -792,8 +842,14 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             switch ($action) {
                 case 'flipreferent' :
 
-                    $referent = $this->getPersonService()->getPersonById($this->params()->fromPost('referent_id'), true);
-                    $newReferent = $this->getPersonService()->getPersonById($this->params()->fromPost('person_id'), true);
+                    $referent = $this->getPersonService()->getPersonById(
+                        $this->params()->fromPost('referent_id'),
+                        true
+                    );
+                    $newReferent = $this->getPersonService()->getPersonById(
+                        $this->params()->fromPost('person_id'),
+                        true
+                    );
                     $mode = $this->params()->fromPost('mode');
                     if (!in_array($mode, ['add', 'replace'])) {
                         throw new OscarException("Mauvaise requête");
@@ -802,7 +858,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     if ($mode == 'replace') {
                         $this->getPersonService()->refererentReplaceBy($newReferent, $referent);
                         return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
-
                     } else {
                         $this->getPersonService()->refererentAddFromReferent($newReferent, $referent);
                         return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
@@ -821,7 +876,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     $other = $this->getPersonService()->getPersonById($person_id);
                     $person->addTimesheetUsurpation($this->getPersonService()->getPersonById($person_id));
                     $this->getEntityManager()->flush([$person, $other]);
-                    $this->flashMessenger()->addSuccessMessage("$other est autorisé à replir les feuilles de temps de $person");
+                    $this->flashMessenger()->addSuccessMessage(
+                        "$other est autorisé à replir les feuilles de temps de $person"
+                    );
                     return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
 
                 case 'removeusurpation' :
@@ -829,7 +886,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                     $other = $this->getPersonService()->getPersonById($person_id);
                     $person->removeTimesheetUsurpation($other);
                     $this->getEntityManager()->flush([$person, $other]);
-                    $this->flashMessenger()->addSuccessMessage(sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person));
+                    $this->flashMessenger()->addSuccessMessage(
+                        sprintf(_('%s ne peut plus remplir les feuilles de temps de %s.'), $other, $person)
+                    );
                     return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
 
                 case 'removereferent' :
@@ -877,7 +936,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'schedule' => $timesheetService->getDayLengthPerson($person),
             'entity' => $person,
             'ldapRoles' => $roles,
-            'scheduleEditable' => $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_MANAGE_SCHEDULE),
+            'scheduleEditable' => $this->getOscarUserContextService()->hasPrivileges(
+                Privileges::PERSON_MANAGE_SCHEDULE
+            ),
             'referents' => $referents,
             'hasTimesheets' => $hasTimesheets,
             'manageHierarchie' => $manageHierarchie,
@@ -887,13 +948,79 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'validations' => $validations,
             'authentification' => $auth,
             'auth' => $auth,
-            'affectations' => $this->getPersonService()->getPersonAffectationsArray($person),
+            // 'affectations' => $this->getPersonService()->getPersonAffectationsArray($person),
             'allowTimesheet' => $allowTimesheet,
-            'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
+            'projects' => new UnicaenDoctrinePaginator(
+                $this->getProjectService()->getProjectUser($person->getId()),
+                $page
+            ),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
             'traces' => $traces,
             'connectors' => array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'))
         ];
+    }
+
+    /**
+     * @param string $idPersonKey
+     * @return Person
+     * @throws OscarException
+     */
+    protected function getRoutePerson(string $idPersonKey = 'id'): Person
+    {
+        $id = $this->params()->fromRoute($idPersonKey);
+        return $this->getPersonService()->getPersonById($id, true);
+    }
+
+    /**
+     *
+     */
+    public function affectationAction()
+    {
+        try {
+            $person = $this->getRoutePerson();
+            $manage = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_EDIT);
+            if (!$manage) {
+                throw new OscarException("Accès interdit");
+            }
+            // TRAITEMENT
+            if ($this->getRequest()->isPost()) {
+                try {
+                    $out = $this->params()->fromPost('out', "");
+                    $this->getPersonService()->affectationsReplace($person, json_decode($out, true));
+                    return $this->getResponseOk("done");
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            // Récupération des affectations
+            if ($this->params()->fromQuery('f') == 'json' || $this->isAjax()) {
+                try {
+                    $replacerId = $this->params()->fromQuery('person');
+                    $replacer = $this->getPersonService()->getPersonById($replacerId, true);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError(
+                        sprintf(
+                            "Impossible de traver le remplaçant : %s",
+                            $e->getMessage()
+                        )
+                    );
+                }
+                $out = [
+                    'affectations' => $this->getPersonService()->getPersonAffectationsArray($person, $replacer)
+                ];
+                return $this->ajaxResponse($out);
+            }
+
+            throw new OscarException("Mauvaise utilisation de l'API");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError(
+                sprintf(
+                    "Gestion des affectations impossible : %s",
+                    $e->getMessage()
+                )
+            );
+        }
     }
 
 
@@ -916,7 +1043,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $form->setData($request->getPost());
 
             if ($form->isValid()) {
-
                 //
                 $this->getEntityManager()->persist($newPerson);
                 $this->getEntityManager()->flush($newPerson);
@@ -928,48 +1054,58 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 foreach ($persons as $person) {
                     // $person->mergeTo($newPerson);
 
-                    $this->getLoggerService()->info('Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId());
+                    $this->getLoggerService()->info(
+                        'Transfert de ' . $person->getId() . ' vers ' . $newPerson->getId()
+                    );
                     // Notification
                     $conn->executeUpdate(
                         'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
 
                     // Affectation
                     $conn->executeUpdate(
                         'UPDATE activityperson SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE administrativedocument SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE contractdocument SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE notificationperson SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE organizationperson SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE projectmember SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
 
                     // Feuille de temps
                     $conn->executeUpdate(
                         'UPDATE timesheet SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
                     $conn->executeUpdate(
                         'UPDATE timesheet SET createdby_id = ? WHERE createdby_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
 
                     // Lot de travail
                     $conn->executeUpdate(
                         'UPDATE workpackageperson SET person_id = ? WHERE person_id = ?',
-                        [$newPerson->getId(), $person->getId()]);
+                        [$newPerson->getId(), $person->getId()]
+                    );
 
                     $conn->executeQuery('DELETE FROM person WHERE id = ? ', [$person->getId()]);
-
-
                 }
 
                 $this->redirect()->toRoute('person/show', ['id' => $newPerson->getId()]);
@@ -998,10 +1134,12 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             var_dump($request->getPost());
         }
 
-        $view = new ViewModel([
-            'entity' => $person,
-            'id' => $id,
-        ]);
+        $view = new ViewModel(
+            [
+                'entity' => $person,
+                'id' => $id,
+            ]
+        );
 
         $view->setTemplate('/oscar/person/organizationrole');
 
@@ -1024,10 +1162,8 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $personConnector = array_keys($connectors);
 
 
-
             $form->setConnectors($personConnector);
         } catch (\Exception $e) {
-
         }
 
         $form->init();
@@ -1040,7 +1176,8 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 $this->getEntityManager()->flush($person);
                 $this->getActivityLogService()->addUserInfo(
                     sprintf('a modifié les informations pour %s', $person->log()),
-                    $this->getDefaultContext(), $person->getId(),
+                    $this->getDefaultContext(),
+                    $person->getId(),
                     LogActivity::LEVEL_INCHARGE
                 );
                 //$this->getPersonService()->getSearchEngineStrategy()->update($person);
@@ -1050,12 +1187,14 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             }
         }
 
-        $view = new ViewModel([
-            'connectors' => $personConnector,
-            'person' => $person,
-            'id' => $id,
-            'form' => $form
-        ]);
+        $view = new ViewModel(
+            [
+                'connectors' => $personConnector,
+                'person' => $person,
+                'id' => $id,
+                'form' => $form
+            ]
+        );
 
         $view->setTemplate('/oscar/person/form');
 
@@ -1083,7 +1222,8 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                 $this->getEntityManager()->flush($person);
                 $this->getActivityLogService()->addUserInfo(
                     sprintf('a ajouté %s à la liste des personnes', $person->log()),
-                    $this->getDefaultContext(), $person->getId(),
+                    $this->getDefaultContext(),
+                    $person->getId(),
                     LogActivity::LEVEL_INCHARGE
                 );
                 $this->getPersonService()->getSearchEngineStrategy()->add($person);
@@ -1092,11 +1232,13 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             }
         }
 
-        $view = new ViewModel([
-            'person' => $person,
-            'id' => null,
-            'form' => $form
-        ]);
+        $view = new ViewModel(
+            [
+                'person' => $person,
+                'id' => null,
+                'form' => $form
+            ]
+        );
 
         $view->setTemplate('/oscar/person/form');
 
