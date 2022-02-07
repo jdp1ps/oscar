@@ -247,31 +247,165 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $query->getQuery()->getResult();
     }
 
-    public function affectationsReplace(Person $fromPerson, array $rules) :void
-    {
-        $this->getLoggerService()->info(print_r($rules, true));
-        $replacer = $this->getPersonById($rules['replacer_id'], true);
-
-        foreach ($rules['projects'] as $projectId=>$projectDatas){
-            if( $projectDatas['apply'] ){
-                $project = $this->getProjectGrantService()->getProjectService()->getProject($projectId, true);
-                $this->getProjectGrantService()->getProjectService()->replacePerson($fromPerson, $replacer, $project);
-                $this->getLoggerService()->info("Replacer $fromPerson par $replacer dans $project");
-            }
-            $this->getLoggerService()->info("Replacer $fromPerson par $replacer");
-        }
-        $this->getLoggerService()->info("Replacer $fromPerson par $replacer");
-    }
 
     /**
+     * Transfert les affectations actives d'une personne vers une autre. Concerne :
+     *  - Affectation Projet
+     *  - Activité
+     *  - Structure
+     *  - Validation
+     *  - N+1 (TODO)
+     *
+     * @param Person $fromPerson
+     * @param array $rules
+     * @throws NoResultException
+     * @throws OscarException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function affectationsReplace(Person $fromPerson, array $rules): void
+    {
+        try {
+            $replacer = $this->getPersonById($rules['replacer_id'], true);
+        } catch (\Exception $exception) {
+            throw new OscarException("Le remplaçant '%s' est introuvable.", $rules['replacer_id']);
+        }
+
+        foreach ($rules['projects'] as $projectId => $projectDatas) {
+            if ($projectDatas['apply']) {
+                try {
+                    $project = $this->getProjectGrantService()->getProjectService()->getProject($projectId, true);
+                    $this->getProjectGrantService()->getProjectService()->replacePerson(
+                        $fromPerson,
+                        $replacer,
+                        $project
+                    );
+                    $this->getLoggerService()->info(
+                        "Remplacement de $fromPerson par $replacer dans le projet $project"
+                    );
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
+        foreach ($rules['activities'] as $activityId => $activityDatas) {
+            if ($activityDatas['apply']) {
+                $activity = $this->getProjectGrantService()->getActivityById($activityId);
+                $this->getProjectGrantService()->replacePerson($fromPerson, $replacer, $activity);
+                $this->getLoggerService()->info("Replacer $fromPerson par $replacer dans l'activité $activity");
+            }
+        }
+
+        foreach ($rules['structures'] as $organizationId => $organizationDatas) {
+            if ($organizationDatas['apply']) {
+                $organization = $this->getProjectGrantService()->getOrganizationService()->getOrganization(
+                    $organizationId
+                );
+                foreach ($organizationDatas['roles'] as $roleDatas) {
+                    if ($roleDatas['active']) {
+                        $roleObj = $this->getRoleRepository()->getRoleByRoleId($roleDatas['roleId']);
+                        $this->personOrganizationAdd(
+                            $organization,
+                            $replacer,
+                            $roleObj
+                        );
+                        // TODO Suppression du remplacé (date de fin)
+                        $this->getLoggerService()->info(
+                            "Replacer $fromPerson par $replacer dans la structure $organization"
+                        );
+                    }
+                }
+            }
+        }
+
+        // Validation PROJET
+        /** @var ActivityPerson $activityPerson */
+        foreach ($rules['validations']['prj'] as $activityId => $validationDatas) {
+            if ($validationDatas['active']) {
+                try {
+                    $activity = $this->getProjectGrantService()->getActivityById($activityId);
+                    $activity->getValidatorsPrj()->add($replacer);
+                    $activity->getValidatorsPrj()->removeElement($fromPerson);
+                    $this->getEntityManager()->flush($activity);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
+                    continue;
+                }
+            }
+        }
+
+        // Validation SCI
+        /** @var ActivityPerson $activityPerson */
+        foreach ($rules['validations']['sci'] as $activityId => $validationDatas) {
+            if ($validationDatas['active']) {
+                try {
+                    $activity = $this->getProjectGrantService()->getActivityById($activityId);
+                    $activity->getValidatorsSci()->add($replacer);
+                    $activity->getValidatorsSci()->removeElement($fromPerson);
+                    $this->getEntityManager()->flush($activity);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
+                    continue;
+                }
+            }
+        }
+
+        // Validation ADM
+        /** @var ActivityPerson $activityPerson */
+        foreach ($rules['validations']['adm'] as $activityId => $validationDatas) {
+            if ($validationDatas['active']) {
+                try {
+                    $activity = $this->getProjectGrantService()->getActivityById($activityId);
+                    $activity->getValidatorsAdm()->add($replacer);
+                    $activity->getValidatorsAdm()->removeElement($fromPerson);
+                    $this->getEntityManager()->flush($activity);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
+                    continue;
+                }
+            }
+        }
+
+        foreach ($rules['referents'] as $referentId => $referentDatas) {
+            try {
+                $referent = $this->getPersonById($referentId, true);
+                $this->addReferent($referent->getId(), $replacer->getId());
+            } catch (\Exception $e) {
+                $this->getLoggerService()->warning("Impossible d'ajouter le référent $referentId à $replacer");
+            }
+        }
+
+        foreach ($rules['subordinates'] as $subordinateId => $subordinateDatas) {
+            try {
+                $subordinate = $this->getPersonById($subordinateId, true);
+                $this->addReferent($replacer->getId(), $subordinate->getId());
+            } catch (\Exception $e) {
+                $this->getLoggerService()->warning("Impossible d'ajouter le subordonné $subordinateId à $replacer");
+            }
+        }
+    }
+
+
+    /**
+     * Aggrégation des données d'affectation d'une personne. Le modèle inclus un calcule d'état sur les assignations en
+     * précisant si l'objet est ACTIF :
+     *  - Projet : Au moins une activité a le status Actif
+     *  - Activité : A le status Actif
+     *  - Structure : A une date de fin null ou > à NOW
+     *  - Validation : L'activité associée a le status Actif
+     *  - N+1
+     *
      * @param Person $person
      * @return array
      */
-    public function getPersonAffectationsArray(Person $person): array
+    public function getPersonAffectationsArray(Person $person, ?Person $replacer = null): array
     {
+        if ($replacer && $replacer == $person) {
+            throw new OscarException("Vous ne pouvez pas remplacer une personne par elle-même");
+        }
         $output = $person->toArray();
         $output['structures'] = [];
-        $output['affectations'] = [];
         $output['activities'] = [];
         $output['projects'] = [];
         $output['validations'] = [
@@ -281,70 +415,79 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         ];
         $output['np1'] = [];
 
+        if ($replacer) {
+            $output['replacer'] = $replacer->toArray();
+        }
+
+        $formatApplyable = function (&$output, $itemId, $itemLabel, $itemActive, $roleId, $roleActive) {
+            $apply = $itemActive && $roleActive;
+            if (!array_key_exists($itemId, $output)) {
+                $output[$itemId] = [
+                    'label' => $itemLabel,
+                    'active' => $itemActive,
+                    'roleActive' => $roleActive,
+                    'apply' => false,
+                    'roles' => []
+                ];
+            }
+            if ($apply) {
+                $output[$itemId]['apply'] = true;
+            }
+
+            if (!in_array($roleId, $output[$itemId]['roles'])) {
+                $output[$itemId]['roles'][$roleId] = [
+                    'roleId' => $roleId,
+                    'active' => false
+                ];
+            }
+            $output[$itemId]['roles'][$roleId]['active'] |= $roleActive;
+        };
+
+        /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization) {
             /** @var Organization $organization */
             $organization = $personOrganization->getOrganization();
 
+            $itemId = $organization->getId();
+            $itemLabel = (string)$organization;
+            $itemActive = !$organization->isClose();
+
             /** @var Role $role */
             $role = $personOrganization->getRoleObj();
+            $roleId = $role->getRoleId();
+            $roleActive = !$personOrganization->isOutOfDate();
 
-            if (!array_key_exists($organization->getId(), $output['structures'])) {
-                $output['structures'][$organization->getId()] = [
-                    'label' => (string)$organization,
-                    'closed' => $organization->isClose(),
-                    'apply' => !$organization->isClose(),
-                    'roles' => []
-                ];
-            }
-            if (!in_array($role->getRoleId(), $output['structures'][$organization->getId()]['roles'])) {
-                $output['structures'][$organization->getId()]['roles'][] = $role->getRoleId();
-            }
+            $formatApplyable($output['structures'], $itemId, $itemLabel, $itemActive, $roleId, $roleActive);
         }
 
         /** @var ProjectMember $personProject */
         foreach ($person->getProjectAffectations() as $personProject) {
-            $project = $personProject->getProject();
+            $item = $personProject->getProject();
+            $itemId = $item->getId();
+            $itemLabel = (string)$item;
+            $itemActive = $item->isActive();
 
             /** @var Role $role */
             $role = $personProject->getRoleObj();
+            $roleId = $role->getRoleId();
+            $roleActive = !$personProject->isOutOfDate();
 
-            if (!array_key_exists($project->getId(), $output['projects'])) {
-                $output['projects'][$project->getId()] = [
-                    'acronym' => $project->getAcronym(),
-                    'label' => $project->getLabel(),
-                    'activities_count' => count($project->getActivities()),
-                    'active' => $project->isActive(),
-                    'apply' => $project->isActive(),
-                    'roles' => []
-                ];
-            }
-            if (!in_array($role->getRoleId(), $output['projects'][$project->getId()]['roles'])) {
-                $output['projects'][$project->getId()]['roles'][] = $role->getRoleId();
-            }
+            $formatApplyable($output['projects'], $itemId, $itemLabel, $itemActive, $roleId, $roleActive);
         }
 
         /** @var ActivityPerson $activityPerson */
         foreach ($person->getActivities() as $activityPerson) {
-            $activity = $activityPerson->getActivity();
+            $item = $activityPerson->getActivity();
+            $itemId = $item->getId();
+            $itemLabel = (string)$item;
+            $itemActive = $item->isActive();
 
             /** @var Role $role */
             $role = $activityPerson->getRoleObj();
+            $roleId = $role->getRoleId();
+            $roleActive = !$activityPerson->isOutOfDate();
 
-            if (!array_key_exists($activity->getId(), $output['activities'])) {
-                $output['activities'][$activity->getId()] = [
-                    'acronym' => $activity->getAcronym(),
-                    'label' => $activity->getLabel(),
-                    'active' => $activity->isActive(),
-                    'apply' => $activity->isActive(),
-                    'status' => $activity->getStatus(),
-                    'status_text' => $activity->getStatusLabel(),
-                    'amount' => $activity->getAmount(),
-                    'roles' => []
-                ];
-            }
-            if (!in_array($role->getRoleId(), $output['activities'][$activity->getId()]['roles'])) {
-                $output['activities'][$activity->getId()]['roles'][] = $role->getRoleId();
-            }
+            $formatApplyable($output['activities'], $itemId, $itemLabel, $itemActive, $roleId, $roleActive);
         }
 
         // Validation PROJET
@@ -353,9 +496,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if (!array_key_exists($activity->getId(), $output['validations']['prj'])) {
                 $output['validations']['prj'][$activity->getId()] = [
                     'id' => $activity->getId(),
-                    'acronym' => $activity->getAcronym(),
-                    'label' => $activity->getLabel(),
-                    'apply' => $activity->isActive()
+                    'label' => (string)$activity,
+                    'apply' => $activity->isActive(),
+                    'active' => $activity->isActive()
                 ];
             }
         }
@@ -366,9 +509,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if (!array_key_exists($activity->getId(), $output['validations']['sci'])) {
                 $output['validations']['sci'][$activity->getId()] = [
                     'id' => $activity->getId(),
-                    'acronym' => $activity->getAcronym(),
-                    'label' => $activity->getLabel(),
-                    'apply' => $activity->isActive()
+                    'label' => (string)$activity,
+                    'apply' => $activity->isActive(),
+                    'active' => $activity->isActive()
                 ];
             }
         }
@@ -379,14 +522,46 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if (!array_key_exists($activity->getId(), $output['validations']['adm'])) {
                 $output['validations']['adm'][$activity->getId()] = [
                     'id' => $activity->getId(),
-                    'acronym' => $activity->getAcronym(),
-                    'label' => $activity->getLabel(),
-                    'apply' => $activity->isActive()
+                    'label' => (string)$activity,
+                    'apply' => $activity->isActive(),
+                    'active' => $activity->isActive()
                 ];
             }
         }
 
+        $referents = $this->getReferentsPerson($person);
+        $subordinates = $this->getSubordinatesPerson($person);
+
+
+        $output['referents'] = [];
+        $output['subordinates'] = [];
         // TODO N+1 replacement
+        foreach ($referents as $referent) {
+            if ($replacer && $referent->getReferent()->getId() == $replacer->getId()) {
+                continue;
+            }
+            $output['referents'][$referent->getReferent()->getId()] = [
+                'id' => $referent->getReferent()->getId(),
+                'label' => (string)$referent->getReferent(),
+                'mail' => $referent->getReferent()->getEmail(),
+                'mailmd5' => md5($referent->getReferent()->getEmail()),
+                'apply' => true
+            ];
+        }
+
+        foreach ($subordinates as $subordinate) {
+            if ($replacer && $subordinate->getPerson()->getId() == $replacer->getId()) {
+                continue;
+            }
+            $output['subordinates'][$subordinate->getPerson()->getId()] = [
+                'id' => $subordinate->getPerson()->getId(),
+                'label' => (string)$subordinate->getPerson(),
+                'mail' => $subordinate->getPerson()->getEmail(),
+                'mailmd5' => md5($subordinate->getPerson()->getEmail()),
+                'apply' => true
+            ];
+        }
+
 
         return $output;
     }
@@ -1833,10 +2008,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         Activity $activity,
         Person $person,
         Role $role,
-        $dateStart = null,
-        $dateEnd = null
+        ?\DateTime $dateStart = null,
+        ?\DateTime $dateEnd = null
     ) {
-        if (!$activity->hasPerson($person, $role, $dateStart, $dateEnd)) {
+        if (!$activity->hasPerson($person, $role, $dateStart, $dateEnd, false)) {
             $personActivity = new ActivityPerson();
             $this->getEntityManager()->persist($personActivity);
             $updateNotification = $role->isPrincipal();
@@ -1864,7 +2039,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         } else {
             $this->getLoggerService()->debug(
                 sprintf(
-                    "%s(%s) n'a pas été ajouté dans %s, car déjà présent",
+                    "%s(%s) n'a pas été ajouté dans %s, car est déjà présent",
                     $person->log(),
                     $role->getRoleId(),
                     $activity->log()

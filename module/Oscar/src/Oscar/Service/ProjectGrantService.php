@@ -211,6 +211,26 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getEntityManager()->getRepository(ActivityType::class)->find($activityTypeId);
     }
 
+    /**
+     * @param Person $from
+     * @param Person $to
+     * @param Activity $activity
+     */
+    public function replacePerson(Person $from, Person $to, Activity $activity) :void
+    {
+       $date = new \DateTime();
+
+       /** @var ActivityPerson $activityPerson */
+        foreach ($activity->getPersons() as $activityPerson) {
+           if( $activityPerson->getPerson()->getId() == $from->getId() ){
+               $roleObj = $activityPerson->getRoleObj();
+               $this->getPersonService()->personActivityAdd($activity, $to, $roleObj, $date);
+               $activityPerson->setDateEnd($date);
+               $this->getEntityManager()->flush($activityPerson);
+           }
+       }
+    }
+
 
     /**
      * @param $id

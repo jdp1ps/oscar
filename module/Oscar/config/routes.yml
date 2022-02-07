@@ -605,6 +605,13 @@ person:
                 defaults:
                     action: access
 
+        affectation:
+            type: segment
+            options:
+                route: '/affectation/:id'
+                defaults:
+                    action: affectation
+
         notification:
             type: segment
             options:

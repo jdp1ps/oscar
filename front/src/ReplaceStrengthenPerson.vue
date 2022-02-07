@@ -1,154 +1,234 @@
 <template>
   <div>
     <div class="overlay" v-if="mode != ''">
-      <div class="overlay-content" style="overflow: scroll">
+      <div class="overlay-content" :style="step == 1 ? 'overflow: visible;' : 'overflow: scroll;'">
         <a href="#" @click.prevent="handlerCancel()" class="overlay-closer">X</a>
         <h1>
           {{ mode }}
           <strong>{{ person.displayname }}</strong>
         </h1>
 
-        <div class="alert-info alert">
-          Remplacer <strong>{{ person.displayname }}</strong> par une autre personnes
+        <div class="steps-bar">
+          <div class="step" :class="{'current': step == 1, 'done': step > 1}">
+            Choisir une personne
+          </div>
+          <div class="step" :class="{'current': step == 2, 'done': step > 2, 'futur': step < 2}">
+            Vérifier les affectations
+          </div>
+          <div class="step" :class="{'current': step == 3, 'futur': step < 3}">
+            Finalisation
+          </div>
         </div>
 
-        <div v-if="recapPending">
-          <i class="icon-spinner animate-spin"></i>
-          {{ recapPending }}
-        </div>
-        <div v-else-if="errorRecap" class="alert-danger alert">
-          <i class="icon-attention-1"></i>
-          <strong>Erreur</strong> :
-          {{ errorRecap }}
-        </div>
-        <div v-else>
-          <p>Choisissez une personne pour {{ mode }}</p>
-          <person-auto-completer @change="handlerSelectPerson" style="z-index: 10"/>
-        </div>
+        <div class="step-content">
 
-        <section class="">
-          <!-- <h2>INFOS : {{ recap.infos }}</h2> -->
-          <section class="affectations" v-if="affectations">
-            <section>
-              <h2>
-                <i class="icon-beaker"></i>
-                Activité/projet de recherche
-              </h2>
+          <!-- Messages -->
+          <div class="alert-info alert" v-if="pendingMessage">
+            <i class="animate-spin icon-spinner"></i>
+            {{ pendingMessage }}
+          </div>
 
-              <section class="projects">
-                <h4><i class="icon-cubes"></i> Projets</h4>
-                <p v-if="replacer_id">
-                  <strong>{{ replacer }}</strong>
-                  va être ajouté dans le(s) <strong>{{ affectations.projects.length }}</strong> projet(s) suivant :
-                </p>
+          <div v-if="errorMessage" class="alert-danger alert">
+            <i class="icon-attention-1"></i>
+            <strong>Erreur</strong> :
+            {{ errorMessage }}
+          </div>
+
+
+
+          <div v-if="step == 1">
+            <div v-if="!replacer_id">
+              <p>Choisissez une personne :</p>
+              <person-auto-completer @change="handlerSelectPerson" style="z-index: 10"/>
+            </div>
+          </div>
+
+          <div class="alert alert-info" v-if="step1info">
+            {{ step1info }}
+          </div>
+
+          <nav class="buttons text-center" v-if="step == 1">
+            <button class="btn btn-success" @click="handlerConfirmStep1()" :class="{ 'disabled': !replacer_id }" >
+              <i class="icon-spinner animate-spin" v-if="pendingMessage"></i>
+              <i class="icon-angle-right" v-else></i>
+              Vérifier les affectations
+            </button>
+          </nav>
+
+          <section class="">
+
+            <!-- <h2>INFOS : {{ recap.infos }}</h2> -->
+            <section class="affectations" v-if="step == 2">
+              <section>
+                <h2>
+                  <i class="icon-beaker"></i>
+                  Activité/projet de recherche
+                </h2>
+
+                <section class="projects">
+                  <h4><i class="icon-cubes"></i> Projets</h4>
+                  <p v-if="replacer_id">
+                    <strong>{{ replacer }}</strong>
+                    va être ajouté dans le(s) <strong>{{ projects.length }}</strong> projet(s) suivant :
+                  </p>
+                  <div class="columns-3">
+                    <div class="card xs applyable"
+                         @click="handlerSwitchApply(p)"
+                         v-for="p in projects" :class="{ 'apply': p.apply, 'active': p.active }">
+                      <div class="">
+                        <strong>
+                          <i class="icon-cubes"></i>
+                          {{ p.label }}
+                        </strong>
+                      </div>
+                      <span class="cartouche xs" v-for="role in p.roles"
+                            :class="{'past obsolete': !role.active, 'success': p.apply}">
+                      {{ role.roleId }}
+                    </span>
+                    </div>
+                  </div>
+                </section>
+
+                <h4><i class="icon-cube"></i> Activités</h4>
                 <div class="columns-3">
                   <div class="card xs applyable"
                        @click="handlerSwitchApply(p)"
-                       v-for="p in affectations.projects" :class="{ 'apply': p.apply }">
+                       v-for="p in activities" :class="{ 'apply': p.apply, 'active': p.active }">
                     <div class="">
                       <strong>
-                        <i class="icon-cubes"></i>
-                        {{ p.acronym }}
+                        <i class="icon-cube"></i>
+                        {{ p.label }}
                       </strong>
-                      <small>{{ p.label }}</small>
-                      <span class="badge bg-info on-right">{{ p.activities_count }}</span>
                     </div>
-                    HHH
-                    <span class="cartouche xs">
-                      {{ p.roles.join(', ') }}
+                    <span class="cartouche xs" v-for="role in p.roles"
+                          :class="{'past obsolete': !role.active, 'success': p.apply}">
+                      {{ role.roleId }}
                     </span>
                   </div>
                 </div>
               </section>
 
-              <h3><i class="icon-cube"></i> Activités</h3>
-
-              <div style="columns: 3">
-                <div v-for="p in activities" class="card xs applyable"
-                     @click="handlerSwitchApply(p)"
-                     :class="{ 'active': p.active, 'disabled': !p.active, 'apply': p.apply }">
-                  <div style="border-bottom: solid thin #ccc">
-                    <strong>
-                      <i class="icon-cube"></i>
-                      {{ p.acronym }}
-                    </strong>
-                    <em>{{ p.label }}</em>
-                    <i class="on-right" :class="'icon-status-' + p.status" :title="p.status_text"></i>
-                  </div>
-                  <small>({{ p.roles.join(', ') }})</small>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2>
-                <i class="icon-building-filled"></i>
-                Structure
-              </h2>
-
+              <section>
+                <h2>
+                  <i class="icon-building-filled"></i>
+                  Structure
+                </h2>
                 <div v-for="p in structures" class="card xs applyable"
                      @click="handlerSwitchApply(p)"
                      :class="{'apply': p.apply }">
                   <strong>{{ p.label }}</strong>
-                  <small>({{ p.roles.join(', ') }})</small>
+                  <span class="cartouche xs" v-for="role in p.roles"
+                        :class="{'past obsolete': !role.active, 'success': p.apply}">
+                  {{ role.roleId }}
+                </span>
+                </div>
+              </section>
+
+              <section>
+                <h2>
+                  <i class="icon-calendar"></i>
+                  Validation
+                </h2>
+
+                <div v-if="validations.prj">
+                  <h4><i class="icon-cube"></i>Validation projet</h4>
+                  <div class="card xs applyable"
+                       @click="v.apply = !v.apply; console.log('OK')"
+                       v-for="v in validations.prj"
+                       :class="{'apply': v.apply }">
+                    <strong>{{ v.acronym }}</strong>
+                    <em>{{ v.label }}</em>
+                  </div>
                 </div>
 
+                <div v-if="validations.sci">
+                  <h4><i class="icon-beaker"></i>Validation scientifique</h4>
+                  <div class="card xs applyable"
+                       @click="v.apply = !v.apply"
+                       v-for="v in validations.sci"
+                       :class="{'apply': v.apply }">
+                    <strong>{{ v.acronym }}</strong>
+                    <em>{{ v.label }}</em>
+                  </div>
+                </div>
+
+                <div v-if="validations.adm">
+                  <h4><i class="icon-book"></i>Validation administratif</h4>
+                  <div class="card xs applyable"
+                       @click="v.apply = !v.apply"
+                       v-for="v in validations.adm"
+                       :class="{'apply': v.apply }">
+                    <strong>{{ v.acronym }}</strong>
+                    <em>{{ v.label }}</em>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h2>
+                  <i class="icon-calendar"></i>
+                  Hiérarchie
+                </h2>
+
+                <div>
+                  <h4><i class="icon-book"></i>Reférent(s)</h4>
+                  <p>
+                    <i class="icon-info-circled"></i>
+                    Personnes qui seront chargées de valider
+                    les déclaration <strong>Hors-lot</strong>
+                    de {{ person.displayname }}.
+                  </p>
+                  <div class="card xs person-card" v-for="p in subordinates" :class="{'apply': p.apply}">
+                    <div class="card-title">
+                      <img :src="'//www.gravatar.com/avatar/' +p.mailmd5 +'&s=20'" alt="" class="gravatar" width="20">
+                      <strong>
+                        <i class="icon-user"></i>
+                        {{ p.label }}
+                      </strong>
+                    </div>
+                    <small>
+                      <i class="icon-mail"></i>
+                      {{ p.mail }}
+                    </small>
+                  </div>
+                </div>
+
+                <div>
+                  <h4><i class="icon-beaker"></i>Subordonné(s)</h4>
+                  <p>
+                    <i class="icon-info-circled"></i>
+                    Personnes pour qui <strong>{{ person.displayname }}</strong> devra
+                    valider les déclarations <strong>Hors-lot</strong>
+                  </p>
+                  <div class="card xs person-card" v-for="p in referents" :class="{'apply': p.apply}">
+                    <div class="card-title">
+                      <img :src="'//www.gravatar.com/avatar/' +p.mailmd5 +'&s=20'" alt="" class="gravatar" width="20">
+                      <strong>
+                        <i class="icon-user"></i>
+                        {{ p.label }}
+                      </strong>
+                    </div>
+                    <small>
+                      <i class="icon-mail"></i>
+                      {{ p.mail }}
+                    </small>
+                  </div>
+                </div>
+              </section>
+
+              <nav class="buttons">
+                <button class="btn btn-success" @click="handlerConfirmReplace">
+                  Terminé
+                </button>
+              </nav>
             </section>
 
-            <section>
-              <h2>
-                <i class="icon-calendar"></i>
-                Validation
-              </h2>
-
-              <div v-if="affectations.validations.prj">
-                <h4><i class="icon-cube"></i>Validation projet</h4>
-                <div class="card xs applyable"
-                     @click="v.apply = !v.apply; console.log('OK')"
-                     v-for="v in affectations.validations.prj"
-                     :class="{'apply': v.apply }">
-                  <strong>{{ v.acronym }}</strong>
-                  <em>{{ v.label }}</em>
-                </div>
-              </div>
-
-              <div v-if="affectations.validations.sci">
-                <h4><i class="icon-beaker"></i>Validation scientifique</h4>
-                <div class="card xs applyable"
-                     @click="v.apply = !v.apply"
-                     v-for="v in affectations.validations.sci"
-                     :class="{'apply': v.apply }">
-                  <strong>{{ v.acronym }}</strong>
-                  <em>{{ v.label }}</em>
-                </div>
-              </div>
-
-              <div v-if="affectations.validations.adm">
-                <h4><i class="icon-book"></i>Validation administratif</h4>
-                <div class="card xs applyable"
-                     @click="v.apply = !v.apply"
-                     v-for="v in affectations.validations.adm"
-                     :class="{'apply': v.apply }">
-                  <strong>{{ v.acronym }}</strong>
-                  <em>{{ v.label }}</em>
-                </div>
-              </div>
-            </section>
           </section>
-          <hr>
-          <nav class="buttons text-center">
-            <button class="btn btn-success" @click="handlerConfirmReplace()">
-              Confirmer
-            </button>
-          </nav>
-        </section>
+        </div>
       </div>
     </div>
 
     <div class="replace-strengthen-person actions text-center">
-      <div class="alert alert-danger">
-        {{ error }}
-      </div>
       <button @click="handlerReplace">
         <i class="icon-rewind-outline"></i> Remplacer
       </button>
@@ -161,7 +241,8 @@
 
 <script>
 // MANUAL COMPILATION
-// node node_modules/.bin/vue-cli-service build --name ReplaceStrengthenPerson --dest ../public/js/oscar/dist/ReplaceStrengthenPerson --no-clean --formats umd,umd-min --target lib src/ReplaceStrengthenPerson.vue;
+// node node_modules/.bin/vue-cli-service build --name ReplaceStrengthenPerson --dest ../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib src/ReplaceStrengthenPerson.vue
+
 import PersonAutoCompleter from "./components/PersonAutoCompleter";
 
 export default {
@@ -178,10 +259,10 @@ export default {
     urlReplace: {
       required: true
     },
-    urlStrengthen: {
+    urlAffectation: {
       required: true
     },
-    affectations: {
+    urlStrengthen: {
       required: true
     }
   },
@@ -193,22 +274,32 @@ export default {
       recapPending: "",
       errorRecap: "",
       error: "",
+
+      step: 1,
+
+      pendingMessage: "",
+      errorMessage: "",
+
       replacer: "",
       replacer_id: null,
+      step1info: "",
 
       projects: {},
       activities: {},
       structures: {},
-      validations: {}
+      validations: {},
+      referents: {},
+      subordinates: {}
     }
   },
 
   methods: {
     handlerReplace() {
       this.mode = 'Remplacer';
+      this.loadingMessage = "Chargement de l'aperçu";
     },
 
-    handlerSwitchApply(item){
+    handlerSwitchApply(item) {
       console.log("handlerSwitchApply", item);
       item.apply = !item.apply;
     },
@@ -219,65 +310,82 @@ export default {
      * @param e
      */
     handlerSelectPerson(e) {
-      console.log("handlerSelectPerson");
-
       this.replacer = e.displayname;
       this.replacer_id = e.id;
-
-      this.recap = {
-        "replacer_id": e.id,
-        "infos": "Remplacer " + this.person.displayname + " par " + e.displayname,
-        "dump": this.person
-      };
-      console.log(e);
+      this.step1info = "Remplacer " + this.person.displayname + " par " + this.replacer;
     },
 
-    handlerConfirmReplace(){
+    handlerConfirmStep1(){
+      this.pendingMessage = "Chargement des affectations...";
+      this.$http.get(this.urlAffectation+"?person=" + this.replacer_id).then(
+          ok => {
+            this.step = 2;
+            this.projects = ok.body.affectations.projects;
+            this.activities = ok.body.affectations.activities;
+            this.structures = ok.body.affectations.structures;
+            this.validations = ok.body.affectations.validations;
+            this.referents = ok.body.affectations.referents;
+            this.subordinates = ok.body.affectations.subordinates;
+          },
+          ko => {
+            this.errorMessage = ko.body;
+          }
+
+      ).then( () => {
+        this.pendingMessage = "";
+      });
+    },
+
+    handlerConfirmReplace() {
       let data = new FormData();
       let out = {
         'projects': this.projects,
         'activities': this.activities,
         'structures': this.structures,
         'validations': this.validations,
+        'subordinates': this.subordinates,
+        'referents': this.referents,
         'replacer_id': this.replacer_id
       };
-      console.log('OUT', out);
-      this.recapPending = "Remplacement...";
+
+      this.pendingMessage = "Remplacement...";
+      this.step = 3;
+
       data.append("out", JSON.stringify(out));
 
-      this.$http.post(this.urlReplace, data).then(
+      this.$http.post(this.urlAffectation, data).then(
           ok => {
-            document.location.refresh();
+            document.location.reload();
           }, ko => {
-            if( ko.status == 403 ){
-              this.errorRecap = "Non-autorisé";
+            if (ko.status == 403) {
+              this.errorMessage = "Non-autorisé";
             } else {
-              if( ko.body.error ){
-                this.errorRecap = "Erreur : " + ko.body.error;
+              if (ko.body.error) {
+                this.errorMessage = "Erreur : " + ko.body.error;
               } else {
-                this.errorRecap = ko.body;
+                this.errorMessage = ko.body;
               }
             }
           }
-      ).then( foo => this.recapPending = "");
+      ).then( foo => {
+        this.pendingMessage = "";
+      })
     },
 
-    handlerCancel(){
-      this.recapPending = "";
-      this.errorRecap = "";
-      this.recap = "";
+    handlerCancel() {
+      this.step = 1;
+      this.errorMessage = "";
       this.mode = "";
+      this.replacer_id = null;
+      this.replacer = "";
+      this.step1info = "";
     },
   },
 
 
   // Lifecycle
   mounted() {
-    console.log("mounted");
-    this.projects = this.affectations.projects;
-    this.activities = this.affectations.activities;
-    this.structures = this.affectations.structures;
-    this.validations = this.affectations.validations;
+    // amazing void content
   }
 }
 </script>

@@ -452,8 +452,7 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         if (
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_PERSON_MANAGE) &&
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_PERSON_MANAGE) &&
-            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT) &&
-            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_INDEX)
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT)
         )
             return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des personnes");
 
@@ -900,6 +899,69 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'traces' => $traces,
             'connectors' => array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'))
         ];
+    }
+
+    /**
+     * @param string $idPersonKey
+     * @return Person
+     * @throws OscarException
+     */
+    protected function getRoutePerson(string $idPersonKey = 'id'): Person
+    {
+        $id = $this->params()->fromRoute($idPersonKey);
+        return $this->getPersonService()->getPersonById($id, true);
+    }
+
+    /**
+     *
+     */
+    public function affectationAction()
+    {
+        try {
+            $person = $this->getRoutePerson();
+            $manage = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_EDIT);
+            if (!$manage) {
+                throw new OscarException("Accès interdit");
+            }
+            // TRAITEMENT
+            if ($this->getRequest()->isPost()) {
+                try {
+                    $out = $this->params()->fromPost('out', "");
+                    $this->getPersonService()->affectationsReplace($person, json_decode($out, true));
+                    return $this->getResponseOk("done");
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            // Récupération des affectations
+            if ($this->params()->fromQuery('f') == 'json' || $this->isAjax()) {
+                try {
+                    $replacerId = $this->params()->fromQuery('person');
+                    $replacer = $this->getPersonService()->getPersonById($replacerId, true);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError(
+                        sprintf(
+                            "Impossible de traver le remplaçant : %s",
+                            $e->getMessage()
+                        )
+                    );
+                }
+                $out = [
+                    'affectations' => $this->getPersonService()->getPersonAffectationsArray($person, $replacer)
+                ];
+                return $this->ajaxResponse($out);
+            }
+
+            throw new OscarException("Mauvaise utilisation de l'API");
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError(
+                sprintf(
+                    "Gestion des affectations impossible : %s",
+                    $e->getMessage()
+                )
+            );
+        }
     }
 
 

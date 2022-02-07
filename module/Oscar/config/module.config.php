@@ -248,7 +248,7 @@ return array(
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
                 ],
                 [ 'controller' =>   'Person',
-                    'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate'],
+                    'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate', 'affectation'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
 
