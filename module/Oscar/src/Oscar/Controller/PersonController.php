@@ -294,12 +294,9 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             $allow = true;
             $justXHR = false;
         } else {
-            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([
-                Privileges::ACTIVITY_PERSON_MANAGE,
-                Privileges::PROJECT_PERSON_MANAGE,
-                Privileges::ORGANIZATION_EDIT,
-                Privileges::ACTIVITY_INDEX,
-            ]);
+            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
+                [Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]
+            );
         }
 
         if (!$allow) {
@@ -661,7 +658,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         if ($this->isAjax()) {
             $action = $this->params()->fromQuery('a');
 
-
             switch ($action) {
                 // Remplacement
                 case 'replace' :
@@ -712,11 +708,11 @@ class PersonController extends AbstractOscarController implements UsePersonServi
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
                                 $this->getLoggerService()->info(print_r($custom, true));
-
                             }
-
                         } catch (\Exception $e) {
-                            return $this->getResponseInternalError("Impossible d'enregistrer les paramètres : " . $e->getMessage());
+                            return $this->getResponseInternalError(
+                                "Impossible d'enregistrer les paramètres : " . $e->getMessage()
+                            );
                         }
                         return $this->getResponseOk();
                     }
@@ -892,7 +888,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
             'validations' => $validations,
             'authentification' => $auth,
             'auth' => $auth,
-            'affectations' => $this->getPersonService()->getPersonAffectationsArray($person),
             'allowTimesheet' => $allowTimesheet,
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectUser($person->getId()), $page),
             'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
@@ -1090,7 +1085,6 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         try {
             $connectors = $this->getOscarConfigurationService()->getConfiguration('connectors.person');
             $personConnector = array_keys($connectors);
-
 
 
             $form->setConnectors($personConnector);
