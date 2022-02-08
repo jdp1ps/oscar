@@ -452,7 +452,8 @@ class PersonController extends AbstractOscarController implements UsePersonServi
         if (
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_PERSON_MANAGE) &&
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_PERSON_MANAGE) &&
-            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT)
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ORGANIZATION_EDIT) &&
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_INDEX)
         )
             return $this->getResponseUnauthorized("Vous n'avez pas accès à la liste des personnes");
 

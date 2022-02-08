@@ -122,7 +122,9 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         } else {
             $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([
                 Privileges::ACTIVITY_ORGANIZATION_MANAGE,
-                Privileges::PROJECT_ORGANIZATION_MANAGE]);
+                Privileges::PROJECT_ORGANIZATION_MANAGE,
+                Privileges::ACTIVITY_INDEX,
+            ]);
         }
 
         if( !$allow ){
@@ -259,7 +261,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
         if(
             !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::PROJECT_ORGANIZATION_MANAGE) &&
-            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_ORGANIZATION_MANAGE)
+            !$this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_ORGANIZATION_MANAGE) &&
+            ! $this->getOscarUserContextService()->hasPrivilegeDeep(Privileges::ACTIVITY_INDEX)
         ){
             return $this->getResponseUnauthorized("Vous n'avez pas l'authorisation d'accéder à la  liste des organisations");
         }
