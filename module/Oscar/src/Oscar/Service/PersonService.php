@@ -236,6 +236,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     /**
      * Retourne les personnes subordonnées du référent.
+     *
      * @param $personId ID du référents
      * @return Referent[]
      */
@@ -245,6 +246,31 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ->where('r.referent = :personId')
             ->setParameter('personId', $personId);
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Cloture le role d'une personne sur une organisation.
+     *
+     * @param Person $person
+     * @param Organization $organization
+     * @param Role $roleObj
+     * @param bool $hardRemove Type de suppression
+     */
+    public function removePersonOrganizationWithRole( Person $person, Organization $organization, Role $roleObj, bool $hardRemove = false) :void
+    {
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            if(
+                $personOrganization->getOrganization()->getId() == $organization->getId() &&
+                $personOrganization->getRoleObj()->getId() == $roleObj->getId()
+            ){
+                if( $hardRemove == true ){
+                    $this->personOrganizationRemove($personOrganization);
+                } else {
+                    $this->getOrganizationService()->closeOrganizationPerson($personOrganization, new \DateTime());
+                }
+            }
+        }
     }
 
 
@@ -304,13 +330,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 );
                 foreach ($organizationDatas['roles'] as $roleDatas) {
                     if ($roleDatas['active']) {
+
                         $roleObj = $this->getRoleRepository()->getRoleByRoleId($roleDatas['roleId']);
                         $this->personOrganizationAdd(
                             $organization,
                             $replacer,
                             $roleObj
                         );
-                        // TODO Suppression du remplacé (date de fin)
+
+                        $this->removePersonOrganizationWithRole($fromPerson, $organization, $roleObj);
+
                         $this->getLoggerService()->info(
                             "Replacer $fromPerson par $replacer dans la structure $organization"
                         );
@@ -371,6 +400,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             try {
                 $referent = $this->getPersonById($referentId, true);
                 $this->addReferent($referent->getId(), $replacer->getId());
+                $this->removeReferentOnPerson($referent, $fromPerson);
+
             } catch (\Exception $e) {
                 $this->getLoggerService()->warning("Impossible d'ajouter le référent $referentId à $replacer");
             }
@@ -380,6 +411,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             try {
                 $subordinate = $this->getPersonById($subordinateId, true);
                 $this->addReferent($replacer->getId(), $subordinate->getId());
+                $this->removeReferentOnPerson($fromPerson, $subordinate);
             } catch (\Exception $e) {
                 $this->getLoggerService()->warning("Impossible d'ajouter le subordonné $subordinateId à $replacer");
             }
@@ -744,6 +776,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     /**
      * Supprime le référent.
+     *
      * @param $referent_id
      * @return bool
      * @throws OscarException
@@ -761,6 +794,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             throw new OscarException(
                 sprintf(_('Impossible de supprimer le référent(%s) : %s', $referent_id, $e->getMessage()))
             );
+        }
+    }
+
+    public function removeReferentOnPerson( Person $referent, Person $on ){
+        try {
+            $referentRepo = $this->getEntityManager()->getRepository(Referent::class);
+            $referents = $referentRepo->findBy([
+                'referent' => $referent,
+                'person' => $on
+            ]);
+            foreach ($referents as $r) {
+                $this->removeReferentById($r->getId());
+            }
+        } catch (\Exception $exception) {
+            throw $exception;
         }
     }
 

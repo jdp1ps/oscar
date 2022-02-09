@@ -46,5 +46,7 @@ class OscarOrganizationSearchReindexCommand extends OscarAdvancedCommandAbstract
         } catch (Exception $e) {
             return $this->finalFatalError($e);
         }
+
+        return 0;
     }
 }

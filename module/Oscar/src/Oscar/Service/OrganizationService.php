@@ -621,9 +621,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
 
         } catch (\Exception $e){
-
+            $this->getLoggerService()->error("! closeOrganizationPerson : $person > $organization > $role");
         }
-
     }
 
     ////////////////////////////////////////////////////////////////////////////
