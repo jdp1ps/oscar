@@ -2234,6 +2234,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $dayOfWeek = $dayIndex + 1;
 
             $duration = array_key_exists($dayOfWeek, $daysDetails['days']) ? $daysDetails['days'][$dayOfWeek] : 0;
+            $nullDayUser = array_key_exists($dayOfWeek, $daysDetails['days']) && $daysDetails['days'][$dayOfWeek] == 0;
             $maxlength = $duration * $amplitudeMax; //$daysDetails['max'];
             $minlength = $duration * $amplitudeMin; // $daysDetails['min'];
 
@@ -2254,6 +2255,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             // Jour fermé (définitif)
             $closed = false;
             $closedReason = "";
+
+
 
             if ($dayIndex > 4 && $weekendAllowed == true) {
                 $duration = 0.0;
@@ -2277,9 +2280,17 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $duration = $daysDetails[$dayIndex + 1];
             }
 
+            if( $locked == false && $nullDayUser == true ){
+                $locked = true;
+                $lockedReason = "Impossible de déclarer ce jour (répartition horaire)";
+            }
+
+
+
 //            $daysLabels[$dayKey] =  $daysFull[$dayIndex];
             $days[$dayKey] = [
                 'duration' => 0.0,
+                'nullDayUser' => $nullDayUser,
                 'dayLength' => $duration,
                 'maxLength' => $maxlength,
                 'minLength' => $minlength,
