@@ -4144,23 +4144,23 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
     /**
-     * @param $personIds
-     * @param $period
-     * @return ValidationPeriod[]
+     * @param array $personIds
+     * @param string $period
+     * @return \Doctrine\ORM\QueryBuilder
      * @throws OscarException
      */
-    public function getValidationsPeriodPersons($personIds, $period)
+    public function getValidationsPeriodPersons(array $personIds, string $period)
     {
         return $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriod($personIds, $period);
     }
 
+    /**
+     * @param Person $person
+     * @return ValidationPeriod[]
+     */
     public function getValidationHorsLotToValidateByPerson(Person $person)
     {
-        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person->getId());
-        if (count($validations) == 0) {
-            throw new OscarException("Aucune déclarations Hors-Lot en attente pour $person");
-        }
-        return $validations;
+        return $this->getValidationPeriodRepository()->getValidationPeriodsOutWPToValidate($person->getId());
     }
 
     /**

@@ -8,15 +8,17 @@
           <strong>{{ person.displayname }}</strong>
         </h1>
 
+        <div class="alert">
+          Cette écran va vous permettre de remplacer <strong>{{ person.displayname }}</strong> par une
+          autre personne. Choisissez un remplaçant, un récapitulatif sera affiché avant confirmation.
+        </div>
+
         <div class="steps-bar">
           <div class="step" :class="{'current': step == 1, 'done': step > 1}">
             Choisir une personne
           </div>
           <div class="step" :class="{'current': step == 2, 'done': step > 2, 'futur': step < 2}">
             Vérifier les affectations
-          </div>
-          <div class="step" :class="{'current': step == 3, 'futur': step < 3}">
-            Finalisation
           </div>
         </div>
 
@@ -229,11 +231,8 @@
     </div>
 
     <div class="replace-strengthen-person actions text-center">
-      <button @click="handlerReplace">
+      <button @click="handlerReplace" class="btn btn-lg btn-info">
         <i class="icon-rewind-outline"></i> Remplacer
-      </button>
-      <button>
-        <i class="icon-plus-circled"></i> Renforcer
       </button>
     </div>
   </div>

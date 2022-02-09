@@ -294,7 +294,14 @@ class ValidationPeriodRepository extends EntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function getValidationPeriodsOutWPToValidate( $idPerson = null ){
+    /**
+     * Retourne la liste des validations Hors-Lots à valider.
+     *
+     * @param int|null $idPerson
+     * @return ValidationPeriod[]
+     */
+    public function getValidationPeriodsOutWPToValidate( ?int $idPerson = null ) :array
+    {
         $parameters = [
             'objectgroup' => ValidationPeriod::GROUP_OTHER,
             'status' => [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3],

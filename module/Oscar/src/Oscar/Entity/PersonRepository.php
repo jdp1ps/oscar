@@ -9,11 +9,9 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use mysql_xdevapi\Exception;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Connector\IConnectedRepository;
-use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
@@ -25,6 +23,46 @@ use Oscar\Utils\PeriodInfos;
 class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
+
+
+    public function getReferentsIdsPerson(int $person): array
+    {
+        try {
+            $rsm = new ResultSetMapping();
+            $rsm->addScalarResult('referent_id', 'referent_id');
+            $sql = 'SELECT referent_id FROM referent WHERE person_id = :person';
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $results = $query->setParameter('person', $person)->getResult();
+            return array_map('current', $results);
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function removeReferent(int $removedReferentPersonId, int $subordinatePersonId): void
+    {
+
+        try {
+            $query = $this->getEntityManager()->createQuery(
+                'DELETE Oscar\Entity\Referent r 
+            WHERE r.person = :subordinate AND r.referent = :referent'
+            );
+
+            $query->setParameters(
+                [
+                    'referent' => $removedReferentPersonId,
+                    'subordinate' => $subordinatePersonId
+                ]
+            );
+
+            $query->execute();
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+    }
 
 
     public function removePersonById(int $personId)

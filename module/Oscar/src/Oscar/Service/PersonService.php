@@ -256,15 +256,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param Role $roleObj
      * @param bool $hardRemove Type de suppression
      */
-    public function removePersonOrganizationWithRole( Person $person, Organization $organization, Role $roleObj, bool $hardRemove = false) :void
-    {
+    public function removePersonOrganizationWithRole(
+        Person $person,
+        Organization $organization,
+        Role $roleObj,
+        bool $hardRemove = false
+    ): void {
         /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization) {
-            if(
+            if (
                 $personOrganization->getOrganization()->getId() == $organization->getId() &&
                 $personOrganization->getRoleObj()->getId() == $roleObj->getId()
-            ){
-                if( $hardRemove == true ){
+            ) {
+                if ($hardRemove == true) {
                     $this->personOrganizationRemove($personOrganization);
                 } else {
                     $this->getOrganizationService()->closeOrganizationPerson($personOrganization, new \DateTime());
@@ -330,7 +334,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 );
                 foreach ($organizationDatas['roles'] as $roleDatas) {
                     if ($roleDatas['active']) {
-
                         $roleObj = $this->getRoleRepository()->getRoleByRoleId($roleDatas['roleId']);
                         $this->personOrganizationAdd(
                             $organization,
@@ -354,9 +357,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if ($validationDatas['active']) {
                 try {
                     $activity = $this->getProjectGrantService()->getActivityById($activityId);
-                    $activity->getValidatorsPrj()->add($replacer);
-                    $activity->getValidatorsPrj()->removeElement($fromPerson);
-                    $this->getEntityManager()->flush($activity);
+                    $this->getTimesheetService()->addValidatorActivity($replacer->getId(), $activity->getId(), 'prj');
+                    $this->getTimesheetService()->removeValidatorActivity(
+                        $fromPerson->getId(),
+                        $activity->getId(),
+                        'prj'
+                    );
                 } catch (\Exception $e) {
                     $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
                     continue;
@@ -370,9 +376,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if ($validationDatas['active']) {
                 try {
                     $activity = $this->getProjectGrantService()->getActivityById($activityId);
-                    $activity->getValidatorsSci()->add($replacer);
-                    $activity->getValidatorsSci()->removeElement($fromPerson);
-                    $this->getEntityManager()->flush($activity);
+                    $this->getTimesheetService()->addValidatorActivity($replacer->getId(), $activity->getId(), 'sci');
+                    $this->getTimesheetService()->removeValidatorActivity(
+                        $fromPerson->getId(),
+                        $activity->getId(),
+                        'sci'
+                    );
                 } catch (\Exception $e) {
                     $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
                     continue;
@@ -386,9 +395,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if ($validationDatas['active']) {
                 try {
                     $activity = $this->getProjectGrantService()->getActivityById($activityId);
-                    $activity->getValidatorsAdm()->add($replacer);
-                    $activity->getValidatorsAdm()->removeElement($fromPerson);
-                    $this->getEntityManager()->flush($activity);
+                    $this->getTimesheetService()->addValidatorActivity($replacer->getId(), $activity->getId(), 'adm');
+                    $this->getTimesheetService()->removeValidatorActivity(
+                        $fromPerson->getId(),
+                        $activity->getId(),
+                        'adm'
+                    );
                 } catch (\Exception $e) {
                     $this->getLoggerService()->warning("Accès à l'activité $activityId impossible");
                     continue;
@@ -401,7 +413,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $referent = $this->getPersonById($referentId, true);
                 $this->addReferent($referent->getId(), $replacer->getId());
                 $this->removeReferentOnPerson($referent, $fromPerson);
-
             } catch (\Exception $e) {
                 $this->getLoggerService()->warning("Impossible d'ajouter le référent $referentId à $replacer");
             }
@@ -564,10 +575,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $referents = $this->getReferentsPerson($person);
         $subordinates = $this->getSubordinatesPerson($person);
 
-
         $output['referents'] = [];
         $output['subordinates'] = [];
-        // TODO N+1 replacement
+        
         foreach ($referents as $referent) {
             if ($replacer && $referent->getReferent()->getId() == $replacer->getId()) {
                 continue;
@@ -598,7 +608,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $output;
     }
 
-
     public function validatorReplace(Person $replaced, Person $replacer): void
     {
         foreach ($replaced->getValidatorActivitiesPrj() as $activity) {
@@ -622,6 +631,103 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public function removeAddReferent(
+        int $subordinateId,
+        ?int $addedReferentId = null,
+        ?int $removedReferentId = null,
+        bool $flush = true
+    ): bool {
+        /** @var Person $subordinate */
+        $subordinate = $this->getPersonById($subordinateId, true);
+
+        /** @var int[] $referentsIds */
+        $referentsIds = $this->getPersonRepository()->getReferentsIdsPerson($subordinate->getId());
+
+        // Référent à ajouter
+        $added = null;
+
+        // Référent à supprimer
+        $removed = null;
+
+        if ($addedReferentId == null && $removedReferentId == null) {
+            $this->getLoggerService()->warning("Bad call : removeAddReferent (no ids)");
+            return false;
+        }
+
+        if ($addedReferentId) {
+            try {
+                $added = $this->getPersonById($addedReferentId, true);
+                if (in_array($added->getId(), $referentsIds)) {
+                    $this->getLoggerService()->warning(sprintf("%s est déjà référent pour '%s'", $added, $subordinate));
+                } else {
+                    $this->getLoggerService()->info(sprintf("ajout de %s référent pour '%s'", $added, $subordinate));
+                    $referentAdd = new Referent();
+                    $referentAdd->setReferent($added)->setPerson($subordinate);
+                    $this->getEntityManager()->persist($referentAdd);
+                    $this->getEntityManager()->flush($referentAdd);
+                }
+            } catch (\Exception $e) {
+                throw new OscarException(
+                    sprintf("Impossible de charger la personne référente à ajouter '%s'", $addedReferentId)
+                );
+            }
+        }
+
+        if ($removedReferentId) {
+            try {
+                $removed = $this->getPersonById($removedReferentId, true);
+                if (!in_array($removed->getId(), $referentsIds)) {
+                    $this->getLoggerService()->warning(
+                        sprintf("%s n'est déjà plus référent pour '%s'", $removed, $subordinate)
+                    );
+                } else {
+                    $this->getLoggerService()->info(
+                        sprintf("suppression de %s référent pour '%s'", $removed, $subordinate)
+                    );
+                    $this->getPersonRepository()->removeReferent($removed->getId(), $subordinate->getId());
+                    $this->getEntityManager()->flush();
+                }
+            } catch (\Exception $e) {
+                throw new OscarException(
+                    sprintf(
+                        "Impossible de supprimer la personne référente '%s' : ''",
+                        $addedReferentId,
+                        $e->getMessage()
+                    )
+                );
+            }
+        }
+
+        // Validation en cours à mettre à jour
+        $timesheetService = $this->getTimesheetService();
+
+        // Mise à jour des déclarations en attentes
+        $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($subordinate, true);
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            if ($added) {
+                $validationPeriod->addValidatorAdm($added);
+                $this->getLoggerService()->notice(
+                    sprintf("$added est maintenant validateur administratif pour $validationPeriod")
+                );
+            }
+            if ($removed) {
+                $validationPeriod->addValidatorAdm($removed);
+                $this->getLoggerService()->notice(
+                    sprintf("$removed est n'est plus validateur administratif pour $validationPeriod")
+                );
+            }
+        }
+
+        if ($flush == true && count($validationPeriods) > 0) {
+            $this->getEntityManager()->flush();
+        }
+
+        return true;
+    }
+
+
     /**
      * Ajoute un référent à la personne
      * @param $referent_id ID du référent
@@ -632,29 +738,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      */
     public function addReferent($referent_id, $person_id)
     {
-        $referent = $this->getPersonById($referent_id, true);
-        $person = $this->getPersonById($person_id, true);
-
-        // @todo Vérifier si le référent n'est pas déjà identifié
-        $verif = $this->getEntityManager()->getRepository(Referent::class)->createQueryBuilder('r')
-            ->where('r.referent = :referent AND r.person = :person')
-            ->setParameters(
-                [
-                    'referent' => $referent,
-                    'person' => $person
-                ]
-            )->getQuery()->getResult();
-        if (count($verif) > 0) {
-            throw new OscarException("$referent est déjà identifié comme référent pour $person");
-        }
-
-
-        $referentRec = new Referent();
-        $this->getEntityManager()->persist($referentRec);
-        $referentRec->setPerson($person)->setReferent($referent);
-        $this->getEntityManager()->flush($referentRec);
-
-        return true;
+        $this->removeAddReferent($person_id, $referent_id, null, true);
     }
 
     /**
@@ -667,7 +751,37 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function addReferentToDeclarerHorsLot(Person $declarer, Person $referent, $flush = false)
+    public function addReferentToDeclarationHorsLot(Person $declarer, Person $referent, $flush = false)
+    {
+        $timesheetService = $this->getTimesheetService();
+
+        // Mise à jour des déclarations en attentes
+        $validationPeriods = $timesheetService->getValidationHorsLotToValidateByPerson($declarer);
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            $this->getLoggerService()->notice(
+                sprintf("$referent est maintenant validateur administratif pour $validationPeriod")
+            );
+            $validationPeriod->addValidatorAdm($referent);
+        }
+
+        if ($flush == true && count($validationPeriods) > 0) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
+     * @param Person $declarer
+     * @param Person $referent
+     * @param false $flush
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function removeReferentToDeclarationHorsLot(Person $declarer, Person $referent, $flush = false)
     {
         $timesheetService = $this->getTimesheetService();
 
@@ -677,7 +791,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationPeriods as $validationPeriod) {
             $this->getLoggerService()->notice(
-                sprintf("$referent est maintenant validateur administratif pour $validationPeriod")
+                sprintf(
+                    "$referent a été retiré de la validation administrative pour la validation hors-lot $validationPeriod"
+                )
             );
             $validationPeriod->addValidatorAdm($referent);
         }
@@ -722,7 +838,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         /** @var ValidationPeriod $validationPeriod */
         foreach ($validationPeriods as $validationPeriod) {
             $this->getLoggerService()->notice(
-                sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod")
+                sprintf("$personNewReferent est maintenant validateur administratif pour $validationPeriod")
             );
             $validationPeriod->removeValidatorAdm($fromPerson);
             $validationPeriod->addValidatorAdm($personNewReferent);
@@ -731,33 +847,23 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return true;
     }
 
-    public function refererentAddFromReferent(Person $personNewReferent, Person $fromPerson)
+    /**
+     * Ajout un référent à partir d'un autre référent.
+     *
+     * @param Person $personNewReferent
+     * @param Person $fromPerson
+     * @throws OscarException
+     */
+    public function refererentAddFromReferent(Person $personNewReferent, Person $fromPerson): void
     {
         try {
             // Liste des subordonnés / création des référents
             $subordinates = $this->getSubordinates($fromPerson);
 
             foreach ($subordinates as $subordinate) {
-                $this->getLoggerService()->notice(
-                    sprintf("$personNewReferent est maintenant référent pour $subordinate")
-                );
-                $r = new Referent();
-                $this->getEntityManager()->persist($r);
-                $r->setPerson($subordinate)
-                    ->setReferent($personNewReferent);
+                $this->removeAddReferent($subordinate->getId(), $personNewReferent->getId(), null, false);
             }
 
-            // Déclarations
-            $timesheetService = $this->getTimesheetService();
-
-            $validationPeriods = $timesheetService->getValidationHorsLotByReferent($fromPerson, true);
-            /** @var ValidationPeriod $validationPeriod */
-            foreach ($validationPeriods as $validationPeriod) {
-                $this->getLoggerService()->notice(
-                    sprintf("$personNewReferent est maintenant validateur administratif pour $$validationPeriod")
-                );
-                $validationPeriod->addValidatorAdm($personNewReferent);
-            }
             $this->getEntityManager()->flush();
         } catch (\Exception $e) {
             throw new OscarException(
@@ -765,8 +871,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             );
         }
     }
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
@@ -787,8 +891,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     {
         try {
             $referent = $this->getReferentById($referent_id);
-            $this->getEntityManager()->remove($referent);
-            $this->getEntityManager()->flush();
+            $this->removeAddReferent($referent->getPerson()->getId(), null, $referent->getReferent()->getId());
             return true;
         } catch (\Exception $e) {
             throw new OscarException(
@@ -797,19 +900,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
     }
 
-    public function removeReferentOnPerson( Person $referent, Person $on ){
-        try {
-            $referentRepo = $this->getEntityManager()->getRepository(Referent::class);
-            $referents = $referentRepo->findBy([
-                'referent' => $referent,
-                'person' => $on
-            ]);
-            foreach ($referents as $r) {
-                $this->removeReferentById($r->getId());
-            }
-        } catch (\Exception $exception) {
-            throw $exception;
-        }
+    public function removeReferentOnPerson(Person $referent, Person $on)
+    {
+       $this->removeAddReferent($on->getId(), null, $referent->getId());
     }
 
 

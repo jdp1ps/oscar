@@ -2268,7 +2268,7 @@ class TimesheetController extends AbstractOscarController
                     $validator = $this->getPersonService()->getPersonById($this->params()->fromPost('validatorId'), true);
                     try {
                         $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
-                        $this->getPersonService()->addReferentToDeclarerHorsLot($declarer, $validator, true);
+                        $this->getPersonService()->addReferentToDeclarationHorsLot($declarer, $validator, true);
                     } catch (\Exception $e){
                         $this->getLoggerService()->error($e->getMessage());
                         $this->flashMessenger()->addErrorMessage("$validator n'a pas été ajouté aux déclarations : " . $e->getMessage());

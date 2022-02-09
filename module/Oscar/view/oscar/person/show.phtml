@@ -90,6 +90,8 @@
             <span><?= $entity->getLdapAffectation() ?></span>
             <?php endif; ?>
         </h1>
+
+        <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
         <div id="replacer"></div>
         <script>
             require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
@@ -109,6 +111,7 @@
 
             });
         </script>
+        <?php endif ?>
         <p>
             <i class="icon-mail"></i> <?= $entity->getEmail() ?>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
