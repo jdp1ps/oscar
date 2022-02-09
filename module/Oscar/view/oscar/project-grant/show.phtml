@@ -206,7 +206,7 @@
                         <i class="icon-group"></i>
                         Membres
                     </h2>
-                    <section id="organizations" class="has-btn"></section>
+                    <section id="membres" class="has-btn"></section>
 
                 </section>
                 <script>
@@ -215,7 +215,7 @@
                         Vue.http.options.emulateJSON = true;
                         Vue.http.options.emulateHTTP = true;
                         new Vue({
-                            el: "#organizations",
+                            el: "#membres",
                             render(h) {
                                 return h(EntityWithRole.default, {
                                     props: {
