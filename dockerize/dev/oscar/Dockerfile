@@ -32,18 +32,22 @@ RUN apt-get install -y\
         && apt-get update && apt-get upgrade -y && apt-get clean
 
 # PROXY (wget)
+# Ca ca marche pas...
 COPY etc/apt/wgetrc /etc/apt/wgetrc
 
 # INSTALL PACKAGES OS
-RUN apt-get install -y  \
+RUN apt-get install -y \
+        libboost-all-dev \
+        libboost-dev \
+        libuuid1 \
+        uuid-dev \
+        gperf \
         apache2 \
         nano \
         supervisor \
         curl \
-
         # Pour OCI 8
         libaio1 \
-
         libpng-dev \
         libpq-dev \
         libicu-dev \
@@ -73,6 +77,7 @@ RUN apt-get install -y  \
         php7.4-zip \
         php-bcmath \
         php7.4-dev \
+        php-pear \
         php-xdebug \
         #php-mcrypt \
         && apt-get clean
@@ -81,7 +86,8 @@ RUN apt-get install -y  \
 #RUN pecl install xdebug
 
 # Install OCI
-#pear config-set http_proxy "${http_proxy}"
+#RUN pear config-set http_proxy "${http_proxy}"
+RUN pear config-set http_proxy "http://proxy.unicaen.fr:3128"
 COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
@@ -93,23 +99,36 @@ RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/l
 RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
     ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
 
-RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0 && \
-    echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
+RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
 
-# Install GEARMAN CLIENT FROM SOURCE
+#Install GEARMAN CLIENT FROM SOURCE
+#RUN mkdir -p /tmp/install \
+#    && cd /tmp/install \
+#    && wget https://github.com/wcgallego/pecl-gearman/archive/master.zip \
+#    && unzip master.zip \
+#    && cd pecl-gearman-master \
+#    && phpize \
+#    && sh configure \
+#    && make install
+
+RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
+
 RUN mkdir -p /tmp/install \
     && cd /tmp/install \
-    && wget https://github.com/wcgallego/pecl-gearman/archive/master.zip \
-    && unzip master.zip \
-    && cd pecl-gearman-master \
-    && phpize \
-    && sh configure \
+    && wget https://github.com/gearman/gearmand/releases/download/1.1.19.1/gearmand-1.1.19.1.tar.gz \
+    && tar xzf gearmand-1.1.19.1.tar.gz \
+    && cd  gearmand-1.1.19.1
+WORKDIR /tmp/install/gearmand-1.1.19.1/
+RUN ./configure \
+    && make \
     && make install
 
-RUN echo "extension=gearman.so" >> /etc/php/7.4/mods-available/gearman.ini
+#RUN echo "extension=gearman.so" >> /etc/php/7.4/mods-available/gearman.ini
+RUN echo "extension=gearman.so" > /etc/php/7.4/cli/conf.d/gearman.so
 RUN phpenmod -v ALL -s ALL gearman
 
 RUN echo "XDEBUG"

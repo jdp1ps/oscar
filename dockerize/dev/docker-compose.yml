@@ -18,7 +18,7 @@ services:
       - 8085:80
       - 9000:9000
     volumes:
-      - /home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar:/var/OscarApp
+      - /home/marie201/projetsUnicaen/projetOscar/oscarSpartan:/var/OscarApp
     networks:
       - oscar_dev_network_spartan
     tty: true
@@ -55,7 +55,7 @@ services:
       dockerfile: Dockerfile
       args:
         proxy_environnement: "http://proxy.unicaen.fr:3128"
-        pathdatas: "/home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar/dockerize/dev/build/database"
+        pathdatas: "/home/marie201/projetsUnicaen/projetOscar/oscarSpartan/dockerize/dev/dev/build/database"
     environment:
       POSTGRES_PASSWORD: "azerty"
       POSTGRES_USER: "oscar"
@@ -64,7 +64,7 @@ services:
       - oscar_dev_network_spartan
     tty: true
     volumes:
-      - /home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar/dockerize/dev/build/database:/var/lib/postgresql/data
+      - /home/marie201/projetsUnicaen/projetOscar/oscarSpartan/dockerize/dev/build/database:/var/lib/postgresql/data
     restart: "always"
 
   # ADMINERDEV
