@@ -71,6 +71,7 @@ return array(
 Les connecteurs sont configurés dans des fichier *YAML* qui vont permettre de configurer les connecteurs. Le connecteur par défaut est HTTP basic, d'autres méthode de récupération des informations existent : 
 
  - HTTP basic (par défaut)
+ - HTTP Basic Auth HTTP
  - HTTP certificat SSL
  - HTTP Token
 
@@ -79,8 +80,11 @@ Les connecteurs sont configurés dans des fichier *YAML* qui vont permettre de c
 
 le fichier `/config/connectors/person_rest.yml` contient les URL utilisées par le connecteur pour obtenir les données :
 
+Pour les personnes : 
+
 ```yml
-# Emplacement du service REST fournissant la liste des personnes
+# config/connectors/person_rest.yml
+# Emplacement du service REST fournissant la liste complète
 url_persons: 'https://rest.service.tdl/api/persons'
 
 # Emplacement du service REST fournissant les données pour une personne
@@ -88,6 +92,44 @@ url_persons: 'https://rest.service.tdl/api/persons'
 # le service REST.
 url_person: 'https://rest.service.tld/api/person/%s'
 ```
+
+Pour les organisations :
+
+```yml
+# config/connectors/organization_rest.yml
+# Emplacement du service REST fournissant la liste complète
+url_organizations: 'https://rest.service.tdl/api/organizations'
+
+# Emplacement du service REST fournissant les données pour
+# Noter la présente du '%s' que Oscar remplacera par l'UID utilisé dans
+# le service REST.
+url_organization: 'https://rest.service.tld/api/organization/%s'
+```
+
+#### HTTP Auth 
+
+Pour les personnes, dans le fichier de configuration le fichier `/config/connectors/person_rest.yml` :
+
+```yml
+# config/connectors/person_rest.yml
+access_strategy: Oscar\Connector\Access\ConnectorAccessCurlHttpBasicAuth
+url_persons: 'https://exemple.dataprovider.ext/api/persons'
+url_person: 'https://exemple.dataprovider.ext/api/persons/%s'
+username: IDENTIFIANT
+password: MOTDEPASSE
+```
+
+Pour les organisations :
+
+```yml
+# config/connectors/organization_rest.yml
+access_strategy: Oscar\Connector\Access\ConnectorAccessCurlHttpBasicAuth
+url_organizations: 'https://exemple.dataprovider.ext/api/organizations'
+url_organization: 'https://exemple.dataprovider.ext/api/organizations/%s'
+username: IDENTIFIANT
+password: MOTDEPASSE
+```
+
 
 #### HTTP Certificat SSL
 Dans le cadre d'une connexion vers une api avec certificat il faudra compléter les éléments suivants avec vos informations
