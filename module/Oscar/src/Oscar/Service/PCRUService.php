@@ -27,6 +27,7 @@ use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\PCRUCvsFile;
+use Oscar\Validator\PCRUValidator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PCRUService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager, UseServiceContainer
@@ -159,8 +160,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
 
         // Contrôle des informations
-        $validation = $pcruInfos->validation();
-        if (count($pcruInfos->getError()) > 0) {
+        $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
+        $validation = $pcruValidation->validate($pcruInfos);
+        if (count($pcruValidation->getError()) > 0) {
             throw new OscarException(
                 "Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées"
             );
@@ -195,12 +197,15 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         try {
             $pcruInfos->setStatus(ActivityPcruInfos::STATUS_DRAFT);
-            $pcruInfos->validation();
+            $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
+            $validation = $pcruValidation->validate($pcruInfos);
 
             $this->getEntityManager()->persist($pcruInfos);
             $this->getEntityManager()->flush($pcruInfos);
         } catch (UniqueConstraintViolationException $e) {
             throw new OscarException("Les donnèes PCRU de cette activité existent déjà");
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf("Une erreur est survenue lors de l'enregistrement des données PCRU : %s", $e->getMessage()));
         }
     }
 
@@ -466,7 +471,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $headers = ActivityPcruInfoFromActivityFactory::getHeaders();
         $datas = $pcruInfos->toArray($this->getEntityManager());
 
-        $validation = $pcruInfos->validation();
+        $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
+        $validation = $pcruValidation->validate($pcruInfos);
+
         $documentPath = "";
         if( $pcruInfos->getDocumentId() ){
             $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());

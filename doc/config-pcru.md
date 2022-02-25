@@ -38,3 +38,6 @@ Pensez à activer les privilèges idoines aux rôles habilités à gérer les do
 ## Envoi des données PCRU
 
 La communication des donnèes vers PCRU se fait via FTP, l'accès au serveur PCRU peut être configuré depuis l'interface d'administration.
+
+
+## Configuration avancées

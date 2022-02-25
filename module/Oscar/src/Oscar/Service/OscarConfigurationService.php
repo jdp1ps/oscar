@@ -297,22 +297,22 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getEditableConfKey('declarersRelanceJour2', 5);
     }
 
-    public function getDeclarersRelanceConflitMessage() :string
+    public function getDeclarersRelanceConflitMessage(): string
     {
         return $this->getEditableConfKey('declarersRelanceConflitMessage', '');
     }
 
-    public function getDeclarersRelanceConflitJour() :int
+    public function getDeclarersRelanceConflitJour(): int
     {
         return $this->getEditableConfKey('declarersRelanceConflitJour', 1);
     }
 
-    public function setDeclarersRelanceConflitMessage( string $message ) :self
+    public function setDeclarersRelanceConflitMessage(string $message): self
     {
         return $this->saveEditableConfKey('declarersRelanceConflitMessage', $message);
     }
 
-    public function setDeclarersRelanceConflitJour( int $days ) :self
+    public function setDeclarersRelanceConflitJour(int $days): self
     {
         return $this->saveEditableConfKey('declarersRelanceConflitJour', $days);
     }
@@ -487,11 +487,57 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('spenttypeannexes');
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PCRU
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const PCRU_UNITE_ROLE_DEFAULT = 'Laboratoire';
+    const PCRU_PARTNER_ROLE_DEFAULT = 'Partenaire';
+    const PCRU_INCHARGE_ROLE_DEFAULT = 'Responsable scientifique';
+
+    /**
+     * @return bool
+     */
     public function getPcruEnabled()
     {
         return $this->getEditableConfKey('pcru_enabled', false);
     }
 
+
+    public function getPcruUnitRoles(): array
+    {
+        return $this->getEditableConfKey('pcru_unit_roles', [self::PCRU_UNITE_ROLE_DEFAULT]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruPartnerRoles(): array
+    {
+        return $this->getEditableConfKey('pcru_partner_roles', [self::PCRU_PARTNER_ROLE_DEFAULT]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruInChargeRole(): string
+    {
+        return $roleRSToFind = $this->getEditableConfKey('pcru_incharge_role', self::PCRU_INCHARGE_ROLE_DEFAULT);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruContractType(): string
+    {
+        //->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
+        return $roleRSToFind = $this->getEditableConfKey('pcru_contrat_type', "Contrat Version Définitive Signée");
+    }
+
+    /**
+     * @return array
+     * @throws OscarException
+     */
     public function getPcruFtpInfos()
     {
         if (!$this->getPcruEnabled()) {
@@ -515,29 +561,9 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getOptionalConfiguration("autorefreshspents", false);
     }
 
-    public function getAuthPersonNormalize() :bool
+    public function getAuthPersonNormalize(): bool
     {
         return $this->getConfiguration(self::auth_person_normalize, false);
-    }
-
-    /**
-     * @return array|object
-     * @throws OscarException
-     */
-    public function getDocumentDropLocation()
-    {
-        static $documentDropLocation;
-        if ($documentDropLocation == null) {
-            $path = realpath($this->getConfiguration('paths.document_oscar'));
-            if (!file_exists($path)) {
-                throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
-            }
-            if (!is_readable($path)) {
-                throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
-            }
-            $documentDropLocation = $path;
-        }
-        return $documentDropLocation;
     }
 
     /**
@@ -656,4 +682,26 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             :
             $this->getConfiguration('pcru.filename_partenaires');
     }
+
+    /**
+     * @return array|object
+     * @throws OscarException
+     */
+    public function getDocumentDropLocation()
+    {
+        static $documentDropLocation;
+        if ($documentDropLocation == null) {
+            $path = realpath($this->getConfiguration('paths.document_oscar'));
+            if (!file_exists($path)) {
+                throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
+            }
+            if (!is_readable($path)) {
+                throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
+            }
+            $documentDropLocation = $path;
+        }
+        return $documentDropLocation;
+    }
+
+
 }
