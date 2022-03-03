@@ -500,6 +500,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setTva($tva)
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
+                ->setPcruValidPoleCompetitivite(false)
                 ->setDateSigned(property_exists($data, 'datesigned') ? new \DateTime($data->datesigned) : null)
                 ->setDateOpened(property_exists($data, 'datePFI') ? new \DateTime($data->datePFI) : null)
                 ->setStatus($status)
@@ -605,8 +606,6 @@ class ConnectorActivityJSON implements ConnectorInterface
                 try {
                     ////////////////////////////////////////////////////////////
                     $roleObj = $this->getRolePersonOrCreate($role, $repport);
-
-
                     foreach ($persons as $fullName) {
                         $datasPerson = (new DataExtractorFullname())->extract($fullName);
                         if ($datasPerson) {
@@ -671,13 +670,14 @@ class ConnectorActivityJSON implements ConnectorInterface
                             )
                         );
                     }
-
+                    $description = $milestone->description;
                     if (!$activity->hasMilestoneAt($type, $date)) {
                         $milestoneActivity = new ActivityDate();
                         $this->entityManager->persist($milestoneActivity);
                         $milestoneActivity->setType($type)
                             ->setActivity($activity)
-                            ->setDateStart($date);
+                            ->setDateStart($date)
+                            ->setComment($description);
                         $this->entityManager->flush($milestoneActivity);
                         $repport->addadded(
                             sprintf(
