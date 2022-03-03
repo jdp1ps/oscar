@@ -14,10 +14,10 @@ les containers créé :
 ```
 cd dev
 # build
-docker-composer build
+docker-compose build
 
 # Run
-docker-composer up -d
+docker-compose up -d
 ```
 
 Accès à oscar (pour les opérations en ligne de commande) : 
@@ -30,7 +30,7 @@ Une fois dans l'instance :
 
 ```
 su
-cd /var/OscarApp/oscar
+cd /var/OscarApp/
 ```
 
 Enjoy

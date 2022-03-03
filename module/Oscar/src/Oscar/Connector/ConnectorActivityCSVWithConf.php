@@ -221,7 +221,6 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                 "datesigned" => null,
                 "pfi" => null,
             ];
-
             foreach ($datas as $index => $value) {
                 if (!$value) {
                     continue 1;
@@ -277,12 +276,39 @@ class ConnectorActivityCSVWithConf implements ConnectorInterface
                             $this->extractArrayString($value, $separator)
                         );
                     }
-                } // JALONS
+                }
+
+                // JALONS
+                // OLD
+                /*
                 elseif (preg_match("/milestones\.(.*)/", $key, $matches)) {
                     $json['milestones'][] = [
                         "type" => $matches[1],
                         "date" => $value
                     ];
+                */
+
+                // NEW
+                elseif (preg_match("/milestones.([\w ]*)(\.([0-9]*))?/u", $key, $matches)){
+                //elseif (preg_match("/milestones.([\p{L} -]*[0-9]?)(\.([0-9]*))?/u", $key, $matches)){
+                    $type = $matches[1];
+                    $date = $value;
+                    $dateChecked = $this->getCheckedDateString($date);
+                    $description = "";
+                    if (count($matches)== 4){
+                        $milestone = $index;
+                        $valueCellPosition = $matches[3];
+                        // Calcule des positions pour les données
+                        $descriptionPosition = $milestone + intval($valueCellPosition);
+                        $description = $datas[$descriptionPosition];
+                    }
+
+                    $json['milestones'][] = [
+                        "type" => $type,
+                        "date" => $dateChecked,
+                        "description" => $description,
+                    ];
+
                 } // VERSEMENTS
                 elseif (preg_match("/payments\.([\-.\d]*)/", $key, $matches)) {
                     $datesPos = explode('.', $matches[1]);

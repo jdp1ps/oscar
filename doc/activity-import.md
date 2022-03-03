@@ -11,7 +11,7 @@ Cet utilitaire sera utilisé pour importer et synchroniser des activités dans O
 La procédure de synchronisation s'utilise en ligne de commande :
 
 ```bash
-$ php public/index.php oscar activity:sync path/to/file.json
+$ php bin/oscar.php activity:cvstojson --fichier=path/to/fileSourceDatas.csv --config=path/to/fileConfig.php
 ```
 
 # Source des données
