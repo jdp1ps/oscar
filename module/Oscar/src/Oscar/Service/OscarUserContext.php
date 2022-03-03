@@ -24,6 +24,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
@@ -128,11 +129,49 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /**
+     * @param int $id
+     * @param bool $throw
+     * @return object|null
+     * @throws OscarException
+     */
+    public function getOrganizationRoleById( int $id, bool $throw = false)
+    {
+        $roleObj = $this->getOrganizationRoleRepository()->find($id);
+        if( !$roleObj && $throw ){
+            throw new OscarException("Impossible de charger le rôle d'organisation '$id'");
+        }
+        return $roleObj;
+    }
+
+    /**
+     * @param string $roleId
+     * @param bool $throw
+     * @return OrganizationRole|null
+     * @throws OscarException
+     */
+    public function getOrganizationRoleByRoleId( string $roleId, bool $throw = false)
+    {
+        $roleObj = $this->getOrganizationRoleRepository()->findOneBy(['label' => $roleId]);
+        if( !$roleObj && $throw ){
+            throw new OscarException("Impossible de charger le rôle d'organisation '$roleId'");
+        }
+        return $roleObj;
+    }
+
+    /**
      * @return RoleRepository
      */
     protected function getRoleRepository(): RoleRepository
     {
         return $this->getEntityManager()->getRepository(Role::class);
+    }
+
+    /**
+     * @return OrganizationRoleRepository
+     */
+    public function getOrganizationRoleRepository(): OrganizationRoleRepository
+    {
+        return $this->getEntityManager()->getRepository(OrganizationRole::class);
     }
 
     /**

@@ -1254,24 +1254,41 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
 
             if ($this->getHttpXMethod() == 'PUT') {
-                // Contrôle du Role
-                $roleId = trim($request->getPost('label'));
-                if ($roleId == "") {
-                    return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
-                }
 
-                $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
-                if ($exist) {
-                    return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
-                }
 
-                $role->setLabel($request->getPost('label'))
-                    ->setDescription($request->getPost('description'))
-                    ->setPrincipal($request->getPost('principal') == 'true');
-                $this->getEntityManager()->persist($role);
-                $this->getEntityManager()->flush();
-                return $this->ajaxResponse($role->toArray());
+
+                try {
+                    // Données du rôle à modifier
+                    $id = (int) $request->getPost('id');
+                    $label = trim($request->getPost('label'));
+                    $description = trim($request->getPost('description'));
+                    $principal = $request->getPost('principal') == "true";
+                    $this->getLoggerService()->info("Modification du rôle d'organization $label");
+
+                    if( $label == "" ){
+                        throw new OscarException("Vous devez renseigner un intitulé");
+                    }
+
+                    $roleObjEdited = $this->getOscarUserContextService()->getOrganizationRoleById($id, true);
+                    $exist = $this->getOscarUserContextService()->getOrganizationRoleByRoleId($label);
+
+                    if( $exist && $exist->getId() != $roleObjEdited->getId() ){
+                        throw new OscarException("Un autre rôle d'organisation porte déjà cet intitulé : '$label'");
+                    }
+
+                    $roleObjEdited->setLabel($label)
+                        ->setDescription($description)
+                        ->setPrincipal($principal);
+
+                    $this->getEntityManager()->flush();
+
+                    return $this->ajaxResponse($roleObjEdited->toArray());
+
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError("Impossible de modifier le rôle : " . $e->getMessage());
+                }
             }
+
             ////////////////////////////////////////////////////////////////////
             // POST : Nouveau rôle
             elseif ($this->getHttpXMethod() == 'DELETE') {
