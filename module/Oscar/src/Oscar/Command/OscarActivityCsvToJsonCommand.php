@@ -44,7 +44,7 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
     protected function configure()
     {
         $this
-            ->setDescription("Synchronisation d'activité de recherche à partir d'un fichier JSON")
+            ->setDescription("Conversion d'un fichier au format CSV d'activités de recherche en un fichier JSON")
             ->addOption('fichier', 'f', InputOption::VALUE_REQUIRED, 'Fichier CSV avec les données')
             ->addOption('config', 'c', InputOption::VALUE_REQUIRED, "Fichier de configuration de l'import")
             ->addOption('skip', 's', InputOption::VALUE_REQUIRED, "Fichier de configuration de l'import", 1)

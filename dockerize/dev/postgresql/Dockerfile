@@ -12,7 +12,7 @@ RUN if [ "$proxy_environnement" != "noProxy" ]; \
     fi
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y nano
+#RUN apt-get install -y nano
 
 # Install bdd fichier SQL
 COPY oscar-install.sql /docker-entrypoint-initdb.d/

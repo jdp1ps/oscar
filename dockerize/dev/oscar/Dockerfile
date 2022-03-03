@@ -1,8 +1,7 @@
-####################################
-# DOCKERFILE TO BUILD APACHE2, PHP7
-# BASED ON DEBIAN
-####################################
-#FROM debian
+#####################################
+# DOCKERFILE TO BUILD APACHE2, PHP7.4
+# BASED ON DEBIAN:BULLSEYE-BACKPORTS
+#####################################
 FROM debian:bullseye-backports
 
 # Issue du docker-compose
@@ -32,18 +31,21 @@ RUN apt-get install -y\
         && apt-get update && apt-get upgrade -y && apt-get clean
 
 # PROXY (wget)
+# Des doutes sur le fonctionnement, perso j'ai eu des soucis derrière le proxy unicaen (HM)
 COPY etc/apt/wgetrc /etc/apt/wgetrc
 
 # INSTALL PACKAGES OS
-RUN apt-get install -y  \
+RUN apt-get install -y \
+        libboost-all-dev \
+        libboost-dev \
+        libuuid1 \
+        uuid-dev \
+        gperf \
         apache2 \
         nano \
         supervisor \
         curl \
-
-        # Pour OCI 8
         libaio1 \
-
         libpng-dev \
         libpq-dev \
         libicu-dev \
@@ -52,7 +54,6 @@ RUN apt-get install -y  \
         libgearman-dev \
         libzip-dev \
         zip \
-        #wget \
         gettext \
         libbz2-dev \
         unzip \
@@ -60,6 +61,7 @@ RUN apt-get install -y  \
         gearman-tools \
         postgresql-client \
         php7.4 \
+        php7.4-gearman \
         php7.4-bz2 \
         php7.4-cli \
         php7.4-curl \
@@ -73,15 +75,16 @@ RUN apt-get install -y  \
         php7.4-zip \
         php-bcmath \
         php7.4-dev \
+        php-pear \
         php-xdebug \
-        #php-mcrypt \
         && apt-get clean
 
 # Enable xdebug -> Need to install later xdebug
 #RUN pecl install xdebug
 
-# Install OCI
-#pear config-set http_proxy "${http_proxy}"
+# Install OCI (penser à forcer le proxy)
+#RUN pear config-set http_proxy "${http_proxy}"
+RUN pear config-set http_proxy "http://proxy.unicaen.fr:3128"
 COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
@@ -93,25 +96,12 @@ RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/l
 RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
     ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
 
-RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0 && \
-    echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
+RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
-
-# Install GEARMAN CLIENT FROM SOURCE
-RUN mkdir -p /tmp/install \
-    && cd /tmp/install \
-    && wget https://github.com/wcgallego/pecl-gearman/archive/master.zip \
-    && unzip master.zip \
-    && cd pecl-gearman-master \
-    && phpize \
-    && sh configure \
-    && make install
-
-RUN echo "extension=gearman.so" >> /etc/php/7.4/mods-available/gearman.ini
-RUN phpenmod -v ALL -s ALL gearman
-
+#RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug
@@ -133,6 +123,12 @@ COPY run /usr/local/bin/run
 RUN chmod +x /usr/local/bin/run
 RUN a2enmod rewrite && a2enmod ssl
 
+#Composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php composer-setup.php
+RUN php -r "unlink('composer-setup.php');"
+RUN mv composer.phar /usr/local/bin/composer
+RUN chmod +x /usr/local/bin/composer
 
 #SUPERVISOR FICHIERS DE CONFIG POUR MULTIPLES SERVICES IN CONTAINER DOCKER
 COPY supervisor /etc/supervisor/conf.d/oscar.conf

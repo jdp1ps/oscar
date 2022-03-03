@@ -34,7 +34,7 @@ class ConnectorActivityCSVWithConfTest extends TestCase
     {
         $config = $this->getDemoConfig();
         $this->assertTrue(is_array($config));
-        $this->assertEquals(27, count($this->getDemoConfig()), "La configuration de démo contient 25 entrées.");
+        $this->assertEquals(28, count($this->getDemoConfig()), "La configuration de démo contient 28 entrées.");
     }
 
 
@@ -98,6 +98,9 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals('2020-12-31', $datas[1]['payments'][2]['date']);
         $this->assertEquals('Rapport financier', $datas[1]['milestones'][0]['type']);
         $this->assertEquals('2018-04-15', $datas[1]['milestones'][0]['date']);
+        $this->assertEquals('Rapport scientifique 9', $datas[1]['milestones'][1]['type']);
+        $this->assertEquals('2022-01-01', $datas[1]['milestones'][1]['date']);
+        $this->assertEquals('Description rapport scientifique', $datas[1]['milestones'][1]['description']);
         $this->assertEquals(null, $datas[1]['tva']);
         $this->assertEquals(15.0, $datas[1]['assietteSubventionnable']);
         $this->assertEquals('Dépense', $datas[1]['financialImpact']);
@@ -113,5 +116,9 @@ class ConnectorActivityCSVWithConfTest extends TestCase
         $this->assertEquals('Aucune', $datas[2]['financialImpact']);
         $this->assertEquals('Yens', $datas[2]['currency']);
         $this->assertEquals(Activity::STATUS_ACTIVE, $datas[2]['status']);
+
+        $this->assertEquals('Rapport scientifique 9', $datas[2]['milestones'][0]['type']);
+        $this->assertEquals('2022-02-02', $datas[2]['milestones'][0]['date']);
+        $this->assertEquals('Description rapport scientifique 2', $datas[2]['milestones'][0]['description']);
     }
 }
