@@ -8,61 +8,59 @@
 namespace Oscar\Entity;
 
 
-use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\QueryBuilder;
 use Oscar\Exception\OscarException;
-use Oscar\Utils\OscarConstants;
+use Oscar\Formatter\OscarFormatterConst;
 
 class RoleRepository extends EntityRepository
 {
-    /**
-     * Retourne la liste des rôles niveau Application.
-     *
-     * @return \Doctrine\ORM\QueryBuilder
-     */
-    public function getRolesAtApplication()
+    public function getRolesAtApplication() :QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_APPLICATION);
     }
 
-    /**
-     * Retourne la liste des rôles niveau organization.
-     *
-     * @return \Doctrine\ORM\QueryBuilder
-     */
-    public function getRolesAtOrganization()
+    public function getRolesAtOrganization() :QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION);
     }
 
-    /**
-     * Retourne la liste des rôles niveau Activité.
-     *
-     * @return \Doctrine\ORM\QueryBuilder
-     */
-    public function getRolesAtActivity()
+    public function getRolesAtActivity() :QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY);
     }
 
     /**
-     * Retourne la liste des rôles d'une activité sous la forme d'un tableau
-     *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @param string $format
+     * @return array
      */
-    public function getRolesAtActivityArray()
+    public function getRolesAtActivityArray( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE) :array
     {
-        static $rolesActivity;
-        if( $rolesActivity === null ){
-            $rolesActivity = [];
-            /** @var Role $role */
-            foreach( $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult() as $role ){
-                $rolesActivity[$role->getId()] = $role->getRoleId();
+        $return = [];
+        $roles = $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult();
+
+        if( $format == OscarFormatterConst::FORMAT_ARRAY_OBJECT ){
+            return $roles;
+        }
+
+        if( $format == OscarFormatterConst::FORMAT_ARRAY_FLAT ){
+            return array_map(function($role){ return $role->getRoleId(); }, $roles);
+        }
+
+        /** @var Role $role */
+        foreach( $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult() as $role ){
+            switch ($format) {
+                case OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT:
+                    $return[$role->getId()] = $role;
+                    break;
+                case OscarFormatterConst::FORMAT_ARRAY_ID_VALUE:
+                    $return[$role->getId()] = $role->getRoleId();
+                    break;
             }
         }
-        return $rolesActivity;
+
+        return $return;
     }
 
     /**
@@ -70,7 +68,7 @@ class RoleRepository extends EntityRepository
      *
      * @return array
      */
-    public function getRolesAvailableForPersonInOrganizationArray()
+    public function getRolesAvailableForPersonInOrganizationArray() :array
     {
         static $rolesOrganization;
         if( $rolesOrganization === null ){
@@ -100,10 +98,9 @@ class RoleRepository extends EntityRepository
      */
     public function getRolesAtLevel($level)
     {
-        $q = $this->createQueryBuilder('r')
+        return $this->createQueryBuilder('r')
             ->andWhere('BIT_AND(r.spot, :level) > 0')
             ->setParameter('level', $level);
-        return $q;
     }
 
     /**
@@ -115,11 +112,7 @@ class RoleRepository extends EntityRepository
     {
         static $rolesByRoleId;
         if( $rolesByRoleId === null ){
-            $rolesByRoleId = [];
-            /** @var Role $role */
-            foreach($this->findAll() as $role ){
-                $rolesByRoleId[$role->getRoleId()] = $role;
-            }
+            $rolesByRoleId = $this->getRolesAtActivityArray(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE);
         }
         return $rolesByRoleId;
     }

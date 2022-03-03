@@ -107,7 +107,7 @@ requirejs.config({
         "rolesadminui": "oscar/dist/RolesAdminUI",
         "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
         "activitydocument": "oscar/dist/ActivityDocument.umd.min",
-        "administrationpcru": "oscar/dist/AdministrationPcru.umd.min",
+        "administrationpcru": "oscar/dist/AdministrationPcru.umd",
         "administrationpcrupc": "oscar/dist/AdministrationPcruPoleCompetitivite.umd.min",
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
         "contrattypepcru": "oscar/dist/ContratTypePCRU.umd.min",

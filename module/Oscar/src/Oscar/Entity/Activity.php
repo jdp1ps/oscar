@@ -1690,7 +1690,12 @@ class Activity implements ResourceInterface
      * @param bool $deep
      * @return bool
      */
-    public function hasPerson( Person $person, ?Role $role = null, ?\DateTime $dateStart = null, ?\DateTime $dateEnd = null, bool $deep = true
+    public function hasPerson(
+        Person $person,
+        ?Role $role = null,
+        ?\DateTime $dateStart = null,
+        ?\DateTime $dateEnd = null,
+        bool $deep = true
     ) {
         $found = false;
         /** @var ActivityPerson $activityPerson */
@@ -1770,6 +1775,21 @@ class Activity implements ResourceInterface
     }
 
     private $_cacheOrganizationsByRole;
+
+    public function getOrganizationsWithOneRole(array $roleIds): array
+    {
+        $structures = [];
+        /** @var ActivityOrganization $organizationRel */
+        foreach ($this->getOrganizationsDeep() as $organizationRel) {
+            $organization = $organizationRel->getOrganization();
+            $role = $organizationRel->getRoleObj()->getRoleId();
+            $organizationId = $organization->getId();
+            if (!array_key_exists($organizationId, $structures) && in_array($role, $roleIds)) {
+                $structures[$organizationId] = $organization;
+            }
+        }
+        return $structures;
+    }
 
     public function getOrganizationsWithRole($role, $deep = true)
     {

@@ -500,10 +500,10 @@ class ConnectorActivityJSON implements ConnectorInterface
                 ->setTva($tva)
                 ->setCodeEOTP($data->pfi)
                 ->setActivityType($type)
-                ->setDateSigned($data->datesigned ? new \DateTime($data->datesigned) : null)
-                ->setDateOpened($data->datePFI ? new \DateTime($data->datePFI) : null)
+                ->setDateSigned(property_exists($data, 'datesigned') ? new \DateTime($data->datesigned) : null)
+                ->setDateOpened(property_exists($data, 'datePFI') ? new \DateTime($data->datePFI) : null)
                 ->setStatus($status)
-                ->setAmount(((double)$data->amount));
+                ->setAmount(property_exists($data, 'amount') ? ((double)$data->amount) : 0.0);
 
             if (property_exists($data, 'datestart') ){
                 try {
@@ -519,10 +519,11 @@ class ConnectorActivityJSON implements ConnectorInterface
                 }
             }
 
-            if ($data->dateend) {
+            if (property_exists($data, 'dateend')) {
                 try {
                     $dateEnd = new \DateTime($data->dateend);
                 } catch (\Exception $e) {
+                    $dateEnd = null;
                     $repport->adderror(
                         sprintf(
                             "Impossible d'extraire une date depuis la valeur %s pour l'activité %s",
@@ -610,7 +611,7 @@ class ConnectorActivityJSON implements ConnectorInterface
                         $datasPerson = (new DataExtractorFullname())->extract($fullName);
                         if ($datasPerson) {
                             $person = $this->getPersonOrCreate($datasPerson, $repport);
-                            if (!$activity->hasPerson($person, $role)) {
+                            if (!$activity->hasPerson($person, $roleObj)) {
                                 try {
                                     $personActivity = new ActivityPerson();
                                     $this->entityManager->persist($personActivity);

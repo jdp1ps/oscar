@@ -8,7 +8,12 @@
             new Vue({
                 el: "#app",
                 render(h){
-                    return h(AdministrationPcru, {props:{url: ''}});
+                    return h(AdministrationPcru, {props:{
+                        url: '',
+                        roles_incharge: [],
+                        roles_partner: [],
+                        roles_unit: [],
+                    }});
                 }
             })
         })

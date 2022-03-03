@@ -18,6 +18,7 @@ use Oscar\Entity\Privilege;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
@@ -1470,9 +1471,25 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
 
         if ($this->isAjax()) {
+
+            $partnerRoles = $this->getProjectGrantService()->getOrganizationService()
+                ->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_FLAT);
+
+            $inchargeRoles = $this->getProjectGrantService()->getPersonService()
+                ->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_FLAT);
+
+            $unitRoles = $this->getProjectGrantService()->getOrganizationService()
+                ->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_FLAT);
+
+            $contractTypes = $this->getProjectGrantService()
+                ->getAvailableDocumentTypes(OscarFormatterConst::FORMAT_ARRAY_FLAT);
+
+
             if ($this->getRequest()->isGet()) {
                 $response = $this->baseJsonResponse();
                 $response['configuration_pcru'] = [
+
+                    // FTP
                     'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
                     'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey(
                         'pcru_host',
@@ -1482,6 +1499,20 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
                     'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
                     'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
+
+                    // Conf
+                    'pcru_incharge_role' => $this->getOscarConfigurationService()->getPcruInChargeRole(),
+                    'pcru_partner_roles' => $this->getOscarConfigurationService()->getPcruPartnerRoles(),
+                    'pcru_unit_roles' => $this->getOscarConfigurationService()->getPcruUnitRoles(),
+                    'pcru_contract_type' => $this->getOscarConfigurationService()->getPcruContractType(),
+
+                    //
+                    'incharge_roles' => $inchargeRoles,
+                    'partner_roles' => $partnerRoles,
+                    'unit_roles' => $unitRoles,
+                    'contract_types' => $contractTypes,
+
+
                 ];
                 return $this->ajaxResponse($response);
             }
@@ -1496,6 +1527,19 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     'pcru_pass' => $this->params()->fromPost('pass'),
                     'pcru_ssh' => $this->params()->fromPost('ssh'),
                 ];
+
+                $partnerRolesPosted = $this->params()->fromPost('pcru_partner_roles', []);
+                $unitRolesPosted = $this->params()->fromPost('pcru_unit_roles', []);
+                $inchargeRolePosted = $this->params()->fromPost('pcru_incharge_role', '');
+                $contractType = $this->params()->fromPost('pcru_contract_type', '');
+
+                $data['pcru_partner_roles'] = explode(',', $partnerRolesPosted);
+                $data['pcru_unit_roles'] = explode(',', $unitRolesPosted);
+                $data['pcru_incharge_role'] = $inchargeRolePosted;
+                $data['pcru_incharge_role'] = $inchargeRolePosted;
+                $data['pcru_contract_type'] = $contractType;
+
+                $this->getLoggerService()->info("Enregistrement de la configuration PCRU" );
 
                 foreach ($data as $key => $value) {
                     $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);

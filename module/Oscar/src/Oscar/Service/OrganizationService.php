@@ -24,6 +24,8 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\OrganizationTypeRepository;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\OscarFormatterFactory;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
 use Oscar\Strategy\Search\OrganizationSearchStrategy;
 use Oscar\Traits\UseEntityManager;
@@ -84,17 +86,23 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     /**
      * @return OscarUserContext
      */
-    protected function getOscarUserContext()
+    protected function getOscarUserContext() :OscarUserContext
     {
         return $this->getOscarUserContextService();
+    }
+
+
+    public function getOrganizationRoleRepository() :OrganizationRoleRepository
+    {
+        return $this->getEntityManager()->getRepository(OrganizationRole::class);
     }
 
     /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
      */
-    public function getAvailableRolesOrganisationActivity()
+    public function getAvailableRolesOrganisationActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT ) :array
     {
-        return $this->getEntityManager()->getRepository(OrganizationRole::class)->findAll();
+        return OscarFormatterFactory::getFormatter($format)->format($this->getOrganizationRoleRepository()->findAll());
     }
 
     /**
@@ -108,7 +116,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getRoleOrganizationById(int $organizationRoleId, $throw = true): OrganizationRole
     {
         /** @var OrganizationRoleRepository $repo */
-        $repo = $this->getEntityManager()->getRepository(OrganizationRole::class);
+        $repo = $this->getOrganizationRoleRepository();
 
         $role = $repo->find($organizationRoleId);
 

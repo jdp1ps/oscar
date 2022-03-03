@@ -6,6 +6,7 @@ namespace Oscar\Entity;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToOne as OneToOne;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Utils\DateTimeUtils;
 
 /**
@@ -343,7 +344,7 @@ class ActivityPcruInfos
         return $out;
     }
 
-    public function validation()
+    public function validation(OscarConfigurationService $oscarConfigurationService) :array
     {
         $this->error = [];
         $datas = $this->toArray();
@@ -382,6 +383,7 @@ class ActivityPcruInfos
         $out['ChaireIndustrielle'] = self::VALIDATION_EMPTY;
         $out['PresencePartenaireIndustriel'] = self::VALIDATION_EMPTY;
         $out['contract_signed'] = self::VALIDATION_ERROR;
+
 
         $disabledFields = [
             'Equipe','ContratsAssocies', 'EmployeurResponsableScientifique',

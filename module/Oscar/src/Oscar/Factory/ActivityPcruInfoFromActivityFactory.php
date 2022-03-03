@@ -53,8 +53,8 @@ class ActivityPcruInfoFromActivityFactory
         // --- Recherche automatique de l'Unité (Laboratoire)
 
         // Intitulé du rôle "Laboratoire" pour PCRU
-        $roleStructureToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_unite_role', 'Laboratoire');
-        $rolePartnerToFind = $this->oscarConfigurationService->getOptionalConfiguration('pcru_partner_role', 'Financeur');
+        $roleStructureToFind = $this->oscarConfigurationService->getPcruUnitRoles();
+        $rolePartnerToFind = $this->oscarConfigurationService->getPcruPartnerRoles();
 
         // Donnèes trouvées
         $codeUniteLabintel = "";
@@ -62,16 +62,20 @@ class ActivityPcruInfoFromActivityFactory
         $idPartenairePrincipal = "";
 
         // Récupération des laboratoires
-        $structures = $activity->getOrganizationsWithRole($roleStructureToFind);
-        if( count($structures) == 0 ){
-            $activityPcruInfos->addError("Aucune structure $roleStructureToFind pour cette activité.");
+
+        $structures = $activity->getOrganizationsWithOneRole($roleStructureToFind);
+
+        if (count($structures) == 0) {
+            $activityPcruInfos->addError(
+                "Aucune structure  " . implode("/", $roleStructureToFind) . " pour cette activité ."
+            );
         }
 
         $organizationsParsed = [];
         /** @var ActivityOrganization $unite */
         foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
             $organizationsParsed[] = (string)$unite->getOrganization();
-            if( $unite->getOrganization()->getLabintel() ){
+            if ($unite->getOrganization()->getLabintel()) {
                 $codeUniteLabintel = $unite->getOrganization()->getLabintel();
                 $sigleUnit = $unite->getOrganization()->getShortName();
             }
@@ -80,41 +84,43 @@ class ActivityPcruInfoFromActivityFactory
         $partners = [];
         /** @var ActivityOrganization $partner */
         foreach ($activity->getOrganizationsWithRole($rolePartnerToFind) as $partner) {
-            if( $partner->getOrganization()->getCodePcru() ){
-                if( $idPartenairePrincipal == "" ){
+            if ($partner->getOrganization()->getCodePcru()) {
+                if ($idPartenairePrincipal == "") {
                     $idPartenairePrincipal = $partner->getOrganization()->getCodePcru();
                 } else {
                     $partners[] = $partner->getOrganization()->getCodePcru();
                 }
             }
         }
-        if( $codeUniteLabintel == "" ){
-            $activityPcruInfos->addError("Le $roleStructureToFind (".implode(', ', $organizationsParsed).") n'a pas de code LABINTEL");
+        if ($codeUniteLabintel == "") {
+            $activityPcruInfos->addError(
+                "Aucune des structures trouvées (" .implode("/", $roleStructureToFind).") n'ont de code LABINTEL valide"
+            );
         }
 
-        // Recherche automatique du responsable scientifique
-        $roleRSToFind = $this->oscarConfigurationService
-            ->getOptionalConfiguration('pcru_respscien_role', 'Responsable scientifique');
+        // --- Recherche automatique du responsable scientifique
+        $roleRSToFind = $this->oscarConfigurationService->getPcruInChargeRole();
         $responsable = "";
 
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsWithRole($roleRSToFind) as $personActivity) {
-            $responsable = $personActivity->getPerson()->getFirstname() . " " . strtoupper($personActivity->getPerson()->getLastname());
+            $responsable = $personActivity->getPerson()->getFirstname() . " " . strtoupper(
+                    $personActivity->getPerson()->getLastname()
+                );
         }
 
         // Document signé
-        $typeDocumentSigne = $this->oscarConfigurationService
-            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
+        $typeDocumentSigne = $this->oscarConfigurationService->getPcruContractType();
         $documentSigned = null;
         $documentId = null;
 
         /** @var ContractDocument $document */
-        foreach ($activity->getDocuments() as $document){
-            if( $document->getTypeDocument()->getLabel() == $typeDocumentSigne ){
+        foreach ($activity->getDocuments() as $document) {
+            if ($document->getTypeDocument()->getLabel() == $typeDocumentSigne) {
                 // Test sur les versions
-                if(  $documentSigned != null ){
+                if ($documentSigned != null) {
                     // On regarde si on est pas entrain de parser une ancienne version du fichier
-                    if( $documentName == $document->getFileName() ){
+                    if ($documentName == $document->getFileName()) {
                         continue;
                     }
                     $activityPcruInfos->addError("Il y'a plusieurs $typeDocumentSigne sur cette activité");
@@ -126,16 +132,14 @@ class ActivityPcruInfoFromActivityFactory
             }
         }
 
-        if( !$documentSigned ){
-            $activityPcruInfos->addError("Oscar n'a pas trouvé de document '$typeDocumentSigne' à utiliser pour la soumission PCRU.");
+        if (!$documentSigned) {
+            $activityPcruInfos->addError(
+                "Oscar n'a pas trouvé de document '$typeDocumentSigne' à utiliser pour la soumission PCRU."
+            );
         }
 
         /** @var PcruTypeContractRepository $pcruContractTypeRepository */
         $pcruContractTypeRepository = $this->entityManager->getRepository(PcruTypeContract::class);
-
-        /** @var string $pcruContract */
-        $pcruType = $pcruContractTypeRepository->getPcruContractForActivityTypeChained($activity->getActivityType());
-
 
         $activityPcruInfos->setActivity($activity)
             ->setDocumentPath($documentSigned)
@@ -149,7 +153,6 @@ class ActivityPcruInfoFromActivityFactory
             ->setIdPartenairePrincipal($idPartenairePrincipal)
             ->setResponsableScientifique($responsable)
             ->setCodeUniteLabintel($codeUniteLabintel)
-            ->setTypeContrat($pcruType)
             ->setObjet($activity->getLabel())
             ->setAcronyme($activity->getAcronym())
             ->setMontantTotal($activity->getAmount())
@@ -158,14 +161,23 @@ class ActivityPcruInfoFromActivityFactory
             ->setDateDerniereSignature($activity->getDateSigned())
             ->setReference($activity->getOscarNum());
 
+        // Patch (si le type d'activité est inconnu)
+        if ($activity->getActivityType()) {
+            $pcruType = $pcruContractTypeRepository->getPcruContractForActivityTypeChained(
+                $activity->getActivityType()
+            );
+            $activityPcruInfos->setTypeContrat($pcruType);
+        }
+
         return $activityPcruInfos;
     }
 
-    public static function getHeaders(){
+    public static function getHeaders()
+    {
         return [
             'Objet' => "Intitulé de l'activité",
             'CodeUniteLabintel' => 'Code LABINTEL (extrait depuis la fiche organisation du laboratoire)',
-            'SigleUnite' =>'Extrait depuis la fiche organisation du laboratoire (nom court)',
+            'SigleUnite' => 'Extrait depuis la fiche organisation du laboratoire (nom court)',
             'NumContratTutelleGestionnaire' => 'N°Oscar',
             'Equipe' => 'off',
             'TypeContrat' => '',

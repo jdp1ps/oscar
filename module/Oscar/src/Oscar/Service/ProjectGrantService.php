@@ -7,8 +7,11 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
+use Doctrine\Persistence\ObjectRepository;
 use Oscar\Entity\ActivityDate;
+use Oscar\Entity\ActivityDateRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
@@ -31,12 +34,15 @@ use Oscar\Entity\PcruTypeContractRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Oscar\Entity\TVA;
 use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\AsArrayFormatter;
+use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\OscarFormatterFactory;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
@@ -580,7 +586,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $datas;
     }
 
-    public function getMilestoneTypesArray()
+    public function getMilestoneTypesArray() :array
     {
         $milestones = [];
         /** @var DateType $milestoneType */
@@ -588,6 +594,16 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $milestones[$milestoneType->getId()] = $milestoneType->toArray();
         }
         return $milestones;
+    }
+
+    protected function getRoleRepository() : RoleRepository
+    {
+        return $this->getEntityManager()->getRepository(Role::class);
+    }
+
+    public function getRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT) :array
+    {
+        return $this->getRoleRepository()->getRolesAtActivityArray($format);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1093,6 +1109,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $out;
     }
 
+    public function getAvailableDocumentTypes( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT ) :array
+    {
+        return OscarFormatterFactory::getFormatter($format)->format($this->getDocumentTypes());
+    }
+
     public function getTVAsForJson()
     {
         try {
@@ -1515,14 +1536,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /**
      * Retourne l'échéance.
      *
-     * @param $id Identifiant de l'échéance
+     * @param $id int Identifiant de l'échéance
      * @param bool|true $throw
      * @return null|object
      * @throws \Exception
      */
-    public function getActivityDate($id, $throw = true)
+    public function getActivityDate(int $id, $throw = true) :ActivityDate
     {
-        $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
+        $activityDate = $this->getActivityDateRepository()->find($id);
         if ($throw === true && !$activityDate) {
             throw new \Exception(sprintf("Échéance '%s' introuvable", $id));
         }
@@ -1537,12 +1558,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return bool
      * @throws \Exception
      */
-    public function deleteActivityDate(ActivityDate $activityDate, $throw = true)
+    public function deleteActivityDate(ActivityDate $activityDate, $throw = true) :void
     {
         try {
             $this->getEntityManager()->remove($activityDate);
             $this->getEntityManager()->flush();
-            return true;
         } catch (\Exception $e) {
             if ($throw) {
                 throw new \Exception(sprintf("Impossible de supprimer l'échéance '%s'.", $activityDate->getId()));
@@ -2213,6 +2233,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
+     * @return array
+     */
+    public function getDocumentTypes() :array
+    {
+        return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
+    }
+
+    /**
      * @param string $format
      * @return array
      * @throws OscarException
@@ -2297,5 +2325,15 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         } else {
             throw new OscarException("Format pour la liste des sources de financement PCRU non-disponible");
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// REPOSITORY ACCESS
+    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function getActivityDateRepository() :ActivityDateRepository
+    {
+        return $this->getEntityManager()->getRepository(ActivityDate::class);
     }
 }

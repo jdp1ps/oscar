@@ -26,6 +26,7 @@ use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Strategy\Search\PersonSearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
@@ -1824,16 +1825,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Retourne la liste des rôles disponibles niveau activité.
-     *
-     * @return Role[]
+     * @param string $format
+     * @return array
      */
-    public function getAvailableRolesPersonActivity()
+    public function getAvailableRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT) :array
     {
-        /** @var RoleRepository $roleRepository */
-        $roleRepository = $this->getEntityManager()->getRepository(Role::class);
-        $roles = $roleRepository->getRolesAtActivityArray();
-        return $roles;
+        return $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray($format);
     }
 
     /**
