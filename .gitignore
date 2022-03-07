@@ -111,3 +111,7 @@ Dockerfile_*
 *#
 public/documentation
 module/Demo
+
+# DOCKER
+dockerize/local
+!dockerize/local/.gitkeep

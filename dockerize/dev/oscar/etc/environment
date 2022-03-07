@@ -1,6 +1,0 @@
-http_proxy=http://proxy.unicaen.fr:3128
-https_proxy=http://proxy.unicaen.fr:3128
-HTTP_PROXY=http://proxy.unicaen.fr:3128
-HTTPS_PROXY=http://proxy.unicaen.fr:3128
-no_proxy=127.0.0.1,localhost,oscar_dev_spartan,oscar_dev_gearman_spartan,oscar_dev_elasticsearch_spartan
-NO_PROXY=127.0.0.1,localhost,oscar_dev_spartan,oscar_dev_gearman_spartan,oscar_dev_elasticsearch_spartan

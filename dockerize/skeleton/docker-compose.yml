@@ -1,0 +1,103 @@
+version: "3"
+services:
+
+  # OSCAR (sources)
+  £CONTAINER_OSCAR:
+    container_name: £CONTAINER_OSCAR
+    build:
+        context: ./oscar/
+        dockerfile: Dockerfile
+        args:
+            proxy_environnement: "£PROXY"
+            service_oscar_name: £CONTAINER_OSCAR
+            service_postgresql_name: £CONTAINER_POSTGRESQL
+            service_gearman_name: £CONTAINER_GEARMAN
+            service_elasticsearch_name: £CONTAINER_ELASTICSEARCH
+    ports:
+      - £PORT_OSCAR:80
+      - 9000:9000
+    volumes:
+      - £DIR_OSCAR:/var/OscarApp
+    networks:
+      - £CONTAINER_NETWORK
+    tty: true
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # ELASTIC DEARCH
+  £CONTAINER_ELASTICSEARCH:
+    depends_on:
+      - £CONTAINER_OSCAR
+    container_name: £CONTAINER_ELASTICSEARCH
+    environment:
+      - discovery.type=single-node
+    build:
+        context: ./elasticsearch/
+        dockerfile: Dockerfile
+        args:
+          proxy_environnement: "£PROXY"
+          service_oscar_name: £CONTAINER_OSCAR
+          service_postgresql_name: £CONTAINER_POSTGRESQL
+          service_gearman_name: £CONTAINER_GEARMAN
+    networks:
+      - £CONTAINER_NETWORK
+    tty: true
+    restart: "always"
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # POSTGRESQL
+  £CONTAINER_POSTGRESQL:
+    depends_on:
+      - £CONTAINER_OSCAR
+    container_name: £CONTAINER_POSTGRESQL
+    build:
+      context: ./postgresql/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: "£PROXY"
+        service_oscar_name: £CONTAINER_OSCAR
+        service_gearman_name: £CONTAINER_GEARMAN
+        service_elasticsearch_name: £CONTAINER_ELASTICSEARCH
+        pathdatas: "£DIR_POSTGRESQL_DATAS"
+    environment:
+      POSTGRES_PASSWORD: "azerty"
+      POSTGRES_USER: "oscar"
+      POSTGRES_DB: "oscar_dev"
+    networks:
+      - £CONTAINER_NETWORK
+    tty: true
+    volumes:
+      - £DIR_POSTGRESQL_DATAS:/var/lib/postgresql/data
+    restart: "always"
+
+  # ADMINERDEV
+  £CONTAINER_ADMINER:
+    container_name: £CONTAINER_ADMINER
+    image: adminer
+    restart: "always"
+    ports:
+      - £PORT_ADMINER:8080
+    networks:
+      - £CONTAINER_NETWORK
+    tty: true
+
+  # GEARMAN
+  £CONTAINER_GEARMAN:
+    container_name: £CONTAINER_GEARMAN
+    build:
+        context: ./gearman/
+        dockerfile: Dockerfile
+        args:
+          proxy_environnement: "£PROXY"
+          service_oscar_name: £CONTAINER_OSCAR
+          service_postgresql_name: £CONTAINER_POSTGRESQL
+          service_elasticsearch_name: £CONTAINER_ELASTICSEARCH
+    networks:
+      - £CONTAINER_NETWORK
+    tty: true
+    restart: "unless-stopped"
+
+# RéSEAU VIRUEL
+networks:
+  £CONTAINER_NETWORK:
+    driver: bridge

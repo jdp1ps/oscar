@@ -1,0 +1,2 @@
+Acquire::http::proxy "£PROXY";
+Acquire::https::proxy "£PROXY";
