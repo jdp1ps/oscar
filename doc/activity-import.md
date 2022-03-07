@@ -280,17 +280,19 @@ La valeur est un tableau contenant des Objets JSON
     "milestones": [
         {
             "type": "Rapport scientifique",
-            "date": "2014-07-03"
+            "date": "2014-07-03",
+            "description": ""
         },
         {
             "type": "Fin des dépenses",
-            "date": "2018-01-31"
+            "date": "2018-01-31",
+            "description": "Description rapport fin des dépenses"
         }
     ]
 }
 ```
 
-Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) :
+Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) et une clef `description` du jalon :
 
 
 
@@ -316,7 +318,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 
 ```json
 {
-    "milestones": [
+    "payments": [
         {
             "amount": 249.5,
             "date": "2014-07-03",
@@ -413,7 +415,10 @@ return [
     28  => "currency",
     29  => "assietteSubventionnable",
     30  => "status",
-    31 => "disciplines"
+    31 => "disciplines",
+    
+    34  => "milestones.Rapport scientifique 9.1"
+    
 ];
 ```
 
@@ -512,7 +517,6 @@ La donnée de colonne `Max Plank, Albert Einstein` produirait :
 }
 ```
 
-
 ### milestones.Type
 
 La clef `milestones` prend pour paramètre le type de jalon trouvé dans la cellule. Si par exemple la colonne 13 contient la date du rapport scientifique, la configuration se présentera ainsi :
@@ -530,12 +534,41 @@ On obtiendra en JSON :
   "milestones": [
       {
         "type": "Rapport scientifique",
-        "date": "VALEUR DE LA COLONNE"
+        "date": "VALEUR DE LA COLONNE",
+        "description": ""
       }
   ]
 }
 ```
 
+### milestones.Type.POSITION
+
+La clef `milestones` peut aussi recevoir une position pour définir une description de ce jalon.
+Si par exemple la colonne 34 est paramétré ainsi, alors nous explicitions la position de la colonne qui contient la description, à savoir 1 colonne plus loin dans cet exemple.
+
+la configuration se présentera ainsi :
+
+```php
+return [
+  34  => "milestones.Rapport scientifique 9.1"
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "milestones": [
+      {
+        "type": "Rapport scientifique",
+        "date": "VALEUR DE LA COLONNE",
+        "description": "DESCRIPTION RAPPORT SCIENTIFIQUE, DANS CET EXEMPLE COLONNE + 1 (35)"
+      }
+  ]
+}
+```
+
+La clef `milestones` peut donc être configurée : sous la forme `millestones.TYPE.POSITION_DESCRIPTION`.
 
 ### payments.POSITIONS
 
