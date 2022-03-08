@@ -13,6 +13,7 @@ use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,13 +26,13 @@ abstract class  OscarAdvancedCommandAbstract extends OscarCommandAbstract
     const OPTION_VERBOSE = 'verbose';
 
     /** @var InputInterface */
-    private $input;
+    private InputInterface $input;
 
     /** @var OutputInterface */
-    private $output;
+    private OutputInterface $output;
 
     /** @var SymfonyStyle */
-    private $io;
+    private SymfonyStyle $io;
 
     protected function configure()
     {
@@ -62,9 +63,14 @@ abstract class  OscarAdvancedCommandAbstract extends OscarCommandAbstract
         return $this->io;
     }
 
+    protected function isNoInteraction() :bool
+    {
+        return !$this->input->isInteractive();
+    }
+
     protected function isInteractive(): bool
     {
-        return !($this->isForce() || $this->isQuiet());
+        return !($this->isForce() || $this->isQuiet() || $this->isNoInteraction());
     }
 
     protected function isForce(): bool

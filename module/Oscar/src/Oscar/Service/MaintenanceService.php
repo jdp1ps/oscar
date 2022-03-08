@@ -58,7 +58,7 @@ class MaintenanceService implements UseEntityManager
         return false;
     }
 
-    public function privilegesCheckUpdate(OutputStyle $output){
+    public function privilegesCheckUpdate(OutputStyle $output, bool $nointeraction = false){
 
         $cheminFichier = realpath(__DIR__ . '/../../../../../install/privileges.json');
 
@@ -155,7 +155,11 @@ class MaintenanceService implements UseEntityManager
             return;
         }
 
-        $confirm = $output->confirm("Mettre à jour les privilèges ?", false);
+        if( !$nointeraction ){
+            $confirm = $output->confirm("Mettre à jour les privilèges ?", false);
+        } else {
+            $confirm = true;
+        }
 
         if ($confirm !== true) {
             $output->warning("Opération abandonnée");

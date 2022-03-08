@@ -14,7 +14,8 @@ chmod -R 777 data/DoctrineORMModule
 ### DEMO DATAS
 php bin/oscar.php auth:sync install/demo/authentification.json
 php bin/oscar.php organizations:sync-json install/demo/organizations.json
-php bin/oscar.php persons:sync-json install/demo/organizations.json
 php bin/oscar.php persons:sync-json install/demo/persons.json
+php bin/oscar.php check:privileges -n
+php bin/oscar.php check:privileges -n
 
 exit 0

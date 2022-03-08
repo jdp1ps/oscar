@@ -3,6 +3,9 @@ services:
 
   # OSCAR (sources)
   £CONTAINER_OSCAR:
+    depends_on:
+      - £CONTAINER_ELASTICSEARCH
+      - £CONTAINER_POSTGRESQL
     container_name: £CONTAINER_OSCAR
     build:
         context: ./oscar/
@@ -47,8 +50,6 @@ services:
   # --------------------------------------------------------------------------------------------------------------------
   # POSTGRESQL
   £CONTAINER_POSTGRESQL:
-    depends_on:
-      - £CONTAINER_OSCAR
     container_name: £CONTAINER_POSTGRESQL
     build:
       context: ./postgresql/
@@ -80,6 +81,7 @@ services:
     networks:
       - £CONTAINER_NETWORK
     tty: true
+
 
   # GEARMAN
   £CONTAINER_GEARMAN:
