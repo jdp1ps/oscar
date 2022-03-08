@@ -27,12 +27,15 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
      * @param $connectorName
      * @return Organization
      */
-    public function getInstance($jsonData, $connectorName=null)
+    public function getInstance($jsonData, $connectorName = null)
     {
         $organization = new Organization();
 
-        return $this->hydrateWithDatas($organization, $jsonData,
-            $connectorName);
+        return $this->hydrateWithDatas(
+            $organization,
+            $jsonData,
+            $connectorName
+        );
     }
 
     /**
@@ -42,12 +45,14 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
     function hydrateWithDatas($object, $jsonData, $connectorName = null)
     {
         if ($connectorName !== null) {
-            $object->setConnectorID($connectorName,
-                $this->getFieldValue($jsonData, 'uid'));
+            $object->setConnectorID(
+                $connectorName,
+                $this->getFieldValue($jsonData, 'uid')
+            );
         }
 
         $object
-            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData,'dateupdate', null)))
+            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', null)))
             ->setLabintel($this->getFieldValue($jsonData, 'labintel', null))
             ->setShortName($this->getFieldValue($jsonData, 'shortname'))
             ->setCode($this->getFieldValue($jsonData, 'code'))
@@ -62,21 +67,20 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             // Ajout de champs
             ->setDuns($this->getFieldValue($jsonData, 'duns'))
             ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra'))
-            ->setRnsr($this->getFieldValue($jsonData, 'rnsr'))
-        ;
+            ->setRnsr($this->getFieldValue($jsonData, 'rnsr'));
 
-        if( property_exists($jsonData, 'address') ){
+        if (property_exists($jsonData, 'address')) {
             $address = $jsonData->address;
-            $object
-                ->setStreet1(property_exists($address,'address1') ? $address->address1 : null)
-                ->setStreet2(property_exists($address,'address2') ? $address->address2 : null)
-                ->setZipCode(property_exists($address,'zipcode') ? $address->zipcode : null)
-                ->setCity(property_exists($address,'city') ? $address->city : null)
-                ->setCountry(property_exists($address,'country') ? $address->country : null)
-                ->setBp(property_exists($address,'address3') ? $address->address3 : null);
+            if (is_object($address)) {
+                $object
+                    ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
+                    ->setStreet2(property_exists($address, 'address2') ? $address->address2 : null)
+                    ->setZipCode(property_exists($address, 'zipcode') ? $address->zipcode : null)
+                    ->setCity(property_exists($address, 'city') ? $address->city : null)
+                    ->setCountry(property_exists($address, 'country') ? $address->country : null)
+                    ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
+            }
         }
-
-
 
 
         return $object;

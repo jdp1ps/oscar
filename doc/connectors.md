@@ -175,6 +175,22 @@ method: POST
 force_unsecure_http: false
 ```
 
+#### Commande locale
+
+Obtention des données via l'exécution d'une commande système locale (Ex : avec **Oscar Bridge**)
+
+```yml
+# Commande pour obtenir sortie le JSON complet (toutes les personnes) - En une seule ligne
+url_persons: '/usr/bin/php /var/OscarBridge/bin/console json:persons-get-all'
+
+# Commande pour synchroniser une seule personne
+url_person: '/usr/bin/php /var/OscarBridge/bin/console json:person-get-one-by-uid %s'
+
+access_strategy: Oscar\Connector\Access\ConnectorLocalCommand
+```
+
+> Plus d'information sur Oscar bridge : https://git.unicaen.fr/certic/oscar-bridge
+
 #### Tester la configuration du connecteur
 
 Vous pouvez utiliser la commande `php bin/oscar.php check:config` pour vérifier que votre connecteur est correctement configuré (la commande va executer une requête d'accès HTTP automatiquement sur l'URL "liste").
