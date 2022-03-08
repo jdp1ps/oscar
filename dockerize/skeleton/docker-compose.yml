@@ -29,8 +29,6 @@ services:
   # --------------------------------------------------------------------------------------------------------------------
   # ELASTIC DEARCH
   £CONTAINER_ELASTICSEARCH:
-    depends_on:
-      - £CONTAINER_OSCAR
     container_name: £CONTAINER_ELASTICSEARCH
     environment:
       - discovery.type=single-node
