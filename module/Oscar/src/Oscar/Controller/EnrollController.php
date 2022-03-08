@@ -444,7 +444,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             );
             return $this->getResponseOk("La personne a bien été ajouté");
         } catch (\Exception $e) {
-            $msg = "Impossible d'ajouter l'organisation à l'activité";
+            $msg = "Impossible d'ajouter l'organisation à l'activité : " . $e->getMessage();
             $this->getLoggerService()->error("$msg : " . $e->getMessage());
             return $this->getResponseInternalError($msg);
         }
@@ -551,9 +551,9 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $input = intval($value);
         }
         if (!is_int($input)) {
-            throw new OscarException("La valeur '$input' n'est pas un entier.");
+            throw new OscarException("La valeur '$value' n'est pas un entier.");
         }
-        return $value;
+        return $input;
     }
 
     /**
