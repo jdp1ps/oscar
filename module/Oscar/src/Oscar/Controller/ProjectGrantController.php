@@ -411,16 +411,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $this->getResponseBadRequest("MAUVAISE UTILISATION ($method)");
         }
 
-
-        $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
-
-
         return [
             'asAdmin' => $asAdmin,
             'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
-            'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson(
-                $this->getOrganizationService()->getAvailableRolesOrganisationActivity()
-            ),
+            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity()
         ];
     }
 
