@@ -589,14 +589,23 @@ class NotificationService implements UseServiceContainer
         $now = (new \DateTime('now'))->modify('-1 month');
 
         foreach ($notificationsActivity as $na) {
+            // TODO récupérer les rôles des personnes
+            // TODO Cas particulier sur le test du jalon, celui-ci est dépassé (terminé) mais la personne ne l'a pas qualifié c'est un cas particulier à prendre en compte dans la feature (ajouter à la condition)
             $isPasted = $ignorePast && ($na->getDateEffective() < $now);
             $idsPersonInPlace = [];
+
             if ($isPasted) {
                 continue;
             }
+
             /** @var NotificationPerson $inscrit */
             foreach ($na->getPersons() as $inscrit) {
                 $idPersonInscrit = $inscrit->getPerson()->getId();
+
+                // TODO faire première requête : "Quel est le jalon, ou en tout cas quel est le type de Jalon concerné par cette notification là ?"
+                // TODO Pour chaque personne récupérer les rôles qu'elle possède dans chaque activité et faire un comparatifs entre les rôles de la personnes et les rôles sur ce jalon.
+                // TODO Attention une personne possède des rôles sur une activité, sur le projet d'une activité et des rôles sur les organisations actives de l'activité
+                // TODO Sur l'objet personne il y a une méthode getOrganizations qui renvoie non pas des organisations, mais renvoie les organisations de personnes
 
                 // Ne devrait pas avoir la notif
                 if (!array_key_exists($idPersonInscrit, $expectedSubscribersById)) {
@@ -606,6 +615,8 @@ class NotificationService implements UseServiceContainer
                     $idsPersonInPlace[] = $idPersonInscrit;
                 }
             }
+
+
             $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
             if (count($diff) > 0) {
                 /** @var int $idPersonToAdd */
