@@ -1,2 +1,4 @@
 tmp
 *-local
+local/*
+!local/.gitkeep
