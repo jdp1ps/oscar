@@ -82,7 +82,7 @@ RUN apt-get install -y \
 
 # Install OCI (penser à forcer le proxy)
 #RUN pear config-set http_proxy "${http_proxy}"
-RUN pear config-set http_proxy "http://proxy.unicaen.fr:3128"
+RUN pear config-set http_proxy "£PROXY"
 COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
@@ -99,7 +99,6 @@ RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
-#RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug
