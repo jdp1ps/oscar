@@ -2,14 +2,17 @@
 
 Création des images DOCKER.
 
-```bash
-. install.sh dev http://proxy.unicaen.fr
+```shell
+. install.sh dev http://proxy.unicaen.fr:3128
+# ou ""
+. install.sh dev ""
 ```
 
 Soit
 
-```
+```shell
 . install.sh <TAG> <PROXY>
+# <PROXY> mettre "" pour une valeur de proxy par défaut vide
 ```
 
 les containers créé dans le dossier `local/<TAG>` :
@@ -22,7 +25,8 @@ les containers créé dans le dossier `local/<TAG>` :
 
 # Build / Run
 
-```
+```shell
+# cd local/<tag>
 cd local/dev
 
 # build
@@ -34,7 +38,8 @@ docker-compose up -d
 
 Accès à oscar (pour les opérations en ligne de commande) : 
 
-```
+```shell
+#docker-compose exec oscar_<TAG> sh
 docker-compose exec oscar_dev sh
 ```
 
@@ -48,12 +53,17 @@ Enjoy
 
 # Dev
 
-Stopper tous les containers
-
+```shell
+#Stopper tous les containers
 docker stop $(docker ps -a -q)
+```
 
+```shell
+#Supprimer les containes (éteints ou non)
 docker rm $(docker ps -a -q)
+```
 
+```shell
+#Supprimer les images Docker
 docker rmi $(docker images -q)
-
-
+```

@@ -15,9 +15,15 @@ ARG CONFIG_TEST="../config"
 LABEL authors="Herve Marie <herve.marie@unicaen.fr> Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
 LABEL description="OSCAR"
 
+# AVEC CETTE SOLUTION CI-DESSOUS (HM)) J'AI EU DES SOUCIS, FAUT'IL FAIRE AUTRE CHOSE QUE COPIER PAS TROUVE DE SOLUTION VIABLE STEPH AVEC COPIE DE FICHIERS.
 # PROXY (environment/apt)
-COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
-COPY etc/environment /etc/environment
+#COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
+#COPY etc/environment /etc/environment
+# REMPLACE PAR SOLUTION CI-DESSOUS FONCTIONNE A TOUS LES COUPS
+RUN if [ "$proxy_environnement" != "" ]; \
+    then \
+      echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
+    fi
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y\
@@ -27,10 +33,6 @@ RUN apt-get install -y\
         wget \
         git \
         && apt-get update && apt-get upgrade -y && apt-get clean
-
-# PROXY (wget)
-# Des doutes sur le fonctionnement, perso j'ai eu des soucis derrière le proxy unicaen (HM)
-COPY etc/apt/wgetrc /etc/apt/wgetrc
 
 # INSTALL PACKAGES OS
 RUN apt-get install -y \
@@ -80,9 +82,16 @@ RUN apt-get install -y \
 # Enable xdebug -> Need to install later xdebug
 #RUN pecl install xdebug
 
-# Install OCI (penser à forcer le proxy)
-#RUN pear config-set http_proxy "${http_proxy}"
-RUN pear config-set http_proxy "http://proxy.unicaen.fr:3128"
+# SOUCIS DERRIERE PROXY UNICAEN (HM) METHODE COPIE DE FICHIERS, PASSAGE PAR UN TEST IF ET CELA FONCTIONNE DANS TOUS LES CAS DE FIGURE
+# PROXY (wget)
+#COPY etc/apt/wgetrc /etc/apt/wgetrc
+# INSTALL OCI ET UTILISATION DE WGET (ATTENTION PROXY) -> LE HOOK VIA UN if CI-DESSOUS FONCTIONNE BIEN DERRIERE OU PAS UN PROXY (HM)
+RUN if [ "$proxy_environnement" != "" ]; \
+    then \
+      pear config-set http_proxy "$proxy_environnement"; \
+      echo "http_proxy = $proxy_environnement"  >> /etc/wgetrc && echo "https_proxy = $proxy_environnement" >> /etc/wgetrc; \
+    fi
+
 COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
@@ -99,7 +108,6 @@ RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
-#RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug
@@ -121,7 +129,7 @@ COPY run /usr/local/bin/run
 RUN chmod +x /usr/local/bin/run
 RUN a2enmod rewrite && a2enmod ssl
 
-#Composer
+#Composer (Attention proxy important pour du wget)
 RUN wget https://getcomposer.org/download/latest-stable/composer.phar
 RUN mv composer.phar /usr/local/bin/composer
 RUN chmod +x /usr/local/bin/composer
