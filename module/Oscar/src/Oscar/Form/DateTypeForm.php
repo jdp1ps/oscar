@@ -17,7 +17,6 @@ use Zend\InputFilter\InputFilterProviderInterface;
 
 class DateTypeForm extends Form implements InputFilterProviderInterface
 {
-    //public function __construct()
     public function __construct(array $roles, EntityManager $em, array $idsRolesCheck = [])
     {
         parent::__construct('datetype');

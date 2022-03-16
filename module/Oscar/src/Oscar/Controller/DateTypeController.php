@@ -116,9 +116,7 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
         }
         $form = new DateTypeForm($this->getOscarUserContextService()->getOscarRoles(), $this->getEntityManager(), $arrayRoles);
         $request = $this->getRequest();
-        //$entity = $this->getEntityManager()->getRepository(DateType::class)->find($this->params()->fromRoute('id'));
         $form->setAttribute('action', $this->url()->fromRoute('datetype/edit', ['id' => $entity->getId()]));
-        //$form->init();
         $form->bind($entity);
         $form->get('finishable')->setAttribute('checked', ($form->get('finishable')->getValue()) ? 'checked' : '');
 
