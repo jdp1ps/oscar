@@ -32,9 +32,37 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const document_location = 'document_location';
     const declarers_white_list = 'declarers_white_list';
     const auth_person_normalize = 'authPersonNormalize';
+    const pfi_strict = 'pfi_strict';
+    const pfi_strict_format = 'pfi_strict_format';
 
 
     const theme = 'theme';
+
+    /**
+     * @return bool
+     */
+    public function isPfiStrict() :bool
+    {
+        return $this->getEditableConfKey(self::pfi_strict, false);
+    }
+
+    /**
+     * @param bool $strict
+     * @throws OscarException
+     */
+    public function setStrict( bool $strict ) :void
+    {
+        $this->saveEditableConfKey(self::pfi_strict, $strict);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPfiRegex() :string
+    {
+        return $this->getEditableConfKey(self::pfi_strict_format, "");
+    }
+
 
     public function getApiFormats($default = [])
     {
@@ -248,7 +276,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getValidationPFI()
     {
-        return $this->getConfiguration('validation.pfi');
+        $reg = $this->getEditableConfKey(self::pfi_strict_format);
+        // On test si la nouvelle configuration est utilisée
+        if( $reg == null ){
+            return $this->getConfiguration('validation.pfi');
+        }
+        return $reg;
     }
 
     public function getTheme()

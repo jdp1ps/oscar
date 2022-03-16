@@ -169,6 +169,33 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
+    public function checkPFIRegex( $regex ) :array
+    {
+        $out = [
+            'warnings' => [],
+            'valids' => [],
+            'count' => 0,
+            'valid' => false
+        ];
+
+        $regex = $this->getOscarConfigurationService()->getPfiRegex();
+
+        $pfi = $this->getActivityRepository()->getDistinctPFI();
+        foreach ($pfi as $pfiTested) {
+            if( $pfiTested == "" ) continue;
+            if( preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)){
+                $out['valids'][] = $pfiTested;
+            } else {
+                $out['warnings'][] = $pfiTested;
+            }
+            $out['count']++;
+        }
+
+        $out['valid'] = count($out['warnings']) == 0;
+
+        return $out;
+    }
+
 
     public function getTypeDocument($typeDocumentId, $throw = false)
     {

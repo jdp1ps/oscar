@@ -845,8 +845,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
         $this->getOscarUserContextService()->checkWithorganizationDeep(Privileges::PROJECT_CREATE);
 
-        die("ICI");
-
         // Création du projet
         $project = new Project();
         $this->getEntityManager()->persist($project);
@@ -2418,8 +2416,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
 
                     // La saisie est un PFI
-                    if (preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
+                    if ( $this->getOscarConfigurationService()->isPfiStrict()
+                        && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
+                        $qb->andWhere('c.codeEOTP = :search');
                         $qb->andWhere('c.codeEOTP = :search');
                     } elseif (preg_match('/(.*)=(.*)/', $search, $result)) {
                         $key = $result[1];

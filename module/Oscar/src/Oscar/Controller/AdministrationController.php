@@ -266,6 +266,12 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'roleOrganizationPrincipal' => $rolesOrganisationPrincipal
         ];
 
+        if( $this->isAjax() && $this->params()->fromQuery('a') == 'verifypfi' ){
+            $regex = $this->params()->fromQuery('reg');
+            $pfis = $this->getProjectGrantService()->checkPFIRegex($regex);
+            return $this->ajaxResponse(['pfi' => $pfis]);
+        }
+
         if ($this->getHttpXMethod() == "POST") {
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
@@ -316,10 +322,23 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getOscarConfigurationService()->setDocumentUseVersionInName($value);
                     return $this->redirect()->toRoute('administration/parameters');
 
+                case OscarConfigurationService::pfi_strict:
+                    $strict = $this->params()->fromPost(OscarConfigurationService::pfi_strict) == "on";
+                    $regex = $this->params()->fromPost(OscarConfigurationService::pfi_strict_format);
+                    if( $strict == true && !$regex ){
+                        throw new OscarException("Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide");
+                    } else {
+                        // Contrôler la regex
+                        $this->getOscarConfigurationService()->setStrict($strict);
+                        $this->getOscarConfigurationService()->saveEditableConfKey(OscarConfigurationService::pfi_strict_format, $regex);
+                    }
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 default:
                     return $this->getResponseBadRequest("Paramètres non-reconnue");
             }
         }
+
 
         return [
             OscarConfigurationService::spents_account_filter => implode(
@@ -338,8 +357,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
             ],
             'organization_leader_role' => $organization_leader_role,
-            OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService(
-            )->getDocumentUseVersionInName()
+            OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService()->getDocumentUseVersionInName(),
+            OscarConfigurationService::pfi_strict => $this->getOscarConfigurationService()->isPfiStrict(),
+            OscarConfigurationService::pfi_strict_format => $this->getOscarConfigurationService()->getPfiRegex(),
         ];
     }
 
