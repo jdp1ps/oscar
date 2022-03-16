@@ -11,6 +11,7 @@ namespace Oscar\Entity;
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use UnicaenAuth\Acl\NamedRole;
 
 /**
@@ -28,11 +29,11 @@ class Role implements HierarchicalRoleInterface
 
     /**
      * Role constructor.
-     * @param int $id
      */
     public function __construct()
     {
         $this->privileges = new ArrayCollection();
+        $this->datesType = new ArrayCollection();
     }
 
     public function asArray()
@@ -147,6 +148,11 @@ class Role implements HierarchicalRoleInterface
      * @ORM\Column(name="accessible_exterieur", type="boolean", nullable=false, options={"default" : true})
      */
     protected $accessibleExterieur = true;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="DateType", mappedBy="roles", fetch="EAGER")
+     */
+    private $datesType;
 
 
     ///////////////////////////////////////////////////////////////// PRIVILEGES
@@ -462,4 +468,37 @@ class Role implements HierarchicalRoleInterface
     {
         return $this->isLevel(self::LEVEL_ACTIVITY);
     }
+
+    /**
+     * @return Collection|DateType[]
+     */
+    public function getDatesType(): Collection
+    {
+        return $this->datesType;
+    }
+
+    /**
+     * @param DateType $dateType
+     * @return $this
+     */
+    public function addDateType(DateType  $dateType): self
+    {
+        if (!$this->datesType->contains($dateType)) {
+            $this->datesType[] = $dateType;
+        }
+        return $this;
+    }
+
+    /**
+     * @param DateType $dateType
+     * @return $this
+     */
+    public function removeDateType(DateType $dateType): self
+    {
+        if ($this->datesType->contains($dateType)) {
+            $this->datesType->removeElement($dateType);
+        }
+        return $this;
+    }
+
 }

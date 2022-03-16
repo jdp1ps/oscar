@@ -629,7 +629,7 @@ class NotificationService implements UseServiceContainer
                 }
             }
         }
-        $this->getEntityManager()->flush();
+        //$this->getEntityManager()->flush();
     }
 
 
