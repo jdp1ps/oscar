@@ -52,15 +52,18 @@ class OscarDataControlPFICommand extends OscarAdvancedCommandAbstract
         }
 
         $repport = $this->getProjectGrantService()->checkPFIRegex($regex, false);
+        if( $repport['error'] ){
+            $this->getIO()->error($repport['error']);
+        }
         $sep = "";
         $this->getIO()->write("PFI conforme : ");
         foreach ($repport['valids'] as $pfi) {
-            $this->getIO()->writeln("$sep<green>$pfi</green>");
+            $this->getIO()->write("$sep<green>$pfi</green>");
             $sep = ", ";
         }
 
         $sep = "";
-        $this->getIO()->write("PFI non-conforme : ");
+        $this->getIO()->write("\nPFI non-conforme : ");
         foreach ($repport['warnings'] as $pfi) {
             $this->getIO()->write("$sep<red>$pfi</red>");
             $sep = ", ";

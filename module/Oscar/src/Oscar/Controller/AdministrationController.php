@@ -324,6 +324,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                 case OscarConfigurationService::pfi_strict:
                     $strict = $this->params()->fromPost(OscarConfigurationService::pfi_strict) == "on";
+                    var_dump($strict);
+                    die();
                     $regex = $this->params()->fromPost(OscarConfigurationService::pfi_strict_format);
                     if( $strict == true && !$regex ){
                         throw new OscarException("Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide");
@@ -340,6 +342,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
 
 
+        $pfiFixed = $this->getOscarConfigurationService()->getPfiRegex();
         return [
             OscarConfigurationService::spents_account_filter => implode(
                 ', ',
@@ -359,7 +362,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'organization_leader_role' => $organization_leader_role,
             OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService()->getDocumentUseVersionInName(),
             OscarConfigurationService::pfi_strict => $this->getOscarConfigurationService()->isPfiStrict(),
-            OscarConfigurationService::pfi_strict_format => $this->getOscarConfigurationService()->getPfiRegex(),
+            OscarConfigurationService::pfi_strict_format => $pfiFixed,
+           "pfi_default_format" => $this->getOscarConfigurationService()->getConfiguration('validation.pfi'),
         ];
     }
 

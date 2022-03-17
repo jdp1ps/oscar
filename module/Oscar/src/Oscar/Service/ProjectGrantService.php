@@ -175,8 +175,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             'warnings' => [],
             'valids' => [],
             'count' => 0,
-            'valid' => false
+            'valid' => false,
+            'error' => []
         ];
+
+        $badPfi = false;
 
         $pfi = $this->getActivityRepository()->getDistinctPFI();
         foreach ($pfi as $pfiTested) {
@@ -184,9 +187,16 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             if( preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)){
                 $out['valids'][] = $pfiTested;
             } else {
+                $badPfi = "Un ou plusieurs PFI ne correspondent pas au format attendu";
                 $out['warnings'][] = $pfiTested;
             }
             $out['count']++;
+        }
+        if($badPfi){
+            $out['error'][] = $badPfi;
+        }
+        if(!$regex){
+            $out['error'][] = "Aucune regex renseignée";
         }
 
         $out['valid'] = count($out['warnings']) == 0;

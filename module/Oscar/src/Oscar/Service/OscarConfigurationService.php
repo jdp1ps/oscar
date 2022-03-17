@@ -44,7 +44,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function isPfiStrict() :bool
     {
         $new = $this->getEditableConfKey(self::pfi_strict, null);
-        if( $new == null ){
+
+        if( $new === null ){
             return true;
         }
         return $new;
