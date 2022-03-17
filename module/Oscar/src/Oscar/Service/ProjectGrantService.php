@@ -178,8 +178,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             'valid' => false
         ];
 
-        $regex = $this->getOscarConfigurationService()->getPfiRegex();
-
         $pfi = $this->getActivityRepository()->getDistinctPFI();
         foreach ($pfi as $pfiTested) {
             if( $pfiTested == "" ) continue;

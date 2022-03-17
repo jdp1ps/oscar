@@ -34,7 +34,7 @@ class OscarDataControlPFICommand extends OscarAdvancedCommandAbstract
             $format = "<red>%s</red>";
         }
         $this->getIO()->writeln("Mode strict : <bold>" .($strict ? "<green>OUI</green>" : "<red>non</red>") . "</bold>");
-        $regex = $this->getOscarConfigurationService()->getPfiRegex();
+        $regex = $this->getOscarConfigurationService()->getValidationPFI();
         $this->getIO()->writeln("Regex : <bold>" . $regex . "</bold>");
 
 

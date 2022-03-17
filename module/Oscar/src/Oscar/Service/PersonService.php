@@ -1615,6 +1615,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         $filters['ids'] = $ids;
                     }
                 } catch (\Exception $e) {
+                    die("what ??? " . $e->getMessage());
                     $this->getLoggerService()->error(
                         sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
                     );
