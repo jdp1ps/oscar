@@ -15,8 +15,12 @@ ARG CONFIG_TEST="../config"
 LABEL authors="Herve Marie <herve.marie@unicaen.fr> Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
 LABEL description="OSCAR"
 
+RUN if [ "$proxy_environnement" != "" ]; \
+    then echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
+    fi
+
 # PROXY (environment/apt)
-COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
+# COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
 COPY etc/environment /etc/environment
 
 RUN apt-get update && apt-get upgrade -y
@@ -30,7 +34,7 @@ RUN apt-get install -y\
 
 # PROXY (wget)
 # Des doutes sur le fonctionnement, perso j'ai eu des soucis derrière le proxy unicaen (HM)
-COPY etc/apt/wgetrc /etc/apt/wgetrc
+COPY etc/wgetrc /etc/wgetrc
 
 # INSTALL PACKAGES OS
 RUN apt-get install -y \
@@ -93,6 +97,11 @@ RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/l
 
 RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
     ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
+
+
+RUN if [ "$proxy_environnement" != "" ]; \
+    then pear config-set http_proxy "£PROXY" \
+    fi
 
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
 RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \

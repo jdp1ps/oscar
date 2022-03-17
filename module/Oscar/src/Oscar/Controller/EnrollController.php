@@ -341,8 +341,15 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
         try {
             $datas = $this->getPostedNew();
-            $person = $this->getPersonService()->getPersonById($datas['enroled'], true);
-            $role = $this->getPersonService()->getRolePersonById($datas['role'], true);
+            $person = $this->getPersonService()->getPersonById($datas['enroled'], false);
+            if( !$person ){
+                throw new OscarException(sprintf("Impossible de charger la personne '%s'.", $datas['enroled']));
+            }
+            $role = $this->getPersonService()->getRolePersonById($datas['role'], false);
+            if( !$role ){
+                throw new OscarException("Vous devez renseigner un rôle");
+            }
+
             $this->getPersonService()->personActivityAdd(
                 $activity,
                 $person,
@@ -352,8 +359,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             );
             return $this->getResponseOk("La personne a bien été ajouté");
         } catch (\Exception $e) {
-            $msg = "Impossible d'ajouter la personne à l'activité";
-            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            $msg = "Impossible d'ajouter la personne à l'activité, " . $e->getMessage();
             return $this->getResponseInternalError($msg);
         }
     }
