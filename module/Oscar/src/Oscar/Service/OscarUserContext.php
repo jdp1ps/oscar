@@ -182,6 +182,19 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getRoleRepository()->getRolesAvailableForPersonInOrganizationArray();
     }
 
+    /**
+     * @return array
+     */
+    public function getAvailabledRolesPersonActivity(): array
+    {
+        return $this->getRoleRepository()->getRolesAvailableForPersonInActivityArray();
+    }
+
+    public function getAvailabledRolesOrganizationActivity() :array
+    {
+        return $this->getOrganizationRoleRepository()->getRolesAvailableInActivityArray();
+    }
+
     public function getRolesWithPrivileges($privilegeCode, $roleLevel = 0)
     {
         $roles_privileges = [];
@@ -434,6 +447,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
     public function getAllRoleIdPersonInActivity()
     {
+        // todo factoriser
         static $_ROLES_IDS_ACTIVITY;
         if ($_ROLES_IDS_ACTIVITY === null) {
             $_ROLES_IDS_ACTIVITY = [];
