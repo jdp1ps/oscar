@@ -260,7 +260,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'type' => 'Text'
         ]);
 
-        $label = "Note financière";
+        $label = "Note";
         $this->add([
             'name' => 'noteFinanciere',
             'options' => [

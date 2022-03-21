@@ -2271,7 +2271,7 @@ class Activity implements ResourceInterface
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'incidence financière' => $this->getIncidenceFinanciere(),
-            'Note financière' => $this->getNoteFinanciere(),
+            'Note' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
@@ -2301,7 +2301,7 @@ class Activity implements ResourceInterface
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'incidence financière',
-            'Note financière',
+            'Note',
             'Disciplines'
         );
     }
