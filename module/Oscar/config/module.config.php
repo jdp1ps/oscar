@@ -1,4 +1,5 @@
 <?php
+
 use Oscar\Service\AccessResolverService;
 use Oscar\View\Helpers\DateRenderer;
 use Oscar\View\Helpers\UnicaenDoctrinePaginatorHelper;
@@ -18,8 +19,9 @@ return array(
             UnicaenAuth\Guard\PrivilegeController::class => [
                 ////////////////////////////////////////////////////////////////////////
                 // PUBLIC
-                [ 'controller' =>  'Public',
-                    'action' => ['index', ],
+                [
+                    'controller' => 'Public',
+                    'action' => ['index',],
                     'roles' => [],
                 ],
 
@@ -29,17 +31,20 @@ return array(
                     'roles' => []
                 ],
 
-                [ 'controller' =>  'Public',
+                [
+                    'controller' => 'Public',
                     'action' => ['documentation', 'parameters', 'gitlog'],
                     'roles' => ['user'],
                 ],
 
-                [ 'controller' =>  'Notification',
+                [
+                    'controller' => 'Notification',
                     'action' => ['indexPerson', 'index', 'test', 'notifyPerson', 'history'],
                     'roles' => ['user'],
                 ],
 
-                [ 'controller' =>  'Administration',
+                [
+                    'controller' => 'Administration',
                     'action' => [
                         'access',
                         "accessAPI",
@@ -83,7 +88,8 @@ return array(
                     'roles' => ['user']
                 ],
 
-                [ 'controller' =>  'Connector',
+                [
+                    'controller' => 'Connector',
                     'action' => ['person', 'persons', 'organization', "organizations"],
                     'roles' => ['user']
                 ],
@@ -91,24 +97,29 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // PROJET
                 ////////////////////////////////////////////////////////////////
-                [   'controller' =>   'Project',
-                    'action' => ['show', 'new', 'edit', 'search', 'makeProject', 'persons', 'organizations'],
+                [
+                    'controller' => 'Project',
+                    'action' => ['edit', 'export', 'makeProject', 'organizations', 'persons', 'new', 'search', 'show'],
                     'roles' => ['user'],
                 ],
-                [   'controller' =>   'Project',
+                [
+                    'controller' => 'Project',
                     'action' => ['currentUserProjects', 'currentUserStructureProjects'],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_DASHBOARD,
                     'roles' => ['user'],
                 ],
-                [   'controller' =>   'Project',
+                [
+                    'controller' => 'Project',
                     'action' => ['index', 'rebuildIndex', 'simplifyPartners', 'simplifyMembers', 'fusion'],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_INDEX
                 ],
-                [   'controller' =>   'Project',
+                [
+                    'controller' => 'Project',
                     'action' => ['addActivities'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
                 ],
-                ['controller' => 'Project',
+                [
+                    'controller' => 'Project',
                     'action' => ['delete', 'empty'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
@@ -116,49 +127,88 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // ACTIVITÉS
                 ////////////////////////////////////////////////////////////////
-                [   'controller' =>   'Activity',
-                    'action' => ['show', 'show2', 'edit', 'new', 'duplicate','persons', 'organizations', 'makeProject',
-                        'delete', 'visualization', 'documentsJson', 'activitiesOrganizations', 'changeProject', 'jsonApi',
-                        'notifications', 'generateNotifications', 'generatedDocument', 'pcru', 'requestFor', 'adminDemande', 'api', 'gant', 'estimatedSpent','estimatedSpentExport', 'spentList', 'newInStructure', 'spentSynthesisActivity', 'pcru', 'pcruInfos', "pcruList", "timesheet"],
+                [
+                    'controller' => 'Activity',
+                    'action' => [
+                        'show',
+                        'show2',
+                        'edit',
+                        'new',
+                        'duplicate',
+                        'persons',
+                        'organizations',
+                        'makeProject',
+                        'delete',
+                        'visualization',
+                        'documentsJson',
+                        'activitiesOrganizations',
+                        'changeProject',
+                        'jsonApi',
+                        'notifications',
+                        'generateNotifications',
+                        'generatedDocument',
+                        'pcru',
+                        'requestFor',
+                        'adminDemande',
+                        'api',
+                        'gant',
+                        'estimatedSpent',
+                        'estimatedSpentExport',
+                        'spentList',
+                        'newInStructure',
+                        'spentSynthesisActivity',
+                        'pcru',
+                        'pcruInfos',
+                        "pcruList",
+                        "timesheet"
+                    ],
 
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>   'Activity',
+                [
+                    'controller' => 'Activity',
                     'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
-                [ 'controller' =>   'Activity',
+                [
+                    'controller' => 'Activity',
                     'action' => ['orphans'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT
                 ],
-                [ 'controller' =>   'Activity',
+                [
+                    'controller' => 'Activity',
                     'action' => ['debug'],
                     'roles' => ['Administrateur']
                 ],
 
                 // DEPENSES
                 // --- VERSEMENTS
-                [ 'controller' =>   'Depense',
+                [
+                    'controller' => 'Depense',
                     'action' => ['activity', 'manageSpendTypeGroup', 'activityApi', 'compteAffectation'],
                     'roles' => ['user'],
                 ],
 
                 // --- VERSEMENTS
-                [ 'controller' =>   'ActivityPayment',
+                [
+                    'controller' => 'ActivityPayment',
                     'action' => ['index', 'indexRest', 'rest'],
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>   'ActivityPayment',
+                [
+                    'controller' => 'ActivityPayment',
                     'action' => ['change', 'new', 'income', 'late', 'difference'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_PAYMENT_MANAGE
                 ],
 
                 // --- DATES CLEFS
-                [ 'controller' =>   'ActivityDate',
+                [
+                    'controller' => 'ActivityDate',
                     'action' => ['index', 'activity'],
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>   'ActivityDate',
+                [
+                    'controller' => 'ActivityDate',
                     'action' => ['change', 'new'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_MILESTONE_MANAGE
                 ],
@@ -177,49 +227,73 @@ return array(
                 ],
 
                 // --- Type d'activités - { controller: ActivityType, action: [new, delete, edit, index, move, merge], roles: [user] }
-                ['controller' => 'ActivityType',
+                [
+                    'controller' => 'ActivityType',
                     'action' => ['new', 'delete', 'edit', 'index', 'move', 'merge'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
                 ],
 
                 // ---   - { controller: ActivityDate, action: [index, change, new], roles: [user] }
-                ['controller' => 'DateType',
+                [
+                    'controller' => 'DateType',
                     'action' => ['index', 'change', 'new', 'edit', 'delete'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE,
                 ],
 
                 // DOCUMENTS
-                ['controller' => 'ContractDocument', // --- Upload
-                    'action' => ['upload', 'delete', 'changeType', 'index','show','download'],
+                [
+                    'controller' => 'ContractDocument', // --- Upload
+                    'action' => ['upload', 'delete', 'changeType', 'index', 'show', 'download'],
                     'roles' => ['user']
                 ],
 
                 // EXPORT
-                ['controller' => 'Activity',
+                [
+                    'controller' => 'Activity',
                     'action' => ['csv', 'csvPayments'],
                     'roles' => ['user'],
                 ],
 
                 // TIMESHEET
-                ['controller' => 'Timesheet',
+                [
+                    'controller' => 'Timesheet',
                     'action' => [
-                        'indexPersonActivity', 'sauvegarde', 'declaration', 'validations', 'resume',
-                        "declaration2", "indexActivity", "validateTimesheet",
-                        'excel', 'organizationLeader',
-                        'declarant', 'declarantAPI', 'validationActivity',
-                        'validationActivity2', 'validationHWPPerson', 'validatePersonPeriod',
-                        'importIcal', 'declarations', 'resumeActivity',
-                        'resolveInvalidLabels', 'syntheseActivity', 'synthesisAll', 'synthesisActivityPeriod',
-                        'exportActivityDates', 'checkperiod'
+                        'indexPersonActivity',
+                        'sauvegarde',
+                        'declaration',
+                        'validations',
+                        'resume',
+                        "declaration2",
+                        "indexActivity",
+                        "validateTimesheet",
+                        'excel',
+                        'organizationLeader',
+                        'declarant',
+                        'declarantAPI',
+                        'validationActivity',
+                        'validationActivity2',
+                        'validationHWPPerson',
+                        'validatePersonPeriod',
+                        'importIcal',
+                        'declarations',
+                        'resumeActivity',
+                        'resolveInvalidLabels',
+                        'syntheseActivity',
+                        'synthesisAll',
+                        'synthesisActivityPeriod',
+                        'exportActivityDates',
+                        'checkperiod'
                     ],
                     'roles' => ['user']
                 ],
-                ['controller' => 'Timesheet',
+                [
+                    'controller' => 'Timesheet',
                     'action' => ['declarers', 'recallDeclarer'],
                     'roles' => ['Administrateur']
                 ],
 
-                ['controller' => 'Api',
+                [
+                    'controller' => 'Api',
                     'action' => [
                         'activity',
                         'activityType',
@@ -239,28 +313,53 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // PERSON
                 ///////////////////////////////////////////////////////////////
-                [ 'controller' =>   'Person',
+                [
+                    'controller' => 'Person',
                     'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search', 'declarers'],
                     'roles' => ['user']
                 ],
-                [ 'controller' =>   'Person',
+                [
+                    'controller' => 'Person',
                     'action' => ['synchronize', 'boss'],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_INDEX
                 ],
-                [ 'controller' =>   'Person',
-                    'action' => ['edit', 'new', 'merge', 'organizationRole', 'notificationPerson', 'notificationPersonGenerate', 'affectation'],
+                [
+                    'controller' => 'Person',
+                    'action' => [
+                        'edit',
+                        'new',
+                        'merge',
+                        'organizationRole',
+                        'notificationPerson',
+                        'notificationPersonGenerate',
+                        'affectation'
+                    ],
                     'privileges' => \Oscar\Provider\Privileges::PERSON_EDIT
                 ],
 
                 // Membre
-                [ 'controller' =>   'Enroll',
+                [
+                    'controller' => 'Enroll',
                     'action' => [
-                        'personProjectNew', 'personProjectDelete', 'personProjectEdit',
-                        'organizationPersonNew', 'organizationPersonDelete', 'organizationPersonEdit',
-                        'personActivityNew', 'personActivityDelete', 'personActivityEdit',
-                        'organizationActivityNew', 'activityOrganizationDelete', 'activityOrganizationEdit',
-                        'personProjectNew', 'personProjectDelete', 'personProjectEdit',
-                        'organizationProjectNew', 'organizationProjectDelete', 'organizationProjectEdit', 'organizationPersonClose'
+                        'personProjectNew',
+                        'personProjectDelete',
+                        'personProjectEdit',
+                        'organizationPersonNew',
+                        'organizationPersonDelete',
+                        'organizationPersonEdit',
+                        'personActivityNew',
+                        'personActivityDelete',
+                        'personActivityEdit',
+                        'organizationActivityNew',
+                        'activityOrganizationDelete',
+                        'activityOrganizationEdit',
+                        'personProjectNew',
+                        'personProjectDelete',
+                        'personProjectEdit',
+                        'organizationProjectNew',
+                        'organizationProjectDelete',
+                        'organizationProjectEdit',
+                        'organizationPersonClose'
 
                     ],
                     'roles' => ['user']
@@ -269,33 +368,40 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['delete', 'index', 'search'],
                     'roles' => ['user']
 
                 ],
 
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['show'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_SHOW
                 ],
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['edit', 'new', 'merge', 'close'],
                     'privileges' => \Oscar\Provider\Privileges::ORGANIZATION_EDIT
                 ],
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['merge'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['sync'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['fusion', 'scission', 'exportCsv'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
-                [ 'controller' =>   'Organization',
+                [
+                    'controller' => 'Organization',
                     'action' => ['synchronizeConnector', 'sync'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN
                 ],
@@ -303,15 +409,18 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // DOCUMENTS ADMINISTRATIFS
                 ////////////////////////////////////////////////////////////////
-                [ 'controller' =>   'AdministrativeDocument',
+                [
+                    'controller' => 'AdministrativeDocument',
                     'action' => ['index', 'download'],
                     'roles' => ['user']
                 ],
-                [ 'controller' =>   'AdministrativeDocument',
+                [
+                    'controller' => 'AdministrativeDocument',
                     'action' => ['upload'],
                     'privileges' => \Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_NEW
                 ],
-                [ 'controller' =>   'AdministrativeDocument',
+                [
+                    'controller' => 'AdministrativeDocument',
                     'action' => ['delete'],
                     'privileges' => \Oscar\Provider\Privileges::ADMINISTRATIVE_DOCUMENT_DELETE
                 ],
@@ -319,15 +428,18 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 // PUBLIC
                 ////////////////////////////////////////////////////////////////
-                [ 'controller' =>   'Public',
+                [
+                    'controller' => 'Public',
                     'action' => ['changelog'],
                     'roles' => ['user'],
                 ],
-                [ 'controller' =>   'Public',
+                [
+                    'controller' => 'Public',
                     'action' => ['test'],
                     'roles' => ['Administrateur'],
                 ],
-                [ 'controller' =>   'Console',
+                [
+                    'controller' => 'Console',
                     'roles' => [],
                 ],
 
@@ -455,7 +567,6 @@ return array(
                         ],
                     ]
                 ],
-
 
 
                 'json_auth_token' => [
@@ -859,7 +970,7 @@ return array(
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
             'Project' => \Oscar\Controller\ProjectControllerFactory::class,
-            'Public'    => \Oscar\Controller\PublicControllerFactory::class,
+            'Public' => \Oscar\Controller\PublicControllerFactory::class,
             'Timesheet' => \Oscar\Controller\TimesheetControllerFactory::class,
             'Person' => \Oscar\Controller\PersonControllerFactory::class,
             'WorkPackage' => \Oscar\Controller\WorkPackageControllerFactory::class,
@@ -872,9 +983,9 @@ return array(
 
     // Emplacement des templates
     'view_manager' => array(
-        'exception_template'       => 'error/index',
+        'exception_template' => 'error/index',
         'template_map' => array(
-            'error/index'             => __DIR__ . '/../view/error.phtml',
+            'error/index' => __DIR__ . '/../view/error.phtml',
             'layout/layout' => __DIR__ . '/../view/layout/layout.phtml',
             'unicaen-auth/droits/privileges' => __DIR__ . '/../view/unicaen-auth/droits/privileges.phtml',
             'unicaen-auth/tbl-link' => __DIR__ . '/../view/unicaen-auth/droits/partials/tbl-link.phtml',
@@ -921,7 +1032,7 @@ return array(
     // Formulaires
     'form_elements' => [
         'invokables' => [
-            'ActivityPayment'   => \Oscar\Form\ActivityPaymentForm::class
+            'ActivityPayment' => \Oscar\Form\ActivityPaymentForm::class
         ]
     ]
 );

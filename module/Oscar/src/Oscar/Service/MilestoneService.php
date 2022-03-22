@@ -131,6 +131,15 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $output;
     }
 
+    public function getMilestoneTypeFlat(){
+        $output = [];
+        /** @var DateType $milestoneType */
+        foreach ($this->getMilestoneTypes() as $milestoneType) {
+            $output[$milestoneType->getId()] =$milestoneType->getLabel();
+        }
+        return $output;
+    }
+
     /**
      * @return mixed
      */

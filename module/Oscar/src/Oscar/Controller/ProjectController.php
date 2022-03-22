@@ -25,6 +25,7 @@ use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectForm;
 use Oscar\Form\ProjectIdentificationForm;
+use Oscar\Formatter\ProjectToArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
@@ -118,6 +119,38 @@ class ProjectController extends AbstractOscarController
         $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT, $p);
         $this->getProjectService()->deleteProject($p);
         $this->redirect()->toRoute('project/mine');
+    }
+
+    public function exportAction()
+    {
+        $id = $this->params()->fromRoute('id', null);
+        if (!$id) {
+            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
+        }
+        try {
+            $project = $this->getProjectService()->getProject($id);
+            $formatter = new ProjectToArrayFormatter();
+
+            $rolesPerson = $this->getOscarUserContextService()->getAvailabledRolesPersonActivity();
+            $rolesOrganizations = $this->getOscarUserContextService()->getAvailabledRolesOrganizationActivity();
+            $milestones = $this->getProjectGrantService()->getMilestoneService()->getMilestoneTypeFlat();
+
+            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
+            $data = $formatter->format($project);
+            echo '<table border="1">';
+            foreach ($data as $key=>$value) {
+                echo "<tr>";
+                echo "<th>".$key."</th>";
+                echo "<td>".$value."</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            die();
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
+        }
+        die("DONNEES");
+        return $data;
     }
 
     /**

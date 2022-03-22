@@ -1064,6 +1064,19 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateOpenedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateOpened()) {
+            return $this->getDateOpened()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * @return Project
      */
     public function getProject()
@@ -2126,6 +2139,19 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateSignedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateSigned()) {
+            return $this->getDateSigned()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * Retourne les données préparées pour le génération des documents
      */
     public function documentDatas($datas)
@@ -2343,6 +2369,25 @@ class Activity implements ResourceInterface
         }
 
         return $this->totalEcartPaiement;
+    }
+
+    private $ecartPaiementExplain = null;
+
+    public function getEcartPaimentExplain() :string
+    {
+        if ($this->ecartPaiementExplain === null) {
+            $this->ecartPaiementExplain = [];
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_ECART && $payment->getComment()) {
+                    $this->ecartPaiementExplain[] = $payment->getComment();
+                }
+            }
+
+            $this->ecartPaiementExplain = implode(', ', $this->ecartPaiementExplain);
+        }
+
+        return $this->ecartPaiementExplain;
     }
 
     private $justificatifEcartPaiement;
