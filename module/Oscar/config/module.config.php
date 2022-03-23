@@ -104,7 +104,11 @@ return array(
                 ],
                 [
                     'controller' => 'Project',
-                    'action' => ['currentUserProjects', 'currentUserStructureProjects'],
+                    'action' => [
+                        'currentUserProjects',
+                        'currentUserStructureProjects',
+                        'exportMany'
+                    ],
                     'privileges' => \Oscar\Provider\Privileges::PROJECT_DASHBOARD,
                     'roles' => ['user'],
                 ],

@@ -2779,6 +2779,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
+            $projectsIds = [];
+            if( $projectview == 'on' ){
+                foreach ($activities as $p) {
+                   $projectsIds[] = $p->getId();
+                }
+            }
+
+
             if ($this->getRequest()->isXmlHttpRequest()) {
                 $json = [
                     'datas' => []
@@ -2814,6 +2822,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortIgnoreNull' => $sortIgnoreNull,
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
                     'disciplines' => $this->getActivityService()->getDisciplines(),
+                    'projectsIds' => $projectsIds,
                 ]
             );
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');

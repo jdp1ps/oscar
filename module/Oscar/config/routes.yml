@@ -458,6 +458,15 @@ project:
                     action: export
             may_terminate: true
 
+        ### Exporter des PROJETS
+        export-many:
+            type: segment
+            options:
+                route: '/export-projects'
+                defaults:
+                    action: exportMany
+            may_terminate: true
+
         ### Fiche du projet :id
         show:
             type: segment
