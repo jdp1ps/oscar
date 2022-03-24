@@ -25,6 +25,7 @@ use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
@@ -581,64 +582,69 @@ class TimesheetController extends AbstractOscarController
         $year = $this->params()->fromQuery('year', null);
         $error = null;
 
-        // Contrôle d'accès
-        $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        try {
 
-        // On détermine la 'plage'
-        if( $year ){
+            // Contrôle d'accès
+            $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
-            if( $format == 'excel') {
-                $datas = $this->getTimesheetService()->getSynthesisActivityYear($year, $activity_id);
+            // On détermine la 'plage'
+            if( $year ){
+
+                if( $format == 'excel') {
+                    $datas = $this->getTimesheetService()->getSynthesisActivityYear($year, $activity_id);
+                    $formatter = new TimesheetActivityPeriodFormatter();
+                    $formatter->output($datas);
+                    die();
+                }
+                if( $format == 'pdf') {
+                    $datas = $this->getTimesheetService()->getHtmlTimesheetYear($year, $activity_id);
+                }
+                throw new OscarException("Format demandé inconnu");
+            }
+
+
+            $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
+
+            if( $format == 'json' ){
+                return $this->jsonOutput($output);
+            }
+            elseif ($format == "excel") {
+                // TODO à revoir/supprimer
+                // Sur le plan métier, les fonctionnels de Tours ne trouve pas utilse de disposer d'un excel
+                // modifiable. A Caen, il est utilisé pour réaliser des synthèses/bilan
                 $formatter = new TimesheetActivityPeriodFormatter();
-                $formatter->output($datas);
+                $formatter->output($output, 'excel');
+            }
+            elseif ($format == "pdf") {
+                $output['format'] = 'pdf';
+
+                $formatter = new TimesheetActivityPeriodPdfFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
+                    $this->getViewRenderer()
+                );
+
+                $formatter->render($output, $this->getOscarConfigurationService()->getHtmlToPdfMethod());
                 die();
             }
-            if( $format == 'pdf') {
-                $datas = $this->getTimesheetService()->getHtmlTimesheetYear($year, $activity_id);
+            elseif ($format == "json") {
+                $output['format'] = 'json';
+                return $this->jsonOutput($output);
+
                 die();
             }
-            throw new OscarException("Seul le format EXCEL pour la synthèse est disponible");
-        }
+            else {
+                $output['format'] = 'html';
+                $formatter =  new TimesheetActivityPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
+                    $this->getViewRenderer()
+                );
+                $html = $formatter->render($output);
+                die($html);
+            }
 
-
-        $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
-
-        if( $format == 'json' ){
-            return $this->jsonOutput($output);
-        }
-        elseif ($format == "excel") {
-            // TODO à revoir/supprimer
-            // Sur le plan métier, les fonctionnels de Tours ne trouve pas utilse de disposer d'un excel
-            // modifiable. A Caen, il est utilisé pour réaliser des synthèses/bilan
-            $formatter = new TimesheetActivityPeriodFormatter();
-            $formatter->output($output, 'excel');
-        }
-        elseif ($format == "pdf") {
-            $output['format'] = 'pdf';
-
-            $formatter = new TimesheetActivityPeriodPdfFormatter(
-                $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
-                $this->getViewRenderer()
-            );
-
-            $formatter->render($output, $this->getOscarConfigurationService()->getHtmlToPdfMethod());
-            die();
-        }
-        elseif ($format == "json") {
-            $output['format'] = 'json';
-            return $this->jsonOutput($output);
-
-            die();
-        }
-        else {
-            $output['format'] = 'html';
-            $formatter =  new TimesheetActivityPeriodHtmlFormatter(
-                $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
-                $this->getViewRenderer()
-            );
-            $html = $formatter->render($output);
-            die($html);
+        } catch (\Exception $e) {
+            die("AÏE");
         }
     }
 
@@ -662,8 +668,10 @@ class TimesheetController extends AbstractOscarController
         $person_id      = $this->params()->fromQuery('person_id', null);
         $format         = $this->params()->fromQuery('format', '');
         $period         = $this->params()->fromQuery('period', null);
+        $version        = $this->params()->fromQuery('v', 1);
         $error          = null;
         $validations    = null;
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités
@@ -690,17 +698,21 @@ class TimesheetController extends AbstractOscarController
                 throw new OscarException("Vous devez renseigner les dates de début et de fin de l'activité.");
             }
 
-            // Période
-            $start  = $activity->getDateStart()->format('Y');
-            $end    = $activity->getDateEnd()->format('Y');
-
             if( count($personsIds) == 0 ){
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
             }
 
-            $validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $start, $end);
-            $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds);
+            // Période
+            $start  = $activity->getDateStart()->format('Y');
+            $end    = $activity->getDateEnd()->format('Y');
 
+            $periodStart = $activity->getDateStart()->format('Y-m');
+            $periodEnd = $activity->getDateEnd()->format('Y-m');
+
+            // $datas = $this->getTimesheetService()->getDatasActivity($activity, $periodStart, $periodEnd);
+
+            $validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $periodStart, $periodEnd);
+            $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds, $periodStart, $periodEnd);
             $horslots = $this->getTimesheetService()->getOthersWP();
         }
 
@@ -803,7 +815,20 @@ class TimesheetController extends AbstractOscarController
 
         }
 
-        if( $format == "json" ){
+        if( $format == "json" || $this->isAjax() ){
+            if( $version == "2" ){
+                $json = [
+                    'date' => date("Y-m-d H:i:s"),
+                    'version' => OscarVersion::getBuild(),
+                    'activity_id' => $activity->getId(),
+                    'acronym' => $activity->getAcronym(),
+                    'label' => $activity->getLabel(),
+                    'start' => $activity->getDateStartStr(),
+                    'end' => $activity->getDateEndStr(),
+                    'synthesis' => $datas
+                ];
+                return $this->jsonOutput($json);
+            }
             return $this->jsonOutput($datas);
         }
 
@@ -820,7 +845,6 @@ class TimesheetController extends AbstractOscarController
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
-        die();
 
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));
@@ -909,8 +933,6 @@ class TimesheetController extends AbstractOscarController
                 }
             }
 
-            var_dump($timePerson);
-
             foreach ($timePerson['otherWP'] as $codeOther=>$dataOther) {
                 $total = $dataOther['total'];
                 $totalOthers[$codeOther] += $total;
@@ -918,8 +940,6 @@ class TimesheetController extends AbstractOscarController
                 $totalPersons[$personId] += $total;
             }
         }
-
-        var_dump($projects);
 
         echo "<table border='1'>";
         /*
@@ -984,10 +1004,6 @@ class TimesheetController extends AbstractOscarController
 
 
         echo "</table>";
-        var_dump($lots);
-//        var_dump($lots);
-//        var_dump($projects);
-//        var_dump($others);
         die("Synthèse activité " . $activity);
     }
 
@@ -1020,7 +1036,6 @@ class TimesheetController extends AbstractOscarController
         // TODO Tester que la période demandée est cohérente
         $datas = $this->getTimesheetService()->getDatasActivityDates($activity, $periodDebut, $periodFin);
 
-        var_dump($datas);
         die("Synthèse entre $periodDebut et $periodFin");
     }
 
@@ -1121,15 +1136,13 @@ class TimesheetController extends AbstractOscarController
                 $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
                 $pdfRendrer->convert($html, $datas['filename']);
                 die("OK");
-                /*
-                die("ICI");
-                $formatter = new TimesheetPersonPeriodPdfFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
-                    $this->getViewRenderer()
-                );
-                $formatter->render($datas);
-                die();
-                */
+//                die("ICI");
+//                $formatter = new TimesheetPersonPeriodPdfFormatter(
+//                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+//                    $this->getViewRenderer()
+//                );
+//                $formatter->render($datas);
+//                die();
             }
             elseif ($out == 'html') {
                 $formatter = new TimesheetPersonPeriodHtmlFormatter(
@@ -1467,8 +1480,6 @@ class TimesheetController extends AbstractOscarController
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
         $correspondances = $this->getTimesheetService()->getAllTimesheetTypes($person);
-
-//        var_dump($correspondances); die();
 
         return [
             'exists' => $resume,
@@ -2257,7 +2268,7 @@ class TimesheetController extends AbstractOscarController
                     $validator = $this->getPersonService()->getPersonById($this->params()->fromPost('validatorId'), true);
                     try {
                         $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
-                        $this->getPersonService()->addReferentToDeclarerHorsLot($declarer, $validator, true);
+                        $this->getPersonService()->addReferentToDeclarationHorsLot($declarer, $validator, true);
                     } catch (\Exception $e){
                         $this->getLoggerService()->error($e->getMessage());
                         $this->flashMessenger()->addErrorMessage("$validator n'a pas été ajouté aux déclarations : " . $e->getMessage());

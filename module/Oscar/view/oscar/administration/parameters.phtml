@@ -7,6 +7,32 @@
  */
 
 ?>
+<style>
+    /*
+    .two-tile {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .two-tile > .tile {
+        display: flex;
+        flex-direction: column;
+        flex-basis: 100%;
+        min-width: 40%;
+        flex: 1;
+    }*/
+
+    .nav-link:target {
+        background: red !important;
+    }
+
+    .nav-tabs .nav-link {
+        padding: 1em;
+    }
+</style>
+
+
 <div class="container">
     <header>
         <h1>
@@ -15,13 +41,34 @@
         </h1>
     </header>
 
-    <section class="row">
-        <div class="col-md-6">
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
+               aria-controls="nav-home" aria-selected="true">
+                <i class="icon-cube"></i>
+                Activités de recherche
+            </a>
+            <a class="nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
+               aria-controls="nav-profile" aria-selected="false">
+                Apparence
+            </a>
+            <a class="nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab"
+               aria-controls="nav-contact" aria-selected="false">
+                Feuille de temps
+            </a>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+            <h2>Activités de recherche</h2>
             <article class="card <?= $allow_numerotation_custom == true ? 'activated' : 'disabled' ?>">
                 <h3><i class="icon-tags"></i>Numérotation des activités</h3>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>
-                    En <strong>activant</strong> cette option, vous autorisez les personnes en charge de l'ajout/modification des activités d'ajouter des types de numérotation non-référencées dans la liste des numérotations disponibles.
+                    En <strong>activant</strong> cette option, vous autorisez les personnes en charge de
+                    l'ajout/modification
+                    des activités d'ajouter des types de numérotation non-référencées dans la liste des numérotations
+                    disponibles.
                 </p>
                 <form action="" method="post" class="form">
                     <div class="row">
@@ -30,8 +77,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="allow_numerotation_custom" />
-                                <input id="allow_numerotation_custom" name="parameter_value" type="checkbox" <?= $allow_numerotation_custom ? "checked" : "" ?> />
+                                <input name="parameter_name" type="hidden" value="allow_numerotation_custom"/>
+                                <input id="allow_numerotation_custom" name="parameter_value"
+                                       type="checkbox" <?= $allow_numerotation_custom ? "checked" : "" ?> />
                                 <label for="allow_numerotation_custom" class="label-primary"></label>
                             </div>
                         </div>
@@ -40,9 +88,7 @@
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
             </article>
-        </div>
 
-        <div class="col-md-6">
             <h2><i class="icon-cube"></i><?= $this->translate("Demande d'activité") ?></h2>
             <article class="card">
                 <h3><i class="icon-calculator"></i> Limiter le nombre de demande</h3>
@@ -54,8 +100,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="activity_request_limit" />
-                                <input type="number" name="parameter_value" value="<?= $activity_request_limit ?>" id="" />
+                                <input name="parameter_name" type="hidden" value="activity_request_limit"/>
+                                <input type="number" name="parameter_value" value="<?= $activity_request_limit ?>"
+                                       id=""/>
                             </div>
                         </div>
                     </div>
@@ -64,7 +111,137 @@
                 </form>
             </article>
 
+            <h2><i class="icon-sort"></i>Dépenses / Finances</h2>
+            <article class="card">
+                <h3><i class="icon-eye"></i>Comptes exclus</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Cette option va exclure les <strong>dépenses</strong> appartenant à un des comptes renseigné (séparé
+                    les comptes par une virgule).
+                </p>
+                <form action="" method="post" class="form">
+                    <label for="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>">Comptes</label>
+                    <input name="parameter_name" type="hidden"
+                           value="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"/>
+                    <input type="text" name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           id="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
+                           value="<?= $spents_account_filter ?>" class="form-control input-lg"/>
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
 
+            <article class="card">
+                <h3><i class="icon-"></i>Format du PFI</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Permet de fixer le mode strict
+                </p>
+
+                <div id="verifEl">
+                    <div v-if="verify" class="overlay">
+                        <div class="overlay-content">
+                            <a href="#" class="overlay-closer" @click.prevent="verify=false">Fermer</a>
+
+                            <h2>Résultats pour {{ verify }} PFI testé(s)</h2>
+                            <p v-if="verifyWarnings.length == 0" class="alert alert-success">
+                                Tous les PFI semblent correspondre au format attendu.
+                            </p>
+                            <p>
+                                Dont {{ verifyOk.length }} <strong>valide : </strong>
+                                {{ verifyOk.join(', ') }}
+                            </p>
+                            <p>
+                                Et {{ verifyWarnings.length }} <strong>non-Valide : </strong>
+                                {{ verifyWarnings.join(', ') }}
+                            </p>
+                        </div>
+                    </div>
+                    <form action="" method="post" class="form">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                      <span class="input-group-addon">
+                                        <input type="checkbox" name="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>"
+                                            v-model="useStrict"
+                                            id="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>"
+                                        />
+                                      </span>
+                                    <label for="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>">Utiliser un PFI strict</label>
+                                </div><!-- /input-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class="col-lg-8">
+                                <div class="input-group">
+                                    <input type="text" name="<?= \Oscar\Service\OscarConfigurationService::pfi_strict_format ?>"
+                                           placeholder="Expression régulière"
+                                           name="<?= \Oscar\Service\OscarConfigurationService::pfi_strict_format ?>"
+                                           id="<?= \Oscar\Service\OscarConfigurationService::pfi_strict_format ?>"
+                                           @change="changed = true"
+                                           v-model="reg" class="form-control"/>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" id="verifyPfi"
+                                                @click="handlerVerify"
+                                                >Vérifier</button>
+                                    </span>
+                                </div><!-- /input-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+
+                        <input name="parameter_name" type="hidden"
+                               value="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>"/>
+
+                        <button class="btn btn-primary" @click="handlerSave"><i class="icon-floppy"></i> Enregistrer</button>
+                    </form>
+                </div>
+                <script>
+                    console.log('HOP');
+                    require(['vue', 'vue-resource'], function(Vue, VueResource){
+                        console.log("OK");
+                        Vue.use(VueResource);
+                        var verif = new Vue({
+                            el: "#verifEl",
+                            data(){
+                                return {
+                                    reg: "<?= $pfi_strict_format ?>",
+                                    useStrict: <?= $pfi_strict ? "true" : "false" ?>,
+                                    changed: false,
+                                    canSave: true,
+                                    verify: false,
+                                    verifyWarnings: [],
+                                    verifyOk: [],
+                                }
+                            },
+                            computed: {
+                                saveEnabled(){
+
+                                }
+                            },
+                            methods: {
+                                handlerSave(e) {
+
+                                },
+                                handlerVerify() {
+                                    console.log("véfif ?", this.reg);
+                                    this.$http.get('?a=verifypfi&reg=' +this.reg).then(
+                                        ok => {
+                                            console.log(ok);
+                                            this.verify = ok.data.pfi.count;
+                                            this.verifyWarnings = ok.data.pfi.warnings;
+                                            this.verifyOk = ok.data.pfi.valids;
+                                        },
+                                        ko => {
+                                            console.log(ko);
+                                        },
+                                    );
+                                }
+                            }
+                        });
+                    })
+                </script>
+            </article>
+
+        </div>
+        <div class="tab-pane" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
             <h2><i class="icon-tags"></i>Apparence</h2>
             <article class="card">
                 <h3><i class="icon-pencil-1"></i>Thème</h3>
@@ -75,11 +252,13 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="theme" />
+                                <input name="parameter_name" type="hidden" value="theme"/>
                                 <select name="parameter_value" id="">
-                                    <?php foreach ($themes as $t): ?>
-                                    <option value="<?= $t ?>" <?= $t == $theme ? 'selected' : '' ?>><?= $t ?></option>
-                                    <?php endforeach; ?>
+                                    <?php
+                                    foreach ($themes as $t): ?>
+                                        <option value="<?= $t ?>" <?= $t == $theme ? 'selected' : '' ?>><?= $t ?></option>
+                                    <?php
+                                    endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -89,12 +268,13 @@
                 </form>
             </article>
 
-            <h2><i class="icon-cube"></i>Activités de Recherche</h2>
             <article class="card">
                 <h3><i class="icon-eye"></i>Document</h3>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>
-                    Lors du téléchargement d'un document d'une activité, cette option ajoute au nom du fichier <strong>le numéro de version</strong> du fichier.
+                    Lors du téléchargement d'un document d'une activité, cette option ajoute au nom du fichier <strong>le
+                        numéro
+                        de version</strong> du fichier.
                 </p>
                 <form action="" method="post" class="form">
                     <div class="row">
@@ -103,8 +283,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="document_use_version_in_name" />
-                                <input id="document_use_version_in_name" name="parameter_value" type="checkbox" <?= $document_use_version_in_name ? "checked" : "" ?> />
+                                <input name="parameter_name" type="hidden" value="document_use_version_in_name"/>
+                                <input id="document_use_version_in_name" name="parameter_value"
+                                       type="checkbox" <?= $document_use_version_in_name ? "checked" : "" ?> />
                                 <label for="document_use_version_in_name" class="label-primary"></label>
                             </div>
                         </div>
@@ -113,11 +294,7 @@
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
             </article>
-        </div>
-    </section>
 
-    <section class="row">
-        <div class="col-md-6">
             <article class="card">
                 <h3><i class="icon-upload"></i> Format d'exportation</h3>
                 <p class="help-message">
@@ -125,12 +302,14 @@
                     Permet de configurer le format des données lors de l'exporation des activités de recherche.
                 </p>
                 <form action="" method="post" class="form">
-                    <input name="parameter_name" type="hidden" value="export_options" />
+                    <input name="parameter_name" type="hidden" value="export_options"/>
                     <label for="separator">Séparateur de chaîne</label>
-                    <input type="text" name="separator" id="separator" value="<?= $export['separator'] ?>" class="form-control input-lg" />
+                    <input type="text" name="separator" id="separator" value="<?= $export['separator'] ?>"
+                           class="form-control input-lg"/>
 
                     <label for="dateformat">Format des dates</label>
-                    <input type="text" name="dateformat" id="dateformat" value="<?= $export['dateformat'] ?>" class="form-control input-lg" />
+                    <input type="text" name="dateformat" id="dateformat" value="<?= $export['dateformat'] ?>"
+                           class="form-control input-lg"/>
                     <hr>
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
@@ -141,40 +320,46 @@
                 <h3><i class="icon-building-filled"></i> rôle des organisations</h3>
 
                 <form action="" method="post">
-                    <p>Lorsque une personne responsable de structure crée une activité, voici l'attribution des organisations en fonction des rôles.</p>
-                    <?php foreach ($organization_leader_role['rolesInOrganization'] as $roleIn):?>
-                    <div class="card cols" style="display: flex">
-                        <div class="col-3">
-                            Si elle est <strong class="cartouche primary"><?= $roleIn ?></strong>, l'organisation aura le rôle
+                    <p>Lorsque une personne responsable de structure crée une activité, voici l'attribution des
+                        organisations en fonction des rôles.</p>
+                    <?php
+                    foreach ($organization_leader_role['rolesInOrganization'] as $roleIn): ?>
+                        <div class="card cols" style="display: flex">
+                            <div class="col-3">
+                                Si elle est <strong class="cartouche primary"><?= $roleIn ?></strong>, l'organisation
+                                aura le rôle
+                            </div>
+                            <div class="col-1">
+                                <select name="role_organization[<?= $roleIn ?>]" id="" class="select2">
+                                    <option value="">Laisser choisir le rôle</option>
+                                    <?php
+                                    foreach ($organization_leader_role['roleOrganizationPrincipal'] as $roleOrganisation) : ?>
+                                        <option value="<?= $roleOrganisation ?>" <?= (array_key_exists(
+                                                $roleIn,
+                                                $organization_leader_role['config']
+                                            ) && $organization_leader_role['config'][$roleIn] == $roleOrganisation) ? " SELECTED" : "" ?>><?= $roleOrganisation ?></option>
+                                    <?php
+                                    endforeach; ?>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-1">
-                            <select name="role_organization[<?= $roleIn ?>]" id="" class="select2">
-                                <option value="">Laisser choisir le rôle</option>
-                                <?php foreach ($organization_leader_role['roleOrganizationPrincipal'] as $roleOrganisation) :?>
-                                <option value="<?= $roleOrganisation ?>" <?= (array_key_exists($roleIn, $organization_leader_role['config']) && $organization_leader_role['config'][$roleIn] == $roleOrganisation) ? " SELECTED" : "" ?>><?= $roleOrganisation ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+                    <?php
+                    endforeach; ?>
                     <hr>
-                    <input name="parameter_name" type="hidden" value="organization_leader_role" />
+                    <input name="parameter_name" type="hidden" value="organization_leader_role"/>
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
-                <pre>
-
-    </pre>
+                <pre></pre>
             </article>
         </div>
-
-        <div class="col-md-6">
+        <div class="tab-pane" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
             <h2><i class="icon-calendar"></i>Feuilles de temps</h2>
-
-            &nbsp;<article class="card">
+            <article class="card">
                 <h3><i class="icon-eye"></i>Aperçu</h3>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>
-                    En <strong>activant</strong> cette option, vous autorisez les personnes à télécharger des feuilles de temps avant qu'elles n'aient été validées numériquement.
+                    En <strong>activant</strong> cette option, vous autorisez les personnes à télécharger des feuilles
+                    de temps avant qu'elles n'aient été validées numériquement.
                 </p>
                 <form action="" method="post" class="form">
                     <div class="row">
@@ -183,8 +368,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="timesheet_preview" />
-                                <input id="timesheet_preview_custom" name="parameter_value" type="checkbox" <?= $timesheet_preview ? "checked" : "" ?> />
+                                <input name="parameter_name" type="hidden" value="timesheet_preview"/>
+                                <input id="timesheet_preview_custom" name="parameter_value"
+                                       type="checkbox" <?= $timesheet_preview ? "checked" : "" ?> />
                                 <label for="timesheet_preview_custom" class="label-primary"></label>
                             </div>
                         </div>
@@ -198,7 +384,8 @@
                 <h3><i class="icon-file-excel"></i>Format Excel</h3>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>
-                    En <strong>activant</strong> cette option, vous donnez l'accès à une version excel des feuilles de temps.
+                    En <strong>activant</strong> cette option, vous donnez l'accès à une version excel des feuilles de
+                    temps.
                 </p>
                 <form action="" method="post" class="form">
                     <div class="row">
@@ -207,8 +394,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="material-switch">
-                                <input name="parameter_name" type="hidden" value="timesheet_excel" />
-                                <input id="timesheet_excel_custom" name="parameter_value" type="checkbox" <?= $timesheet_excel ? "checked" : "" ?> />
+                                <input name="parameter_name" type="hidden" value="timesheet_excel"/>
+                                <input id="timesheet_excel_custom" name="parameter_value"
+                                       type="checkbox" <?= $timesheet_excel ? "checked" : "" ?> />
                                 <label for="timesheet_excel_custom" class="label-primary"></label>
                             </div>
                         </div>
@@ -217,25 +405,7 @@
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
             </article>
-
-            <h2><i class="icon-sort"></i>Dépense : Comptes filtrés</h2>
-
-            &nbsp;<article class="card">
-                <h3><i class="icon-eye"></i>Aperçu</h3>
-                <p class="help-message">
-                    <i class="icon-help-circled"></i>
-                    Cette option va exclure les <strong>dépenses</strong> appartenant à un des comptes renseigné (séparé les comptes par une virgule).
-                </p>
-                <form action="" method="post" class="form">
-                    <label for="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter  ?>">Comptes</label>
-                    <input name="parameter_name" type="hidden" value="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>" />
-                    <input type="text" name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
-                           name="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
-                           id="<?= \Oscar\Service\OscarConfigurationService::spents_account_filter ?>"
-                           value="<?= $spents_account_filter ?>" class="form-control input-lg" />
-                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
-                </form>
-            </article>
         </div>
-    </section>
+    </div>
+
 </div>

@@ -1,0 +1,22 @@
+<div class="container">
+    <h1><i class="icon-beaker"></i> PCRU</h1>
+    <div id="app"></div>
+
+    <script>
+        require(['vue', 'vue-resource', 'administrationpcru'], function(Vue, VueResource, AdministrationPcru){
+            Vue.use(VueResource);
+            new Vue({
+                el: "#app",
+                render(h){
+                    return h(AdministrationPcru, {props:{
+                        url: '',
+                        roles_incharge: [],
+                        roles_partner: [],
+                        roles_unit: [],
+                    }});
+                }
+            })
+        })
+    </script>
+
+</div>

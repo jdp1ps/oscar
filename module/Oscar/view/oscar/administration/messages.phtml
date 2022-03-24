@@ -20,26 +20,38 @@
                 <textarea name="declarersRelance2" id="" cols="30" rows="10"
                           class="form-control"><?= $declarersRelance2 ?></textarea>
             </div>
+            <div class="col-md-4">
+                <h3><i class="icon-calendar"></i> Déclarant, conflit</h3>
+                <p>
+                    Envoyée à <strong>J+</strong>
+                    <input type="number" name="declarersRelanceConflitJour"
+                           value="<?= $declarersRelanceConflitJour ?>"/>
+                </p>
+                <textarea name="declarersRelanceConflitMessage" id="" cols="30" rows="10"
+                          class="form-control"><?= $declarersRelanceConflitMessage ?></textarea>
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-4">
-                <h3><i class="icon-calendar"></i> Validateur scientifique, première relance</h3>
+                <h3><i class="icon-calendar"></i> Validateur</h3>
                 <p>
-                    Envoyée à <strong>J+</strong>
+                    Jour entre chaque rappel
                     <input type="number" name="validatorsRelanceJour1" value="<?= $validatorsRelanceJour1 ?>"/>
                 </p>
                 <textarea name="validatorsRelance1" id="" cols="30" rows="10"
                           class="form-control"><?= $validatorsRelance1 ?></textarea>
             </div>
             <div class="col-md-4">
-                <h3><i class="icon-calendar"></i> Validateur scientifique, Deuxième relance</h3>
-                <p>
-                    Envoyée à <strong>J+</strong>
-                    <input type="number" name="validatorsRelanceJour2" value="<?= $validatorsRelanceJour2 ?>"/>
-                </p>
-                <textarea name="validatorsRelance2" id="" cols="30" rows="10"
-                          class="form-control"><?= $validatorsRelance2 ?></textarea>
+                <div style="visibility: hidden">
+                    <h3><i class="icon-calendar"></i> Validateur scientifique, Deuxième relance</h3>
+                    <p>
+                        Envoyée à <strong>J+</strong>
+                        <input type="number" name="validatorsRelanceJour2" value="<?= $validatorsRelanceJour2 ?>"/>
+                    </p>
+                    <textarea name="validatorsRelance2" id="" cols="30" rows="10"
+                              class="form-control"><?= $validatorsRelance2 ?></textarea>
+                </div>
             </div>
         </div>
 

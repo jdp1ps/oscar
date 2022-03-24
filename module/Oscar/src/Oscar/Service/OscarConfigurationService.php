@@ -29,8 +29,45 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const spents_account_filter = 'spents_account_filter';
     const activity_request_limit = 'activity_request_limit';
     const document_use_version_in_name = 'document_use_version_in_name';
+    const document_location = 'document_location';
+    const declarers_white_list = 'declarers_white_list';
+    const auth_person_normalize = 'authPersonNormalize';
+    const pfi_strict = 'pfi_strict';
+    const pfi_strict_format = 'pfi_strict_format';
+
 
     const theme = 'theme';
+
+    /**
+     * @return bool
+     */
+    public function isPfiStrict() :bool
+    {
+        $new = $this->getEditableConfKey(self::pfi_strict, null);
+
+        if( $new === null ){
+            return true;
+        }
+        return $new;
+    }
+
+    /**
+     * @param bool $strict
+     * @throws OscarException
+     */
+    public function setStrict( bool $strict ) :void
+    {
+        $this->saveEditableConfKey(self::pfi_strict, $strict);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPfiRegex() :string
+    {
+        return $this->getEditableConfKey(self::pfi_strict_format, "");
+    }
+
 
     public function getApiFormats($default = [])
     {
@@ -79,11 +116,14 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getPayementsConfig()
     {
-        return $this->getOptionalConfiguration('payements', [
-            'separator' => '$$',
-            'persons' => '',
-            'organizations' => ''
-        ]);
+        return $this->getOptionalConfiguration(
+            'payements',
+            [
+                'separator' => '$$',
+                'persons' => '',
+                'organizations' => ''
+            ]
+        );
     }
 
     /**
@@ -99,7 +139,17 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      */
     public function getLoggerLevel(): int
     {
-        return $this->getOptionalConfiguration('log_level', Logger::WARNING);
+        return $this->getOptionalConfiguration('log_level', Logger::INFO);
+    }
+
+    public function useDeclarersWhiteList(): bool
+    {
+        return $this->getEditableConfKey(self::declarers_white_list, true);
+    }
+
+    public function setUseDeclarerWhiteList(bool $use): void
+    {
+        $this->saveEditableConfKey(self::declarers_white_list, $use);
     }
 
 
@@ -157,8 +207,10 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             if (!is_writeable($dir)) {
                 throw new OscarException("Impossible d'écrire la configuration dans le dossier $dir");
             }
-        } else if (!is_writeable($file)) {
-            throw new OscarException("Impossible d'écrire le fichier $file");
+        } else {
+            if (!is_writeable($file)) {
+                throw new OscarException("Impossible d'écrire le fichier $file");
+            }
         }
         return $file;
     }
@@ -168,23 +220,38 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $path = $this->getYamlConfigPath();
         if (file_exists($path)) {
             $parser = new Parser();
-            return $parser->parse(file_get_contents($path));
+            $parsed = $parser->parse(file_get_contents($path));
+            if ($parsed) {
+                return $parsed;
+            } else {
+                return [];
+            }
         } else {
             return [];
         }
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     * @throws OscarException
+     */
     public function saveEditableConfKey($key, $value)
     {
         $conf = $this->getEditableConfRoot();
         $conf[$key] = $value;
         $writer = new Dumper();
         file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
+        return $this;
     }
 
     public function getEditableConfKey($key, $default = null)
     {
         $conf = $this->getEditableConfRoot();
+        if ($conf == null) {
+            $conf = [];
+        }
         if (array_key_exists($key, $conf)) {
             return $conf[$key];
         } else {
@@ -214,7 +281,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getValidationPFI()
     {
-        return $this->getConfiguration('validation.pfi');
+        $reg = $this->getEditableConfKey(self::pfi_strict_format);
+        // On test si la nouvelle configuration est utilisée
+        if( $reg == null ){
+            return $this->getConfiguration('validation.pfi');
+        }
+        return $reg;
     }
 
     public function getTheme()
@@ -261,6 +333,26 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getDeclarersRelanceJour2()
     {
         return $this->getEditableConfKey('declarersRelanceJour2', 5);
+    }
+
+    public function getDeclarersRelanceConflitMessage(): string
+    {
+        return $this->getEditableConfKey('declarersRelanceConflitMessage', '');
+    }
+
+    public function getDeclarersRelanceConflitJour(): int
+    {
+        return $this->getEditableConfKey('declarersRelanceConflitJour', 1);
+    }
+
+    public function setDeclarersRelanceConflitMessage(string $message): self
+    {
+        return $this->saveEditableConfKey('declarersRelanceConflitMessage', $message);
+    }
+
+    public function setDeclarersRelanceConflitJour(int $days): self
+    {
+        return $this->saveEditableConfKey('declarersRelanceConflitJour', $days);
     }
 
     public function setDeclarersRelanceJour2($value)
@@ -351,7 +443,9 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         if ($publicdoclocation == null) {
             $conf = $this->getConfiguration('paths.document_admin_oscar');
             if (!file_exists($conf) || !is_writable($conf)) {
-                throw new OscarException("L'emplacement des documents publiques n'est pas un dossier accessible en écriture");
+                throw new OscarException(
+                    "L'emplacement des documents publiques n'est pas un dossier accessible en écriture"
+                );
             }
             $publicdoclocation = $conf . '/';
         }
@@ -431,6 +525,72 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->getConfiguration('spenttypeannexes');
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PCRU
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const PCRU_UNITE_ROLE_DEFAULT = 'Laboratoire';
+    const PCRU_PARTNER_ROLE_DEFAULT = 'Partenaire';
+    const PCRU_INCHARGE_ROLE_DEFAULT = 'Responsable scientifique';
+
+    /**
+     * @return bool
+     */
+    public function getPcruEnabled()
+    {
+        return $this->getEditableConfKey('pcru_enabled', false);
+    }
+
+
+    public function getPcruUnitRoles(): array
+    {
+        return $this->getEditableConfKey('pcru_unit_roles', [self::PCRU_UNITE_ROLE_DEFAULT]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruPartnerRoles(): array
+    {
+        return $this->getEditableConfKey('pcru_partner_roles', [self::PCRU_PARTNER_ROLE_DEFAULT]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruInChargeRole(): string
+    {
+        return $roleRSToFind = $this->getEditableConfKey('pcru_incharge_role', self::PCRU_INCHARGE_ROLE_DEFAULT);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPcruContractType(): string
+    {
+        //->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
+        return $roleRSToFind = $this->getEditableConfKey('pcru_contrat_type', "Contrat Version Définitive Signée");
+    }
+
+    /**
+     * @return array
+     * @throws OscarException
+     */
+    public function getPcruFtpInfos()
+    {
+        if (!$this->getPcruEnabled()) {
+            throw new OscarException("Le module PCRU n'est pas activé");
+        }
+        return [
+            'host' => $this->getEditableConfKey('pcru_host'),
+            'port' => $this->getEditableConfKey('pcru_port'),
+            'user' => $this->getEditableConfKey('pcru_user'),
+            'pass' => $this->getEditableConfKey('pcru_pass'),
+            'ssh' => $this->getEditableConfKey('pcru_ssh'),
+            'timeout' => $this->getEditableConfKey('pcru_timeout', 15),
+        ];
+    }
+
     /**
      * @return bool
      */
@@ -438,4 +598,148 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     {
         return $this->getOptionalConfiguration("autorefreshspents", false);
     }
+
+    public function getAuthPersonNormalize(): bool
+    {
+        return $this->getConfiguration(self::auth_person_normalize, false);
+    }
+
+    /**
+     * Retourne le dossier racine PCRU.
+     *
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruRootDirectory(): string
+    {
+        static $pcru_root = null;
+        if ($pcru_root === null) {
+            // Test de la racine PCRU
+            $path = realpath($this->getConfiguration('pcru.files_path'));
+            if (!file_exists($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement temporaire n'existe pas"
+                );
+            }
+            if (!is_dir($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement temporaire doit être un dossier"
+                );
+            }
+            if (!is_writable($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier de traitement doit être accessible en écriture"
+                );
+            }
+            $pcru_root = $path;
+        }
+        return $pcru_root;
+    }
+
+    /**
+     * Retourne le dossier où sont archivés les fichiers avant l'envoi PCRU.
+     *
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruDirectoryForUpload(): string
+    {
+        static $pcru_pool = null;
+        if ($pcru_pool === null) {
+            // Test de la racine PCRU
+            $path = $this->getPcruRootDirectory() . DIRECTORY_SEPARATOR . $this->getConfiguration('pcru.pool_current');
+
+            if (!file_exists($path)) {
+                if (!@mkdir($path)) {
+                    throw new OscarException("Erreur de configuration PCRU : Impossible de créer le dossier d'envoi");
+                }
+            }
+
+            if (!is_dir($path)) {
+                throw new OscarException("Erreur de configuration PCRU : Le dossier d'envoi doit être un dossier");
+            }
+
+            if (!is_writable($path)) {
+                throw new OscarException(
+                    "Erreur de configuration PCRU : Le dossier d'envoi doit être accessible en écriture"
+                );
+            }
+
+            $pcru_pool = $path;
+        }
+        return $pcru_pool;
+    }
+
+    public function getPcruDirectoryForUploadEffective(): string
+    {
+        return $this->getPcruRootDirectory()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_effective');
+    }
+
+    public function getPcruPoolLockFile(): string
+    {
+        return $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_lock');
+    }
+
+    public function getPcruLogPoolFile(): string
+    {
+        return $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.pool_log');
+    }
+
+    /**
+     * @param bool $withPath
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruContratFile($withPath = true): string
+    {
+        return $withPath ?
+            $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.filename_contrats')
+            :
+            $this->getConfiguration('pcru.filename_contrats');
+    }
+
+    /**
+     * @param bool $withPath
+     * @return string
+     * @throws OscarException
+     */
+    public function getPcruPartenaireFile($withPath = true): string
+    {
+        return $withPath ?
+            $this->getPcruDirectoryForUpload()
+            . DIRECTORY_SEPARATOR
+            . $this->getConfiguration('pcru.filename_partenaires')
+            :
+            $this->getConfiguration('pcru.filename_partenaires');
+    }
+
+    /**
+     * @return array|object
+     * @throws OscarException
+     */
+    public function getDocumentDropLocation()
+    {
+        static $documentDropLocation;
+        if ($documentDropLocation == null) {
+            $path = realpath($this->getConfiguration('paths.document_oscar'));
+            if (!file_exists($path)) {
+                throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
+            }
+            if (!is_readable($path)) {
+                throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
+            }
+            $documentDropLocation = $path;
+        }
+        return $documentDropLocation;
+    }
+
+
 }

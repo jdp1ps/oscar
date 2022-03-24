@@ -103,6 +103,22 @@
     "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
     "fullcode": "ACTIVITY-EDIT"
   },
+  "ACTIVITY-PCRU": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "PCRU",
+    "libelle": "Permet d'afficher les informations PCRU de l'activité de recherche",
+    "fullcode": "ACTIVITY-PCRU"
+  },
+  "ACTIVITY-PCRU_ACTIVATE": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "PCRU_ACTIVATE",
+    "libelle": "Permet d'activer les données PCRU pour une activité",
+    "fullcode": "ACTIVITY-PCRU_ACTIVATE"
+  },
 
   "ACTIVITY-PERSON_SHOW": {
     "category_id": 2,
@@ -702,6 +718,22 @@
     "code": "VALIDATION_MANAGE",
     "libelle": "Peut gérer, modifier ou supprimer l'état des déclarations envoyées",
     "fullcode": "MAINTENANCE-VALIDATION_MANAGE"
+  },
+
+  "MAINTENANCE-PCRU_LIST": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "PCRU_LIST",
+    "libelle": "Peut visualiser la liste des données PCRU",
+    "fullcode": "MAINTENANCE-PCRU_LIST"
+  },
+
+  "MAINTENANCE-PCRU_UPLOAD": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "PCRU_UPLOAD",
+    "libelle": "Peut déclencher manuellement le transfert des donnèes vers PCRU",
+    "fullcode": "MAINTENANCE-PCRU_UPLOAD"
   },
 
   "MAINTENANCE-ACTIVITYTYPE_MANAGE": {

@@ -32,11 +32,7 @@ $settings = array(
     'shib' => [
         'order' => 4,
         'enabled' => false,
-        'description' =>
-            "Cliquez sur le bouton ci-dessous pour accéder à l'authentification via la fédération d'identité. " .
-            "<strong>NB: Vous devrez utiliser votre compte " .
-            "&laquo; <a href='http://vie-etudiante.unicaen.fr/vie-numerique/etupass/'>etupass</a> &raquo; " .
-            "pour vous authentifier...</strong>",
+        'description' => "Authentification via la fédération d'identité.",
 
         /**
          * URL de déconnexion.

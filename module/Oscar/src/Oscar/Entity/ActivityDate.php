@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Dates des Activités (Jalons)
  *
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\ActivityDateRepository")
  */
 class ActivityDate implements ITrackable
 {
@@ -203,6 +204,13 @@ class ActivityDate implements ITrackable
     public function getDateStart()
     {
         return $this->dateStart;
+    }
+
+    public function getDateStartStr( $format = 'Y-m-d' ) :string
+    {
+        if( $this->getDateStart() )
+            return $this->getDateStart()->format($format);
+        return "";
     }
 
     /**

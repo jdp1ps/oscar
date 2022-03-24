@@ -31,27 +31,26 @@ class LoggerServiceFactory implements FactoryInterface
         // Emplacement du fichier de log
         $logPath = $configurationService->getLoggerFilePath();
 
+        if( !$logPath ){
+            throw new OscarException("Fichier de log mal configuré (Le chemin est vide)");
+        }
+
         // Niveau de log
         $logLevel = $configurationService->getLoggerLevel();
 
-        if( !file_exists($logPath) ){
-            $handler = fopen($logPath, 'w');
-            if( !$handler ){
-              throw new OscarException("Impossible de créer le fichier de LOG !");
-            }
-            fwrite($handler, "");
-            fclose($handler);
-        }
-
         if( !is_writable($logPath) ){
             throw new OscarException("Le fichier de log n'est pas accessible en écriture");
+        }
+
+        if( !file_exists($logPath) ){
+            file_put_contents($logPath, "");
         }
 
         // Sorties des logs (fichier + PHP stdrout)
         $stream = new StreamHandler($logPath, $logLevel);
         $firephp = new FirePHPHandler($logLevel);
 
-        $logger = new Logger('oscar');
+        $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);
         $logger->pushHandler($firephp);
 

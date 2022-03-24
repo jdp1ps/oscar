@@ -1,0 +1,90 @@
+<div class="container">
+    <h1>
+        Activités PCRU
+    </h1>
+    <!-- <div id="recherche"></div> -->
+    <p class="alert alert-info">
+        Les activités présentes dans cet écran sont soumises à un processus PCRU.<br>
+        Pour activer le processus PCRU d'une activité, rendez-vous sur la fiche activité, puis dans l'encart PCRU, cliquez sur <strong>informations PCRU</strong>, une fois dans le récapitulatif des informations, cliquez sur <strong>Activer PCRU</strong>
+    </p>
+    <?php if(count($pcruInfos) == 0): ?>
+    <div class="alert alert-warning">
+        Aucun processus PCRU en cours
+    </div>
+    <?php else: ?>
+    <section>
+        <?php
+        /** @var \Oscar\Entity\ActivityPcruInfos $pcruInfo */
+        foreach ($pcruInfos as $pcruInfo): ?>
+        <article class="card xs">
+            <h4>
+                <strong><?= $pcruInfo->getAcronyme() ?></strong>
+                <em><?= $pcruInfo->getObjet() ?></em>
+                <?php switch($pcruInfo->getStatus()):
+                    case 'file_wait': ?>
+                    <span class="cartouche xs blue">
+                        <i class="icon-hourglass-3"></i>
+                        En attente de transfert</span>
+                <?php break; ?>
+
+                <?php case 'send_pending': ?>
+                    <span class="cartouche xs success">
+                        <i class="icon-paper-plane"></i>
+                        Transférée (en attente d'un retour)</span>
+                <?php break; ?>
+
+                <?php case 'draft': ?>
+                    <span class="cartouche xs default">
+                    <i class="icon-edit"></i>
+                    Brouillon</span>
+                    <?php break; ?>
+
+                <?php default: ?>
+                    <pre><?php var_dump($pcruInfos); ?></pre>
+                <?php break; ?>
+                <?php endswitch; ?>
+                <a href="<?= $this->url('contract/show', ['id' => $pcruInfo->getActivity()->getId()]) ?>">
+                    <i class="icon-cube"></i>
+                    Voir la fiche activité</a>
+        </article>
+        <?php endforeach; ?>
+    </section>
+
+    <nav>
+
+        <?php if( $downloadable == true): ?>
+            <a href="?a=download" class="btn btn-default">
+                <i class="icon-download"></i>
+                Télécharger les fichiers PCRU en attente
+            </a>
+        <?php endif; ?>
+
+
+        <?php if( $uploadable == true): ?>
+        <form action="" method="post" class="form-inline">
+            <button value="upload" name="action" class="btn btn-primary">
+                <i class="icon-upload"></i>
+                Transferer vers PCRU
+            </button>
+        </form>
+        <?php else: ?>
+            <div class="alert alert-info">Un processus PCRU est déjà en cours (En attente d'un retour)</div>
+        <?php endif; ?>
+    </nav>
+    <?php endif; ?>
+    <?php /* <script>
+        require(['vue', 'vue-resource', 'createprocessuspcru'], function(Vue,VueResource,CreateProcessusPCRU){
+            new Vue({
+                render(h){
+                    return h(CreateProcessusPCRU, { props: {
+                        urlSearchActivities: '?a=search',
+                        urlActivityPCRUCreate: '?a=create',
+                        urlPreviewPCRU: '?a=preview'
+                        }})
+                }
+            }).$mount('#recherche')
+        })
+    </script>
+    /****/ ?>
+
+</div>

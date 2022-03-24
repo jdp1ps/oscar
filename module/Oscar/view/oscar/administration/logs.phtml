@@ -1,0 +1,59 @@
+<section class="container">
+    <h1><i class="icon-user-md"></i>Logs</h1>
+    <p class="alert alert-info">
+        Cet écran n'affiche que les 25 dernières lignes de la sortie standard <strong><?= $log_file ?></strong>. Pour afficher les logs en temps réél, connectez-vous à l'instance d'Oscar et utilisez la commande <code>tail -f <?= $log_file ?></code>.
+    </p>
+
+    <p>
+        Le niveau de log est fixé à <code><?= $log_level ?></code>
+    </p>
+
+    <pre id="logs">
+        TOTO
+    </pre>
+
+    <script>
+        require(['vue', 'vue-resource'], function(Vue, VueResource){
+            Vue.use(VueResource);
+            var interval;
+            new Vue({
+                el: "#logs",
+                data: {
+                    logs: "Pas de logs...",
+                    refresh: 5,
+                    loading: false
+                },
+                template: `
+<div class="logger terminal" :class="{'loading': loading}">
+    <div class="terminal-header">
+        <em>Mise à jour toute les {{refresh}} secondes</em>
+        <i class="icon-hourglass-3"></i>
+    </div>
+    <pre class="terminal-content">{{ logs }}</pre>
+</div>`,
+                methods: {
+                    loadLastLogs(){
+                        this.loading = true;
+                        this.$http.get('').then(
+                            ok => {
+                                this.logs = ok.body;
+                            },
+                            ko => {
+                                this.logs = "Impossible de connaitre l'état de OscarWorker : " + ko.body;
+                            }
+                        ).then(()=>{
+                            this.loading = false;
+                        });
+                    }
+                },
+                mounted(){
+                    this.loadLastLogs();
+                    var self = this;
+                    interval = setInterval(()=> {
+                        self.loadLastLogs()
+                    }, this.refresh*1000);
+                }
+            })
+        })
+    </script>
+</section>

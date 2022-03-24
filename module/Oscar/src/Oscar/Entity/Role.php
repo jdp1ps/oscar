@@ -149,8 +149,6 @@ class Role implements HierarchicalRoleInterface
     protected $accessibleExterieur = true;
 
 
-
-
     ///////////////////////////////////////////////////////////////// PRIVILEGES
 
     /**
@@ -178,19 +176,17 @@ class Role implements HierarchicalRoleInterface
     }
 
 
-
     /**
      * Test si le rôle dispose du privilège.
      *
      * @param $privilege
      * @throws \Exception
      */
-    public function hasPrivilege( $privilege ){
-
+    public function hasPrivilege($privilege)
+    {
         /** @var Privilege $privilege */
-        foreach ( $this->getPrivileges() as $p ){
-
-            if( $p->getFullCode() == $privilege ){
+        foreach ($this->getPrivileges() as $p) {
+            if ($p->getFullCode() == $privilege) {
                 return true;
             }
         }
@@ -203,7 +199,8 @@ class Role implements HierarchicalRoleInterface
      *
      * @throws \Exception
      */
-    public function getPrivilegesArrayString(){
+    public function getPrivilegesArrayString()
+    {
         throw new \Exception('NOT IMPLEMENTED');
     }
 
@@ -414,7 +411,6 @@ class Role implements HierarchicalRoleInterface
     public function getLevels()
     {
         if ($this->_levels === null) {
-
             $this->_levels = [];
             if ($this->isLevelApplication()) {
                 $this->_levels[] = self::getLevelLabel(self::LEVEL_APPLICATION);
@@ -435,7 +431,7 @@ class Role implements HierarchicalRoleInterface
      * @param int $level
      * @return bool
      */
-    public function isLevel( int $level ) :bool
+    public function isLevel(int $level): bool
     {
         return ($this->getSpot() & $level) > 0;
     }
@@ -444,7 +440,7 @@ class Role implements HierarchicalRoleInterface
      * Retourne TRUE si le rôle est au niveau applicatif
      * @return bool
      */
-    public function isLevelApplication() :bool
+    public function isLevelApplication(): bool
     {
         return $this->isLevel(self::LEVEL_APPLICATION);
     }
@@ -453,7 +449,7 @@ class Role implements HierarchicalRoleInterface
      * Retourne TRUE si le rôle est au niveau organisation
      * @return bool
      */
-    public function isLevelOrganization() :bool
+    public function isLevelOrganization(): bool
     {
         return $this->isLevel(self::LEVEL_ORGANIZATION);
     }
@@ -462,7 +458,7 @@ class Role implements HierarchicalRoleInterface
      * Retourne TRUE si le rôle est au niveau activité
      * @return bool
      */
-    public function isLevelActivity() :bool
+    public function isLevelActivity(): bool
     {
         return $this->isLevel(self::LEVEL_ACTIVITY);
     }

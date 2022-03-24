@@ -7,13 +7,14 @@
 namespace Oscar\Entity;
 
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
-use mysql_xdevapi\Exception;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Connector\IConnectedRepository;
-use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
+use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\PeriodInfos;
 
 /**
  * Class ProjectGrantRepository
@@ -22,6 +23,46 @@ use Oscar\Import\Data\DataExtractorFullname;
 class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
+
+
+    public function getReferentsIdsPerson(int $person): array
+    {
+        try {
+            $rsm = new ResultSetMapping();
+            $rsm->addScalarResult('referent_id', 'referent_id');
+            $sql = 'SELECT referent_id FROM referent WHERE person_id = :person';
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $results = $query->setParameter('person', $person)->getResult();
+            return array_map('current', $results);
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function removeReferent(int $removedReferentPersonId, int $subordinatePersonId): void
+    {
+
+        try {
+            $query = $this->getEntityManager()->createQuery(
+                'DELETE Oscar\Entity\Referent r 
+            WHERE r.person = :subordinate AND r.referent = :referent'
+            );
+
+            $query->setParameters(
+                [
+                    'referent' => $removedReferentPersonId,
+                    'subordinate' => $subordinatePersonId
+                ]
+            );
+
+            $query->execute();
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+    }
 
 
     public function removePersonById(int $personId)
@@ -46,12 +87,16 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->execute();
     }
 
+    /**
+     * @param array $ids
+     * @return Person[]
+     */
     public function getPersonsByIds(array $ids)
     {
         $qb = $this->getBaseQuery()
             ->where('p.id IN (:ids)')
             ->setParameter('ids', $ids);
-        return $qb->getQuery()->execute();
+        return $qb->getQuery()->getResult();
     }
 
 
@@ -157,7 +202,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->setParameter('ids', $ids)
             ->getQuery()
             ->getResult();
-
     }
 
     public function getSubordinatesIds($referentId)
@@ -170,7 +214,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->getQuery()
             ->getResult();
         return array_map('current', $result);
-
     }
 
     /**
@@ -183,9 +226,15 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $qb = $this->createQueryBuilder('p');
         $persons = $qb
             ->select('p')
-            ->innerJoin(Authentification::class, 'a', Join::WITH, $qb->expr()->eq(
-                $normalize ? 'lower(p.ladapLogin)' : 'p.ladapLogin',
-                $normalize ? 'lower(a.username)' : 'a.username'))
+            ->innerJoin(
+                Authentification::class,
+                'a',
+                Join::WITH,
+                $qb->expr()->eq(
+                    $normalize ? 'lower(p.ladapLogin)' : 'p.ladapLogin',
+                    $normalize ? 'lower(a.username)' : 'a.username'
+                )
+            )
             ->innerJoin(NotificationPerson::class, 'n', Join::WITH, $qb->expr()->eq('p.id', 'n.person'))
             ->where('n.read IS NULL')
             ->getQuery()
@@ -250,7 +299,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
     public function getRolesOrganizationArray()
     {
-        return $this->getEntityManager()->getRepository(Role::class)->getRolesAtOrganizationArray();
+        return $this->getEntityManager()->getRepository(Role::class)->getRolesAvailableForPersonInOrganizationArray();
     }
 
 
@@ -363,7 +412,8 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     public function getRolesLdapUsed()
     {
         $query = $this->getEntityManager()->createQuery(
-            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM ' . Role::class . ' r WHERE r.ldapFilter IS NOT NULL');
+            'SELECT DISTINCT r.ldapFilter, r.roleId, r.principal FROM ' . Role::class . ' r WHERE r.ldapFilter IS NOT NULL'
+        );
         $filtersUsed = [];
         foreach ($query->getResult() as $row) {
             $ldapFilter = preg_replace('/\(memberOf=(.*)\)/i', '$1', $row['ldapFilter']);
@@ -378,7 +428,133 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ];
         }
         return $filtersUsed;
+    }
 
+    public function getIdsValidatorsProject(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsPrj', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP1);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+    public function getIdsValidatorsSci(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsSci', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP2);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+    public function getIdsValidatorsAdm(bool $hasToValidate = false, int $year = -1, int $month = -1): array
+    {
+        $qb = $this->getBaseQueryValidator($year, $month)
+            ->innerJoin('vp.validatorsAdm', 'p');
+
+        if ($hasToValidate === true) {
+            $qb->andWhere('vp.status = :step')
+                ->setParameter('step', ValidationPeriod::STATUS_STEP3);
+        }
+
+        $ids = $qb->getQuery()->getArrayResult();
+
+        return array_map('current', $ids);
+    }
+
+
+    public function getIdsValidators($hasValidating = true, $period = ""): array
+    {
+        $year = -1;
+        $month = -1;
+        if ($period != "") {
+            $periodInfos = PeriodInfos::getPeriodInfosObj($period);
+            $year = $periodInfos->getYear();
+            $month = $periodInfos->getMonth();
+        }
+
+        $prj = $this->getIdsValidatorsProject($hasValidating, $year, $month);
+        $sci = $this->getIdsValidatorsSci($hasValidating, $year, $month);
+        $adm = $this->getIdsValidatorsAdm($hasValidating, $year, $month);
+
+        $ids = array_unique(array_merge($sci, $adm, $prj));
+
+        return $ids;
+    }
+
+    /**
+     * Retourne le liste des person.id des déclarants (pour la période si spécifiée).
+     *
+     * @param string|null $periodA (période, sous la forme YYYY-MM)
+     * @return array
+     */
+    public function getIdsDeclarers(?string $period = null): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT(p.id) id')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wpp')
+            ->groupBy('p.id');
+
+        $parametersQuery = [];
+
+        // Traitement de la clause sur la période si besoin
+        if ($period !== null) {
+            // Filtrer sur la période
+            $extract = DateTimeUtils::periodBounds($period);
+            $start = $extract['start'];
+            $end = $extract['end'];
+            $qb->innerJoin('wpp.workPackage', 'wp')
+                ->innerJoin('wp.activity', 'a')
+                ->where('a.dateStart < :periodEnd AND a.dateEnd > :periodStart');
+            $parametersQuery = [
+                'periodEnd' => $end,
+                'periodStart' => $start,
+            ];
+        }
+        $qb->setParameters($parametersQuery);
+
+        $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        return array_map('current', $results);
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Requête de base pour obtenir les PersonID des validateurs identifiés dans les procédures de validation.
+     *
+     * @param int $year Année ou -1 pour ignorer
+     * @param int $month Mois (1=Janvier, 2=février, etc..  ou -1 pour ignorer)
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function getBaseQueryValidator(int $year = -1, int $month = -1)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder('vp')
+            ->select('DISTINCT(p.id)')
+            ->from(ValidationPeriod::class, 'vp');
+
+        if ($year > -1) {
+            $qb->andWhere('vp.year = :year')
+                ->setParameter('year', $year);
+        }
+
+        if ($month > -1) {
+            $qb->andWhere('vp.month = :month')
+                ->setParameter('month', $month);
+        }
+        return $qb;
     }
 
     public function getObjectByConnectorID($connectorName, $connectorID)

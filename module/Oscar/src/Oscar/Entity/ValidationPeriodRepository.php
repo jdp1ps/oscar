@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\PeriodInfos;
 
 class ValidationPeriodRepository extends EntityRepository
 {
@@ -177,6 +178,8 @@ class ValidationPeriodRepository extends EntityRepository
            ->getResult();
     }
 
+
+
     /**
      * Retourne la liste des validations disponible pour la personne et la période donnée.
      *
@@ -184,22 +187,40 @@ class ValidationPeriodRepository extends EntityRepository
      * @param $periodStr
      * @return int|mixed|string
      */
-    public function getValidationPeriodForPersonAtPeriod($personId, $periodStr){
+    public function getValidationPeriodForPersonAtPeriod(int $personId, string $periodStr){
         // Récupération des données de la périodes
-        $periodDatas = DateTimeUtils::periodBounds($periodStr);
-        $year   = $periodDatas['year'];
-        $month  = $periodDatas['month'];
-
+        $periodInfos = PeriodInfos::getPeriodInfosObj($periodStr);
 
         return $this->createQueryBuilder('vp')
             ->where('vp.declarer = :person AND vp.year = :year AND vp.month = :month')
             ->setParameters([
                 'person' => $personId,
-                'year' => $year,
-                'month' => $month,
+                'year' => $periodInfos->getYear(),
+                'month' => $periodInfos->getMonth(),
             ])
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param array $personIds
+     * @param string $periodStr
+     * @return \Doctrine\ORM\QueryBuilder
+     * @throws OscarException
+     */
+    public function getValidationPeriodsForPersonsAtPeriod( array $personIds, string $periodStr )
+    {
+        $periodInfos = PeriodInfos::getPeriodInfosObj($periodStr);
+
+        return $this->createQueryBuilder('v')
+            ->where('v.declarer IN(:personIds) AND v.month = :month AND v.year = :year')
+            ->setParameters(
+                [
+                    'personIds' => $personIds,
+                    'year' => $periodInfos->getYear(),
+                    'month' => $periodInfos->getMonth(),
+                ]
+            )->getQuery()->getResult();
     }
 
     /**
@@ -273,7 +294,14 @@ class ValidationPeriodRepository extends EntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function getValidationPeriodsOutWPToValidate( $idPerson = null ){
+    /**
+     * Retourne la liste des validations Hors-Lots à valider.
+     *
+     * @param int|null $idPerson
+     * @return ValidationPeriod[]
+     */
+    public function getValidationPeriodsOutWPToValidate( ?int $idPerson = null ) :array
+    {
         $parameters = [
             'objectgroup' => ValidationPeriod::GROUP_OTHER,
             'status' => [ValidationPeriod::STATUS_STEP1, ValidationPeriod::STATUS_STEP2, ValidationPeriod::STATUS_STEP3],
@@ -309,7 +337,6 @@ class ValidationPeriodRepository extends EntityRepository
     }
 
     public function getDatasValidationPersonsPeriod($personsIds, $start, $end){
-        // SELECT CONCAT(year, '-', month) as period, * FROM validationperiod WHERE CONCAT(year, '-', month) > '2018-8';
 
         $rsm = new ResultSetMapping();
         $result = $this->getEntityManager()->getConnection()->fetchAll("SELECT CONCAT(v.year, '-', v.month) as period, * 

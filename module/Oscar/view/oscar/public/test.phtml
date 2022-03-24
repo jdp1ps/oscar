@@ -1,0 +1,23 @@
+<div class="container">
+    <div id="synthesis-timesheet">ICI</div>
+</div>
+
+    <script>
+        require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
+
+        Vue.use(VueResource);
+        Vue.http.options.emulateJSON = true;
+        Vue.http.options.emulateHTTP = true;
+
+        new Vue({
+            render: function (h) {
+        return h(ActivityTimesheetSynthesisMenu, {
+        props: {
+        url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=9310&v=2'
+    }
+    })
+    },
+        el: '#synthesis-timesheet'
+    }).$mount()
+    });
+</script>

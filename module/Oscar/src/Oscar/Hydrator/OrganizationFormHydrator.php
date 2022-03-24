@@ -15,16 +15,18 @@ class OrganizationFormHydrator implements HydratorInterface
 {
     private $connectors;
     private $types;
+    private $countries;
 
     /**
      * OrganizationFormHydrator constructor.
      * @param $connectors
      * @param $types
      */
-    public function __construct($connectors, $types)
+    public function __construct($connectors, $types, $countries)
     {
         $this->connectors = $connectors;
         $this->types = $types;
+        $this->countries = $countries;
     }
 
 
@@ -41,6 +43,10 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setCode($data['code']);
         $object->setSiret($data['siret']);
         $object->setFullName($data['fullName']);
+        $object->setLabintel($data['labintel']);
+        $object->setRnsr($data['rnsr']);
+        $object->setDuns($data["duns"]);
+        $object->setTvaintra($data["tvaintra"]);
 
         $object->setDateStart(
             !$data['dateStart'] ? null : new \DateTime($data['dateStart'])
@@ -48,8 +54,6 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setDateEnd(
             !$data['dateEnd'] ? null : new \DateTime($data['dateEnd'])
         );
-
-
 
         // ADDRESS
         $object->setStreet1($data['street1']);
@@ -59,7 +63,6 @@ class OrganizationFormHydrator implements HydratorInterface
         $object->setCity($data['city']);
         $object->setCountry($data['country']);
         $object->setPhone($data['phone']);
-
         $object->setEmail($data['email']);
         $object->setUrl($data['url']);
         $object->setDescription($data['description']);
@@ -79,27 +82,33 @@ class OrganizationFormHydrator implements HydratorInterface
     {
 
         $datas = [
-            'id'        => $object->getId(),
+            'id' => $object->getId(),
             'shortName' => $object->getShortName(),
-            'code'      => $object->getCode(),
-            'typeObj'   => $object->getTypeObj() ? $object->getTypeObj()->getId() : null,
-            'siret'     => $object->getSiret(),
-            'fullname'  => $object->getFullName(),
-            'dateStart' => $object->getDateStart()  ? $object->getDateStart()->format('Y-m-d')  : '',
-            'dateEnd'   => $object->getDateEnd()    ? $object->getDateEnd()->format('Y-m-d')    : '',
-            'fullName'  => $object->getFullName(),
-            // ADDRESS
-            'street1'  => $object->getStreet1(),
-            'street2'  => $object->getStreet2(),
-            'street3'  => $object->getStreet3(),
-            'zipCode'  => $object->getZipCode(),
-            'city'  => $object->getCity(),
-            'country'  => $object->getCountry(),
-            'phone'  => $object->getPhone(),
+            'code' => $object->getCode(),
+            'labintel' => $object->getLabintel(),
+            'rnsr' => $object->getRnsr(),
 
-            'email'  => $object->getEmail(),
-            'url'  => $object->getUrl(),
-            'description'  => $object->getDescription(),
+            'duns' => $object->getDuns(),
+            'tvaintra' => $object->getTvaintra(),
+
+            'typeObj' => $object->getTypeObj() ? $object->getTypeObj()->getId() : null,
+            'siret' => $object->getSiret(),
+            'fullname' => $object->getFullName(),
+            'dateStart' => $object->getDateStart() ? $object->getDateStart()->format('Y-m-d') : '',
+            'dateEnd' => $object->getDateEnd() ? $object->getDateEnd()->format('Y-m-d') : '',
+            'fullName' => $object->getFullName(),
+            // ADDRESS
+            'street1' => $object->getStreet1(),
+            'street2' => $object->getStreet2(),
+            'street3' => $object->getStreet3(),
+            'zipCode' => $object->getZipCode(),
+            'city' => $object->getCity(),
+            'country' => $object->getCountry(),
+            'phone' => $object->getPhone(),
+
+            'email' => $object->getEmail(),
+            'url' => $object->getUrl(),
+            'description' => $object->getDescription(),
         ];
         foreach ($this->connectors as $connector) {
             $datas['connector_' . $connector] = $object->getConnectorID($connector);

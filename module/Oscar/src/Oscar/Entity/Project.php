@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Utils\StringUtils;
+use phpDocumentor\Reflection\Types\Integer;
 use Zend\Form\Annotation;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 use ZendTest\Code\Annotation\TestAsset\DoctrineAnnotation;
@@ -106,13 +107,6 @@ class Project implements ResourceInterface
      */
     protected $partners;
 
-//    /**
-//     * Discipline
-//     * @var Discipline
-//     * @ORM\ManyToOne(targetEntity="Discipline")
-//     */
-//    protected $discipline;
-
     /**
      * Discipline
      * @var Discipline
@@ -128,24 +122,23 @@ class Project implements ResourceInterface
         $this->grants = new ArrayCollection();
         $this->members = new ArrayCollection();
         $this->partners = new ArrayCollection();
-//        $this->disciplines = new ArrayCollection();
     }
 
 
     public function getDateStart()
     {
         $start = null;
-        foreach( $this->getActivities() as $activity ){
-            if( $activity->getDateStart() === null ){
+        foreach ($this->getActivities() as $activity) {
+            if ($activity->getDateStart() === null) {
                 continue;
             }
 
-            if( $start === null ){
+            if ($start === null) {
                 $start = $activity->getDateStart();
                 continue;
             }
 
-            if( $activity->getDateStart() < $start ){
+            if ($activity->getDateStart() < $start) {
                 $start = $activity->getDateStart();
             }
         }
@@ -155,52 +148,50 @@ class Project implements ResourceInterface
     public function getDateEnd()
     {
         $end = null;
-        foreach( $this->getActivities() as $activity ){
-            if( $activity->getDateEnd() === null ){
+        foreach ($this->getActivities() as $activity) {
+            if ($activity->getDateEnd() === null) {
                 continue;
             }
 
-            if( $end === null ){
+            if ($end === null) {
                 $end = $activity->getDateEnd();
                 continue;
             }
 
-            if( $activity->getDateEnd() > $end ){
+            if ($activity->getDateEnd() > $end) {
                 $end = $activity->getDateEnd();
             }
         }
         return $end;
     }
 
-//    /**
-//     * @param Discipline $discipline
-//     * @return $this
-//     */
-//    public function addDiscipline(Discipline $discipline)
-//    {
-//        if( !$this->disciplines->contains($discipline) ){
-//            $this->disciplines->add($discipline);
-//        }
-//        return $this;
-//    }
-//
-//    /**
-//     * @param Discipline $discipline
-//     * @return $this
-//     */
-//    public function removeDiscipline(Discipline $discipline)
-//    {
-//        $this->disciplines->removeElement($discipline);
-//        return $this;
-//    }
-//
-//    /**
-//     * @return ArrayCollection|Discipline
-//     */
-//    public function getDisciplines()
-//    {
-//        return $this->disciplines;
-//    }
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        foreach ($this->getActivities() as $activity) {
+            if ($activity->isActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getAmount(): ?float
+    {
+        if ($this->getActivities()->count() == 0) {
+            return null;
+        }
+        $amount = 0.0;
+        foreach ($this->getActivities() as $activity) {
+            $amount += $activity->getAmount();
+        }
+        return $amount;
+    }
 
     /**
      * @param \Oscar\Entity\ProjectMember $projectMember
@@ -213,7 +204,7 @@ class Project implements ResourceInterface
     }
 
     /**
-     * Test si la personne est présente dans le projet entre $start et $end, avec 
+     * Test si la personne est présente dans le projet entre $start et $end, avec
      * le role si l'argument $role est spécifié.
      *
      * @param Person $person
@@ -243,14 +234,14 @@ class Project implements ResourceInterface
         }
         return false;
     }
-    
+
     public function getRolesPersonne(Person $person, $role)
     {
         $result = [];
         foreach ($this->members as $member) {
             /** @var \Oscar\Entity\ProjectMember $member */
             if ($member->getPerson()->getId() === $person->getId()
-                    &&
+                &&
                 $member->getRole() === $role) {
                 $result[] = $member;
             }
@@ -263,7 +254,7 @@ class Project implements ResourceInterface
         $roles = [];
         foreach ($this->members as $member) {
             /** @var \Oscar\Entity\ProjectMember $member */
-            if ($member->getPerson()->getId() === $person->getId()){
+            if ($member->getPerson()->getId() === $person->getId()) {
                 $roles[] = $member->getRole();
             }
         }
@@ -274,8 +265,7 @@ class Project implements ResourceInterface
     {
         return sprintf('[Project:%s:%s]', $this->getId(), (string)$this);
     }
-    
-    
+
 
     /**
      * Test si l'organisation est présente dans le projet, avec le role si l'
@@ -311,15 +301,19 @@ class Project implements ResourceInterface
     );
 
 
-    private function getPartnersByType($type, $deep=false)
+    private function getPartnersByType($type, $deep = false)
     {
-        $needed = in_array($type,
-            $this->_partnersSpecialsTypes) ? $type : 'non-special';
+        $needed = in_array(
+            $type,
+            $this->_partnersSpecialsTypes
+        ) ? $type : 'non-special';
         if ($this->_partnersByType === null) {
             $this->_partnersByType = array();
             foreach ($this->partners as $partner) {
-                $key = !in_array($partner->getRole(),
-                    $this->_partnersSpecialsTypes) ? 'non-special' : $partner->getRole();
+                $key = !in_array(
+                    $partner->getRole(),
+                    $this->_partnersSpecialsTypes
+                ) ? 'non-special' : $partner->getRole();
                 if (!isset($this->_partnersByType[$key])) {
                     $this->_partnersByType[$key] = array();
                 }
@@ -351,9 +345,9 @@ class Project implements ResourceInterface
         return $this->getPartnersByType('non-special');
     }
 
-    public function getPersons( $deep=false )
+    public function getPersons($deep = false)
     {
-        if( $deep ){
+        if ($deep) {
             return $this->getPersonsDeep();
         } else {
             return $this->getMembers();
@@ -364,41 +358,43 @@ class Project implements ResourceInterface
      * Retourne la liste des personnes ayant le rôle.
      * @param string $role
      */
-    public function getPersonsRoled( array $roles )
+    public function getPersonsRoled(array $roles)
     {
         $persons = [];
-        foreach( $this->getPersons() as $p ){
-            if( in_array($p->getRole(), $roles ) ) {
+        foreach ($this->getPersons() as $p) {
+            if (in_array($p->getRole(), $roles)) {
                 $persons[] = $p;
             }
         }
         return $persons;
     }
 
-    public function getPersonsDeep(){
+    public function getPersonsDeep()
+    {
         $persons = [];
-        foreach( $this->getMembers(true) as $member ){
+        foreach ($this->getMembers(true) as $member) {
             $persons[] = $member;
         }
 
         /** @var Activity $activity */
-        foreach( $this->getActivities() as $activity ){
-            foreach( $activity->getPersons() as $person ){
+        foreach ($this->getActivities() as $activity) {
+            foreach ($activity->getPersons() as $person) {
                 $persons[] = $person;
             }
         }
         return $persons;
     }
 
-    public function getOrganizations( $deep = false ){
+    public function getOrganizations($deep = false)
+    {
         $organisations = [];
-        foreach( $this->getPartners(true) as $partner ){
+        foreach ($this->getPartners(true) as $partner) {
             $organisations[] = $partner;
         }
-        if( $deep === true ){
+        if ($deep === true) {
             /** @var Activity $activity */
-            foreach( $this->getActivities() as $activity ){
-                foreach( $activity->getOrganizations() as $organisation ){
+            foreach ($this->getActivities() as $activity) {
+                foreach ($activity->getOrganizations() as $organisation) {
                     $organisations[] = $organisation;
                 }
             }
@@ -406,7 +402,8 @@ class Project implements ResourceInterface
         return $organisations;
     }
 
-    public function getOrganisationsDeep(){
+    public function getOrganisationsDeep()
+    {
         return $this->getOrganizations(true);
     }
 
@@ -420,7 +417,7 @@ class Project implements ResourceInterface
         return $this->getPartnersByType(Organization::ROLE_COMPOSANTE_GESTION);
     }
 
-    public function getLaboratories($deep=false)
+    public function getLaboratories($deep = false)
     {
         return $this->getPartnersByType(Organization::ROLE_LABORATORY);
     }
@@ -532,8 +529,8 @@ class Project implements ResourceInterface
     public function getEotp()
     {
         $pfi = [];
-        foreach($this->getActivities() as $activity ){
-            if($activity->getCodeEOTP() && !in_array($activity->getCodeEOTP(), $pfi) ){
+        foreach ($this->getActivities() as $activity) {
+            if ($activity->getCodeEOTP() && !in_array($activity->getCodeEOTP(), $pfi)) {
                 $pfi[] = $activity->getCodeEOTP();
             }
         }
@@ -719,7 +716,7 @@ class Project implements ResourceInterface
     public function getDisplayName()
     {
         return ($this->getCode() ? $this->getCode() . ' : ' : '')
-        . $this->getLabel();
+            . $this->getLabel();
     }
 
     public function userActiveByEmail($email)
@@ -738,18 +735,18 @@ class Project implements ResourceInterface
         $grants = [];
         $members = [];
         $partners = [];
-        
-        /** @var \Oscar\Entity\ProjectMember $member **/
+
+        /** @var \Oscar\Entity\ProjectMember $member * */
         foreach ($this->getMembers() as $member) {
             $members[] = $member->toArray();
         }
-        
-        /** @var \Oscar\Entity\ProjectPartner $member **/
+
+        /** @var \Oscar\Entity\ProjectPartner $member * */
         foreach ($this->getPartners() as $partner) {
             $partners[] = $partner->toArray();
         }
 
-        /** @var \Oscar\Entity\Activity $grant **/
+        /** @var \Oscar\Entity\Activity $grant * */
         foreach ($this->getGrants() as $grant) {
             $grants[] = $grant->toArray();
         }
@@ -769,14 +766,16 @@ class Project implements ResourceInterface
 
 
     private $_pfi;
+
     public function getPFI()
     {
-        if( $this->_pfi === null ){
+        if ($this->_pfi === null) {
             $this->_pfi = [];
             /** @var Activity $activity */
-            foreach( $this->getActivities() as $activity ){
-                if( $activity->getCodeEOTP() )
+            foreach ($this->getActivities() as $activity) {
+                if ($activity->getCodeEOTP()) {
                     $this->_pfi[] = $activity->getCodeEOTP();
+                }
             }
         }
         return implode(', ', array_unique($this->_pfi));
@@ -785,7 +784,8 @@ class Project implements ResourceInterface
     /**
      * @return Activity[]
      */
-    public function getActivities(){
+    public function getActivities()
+    {
         return $this->getGrants();
     }
 
@@ -808,7 +808,6 @@ class Project implements ResourceInterface
     }
 
 
-
     public function toJson()
     {
         return json_encode($this->toArray());
@@ -821,7 +820,7 @@ class Project implements ResourceInterface
 
     public function __toString()
     {
-        return ($this->getAcronym() ? $this->getAcronym().' ':'') . $this->getLabel();
+        return ($this->getAcronym() ? $this->getAcronym() . ' ' : '') . $this->getLabel();
     }
 
     public function getResourceId()

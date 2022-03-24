@@ -73,12 +73,16 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         $connectors = $config->getConfiguration('connectors.person');
 
         foreach ($connectors as $key=>$params) {
-            $io->text(sprintf("Configuration : <bold>%s</bold>", $key));
+            $io->text("-------------------------------------------------------");
+            $io->text(sprintf("# Configuration : <bold>%s</bold>", $key));
 
             // Class
             $io->text(sprintf("class: <bold>%s</bold>", $params['class']));
+            $io->text("---");
+
 
             // Options du connecteur
+
             $fileYml = $params['params'];
 
             /** @var AbstractConnectorOscar $class */
@@ -101,6 +105,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 }
                 $io->newLine();
             }
+            $io->text("-------------------------------------------------------");
         }
     }
 
@@ -224,32 +229,41 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         }
         $io->writeln("<green>OK</green>");
 
+        $logPath = $oscarConfig->getLoggerFilePath();
+        $io->write(" - Fichier de LOG (<bold>$logPath</bold>) :  ");
+        if( !is_writable($logPath) ){
+            $io->error("Le fichier de log n'est pas éditable");
+            return;
+        }
+        $io->writeln("<green>OK</green>");
+
 
 
         $config = new ConfigurationParser($this->getServicemanager()->get(OscarConfigurationService::class)->getConfigArray());
         $em = $this->getServicemanager()->get(EntityManager::class);
 
         try {
-            $io->write(" * Accès à la base de données ");
+            $io->write(" - Accès à la base de données ");
             $io->write($config->getConfiguration('doctrine.connection.orm_default.params.host'));
             $io->write(" ... ");
 
             if ($em->getConnection()->isConnected()) {
-                $io->writeln("OK");
+                $io->writeln("<green>OK</green>");
             }
 
             $validator = new SchemaValidator($em);
             $errors = $validator->validateMapping();
 
-            $io->write(" * Modèle de donnée ");
+            $io->write(" - Modèle de donnée ");
             if (count($errors) > 0) {
                 $io->warning("Obsolète");
                 foreach( $errors as $error ){
                     $io->error(" - " . $error . " - " . print_r($error));
                 }
                 $io->error("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
+                return;
             } else {
-                $io->success("OK");
+                $io->writeln("<green>OK</green>");
             }
 
         } catch (\Exception $e ){
@@ -273,6 +287,9 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $pathDocuments = $config->getConfiguration('oscar.mailer.template');
             $this->checkPath($io, $pathDocuments, "Modèle de mail > TEMPLATE");
 
+            $pathDocuments = $config->getConfiguration('oscar.pcru.files_path');
+            $this->checkPath($io, $pathDocuments, "Documents temporaires PCRU");
+
         } catch ( OscarException $e ){
             $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
         }
@@ -283,19 +300,19 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $io->section(" ### Configuration du mailer : ");
 
             $urlAbsolute = $config->getConfiguration('oscar.urlAbsolute');
-            $io->write(" * URL absolue : ");
+            $io->write(" - URL absolue (Utilisée pour forger les liens) : ");
             if( $urlAbsolute == "http://localhost:8080" ){
-                $io->write('<bold> !DEV! ' . $urlAbsolute .'</bold>');
+                $io->writeln('<id> !DEV! ' . $urlAbsolute .'</id>');
             } else {
-                $io->write($urlAbsolute);
+                $io->writeln($urlAbsolute);
             }
 
-            $io->write(" * Transport : ");
+            $io->write(" - Transport : ");
             $typeTransport = $config->getConfiguration('oscar.mailer.transport.type');
             $typeTransportValid = in_array($typeTransport, ['sendmail', 'smtp', 'file']);
 
             if( $typeTransportValid ){
-                $io->writeln($typeTransport);
+                $io->writeln("<green>$typeTransport</green>");
                 switch ($typeTransport) {
                     case 'sendmail' :
                         $io->writeln("Attention, l'utilisation de SENDMAIL n'est pas testée dans cette version");
@@ -376,6 +393,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         try {
             $this->checkConnectorPerson($input,$output);
         } catch ( OscarException $e ){
+            echo $e->getTraceAsString();
             $io->warning(sprintf(" ~ CONNECTOR > PERSONS : Pas de connecteur person : %s", $e->getMessage()));
         }
 

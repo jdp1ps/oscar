@@ -7,7 +7,7 @@
     "uid": "alberteinstein",
     "dateupdated": "2021-11-14",
     "roles": {
-
+      "LABO1": ["Directeur de laboratoire"]
     }
   },
 
@@ -25,7 +25,8 @@
     "login": "mauricesolovine",
     "uid": "mauricesolovine",
     "roles": {
-      "UNIV1": ["Responsable scientifique", "Doctorant"]
+      "UNIV1": ["Responsable scientifique", "Doctorant"],
+      "LABO1": ["Gestionnaire recherche de laboratoire"]
     }
   },
   {
@@ -47,7 +48,7 @@
     "roles": {
       "14": ["Turlututu"],
       "ED209": ["Code Absent de oscar => Ignoré"],
-      "UNIV2": ["Gestionnaire"]
+      "UNIV2": ["Gestionnaire recherche de laboratoire"]
     }
   },
   {

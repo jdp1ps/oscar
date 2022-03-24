@@ -28,7 +28,7 @@ return [
 
 ## Script d'envoi
 
-La commande `php public/index.php oscar notifications:mails:persons` permet de déclencher la procédure d'envoi des mails : 
+La commande `php bin/oscar.php notifications:mails:persons` permet de déclencher la procédure d'envoi des mails : 
 
 ```bash
 $ php public/index.php oscar notifications:mails:persons

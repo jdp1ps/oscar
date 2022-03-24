@@ -1,109 +1,54 @@
 # Support Oracle OCI8 pour PHP
 
+> UPDATE : Debian bullseye / PHP7.4
+
 Procédure d'installation du **module PHP OCI8** afin de permettre d'utiliser les connexions à une base de données Oracle en PHP.
 
-Cette procédure se fait en 2 étapes, commencer par récupérer et installer les différents utilitaires pour la connexion à Oracle (utilitaires indépendant de PHP). Puis l'installation du module PHP OCI8.
+Cette procédure se fait en 2 étapes, commencer par récupérer et installer les différents utilitaires pour la connexion à Oracle (utilitaires indépendants de PHP). Puis l'installation du module PHP OCI8.
 
+### Prérequis
+ - *phpize* et *pecl* Installation du paquet `php7.4-dev`
 
 ## Oracle Instant Client
 
-Les différents utilitaires sont accessibles depuis la page <https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html>
+Les différents utilitaires sont accessibles depuis la page 
+https://git.unicaen.fr/open-source/oscar/-/wikis/Installation-OCI
 
-Vous devrez récupérer au minimum  : 
-
- - Basic Package (ZIP) instantclient-basic-linux.x64-X.X.X.X.dbru.zip
- - SDK Package (ZIP) instantclient-sdk-linux.x64-X.X.X.X.dbru.zip
+Téléchargez les dans votre `/tmp`
 
 
-Dans cet exemple, je vais placer les utilitaires dans le dossier **/opt/oracle** : 
+## Installation
 
 ```bash
-mkdir -p /opt/oracle
-cd !$
+# Extraction des archives
+unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
+unzip -o /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
+unzip -o /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
+
+# Lien symbolique "instantclient/sqlplus"
+ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient
+ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
+
+# Installation via PECL
+echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
+
+# Configuration PHP
+echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini
+echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini
+
+# Dynamic Library Config
+echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf
+ldconfig
 ```
 
-On va dézipper les 2 archives obtenues : 
+Petit *restart* de *Apache*
 
 ```bash
-unzip  /path/to/instantclient-basic-linux.x64-X.X.X.X.dbru.zip
-unzip  /path/to/instantclient-sdk-linux.x64-X.X.X.X.dbru.zip
-```
-
-Vous devriez avoir dans votre dossier **/opt/oracle** un dossier **instantclient_X_X**
-
-
-##  PHP7.3 OCI
-
-## LIBAIO1
-
-On commence  par installer la  librairie **libaio**
-
-```bash
-$ apt install libaio
-```
-
-### PECL
-
-Pour l'installation du module OCI8 de PHP7.3, on va utiliser **pecl**
- 
-Pour installer PECL : 
-
-```bash
-$ apt install php-pear
-$ pecl version
-  PEAR Version: 1.10.8
-  PHP Version: 7.3.11-1+ubuntu18.04.1+deb.sury.org+1
-  Zend Engine Version: 3.3.11
-  Running on: Linux ED209 #67-Ubuntu SMP Thu Aug 22 16:55:30 UTC 2019 x86_64
-```
-
-> Si vous êtes derrière un proxy, utilisez la commande `pear config-set http_proxy http://<user>:<password>@<ip_proxy>:<port>` pour régler le proxy utilisé par PEAR (il n'utilise pas le proxy système...)
-
-PECL a besoin de **phpize** qui est inclus dans la librairie **php7.3-dev** pour compiler certains module (dont OCI8 qui nous interesse): 
-
-```bash
-$ apt install php7.3-dev
-$ phpize -v
-Configuring for:
-PHP Api Version:         20180731
-Zend Module Api No:      20180731
-Zend Extension Api No:   320180731
+service apache2 restart
 ```
 
 
-### OCI8 
-
-```bash
-pecl install oci8
-```
-
-Enfin, on installe OCI8. Vous devrez renseigner l'emplacement de l'instantclient installé à l'étape précédente :
- 
-la réponse sera : **instantclient,/opt/oracle/instantclient_X_X**
-
-
-
-### PHP.INI
-
-On va maintenant activer le module PHP (OCI8) dans le PHP.INI.
-Pensez à le faire pour les PHP CLI et SERVEUR
-  
-
-```
-# Extrait du fichier php.ini
-;extension=interbase
-;extension=ldap
-;extension=mbstring
-;extension=exif      ; Must be after mbstring as it depends on it
-;extension=mysqli
-
-# ON ACTIVE  OCI8
-extension=oci8  ; Use with Oracle Database 12c Instant Client
-
-;extension=odbc
-;etc...
-```
-    
+## Problèmes connus
 
 ### libnnz19.so !
 

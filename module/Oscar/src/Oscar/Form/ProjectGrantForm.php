@@ -4,11 +4,13 @@
  * @date October 16, 2015 15:34
  * @copyright Certic (c) 2015
  */
+
 namespace Oscar\Form;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\TimeSheet;
 use Oscar\Form\Element\KeyValue;
+use Oscar\Formatter\AsArrayFormatter;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\ProjectGrantService;
@@ -34,7 +36,8 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
     private $organizations = false;
     private $organizationRoles = null;
 
-    public function setNumbers($numbers, $editable){
+    public function setNumbers($numbers, $editable)
+    {
         $this->numbers = $numbers;
         $this->editable = $editable;
     }
@@ -42,11 +45,13 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
     /**
      * @return ProjectGrantService
      */
-    public function getProjectGrantService(){
+    public function getProjectGrantService()
+    {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
-    public function addOrganizationsLeader($organizations, $organizationRoles){
+    public function addOrganizationsLeader($organizations, $organizationRoles)
+    {
         $this->organizations = $organizations;
         $this->organizationRoles = $organizationRoles;
     }
@@ -88,7 +93,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
         // LABEL
         $label = _("Intitulé de l'activité");
         $this->add([
-            'name'   => 'label',
+            'name' => 'label',
             'options' => [
                 'label' => $label,
             ],
@@ -96,13 +101,13 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'class' => 'form-control input-lg',
                 'placeholder' => $label,
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // DESCRIPTION
         $label = _("Description");
         $this->add([
-            'name'   => 'description',
+            'name' => 'description',
             'options' => [
                 'label' => $label,
             ],
@@ -110,12 +115,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'class' => 'form-control input-xs',
                 'placeholder' => $label,
             ],
-            'type'=>'Textarea'
+            'type' => 'Textarea'
         ]);
 
         // Source
         $this->add([
-            'name'   => 'disciplines',
+            'name' => 'disciplines',
             'options' => [
                 'label' => _('Discipline(s)'),
                 'value_options' => $this->getProjectGrantService()->getDisciplines()
@@ -124,12 +129,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'class' => 'form-control select2',
                 'multiple' => 'multiple'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         // Status
         $this->add([
-            'name'   => 'status',
+            'name' => 'status',
             'options' => [
                 'label' => 'Statut',
                 'value_options' => $this->getProjectGrantService()->getStatus()
@@ -137,12 +142,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         // Financial impact
         $this->add([
-            'name'   => 'financialImpact',
+            'name' => 'financialImpact',
             'options' => [
                 'label' => _('Incidence financière'),
                 'value_options' => Activity::getFinancialImpactValues()
@@ -150,12 +155,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         // Source
         $this->add([
-            'name'   => 'activityType',
+            'name' => 'activityType',
             'options' => [
                 'label' => _("Type d'activité"),
                 'value_options' => $this->getProjectGrantService()->getActivityTypes(true)
@@ -163,12 +168,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         // Tune
         $this->add([
-            'name'   => 'currency',
+            'name' => 'currency',
             'options' => [
                 'label' => _("Devise"),
                 'value_options' => Util::collectionAsOptions($grantService->getCurrencies())
@@ -176,13 +181,13 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
 
         // Tune
         $this->add([
-            'name'   => 'tva',
+            'name' => 'tva',
             'options' => [
                 'label' => "TVA",
                 'value_options' => $this->getProjectGrantService()->getTVAsValuesOptions()
@@ -190,60 +195,60 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         // CodeEOTP
         $this->add([
-            'name'   => 'codeEOTP',
+            'name' => 'codeEOTP',
             'options' => [
                 'label' => 'EOTP'
             ],
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // Amount
         $this->add([
-            'name'   => 'amount',
+            'name' => 'amount',
             'options' => [
                 'label' => 'Montant'
             ],
             'attributes' => [
                 'class' => 'form-control input-lg'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // Amount
         $this->add([
-            'name'   => 'fraisDeGestion',
+            'name' => 'fraisDeGestion',
             'options' => [
                 'label' => 'Frais de Gestion'
             ],
             'attributes' => [
                 'class' => 'form-control',
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // Amount
         $this->add([
-            'name'   => 'fraisDeGestionPartHebergeur',
+            'name' => 'fraisDeGestionPartHebergeur',
             'options' => [
                 'label' => 'Part hébergeur'
             ],
             'attributes' => [
                 'class' => 'form-control',
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // Amount
         $this->add([
-            'name'   => 'assietteSubventionnable',
+            'name' => 'assietteSubventionnable',
             'help' => "% de l'assiette éligible",
             'options' => [
                 'label' => 'Assiette éligible'
@@ -252,12 +257,12 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'class' => 'form-control',
                 'placeholder' => 'Assiette éligible (ex: 5.5)'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
-        $label = "Note financière";
+        $label = "Note";
         $this->add([
-            'name'   => 'noteFinanciere',
+            'name' => 'noteFinanciere',
             'options' => [
                 'label' => $label,
             ],
@@ -265,56 +270,56 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'class' => 'form-control input-xs',
                 'placeholder' => $label,
             ],
-            'type'=>'Textarea'
+            'type' => 'Textarea'
         ]);
 
 
         // DateStart
         $this->add([
-            'name'   => 'dateStart',
+            'name' => 'dateStart',
             'options' => [
                 'label' => 'Début du contrat'
             ],
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // DateEnd
         $this->add([
-            'name'   => 'dateEnd',
+            'name' => 'dateEnd',
             'options' => [
                 'label' => 'Fin du contrat'
             ],
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // DateSigned
         $this->add([
-            'name'   => 'dateSigned',
+            'name' => 'dateSigned',
             'options' => [
                 'label' => 'Date de signature'
             ],
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
         // DateOpened
         $this->add([
-            'name'   => 'dateOpened',
+            'name' => 'dateOpened',
             'options' => [
                 'label' => "Création du PFI"
             ],
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'Text'
+            'type' => 'Text'
         ]);
 
 
@@ -324,7 +329,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
 
         // Type
         $this->add([
-            'name'   => 'type',
+            'name' => 'type',
             'options' => [
                 'label' => 'Type de convention',
                 'value_options' => $this->getProjectGrantService()->getTypes()
@@ -332,70 +337,127 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
+        ]);
+
+        // Type
+        $this->add([
+            'name' => 'pcruPoleCompetitivite',
+            'options' => [
+                'label' => 'Pôle de compétitivité (PCRU)',
+                'value_options' => $this->getProjectGrantService()->getPcruPoleCompetitiviteSelect()
+            ],
+            'attributes' => [
+                'class' => 'form-control'
+            ],
+            'type' => 'Select'
+        ]);
+
+        // Type
+        $this->add([
+            'name' => 'pcruValidPoleCompetitivite',
+            'options' => [
+                'label' => 'Validé par le pôle de compétitivité (PCRU)',
+            ],
+            'attributes' => [
+                'class' => 'checkbox'
+            ],
+            'type' => 'Checkbox'
+        ]);
+
+        // Type
+        $this->add([
+            'name' => 'pcruSourceFinancement',
+            'options' => [
+                'label' => 'Source de financement (PCRU)',
+                'value_options' => $this->getProjectGrantService()->getPcruSourceFinancementSelect()
+            ],
+            'attributes' => [
+                'class' => 'form-control'
+            ],
+            'type' => 'Select'
         ]);
 
     }
 
     public function getInputFilterSpecification()
     {
+        // PFI
+        /** @var OscarConfigurationService $oscarConfigurationService */
+        $oscarConfigurationService = $this->getServiceContainer()->get(OscarConfigurationService::class);
+        $validatorEotp = [];
+        if( $oscarConfigurationService->isPfiStrict() ){
+            $validatorEotp[] = new EOTP($oscarConfigurationService->getValidationPFI());
+        }
+
+
         return [
-            'centaureId'=> [
+            'centaureId' => [
                 'required' => false,
             ],
 
-            'centaureNumConvention'=> [
+            'centaureNumConvention' => [
                 'required' => false,
             ],
 
-            'source'=> [
+            'source' => [
                 'required' => false,
             ],
 
-            'type'=> [
+            'type' => [
                 'required' => false,
             ],
 
-            'numbers'=> [
+            'numbers' => [
                 'required' => false,
             ],
 
-            'codeEOTP'=> [
+            'codeEOTP' => [
                 'required' => false,
                 'filters' => [
                     ['name' => StringTrim::class],
                 ],
-                'validators' => [
-                    new EOTP($this->getServiceContainer()->get(OscarConfigurationService::class)->getConfiguration('validation.pfi')),
-                ]
+                'validators' => $validatorEotp
             ],
 
-            'amount'=> [
+            'amount' => [
                 'required' => false,
             ],
 
-            'dateStart'=> [
+            'dateStart' => [
                 'required' => false,
             ],
 
-            'dateEnd'=> [
+            'dateEnd' => [
                 'required' => false,
             ],
 
-            'status'=> [
+            'status' => [
                 'required' => false,
             ],
 
-            'dateSigned'=> [
+            'dateSigned' => [
                 'required' => false,
             ],
 
-            'dateOpened'=> [
+            'dateOpened' => [
                 'required' => false,
             ],
 
             'disciplines' => [
                 'required' => false,
+            ],
+
+            'pcruPoleCompetitivite' => [
+                'required' => false
+            ],
+
+            'pcruValidPoleCompetitivite' => [
+                'required' => false
+            ],
+
+            'pcruSourceFinancement' => [
+                'required' => false
             ],
         ];
     }

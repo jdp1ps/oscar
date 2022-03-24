@@ -155,6 +155,24 @@ class Person implements ResourceInterface
     protected $timesheets;
 
     /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsPrj")
+     */
+    protected $validatorActivitiesPrj;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsSci")
+     */
+    protected $validatorActivitiesSci;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Activity", mappedBy="validatorsAdm")
+     */
+    protected $validatorActivitiesAdm;
+
+    /**
      * @ORM\ManyToMany(targetEntity="Person", inversedBy="timesheetsFor")
      * @ORM\JoinTable(name="timesheetsBy",
      *      joinColumns={@ORM\JoinColumn(name="person_id", referencedColumnName="id")},
@@ -201,6 +219,9 @@ class Person implements ResourceInterface
         $this->timesheets = new ArrayCollection();
         $this->timesheetsBy = new ArrayCollection();
         $this->timesheetsFor = new ArrayCollection();
+        $this->validatorActivitiesPrj = new ArrayCollection();
+        $this->validatorActivitiesSci = new ArrayCollection();
+        $this->validatorActivitiesAdm = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
     }
@@ -494,6 +515,11 @@ class Person implements ResourceInterface
         return $this->firstname;
     }
 
+    public function getFullname()
+    {
+        return $this->getFirstname() . ' ' . $this->getLastname();
+    }
+
     /**
      * @param string $firstname
      */
@@ -668,6 +694,40 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function isValidator()
+    {
+        return
+            count($this->getValidatorActivitiesPrj()) > 0 ||
+            count($this->getValidatorActivitiesSci()) > 0 ||
+            count($this->getValidatorActivitiesAdm()) > 0;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesPrj()
+    {
+        return $this->validatorActivitiesPrj;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesSci()
+    {
+        return $this->validatorActivitiesSci;
+    }
+
+    /**
+     * @return Activity[]
+     */
+    public function getValidatorActivitiesAdm()
+    {
+        return $this->validatorActivitiesAdm;
+    }
+
+
+
     /**
      * @return string
      */
@@ -810,7 +870,8 @@ class Person implements ResourceInterface
             'firstName'             => $this->getFirstname(),
             'lastName'              => $this->getLastname(),
             'displayname'           => $this->getDisplayName(),
-            'label'           => $this->getDisplayName(),
+            'login'                 => $this->getLadapLogin(),
+            'label'                 => $this->getDisplayName(),
             'text'                  => $this->getDisplayName(),
             'email'                 => $this->getEmail(),
             'phone'                 => $this->getPhone(),

@@ -9,51 +9,73 @@
 
 namespace Oscar;
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Monolog\Logger;
 use Oscar\Auth\UserAuthenticatedEventListener;
-use Oscar\Entity\LogActivity;
-use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\Authentification;
-use Oscar\Exception\OscarException;
-use Oscar\Service\ActivityLogService;
-use Oscar\Service\OscarUserContext;
-use Oscar\Service\PersonService;
 use UnicaenAuth\Authentication\Adapter\Ldap;
 use UnicaenAuth\Event\UserAuthenticatedEvent;
-use UnicaenAuth\Provider\Identity\ChainEvent;
-use UnicaenAuth\Service\User;
-use UnicaenAuth\Service\UserContext;
-use Zend\Console\Adapter\AdapterInterface;
+use Zend\Authentication\Result as AuthenticationResult;
 use Zend\EventManager\Event;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\ModuleManager\Feature\ConsoleBannerProviderInterface;
-use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
-use Zend\ModuleManager\ModuleEvent;
 use Zend\ModuleManager\ModuleManager;
-use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
-use Zend\Mvc\Router\Http\RouteMatch;
-use Zend\ServiceManager\ServiceManager;
 use ZfcUser\Authentication\Adapter\AdapterChainEvent;
 
 class Module
 {
 
+    private $logger;
 
     public function onBootstrap(MvcEvent $e)
     {
+        // FIX : Login
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            "*",
+            'prePersist', //"authentication.success",
+            [$this, "onUserLogin"],
+            100
+        );
 
+        $e->getApplication()->getEventManager()->getSharedManager()->attach(
+            "*",
+            Ldap::LDAP_AUTHENTIFICATION_FAIL, //"authentication.success",
+            [$this, "onLdapError"],
+            100
+        );
+
+        $this->logger = $e->getApplication()->getServiceManager()->get('Logger');
+
+    }
+
+    /**
+     * Lors de la connexion, on enregistre la Datetime de login
+     * @param $e UserAuthenticatedEvent
+     */
+    public function onUserLogin($e)
+    {
+        if (get_class($e) == UserAuthenticatedEvent::class) {
+            /** @var Authentification $user */
+            $user = $e->getDbUser();
+            $user->setDateLogin(new \DateTime());
+        }
     }
 
     // FIX : ZendFramework 3
     public function init(ModuleManager $manager)
     {
-
+        $sharedEventManager = $manager->getEventManager()->getSharedManager();
     }
 
+    public function onLdapError(Event $event)
+    {
+        if ($event->getName() == Ldap::LDAP_AUTHENTIFICATION_FAIL) {
+            $messages = "";
+            foreach ($event->getParams() as $k => $m) {
+                $messages .= strval($m) . "\n";
+            }
+            $error = "[OSCAR] LDAP authentification FAIL " . $messages;
+            $this->logger->error($error);
+            error_log($error);
+        }
+    }
 
     public function getConfig()
     {

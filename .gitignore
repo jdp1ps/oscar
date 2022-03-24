@@ -12,7 +12,8 @@ databases_maintenance/backup/*.sql
 databases_maintenance/copy-prod-to-local.sh
 !databases_maintenance/backup/.gitkeep
 
-tmp
+tmp/*
+!tmp/.gitkeep
 sandbox
 debug
 DEV.md
@@ -83,6 +84,9 @@ data/templates/timesheet_person_month.html.php
 !data/backup_oscar-empty.sql
 !data/oscar-demo-lasted.sql
 
+# PHPUnit
+tests/.phpunit.result.cache
+
 # Residus
 public/js/oscar/dist/index.html
 
@@ -107,3 +111,7 @@ Dockerfile_*
 *#
 public/documentation
 module/Demo
+
+# DOCKER
+dockerize/local/*
+!dockerize/local/.gitkeep

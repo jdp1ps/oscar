@@ -14,6 +14,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestRepository;
@@ -30,12 +31,11 @@ use Oscar\Entity\Project;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
-use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
-use Oscar\Entity\TypeDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Form\ActivityInfosPcruForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\ActivityToJsonFormatter;
@@ -43,7 +43,7 @@ use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
-use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -53,10 +53,10 @@ use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
-use Oscar\Traits\UseActivityLogService;
-use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
+use Oscar\Traits\UsePCRUService;
+use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
@@ -67,7 +67,6 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Psr\Log\LogLevel;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
@@ -83,10 +82,10 @@ use Zend\View\Renderer\PhpRenderer;
  */
 class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService,
                                                                         UseServiceContainer, UseProjectService,
-                                                                        UseSpentService
+                                                                        UseSpentService, UsePCRUService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -412,16 +411,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $this->getResponseBadRequest("MAUVAISE UTILISATION ($method)");
         }
 
-
-        $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
-
-
         return [
             'asAdmin' => $asAdmin,
             'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
-            'rolesOrganisation' => $jsonFormatter->objectsCollectionToJson(
-                $this->getOrganizationService()->getAvailableRolesOrganisationActivity()
-            ),
+            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity()
         ];
     }
 
@@ -464,7 +457,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             if ($dlFile) {
                 $fileInfo = $demande->getFileInfosByFile($dlFile);
-                $filepath = $this->getOscarConfigurationService()->getCOnfiguration(
+                $filepath = $this->getOscarConfigurationService()->getConfiguration(
                         'paths.document_request'
                     ) . '/' . $fileInfo['file'];
                 $filename = $fileInfo['name'];
@@ -483,7 +476,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 foreach ($files as $file) {
                     if ($file['file'] == $rdlFile) {
                         @unlink(
-                            $this->getOscarConfigurationService()->getCOnfiguration(
+                            $this->getOscarConfigurationService()->getConfiguration(
                                 'paths.document_request'
                             ) . '/' . $file['file']
                         );
@@ -687,11 +680,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
+        $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
 
         if ($doc == "dump") {
             echo "<table border='1'>";
             $activity = $this->getProjectGrantService()->getGrant($id);
-            foreach ($activity->documentDatas() as $key => $value) {
+            foreach ($activity->documentDatas($baseDatas) as $key => $value) {
                 echo "<tr>";
                 if (is_array($value)) {
                     echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
@@ -712,7 +706,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
-        $documentDatas = $activity->documentDatas();
+
+        $documentDatas = $activity->documentDatas($baseDatas);
 
         foreach ($documentDatas as $key => $value) {
             if (is_array($value)) {
@@ -782,7 +777,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $form->setData($request->getPost());
             if ($form->isValid()) {
                 $this->getEntityManager()->flush($projectGrant);
-                $this->getActivityService()->jobSearchUpdate($projectGrant);
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity(
+                    $projectGrant
+                );
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity(
+                    $projectGrant
+                );
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $projectGrant->getId()]
@@ -846,8 +846,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
         }
         $this->getOscarUserContextService()->checkWithorganizationDeep(Privileges::PROJECT_CREATE);
-
-        die("ICI");
 
         // Création du projet
         $project = new Project();
@@ -923,9 +921,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $entity = $this->getActivityFromRoute();
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_GENERATE, $entity);
-        $this->getNotificationService()->purgeNotificationsActivity($entity);
-        $this->getNotificationService()->generateNotificationsForActivity($entity);
-        // die("ICI");
+        $this->getNotificationService()->updateNotificationsActivity($entity);
         $this->flashMessenger()->addSuccessMessage('Les notifications ont été mises à jour');
         return $this->redirect()->toRoute('contract/notifications', ['id' => $entity->getId()]);
     }
@@ -1826,6 +1822,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'generatedDocuments' => $this->getOscarConfigurationService()->getConfiguration(
                 'generated-documents.activity'
             ),
+
+            'pcruEnabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
+
             'entity' => $activity,
 
             'currencies' => $currencies,
@@ -1941,7 +1940,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Récupération de l'activités
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
 
-
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
 
         $out = [];
@@ -2005,6 +2003,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'context' => $context,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
+                'past' => $activityPerson->isPast(),
                 'enroller' => $idEnroller,
                 'enrollerLabel' => $activity->getLabel(),
                 'editable' => $editable,
@@ -2021,7 +2020,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
     public function organizationsAction()
     {
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
+        $activityId = $this->params()->fromRoute('id');
+        $activity = $this->getActivityService()->getActivityById($activityId);
+
         $this->getOscarUserContextService()->check(
             Privileges::ACTIVITY_PERSON_SHOW,
             $activity
@@ -2050,6 +2051,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
          * @var ActivityOrganization $activityOrganization
          */
         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            // FIX (non idéale)
+            if( !$activityOrganization->getRoleObj() ){
+                $this->getLoggerService()->warning(
+                    sprintf(
+                        "L'organisation '%s' n'a pas d'objet rôle sur '%s'",
+                        $activityOrganization->getOrganization(),
+                        $activityOrganization->getEnroller()
+                    )
+                );
+                continue;
+            }
             $class = get_class($activityOrganization);
 
             if ($class == ActivityOrganization::class || get_class($activityOrganization) == $class) {
@@ -2066,6 +2078,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $classRoutes[$class] . '/delete',
                 ['idenroll' => $activityOrganization->getId()]
             ) : false;
+
             $urlEdit = $editableA ? $this->url()->fromRoute(
                 $classRoutes[$class] . '/edit',
                 ['idenroll' => $activityOrganization->getId()]
@@ -2405,8 +2418,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
 
                     // La saisie est un PFI
-                    if (preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
+                    if ( $this->getOscarConfigurationService()->isPfiStrict()
+                        && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
+                        $qb->andWhere('c.codeEOTP = :search');
                         $qb->andWhere('c.codeEOTP = :search');
                     } elseif (preg_match('/(.*)=(.*)/', $search, $result)) {
                         $key = $result[1];
@@ -2764,6 +2779,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
+            $projectsIds = [];
+            if( $projectview == 'on' ){
+                foreach ($activities as $p) {
+                   $projectsIds[] = $p->getId();
+                }
+            }
+
+
             if ($this->getRequest()->isXmlHttpRequest()) {
                 $json = [
                     'datas' => []
@@ -2799,6 +2822,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortIgnoreNull' => $sortIgnoreNull,
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
                     'disciplines' => $this->getActivityService()->getDisciplines(),
+                    'projectsIds' => $projectsIds,
                 ]
             );
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');
@@ -2907,6 +2931,231 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $view->setTemplate('oscar/activity/list-view.phtml');
 
         return $view;
+    }
+
+    /**
+     * Affiche la liste des activités soumises à un processus PCRU.
+     *
+     * @return array
+     */
+    public function pcruListAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_LIST);
+        $accessUpload = $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_PCRU_UPLOAD);
+        $pcruInfos = $this->getProjectGrantService()->getPCRUService()->getPcruInfos();
+        $methods = $this->getHttpXMethod();
+
+        if ($methods == 'GET') {
+            $action = $this->params()->fromQuery('a');
+
+            // Recherche des activités
+            if ($action == 'search') {
+                $search = $this->params()->fromQuery('search');
+                $idsActivities = $this->getProjectGrantService()->search($search);
+                $activities = [];
+                /** @var Activity $activity */
+                foreach ($this->getProjectGrantService()->getActivitiesByIds($idsActivities) as $activity) {
+                    $a = $activity->toArray();
+                    $a['pcru'] = [];
+                    $a['pcruenable'] = false;
+                    $activities[] = $a;
+                }
+                return $this->jsonOutput(["activities" => $activities]);
+            }
+
+            // Aperçu PCRU
+            if ($action == 'preview') {
+                $activity_id = $this->params()->fromQuery('activity_id');
+                $activity = $this->getProjectGrantService()->getActivityById($activity_id);
+                $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+                return $this->jsonOutput(["preview" => $preview]);
+            }
+
+            if ($action == 'download') {
+                $pcru = $this->getProjectGrantService()->getPCRUService()->downloadPCRUSendableFile();
+            }
+        } elseif ($methods == "POST") {
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PCRU_UPLOAD);
+            $action = $this->params()->fromPost('action');
+            if ($action == 'upload') {
+                $this->getProjectGrantService()->getPCRUService()->upload();
+                $this->redirect()->toRoute('contract/pcru-list');
+            }
+        }
+
+        return [
+            'downloadable' => $this->getProjectGrantService()->getPCRUService()->hasDownload(),
+            'uploadable' => !$this->getProjectGrantService()->getPCRUService()->hasUploadInProgress() && $accessUpload,
+            'pcruInfos' => $pcruInfos
+        ];
+    }
+
+    public function timesheetAction()
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+
+        if( $this->isAjax() ){
+
+
+            $action = $this->getRequest()->getQuery()->get('a', null);
+
+            if( $this->getRequest()->isDelete() || $action == 'd' ){
+                $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
+                $person_id = $this->getRequest()->getQuery()->get('p');
+                $where = $this->getRequest()->getQuery()->get('w');
+                try {
+                    $this->getTimesheetService()->removeValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            if( $this->getRequest()->isPost() && $action != 'd' ){
+                //
+                $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
+                $person_id = $this->getRequest()->getPost()->get('person_id');
+                $where = $this->getRequest()->getPost()->get('where');
+                try {
+                    $this->getTimesheetService()->addValidatorActivity($person_id, $activity->getId(), $where);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            $response = $this->baseJsonResponse();
+            $response['workpackages'] = $this->getTimesheetService()->getDatasActivityWorkpackages($activity);
+            $response['validators'] = $this->getTimesheetService()->getDatasValidatorsActivity($activity);
+            $response['members'] = $this->getTimesheetService()->getDatasActivityMembers(
+                $activity,
+                $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW),
+                $this->url()
+            );
+            $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
+            $response['validators_editable'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
+
+            return $this->jsonOutput($response);
+        }
+
+        return [
+            'activity' => $activity,
+            'timesheetAllow' => $activity->isTimesheetAllowed()
+        ];
+    }
+
+    /**
+     * Gestion/récapitulatif des informations PCRU
+     *
+     * @return array|\Zend\Http\Response
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function pcruInfosAction()
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityFromRoute();
+
+        // Accès
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU, $activity);
+
+        if ($this->params()->fromQuery("a") == "reset") {
+            $this->getProjectGrantService()->getPCRUService()->resetTmpPcruInfos($activity);
+            $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
+        }
+
+        if ($this->params()->fromQuery("a") == "activate") {
+            // Formulaire
+            $form = new ActivityInfosPcruForm($this->getProjectGrantService(), $activity);
+            $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+            $pcruInfos = $preview['infos'];
+            $form->init();
+            $form->bind($pcruInfos);
+
+            if ($this->getRequest()->getMethod() == "POST") {
+                $posted = $this->getRequest()->getPost();
+                $form->setData($posted);
+                if ($form->isValid()) {
+                    $this->getProjectGrantService()->getPCRUService()->activateActivity($activity, $pcruInfos);
+                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
+                } else {
+                }
+            }
+
+            $preview['form'] = $form;
+            $preview['activity'] = $activity;
+            $view = new ViewModel($preview);
+            $view->setTemplate('oscar/activity/pcruinfos-form.phtml');
+
+            return $view;
+        }
+
+        if ($this->params()->fromQuery("a") == "edit") {
+            // Formulaire
+            $form = new ActivityInfosPcruForm($this->getProjectGrantService(), $activity);
+            $preview = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+            $pcruInfos = $preview['infos'];
+            $form->init();
+            $form->bind($pcruInfos);
+
+            if ($this->getRequest()->getMethod() == "POST") {
+                $posted = $this->getRequest()->getPost();
+                $form->setData($posted);
+                if ($form->isValid()) {
+                    $this->getProjectGrantService()->getPCRUService()->updatePcruInfos($activity, $pcruInfos);
+                    return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
+                } else {
+                }
+            }
+
+            $preview['form'] = $form;
+            $preview['mode'] = "edit";
+            $preview['activity'] = $activity;
+            $view = new ViewModel($preview);
+            $view->setTemplate('oscar/activity/pcruinfos-form.phtml');
+
+            return $view;
+        }
+
+        $method = $this->getHttpXMethod();
+
+        if ($method == 'POST') {
+            $action = $this->params()->fromPost('action');
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PCRU_ACTIVATE, $activity);
+            switch ($action) {
+                case 'remove-waiting';
+                    $idActivityPcruInfo = intval($this->params()->fromPost('activitypcruinfo_id'));
+                    $this->getProjectGrantService()->getPCRUService()->removeWaiting($idActivityPcruInfo);
+                    $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
+
+                case 'add-pool':
+                    $this->getProjectGrantService()->getPCRUService()->addToPool($activity);
+                    break;
+
+                case 'download-pcru':
+                    $this->getProjectGrantService()->getPCRUService()->downloadOne($activity);
+                    break;
+            }
+            return $this->redirect()->toRoute('contract/pcru-infos', ['id' => $activity->getId()]);
+        }
+
+        $return = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+        $return['contratSignedType'] = $this->getOscarConfigurationService()
+            ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
+
+        /** @var ActivityPcruInfos $pcruInfos */
+        $pcruInfos = $return['infos'];
+
+        if ($pcruInfos->isWaiting()) {
+            $return['deletable'] = true;
+            $return['activitypcruinfo_id'] = $pcruInfos->getId();
+        }
+
+        $return['poolopen'] = $this->getProjectGrantService()->getPCRUService()->isPoolOpen();
+
+        return $return;
     }
 
     public function mergeAction()

@@ -23,6 +23,7 @@ $colorGreyLight: #AAA;
 
 $font-size-smallest: 9px;
 $font-size-smaller: 10px;
+$font-size-smaller: 10px;
 $font-size-small: 12px;
 $font-size-base: 14px;
 $font-size-big: 16px;
@@ -30,12 +31,10 @@ $font-size-bigger: 18px;
 $font-size-biggest: 20px;
 
 $grey-ultra-light: #CCC;
-
 $grid-float-breakpoint: 1024px;
 $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
-
 
 // Update 2020-11-04
 @import "_common.scss";

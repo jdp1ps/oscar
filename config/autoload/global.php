@@ -18,6 +18,31 @@ return array(
         'theme' => 'oscar',
         'themes' => ['oscar', 'adaj', 'debug'],
 
+        // Paramètres liés à l'installation/initialisation d'une
+        // instance d'oscar
+        'install' => [
+            // Liste des pays (Norme ISO 3166)
+            'iso-3166' => __DIR__ . '/../../install/iso/iso-3166-final.js'
+        ],
+
+
+        'pcru' => [
+            // Référenciel PCRU (Fichiers contenant les données officielles)
+            'polecompetitivite' => __DIR__ .'/../../install/pcru-pole-competitivite.json',
+            'sourcefinancement' => __DIR__ .'/../../install/pcru-sources-financement.json',
+            'contracttype' => __DIR__ .'/../../install/pcru-contracts-types.json',
+
+            // Paramètres de la POOL d'envoi PCRU
+            'files_path' => __DIR__.'/../../tmp',       // Dossier où seront gérés les fichiers à envoyer
+            'filename_contrats' => 'contrat.csv',       // Nom du fichier CSV (contrats)
+            'filename_partenaires' => 'partenaire.csv', // Nom du fichier (Partenaires)
+            'pool_current' => 'waiting',                // Nom du dossier où sont stoqués les fichiers avant envoi
+            'pool_effective' => 'uploaded',                // Nom du dossier où sont stoqués les fichiers avant envoi
+            'pool_history' => 'send-%s',                // Nom des dossiers archivés
+            'pool_log' => 'pcru.log',                   // Nom du fichier de log
+            'pool_lock' => 'PCRU.LOCK'                  // Nom du fichier de verrouillage
+        ],
+
         'htmltopdfrenderer' => [
             'class' => \Oscar\Formatter\File\HtmlToPdfDomPDFFormatter::class,
             'arguments' => []
@@ -202,7 +227,7 @@ return array(
         ],
 
         'horslots' => [
-            ////////////////////////////////// EXEMPLE de CONFIGURATION DES
+            ////////////////////////////////// EXEMPLE de CONFIGURATION DES HORS-LOTS
 //            'conges' => [ 'code' => 'conges',  'label' => 'Congés',
 //                'group' => 'abs',
 //                'description' => 'Congès, RTT, récupération', 'icon' => true ],
@@ -213,9 +238,7 @@ return array(
 //                'group' => 'education',
 //                'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
 //            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',
-//                'description' => '', 'icon' => true ],
 //                'group' => 'abs',
-//                'absent' => [ 'code' => 'absent',  'label' => 'Absent',
 //                'description' => '', 'icon' => true ],
 //            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',
 //                'group' => 'research',

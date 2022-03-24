@@ -69,6 +69,8 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         /** @var Authentification $auth */
         $auth = $this->getOscarUserContextService()->getAuthentification();
 
+
+
         if( !$this->getCurrentPerson() ){
             throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
         }
@@ -163,6 +165,14 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             'actions'   => $actions,
             'roles'     => ActivityPerson::getRoles(),
         ];
+    }
+
+    public function testAction()
+    {
+        if( DEBUG_OSCAR ){
+            return [];
+        }
+        die("to test");
     }
 
     /**

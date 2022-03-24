@@ -44,6 +44,7 @@ class ContractType extends AbstractTreeData
      */
     protected $description;
 
+
     /**
      * @return mixed
      */

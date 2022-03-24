@@ -116,6 +116,12 @@ class ActivityTypeService implements UseEntityManager
         return $chain;
     }
 
+    public function getActivityTypesPcru()
+    {
+        //$activity
+        return [];
+    }
+
     /**
      * @return ActivityType[]
      */
@@ -159,6 +165,50 @@ class ActivityTypeService implements UseEntityManager
         } else {
             return $datas;
         }
+    }
+
+
+    protected function getTreeArray(&$index, $datas, &$children){
+        if( !array_key_exists($index, $datas) ){
+            return;
+        }
+
+        /** @var ActivityType $activityType */
+        $activityType = $datas[$index];
+
+        $out = [
+            'id' => $activityType->getId(),
+            'label' => $activityType->getLabel(),
+            'children' => []
+        ];
+
+        $index++;
+
+        if( $activityType->getLft()+1 < $activityType->getRgt() ){
+            for(; $datas[$index] && $datas[$index]->getLft() > $activityType->getLft() && $datas[$index]->getRgt()-1 <= $activityType->getRgt() ;){
+                $this->getTreeArray($index, $datas, $out['children']);
+            }
+        }
+
+        $children[] = $out;
+    }
+
+    /**
+     * Retourne un tableau imbriqué des types pour l'utilisation au format JSON.
+     * @param false $asArray
+     * @return array
+     */
+    public function getActivityTypesTree( $asArray = false )
+    {
+        $datas = $this->getBaseQuery()
+            ->getQuery()
+            ->getResult();
+
+        $out = [];
+        $start = 0;
+        $this->getTreeArray($start, $datas, $out);
+
+        return $out;
     }
 
     public function deleteNode(ActivityType $activityType, $deleteEntity = true)

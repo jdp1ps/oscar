@@ -24,6 +24,7 @@ class ProjectGrantServiceFactory extends AbstractOscarFactory
         $s->setOrganizationService($container->get(OrganizationService::class));
         $s->setMilestoneService($container->get(MilestoneService::class));
         $s->setNotificationService($container->get(NotificationService::class));
+        $s->setGearmanJobLauncherService($container->get(GearmanJobLauncherService::class));
         return $s;
     }
 }

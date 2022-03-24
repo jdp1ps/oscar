@@ -66,26 +66,78 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <div class="input-group input-group-sm">
-            <span class="input-group-addon">Code interne</span>
-            <?= $this->formInput($form->get('code')) ?>
-            <?= $this->formElementErrors($form->get('code')); ?>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="input-group input-group-lg">
-            <span class="input-group-addon">Type</span>
-            <?= $this->formSelect($form->get('typeObj')) ?>
-            <?= $this->formElementErrors($form->get('typeObj')); ?>
-        </div>
-    </div>
+    <h3>Identification</h3>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">Code interne</span>
+                <?= $this->formInput($form->get('code')) ?>
+                <?= $this->formElementErrors($form->get('code')); ?>
+            </div>
 
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">N°DUNS</span>
+                <?= $this->formInput($form->get('duns')) ?>
+                <?= $this->formElementErrors($form->get('duns')); ?>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">Labintel (CNRS)</span>
+                <?= $this->formInput($form->get('labintel')) ?>
+                <?= $this->formElementErrors($form->get('labintel')); ?>
+            </div>
+
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">TVA Intracommunautaire</span>
+                <?= $this->formInput($form->get('tvaintra')) ?>
+                <?= $this->formElementErrors($form->get('tvaintra')); ?>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">N°RNSR</span>
+                <?= $this->formInput($form->get('rnsr')) ?>
+                <?= $this->formElementErrors($form->get('rnsr')); ?>
+                <div id="rnsrfield"></div>
+                <script>
+
+                    require(['vue', 'vue-resource', 'rnsrfield'], function(Vue, VueResource, RNSRField){
+                        /**
+                         * Système de recherche des RSNS, pas très classe, mais fonctionnel
+                         */
+                        var v = new Vue({
+                            components: { 'rsnsfield': RNSRField },
+                            template: '<rsnsfield @select="selectrsns" :code="\'<?= $organization &&  $organization->getShortname() ? $organization->getShortname() : "" ?>\'" />',
+                            methods: {
+                                selectrsns(foo){
+                                    this.$emit('change', foo);
+                                }
+                            }
+                        }).$mount("#rnsrfield");
+                        v.$on('change', function(foo){
+                            document.querySelector('[name="rnsr"]').value = foo;
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
     <div class="form-group">
         <div class="input-group">
             <span class="input-group-addon">SIRET</span>
             <?= $this->formInput($form->get('siret')) ?>
             <?= $this->formElementErrors($form->get('siret')); ?>
+        </div>
+    </div>
+    <div class="form-group">
+    </div>
+
+    <div class="form-group">
+        <div class="input-group input-group-lg">
+            <span class="input-group-addon">Type</span>
+            <?= $this->formSelect($form->get('typeObj')) ?>
+            <?= $this->formElementErrors($form->get('typeObj')); ?>
         </div>
     </div>
 
@@ -97,7 +149,6 @@
         <?= $this->formElementErrors($form->get('dateStart')); ?>
     </div>
 
-
     <div class="form-group">
         <div class="input-group input-group-sm">
             <span class="input-group-addon">Date de fin (fermeture)</span>
@@ -106,9 +157,7 @@
         <?= $this->formElementErrors($form->get('dateEnd')); ?>
     </div>
 
-
     <h3>Adresse</h3>
-
     <div class="form-group">
         <div class="input-group input-group-sm">
             <span class="input-group-addon">Rue 1</span>
@@ -156,7 +205,7 @@
             <div class="form-group">
                 <div class="input-group input-group-sm">
                     <span class="input-group-addon">Pays</span>
-                    <?= $this->formInput($form->get('country')) ?>
+                    <?= $this->formSelect($form->get('country')) ?>
                 </div>
                 <?= $this->formElementErrors($form->get('country')); ?>
             </div>
@@ -349,6 +398,8 @@
             $('[name="type"]').select2({
                 results: <?= json_encode($types) ?>
             });
+
+            $('[name="country"]').select2({});
         });
     </script>
 <?php

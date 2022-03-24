@@ -219,6 +219,7 @@ foreach ( $entities as $relation) {
             $('#<?= $componentId ?>').append(membersView.render().$el);
             <?php if( $manage ): ?>
             membersView.on('delete-data', function(role, e){
+                console.log(role.model.get('urlDelete'));
                 bootbox.confirm('Êtes-vous sûr de vouloir supprimer ?', function( response ){
                     if( response ){
                         $.ajax({ url: role.model.get('urlDelete')})
@@ -231,6 +232,7 @@ foreach ( $entities as $relation) {
             });
 
             membersView.on('edit-data', function(role){
+                console.log(role.model.get('urlEdit'));
                 require(['modalform'], function(ModalForm){
                     ModalForm.ajaxModal(role.model.get('urlEdit'));
                 });

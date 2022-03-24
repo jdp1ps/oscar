@@ -35,9 +35,10 @@ class Organization implements ResourceInterface, IConnectedObject
     const TYPE_INCONNU = 'Inconnue';
     const TYPE_PLATEAU_TECHNIQUE = 'Plateau technique';
 
-    public static function getTypes(){
+    public static function getTypes()
+    {
         static $types;
-        if( !$types ){
+        if (!$types) {
             $types = [
                 self::TYPE_INCONNU,
                 self::TYPE_COMPOSANTE,
@@ -54,7 +55,8 @@ class Organization implements ResourceInterface, IConnectedObject
         return $types;
     }
 
-    public function getTypeSlug(){
+    public function getTypeSlug()
+    {
         return self::getTypesSlug($this->getType());
     }
 
@@ -62,28 +64,30 @@ class Organization implements ResourceInterface, IConnectedObject
      * Return TRUE si l'objet a un connector.
      * Si $connecteur est renseigné, localise le teste uniquement sur ce connecteur
      */
-    public function isConnected( $connectors = null){
+    public function isConnected($connectors = null)
+    {
 
-        foreach ($this->getConnectors() as $connector=>$value ){
-            if( $connectors != null && !in_array($connector, $connectors) ) continue;
-            if( $value ){
+        foreach ($this->getConnectors() as $connector => $value) {
+            if ($connectors != null && !in_array($connector, $connectors)) continue;
+            if ($value) {
                 return true;
             }
         }
         return false;
     }
 
-    public static function getTypesSlug( $typeStr )
+    public static function getTypesSlug($typeStr)
     {
         static $slugs;
-        if( !$slugs ) $slugs = [];
-        if( !array_key_exists($typeStr, $slugs) ){
+        if (!$slugs) $slugs = [];
+        if (!array_key_exists($typeStr, $slugs)) {
             $slugs[$typeStr] = Slugify::create()->slugify($typeStr);
         }
         return $slugs[$typeStr];
     }
 
-    public static function getTypesSelect(){
+    public static function getTypesSelect()
+    {
         return self::getTypes();
     }
 
@@ -294,10 +298,21 @@ class Organization implements ResourceInterface, IConnectedObject
 
     /**
      * Numéro de TVA CA (SIFAC)
-     * @var
      * @ORM\Column(type="string", nullable=true)
      */
     protected $numTVACA;
+
+    /**
+     * Code labintel
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $labintel;
+
+    /**
+     * N°RNSR
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $rnsr;
 
     /**
      * @var string
@@ -305,6 +320,18 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     protected $connectors;
 
+
+    /**
+     * @var string Numéro DUNS
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $duns;
+
+    /**
+     * @var string TVA Intracommunautaire
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $tvaintra;
 
 
     public function __construct()
@@ -315,9 +342,50 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->setDateCreated(new \DateTime());
     }
 
+    public function getCodePcru(){
+        if( $this->getSiret() ) return $this->getSiret();
+        if( $this->getTvaintra() ) return $this->getTvaintra();
+        if( $this->getDuns() ) return $this->getDuns();
+        return null;
+    }
+
     public function isClose()
     {
         return $this->getDateEnd() && $this->getDateEnd() <= new \DateTime();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDuns(): ?string
+    {
+        return $this->duns;
+    }
+
+    /**
+     * @param string $duns
+     */
+    public function setDuns(?string $duns): self
+    {
+        $this->duns = $duns;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTvaintra(): ?string
+    {
+        return $this->tvaintra;
+    }
+
+    /**
+     * @param string $tvaintra
+     */
+    public function setTvaintra(?string $tvaintra): self
+    {
+        $this->tvaintra = $tvaintra;
+        return $this;
     }
 
     /**
@@ -336,9 +404,39 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->typeObj = $typeObj;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getRnsr()
+    {
+        return $this->rnsr;
+    }
 
+    /**
+     * @param mixed $rnsr
+     */
+    public function setRnsr($rnsr): self
+    {
+        $this->rnsr = $rnsr;
+        return $this;
+    }
 
+    /**
+     * @return mixed
+     */
+    public function getLabintel()
+    {
+        return $this->labintel;
+    }
 
+    /**
+     * @param mixed $labintel
+     */
+    public function setLabintel($labintel): self
+    {
+        $this->labintel = $labintel;
+        return $this;
+    }
 
     /**
      * @return array
@@ -348,16 +446,16 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this->connectors;
     }
 
-    public function getConnectorID( $connectorName )
+    public function getConnectorID($connectorName)
     {
         $id = null;
-        if( $this->connectors && isset($this->connectors[$connectorName]) ){
+        if ($this->connectors && isset($this->connectors[$connectorName])) {
             $id = $this->connectors[$connectorName];
         }
         return $id;
     }
 
-    public function setConnectorID( $connectorName, $value )
+    public function setConnectorID($connectorName, $value)
     {
         $this->connectors[$connectorName] = $value;
         return $this;
@@ -366,13 +464,13 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return ArrayCollection
      */
-    public function getPersons( $includeInactive = true )
+    public function getPersons($includeInactive = true)
     {
-        if( $includeInactive == false ){
+        if ($includeInactive == false) {
             $out = [];
             /** @var OrganizationPerson $member */
-            foreach( $this->getPersons() as $member ){
-                if( !$member->isOutOfDate() ){
+            foreach ($this->getPersons() as $member) {
+                if (!$member->isOutOfDate()) {
                     $out[] = $member;
                 }
             }
@@ -391,11 +489,12 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this;
     }
 
-    public function hasPerson( Person $person, $role = false ){
+    public function hasPerson(Person $person, $role = false)
+    {
         /** @var OrganizationPerson $member */
-        foreach( $this->getPersons() as $member ){
-            if( $member->getPerson()->getId() == $person->getId() ){
-                if( $role === false || $role == $member->getRole() ){
+        foreach ($this->getPersons() as $member) {
+            if ($member->getPerson()->getId() == $person->getId()) {
+                if ($role === false || $role == $member->getRole()) {
                     return true;
                 }
             }
@@ -404,13 +503,13 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
 
-    public function hasResponsable( Person $person )
+    public function hasResponsable(Person $person)
     {
         $responsables = [ProjectMember::ROLE_RESPONSABLE];
         /** @var OrganizationPerson $member */
-        foreach( $this->getPersons() as $member ){
+        foreach ($this->getPersons() as $member) {
 
-            if( $member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables ) ){
+            if ($member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables)) {
                 return true;
             }
         }
@@ -473,17 +572,15 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function setDateStart($dateStart)
     {
-        if( $dateStart == '' ){
+        if ($dateStart == '') {
             $dateStart = null;
-        }
-        elseif( is_string($dateStart) ){
+        } elseif (is_string($dateStart)) {
             $dateStart = new \DateTime($dateStart);
         }
         $this->dateStart = $dateStart;
 
         return $this;
     }
-
 
 
     /**
@@ -500,10 +597,9 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function setDateEnd($dateEnd)
     {
-        if( $dateEnd == '' ){
+        if ($dateEnd == '') {
             $dateEnd = null;
-        }
-        elseif( is_string($dateEnd) ){
+        } elseif (is_string($dateEnd)) {
             $dateEnd = new \DateTime($dateEnd);
         }
         $this->dateEnd = $dateEnd;
@@ -667,7 +763,8 @@ class Organization implements ResourceInterface, IConnectedObject
      * @param $connector
      * @return $this
      */
-    public function setConnector($connector){
+    public function setConnector($connector)
+    {
         $this->connectors = $connector;
         return $this;
     }
@@ -810,8 +907,8 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function getType()
     {
-        if( $this->getTypeObj() ){
-            return (string) $this->getTypeObj();
+        if ($this->getTypeObj()) {
+            return (string)$this->getTypeObj();
         }
         return $this->type;
     }
@@ -960,9 +1057,9 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this;
     }
 
-    public function fullOrShortName( $displayClose = false )
+    public function fullOrShortName($displayClose = false)
     {
-        if( $this->getFullName() ){
+        if ($this->getFullName()) {
             return $this->getFullName();
         } else {
             return $this->getShortName();
@@ -970,22 +1067,22 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
 
-    public function displayName( $displayClose = false )
+    public function displayName($displayClose = false)
     {
         return
-            ($this->isClose() && $displayClose ? '!FERME! ' : '').
-            ($this->getCode() ? '['.$this->getCode().'] ' : '').
-            ($this->getShortName() ? $this->getShortName().' ' : '').
-            ($this->getFullName() ? $this->getFullName().' ' : '').
+            ($this->isClose() && $displayClose ? '!FERME! ' : '') .
+            ($this->getCode() ? '[' . $this->getCode() . '] ' : '') .
+            ($this->getShortName() ? $this->getShortName() . ' ' : '') .
+            ($this->getFullName() ? $this->getFullName() . ' ' : '') .
             ($this->getCity() ? '(' . $this->getCity() . ')' : '');
     }
 
     public function displayNameLong()
     {
         return
-            ($this->getShortName() ? $this->getShortName() : '').
-            ($this->getFullName() && $this->getShortName() ? ', ' : '').
-            ($this->getFullName() ? $this->getFullName() : '').
+            ($this->getShortName() ? $this->getShortName() : '') .
+            ($this->getFullName() && $this->getShortName() ? ', ' : '') .
+            ($this->getFullName() ? $this->getFullName() : '') .
             ($this->getCity() ? ' (' . $this->getCity() . ')' : '');
     }
 
@@ -999,11 +1096,11 @@ class Organization implements ResourceInterface, IConnectedObject
     {
         return StringUtils::transliterateString($this->__toString());
     }
-    
+
     public function toArray()
     {
         return [
-            'id'    => $this->getId(),
+            'id' => $this->getId(),
             'label' => $this->displayName(true),
             'closed' => $this->isClose()
         ];
@@ -1022,21 +1119,24 @@ class Organization implements ResourceInterface, IConnectedObject
     private $cGetDateCreated;
     private $cGetDateUpdated;
 
-    public function getDateCreatedStr(){
-        if( $this->cGetDateCreated == null ){
+    public function getDateCreatedStr()
+    {
+        if ($this->cGetDateCreated == null) {
             $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
         }
         return $this->cGetDateCreated;
     }
 
-    public function getDateUpdatedStr(){
-        if( $this->cGetDateUpdated == null ){
+    public function getDateUpdatedStr()
+    {
+        if ($this->cGetDateUpdated == null) {
             $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
         }
         return $this->cGetDateUpdated;
     }
 
-    public function getDateCachedStr(){
+    public function getDateCachedStr()
+    {
         return $this->getDateUpdatedStr();
     }
 }

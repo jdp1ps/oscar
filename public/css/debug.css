@@ -11553,6 +11553,23 @@ pre.alert-danger, pre.alert-info {
   width: 100%;
 }
 
+.password-displayed {
+  background-color: #30b0d5;
+  transition: background-color linear 5s;
+}
+
+.vue-ui-textarea .vue-ui-content {
+  position: relative;
+}
+.vue-ui-textarea .vue-ui-content .errors {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #DD423E;
+  color: white;
+  text-shadow: 1px -1px 1px rgba(0, 0, 0, 0.8);
+}
+
 .datepicker-selector {
   position: absolute;
   width: 16em;
@@ -11672,6 +11689,157 @@ pre.alert-danger, pre.alert-info {
 
 .datepicker-selector .week .week-day:nth-child(odd) {
   background: rgba(0, 0, 0, 0.05);
+}
+
+.list-selector {
+  display: block;
+}
+.list-selector div {
+  display: block;
+}
+.list-selector div article {
+  cursor: pointer;
+  display: block;
+  align-items: center;
+  justify-items: center;
+}
+.list-selector div article:nth-child(even) {
+  background: rgba(10, 55, 131, 0.05);
+}
+.list-selector div article:hover {
+  background: rgba(156, 239, 232, 0.8);
+}
+.list-selector div article strong {
+  flex: 5;
+}
+.list-selector div article small {
+  margin-left: auto;
+  flex: 0;
+}
+
+.div-connexion {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.connect-credentials-lost {
+  display: none;
+}
+
+.overlay-content .tree-root {
+  font-size: 1.2em;
+  font-weight: 900;
+}
+
+.select-handler {
+  display: inline-block;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.select-handler:hover {
+  background: #0b93d5;
+}
+
+.open-handler {
+  cursor: pointer;
+}
+.open-handler:hover {
+  color: #0a3783;
+}
+
+.children {
+  margin-left: 1em;
+  margin-bottom: 0.3em;
+  font-size: 0.9em;
+  font-weight: lighter;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.activity-timesheet-synthesis {
+  background: rgba(255, 255, 255, 0.5);
+}
+.activity-timesheet-synthesis h2, .activity-timesheet-synthesis h3, .activity-timesheet-synthesis h4, .activity-timesheet-synthesis h5 {
+  font-size: 1.5rem;
+  margin: 0 1rem;
+  padding: 0;
+}
+.activity-timesheet-synthesis .line {
+  border-top: solid thin #6e2458;
+  display: flex;
+}
+.activity-timesheet-synthesis .line strong {
+  flex: 1;
+  font-weight: 400;
+}
+.activity-timesheet-synthesis .line em {
+  flex: 0 10rem;
+  text-align: right;
+  font-weight: 400;
+  font-style: normal;
+}
+.activity-timesheet-synthesis .line.totalline strong {
+  font-weight: 700 !important;
+}
+.activity-timesheet-synthesis .line.totalline em {
+  font-weight: 700;
+}
+.activity-timesheet-synthesis .line:hover {
+  background: #e4add4;
+}
+.activity-timesheet-synthesis .year {
+  border: solid thin grey;
+  border-left: 4px solid grey;
+  margin: 1em;
+}
+.activity-timesheet-synthesis .year h3 {
+  cursor: pointer;
+  line-height: 1.5rem;
+}
+.activity-timesheet-synthesis .year h3 strong {
+  font-size: 2rem;
+}
+.activity-timesheet-synthesis .year:hover {
+  border-color: #6e2458;
+}
+.activity-timesheet-synthesis .year:not(.open) h3 em {
+  font-weight: 700;
+}
+.activity-timesheet-synthesis .year.open h3 strong {
+  font-weight: 700;
+}
+.activity-timesheet-synthesis .month {
+  margin-left: 1rem;
+  margin-bottom: 0.25em;
+  border: solid thin grey;
+  border-left: 2px solid grey;
+  border-right: none;
+  padding: 0.1em;
+  background: rgba(255, 255, 255, 0.7);
+}
+.activity-timesheet-synthesis .month h4 {
+  cursor: pointer;
+}
+.activity-timesheet-synthesis .month:hover {
+  border-color: #6e2458;
+}
+.activity-timesheet-synthesis .month:hover em {
+  color: #6e2458;
+}
+.activity-timesheet-synthesis .person {
+  margin-left: 2rem;
+  font-size: 1.5rem;
+  border-top: thin #64817A solid;
+  background: rgba(255, 255, 255, 0.7);
+}
+.activity-timesheet-synthesis .person .line strong {
+  font-weight: 300;
+}
+.activity-timesheet-synthesis .person:hover {
+  background: #f1d3e8;
+}
+.activity-timesheet-synthesis .person:nth-child(odd) {
+  background: rgba(110, 36, 88, 0.1);
 }
 
 body {

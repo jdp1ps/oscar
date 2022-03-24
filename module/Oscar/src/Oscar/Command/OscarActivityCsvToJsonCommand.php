@@ -44,7 +44,7 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
     protected function configure()
     {
         $this
-            ->setDescription("Synchronisation d'activité de recherche à partir d'un fichier JSON")
+            ->setDescription("Conversion d'un fichier au format CSV d'activités de recherche en un fichier JSON")
             ->addOption('fichier', 'f', InputOption::VALUE_REQUIRED, 'Fichier CSV avec les données')
             ->addOption('config', 'c', InputOption::VALUE_REQUIRED, "Fichier de configuration de l'import")
             ->addOption('skip', 's', InputOption::VALUE_REQUIRED, "Fichier de configuration de l'import", 1)
@@ -62,12 +62,12 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
 
         if (!is_file($realpath)) {
-            throw new OscarException(sprintf("Le chemin '%s' n'est pas un fichier... faites un effort.",
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas un fichier...",
                 $realpath));
         }
 
         if (!is_readable($realpath)) {
-            throw new OscarException(sprintf("Le chemin '%s' n'est pas lisible....",
+            throw new OscarException(sprintf("Le chemin '%s' n'est pas lisible...",
                 $realpath));
         }
 
@@ -84,8 +84,6 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Conversion CSV > JSON des activités");
-
         ///////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////// SERVICES
         /** @var OscarConfigurationService $oscarConfig */
@@ -100,6 +98,15 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
         // Fichiers
         try {
+
+            $optFichier = $input->getOption('fichier');
+            $optConfig = $input->getOption('config');
+
+            if( !$optConfig || !$optFichier ){
+                $io->error("Les options --fichier <SOURCE CSV> et --config <FICHIER PHP> sont requises");
+                return 0;
+            }
+
             $sourceFilePath = $this->getReadablePath($input->getOption('fichier'));
             $configurationFilePath = $this->getReadablePath($input->getOption('config'));
             $skip = $input->getOption('skip');

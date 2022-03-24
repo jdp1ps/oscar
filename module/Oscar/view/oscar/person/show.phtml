@@ -7,7 +7,80 @@
 
 /** @var \Oscar\Entity\Person $entity */
 ?>
+<style>
+    .card.disabled {
+        border-left-color: #ccc;
+        opacity: .5;
+    }
+    .columns {
+        columns: 1
+    }
 
+    .columns .card {
+        page-break-inside: avoid;
+        break-inside: avoid-column;
+        display: table;
+    }
+    .columns .card > * {
+        page-break-inside: avoid;
+        break-inside: avoid-column;
+    }
+
+    .affectations .card.apply {
+        border: solid thin green;
+        border-left-width: 4px;
+        opacity: 1;
+    }
+    .affectations .card.applyable {
+        cursor: pointer;
+    }
+    .affectations .card.applyable:hover {
+        transform: scale(1.01);
+    }
+
+    .steps-bar {
+        display: flex;
+        text-shadow: -1px 1px 1px rgba(0,0,0,.3);
+        background: #ccc;
+        border-radius: .5em;
+    }
+
+    .step-content {
+        border: thin solid #aaa;
+        border-top: none;
+        padding: 1em;
+    }
+
+    .step {
+        flex: 1;
+        padding: 1em;
+        text-align: center;
+        border: thin solid #aaa;
+    }
+
+    .step:first-child {
+        border-radius: .5em 0 0 0;
+    }
+    .step:last-child {
+        border-radius: 0 .5em 0 0;
+    }
+
+    .step.current {
+        color: #333;
+        font-weight: bold;
+        background: white;
+        border-bottom-color: white;
+    }
+    .step.futur {
+        color: #777;
+        text-shadow: 1px -1px 1px rgba(255,255,255,.3);
+        font-weight: 100;
+    }
+    .step.done {
+        background: green;
+        color: #dddddd;
+    }
+</style>
 <section class="container">
     <div class="row">
         <h1 class="">
@@ -17,6 +90,28 @@
             <span><?= $entity->getLdapAffectation() ?></span>
             <?php endif; ?>
         </h1>
+
+        <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+        <div id="replacer"></div>
+        <script>
+            require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
+                Vue.use(VueResource);
+                new Vue({
+                    el: "#replacer",
+                    render(h){
+                        return h(ReplaceStengthenPerson, {props: {
+                                urlReplace: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=replace",
+                                urlAffectation: "<?= $this->url('person/affectation', ['id'=>$entity->getId()]) ?>",
+                                urlStrengthen: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=strengthen",
+                                person: <?= json_encode($entity->toArray()) ?>,
+                                affectations: <?= json_encode($affectations) ?>,
+                            }})
+                    }
+                })
+
+            });
+        </script>
+        <?php endif ?>
         <p>
             <i class="icon-mail"></i> <?= $entity->getEmail() ?>
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
@@ -383,6 +478,88 @@
                             </script>
                         <?php endif; ?>
                     </div>
+                </div>
+                <div class="col">
+                    <h2>
+                        <i class="icon-calendar"></i>
+                        Validateur
+                    </h2>
+
+                    <?php if( $entity->isValidator() ): ?>
+                        <p class="alert alert-info">
+                            Activités pour lesquelles <strong><?= $entity ?></strong> est désigné comme validateur.
+                        </p>
+                        <?php if( count($entity->getValidatorActivitiesPrj()) ): ?>
+                            <h3>
+                                <i class="icon-cube"></i>
+                                Validateur projet
+                            </h3>
+                            <section>
+                                <?php
+                                foreach ($entity->getValidatorActivitiesPrj() as $activity) : ?>
+                                <article class="card xs">
+                                    <i class="icon-cube"></i>
+                                    <?= $activity ?>
+                                    <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="on-right">
+                                        Voir la fiche
+                                    </a>
+                                    <?php if( count($activity->getValidatorsPrj()) -1 > 0 ): ?>
+                                    <br>
+                                    Autres validateur(s) sur cette activité :
+                                    <ul>
+                                    <?php foreach ($activity->getValidatorsPrj() as $p): if( $p != $entity) ?>
+                                    <li><?= $p ?></li>
+                                    <?php endforeach; ?>
+                                    </ul>
+                                    <?php endif; ?>
+                                </article>
+                                <?php endforeach; ?>
+                            </section>
+                        <?php endif; ?>
+
+                        <?php if( count($entity->getValidatorActivitiesSci()) ): ?>
+                            <h3>
+                                <i class="icon-beaker"></i>
+                                Validateur scientifique
+                            </h3>
+                            <section>
+                                <?php
+                                foreach ($entity->getValidatorActivitiesSci() as $activity) : ?>
+                                    <article class="card xs">
+                                        <i class="icon-cube"></i>
+                                        <?= $activity ?>
+                                        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="on-right">
+                                            Voir la fiche
+                                        </a>
+                                    </article>
+                                <?php endforeach; ?>
+                            </section>
+                        <?php endif; ?>
+
+                        <?php if( count($entity->getValidatorActivitiesAdm()) ): ?>
+                            <h3>
+                                <i class="icon-beaker"></i>
+                                Validateur administratif
+                            </h3>
+                            <section>
+                                <?php
+                                foreach ($entity->getValidatorActivitiesAdm() as $activity) : ?>
+                                    <article class="card xs">
+                                        <i class="icon-cube"></i>
+                                        <?= $activity ?>
+                                        <a href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>" class="on-right">
+                                            Voir la fiche
+                                        </a>
+                                    </article>
+                                <?php endforeach; ?>
+                            </section>
+                        <?php endif; ?>
+
+                    <?php else: ?>
+                    <div class="alert alert-info">
+                        <?= $entity ?> n'est pas validateur <strong>désigné</strong> sur une activité de recherche
+                    </div>
+                    <?php endif; ?>
                 </div>
             </section>
         </div>

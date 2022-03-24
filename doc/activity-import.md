@@ -11,7 +11,7 @@ Cet utilitaire sera utilisé pour importer et synchroniser des activités dans O
 La procédure de synchronisation s'utilise en ligne de commande :
 
 ```bash
-$ php public/index.php oscar activity:sync path/to/file.json
+$ php bin/oscar.php activity:cvstojson --fichier=path/to/fileSourceDatas.csv --config=path/to/fileConfig.php
 ```
 
 # Source des données
@@ -86,7 +86,11 @@ Le fichier source est au [format JSON]([http://json.org/). Un échantillon de ce
         "John Doe",
         "Marcel Grossmann"
       ]
-    }
+    },
+    "disciplines": [
+      "Physique",
+      "Chimie"
+    ]
   }
 ]
 ```
@@ -119,6 +123,7 @@ organizations   | Object    | Oui       | Non    | Voir détails dans [Gestion d
 persons         | Object    | Oui       | Non    | Voir détails dans [Gestion des personnes](#persons)
 milestones      | Array     | Oui       | Non    | Voir détails dans [Gestion des jalons](#milestones)
 payments        | Array     | Oui       | Non    | Voir détails dans [Gestion des versements](#payments)
+disciplines        | Array     | Oui       | Non    | Voir détails dans [Gestion des disciplines](#disciplines)
 
 
 ```json
@@ -275,17 +280,19 @@ La valeur est un tableau contenant des Objets JSON
     "milestones": [
         {
             "type": "Rapport scientifique",
-            "date": "2014-07-03"
+            "date": "2014-07-03",
+            "description": ""
         },
         {
             "type": "Fin des dépenses",
-            "date": "2018-01-31"
+            "date": "2018-01-31",
+            "description": "Description rapport fin des dépenses"
         }
     ]
 }
 ```
 
-Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) :
+Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant à la date d'échéance du jalon, ainsi qu'une clef `type` correspondant au type de jalon (**Administration > Gérer les types d'activités**) et une clef `description` du jalon :
 
 
 
@@ -311,7 +318,7 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 
 ```json
 {
-    "milestones": [
+    "payments": [
         {
             "amount": 249.5,
             "date": "2014-07-03",
@@ -329,11 +336,16 @@ Ces objets contiennent une clef `date` qui contiendra une Date ISO correspondant
 > Les versements sans valeur dans la clef `date` mais avec une clef `predicted` seront tagués comme prévisionnels.
 
 
+<a id="disciplines"></a>
+### La clef disciplines (array de string)
+
+La clef `disciplines` permet de spécifier une ou plusieurs disciplines a associer à l'activité. Le séparateur `#` dans la source CSV permet de gérer plusieurs disciplines : La valeur `Physique#Chimie` donnera `["Physique","Chimie"]. 
+
+> Si la discipline est manquante, elle sera créée.
+
 ## La clef TVA (float, ex: 19.6)
 
 La valeur doit correspondre à un taux présent dans la base de données (table `tva`)
-
-
 
 
 ## Currency (string, ex: €)
@@ -402,7 +414,11 @@ return [
     27  => "financialImpact",
     28  => "currency",
     29  => "assietteSubventionnable",
-    30  => "status"
+    30  => "status",
+    31 => "disciplines",
+    
+    34  => "milestones.Rapport scientifique 9.1"
+    
 ];
 ```
 
@@ -501,7 +517,6 @@ La donnée de colonne `Max Plank, Albert Einstein` produirait :
 }
 ```
 
-
 ### milestones.Type
 
 La clef `milestones` prend pour paramètre le type de jalon trouvé dans la cellule. Si par exemple la colonne 13 contient la date du rapport scientifique, la configuration se présentera ainsi :
@@ -519,16 +534,45 @@ On obtiendra en JSON :
   "milestones": [
       {
         "type": "Rapport scientifique",
-        "date": "VALEUR DE LA COLONNE"
+        "date": "VALEUR DE LA COLONNE",
+        "description": ""
       }
   ]
 }
 ```
 
+### milestones.Type.POSITION
+
+La clef `milestones` peut aussi recevoir une position pour définir une description de ce jalon.
+Si par exemple la colonne 34 est paramétré ainsi, alors nous explicitions la position de la colonne qui contient la description, à savoir 1 colonne plus loin dans cet exemple.
+
+la configuration se présentera ainsi :
+
+```php
+return [
+  34  => "milestones.Rapport scientifique 9.1"
+]
+```
+
+On obtiendra en JSON :
+
+```json
+{
+  "milestones": [
+      {
+        "type": "Rapport scientifique",
+        "date": "VALEUR DE LA COLONNE",
+        "description": "DESCRIPTION RAPPORT SCIENTIFIQUE, DANS CET EXEMPLE COLONNE + 1 (35)"
+      }
+  ]
+}
+```
+
+La clef `milestones` peut donc être configurée : sous la forme `millestones.TYPE.POSITION_DESCRIPTION`.
 
 ### payments.POSITIONS
 
-La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective souf la forme `payments.PREVU.EFFECTIF`.
+La clef `payments` indique l'emplacement du montant du versement et prends comme premier paramètre la date prévue du versement, et en deuxième paramêtre la date effective sous la forme `payments.PREVU.EFFECTIF`.
 
 #### Exemple 1
 

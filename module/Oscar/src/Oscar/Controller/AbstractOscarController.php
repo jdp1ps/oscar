@@ -259,4 +259,11 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     {
         return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
     }
+
+    protected function getJsonPosted()
+    {
+        $inputJSON = file_get_contents('php://input');
+        $input = json_decode($inputJSON, TRUE);
+        return $input;
+    }
 }

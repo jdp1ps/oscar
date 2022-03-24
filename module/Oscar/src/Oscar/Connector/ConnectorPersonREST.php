@@ -190,7 +190,7 @@ class ConnectorPersonREST extends AbstractConnector
                         }
 
                     } catch (\Exception $e){
-                        $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est actif dans les activités : " . $e->getMessage());
+                        $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est utilisé dans oscar : " . $e->getMessage());
                     }
                 }
 

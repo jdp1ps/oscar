@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
+use Doctrine\ORM\Mapping\OneToOne as OneToOne;
 
 /**
  * ProjectGrant, correspond aux conventions (Contrats).
@@ -150,6 +151,31 @@ class Activity implements ResourceInterface
      * @ORM\ManyToOne(targetEntity="ActivityType")
      */
     private $activityType;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @var PcruPoleCompetitivite
+     * @ORM\ManyToOne(targetEntity="PcruPoleCompetitivite")
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     */
+    private $pcruPoleCompetitivite;
+
+    /**
+     * Pôle de compétitivité
+     *
+     * @ORM\Column(type="boolean", options={"default" : false})
+     */
+    private $pcruValidPoleCompetitivite;
+
+    /**
+     * Source de financement
+     *
+     * @var PcruSourceFinancement
+     * @ORM\ManyToOne(targetEntity="PcruSourceFinancement")
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     */
+    private $pcruSourceFinancement;
 
 
     /**
@@ -312,6 +338,27 @@ class Activity implements ResourceInterface
     protected $persons;
 
     /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesPrj")
+     * @ORM\JoinTable (name="person_activity_validator_prj")
+     */
+    private $validatorsPrj;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesSci")
+     * @ORM\JoinTable (name="person_activity_validator_sci")
+     */
+    private $validatorsSci;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesAdm")
+     * @ORM\JoinTable (name="person_activity_validator_adm")
+     */
+    private $validatorsAdm;
+
+    /**
      * Liste des jalons (dates clefs).
      *
      * @var ArrayCollection
@@ -381,6 +428,12 @@ class Activity implements ResourceInterface
 
 
     /**
+     * Informations complémentaires PCRU
+     * @OneToOne(targetEntity="ActivityPcruInfos", mappedBy="activity", orphanRemoval=true, cascade={"remove"})
+     */
+    private $pcruInfo;
+
+    /**
      * @var String
      * @ORM\Column(type="string", options={"default":"none"}, nullable=false)
      */
@@ -393,6 +446,24 @@ class Activity implements ResourceInterface
      * @ORM\Column(type="object", nullable=true)
      */
     protected $numbers = [];
+
+    /**
+     * @return mixed
+     */
+    public function isPcruValidPoleCompetitivite()
+    {
+        return $this->pcruValidPoleCompetitivite;
+    }
+
+    /**
+     * @param mixed $pcruValidPoleCompetitivite
+     */
+    public function setPcruValidPoleCompetitivite($pcruValidPoleCompetitivite): self
+    {
+        $this->pcruValidPoleCompetitivite = $pcruValidPoleCompetitivite;
+        return $this;
+    }
+
 
     public function isActive()
     {
@@ -415,6 +486,64 @@ class Activity implements ResourceInterface
     public function getRemainder()
     {
         return $this->getAmount() - abs($this->getTotalSpent());
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitivite()
+    {
+        return $this->pcruPoleCompetitivite;
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function getPcruPoleCompetitiviteStr()
+    {
+        return $this->getPcruPoleCompetitivite() ?: "";
+    }
+
+    /**
+     * @return PcruPoleCompetitivite
+     */
+    public function isPcruPolePoleCompetitiviteStr()
+    {
+        return $this->isPcruValidPoleCompetitivite();
+    }
+
+    /**
+     * @param PcruPoleCompetitivite $pcruPoleCompetitivite
+     */
+    public function setPcruPoleCompetitivite($pcruPoleCompetitivite): self
+    {
+        $this->pcruPoleCompetitivite = $pcruPoleCompetitivite;
+        return $this;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancement()
+    {
+        return $this->pcruSourceFinancement;
+    }
+
+    /**
+     * @return PcruSourceFinancement
+     */
+    public function getPcruSourceFinancementStr()
+    {
+        return $this->getPcruSourceFinancement() ?: "";
+    }
+
+    /**
+     * @param PcruSourceFinancement $pcruSourceFinancement
+     */
+    public function setPcruSourceFinancement($pcruSourceFinancement): self
+    {
+        $this->pcruSourceFinancement = $pcruSourceFinancement;
+        return $this;
     }
 
     /**
@@ -500,6 +629,28 @@ class Activity implements ResourceInterface
         return $this;
     }
 
+    private $pcruMissings;
+
+    public function isPcruFriendly()
+    {
+        return count($this->getPcruMissings()) == 0;
+    }
+
+    public function getPcruMissings()
+    {
+        if ($this->pcruMissings === null) {
+            $missings = [];
+            if (!$this->getProject()) {
+                $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
+            } elseif (!$this->getAcronym()) {
+                $missings[] = _("Le projet de l'activité doit avoir un acronyme");
+            }
+
+            $this->pcruMissings = $missings;
+        }
+
+        return $this->pcruMissings;
+    }
 
     /**
      * Retourne l'acronyme du projet si disponible.
@@ -571,6 +722,23 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @return mixed
+     */
+    public function getPcruInfo()
+    {
+        return $this->pcruInfo;
+    }
+
+    /**
+     * @param mixed $pcruInfo
+     */
+    public function setPcruInfo($pcruInfo): self
+    {
+        $this->pcruInfo = $pcruInfo;
+        return $this;
+    }
+
+    /**
      * @return String
      */
     public function getTimesheetFormat()
@@ -633,6 +801,7 @@ class Activity implements ResourceInterface
 
     /**
      * @return mixed
+     * @deprecated
      */
     public function getOscarId()
     {
@@ -895,6 +1064,19 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateOpenedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateOpened()) {
+            return $this->getDateOpened()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * @return Project
      */
     public function getProject()
@@ -1075,6 +1257,75 @@ class Activity implements ResourceInterface
         $this->disciplines = new ArrayCollection();
         $this->estimatedSpentLines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
+        $this->validatorsPrj = new ArrayCollection();
+        $this->validatorsSci = new ArrayCollection();
+        $this->validatorsAdm = new ArrayCollection();
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsPrj()
+    {
+        return $this->validatorsPrj;
+    }
+
+    public function hasValidatorsPrj(): bool
+    {
+        return count($this->getValidatorsPrj()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsPrj
+     */
+    public function setValidatorsPrj(ArrayCollection $validatorsPrj): self
+    {
+        $this->validatorsPrj = $validatorsPrj;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsSci()
+    {
+        return $this->validatorsSci;
+    }
+
+    public function hasValidatorsSci(): bool
+    {
+        return count($this->getValidatorsSci()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsSci
+     */
+    public function setValidatorsSci(ArrayCollection $validatorsSci): self
+    {
+        $this->validatorsSci = $validatorsSci;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getValidatorsAdm()
+    {
+        return $this->validatorsAdm;
+    }
+
+    public function hasValidatorsAdm(): bool
+    {
+        return count($this->getValidatorsAdm()) > 0;
+    }
+
+    /**
+     * @param ArrayCollection $validatorsAdm
+     */
+    public function setValidatorsAdm(ArrayCollection $validatorsAdm): self
+    {
+        $this->validatorsAdm = $validatorsAdm;
+        return $this;
     }
 
     /**
@@ -1178,7 +1429,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return Discipline[]
+     * @return self
      */
     public function setDisciplines($disciplines)
     {
@@ -1444,18 +1695,26 @@ class Activity implements ResourceInterface
         $this->getPersons()->add($activityPerson);
     }
 
+    /**
+     * @param Person $person
+     * @param Role|null $role
+     * @param \DateTime|null $dateStart
+     * @param \DateTime|null $dateEnd
+     * @param bool $deep
+     * @return bool
+     */
     public function hasPerson(
         Person $person,
-        $role = null,
-        \DateTime $dateStart = null,
-        \DateTime $dateEnd = null,
-        $deep = true
+        ?Role $role = null,
+        ?\DateTime $dateStart = null,
+        ?\DateTime $dateEnd = null,
+        bool $deep = true
     ) {
         $found = false;
         /** @var ActivityPerson $activityPerson */
         foreach ($this->persons as $activityPerson) {
             if ($person == $activityPerson->getPerson()) {
-                if ($role !== null && $activityPerson->getRole() !== $role) {
+                if ($role !== null && $activityPerson->getRoleObj() !== $role) {
                     continue;
                 } else {
                     $found = true;
@@ -1529,6 +1788,21 @@ class Activity implements ResourceInterface
     }
 
     private $_cacheOrganizationsByRole;
+
+    public function getOrganizationsWithOneRole(array $roleIds): array
+    {
+        $structures = [];
+        /** @var ActivityOrganization $organizationRel */
+        foreach ($this->getOrganizationsDeep() as $organizationRel) {
+            $organization = $organizationRel->getOrganization();
+            $role = $organizationRel->getRoleObj()->getRoleId();
+            $organizationId = $organization->getId();
+            if (!array_key_exists($organizationId, $structures) && in_array($role, $roleIds)) {
+                $structures[$organizationId] = $organization;
+            }
+        }
+        return $structures;
+    }
 
     public function getOrganizationsWithRole($role, $deep = true)
     {
@@ -1865,35 +2139,41 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateSignedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateSigned()) {
+            return $this->getDateSigned()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * Retourne les données préparées pour le génération des documents
      */
-    public function documentDatas()
+    public function documentDatas($datas)
     {
         //
-        $datas = [
-            'id' => $this->getId(),
-            'acronym' => htmlspecialchars($this->getAcronym()),
-            'amount' => $this->getAmount(),
-            'pfi' => $this->getCodeEOTP(),
-            'oscar' => $this->getOscarNum(),
-            'montant' => number_format(
-                    (double)$this->getAmount(),
-                    2,
-                    ',',
-                    ' '
-                ) . $this->getCurrency()->getSymbol(),
-            'annee-debut' => $this->getDateStartStr('Y'),
-            'annee-fin' => $this->getDateEndStr('Y'),
-            'debut' => $this->getDateStartStr('d/m/Y'),
-            'fin' => $this->getDateEndStr('d/m/Y'),
-            'intitule' => htmlspecialchars($this->getLabel()),
-            'label' => htmlspecialchars($this->getLabel()),
-            'tva' => $this->getTva() ? (string)$this->getTva() : '',
-            'assiette-subventionnable' => (string)$this->getAssietteSubventionnable(),
-            'note-financiere' => $this->getNoteFinanciere(),
+        $datas['id'] = $this->getId();
+        $datas['acronym'] = htmlspecialchars($this->getAcronym());
+        $datas['amount'] = $this->getAmount();
+        $datas['pfi'] = $this->getCodeEOTP();
+        $datas['oscar'] = $this->getOscarNum();
+        $datas['montant'] = number_format((double)$this->getAmount(),2,',',' ') . $this->getCurrency()->getSymbol();
+        $datas['annee-debut'] = $this->getDateStartStr('Y');
+        $datas['annee-fin'] = $this->getDateEndStr('Y');
+        $datas['debut'] = $this->getDateStartStr('d/m/Y');
+        $datas['fin'] = $this->getDateEndStr('d/m/Y');
+        $datas['intitule'] = htmlspecialchars($this->getLabel());
+        $datas['label'] = htmlspecialchars($this->getLabel());
+        $datas['tva'] = $this->getTva() ? (string)$this->getTva() : '';
+        $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
+        $datas['note-financiere'] = $this->getNoteFinanciere();
 
-            'type' => (string)$this->getActivityType(),
-        ];
+        $datas['type'] = (string)$this->getActivityType();
 
         $sluger = Slugify::create();
 
@@ -1985,6 +2265,9 @@ class Activity implements ResourceInterface
         $datas['versement-effectue-montant'] = $versementsEffectues;
         $datas['versement-effectue-date'] = $versementsEffectuesDate;
 
+        foreach ($this->getNumbers() as $key => $value) {
+            $datas['num-'.$sluger->slugify($key)] = $value;
+        }
 
         return $datas;
     }
@@ -2014,7 +2297,7 @@ class Activity implements ResourceInterface
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'incidence financière' => $this->getIncidenceFinanciere(),
-            'Note financière' => $this->getNoteFinanciere(),
+            'Note' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
@@ -2038,14 +2321,13 @@ class Activity implements ResourceInterface
             'Fin',
             'Date de signature',
             'versement effectué',
-            'versement effectué',
             'versement prévu',
             'écart de paiement',
             'justificatif écart de paiement',
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'incidence financière',
-            'Note financière',
+            'Note',
             'Disciplines'
         );
     }
@@ -2087,6 +2369,25 @@ class Activity implements ResourceInterface
         }
 
         return $this->totalEcartPaiement;
+    }
+
+    private $ecartPaiementExplain = null;
+
+    public function getEcartPaimentExplain() :string
+    {
+        if ($this->ecartPaiementExplain === null) {
+            $this->ecartPaiementExplain = [];
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_ECART && $payment->getComment()) {
+                    $this->ecartPaiementExplain[] = $payment->getComment();
+                }
+            }
+
+            $this->ecartPaiementExplain = implode(', ', $this->ecartPaiementExplain);
+        }
+
+        return $this->ecartPaiementExplain;
     }
 
     private $justificatifEcartPaiement;
@@ -2316,23 +2617,37 @@ class Activity implements ResourceInterface
         return false;
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private $tmpOrganizationsWithRoleForm = [];
-
-    public function setOrganizationsWithRoleForm($formName, $formValue)
+    /**
+     * La feuille de temps est éligible aux feuilles de temps.
+     *
+     * @return bool
+     */
+    public function isTimesheetAllowed(): bool
     {
-        var_dump($formName);
-        var_dump($formValue);
+        return count($this->getNoTimesheetReason()) == 0;
     }
 
-    public function getOrganizationsWithRoleForm($formName)
+    private $_noTimesheetReason;
+
+    /**
+     * Retourne la liste des raisons d'inégibilité aux feuilles de temps.
+     *
+     * @return array
+     */
+    public function getNoTimesheetReason(): array
     {
-        if (array_key_exists($formName)) {
-            return $this->tmpOrganizationsWithRoleForm[$formName];
-        } else {
-            return '';
+        if ($this->_noTimesheetReason == null) {
+            $this->_noTimesheetReason = [];
+            if (!$this->getProject()) {
+                $reasons[] = "L'activité n'a pas de projet";
+            } elseif (!$this->getProject()->getAcronym()) {
+                $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
+            }
+
+            if (!$this->getDateStart() || !$this->getDateEnd()) {
+                $reasons[] = "L'activité n'a pas de date de début/fin";
+            }
         }
+        return $this->_noTimesheetReason;
     }
-
 }

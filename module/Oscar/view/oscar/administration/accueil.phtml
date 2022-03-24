@@ -12,6 +12,10 @@
             <i class="icon-cog"></i>
             Administration et configuration Oscar
         </h1>
+        <div class="infos text-right">
+            <strong>Oscar</strong>
+            <small><?= \Oscar\OscarVersion::getBuild() ?></small>
+        </div>
     </header>
 
     <section>
@@ -35,23 +39,37 @@
             </h3>
             <p>Options générales de l'application</p>
         </article>
-        <?php /****
+
         <article class="card">
             <h3 class="card-title">
                 <strong>
-                    <i class="icon-cog"></i>
-                    Messages
+                    <i class="icon-calendar"></i>
+                    Feuille de temps
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
-                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
-
             </h3>
+            <ul>
+                <li>
+                    <strong>Messages de relance</strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                </li>
+                <li>
+                    <strong>Régles de relance</strong>
+                    <small>Liste blanche et liste noire</small>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/listdeclarers') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                </li>
+            </ul>
             <p>Messages et formules</p>
         </article>
-        /****/ ?>
+
+
         <article class="card">
             <h3 class="card-title">
                 <strong>
@@ -206,6 +224,28 @@
             </h3>
             <p>Gestion des types de dépense.</p>
         </article>
+
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-flag"></i>
+                    Pays (ISO 3166)
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/countries') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <div class="alert alert-info">
+                Charger les informations depuis le référentiel :
+                <form action="<?= $this->url('administration/countries') ?>" method="post">
+                    <button type="submit" name="action" value="update-countries-3166" class="btn btn-default">Actualiser les pays</button>
+                </form>
+            </div>
+            <p>Référenciel des pays proposés dans la fiche organisation</p>
+        </article>
+
     </section>
 
     <section>
@@ -352,8 +392,75 @@
             </p>
             <p class="alert-warning alert">
                 Cette opération est coûteuse en ressource et peut dépasser la durée d'execution autorisée. Il est préférable de réaliser cette opération de amintenance depuis l'utilitaire en ligne de commande :
-                <br>$ <code>php public/index.php oscar activity:search:build</code>
+                <br>$ <code>php bin/oscar.php activity:search-build</code>
             </p>
+        </article>
+
+        <h2>
+            <i class="icon-puzzle"></i>
+            Modules
+        </h2>
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-beaker"></i>
+                    PCRU
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                    <a href="<?= $this->url('administration/pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Le modules PCRU permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
+            <hr>
+            <h4 style="font-weight: bold">Référentiels PCRU</h4>
+            <div class="alert alert-info">
+            <p>Les référentiels ci-dessous sont <strong>obligatoires</strong> si vous utilisez PCRU, mais rien ne vous empèche de les utiliser dans la qualification des activités pour compléter les informations.</p>
+            <p>Vous pouvez actualiser les référentiels en cliquant ici <a href="?action=pcru-referentiel-update" class="btn btn-success">Mettre à jour les référentiels</a></p>
+
+            </div>
+            <ul>
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                        Correspondance des types de contrat
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/contrat-type-pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br><small>Correspondance entre les types d'activités Oscar et les types de contrat PCRU</small>
+                </li>
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                    Référenciel des pôles de compétitivité :
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br>
+                    <small>La liste des pôles de compétitivité est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                </li>
+
+                <li>
+                    <strong>
+                        <i class="icon-tags"></i>
+                        Référenciel des sources de financement
+                    </strong>
+                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
+                    <?php else: ?>
+                        <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                    <?php endif; ?>
+                    <br>
+                    <small>La liste des sources de financement est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                </li>
+            </ul>
         </article>
 
         <h2>

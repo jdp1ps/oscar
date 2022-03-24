@@ -50,6 +50,11 @@ h2.tv-serie-label { border-bottom: none; }
                     </abbr>
                 <?php endif; ?>
                 <?= $project->getLabel() ?>
+
+                <div class="budget montant">
+                    <small><em>Montant</em></small><br>
+                    <strong><?= $this->currency($project->getAmount()) ?></strong>
+                </div>
             </h1>
         </header>
 
@@ -143,7 +148,6 @@ h2.tv-serie-label { border-bottom: none; }
             </form>
             <script>
                 require(['jquery','select2'], function($) {
-                    console.log('Chargement OK.');
                     var formatRepo, formatRepoSelection;
 
                     formatRepo = function (repo) {
@@ -197,38 +201,72 @@ h2.tv-serie-label { border-bottom: none; }
     </section>
 
     <section>
-        <h2><i class="icon-group"></i> Participants</h2>
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)): ?>
+            <section class="has-btn">
+                <h2>
+                    <i class="icon-group"></i>
+                    Membres
+                </h2>
+                <section id="organizations" class="has-btn"></section>
 
-        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project)): ?>
-            <section class="subsection has-btn">
-                <h3 class="h4">Membres du projet</h3>
-                <?php if (count($project->getPersonsDeep())): ?>
-                    <?= $this->partial('/partials/timewalker-pack.phtml', [
-                        'enroler' => $project,
-                        'type' => 'Person',
-                        'deep' => true,
-                        'manage' => $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)
-                    ]); ?>
-                <?php else: ?>
-                    <p>Aucun membre sur ce projet</p>
-                <?php endif; ?>
-
-                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)): ?>
-            <div class="btn-area">
-                <a href="<?= $this->url('personproject/new', ['idenroller' => $project->getId()]) ?>"
-                   class="smoke" data-modalform>
-                    <i class="icon-user"></i>
-                    Ajouter un membre
-                </a>
-            </div>
-                <?php endif; ?>
             </section>
-        <?php else: ?>
-            <p class="credential-msg">Vous n'avez pas les droits pour voir les
-                membres de ce projet</p>
+            <script>
+                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
+                    Vue.use(VueResource);
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+                    new Vue({
+                        el: "#organizations",
+                        render(h){
+                            return h(EntityWithRole.default, { props: {
+                                    url: "<?= $this->url('project/persons', ['idproject' => $project->getId()]) ?>",
+                                    urlNew: "<?= $this->url('personproject/new', ['idenroller' => $project->getId()]) ?>",
+                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project) ? "true" : 'false' ?>,
+                                    title: "Personne",
+                                    roles: <?= json_encode($rolesPersons) ?>,
+                                    moment: moment
+                                }});
+                        }
+
+                    })
+                });
+            </script>
+        <?php endif; ?>
+
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $project)): ?>
+            <section class="has-btn">
+                <h2>
+                    <i class="icon-group"></i>
+                    Partenaires
+                </h2>
+                <section id="organizations" class="has-btn"></section>
+
+            </section>
+            <script>
+                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
+                    Vue.use(VueResource);
+                    Vue.http.options.emulateJSON = true;
+                    Vue.http.options.emulateHTTP = true;
+                    new Vue({
+                        el: "#organizations",
+                        render(h){
+                            return h(EntityWithRole.default, { props: {
+                                    url: "<?= $this->url('project/organizations', ['idproject' => $project->getId()]) ?>",
+                                    urlNew: "<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>",
+                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project) ? "true" : 'false' ?>,
+                                    title: "Organisation",
+                                    roles: <?= json_encode($rolesPersons) ?>,
+                                    moment: moment
+                                }});
+                        }
+
+                    })
+                });
+            </script>
         <?php endif; ?>
 
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_SHOW, $project)): ?>
+        <?php /****
             <section id="partners" class="subsection has-btn">
                 <h3 class="h4">
                     <!--<i class="icon-building-filled">--></i> Partenaires
@@ -253,7 +291,7 @@ h2.tv-serie-label { border-bottom: none; }
                         </a>
                     </div>
                 <?php endif; ?>
-            </section>
+            </section> ****/ ?>
         <?php else: ?>
             <p class="credential-msg">Vous n'avez pas les droits pour voir les
                 partenaires de ce projet</p>

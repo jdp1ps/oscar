@@ -22,8 +22,12 @@
 
         </span>
 
+        <span class="montant">
+            <?= $this->currency($project->getAmount()) ?>
+        </span>
+
         <?php if( $project->getPFI() ): ?>
-            <span class="eotp on-right">
+        <span class="eotp on-right">
             <?= $project->getPFI() ?>
         </span>
         <?php endif; ?>

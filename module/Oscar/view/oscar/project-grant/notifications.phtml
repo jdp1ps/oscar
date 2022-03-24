@@ -4,9 +4,12 @@
  * @date: 17-10-11 10:55
  * @copyright Certic (c) 2017
  */
+
 ?>
 <style>
-    .past { opacity: .5}
+    .past {
+        opacity: .5
+    }
 </style>
 <div class="container">
     <header>
@@ -17,20 +20,23 @@
                 <?= $activity ?></a>
         </h1>
 
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_GENERATE) ):?>
-        <nav>
-            <a href="<?= $this->url('contract/generatenotifications', ['id' => $activity->getId()]) ?>" class="btn btn-primary">
-                Générer les notifications
-            </a>
-        </nav>
-        <?php endif; ?>
+        <?php
+        if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_GENERATE)): ?>
+            <nav>
+                <a href="<?= $this->url('contract/generatenotifications', ['id' => $activity->getId()]) ?>"
+                   class="btn btn-primary">
+                    Générer les notifications
+                </a>
+            </nav>
+        <?php
+        endif; ?>
     </header>
     <div id="notifications"></div>
     <script>
-        require(['vue', 'mm'], function(Vue, moment){
-            Vue.filter('fromNow', function(str){
+        require(['vue', 'mm'], function (Vue, moment) {
+            Vue.filter('fromNow', function (str) {
                 let m = moment(str);
-               return m.format("D MMMM YYYY") +", " +m.fromNow()
+                return m.format("D MMMM YYYY") + ", " + m.fromNow()
             });
             new Vue({
                 el: '#notifications',
@@ -38,37 +44,42 @@
 <section>
     <section v-for="s in grouped" class="card">
         <p>{{ s.message }}</p>
-        <strong><i class="icon-group"></i> Personnes concernées :</strong>
-        <span class="cartouche xs" v-for="p in s.persons" :class="p.read ? 'read' : ''">
+
+        <strong><i class="icon-calendar"></i> Rappels actifs : </strong>
+        <article v-for="e in s.events">
+          <strong><i class="icon-calendar"></i> {{ e.dateEffective | fromNow }}</strong><br>
+          Personnes concernées :
+          <span class="cartouche" v-for="p in e.persons" :class="{ 'primary' : p.read }">
+            <i class="icon-valid" v-if="p.read"></i>
             {{ p.person }}
         </span>
-        <br>
-        <strong><i class="icon-calendar"></i> Rappels</strong>
-        <span class="cartouche" v-for="d in s.dates" :class="d < now ? 'past' : ''">
-            {{ d | fromNow }}
-        </span>
+          <span v-else>
+Aucun inscrit pour ce rappel
+</span>
+        </article>
     </section>
 </section>`,
-                data : {
+                data: {
                     notifications: <?= json_encode($notifications) ?>,
                     groupBy: "serie"
                 },
                 computed: {
-                    now(){
-                      return moment().format('YYYY-MM-DD');
+                    now() {
+                        return moment().format('YYYY-MM-DD');
                     },
-                    grouped(){
+                    grouped() {
                         let group = {};
                         this.notifications.forEach(n => {
                             let serie = n.serie;
-                            if( !group.hasOwnProperty(serie) ){
+                            if (!group.hasOwnProperty(serie)) {
                                 group[serie] = {
                                     message: n.message,
                                     persons: n.persons,
-                                    dates: []
+                                    dates: [],
+                                    events: []
                                 }
                             }
-                            group[serie].dates.push(n.dateEffective);
+                            group[serie].events.push(n);
 
                         })
                         return group;

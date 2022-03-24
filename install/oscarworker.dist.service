@@ -14,7 +14,7 @@ ExecStop=/bin/kill -s TERM $MAINPID
 Restart=always
 RestartSec=30
 
-# Mettre le chemin complet vers <DOSSIER-OSCOR>/bin/oscar-worker.php
+# Mettre le chemin complet vers <DOSSIER-OSCAR>/bin/oscar-worker.php
 ExecStart=/usr/bin/php /path/to/oscar/bin/oscar-worker.php
 
 # Root

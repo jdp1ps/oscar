@@ -37,7 +37,7 @@ class OscarPersonsSyncCommand extends OscarCommandAbstract
             ->setDescription("Execute la synchronisation des personnes")
             ->addArgument("connectorname", InputArgument::REQUIRED, "Connector (rest)")
             ->addOption('no-rebuild','b', InputOption::VALUE_NONE, 'Ignore la reconstruction de l\'index de recherche après la mise à jour')
-            ->addOption('purge','p', InputOption::VALUE_NONE, 'Supprime les personnes d\'Oscar si elles ne sont plus proposées dans la source distante (et qu\'elles ne sont pas utilisées dans Oscar')
+            ->addOption('purge','p', InputOption::VALUE_NONE, 'Supprime les personnes d\'Oscar si elles ne sont plus proposées dans la source distante (et qu\'elles ne sont pas utilisées dans Oscar)')
         ;
     }
 

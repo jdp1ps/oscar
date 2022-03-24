@@ -115,6 +115,29 @@ class Authentification implements UserInterface, ProviderInterface
         $this->settings = [];
     }
 
+
+    protected $lastRole;
+
+    /**
+     * @return AbstractRole|null
+     */
+    public function getLastRole()
+    {
+        return $this->lastRole;
+    }
+
+    /**
+     * @param AbstractRole|null $lastRole
+     * @return self
+     */
+    public function setLastRole($lastRole = null)
+    {
+        $this->lastRole = $lastRole;
+
+        return $this;
+    }
+
+
     public function hasRole( $roleId ){
         foreach ($this->getRoles() as $role ){
             if( $roleId == $role ){

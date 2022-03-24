@@ -16,7 +16,7 @@
                 "Albert Einstein"
             ],
             "Ing\u00e9nieur": [
-                "NATHALIE HEUZE VOURC'H",
+                "HEUZE VOURC'H NATHALIE",
                 "Serge Le Normand"
             ],
             "Participants": [
@@ -30,6 +30,9 @@
         "currency": null,
         "assietteSubventionnable": null,
         "financialImpact": "Recette",
+        "disciplines": [
+            "Physique"
+        ],
         "description": "Description 1",
         "acronym": "RELATIV",
         "label": "Relativit\u00e9 restreinte",
@@ -89,6 +92,9 @@
         "currency": "$",
         "assietteSubventionnable": 15,
         "financialImpact": "D\u00e9pense",
+        "disciplines": [
+            "Autre discipline"
+        ],
         "description": "Description 2",
         "acronym": "RELATIV",
         "label": "Relativit\u00e9 g\u00e9n\u00e9rale",
@@ -132,6 +138,9 @@
         "currency": "Yens",
         "assietteSubventionnable": 5,
         "financialImpact": "Aucune",
+        "disciplines": [
+            "Physique des particules"
+        ],
         "description": "M\u00e9canique quantique",
         "acronym": "QUANTIK",
         "label": "Th\u00e9orie des cordes",

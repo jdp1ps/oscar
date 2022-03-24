@@ -134,13 +134,22 @@ abstract class AbstractConnector implements IConnector
      * @return mixed
      * @throws OscarException
      */
-    public function getParameter( string  $key ){
+    public function getParameter( string  $key, $default = null )
+    {
         $paths = explode('.', $key);
         $config = $this->config;
         foreach ($paths as $path) {
 
-            if( !isset($config[$path]) ){
-                throw new OscarException(sprintf("La clef '%s' absente dans le fichier de configuration '%s'.", $key, $this->configFilepath));
+            if( !isset($config[$path]) ) {
+                if ( $default == null ){
+                    throw new OscarException(sprintf(
+                        "La clef '%s' absente dans le fichier de configuration '%s'.",
+                        $key,
+                        $this->configFilepath)
+                    );
+                } else {
+                    return $default;
+                }
             }
             $config = $config[$path];
         }

@@ -63,6 +63,14 @@ api:
                 defaults:
                     action: help
 
+        # Référenciel PCRU
+        referenciel-pcru-polecompetitivite:
+            type: segment
+            options:
+                route: /referenciel/pcru/pole-competitivite
+                defaults:
+                    action: referencielPcruPoleCompetitivite
+
         organizations:
             type: segment
             options:
@@ -90,6 +98,27 @@ api:
                 route: /persons/:id
                 defaults:
                     action: person
+
+        activity:
+            type: segment
+            options:
+                route: /activity
+                defaults:
+                    action: activity
+
+        typeactivity:
+            type: segment
+            options:
+                route: /activity-type
+                defaults:
+                    action: activityType
+
+        typeactivitypcru:
+            type: segment
+            options:
+                route: /activity-type-pcru
+                defaults:
+                    action: activityTypePcru
 
 ################################################################################
 # NOTIFICATIONS
@@ -420,6 +449,23 @@ project:
                 route: /si-seul
                 defaults:
                     action: empty
+        ### Fiche du projet :id
+        export:
+            type: segment
+            options:
+                route: '/export/:id'
+                defaults:
+                    action: export
+            may_terminate: true
+
+        ### Exporter des PROJETS
+        export-many:
+            type: segment
+            options:
+                route: '/export-projects'
+                defaults:
+                    action: exportMany
+            may_terminate: true
 
         ### Fiche du projet :id
         show:
@@ -518,6 +564,20 @@ project:
                 defaults:
                     action: search
 
+        persons:
+            type: segment
+            options:
+                route: /persons/:idproject
+                defaults:
+                    action: persons
+
+        organizations:
+            type: segment
+            options:
+                route: /organizations/:idproject
+                defaults:
+                    action: organizations
+
 ################################################################################
 # GESTION des PERSONNES
 person:
@@ -561,6 +621,13 @@ person:
                 route: '/access/:id'
                 defaults:
                     action: access
+
+        affectation:
+            type: segment
+            options:
+                route: '/affectation/:id'
+                defaults:
+                    action: affectation
 
         notification:
             type: segment
@@ -765,6 +832,15 @@ generate:
             action: generate
     may_terminate: true
 
+test:
+    type: literal
+    options:
+        route: /test
+        defaults:
+            controller: Public
+            action: test
+    may_terminate: true
+
 spent:
     type: literal
     options:
@@ -804,6 +880,19 @@ contract:
                 route: /debug
                 defaults:
                     action: debug
+        timesheet:
+            type: segment
+            options:
+                route: /feuille-de-temps/:id
+                defaults:
+                    action: timesheet
+
+        advancedsearch:
+            type: segment
+            options:
+                route: /advancedsearch
+                defaults:
+                    action: advancedSearch
 
         api:
             type: segment
@@ -811,12 +900,6 @@ contract:
                 route: /api
                 defaults:
                     action: api
-        gant:
-            type: segment
-            options:
-                route: /gant
-                defaults:
-                    action: gant
 
         apiui:
             type: segment
@@ -825,12 +908,21 @@ contract:
                 defaults:
                     action: apiUi
 
-        advancedsearch:
+        pcru-list:
             type: segment
             options:
-                route: /advancedsearch
+                route: /transmission-pcru
                 defaults:
-                    action: advancedSearch
+                    action: pcruList
+
+        gant:
+            type: segment
+            options:
+                route: /gant
+                defaults:
+                    action: gant
+
+
         orphans:
             type: segment
             options:
@@ -849,6 +941,13 @@ contract:
                 route: /fiche-detaillee/:id
                 defaults:
                     action: show
+
+        pcru-infos:
+            type: segment
+            options:
+                route: /pcru-infos/:id
+                defaults:
+                    action: pcruInfos
 
         estimated-spent:
             type: segment
@@ -870,6 +969,13 @@ contract:
                 route: /depenses/:id
                 defaults:
                     action: spentList
+
+        pcru:
+            type: segment
+            options:
+                route: /pcru/:id
+                defaults:
+                    action: pcru
 
         spent-synthesis:
             type: segment
@@ -1538,6 +1644,33 @@ administration:
 
 
     child_routes:
+        # Gestion et chargement du référenciel des pays
+        logs:
+            type: segment
+            may_terminate: true
+            options:
+                route: /logs
+                defaults:
+                    action: logs
+
+        # Gestion et chargement du référenciel des pays
+        listdeclarers:
+            type: segment
+            may_terminate: true
+            options:
+                route: /filter-declarers-recalls
+                defaults:
+                    action: declarersList
+
+        # Gestion et chargement du référenciel des pays
+        countries:
+            type: segment
+            may_terminate: true
+            options:
+                route: /pays-iso-3166
+                defaults:
+                    action: paysIso3166
+
         gestionprivilege:
             type: segment
             may_terminate: true
@@ -1560,6 +1693,14 @@ administration:
                 route: /documents-sections
                 defaults:
                     action: documentSections
+
+        contrat-type-pcru:
+            type: segment
+            may_terminate: true
+            options:
+                route: /contrat-type-pcru
+                defaults:
+                    action: contratTypePcru
 
         testconfig:
             type: segment
@@ -1767,4 +1908,31 @@ administration:
                 route: /messages
                 defaults:
                     action: messages
+            may_terminate: true
+
+        # Types d'organisation
+        pcru:
+            type: segment
+            options:
+                route: /pcru
+                defaults:
+                    action: pcru
+            may_terminate: true
+
+        # PCRU / CNRS - Pôles de compétivité
+        poles-competitivite:
+            type: segment
+            options:
+                route: /poles-competitivite
+                defaults:
+                    action: polesCompetitivite
+            may_terminate: tr
+
+        # PCRU / CNRS - Sources de financement
+        sources-financement:
+            type: segment
+            options:
+                route: /sources-financement
+                defaults:
+                    action: sourcesFinancement
             may_terminate: true

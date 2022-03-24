@@ -40,8 +40,6 @@ var Datas = {
         var file = fs.readFileSync(__dirname +'/../organizations.json');
         return JSON.parse(file);
     }
-
-    // @todo Séparation des rôles
 };
 
 
