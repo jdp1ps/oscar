@@ -6,7 +6,7 @@ LABEL Herve Marie <herve.marie@unicaen.fr> Stéphane Bouvry <stephane.bouvry@uni
 LABEL description="Postgresql for Oscar"
 
 #ACTIVATE OR DESACTIVATE PROXY
-RUN if [ "$proxy_environnement" != "noProxy" ]; \
+RUN if [ "$proxy_environnement" != "" ]; \
     then echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
     fi
 

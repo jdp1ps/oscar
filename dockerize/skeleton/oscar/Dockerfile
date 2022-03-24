@@ -100,7 +100,7 @@ RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
 
 
 RUN if [ "$proxy_environnement" != "" ]; \
-    then pear config-set http_proxy "£PROXY" \
+    then pear config-set http_proxy "£PROXY"; \
     fi
 
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
@@ -121,6 +121,7 @@ RUN apt-get autoremove -y && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 #CONFIG APACHE2
 #RUN rm /etc/apache2/site-available/000-default.conf /etc/apache2/site-available/default-ssl.conf
+COPY etc/php/7.4/99-oscar.ini /etc/php/7.4/99-oscar.ini
 COPY etc/apache2/sites-available/oscar.conf /etc/apache2/sites-available/oscar.conf
 RUN a2dissite 000-default && a2dissite default-ssl && a2ensite oscar
 

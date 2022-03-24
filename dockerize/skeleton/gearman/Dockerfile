@@ -12,7 +12,7 @@ LABEL authors="Herve Marie <herve.marie@unicaen.fr> Stéphane Bouvry <stephane.b
 LABEL description="Gearman for Oscar"
 
 #ACTIVER OU DESACTIVER PROXY
-RUN if [ "$proxy_environnement" != "noProxy" ]; \
+RUN if [ "$proxy_environnement" != "" ]; \
     then echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
     fi
 

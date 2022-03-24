@@ -66,5 +66,9 @@ for i in $(find $DIR_DEST -type f); do
   sed -i s%£CONTAINER_ADMINER%$CONTAINER_ADMINER%g "$i"
 done
 
-docker-compose build -f "$DIR_DEST"/docker-compose.yml
+echo "# For Build / Run"
+echo "cd $DIR_DEST"
+echo "docker-compose build"
+echo "docker-compose up"
+
 
