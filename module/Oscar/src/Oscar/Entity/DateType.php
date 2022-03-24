@@ -68,7 +68,7 @@ class DateType implements ITrackable
     private $milestones;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="datesType")
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="datesType", fetch="EAGER")
      * @ORM\JoinTable(name="role_datetype")
      *      joinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="date_type_id", referencedColumnName="id")})
@@ -190,7 +190,6 @@ class DateType implements ITrackable
             'recursivity' => $this->getRecursivityArray()
         ];
     }
-
 
     public function getRoles()
     {

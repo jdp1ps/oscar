@@ -578,7 +578,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         $output['referents'] = [];
         $output['subordinates'] = [];
-        
+
         foreach ($referents as $referent) {
             if ($replacer && $referent->getReferent()->getId() == $replacer->getId()) {
                 continue;
@@ -1080,7 +1080,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * activité. (Beaucoup de requêtes, attention ux perfs)
      *
      * @param $privilegeFullCode
-     * @param $activity
+     * @param Activity $activity
+     * @param bool $includeApp
+     * @return array
+     * @throws OscarException
      */
     public function getAllPersonsWithPrivilegeInActivity($privilegeFullCode, Activity $activity, $includeApp = false)
     {
@@ -1170,6 +1173,42 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 }
             }
 
+            return $persons;
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
+        }
+    }
+
+
+    /**
+     * Charge en profondeur la liste des personnes sur une
+     * activité (structure, projet). (Beaucoup de requêtes, attention aux perfs)
+     * Retourne un tableau de tableaux id activité -> array ids roles -> arrayIdsPersons
+     *
+     * @param Activity $activity
+     * @return array
+     * @throws OscarException
+     */
+    public function getAllPersonsWithRolesInActivity(Activity $activity): array
+    {
+        //Résultat
+        $persons = [];
+        try {
+            // Selection des personnes associées via le Projet/Activité
+            /** @var ActivityPerson $p */
+            foreach ($activity->getPersonsDeep() as $p) {
+                $persons[$p->getRoleObj()->getId()] [] = $p->getPerson()->getId();
+            }
+            // Selection des personnes via l'organisation associée au Projet/Activité
+            /** @var ActivityOrganization $organization */
+            foreach ($activity->getOrganizationsDeep() as $organization) {
+                if ($organization->isPrincipal()) {
+                    /** @var OrganizationPerson $personOrganization */
+                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
+                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson()->getId();
+                    }
+                }
+            }
             return $persons;
         } catch (\Exception $e) {
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());

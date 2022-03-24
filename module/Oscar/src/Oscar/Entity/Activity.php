@@ -1575,7 +1575,8 @@ class Activity implements ResourceInterface
 
     /**
      * Retourne la liste des personnes ayant le rôle.
-     * @param string $role
+     * @param array $roles
+     * @return array
      */
     public function getPersonsRoledDeep(array $roles)
     {

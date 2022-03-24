@@ -9,6 +9,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
@@ -18,12 +19,14 @@ use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\NotificationRepository;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\Role;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
@@ -227,6 +230,28 @@ class NotificationService implements UseServiceContainer
         return $this->_object_privilege_persons[$activityId][$privilege];
     }
 
+    /**
+     * @var array
+     */
+    private $_object_roles_persons = [];
+
+    /**
+     * Retourne un tableau de la liste des personnes et leurs rôles en relation avec l'activité $activité.
+     *
+     * @param Activity $activity
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getRolesIdsWithPersonsIds(Activity $activity)
+    {
+        $activityId = $activity->getId();
+        $personsService = $this->getPersonService();
+        /** @var Person[] $persons Liste des personnes impliquées dans une activité avec leurs rôles cherche en profondeur */
+        $persons = $personsService->getAllPersonsWithRolesInActivity($activity);
+        $this->_object_roles_persons[$activityId] = $persons;
+        return $this->_object_roles_persons;
+    }
+
 
     /**
      * Déclenche l'envoi d'un document lors de l'upload.
@@ -273,7 +298,7 @@ class NotificationService implements UseServiceContainer
      * Suppression des notifications liées à un jalon.
      *
      * @param ActivityDate $milestone
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function purgeNotificationMilestone(ActivityDate $milestone)
@@ -569,46 +594,98 @@ class NotificationService implements UseServiceContainer
         }
     }
 
+    /**
+     * @param Activity $activity
+     * @param $ignorePast
+     * @return void
+     * @throws ORMException
+     * @throws OscarException
+     */
     public function updateNotificationsMilestonePersonActivity(Activity $activity, $ignorePast = true)
     {
         // Liste des notifications Programmées
         $notificationsActivity = $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
-
-        // Personnes devant être inscrite
-        $expectedSubscribers = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $activity, true);
-
-        $expectedSubscribersById = [];
-        $idsExpectedSubscribers = [];
-
-        /** @var Person $p */
-        foreach ($expectedSubscribers as $p) {
-            $expectedSubscribersById[$p->getId()] = $p;
-            $idsExpectedSubscribers[] = $p->getId();
-        }
+        // Personnes devant être inscrites
+        $idsPersonsRoles = $this->getRolesIdsWithPersonsIds($activity);
+        /*
+        // Structuration retour infos $idsPersonsRoles
+        array:1
+        [
+            // 2 = Id activité
+            2 => array:2 [
+                // 10 = id role
+                10 => array:2 [
+                    // 1 = id person
+                    0 => 1
+                    // 2 = id person
+                    1 => 2
+                ]
+                // 11 = id role
+                11 => array:3 [
+                    // 10 = id person
+                    0 => 10
+                    // 3 = id person
+                    1 => 3
+                    // 8 = id person
+                    2 => 8
+                ]
+            ]
+        ]
+        */
 
         $now = (new \DateTime('now'))->modify('-1 month');
 
+        //$na = notification
         foreach ($notificationsActivity as $na) {
-            // TODO récupérer les rôles des personnes
-            // TODO Cas particulier sur le test du jalon, celui-ci est dépassé (terminé) mais la personne ne l'a pas qualifié c'est un cas particulier à prendre en compte dans la feature (ajouter à la condition)
-            $isPasted = $ignorePast && ($na->getDateEffective() < $now);
-            $idsPersonInPlace = [];
+            $contextNotification = explode(":", $na->getContext());
+            //ActivityDate = Jalon donc Milestone (ancienne nomenclature, terminologie métier)
+            $idActivityDate = $contextNotification [1];
+            $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
+            //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
+            $rolesActivityDate  = $activityDate->getType()->getRoles();
+            // Si pas de rôles on passe directement, pas de calcul de notifications
+            if (count($rolesActivityDate) == 0){
+                continue;
+            }
+            // Si finishable et pas fait
+            if (!$activityDate->isLate()){
+                continue;
+            }
 
+            // Mais la personne ne l'a pas qualifié c'est un cas particulier à prendre en compte dans la feature (ajouter à la condition)
+            $isPasted = $ignorePast && ($na->getDateEffective() < $now);
             if ($isPasted) {
                 continue;
             }
 
+            // On stock tous les ids des roles de ce type de jalon dans un tableau pour comparaison avec les rôles de la personne
+            $idsRolesActivityDate = [];
+            /** @var  Role $roleActivityDate */
+            foreach ($rolesActivityDate as $roleActivityDate){
+                //idRole associé au type de jalon/milestone (ActivityDate)
+                $idsRolesActivityDate [] = $roleActivityDate->getId();
+            }
+
+            // Comparaison rôles du jalon et rôles des personnes et génération du tableau des personnes concernées
+            $idsExpectedSubscribersById = [];
+            $rolesAndExpectedSubscribers = $idsPersonsRoles [1];
+            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons){
+                if (in_array($idRole, $idsRolesActivityDate)){
+                    foreach ($arrayIdspersons as $key => $idPerson){
+                        if (!in_array($idPerson, $idsExpectedSubscribersById)){
+                            $idsExpectedSubscribersById [] = $idPerson;
+                        }
+                    }
+                }
+            }
+
+            $idsPersonInPlace = [];
+            // On récupère déjà les personnes inscrites
             /** @var NotificationPerson $inscrit */
             foreach ($na->getPersons() as $inscrit) {
                 $idPersonInscrit = $inscrit->getPerson()->getId();
-
-                // TODO faire première requête : "Quel est le jalon, ou en tout cas quel est le type de Jalon concerné par cette notification là ?"
-                // TODO Pour chaque personne récupérer les rôles qu'elle possède dans chaque activité et faire un comparatifs entre les rôles de la personnes et les rôles sur ce jalon.
-                // TODO Attention une personne possède des rôles sur une activité, sur le projet d'une activité et des rôles sur les organisations actives de l'activité
-                // TODO Sur l'objet personne il y a une méthode getOrganizations qui renvoie non pas des organisations, mais renvoie les organisations de personnes
-
                 // Ne devrait pas avoir la notif
-                if (!array_key_exists($idPersonInscrit, $expectedSubscribersById)) {
+                if (!array_key_exists($idPersonInscrit, $idsExpectedSubscribersById)) {
                     $this->getEntityManager()->remove($inscrit);
                 } // OK
                 else {
@@ -616,20 +693,18 @@ class NotificationService implements UseServiceContainer
                 }
             }
 
-
-            $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
+            $diff = array_diff($idsExpectedSubscribersById, $idsPersonInPlace);
             if (count($diff) > 0) {
                 /** @var int $idPersonToAdd */
                 foreach ($diff as $idPersonToAdd) {
-                    $personToAdd = $expectedSubscribersById[$idPersonToAdd];
+                    $personToAdd = $this->getEntityManager()->getRepository(Person::class)->find($idPersonToAdd);
                     $subscribe = new NotificationPerson();
                     $this->getEntityManager()->persist($subscribe);
-                    $subscribe->setNotification($na)
-                        ->setPerson($personToAdd);
+                    $subscribe->setNotification($na)->setPerson($personToAdd);
                 }
             }
         }
-        //$this->getEntityManager()->flush();
+        $this->getEntityManager()->flush();
     }
 
 

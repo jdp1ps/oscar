@@ -87,8 +87,6 @@ class ActivityDate implements ITrackable
     private $dateFinish;
 
 
-
-
     public function finish( $value = 100, $date = null ){
         $this->finished = $value;
         if( $this->finished >= self::VALUE_VALIDED ){
