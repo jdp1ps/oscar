@@ -28,7 +28,6 @@ class ContractDocument extends AbstractVersionnedDocument
      */
     private $grant;
 
-
     /**
      * Centaure ID.
      *
@@ -37,8 +36,6 @@ class ContractDocument extends AbstractVersionnedDocument
      */
     private $centaureId;
 
-
-
     /**
      * Type d'activité
      *
@@ -46,6 +43,23 @@ class ContractDocument extends AbstractVersionnedDocument
      * @ORM\ManyToOne(targetEntity="TypeDocument")
      */
     private $typeDocument;
+
+    /**
+     * Onglet où est affecté ce document
+     *
+     * @var TabDocument
+     * @ORM\ManyToOne(targetEntity=TabDocument::class)
+     */
+    private TabDocument $tabDocument;
+
+    /**
+     * Ce document est privé ou non false par défaut
+     *
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+
+    private bool $private = false;
 
     /**
      * Date de dépôt du fichier.
@@ -167,7 +181,38 @@ class ContractDocument extends AbstractVersionnedDocument
         return $this;
     }
 
+    /**
+     * @return TabDocument
+     */
+    public function getTabDocument(): TabDocument
+    {
+        return $this->tabDocument;
+    }
 
+    /**
+     * @param TabDocument $tabDocument
+     */
+    public function setTabDocument(TabDocument $tabDocument): void
+    {
+        $this->tabDocument = $tabDocument;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate(): bool
+    {
+        return $this->private;
+    }
+
+    /**
+     * @param bool $private
+     */
+    public function setPrivate(bool $private): void
+    {
+        $this->private = $private;
+    }
+    
 
     public function toJson( $options=false ){
         $defaultOptions = [
