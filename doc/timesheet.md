@@ -1,4 +1,6 @@
-# Feuille de temps
+
+Feuille de temps
+================
 
 ## Déclarant
 
@@ -430,16 +432,73 @@ return array(
 > Les fichiers `data/templates/timesheet_person_month.html.php` et `data/templates/timesheet_activity_synthesis.html.php` seront ignorés par GIT.
 
 
-## Usurpation
+## Rappels des déclarants/validateurs (v SPARTAN)
 
-Oscar intègre un mécanisme d'*usurpation* pour autoriser un tiers de compléter la feuille de temps d'une autre personne.
+Oscar permet de configurer un système de rappel pour notifier par mail les déclarants et les validateurs pour les périodes passées.
 
-L'interface de saisie est accessible depuis la fiche de la personne.
+Plusieurs choses doivent être configurées : 
+
+ - Les gabarits des messages
+ - Le delais entre les rappels
+ - Les validateurs des activités  
+ - La liste des utilisateurs concernés 
+ - Un **tâche planifié (CRON)** pour déclencher l'envoi des rappels
 
 
+### Gabarits et delais
 
-### Globale
+Ces informations peuvent être renseignées directement depuis l'interface d'administration Oscar depuis le menu `Administration > Configuration et maintenance > Paramètres > Feuille de temps`
 
-Cette fonctionnalité peut être accordée de façon générale via les privilèges, ou individuellement à partir de la fiche personne : 
+![Messages](images/timesheet-config-messages.png)
+
+Pour le déclarant, la première relance est déclenchée le jour indiqué (ex: 1 => 1 jour du mois). La deuxième relance est envoyée tous le X jours (5 jours dans l'exemple). Les relances en cas de conflit fonctionne sur le même principe (dans l'exemple tous les jours).
+
+Pour les validateurs, un seul message est possible avec la fréquence en jour.
+
+
+> Publipostage
+> 
+> Les gabarits proposent des champs qui seront automatiquement remplacés par l'information idoine
+> 
+> - `{PERSON}` le prénom nom de la personne concernée (ex: Albert Einstein)
+> - `{PERIOD}` La période en toute lettre (ex: Janvier 2023)
+
+### Affectation des validateurs
+
+Depuis le fiche activité, le bouton **Feuille de temps** à gauche vous donne accès à l'écran de configuration des **validateurs**.
+
+Les validateurs peuvent être nommés depuis la zone **validateurs** (B) 
+
+![Configuration des listes](images/timesheet-validateurs.png)
+
+### Listes des utilisateurs
+
+> `Administration > Configuration > Feuille de temps > Régles de relance`
+
+![Configuration des listes](images/timesheet-config-whitelist.png)
+
+Par défaut, Oscar va envoyer des rappels à la liste des utilisateurs spécifiés (mode *Whitelist*). Si aucune personne n'est identifié dans la *whitelist*, la distribution des notifications ne touchera personne.
+
+Pour activer le système de rappel (En production), vous pouvez simplement **désactiver la *whitelist***.
+
+### Tâche planifiée
+
+La commande : 
+
+```bash
+# Prévisualisation des rappels
+php bin/oscar.php timesheets:recalls --preview
+```
+
+Permet de visualiser les rappels qui seront distribués.
+
+Pour déclencher la distribution effective, utilisez la même commande sans l'option `--preview`
+
+```bash
+# Procédure de rappel des feuilles de temps
+php bin/oscar.php timesheets:recalls
+```
+
+
 
 
