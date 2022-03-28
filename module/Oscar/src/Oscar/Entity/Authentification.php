@@ -86,13 +86,13 @@ class Authentification implements UserInterface, ProviderInterface
     protected $secret;
 
 
-    protected $lastRole;
+
     /**
      * @return AbstractRole|null
      */
     public function getLastRole()
     {
-        return $this->lastRole;
+        return null;
     }
 
     /**
@@ -101,8 +101,6 @@ class Authentification implements UserInterface, ProviderInterface
      */
     public function setLastRole(AbstractRole $lastRole = null)
     {
-        $this->lastRole = $lastRole;
-
         return $this;
     }
 
@@ -114,29 +112,6 @@ class Authentification implements UserInterface, ProviderInterface
         $this->roles = new ArrayCollection();
         $this->settings = [];
     }
-
-
-    protected $lastRole;
-
-    /**
-     * @return AbstractRole|null
-     */
-    public function getLastRole()
-    {
-        return $this->lastRole;
-    }
-
-    /**
-     * @param AbstractRole|null $lastRole
-     * @return self
-     */
-    public function setLastRole($lastRole = null)
-    {
-        $this->lastRole = $lastRole;
-
-        return $this;
-    }
-
 
     public function hasRole( $roleId ){
         foreach ($this->getRoles() as $role ){
