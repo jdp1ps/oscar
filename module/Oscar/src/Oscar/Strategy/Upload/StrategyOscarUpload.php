@@ -35,6 +35,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
 
         // Traitement des données envoyées utilisation System file Oscar interne à Oscar donc pas de Ged générique ici
         $this->datas = $this->document->getRequest()->getPost()->toArray();
+
         $this->datas[self::ERROR_FILE] = null;
         $file = $this->document->getRequest()->getFiles(self::NAME_INPUT_FILE);
 
@@ -116,7 +117,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
                 }
             }
         }
-        //return $this->datas;
     }
 
     public function getDocument(): TypeDocumentInterface

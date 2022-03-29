@@ -194,7 +194,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     /**
      * @return array
-     * @throws OscarException
      * @annotations Procédure générique pour l'envoi des fichiers.
      */
     public function uploadAction() {
@@ -206,7 +205,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $idActivity = $this->params()->fromRoute('idactivity');
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
-        
+
         /**
          * ******************************************
          * Début tests new code
@@ -221,7 +220,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             //$typeDocument = this->params()->fromQuery('type', null);
             // Get ID pour remplacement ou ajout
             $docId = $this->params()->fromQuery('id', null);
-            // Les injecions de service nécessaires pour le service de traitement upload (une factory pourrait être envisagée).
+            // Les injections de service nécessaires pour le service de traitement upload (une factory pourrait être envisagée).
             $documentService = $this->getVersionnedDocumentService();
             $oscarUserContext = $this->getOscarUserContext();
             $notificationService = $this->getNotificationService();
@@ -266,7 +265,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             return [
                 'activity' => $activity,
                 'data'  => $datas,
-                'types' => $this->getContractDocumentService()->getContractDocumentTypes()
+                'types' => $this->getContractDocumentService()->getContractDocumentTypes(),
+                'tabs' => $this->getContractDocumentService()->getContractTabDocuments(),
             ];
 
         }catch (\Exception $e){
@@ -276,47 +276,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
          * ******************************************
          * Fin nouveau code
          */
-
-        /** Ancien code en cours de reprise */
-        try {
-            $docId = $this->params()->fromQuery('id', null);
-            $docReplaced = null;
-            if ($docId) {
-                if ($doc = $this->getEntityManager()->getRepository(ContractDocument::class)->find($docId)) {
-                    $docReplaced = $doc->getFileName();
-                }
-            }
-            $documentService = $this->getVersionnedDocumentService();
-
-            $datas = $documentService->performRequest($this->getRequest(), $docReplaced,
-                function (ContractDocument $document) use( $activity ) {
-
-                    $this->getNotificationService()->generateActivityDocumentUploaded($document);
-
-                    $this->getActivityLogService()->addUserInfo(
-                                sprintf("a déposé le document '%s' dans l'activité %s", $document->getFileName(), $activity->log()),
-                                'Activity', $activity->getId()
-                            );
-                    $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
-                },
-                function( ContractDocument $document, $datas ) use ($activity, $documentService){
-                    $document->setGrant($activity)
-                        ->setPerson($this->getOscarUserContext()->getCurrentPerson())
-                        ->setDateDeposit($datas["dateDeposit"] ? new \DateTime($datas["dateDeposit"]):null)
-                        ->setDateSend($datas['dateSend'] ? new \DateTime($datas['dateSend']):null)
-                        ->setTypeDocument($documentService->getContractDocumentType($datas['type']));
-                    return $document;
-                }
-            );
-            return [
-                'activity' => $activity,
-                'data'  => $datas,
-                'types' => $this->getContractDocumentService()->getContractDocumentTypes()
-            ];
-        } catch( \Exception $e ){
-            throw new OscarException($e->getMessage());
-        }
-
     }
 
     public function downloadAction()

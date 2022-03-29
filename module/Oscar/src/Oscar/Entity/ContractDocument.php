@@ -56,10 +56,10 @@ class ContractDocument extends AbstractVersionnedDocument
      * Ce document est privé ou non false par défaut
      *
      * @var boolean
-     * @ORM\Column(type="boolean", nullable=false)
+     * @ORM\Column(type="boolean", nullable=true)
      */
 
-    private bool $private = false;
+    private ?bool $private = false;
 
     /**
      * Date de dépôt du fichier.
@@ -202,17 +202,17 @@ class ContractDocument extends AbstractVersionnedDocument
      */
     public function isPrivate(): bool
     {
-        return $this->private;
+        return ($this->private === null)?false:$this->private;
     }
 
     /**
      * @param bool $private
      */
-    public function setPrivate(bool $private): void
+    public function setPrivate(?bool $private): void
     {
         $this->private = $private;
     }
-    
+
 
     public function toJson( $options=false ){
         $defaultOptions = [

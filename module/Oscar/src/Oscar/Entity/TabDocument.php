@@ -10,9 +10,15 @@ use Doctrine\ORM\Mapping as ORM;
  * @package Oscar\Entity
  * @ORM\Entity
  */
-class TabDocument implements ITrackable
+class TabDocument
 {
-    use TraitTrackable;
+
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 
     /**
      * @var string
@@ -25,6 +31,14 @@ class TabDocument implements ITrackable
      * @ORM\Column(type="string", nullable=true)
      */
     private $description;
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @return string

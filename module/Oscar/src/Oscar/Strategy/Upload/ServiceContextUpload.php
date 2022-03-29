@@ -4,6 +4,8 @@
 namespace Oscar\Strategy\Upload;
 
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use DoctrineORMModule\Options\EntityManager;
 use DoctrineORMModule\Service\EntityManagerAliasCompatFactory;
 use Oscar\Constantes\Constantes;
@@ -63,7 +65,11 @@ class ServiceContextUpload
         $this->activityLogService = $activityLogService;
     }
 
-
+    /**
+     * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
     public function treatementUpload():bool
     {
         // Bla bla bla traitement pour trouver la bonne stratégie et hydrater l'object Type choisis avec la stratégie
@@ -79,7 +85,7 @@ class ServiceContextUpload
         if( $this->request->isPost() ) {
             $isPost = true;
             // Ci-dessous juste pour tester avec Ged Oscar Actuellement
-            //$typeDocumentStrategyConfig = Constantes::GED_UP;
+            // $typeDocumentStrategyConfig = Constantes::GED_UP;
             $typeDocumentStrategyConfig = Constantes::GED_OSCAR;
             // Fin bla bla
             $typeDocumentGedOscar = new TypeOscar
