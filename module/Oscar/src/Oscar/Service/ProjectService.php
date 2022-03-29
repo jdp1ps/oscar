@@ -27,6 +27,8 @@ use Oscar\Entity\ProjectRepository;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\EnrollToArrayFormatter;
+use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\ProjectToArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
@@ -298,6 +300,28 @@ class ProjectService implements UseServiceContainer
     public function getProjects()
     {
         return $this->getBaseQuery()->getQuery()->getResult();
+    }
+
+    public function getProjectsByIds( array $projectIds ):array
+    {
+        return $this->getProjectRepository()->getByIds($projectIds);
+    }
+
+
+    public function getFormatter( $format )
+    {
+        if( $format == OscarFormatterConst::FORMAT_IO_CSV ){
+            $formatter = new ProjectToArrayFormatter();
+            $rolesPerson = $this->getProjectGrantService()->getOscarUserContextService()
+                ->getAvailabledRolesPersonActivity();
+            $rolesOrganizations = $this->getProjectGrantService()->getOscarUserContextService()
+                ->getAvailabledRolesOrganizationActivity();
+            $milestones = $this->getProjectGrantService()->getMilestoneService()
+                ->getMilestoneTypeFlat();
+            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
+            return $formatter;
+        }
+        throw new OscarException(sprintf(_("Formatteur de projet '%s' inconnue"), $format));
     }
 
     /**

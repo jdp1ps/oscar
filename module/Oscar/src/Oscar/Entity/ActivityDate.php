@@ -204,6 +204,13 @@ class ActivityDate implements ITrackable
         return $this->dateStart;
     }
 
+    public function getDateStartStr( $format = 'Y-m-d' ) :string
+    {
+        if( $this->getDateStart() )
+            return $this->getDateStart()->format($format);
+        return "";
+    }
+
     /**
      * @param datetime $dateStart
      */

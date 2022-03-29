@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
@@ -25,6 +26,10 @@ use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\ProjectForm;
 use Oscar\Form\ProjectIdentificationForm;
+use Oscar\Formatter\CSVDownloader;
+use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\ProjectFormatterFactory;
+use Oscar\Formatter\ProjectToArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
@@ -118,6 +123,96 @@ class ProjectController extends AbstractOscarController
         $this->getOscarUserContextService()->check(Privileges::PROJECT_EDIT, $p);
         $this->getProjectService()->deleteProject($p);
         $this->redirect()->toRoute('project/mine');
+    }
+
+    public function exportManyAction()
+    {
+        try {
+            // Récupération des données
+            $ids = $this->params()->fromPost('ids', '');
+            $format = $this->params()->fromPost('format', OscarFormatterConst::FORMAT_IO_JSON);
+            $fields = $this->params()->fromPost('fields', null);
+
+            if( $this->params()->fromQuery('f') ){
+                $format = $this->params()->fromQuery('f');
+            }
+
+            $allowedFormat = [OscarFormatterConst::FORMAT_IO_CSV, OscarFormatterConst::FORMAT_IO_JSON];
+
+            if( !in_array($format, $allowedFormat) ){
+                return $this->getResponseInternalError(sprintf(_("Format '%s' inconnue"), $format));
+            }
+
+
+            $projectIds = explode(',', $ids);
+            if( count($projectIds) == 0 ){
+                return $this->getResponseInternalError("Aucun projet à exporter");
+            }
+
+            // Récupération des projets
+            $projects = $this->getProjectService()->getProjectsByIds($projectIds);
+            $formatter = $this->getProjectService()->getFormatter($format);
+
+            $csv = [];
+
+            // Fichier temporaire
+            $filename = uniqid('oscar_export_project_') . '.csv';
+            $filePath = '/tmp/' . $filename;
+
+            $handler = fopen($filePath, 'w');
+
+
+            $delimiter = "\t";
+
+            fputcsv($handler, $formatter->headers(), $delimiter);
+
+            foreach ($projects as $p) {
+                fputcsv($handler, $formatter->format($p), $delimiter);
+            }
+
+            fclose($handler);
+
+            $downloader = new CSVDownloader();
+            $downloader->downloadCSVToExcel($filePath);
+            unlink($filePath);
+            die();
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
+
+    }
+
+    public function exportAction()
+    {
+        $id = $this->params()->fromRoute('id', null);
+        if (!$id) {
+            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
+        }
+        try {
+            $project = $this->getProjectService()->getProject($id);
+            $formatter = new ProjectToArrayFormatter();
+
+            $rolesPerson = $this->getOscarUserContextService()->getAvailabledRolesPersonActivity();
+            $rolesOrganizations = $this->getOscarUserContextService()->getAvailabledRolesOrganizationActivity();
+            $milestones = $this->getProjectGrantService()->getMilestoneService()->getMilestoneTypeFlat();
+
+            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
+            $data = $formatter->format($project);
+
+            echo '<table border="1">';
+            foreach ($data as $key=>$value) {
+                echo "<tr>";
+                echo "<th>".$key."</th>";
+                echo "<td>".$value."</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+            die();
+        } catch (\Exception $e) {
+            throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
+        }
+        die("DONNEES");
+        return $data;
     }
 
     /**

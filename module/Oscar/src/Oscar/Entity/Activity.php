@@ -1064,6 +1064,19 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateOpenedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateOpened()) {
+            return $this->getDateOpened()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * @return Project
      */
     public function getProject()
@@ -2127,35 +2140,41 @@ class Activity implements ResourceInterface
     }
 
     /**
+     * @param string $format
+     * @return string
+     */
+    public function getDateSignedStr( $format = 'Y-m-d') :string
+    {
+        if ($this->getDateSigned()) {
+            return $this->getDateSigned()->format($format);
+        } else {
+            return "";
+        }
+    }
+
+    /**
      * Retourne les données préparées pour le génération des documents
      */
-    public function documentDatas()
+    public function documentDatas($datas)
     {
         //
-        $datas = [
-            'id' => $this->getId(),
-            'acronym' => htmlspecialchars($this->getAcronym()),
-            'amount' => $this->getAmount(),
-            'pfi' => $this->getCodeEOTP(),
-            'oscar' => $this->getOscarNum(),
-            'montant' => number_format(
-                    (double)$this->getAmount(),
-                    2,
-                    ',',
-                    ' '
-                ) . $this->getCurrency()->getSymbol(),
-            'annee-debut' => $this->getDateStartStr('Y'),
-            'annee-fin' => $this->getDateEndStr('Y'),
-            'debut' => $this->getDateStartStr('d/m/Y'),
-            'fin' => $this->getDateEndStr('d/m/Y'),
-            'intitule' => htmlspecialchars($this->getLabel()),
-            'label' => htmlspecialchars($this->getLabel()),
-            'tva' => $this->getTva() ? (string)$this->getTva() : '',
-            'assiette-subventionnable' => (string)$this->getAssietteSubventionnable(),
-            'note-financiere' => $this->getNoteFinanciere(),
+        $datas['id'] = $this->getId();
+        $datas['acronym'] = htmlspecialchars($this->getAcronym());
+        $datas['amount'] = $this->getAmount();
+        $datas['pfi'] = $this->getCodeEOTP();
+        $datas['oscar'] = $this->getOscarNum();
+        $datas['montant'] = number_format((double)$this->getAmount(),2,',',' ') . $this->getCurrency()->getSymbol();
+        $datas['annee-debut'] = $this->getDateStartStr('Y');
+        $datas['annee-fin'] = $this->getDateEndStr('Y');
+        $datas['debut'] = $this->getDateStartStr('d/m/Y');
+        $datas['fin'] = $this->getDateEndStr('d/m/Y');
+        $datas['intitule'] = htmlspecialchars($this->getLabel());
+        $datas['label'] = htmlspecialchars($this->getLabel());
+        $datas['tva'] = $this->getTva() ? (string)$this->getTva() : '';
+        $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
+        $datas['note-financiere'] = $this->getNoteFinanciere();
 
-            'type' => (string)$this->getActivityType(),
-        ];
+        $datas['type'] = (string)$this->getActivityType();
 
         $sluger = Slugify::create();
 
@@ -2247,6 +2266,9 @@ class Activity implements ResourceInterface
         $datas['versement-effectue-montant'] = $versementsEffectues;
         $datas['versement-effectue-date'] = $versementsEffectuesDate;
 
+        foreach ($this->getNumbers() as $key => $value) {
+            $datas['num-'.$sluger->slugify($key)] = $value;
+        }
 
         return $datas;
     }
@@ -2276,7 +2298,7 @@ class Activity implements ResourceInterface
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'incidence financière' => $this->getIncidenceFinanciere(),
-            'Note financière' => $this->getNoteFinanciere(),
+            'Note' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
@@ -2306,7 +2328,7 @@ class Activity implements ResourceInterface
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'incidence financière',
-            'Note financière',
+            'Note',
             'Disciplines'
         );
     }
@@ -2348,6 +2370,25 @@ class Activity implements ResourceInterface
         }
 
         return $this->totalEcartPaiement;
+    }
+
+    private $ecartPaiementExplain = null;
+
+    public function getEcartPaimentExplain() :string
+    {
+        if ($this->ecartPaiementExplain === null) {
+            $this->ecartPaiementExplain = [];
+            /** @var ActivityPayment $payment */
+            foreach ($this->getPayments() as $payment) {
+                if ($payment->getStatus() === ActivityPayment::STATUS_ECART && $payment->getComment()) {
+                    $this->ecartPaiementExplain[] = $payment->getComment();
+                }
+            }
+
+            $this->ecartPaiementExplain = implode(', ', $this->ecartPaiementExplain);
+        }
+
+        return $this->ecartPaiementExplain;
     }
 
     private $justificatifEcartPaiement;

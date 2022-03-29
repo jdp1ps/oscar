@@ -13,7 +13,8 @@ use Doctrine\ORM\NoResultException;
 
 class OrganizationRoleRepository extends EntityRepository
 {
-    public function getRoleByRoleIdOrCreate( $roleId ){
+    public function getRoleByRoleIdOrCreate($roleId)
+    {
         try {
             return $this->createQueryBuilder('r')
                 ->select('r')
@@ -21,12 +22,32 @@ class OrganizationRoleRepository extends EntityRepository
                 ->getQuery()
                 ->setParameter('label', $roleId)
                 ->getSingleResult();
-        } catch (NoResultException $e){
+        } catch (NoResultException $e) {
             $role = new OrganizationRole();
             $this->getEntityManager()->persist($role);
             $role->setLabel($roleId);
             $this->getEntityManager()->flush($role);
             return $role;
         }
+    }
+
+    public function getRolesAvailableInActivityArray(): array
+    {
+        $out = [];
+        foreach ($this->getRolesAvailableInActivity() as $organizationRole) {
+            $out[$organizationRole->getId()] = $organizationRole->getRoleId();
+        }
+        return $out;
+    }
+
+    /**
+     * @return OrganizationRole[]
+     */
+    public function getRolesAvailableInActivity(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->select('r')
+            ->getQuery()
+            ->getResult();
     }
 }

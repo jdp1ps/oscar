@@ -7,6 +7,7 @@
 
 namespace Oscar\Service;
 
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ObjectRepository;
@@ -167,6 +168,41 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function getActivityFullText(Activity $activity)
     {
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
+    }
+
+    public function checkPFIRegex( $regex ) :array
+    {
+        $out = [
+            'warnings' => [],
+            'valids' => [],
+            'count' => 0,
+            'valid' => false,
+            'error' => []
+        ];
+
+        $badPfi = false;
+
+        $pfi = $this->getActivityRepository()->getDistinctPFI();
+        foreach ($pfi as $pfiTested) {
+            if( $pfiTested == "" ) continue;
+            if( preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)){
+                $out['valids'][] = $pfiTested;
+            } else {
+                $badPfi = "Un ou plusieurs PFI ne correspondent pas au format attendu";
+                $out['warnings'][] = $pfiTested;
+            }
+            $out['count']++;
+        }
+        if($badPfi){
+            $out['error'][] = $badPfi;
+        }
+        if(!$regex){
+            $out['error'][] = "Aucune regex renseignée";
+        }
+
+        $out['valid'] = count($out['warnings']) == 0;
+
+        return $out;
     }
 
 
@@ -451,7 +487,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
                 ->select('a.numbers')
                 ->distinct();
-            echo "<pre>";
+
             foreach ($query->getQuery()->getResult(Query::HYDRATE_ARRAY) as $r) {
                 if ($r['numbers']) {
                     foreach ($r['numbers'] as $key => $value) {
@@ -1935,6 +1971,72 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->setParameter('id', $projectGrantId)
             ->getQuery()
             ->getSingleResult();
+    }
+
+    public function getBaseDataTemplate() :array
+    {
+        //
+        $datas = [
+            'id' => '',
+            'acronym' => '',
+            'amount' => '',
+            'pfi' => '',
+            'oscar' => '',
+            'montant' => '',
+            'annee-debut' => '',
+            'annee-fin' => '',
+            'debut' => '',
+            'fin' => '',
+            'intitule' => '',
+            'label' => '',
+            'tva' => '',
+            'assiette-subventionnable' => '',
+            'note-financiere' => '',
+            'type' => '',
+        ];
+
+        $sluger = Slugify::create();
+
+        // Dépenses
+        $datas['total-depense'] = '';
+        $datas['total-depense-percent'] = '';
+        $datas['total-reste'] = '';
+
+        // Rôles possibles
+        $rolesInActivity = $this->getOscarUserContextService()->getAvailabledRolesPersonActivity();
+        foreach ($rolesInActivity as $role) {
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = "";
+            $datas["$slug-list"] = "";
+        }
+
+        $organizationRolesActivity = $this->getOscarUserContextService()->getAvailabledRolesOrganizationActivity();
+
+        foreach ($organizationRolesActivity as $role) {
+            $slug = $sluger->slugify($role);
+            $datas[$slug] = "";
+            $datas["$slug-list"] = "";
+        }
+
+        foreach ($this->getMilestoneTypesArray() as $milestoneType) {
+            $slug = $sluger->slugify($milestoneType['label']);
+            $datas['jalon-' . $slug] = "";
+            $datas["jalon-$slug-list"] = "";
+        }
+
+        $datas['versements-prevus'] = "";
+        $datas['versements-effectues'] = "";
+        $datas['versementPrevuMontant'] = "";
+        $datas['versementPrevuDate'] = "";
+        $datas['versement-effectue-montant'] = "";
+        $datas['versement-effectue-date'] = "";
+
+        foreach ($this->getCustomNum() as $code) {
+            $codeSlug = $sluger->slugify('num ' . $code);
+            $datas[$codeSlug] = "";
+        }
+
+        return $datas;
     }
 
     /**

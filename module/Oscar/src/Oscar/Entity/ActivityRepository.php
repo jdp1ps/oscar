@@ -19,6 +19,14 @@ use Oscar\Utils\DateTimeUtils;
 class ActivityRepository extends EntityRepository
 {
 
+    public function getDistinctPFI() :array
+    {
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->select('DISTINCT a.codeEOTP');
+
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
     /**
      * @param null $limitEnd
      * @param bool $statusActive

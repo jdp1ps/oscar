@@ -260,7 +260,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'type' => 'Text'
         ]);
 
-        $label = "Note financière";
+        $label = "Note";
         $this->add([
             'name' => 'noteFinanciere',
             'options' => [
@@ -382,6 +382,15 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
 
     public function getInputFilterSpecification()
     {
+        // PFI
+        /** @var OscarConfigurationService $oscarConfigurationService */
+        $oscarConfigurationService = $this->getServiceContainer()->get(OscarConfigurationService::class);
+        $validatorEotp = [];
+        if( $oscarConfigurationService->isPfiStrict() ){
+            $validatorEotp[] = new EOTP($oscarConfigurationService->getValidationPFI());
+        }
+
+
         return [
             'centaureId' => [
                 'required' => false,
@@ -408,9 +417,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                 'filters' => [
                     ['name' => StringTrim::class],
                 ],
-                'validators' => [
-                    new EOTP($this->getServiceContainer()->get(OscarConfigurationService::class)->getConfiguration('validation.pfi')),
-                ]
+                'validators' => $validatorEotp
             ],
 
             'amount' => [

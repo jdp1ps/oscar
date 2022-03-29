@@ -34,6 +34,10 @@ RUN apt-get install -y\
         git \
         && apt-get update && apt-get upgrade -y && apt-get clean
 
+# PROXY (wget)
+# Des doutes sur le fonctionnement, perso j'ai eu des soucis derrière le proxy unicaen (HM)
+COPY etc/apt/wgetrc /etc/apt/wgetrc
+
 # INSTALL PACKAGES OS
 RUN apt-get install -y \
         libboost-all-dev \
@@ -108,6 +112,7 @@ RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
+#RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug

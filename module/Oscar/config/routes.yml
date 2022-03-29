@@ -449,6 +449,23 @@ project:
                 route: /si-seul
                 defaults:
                     action: empty
+        ### Fiche du projet :id
+        export:
+            type: segment
+            options:
+                route: '/export/:id'
+                defaults:
+                    action: export
+            may_terminate: true
+
+        ### Exporter des PROJETS
+        export-many:
+            type: segment
+            options:
+                route: '/export-projects'
+                defaults:
+                    action: exportMany
+            may_terminate: true
 
         ### Fiche du projet :id
         show:

@@ -680,11 +680,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
+        $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
 
         if ($doc == "dump") {
             echo "<table border='1'>";
             $activity = $this->getProjectGrantService()->getGrant($id);
-            foreach ($activity->documentDatas() as $key => $value) {
+            foreach ($activity->documentDatas($baseDatas) as $key => $value) {
                 echo "<tr>";
                 if (is_array($value)) {
                     echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
@@ -705,7 +706,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getProjectGrantService()->getGrant($id);
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
-        $documentDatas = $activity->documentDatas();
+
+        $documentDatas = $activity->documentDatas($baseDatas);
 
         foreach ($documentDatas as $key => $value) {
             if (is_array($value)) {
@@ -844,8 +846,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
         }
         $this->getOscarUserContextService()->checkWithorganizationDeep(Privileges::PROJECT_CREATE);
-
-        die("ICI");
 
         // Création du projet
         $project = new Project();
@@ -2418,8 +2418,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
 
                     // La saisie est un PFI
-                    if (preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
+                    if ( $this->getOscarConfigurationService()->isPfiStrict()
+                        && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
+                        $qb->andWhere('c.codeEOTP = :search');
                         $qb->andWhere('c.codeEOTP = :search');
                     } elseif (preg_match('/(.*)=(.*)/', $search, $result)) {
                         $key = $result[1];
@@ -2777,6 +2779,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
+            $projectsIds = [];
+            if( $projectview == 'on' ){
+                foreach ($activities as $p) {
+                   $projectsIds[] = $p->getId();
+                }
+            }
+
+
             if ($this->getRequest()->isXmlHttpRequest()) {
                 $json = [
                     'datas' => []
@@ -2812,6 +2822,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortIgnoreNull' => $sortIgnoreNull,
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
                     'disciplines' => $this->getActivityService()->getDisciplines(),
+                    'projectsIds' => $projectsIds,
                 ]
             );
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');

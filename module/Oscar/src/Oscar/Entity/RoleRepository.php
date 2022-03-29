@@ -90,6 +90,23 @@ class RoleRepository extends EntityRepository
         return $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
     }
 
+    public function getRolesAvailableForPersonInActivity() :array
+    {
+        return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult();
+    }
+
+    public function getRolesAvailableForPersonInActivityArray() :array
+    {
+        static $rolesActivity;
+        if( $rolesActivity === null ){
+            $rolesActivity = [];
+            foreach( $this->getRolesAvailableForPersonInActivity() as $role ){
+                $rolesActivity[$role->getId()] = $role->getRoleId();
+            }
+        }
+        return $rolesActivity;
+    }
+
     /**
      * Retourne la liste des rôles au niveau spécifié.
      *

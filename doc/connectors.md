@@ -177,13 +177,13 @@ force_unsecure_http: false
 
 #### Commande locale
 
-Obtention des données via l'exécution d'une commande système locale (Ex : avec **Oscar Bridge**)
+Obtention des données via l'exécution d'une commande système locale
 
 ```yml
-# Commande pour obtenir sortie le JSON complet (toutes les personnes) - En une seule ligne
+# Commande pour obtenir en sortie le JSON complet (toutes les personnes) - En une seule ligne
 url_persons: '/usr/bin/php /var/OscarBridge/bin/console json:persons-get-all'
 
-# Commande pour synchroniser une seule personne
+# Commande pour obtenir les données d'une seule personne
 url_person: '/usr/bin/php /var/OscarBridge/bin/console json:person-get-one-by-uid %s'
 
 access_strategy: Oscar\Connector\Access\ConnectorLocalCommand
