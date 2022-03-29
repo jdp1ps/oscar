@@ -1588,6 +1588,240 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         die();
     }
 
+    public function getSynthesisActivityPeriods( string $from, string $to, int $activity_id ) :array
+    {
+        $output = [
+            'activity' => null,
+            'persons' => [],
+            'period' => DateTimeUtils::periodBounds($from)
+        ];
+
+        /** @var string[] $ceStr Liste des acronymes des autres activités */
+        $ceStr = [];
+
+        $strData = [];
+
+        $totaux = [
+            // Totaux Lots
+            'wps' => [],
+            // Total des heures pour l'activités de référence
+            'totalMain' => 0.0,
+
+            // Totaux autres projets
+            'ce' => [],
+            'totalCe' => 0.0,
+
+            // Totaux hors-lots
+            'others' => [],
+
+            // Total groupes
+            'groups' => [],
+
+            // Total
+            'total' => 0.0,
+
+            // Total (hors ABS)
+            'totalWork' => 0.0,
+
+            // Total Recherche (Workpackage + groupe 'research')
+            'totalResearch' => 0.0,
+
+            'comments' => []
+        ];
+
+
+        /** @var [] $others Détails des Hors-Lots */
+        $others = $this->getOthersWP();
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+
+        /** @var integer[] $personIds Identififiants des déclarants de l'activité */
+        $personIds = [];
+
+        /** @var Person $person */
+        foreach ($activity->getDeclarers() as $person) {
+            $personIds[] = $person->getId();
+        }
+
+        /** @var string[] $lotsStr Liste des codes des lots de travail de l'activité */
+        $lotsStr = [];
+
+        /** @var [] $lots Détails des Lots de travail de l'activité */
+        $lots = [];
+
+        /** @var $lot WorkPackage */
+        foreach ($activity->getWorkPackages() as $lot) {
+            $lots[$lot->getId()] = $lot->toArray();
+            $lotsStr[] = $lot->getCode();
+            $totaux['wps'][$lot->getCode()] = 0.0;
+        }
+
+        // Hors-lots
+        $othersGroups = [];
+
+        // Données des déclarants pour la période
+        $datas = $this->getTimesheetRepository()->getPersonPeriodSynthesisBounds($personIds, $from, $to);
+
+        $validations = $this->getValidationsPeriodPersonsBounds($personIds, $from, $to);
+
+        $comments = [];
+
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation) {
+            $declarerKey = (string)$validation->getDeclarer();
+            $key = $validation->getObjectId();
+            if ($key < 1) {
+                $key = $validation->getObject();
+            }
+
+            if (!array_key_exists($declarerKey, $comments)) {
+                $comments[(string)$validation->getDeclarer()] = [];
+            }
+
+            $comments[$declarerKey][$key] = [
+                'comment' => $validation->getComment(),
+                'status' => $validation->getStatus()
+            ];
+        }
+
+        // Parse préabable pour obtenir la liste des autres projets dans lesquel les déclarants sont identifiés
+        foreach ($datas as $d) {
+            if ($d['activity_id'] && $d['activity_id'] != $activity_id) {
+                $acronym = $d['acronym'];
+                if (!in_array($acronym, $ceStr)) {
+                    $ceStr[] = $acronym;
+                    $totaux['ce'][$acronym] = 0.0;
+                }
+            }
+        }
+
+        foreach ($others as $key => $other) {
+            $totaux['others'][$key] = 0.0;
+
+            $group = $other['group'];
+
+            if (!array_key_exists($group, $othersGroups)) {
+                $othersGroups[$group] = [];
+                $totaux['groups'][$group] = 0.0;
+            }
+
+            $othersGroups[$group][$key] = $other;
+        }
+
+        // INITIALISATION de la SORTIE
+        foreach ($activity->getDeclarers() as $person) {
+            $personIds[] = $person->getId();
+            $output['persons'][$person->getId()] = $this->getTimesheetDatasPersonPeriodBounds($person, $from, $to);
+            $strData[(string)$person] = [
+                'main' => [],
+                'ce' => [],
+                'otherresearch' => 0.0,
+                'others' => [],
+                'othersGroups' => [],
+                'totaux' => [
+                    'total' => 0.0,
+                    'totalWork' => 0.0,
+                    'totalResearch' => 0.0
+                ],
+                'totalMain' => 0.0,
+                'totalProjects' => 0.0,
+                'totalResearch' => 0.0,
+                'totalWork' => 0.0
+            ];
+
+            foreach ($lotsStr as $l) {
+                $strData[(string)$person]['main'][$l] = 0.0;
+            }
+
+            foreach ($ceStr as $p) {
+                $strData[(string)$person]['ce'][$p] = 0.0;
+            }
+
+            foreach ($others as $key => $other) {
+                $group = $other['group'];
+
+                $strData[(string)$person]['others'][$key] = 0.0;
+                $strData[(string)$person]['totaux'][$group] = 0.0;
+
+                if (!array_key_exists($group, $strData[(string)$person]['othersGroups'])) {
+                    $strData[(string)$person]['othersGroups'][$group] = [
+                        'total' => 0.0,
+                        'others' => []
+                    ];
+                }
+                $strData[(string)$person]['othersGroups'][$group]['others'][$key] = 0.0;
+            }
+        }
+
+        foreach ($datas as $d) {
+            $group = 'research';
+            $person = $d['person'];
+            $key = $d['itemkey'];
+            $duration = (float)$d['duration'];
+            $activityId = $d['activity_id'];
+
+            // Hors-lot
+            if (!$activityId) {
+                $group = $others[$key]['group'];
+
+                $strData[$person]['others'][$key] += $duration;
+                $strData[$person]['othersGroups'][$group]['others'][$key] += $duration;
+                $strData[$person]['othersGroups'][$group]['total'] += $duration;
+                $strData[$person]['totaux'][$group] += $duration;
+
+                if ($group == 'research') {
+                    $strData[$person]['otherresearch'] += $duration;
+                    $strData[$person]['totalResearch'] += $duration;
+                    $totaux['totalResearch'] += $duration;
+                }
+
+                // sous total travaillé
+                if ($group != 'abs') {
+                    $totaux['totalWork'] += $duration;
+                    $strData[$person]['totaux']['totalWork'] += $duration;
+                }
+                $totaux['groups'][$group] += $duration;
+                $totaux['others'][$key] += $duration;
+            } else {
+                // Projet
+                if ($activityId == $idActivity) {
+                    if (!array_key_exists($key, $strData[$person]['main'])) {
+                        $strData[$person]['main'][$key] = 0.0;
+                    }
+                    $strData[$person]['totalMain'] += $duration;
+                    $strData[$person]['main'][$key] += $duration;
+                    $totaux['wps'][$key] += $duration;
+                    $totaux['totalMain'] += $duration;
+                } else {
+                    $acronym = $d['acronym'];
+                    $strData[$person]['ce'][$acronym] += $duration;
+                    $strData[$person]['totalProjects'] += $duration;
+                    $strData[$person]['totalWork'] += $duration;
+                    $totaux['totalCe'] += $duration;
+                    $totaux['ce'][$acronym] += $duration;
+                }
+                $totaux['totalResearch'] += $duration;
+                $strData[$person]['totalResearch'] += $duration;
+                $strData[$person]['totaux']['totalWork'] += $duration;
+                $totaux['totalWork'] += $duration;
+            }
+            $strData[$person]['totaux']['total'] += $duration;
+            $totaux['total'] += $duration;
+        }
+
+        $output['foo'] = $strData;
+        $output['others'] = $others;
+        $output['othersGroups'] = $othersGroups;
+        $output['ces'] = $ceStr;
+        $output['totaux'] = $totaux;
+        $output['wps'] = $lots;
+        $output['comments'] = $comments;
+        $output['activity'] = $activity->toArray();
+
+        return $output;
+    }
+
     public function getSynthesisActivityYear($year, $activity_id)
     {
         $periodsStrs = DateTimeUtils::allperiodsBetweenTwo("$year-01", "$year-12");
@@ -4153,6 +4387,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     {
         return $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriod($personIds, $period);
     }
+
+    /**
+     * @param array $personIds
+     * @param string $period
+     * @return \Doctrine\ORM\QueryBuilder
+     * @throws OscarException
+     */
+    public function getValidationsPeriodPersonsBounds(array $personIds, string $from, string $to)
+    {
+        return $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriodBounds($personIds, $from, $to);
+    }
+
+
 
     /**
      * @param Person $person

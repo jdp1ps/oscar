@@ -53,6 +53,15 @@
     <?php if($activity->isTimesheetAllowed()): ?>
     <section>
         <h2>
+            <i class="icon-calendar"></i>
+            Synthèse
+        </h2>
+
+        <?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>
+
+    </section>
+    <section>
+        <h2>
             <i class="icon-archive"></i>
             Lots de travail
         </h2>

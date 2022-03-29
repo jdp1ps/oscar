@@ -567,6 +567,26 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function synthesisActivityPeriodsBoundsAction()
+    {
+        $datas = [];
+        $activity_id = $this->params()->fromQuery('activity_id', null);
+
+        try {
+            $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+            $from = $activity->getDateStartStr('Y-m');
+            $to = $activity->getDateEndStr('Y-m');
+            $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($from, $to, $activity->getId());
+
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
+
+        var_dump($datas);
+        die();
+    }
+
     /**
      * Accès à la synthèse des déclaration pour une activité.
      *

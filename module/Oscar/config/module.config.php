@@ -285,6 +285,7 @@ return array(
                         'syntheseActivity',
                         'synthesisAll',
                         'synthesisActivityPeriod',
+                        'synthesisActivityPeriodsBounds',
                         'exportActivityDates',
                         'checkperiod'
                     ],
