@@ -15,6 +15,16 @@
             <div class="col-md-6">
                 <label for="file">Fichier</label>
                 <input type="file" class="form-control" name="file" id="file" />
+
+                <label for="dateDeposit">Date de dépôt</label>
+                <p class="help">Date à laquelle le fichier a été reçu</p>
+                <input type="text" class="input-date form-control" name="dateDeposit" id="dateDeposit" class="datetime"
+                       value="<?= (array_key_exists('dateDeposit', $data) ? $data['dateDeposit'] :  '') ?>"/>
+
+                <label for="dateSend">Date d'envoi</label>
+                <p class="help">Date à laquelle le fichier a été envoyé</p>
+                <input type="text" class="input-date form-control" name="dateSend" id="dateSend"
+                       value="<?= (array_key_exists('dateSend',$data) ? $data['dateSend'] : '') ?>"/>
             </div>
 
             <div class="col-md-6">
@@ -24,28 +34,28 @@
                         <option value="<?= $type->getId() ?>" <?= $selected ?>><?= $type ?></option>
                     <?php endforeach; ?>
                 </select>
-            </div>
-        </div>
-        <div class="row">
 
-            <div class="col-md-6">
-                <label for="dateDeposit">Date de dépôt</label>
-                <p class="help">Date à laquelle le fichier a été reçu</p>
-                <input type="text" class="input-date form-control" name="dateDeposit" id="dateDeposit" class="datetime"
-                       value="<?= (array_key_exists('dateDeposit', $data) ? $data['dateDeposit'] :  '') ?>"/>
-            </div>
-
-            <div class="col-md-6">
-                <label for="dateSend">Date d'envoi</label>
-                <p class="help">Date à laquelle le fichier a été envoyé</p>
-                <input type="text" class="input-date form-control" name="dateSend" id="dateSend"
-                    value="<?= (array_key_exists('dateSend',$data) ? $data['dateSend'] : '') ?>"/>
+                <label for="tab">Onglet document</label>
+                <select name="tab" id="tab" class="form-control">
+                    <?php foreach( $tabs as $tab ): $selected = (key_exists('tab', $data) && $data['tab'] == $tab->getId() ? ' selected="selected"' : '')?>
+                        <option value="<?= $tab->getId() ?>" <?= $selected ?>><?= $tab ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col-md-6">
+                        <label for="private">Document privé</label>
+                    </div>
+                    <div class="col-md-6">
+                        <?php $checked = (array_key_exists('private',$data) && $data['private'] == true ? ' checked="checked"' :'') ?>
+                        <input type="checkbox" name="private" id="private" class="form-control" <?= $checked ?>>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12">
                 <label for="informations">Note</label>
-                <textarea name="informations" id="informations" class="form-control" id="" cols="30" rows="10"><?= (array_key_exists('informations',$data) ? $data['informations'] :'') ?></textarea>
+                <textarea name="informations" id="informations" class="form-control" cols="30" rows="10"><?= (array_key_exists('informations',$data) ? $data['informations'] :'') ?></textarea>
             </div>
         </div>
         <div class="row">
@@ -57,10 +67,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
 
     </form>
 </div>

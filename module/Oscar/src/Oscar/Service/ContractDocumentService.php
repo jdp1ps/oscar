@@ -18,6 +18,7 @@ use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
+use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -136,10 +137,19 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
     /**
      * @return TypeDocument[]
      */
-    public function getContractDocumentTypes()
+    public function getContractDocumentTypes(): array
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
     }
+
+    /**
+     * @return TabDocument[]
+     */
+    public function getContractTabDocuments(): array
+    {
+        return $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+    }
+
 
     /**
      * @return TypeDocument

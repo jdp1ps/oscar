@@ -9,6 +9,8 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
@@ -1343,13 +1345,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * Fiche pour une activité de recherche.
+     * Affiche les documents pour une activité de recherche, retour JSON.
+     *
+     * @return JsonModel
+     * @throws OscarException
      */
-    public function documentsJsonAction()
+    public function documentsJsonAction():JsonModel
     {
         $id = $this->params()->fromRoute('id');
         $ui = $this->params()->fromQuery('ui');
-
 
         /** @var Activity $entity */
         $entity = $this->getActivityService()->getActivityById($id, true);
@@ -1753,9 +1757,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * Fiche pour une activité de recherche.
+     * @return array
+     * @throws OscarException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function showAction()
+    public function showAction():array
     {
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
