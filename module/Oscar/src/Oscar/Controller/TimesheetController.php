@@ -20,6 +20,7 @@ use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
@@ -570,21 +571,50 @@ class TimesheetController extends AbstractOscarController
     public function synthesisActivityPeriodsBoundsAction()
     {
         $datas = [];
-        $activity_id = $this->params()->fromQuery('activity_id', null);
+        $activity_id = $this->params()->fromRoute('id', null);
+
+        // Analyse des critères
+        $year = $this->params()->fromQuery('year', null);
+        $from = $this->params()->fromQuery('from', null);
+        $to = $this->params()->fromQuery('to', null);
+        $format = $this->params()->fromQuery('format', OscarFormatterConst::FORMAT_IO_JSON);
+
+        //
+        $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        $start = $activity->getDateStartStr('Y-m');
+        $end = $activity->getDateEndStr('Y-m');
+
+        if( $year ){
+            $start = sprintf('%s-01', $year);
+            $end = sprintf('%s-12', $year);
+        }
+
+        if( $from ){
+            $start = $from;
+        }
+
+        if( $to ){
+            $end = $to;
+        }
 
         try {
-            $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
-            $from = $activity->getDateStartStr('Y-m');
-            $to = $activity->getDateEndStr('Y-m');
-            $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($from, $to, $activity->getId());
+            $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($start, $end, $activity->getId());
 
         } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
         }
 
-        var_dump($datas);
-        die();
+
+        switch ($format) {
+            case OscarFormatterConst::FORMAT_IO_JSON :
+                return $this->jsonOutput($datas);
+
+            default:
+                return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
+        }
+
     }
 
     /**
@@ -650,8 +680,6 @@ class TimesheetController extends AbstractOscarController
             elseif ($format == "json") {
                 $output['format'] = 'json';
                 return $this->jsonOutput($output);
-
-                die();
             }
             else {
                 $output['format'] = 'html';

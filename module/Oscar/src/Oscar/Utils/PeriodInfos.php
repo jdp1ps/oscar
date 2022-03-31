@@ -118,12 +118,18 @@ class PeriodInfos
         return sprintf('%s-%s', $this->getYear(), ($this->getMonth() < 10 ? '0' : '') . $this->getMonth());
     }
 
+    public function getPeriodSimple(): string
+    {
+        return sprintf('%s-%s', $this->getYear(), $this->getMonth());
+    }
+
     public function toArray(): array
     {
         return [
             'period' => sprintf('%s-%s', $this->getYear(), $this->getMonth()),
             'periodLabel' => $this->getPeriodLabel(),
             'periodCode' => $this->getPeriodCode(),
+            'periodCodeSimple' => $this->getPeriodCode(),
             'month' => $this->getMonth(),
             'year' => $this->getYear()
         ];

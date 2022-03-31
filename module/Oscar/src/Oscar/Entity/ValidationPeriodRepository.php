@@ -230,17 +230,24 @@ class ValidationPeriodRepository extends EntityRepository
      */
     public function getValidationPeriodsForPersonsAtPeriodBounds( array $personIds, string $from, string $to)
     {
-        $periodInfos = PeriodInfos::getPeriodInfosObj($periodStr);
+        $start = PeriodInfos::getPeriodInfosObj($from);
+        $end = PeriodInfos::getPeriodInfosObj($to);
 
-        return $this->createQueryBuilder('v')
-            ->where('v.declarer IN(:personIds) AND v.month = :month AND v.year = :year')
+        $query = $this->createQueryBuilder('v')
+            ->select('v')
+            ->where("v.declarer IN(:personIds) 
+                AND CONCAT(v.year, '-', v.month) >= :speriod 
+                AND CONCAT(v.year, '-', v.month) <= :fperiod 
+                " )
             ->setParameters(
                 [
                     'personIds' => $personIds,
-                    'year' => $periodInfos->getYear(),
-                    'month' => $periodInfos->getMonth(),
+                    'speriod' => $start->getPeriodSimple(),
+                    'fperiod' => $end->getPeriodSimple()
                 ]
-            )->getQuery()->getResult();
+            )->getQuery();
+
+        return $query->getResult();
     }
 
     /**

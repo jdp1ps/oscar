@@ -2999,7 +2999,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $this->isAjax() ){
 
-
             $action = $this->getRequest()->getQuery()->get('a', null);
 
             if( $this->getRequest()->isDelete() || $action == 'd' ){
@@ -3039,9 +3038,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $this->jsonOutput($response);
         }
 
+        $timesheetRepport = null;
+        if( $activity->isTimesheetAllowed() ){
+            $timesheetRepport = $this->getTimesheetService()->getSynthesisActivityPeriods(
+                $activity->getDateStartStr('Y-m'),
+                $activity->getDateEndStr('Y-m'),
+                $activity->getId()
+            );
+        }
+
         return [
             'activity' => $activity,
-            'timesheetAllow' => $activity->isTimesheetAllowed()
+            'timesheetAllow' => $activity->isTimesheetAllowed(),
+            'timesheetRepport' => $timesheetRepport
         ];
     }
 

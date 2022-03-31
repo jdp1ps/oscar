@@ -39,6 +39,13 @@
     .validators-todo span:last-child:after {
         content: '';
     }
+
+    .synthesis .project {
+        background: #0b97c4;
+    }
+    .synthesis .project {
+        background: #0b97c4;
+    }
 </style>
 <div class="container">
     <h1>
@@ -49,6 +56,27 @@
             Revenir sur la fiche
         </a>
     </h1>
+    <div id="synthesis"></div>
+
+    <script>
+        require(['vue', 'timesheetactivitysynthesis'], function(Vue, TimesheetActivitySynthesis){
+            console.log(TimesheetActivitySynthesis);
+            new Vue({
+                el: '#synthesis',
+                render(h){
+                    return h(TimesheetActivitySynthesis, { props: {initialdata: <?= json_encode($timesheetRepport) ?>}})
+                }
+            })
+        })
+    </script>
+
+    <a href="<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>?year=2020">
+        2020
+    </a>
+
+    <a href="<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>?year=2021">
+        2021
+    </a>
 
     <?php if($activity->isTimesheetAllowed()): ?>
     <section>

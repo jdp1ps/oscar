@@ -172,7 +172,7 @@ timesheet:
         synthesisactivitybounds:
             type: segment
             options:
-                route: /synthese-activite-periode
+                route: /synthese-activite-periode/:id
                 defaults:
                     action: synthesisActivityPeriodsBounds
 
