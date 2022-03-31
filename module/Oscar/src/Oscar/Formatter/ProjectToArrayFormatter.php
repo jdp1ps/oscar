@@ -197,7 +197,7 @@ class ProjectToArrayFormatter implements IProjectFormater
         $output['amount'] = $amount;
         $output['pfi'] = implode(', ', $pfi);
         $output['oscarNum'] = implode(', ', $oscarNum);
-        $output['type'] = implode(', ', $type);
+        $output['type'] = implode(', ', $types);
         $output['status'] = implode(', ', $status);
         $output['start'] = implode(', ', $start);
         $output['end'] = implode(', ', $end);
