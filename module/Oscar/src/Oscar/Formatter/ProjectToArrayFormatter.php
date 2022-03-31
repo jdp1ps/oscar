@@ -81,7 +81,7 @@ class ProjectToArrayFormatter implements IProjectFormater
         $amount = 0.0;
         $pfi = [];
         $oscarNum = [];
-        $type = [];
+        $types = [];
         $status = [];
         $start = [];
         $end = [];
@@ -128,7 +128,7 @@ class ProjectToArrayFormatter implements IProjectFormater
             }
 
             if ($activity->getType()) {
-                $type[] = $activity->getType();
+                $types[] = $activity->getType();
             }
 
             $status[] = $activity->getStatusLabel();
@@ -197,7 +197,7 @@ class ProjectToArrayFormatter implements IProjectFormater
         $output['amount'] = $amount;
         $output['pfi'] = implode(', ', $pfi);
         $output['oscarNum'] = implode(', ', $oscarNum);
-        $output['type'] = implode(', ', $type);
+        $output['type'] = implode(', ', $types);
         $output['status'] = implode(', ', $status);
         $output['start'] = implode(', ', $start);
         $output['end'] = implode(', ', $end);
