@@ -769,7 +769,7 @@ module.exports = function settle(resolve, reject, response) {
 /***/ "4a0c":
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"_from\":\"axios@0.21.4\",\"_id\":\"axios@0.21.4\",\"_inBundle\":false,\"_integrity\":\"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==\",\"_location\":\"/axios\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"axios@0.21.4\",\"name\":\"axios\",\"escapedName\":\"axios\",\"rawSpec\":\"0.21.4\",\"saveSpec\":null,\"fetchSpec\":\"0.21.4\"},\"_requiredBy\":[\"#DEV:/\",\"#USER\"],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz\",\"_shasum\":\"c67b90dc0568e5c1cf2b0b858c43ba28e2eda575\",\"_spec\":\"axios@0.21.4\",\"_where\":\"/home/bouvry/Projects/Unicaen/OscarProject/Spartan/oscar/front\",\"author\":{\"name\":\"Matt Zabriskie\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"bundleDependencies\":false,\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"dependencies\":{\"follow-redirects\":\"^1.14.0\"},\"deprecated\":false,\"description\":\"Promise based HTTP client for the browser and node.js\",\"devDependencies\":{\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.3.0\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^23.0.0\",\"grunt-karma\":\"^4.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^4.0.2\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^6.3.2\",\"karma-chrome-launcher\":\"^3.1.0\",\"karma-firefox-launcher\":\"^2.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^4.3.6\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.8\",\"karma-webpack\":\"^4.0.2\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^8.2.1\",\"sinon\":\"^4.5.0\",\"terser-webpack-plugin\":\"^4.2.3\",\"typescript\":\"^4.0.5\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^4.44.2\",\"webpack-dev-server\":\"^3.11.0\"},\"homepage\":\"https://axios-http.com\",\"jsdelivr\":\"dist/axios.min.js\",\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"license\":\"MIT\",\"main\":\"index.js\",\"name\":\"axios\",\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/axios/axios.git\"},\"scripts\":{\"build\":\"NODE_ENV=production grunt build\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"examples\":\"node ./examples/server.js\",\"fix\":\"eslint --fix lib/**/*.js\",\"postversion\":\"git push && git push --tags\",\"preversion\":\"npm test\",\"start\":\"node ./sandbox/server.js\",\"test\":\"grunt test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\"},\"typings\":\"./index.d.ts\",\"unpkg\":\"dist/axios.min.js\",\"version\":\"0.21.4\"}");
+module.exports = JSON.parse("{\"_args\":[[\"axios@0.21.4\",\"/home/marie201/projetsUnicaen/projetOscar/oscarSpartan/front\"]],\"_development\":true,\"_from\":\"axios@0.21.4\",\"_id\":\"axios@0.21.4\",\"_inBundle\":false,\"_integrity\":\"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==\",\"_location\":\"/axios\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"axios@0.21.4\",\"name\":\"axios\",\"escapedName\":\"axios\",\"rawSpec\":\"0.21.4\",\"saveSpec\":null,\"fetchSpec\":\"0.21.4\"},\"_requiredBy\":[\"#DEV:/\"],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz\",\"_spec\":\"0.21.4\",\"_where\":\"/home/marie201/projetsUnicaen/projetOscar/oscarSpartan/front\",\"author\":{\"name\":\"Matt Zabriskie\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"dependencies\":{\"follow-redirects\":\"^1.14.0\"},\"description\":\"Promise based HTTP client for the browser and node.js\",\"devDependencies\":{\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.3.0\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^23.0.0\",\"grunt-karma\":\"^4.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^4.0.2\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^6.3.2\",\"karma-chrome-launcher\":\"^3.1.0\",\"karma-firefox-launcher\":\"^2.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^4.3.6\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.8\",\"karma-webpack\":\"^4.0.2\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^8.2.1\",\"sinon\":\"^4.5.0\",\"terser-webpack-plugin\":\"^4.2.3\",\"typescript\":\"^4.0.5\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^4.44.2\",\"webpack-dev-server\":\"^3.11.0\"},\"homepage\":\"https://axios-http.com\",\"jsdelivr\":\"dist/axios.min.js\",\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"license\":\"MIT\",\"main\":\"index.js\",\"name\":\"axios\",\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/axios/axios.git\"},\"scripts\":{\"build\":\"NODE_ENV=production grunt build\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"examples\":\"node ./examples/server.js\",\"fix\":\"eslint --fix lib/**/*.js\",\"postversion\":\"git push && git push --tags\",\"preversion\":\"npm test\",\"start\":\"node ./sandbox/server.js\",\"test\":\"grunt test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\"},\"typings\":\"./index.d.ts\",\"unpkg\":\"dist/axios.min.js\",\"version\":\"0.21.4\"}");
 
 /***/ }),
 
@@ -1202,6 +1202,91 @@ module.exports = {
   assertOptions: assertOptions,
   validators: validators
 };
+
+
+/***/ }),
+
+/***/ "8875":
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// addapted from the document.currentScript polyfill by Adam Miller
+// MIT license
+// source: https://github.com/amiller-gh/currentScript-polyfill
+
+// added support for Firefox https://bugzilla.mozilla.org/show_bug.cgi?id=1620505
+
+(function (root, factory) {
+  if (true) {
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+}(typeof self !== 'undefined' ? self : this, function () {
+  function getCurrentScript () {
+    var descriptor = Object.getOwnPropertyDescriptor(document, 'currentScript')
+    // for chrome
+    if (!descriptor && 'currentScript' in document && document.currentScript) {
+      return document.currentScript
+    }
+
+    // for other browsers with native support for currentScript
+    if (descriptor && descriptor.get !== getCurrentScript && document.currentScript) {
+      return document.currentScript
+    }
+  
+    // IE 8-10 support script readyState
+    // IE 11+ & Firefox support stack trace
+    try {
+      throw new Error();
+    }
+    catch (err) {
+      // Find the second match for the "at" string to get file src url from stack.
+      var ieStackRegExp = /.*at [^(]*\((.*):(.+):(.+)\)$/ig,
+        ffStackRegExp = /@([^@]*):(\d+):(\d+)\s*$/ig,
+        stackDetails = ieStackRegExp.exec(err.stack) || ffStackRegExp.exec(err.stack),
+        scriptLocation = (stackDetails && stackDetails[1]) || false,
+        line = (stackDetails && stackDetails[2]) || false,
+        currentLocation = document.location.href.replace(document.location.hash, ''),
+        pageSource,
+        inlineScriptSourceRegExp,
+        inlineScriptSource,
+        scripts = document.getElementsByTagName('script'); // Live NodeList collection
+  
+      if (scriptLocation === currentLocation) {
+        pageSource = document.documentElement.outerHTML;
+        inlineScriptSourceRegExp = new RegExp('(?:[^\\n]+?\\n){0,' + (line - 2) + '}[^<]*<script>([\\d\\D]*?)<\\/script>[\\d\\D]*', 'i');
+        inlineScriptSource = pageSource.replace(inlineScriptSourceRegExp, '$1').trim();
+      }
+  
+      for (var i = 0; i < scripts.length; i++) {
+        // If ready state is interactive, return the script tag
+        if (scripts[i].readyState === 'interactive') {
+          return scripts[i];
+        }
+  
+        // If src matches, return the script tag
+        if (scripts[i].src === scriptLocation) {
+          return scripts[i];
+        }
+  
+        // If inline source matches, return the script tag
+        if (
+          scriptLocation === currentLocation &&
+          scripts[i].innerHTML &&
+          scripts[i].innerHTML.trim() === inlineScriptSource
+        ) {
+          return scripts[i];
+        }
+      }
+  
+      // If no match, return null
+      return null;
+    }
+  };
+
+  return getCurrentScript
+}));
 
 
 /***/ }),
@@ -2435,7 +2520,15 @@ __webpack_require__.r(__webpack_exports__);
 
 if (typeof window !== 'undefined') {
   var currentScript = window.document.currentScript
-  if (false) { var getCurrentScript; }
+  if (true) {
+    var getCurrentScript = __webpack_require__("8875")
+    currentScript = getCurrentScript()
+
+    // for backward compatibility, because previously we directly included the polyfill
+    if (!('currentScript' in document)) {
+      Object.defineProperty(document, 'currentScript', { get: getCurrentScript })
+    }
+  }
 
   var src = currentScript && currentScript.src.match(/(.+\/)[^/]+\.js(\?.*)?$/)
   if (src) {
@@ -2446,14 +2539,14 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"b5c7376e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=d21f6b24&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),(_vm.editData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Modification du document "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.editData = null}}},[_vm._v("X")])]),_c('label',{attrs:{"for":"typedocument"}},[_vm._v("Type de document")]),_c('div',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.editData.documentype_id),expression:"editData.documentype_id"}],attrs:{"name":"type","id":"typedocument"},on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.editData, "documentype_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0])}}},_vm._l((_vm.documentTypes),function(t,id){return _c('option',{key:id,domProps:{"value":id}},[_vm._v(_vm._s(t))])}),0)]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.editData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.performEdit()}}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Enregistrer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),_c('small',{staticClass:"text-light"},[_vm._v(_vm._s(document.categoryText)+" ~ ")]),_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])]),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-upload-outline"}),_vm._v(" Télécharger ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")]),_c('a',{staticClass:"btn btn-xs btn-default",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.handlerEdit(document)}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" Modifier ")])])])])})],2)}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5e98633e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=1c36b13b&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),(_vm.editData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Modification du document "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.editData = null}}},[_vm._v("X")])]),_c('label',{attrs:{"for":"typedocument"}},[_vm._v("Type de document")]),_c('div',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.editData.documentype_id),expression:"editData.documentype_id"}],attrs:{"name":"type","id":"typedocument"},on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.editData, "documentype_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0])}}},_vm._l((_vm.documentTypes),function(t,id){return _c('option',{key:id,domProps:{"value":id}},[_vm._v(_vm._s(t))])}),0)]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.editData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.performEdit()}}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Enregistrer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.tabs),function(tab){return _c('ul',{key:tab.id},[_c('li',{staticStyle:{"cursor":"pointer"},on:{"click":function($event){return _vm.activeTab(tab.id)}}},[_c('i',{staticClass:"picto icon-Activity"}),_vm._v(" "+_vm._s(tab.label)+" ")])])}),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),_c('small',{staticClass:"text-light"},[_vm._v(_vm._s(document.categoryText)+" ~ ")]),_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])]),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-upload-outline"}),_vm._v(" Télécharger ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")]),_c('a',{staticClass:"btn btn-xs btn-default",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.handlerEdit(document)}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" Modifier ")])])])])})],2)}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=d21f6b24&
+// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=1c36b13b&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"b5c7376e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5e98633e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
 var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"5em","right":"5em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('code',[_vm._v(_vm._s(_vm.oscarRemoteData.error))]),_c('br'),_c('a',{staticStyle:{"color":"white"},attrs:{"href":"#"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("Fermer")])]):_vm._e()])])}
 var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_staticRenderFns = []
 
@@ -2878,11 +2971,25 @@ class OscarRemoteData_OscarRemoteData {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /******************************************************************************************************************/
 /* ! DEVELOPPEUR
+Depuis la racine OSCAR :
+
 cd front
-node node_modules/.bin/vue-cli-service build --name ActivityDocument --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/ActivityDocument.vue
+
+Pour compiler en temps réél :
+node node_modules/.bin/gulp activityDocumentWatch
+
+Pour compiler :
+node node_modules/.bin/gulp activityDocument
  */
 
 
@@ -2909,16 +3016,17 @@ function flashMessage(){
 
     data(){
         return {
-            formData: null,
-            error: null,
-            deleteData: null,
-            editData: null,
-            documents: [],
-            loading: true,
-            sortField: 'dateUpload',
-            sortDirection: -1,
-            editable: true,
-            remoterState: oscarRemoteData.state
+          tabs: null,
+          formData: null,
+          error: null,
+          deleteData: null,
+          editData: null,
+          documents: [],
+          loading: true,
+          sortField: 'dateUpload',
+          sortDirection: -1,
+          editable: true,
+          remoterState: oscarRemoteData.state
         }
     },
 
@@ -2944,76 +3052,85 @@ function flashMessage(){
     },
 
     methods:{
-        deleteDocument(document) {
-            this.deleteData = document;
-        },
+      activeTab(tabId){
+        console.log(tabId)
+      } ,
 
-        order: function (field) {
-            if( this.sortField == field ){
-                this.sortDirection *= -1;
-            } else {
-                this.sortField = field;
-            }
-        },
+      deleteDocument(document) {
+          this.deleteData = document;
+      },
 
-        cssSort: function(compare){
-            return compare == this.sortField ? "active" : "";
-        },
+      order: function (field) {
+          if( this.sortField == field ){
+              this.sortDirection *= -1;
+          } else {
+              this.sortField = field;
+          }
+      },
 
-        handlerEdit(document){
-            this.editData = {
-                'documentype_id': document.category ? document.category.id : "",
-                'basename': document.basename,
-                'document': document
-            };
-        },
+      cssSort: function(compare){
+          return compare == this.sortField ? "active" : "";
+      },
 
-        performEdit(){
-            let documentId = this.editData.document.id;
-            let newType = this.editData.documentype_id;
-            this.editData = null;
-            let formData = new FormData();
-            formData.append('documentId', documentId);
-            formData.append('type', newType);
-            oscarRemoteData
-                .setPendingMessage("Modification du type de document")
-                .setErrorMessage("Impossible de modifier le type de document")
-                .performPost(this.urlDocumentType, formData, (response) => {
-                    this.fetch();
-                });
-        },
+      handlerEdit(document){
+          console.log(document);
+          this.editData = {
+              'documentype_id': document.category.id,
+              'basename': document.basename,
+              'document': document
+          };
+      },
 
-        handlerSuccess(success){
-            let data = success.data.datas;
-            let documentsOrdered = [];
-            let documents = {};
+      performEdit(){
+          let documentId = this.editData.document.id;
+          let newType = this.editData.documentype_id;
+          this.editData = null;
+          let formData = new FormData();
+          formData.append('documentId', documentId);
+          formData.append('type', newType);
+          oscarRemoteData
+              .setPendingMessage("Modification du type de document")
+              .setErrorMessage("Impossible de modifier le type de document")
+              .performPost(this.urlDocumentType, formData, (response) => {
+                  this.fetch();
+              });
+      },
 
-            data.forEach(function(doc){
-                doc.categoryText = doc.category ? doc.category.label : "";
-                doc.explode = true;
-                var filename = doc.fileName;
-                if( ! documents[filename] ){
-                    documents[filename] = doc;
-                    documents[filename].previous = [];
-                    documentsOrdered.push(doc);
-                } else {
-                    documents[filename].previous.push(doc);
-                }
-            });
-            this.documents = documentsOrdered;
-        },
+      handlerSuccess(success){
+          let data = success.data.datas;
+          let objectsTabs = success.data.tabs;
+          //console.log(objectsTabs);
+          this.tabs = objectsTabs;
+          //console.log(this.tabs);
+          let documentsOrdered = [];
+          let documents = {};
 
-        fetch(){
-            oscarRemoteData
-                .setPendingMessage("Chargement des documents")
-                .setErrorMessage("Impossible de charger les documents")
-                .performGet(this.url, this.handlerSuccess);
-        }
-    },
+          data.forEach(function(doc){
+              doc.categoryText = doc.category ? doc.category.label : "";
+              doc.explode = true;
+              var filename = doc.fileName;
+              if( ! documents[filename] ){
+                  documents[filename] = doc;
+                  documents[filename].previous = [];
+                  documentsOrdered.push(doc);
+              } else {
+                  documents[filename].previous.push(doc);
+              }
+          });
+          this.documents = documentsOrdered;
+      },
 
-    mounted(){
-        this.fetch();
-    }
+      fetch(){
+          oscarRemoteData
+              .setPendingMessage("Chargement des documents")
+              .setErrorMessage("Impossible de charger les documents")
+              .performGet(this.url, this.handlerSuccess);
+      }
+  },
+
+  mounted(){
+      this.fetch();
+  }
 
 });
 

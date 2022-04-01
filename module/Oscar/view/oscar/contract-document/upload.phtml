@@ -47,7 +47,7 @@
                     </div>
                     <div class="col-md-6">
                         <?php $checked = (array_key_exists('private',$data) && $data['private'] == true ? ' checked="checked"' :'') ?>
-                        <input type="checkbox" name="private" id="private" class="form-control" <?= $checked ?>>
+                        <input type="checkbox" name="private" id="private" class="form-control" value="1" <?= $checked ?>>
                     </div>
                 </div>
             </div>
@@ -63,11 +63,9 @@
                 <div class="btn-group">
                     <a href="javascript: history.back()" class="btn btn-default">Retour à l'activité</a>
                     <button type="submit" class="btn btn-primary">Envoyer</button>
-
                 </div>
             </div>
         </div>
-
     </form>
 </div>
 

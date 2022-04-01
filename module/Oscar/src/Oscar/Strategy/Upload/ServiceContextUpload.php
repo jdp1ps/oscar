@@ -70,11 +70,12 @@ class ServiceContextUpload
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function treatementUpload():bool
+    public function processUpload():bool
     {
-        // Bla bla bla traitement pour trouver la bonne stratégie et hydrater l'object Type choisis avec la stratégie
-        // C'est ici que tout ca se jouer ! GED ou OSCAR POST OU PAS POST
+        // Choix stratégie et hydrater l'objet Type choisi avec la stratégie
+        // GED ou OSCAR (POST OU PAS POST)
         $isPost = false;
+        // Mise à jour document id doc
         if ($this->docId) {
             $doc = new ContractDocument();
             if ($doc = $this->documentService->getDocument($this->docId)->getQuery()->getSingleResult()) {
@@ -99,6 +100,7 @@ class ServiceContextUpload
                 $this->notificationService,
                 $this->activityLogService
             );
+            // Ici il serait bon de récup la stratégie choisis via un fichier de config
             $this->strategy = new StrategyOscarUpload($typeDocumentGedOscar);
             $this->strategy->setEtat(1);
             $this->upload($this->strategy);
@@ -106,11 +108,13 @@ class ServiceContextUpload
         return $isPost;
     }
 
-
+    /**
+     * @param StrategyTypeInterface $strategy
+     * @return void
+     */
     private function upload(StrategyTypeInterface $strategy):void
     {
-        // Nous ne savons pas quelle stratégie est utilisée (design pattern stratégie plus ou moins) mais c'est l'objectif
-        //echo "je passe par upload du service ";
+        //Nous ne savons pas quelle stratégie est utilisée (design pattern stratégie plus ou moins) mais c'est l'objectif
         //$this->strategy = $strategy;
         //$this->strategy->uploadDocument();
         $strategy->uploadDocument();

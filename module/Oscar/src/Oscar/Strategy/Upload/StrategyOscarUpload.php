@@ -4,7 +4,9 @@
 namespace Oscar\Strategy\Upload;
 
 
+use Exception;
 use Oscar\Entity\AbstractVersionnedDocument;
+use Oscar\Entity\ContractDocument;
 use Oscar\Exception\OscarException;
 
 
@@ -16,6 +18,8 @@ class StrategyOscarUpload implements StrategyTypeInterface
     const NAME_FILE                 = "name";
     const ARRAY_FILE_MIME           = ['application/octet-stream; charset=binary', 'application/vnd.ms-office; charset=binary'];
     const DATE_DEPOSIT              = "dateDeposit";
+    const PRIVATE                   = "private";
+    const TAB_DOCUMENT              = "tab";
     const DATE_SEND                 = "dateSend";
     const NAME_INPUT_FILE           = "file";
 
@@ -30,12 +34,14 @@ class StrategyOscarUpload implements StrategyTypeInterface
         $this->etat = false;
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function uploadDocument(): void
     {
-
         // Traitement des données envoyées utilisation System file Oscar interne à Oscar donc pas de Ged générique ici
         $this->datas = $this->document->getRequest()->getPost()->toArray();
-
         $this->datas[self::ERROR_FILE] = null;
         $file = $this->document->getRequest()->getFiles(self::NAME_INPUT_FILE);
 
@@ -45,7 +51,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
             $this->datas[self::ERROR_FILE] = array_key_exists('message', $lastError) ? $lastError['message'] : "Erreur inattendue";
             return;
         }
-        // OK file récup
+
         if( !$file ){
             $error = "Beaucoup de chose restent inexpliquées, cette erreur en fait partie...";
             if( is_array($lastError) && array_key_exists('message', $lastError) ){
@@ -55,7 +61,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
         }
 
         if( $file[self::ERROR_FILE] != 0 ){
-            //var_dump($datas); // Errors dans le fichier uploadé genre taille trop grande etc...
+            //dump($datas); // Errors dans le fichier uploadé genre taille trop grande etc...
             $errors = [
                 UPLOAD_ERR_INI_SIZE => 'Le fichier dépasse la taille autorisée par le serveur ('.ini_get('upload_max_filesize').')',
                 UPLOAD_ERR_FORM_SIZE => 'Le fichier dépasse la taille autorisée par le formulaire',
@@ -82,9 +88,9 @@ class StrategyOscarUpload implements StrategyTypeInterface
                 if(false === $fileExtension){
                     $this->datas[self::ERROR_FILE] = sprintf("Le fichier '%s' est un type de fichier %s (%s) non-supporté dans Oscar.", $fileName, $fileExtension, $fileMime);
                 } else {
-
                     /** @var AbstractVersionnedDocument $document */
                     $nameClass = $this->document->getDocumentService()->getEffectiveClass();
+                    /** @var ContractDocument $document */
                     $document = new $nameClass;
                     $document
                         ->setVersion(1)
@@ -93,13 +99,13 @@ class StrategyOscarUpload implements StrategyTypeInterface
                         ->setFileSize($fileSize)
                         ->setFileTypeMime($fileMime)
                         ->setInformation($this->datas['informations'])
-
-                        // Essayer d'intégrer les closures hydrate ci-dessous
                         ->setPerson($this->getDocument()->getOscarUserContext()->getCurrentPerson())
+                        ->setTabDocument($this->getDocument()->getDocumentService()->getContractTabDocument($this->datas[self::TAB_DOCUMENT]))
                         ->setTypeDocument($this->getDocument()->getDocumentService()->getContractDocumentType($this->datas[self::TYPE_FILE]))
                         ->setGrant($this->getDocument()->getActivity())
                         ->setDateDeposit($this->datas[self::DATE_DEPOSIT] ? new \DateTime($this->datas[self::DATE_DEPOSIT]):null)
-                        ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null);
+                        ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null)
+                        ->setPrivate($this->datas[self::PRIVATE] ?? false);
                         $this->etat = true;
                         $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
                     if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){

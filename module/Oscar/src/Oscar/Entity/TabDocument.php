@@ -81,8 +81,10 @@ class TabDocument
         return $this->getLabel();
     }
 
-
-    function toJson()
+    /**
+     * @return array
+     */
+    public function toJson(): array
     {
         return [
             'id' => $this->getId(),
@@ -91,8 +93,10 @@ class TabDocument
         ];
     }
 
-
-    function toArray()
+    /**
+     * @return array
+     */
+    public function toArray(): array
     {
         return array(
             'id' => $this->getId(),

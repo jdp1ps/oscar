@@ -336,13 +336,10 @@
 
             <?php
             $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity);
-
+            /** ######## SECTION GESTION DES DOCUMENTS ########## */
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity)): ?>
                 <section id="documents" class="has-btn">
-
-
                     <h2><i class="icon-book"></i> Documents</h2>
-
                     <?php
                     if ($manage): ?>
                         <div class="btn-area">
@@ -354,7 +351,6 @@
                         </div>
                     <?php
                     endif; ?>
-
                     <nav>
                         <?php
                         foreach ($generatedDocuments as $key => $infos): ?>
@@ -367,7 +363,6 @@
                         <?php
                         endforeach; ?>
                     </nav>
-
                     <div id="docv2"></div>
                     <script>
                         requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
