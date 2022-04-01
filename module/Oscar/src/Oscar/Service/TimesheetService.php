@@ -1616,6 +1616,26 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'workpackages' => []
         ];
 
+        $headings = [
+            'total_current'     => 0.0,
+            'total_prjs'        => 0.0,
+            'total_others'      => 0.0,
+            'total_active'      => 0.0,
+            'total_off'      => 0.0,
+            'total'         => 0.0,
+            'current' => [
+                'total' => 0.0,
+                'workpackages' => []
+            ],
+            'prjs' => [
+                'total' => 0.0,
+                'prjs' => []
+            ],
+            'others' => [
+
+            ],
+        ];
+
         $activityInfos = [
             'total' => 0.0,
             'workpackages' => []
@@ -1629,6 +1649,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'total' => 0.0
             ];
             $activityInfos['workpackages'][$workPackage->getId()] = [
+                'label' => $workPackage->getLabel(),
+                'code' => $workPackage->getCode(),
+                'total' => 0.0
+            ];
+            $headings['current']['workpackages'][$workPackage->getId()] = [
                 'label' => $workPackage->getLabel(),
                 'code' => $workPackage->getCode(),
                 'total' => 0.0
@@ -1662,6 +1687,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'group' => $group,
                 'total' => 0.0,
             ];
+
+            $headings['others'][$item] = [
+                'label' => $label,
+                'group' => $group,
+                'total' => 0.0,
+            ];
         }
 
         $output = [
@@ -1680,8 +1711,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 'label' => $periodInfos->getPeriodLabel(),
                 'code' => $periodInfos->getPeriodCode(),
                 'total' => 0.0,
-                'details' => [
-                    'activity' => $activityInfos,
+                'datas' => [
+                    'current' => $activityInfos,
                     'prjs' => [],
                     'others' => $othersModel
                 ]
@@ -1730,8 +1761,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $datasPersons[$personId]['datas']["current"]['total'] += $timesheetDuration;
                     $datasPersons[$personId]['datas']["current"]['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
 
-                    $datasPeriods[$timesheetPeriod]['details']['activity']['total'] += $timesheetDuration;
-                    $datasPeriods[$timesheetPeriod]['details']['activity']['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
+                    $datasPeriods[$timesheetPeriod]['datas']['current']['total'] += $timesheetDuration;
+                    $datasPeriods[$timesheetPeriod]['datas']['current']['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
+
+                    $headings['current']['total'] += $timesheetDuration;
+                    $headings['current']['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
                 } // Autre projet avec Feuille de temps
                 elseif ($timesheetActivityId != null) {
                     $infosProjects['total'] += $timesheetDuration;
@@ -1758,20 +1792,37 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                         ];
                     }
 
+                    if (!array_key_exists($timesheetActivityId, $headings['prjs']['prjs'])) {
+                        $headings['prjs']['prjs'][$timesheetActivityId] = [
+                            'label' => $t['acronym'],
+                            'total' => 0.0
+                        ];
+                    }
+
                     $infosProjects['projects'][$timesheetActivityId]['total'] += $timesheetDuration;
+
                     $datasPersons[$personId]['datas']["prjs"][$timesheetActivityId]['total'] += $timesheetDuration;
+                    $datasPeriods[$timesheetPeriod]['datas']["prjs"][$timesheetActivityId]['total'] += $timesheetDuration;
+
+                    $headings['prjs']['total'] += $timesheetDuration;
+                    $headings['prjs']['prjs'][$timesheetActivityId]['total'] += $timesheetDuration;
+
                 } // Autre
                 else {
                     $key = $t['itemkey'];
                     $datasPersons[$personId]['datas']["others"][$key]['total'] += $timesheetDuration;
+                    $datasPeriods[$timesheetPeriod]['datas']["others"][$key]['total'] += $timesheetDuration;
+                    $headings['others'][$key]['total'] += $timesheetDuration;
                 }
+
+                $headings['total'] += $timesheetDuration;
             }
         }
 
         foreach ($otherProjectsModel as $activityId => $dt) {
             foreach ($datasPeriods as $period => $periodDt) {
-                if (!array_key_exists($activityId, $periodDt['details']['prjs'])) {
-                    $datasPeriods[$period]['details']['prjs'][$activityId] = [
+                if (!array_key_exists($activityId, $periodDt['datas']['prjs'])) {
+                    $datasPeriods[$period]['datas']['prjs'][$activityId] = [
                         'label' => $dt['label'],
                         'total' => 0.0
                     ];
@@ -1787,6 +1838,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
         }
 
+        $output['headings'] = $headings;
         $output['by_persons'] = $datasPersons;
         $output['by_periods'] = $datasPeriods;
 

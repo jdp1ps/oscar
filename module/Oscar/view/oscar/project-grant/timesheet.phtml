@@ -40,12 +40,60 @@
         content: '';
     }
 
-    .synthesis .project {
-        background: #0b97c4;
+
+    .synthesis {
+        border-bottom: thin solid #333;
+        display: flex;
+        font-weight: 100;
     }
-    .synthesis .project {
-        background: #0b97c4;
+
+    .synthesis > * {
+        flex: 1;
+        text-align: right;
+        vertical-align: center;
     }
+
+    .synthesis .label-line {
+        flex: 2;
+    }
+
+    synthesis .group {
+        display: flex;
+    }
+    synthesis .group > * {
+        flex: 1;
+    }
+
+    .synthesis .research {
+        background: #b5dae0;
+    }
+
+    .synthesis .abs {
+        background: #d5e3b1;
+    }
+
+    .synthesis .other {
+        background: #d6b4e4;
+    }
+
+    .synthesis .education {
+        background: #a5e2c6;
+    }
+
+    .synthesis .total {
+        font-weight: 500;
+    }
+
+    .synthesis.heading .total {
+        font-weight: 500;
+    }
+
+    .synthesis .value {
+        padding: .25em;
+        display: block;
+        border-left: thin solid rgba(255,255,255,.5);
+    }
+
 </style>
 <div class="container">
     <h1>
@@ -56,27 +104,6 @@
             Revenir sur la fiche
         </a>
     </h1>
-    <div id="synthesis"></div>
-
-    <script>
-        require(['vue', 'timesheetactivitysynthesis'], function(Vue, TimesheetActivitySynthesis){
-            console.log(TimesheetActivitySynthesis);
-            new Vue({
-                el: '#synthesis',
-                render(h){
-                    return h(TimesheetActivitySynthesis, { props: {initialdata: <?= json_encode($timesheetRepport) ?>}})
-                }
-            })
-        })
-    </script>
-
-    <a href="<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>?year=2020">
-        2020
-    </a>
-
-    <a href="<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>?year=2021">
-        2021
-    </a>
 
     <?php if($activity->isTimesheetAllowed()): ?>
     <section>
@@ -85,7 +112,19 @@
             Synthèse
         </h2>
 
-        <?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>
+        <div id="synthesis"></div>
+
+        <script>
+            require(['vue', 'timesheetactivitysynthesis'], function(Vue, TimesheetActivitySynthesis){
+                console.log(TimesheetActivitySynthesis);
+                new Vue({
+                    el: '#synthesis',
+                    render(h){
+                        return h(TimesheetActivitySynthesis, { props: {initialdata: <?= json_encode($timesheetRepport) ?>}})
+                    }
+                })
+            })
+        </script>
 
     </section>
     <section>

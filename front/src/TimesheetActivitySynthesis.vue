@@ -18,27 +18,90 @@
             </div>
         </transition>
 
-      <section v-for="entry in synthesis.by_persons">
-        <strong>{{ entry.label }}</strong>
 
-        <section class="projet">
-          <div v-for="wp in entry.datas.current.workpackages">
-            {{ wp }}
-          </div>
-        </section>
-
-        <strong class="total">
-          <span class="value">
-            {{ entry.total | duration }}
+      <section class="synthesis heading">
+        <div class="label-line">
+          <span @click="state = (state == 'period' ? 'person' : 'period')" style="cursor: pointer">
+            <i class="icon-angle-left" :class="{'disabled': state == 'period' }"></i>
+            <span v-if="state == 'person'">Par Période</span>
+            <span v-if="state == 'period'">Par Période</span>
+            <i class="icon-angle-right" :class="{'disabled': state == 'person' }"></i>
           </span>
-          heure(s)
-        </strong>
-        <hr>
-        {{ entry }}
+        </div>
+
+        <div v-for="wp in synthesis.headings.current.workpackages" class="main research">
+          <span class="value hours">{{ wp.label }}</span>
+        </div>
+
+        <div class="main research total">
+          <span class="value hours">Total</span>
+        </div>
+
+        <div v-for="prj in synthesis.headings.prjs.prjs" :title="prj.label"  class="research">
+          <span class="value hours">{{ prj.label }}</span>
+        </div>
+
+        <div v-for="other in synthesis.headings.others" :title="other.label" :class="other.group">
+          <span class="value hours">{{ other.label }}</span>
+        </div>
+
+        <div class="total">
+          <span class="value">
+            Total
+          </span>
+        </div>
       </section>
 
+      <section v-for="entry in facet" class="synthesis">
+        <div class="label-line">{{ entry.label }}</div>
 
-       <pre>{{ synthesis }}</pre>
+        <div v-for="wp in entry.datas.current.workpackages" :title="wp.code +' - ' +wp.label" class="main research">
+          <span class="value hours">{{ wp.total | duration }}</span>
+        </div>
+
+        <div class="main research total">
+          <span class="value hours">{{ entry.datas.current.total | duration }}</span>
+        </div>
+
+        <div v-for="prj in entry.datas.prjs" :title="prj.label"  class="research">
+          <span class="value hours">{{ prj.total | duration }}</span>
+        </div>
+
+        <div v-for="other in entry.datas.others" :title="other.label" :class="other.group">
+          <span class="value hours">{{ other.total | duration }}</span>
+        </div>
+
+        <div class="total">
+          {{ entry.total | duration }}
+        </div>
+
+      </section>
+
+      <section class="synthesis heading">
+        <div class="label-line"> Total </div>
+
+        <div v-for="wp in synthesis.headings.current.workpackages" class="main research">
+          <span class="value hours">{{ wp.total | duration }}</span>
+        </div>
+
+        <div class="main research total">
+          <span class="value hours">{{ synthesis.headings.current.total | duration }}</span>
+        </div>
+
+        <div v-for="prj in synthesis.headings.prjs.prjs" :title="prj.label"  class="research">
+          <span class="value hours">{{ prj.total | duration }}</span>
+        </div>
+
+        <div v-for="other in synthesis.headings.others" :title="other.label" :class="other.group">
+          <span class="value hours">{{ other.total | duration }}</span>
+        </div>
+
+        <div class="total">
+          <span class="value">
+            {{ synthesis.headings.total | duration }}
+          </span>
+        </div>
+      </section>
 
     </section>
 </template>
@@ -46,11 +109,8 @@
 
     // node node_modules/.bin/vue-cli-service build --name TimesheetActivitySynthesis --dest public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/TimesheetActivitySynthesis.vue
 
-    import PersonAutoCompleter from "./components/PersonAutoCompleter";
-    import PersonSchedule from "./components/PersonSchedule";
-    import AjaxResolve from "./components/AjaxResolve";
-
-
+    const STATE_PERIOD = "period";
+    const STATE_PERSON = "person";
 
     export default {
         name: 'TimesheetActivitySynthesis',
@@ -68,13 +128,28 @@
 
         data() {
             return {
-                loading: null
+                loading: null,
+                state: STATE_PERIOD
             }
         },
 
         computed: {
           synthesis(){
             return this.initialdata;
+          },
+          facet(){
+            if( this.state == STATE_PERIOD )
+              return this.synthesis.by_periods;
+            else
+              return this.synthesis.by_persons;
+          }
+        },
+
+        filters: {
+          duration(v){
+            let h = Math.floor(v);
+            let m = v - h;
+            return h + "h" +m;
           }
         },
 
