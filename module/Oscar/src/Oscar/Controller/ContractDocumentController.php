@@ -7,6 +7,11 @@
 
 namespace Oscar\Controller;
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Exception;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Oscar\Constantes\Constantes;
 use Oscar\Entity\Activity;
@@ -17,6 +22,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
 use Oscar\Strategy\Upload\conventionSignee;
@@ -29,6 +35,7 @@ use Oscar\Strategy\Upload\TypeOscar;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use Psr\Container\ContainerInterface;
 use Zend\Http\Request;
 use Zend\Json\Server\Exception\HttpException;
 use Zend\Mvc\Controller\Plugin\Redirect;
@@ -52,14 +59,14 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
-     * @return \Oscar\Service\OscarUserContext
+     * @return OscarUserContext
      */
     public function getOscarUserContext(){
         return $this->getOscarUserContextService();
     }
 
     /**
-     * @return \Psr\Container\ContainerInterface
+     * @return ContainerInterface
      */
     public function getServiceLocator(){
         return $this->getServiceContainer();
@@ -99,7 +106,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     /**
      * @return VersionnedDocumentService
-     * @throws \Exception
+     * @throws Exception
      * @annotations Retourne le service pour gérer les documents
      */
 
@@ -116,6 +123,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     ////////////////////////////////////////////////////////////////////////////
 
 
+    /**
+     * @return UnicaenDoctrinePaginator[]
+     * @throws Exception
+     */
     public function indexAction()
     {
         $documents = $this->getVersionnedDocumentService()->getDocuments();
@@ -125,6 +136,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         ];
     }
 
+    /**
+     * @return void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
     public function deleteAction()
     {
         $em = $this->getEntityManager()->getRepository(ContractDocument::class);
@@ -168,6 +184,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
 
+    /**
+     * @return JsonModel
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws \HttpException
+     */
     public function changeTypeAction(){
 
         /** @var Request $request */
@@ -193,6 +215,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
+     * Upload de document sur une activité
+     * /documents-des-contracts/televerser/idActivité/idDocument
+     *
      * @return array
      * @annotations Procédure générique pour l'envoi des fichiers.
      */
@@ -206,13 +231,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
-        /**
-         * ******************************************
-         * Début tests new code
-         */
         try {
-            //ATTENTION JACK SE SERT DES POSTS POUR SAVOIR SI IL UPLOAD OU PAS... ?
-            //Pour info Il faudra récup la section ici (évolution en cours), passer cette section au ServiceContextUpload pour faire traitement et choisir la stratégie adaptée d'upload
+            //ATTENTION JACK SE SERT DES POSTS POUR SAVOIR SI LE CONTEXTE EST UPLOAD OU PAS
+            //Pour info, il faudra récup la section ici (évolution en cours), passer cette section au ServiceContextUpload pour faire traitement et choisir la stratégie adaptée d'upload
             //Exemple récup possible
             //$section = $this->params()->fromQuery('section,' null);
             //Il faudra récupérer le type pour choisir stratégie dans le service serviceUpload pareil que section (évolution prévue sous peu)
@@ -220,13 +241,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             //$typeDocument = this->params()->fromQuery('type', null);
             // Get ID pour remplacement ou ajout
             $docId = $this->params()->fromQuery('id', null);
-            // Les injections de service nécessaires pour le service de traitement upload (une factory pourrait être envisagée).
+            // Les injections de service nécessaires pour le service de traitement upload
             $documentService = $this->getVersionnedDocumentService();
             $oscarUserContext = $this->getOscarUserContext();
             $notificationService = $this->getNotificationService();
             $activityLogService = $this->getActivityLogService();
-
-            /** new code $serviceUpload instanciation */
+            /** $serviceUpload instanciation */
             $serviceUpload = new ServiceContextUpload
             (
                 $this->getRequest(),
@@ -239,13 +259,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $notificationService,
                 $activityLogService
             );
-
-            $treatementUpload = $serviceUpload->treatementUpload();
-            // IF TRUE -> POSTS
-            if(true == $treatementUpload)
+            $processUpload = $serviceUpload->processUpload();
+            // IF TRUE =-> POSTS
+            if(true == $processUpload)
             {
-                // Nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
-                //echo "Nous avons des posts il a donc eu traitement ! se servir des ETATS de la stratégie pour savoir quoi faire";
+                // Le retour bool true indique que nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
                 switch ($serviceUpload->getStrategy()->getEtat()){
                     case true:
                         // Infos juste pour xdebug
@@ -257,11 +275,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                         }
                         break;
                     default:
-                        echo "pas normal d'arrivé là... !";
+                        throw new Exception("Erreur arrivé dans le cas par défaut switch case ? -> Méthode : ". __METHOD__ . " Fichier : " . __FILE__ . " Ligne : " . __LINE__);
                         break;
                 }
             }
-
+            // Affichage template par défaut upload new doc -> view/oscar/contract-document/upload.phtml
             return [
                 'activity' => $activity,
                 'data'  => $datas,
@@ -269,15 +287,18 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 'tabs' => $this->getContractDocumentService()->getContractTabDocuments(),
             ];
 
-        }catch (\Exception $e){
+        }catch (Exception $e){
+            // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
+            $this->getLoggerService()->error($e->getMessage());
             die($e->getMessage());
         }
-        /**
-         * ******************************************
-         * Fin nouveau code
-         */
     }
 
+    /**
+     * @return void
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
     public function downloadAction()
     {
         $idDoc = $this->params()->fromRoute('id');

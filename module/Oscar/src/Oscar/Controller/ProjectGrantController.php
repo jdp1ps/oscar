@@ -34,6 +34,7 @@ use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\SpentTypeGroup;
+use Oscar\Entity\TabDocument;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
@@ -1514,6 +1515,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $personShow = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
 
         $out = $this->baseJsonResponse();
+
+        // ID des tabs
+        $tabsArray = [];
+        $entitiesTabs = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+
+        foreach ($entitiesTabs as $tab){
+            $tabsArray [] = $tab->toJson();
+        }
+
         $datas = [];
 
         /** @var ContractDocument $doc */
@@ -1539,10 +1549,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $datas[] = $docDt;
         }
         $out['datas'] = $datas;
+        $out['tabs'] =  $tabsArray;;
 
         return new JsonModel($out);
     }
 
+    /**
+     * @return array
+     * @throws OscarException
+     */
     public function notificationsAction()
     {
         /** @var Activity $entity */
@@ -1921,6 +1936,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
+     * activites-de-recherche/fiche-detaillee/idActivité
+     *
      * @return array
      * @throws OscarException
      * @throws NoResultException
