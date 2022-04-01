@@ -1697,7 +1697,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $output = [
             'period_from' => $startPeriod->getPeriodLabel(),
-            'period_to' => $endPeriod->getPeriodLabel()
+            'period_to' => $endPeriod->getPeriodLabel(),
+            'activity_id' => $activity->getId()
         ];
 
         ////////////////////////////////////////////////////////////////////////////:

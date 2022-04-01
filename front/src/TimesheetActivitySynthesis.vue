@@ -52,8 +52,14 @@
         </div>
       </section>
 
-      <section v-for="entry in facet" class="synthesis">
-        <div class="label-line">{{ entry.label }}</div>
+      <section v-for="entry, key in facet" class="synthesis">
+        <div class="label-line">
+          {{ entry.label }}
+          <a :href="'/feuille-de-temps/synthesisactivity?activity_id=' +synthesis.activity_id +'&format=pdf&period=' + key">
+            <i class="icon-file-pdf"></i>
+            Télécharger
+          </a>
+        </div>
 
         <div v-for="wp in entry.datas.current.workpackages" :title="wp.code +' - ' +wp.label" class="main research">
           <span class="value hours">{{ wp.total | duration }}</span>
@@ -77,7 +83,7 @@
 
       </section>
 
-      <section class="synthesis heading">
+      <section class="synthesis heading sum">
         <div class="label-line"> Total </div>
 
         <div v-for="wp in synthesis.headings.current.workpackages" class="main research">
