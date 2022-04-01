@@ -1,4 +1,5 @@
 <template>
+    <!-- Modal de suppression de document -->
     <section style="position: relative; min-height: 100px">
         <ajax-oscar :oscar-remote-data="remoterState" />
         <div class="overlay" v-if="deleteData">
@@ -21,7 +22,7 @@
                 </a>
             </div>
         </div>
-
+        <!-- Modal de modification du type -->
         <div class="overlay" v-if="editData">
             <div class="overlay-content">
                 <h2>
@@ -35,7 +36,6 @@
                         <option :value="id" v-for="t, id in documentTypes" :key="id">{{ t }}</option>
                     </select>
                 </div>
-
                 <!--
                 <label for="filename">Nom du fichier</label>
                 <p class="help">
@@ -43,7 +43,6 @@
                 </p>
                 <input type="text" id="filename" class="form-control" v-model="editData.basename" />
                 -->
-
                 <button class="btn btn-danger" @click="editData = null">
                     <i class="icon-cancel-alt"></i> Annuler
                 </button>
@@ -54,6 +53,7 @@
             </div>
         </div>
 
+        <!-- Barre de tri des documents -->
         <div>
             <div class="oscar-sorter">
                 <i class=" icon-sort"></i>
@@ -76,6 +76,14 @@
             </div>
         </div>
 
+      <!-- Informations par document -->
+      <!-- Section Onglets -->
+        <ul v-for="tab in tabs" :key="tab.id">
+          <li style="cursor:pointer;" v-on:click="activeTab(tab.id)">
+            <i class="picto icon-Activity"></i> {{ tab.label }}
+          </li>
+        </ul>
+      <!-- Section boucle documents -->
         <article class="card xs" v-for="document in documentsPacked" :key="document.id">
             <div class="card-title">
                 <i class="picto icon-doc" :class="'doc' + document.extension"></i>
@@ -109,7 +117,6 @@
                         <span v-if="sub.uploader">
                         par <strong>{{ sub.uploader.displayname }}</strong>
                         </span>
-
                         <a :href="sub.urlDownload">
                             <i class="icon-download-outline"></i>
                             Télécharger cette version
@@ -148,11 +155,10 @@
     cd front
 
     Pour compiler en temps réél :
-    node node_module/.bin/gulp activityDocumentWatch
+    node node_modules/.bin/gulp activityDocumentWatch
 
     Pour compiler :
-    node node_module/.bin/gulp activityDocument
-
+    node node_modules/.bin/gulp activityDocument
      */
 
     import AjaxOscar from "./remote/AjaxOscar";
@@ -179,16 +185,17 @@
 
         data(){
             return {
-                formData: null,
-                error: null,
-                deleteData: null,
-                editData: null,
-                documents: [],
-                loading: true,
-                sortField: 'dateUpload',
-                sortDirection: -1,
-                editable: true,
-                remoterState: oscarRemoteData.state
+              tabs: null,
+              formData: null,
+              error: null,
+              deleteData: null,
+              editData: null,
+              documents: [],
+              loading: true,
+              sortField: 'dateUpload',
+              sortDirection: -1,
+              editable: true,
+              remoterState: oscarRemoteData.state
             }
         },
 
@@ -214,77 +221,85 @@
         },
 
         methods:{
-            deleteDocument(document) {
-                this.deleteData = document;
-            },
+          activeTab(tabId){
+            console.log(tabId)
+          } ,
 
-            order: function (field) {
-                if( this.sortField == field ){
-                    this.sortDirection *= -1;
-                } else {
-                    this.sortField = field;
-                }
-            },
+          deleteDocument(document) {
+              this.deleteData = document;
+          },
 
-            cssSort: function(compare){
-                return compare == this.sortField ? "active" : "";
-            },
+          order: function (field) {
+              if( this.sortField == field ){
+                  this.sortDirection *= -1;
+              } else {
+                  this.sortField = field;
+              }
+          },
 
-            handlerEdit(document){
-                console.log(document);
-                this.editData = {
-                    'documentype_id': document.category.id,
-                    'basename': document.basename,
-                    'document': document
-                };
-            },
+          cssSort: function(compare){
+              return compare == this.sortField ? "active" : "";
+          },
 
-            performEdit(){
-                let documentId = this.editData.document.id;
-                let newType = this.editData.documentype_id;
-                this.editData = null;
-                let formData = new FormData();
-                formData.append('documentId', documentId);
-                formData.append('type', newType);
-                oscarRemoteData
-                    .setPendingMessage("Modification du type de document")
-                    .setErrorMessage("Impossible de modifier le type de document")
-                    .performPost(this.urlDocumentType, formData, (response) => {
-                        this.fetch();
-                    });
-            },
+          handlerEdit(document){
+              console.log(document);
+              this.editData = {
+                  'documentype_id': document.category.id,
+                  'basename': document.basename,
+                  'document': document
+              };
+          },
 
-            handlerSuccess(success){
-                let data = success.data.datas;
-                let documentsOrdered = [];
-                let documents = {};
+          performEdit(){
+              let documentId = this.editData.document.id;
+              let newType = this.editData.documentype_id;
+              this.editData = null;
+              let formData = new FormData();
+              formData.append('documentId', documentId);
+              formData.append('type', newType);
+              oscarRemoteData
+                  .setPendingMessage("Modification du type de document")
+                  .setErrorMessage("Impossible de modifier le type de document")
+                  .performPost(this.urlDocumentType, formData, (response) => {
+                      this.fetch();
+                  });
+          },
 
-                data.forEach(function(doc){
-                    doc.categoryText = doc.category ? doc.category.label : "";
-                    doc.explode = true;
-                    var filename = doc.fileName;
-                    if( ! documents[filename] ){
-                        documents[filename] = doc;
-                        documents[filename].previous = [];
-                        documentsOrdered.push(doc);
-                    } else {
-                        documents[filename].previous.push(doc);
-                    }
-                });
-                this.documents = documentsOrdered;
-            },
+          handlerSuccess(success){
+              let data = success.data.datas;
+              let objectsTabs = success.data.tabs;
+              //console.log(objectsTabs);
+              this.tabs = objectsTabs;
+              //console.log(this.tabs);
+              let documentsOrdered = [];
+              let documents = {};
 
-            fetch(){
-                oscarRemoteData
-                    .setPendingMessage("Chargement des documents")
-                    .setErrorMessage("Impossible de charger les documents")
-                    .performGet(this.url, this.handlerSuccess);
-            }
-        },
+              data.forEach(function(doc){
+                  doc.categoryText = doc.category ? doc.category.label : "";
+                  doc.explode = true;
+                  var filename = doc.fileName;
+                  if( ! documents[filename] ){
+                      documents[filename] = doc;
+                      documents[filename].previous = [];
+                      documentsOrdered.push(doc);
+                  } else {
+                      documents[filename].previous.push(doc);
+                  }
+              });
+              this.documents = documentsOrdered;
+          },
 
-        mounted(){
-            this.fetch();
-        }
+          fetch(){
+              oscarRemoteData
+                  .setPendingMessage("Chargement des documents")
+                  .setErrorMessage("Impossible de charger les documents")
+                  .performGet(this.url, this.handlerSuccess);
+          }
+      },
+
+      mounted(){
+          this.fetch();
+      }
 
     }
 </script>

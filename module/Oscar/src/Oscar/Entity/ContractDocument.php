@@ -191,10 +191,12 @@ class ContractDocument extends AbstractVersionnedDocument
 
     /**
      * @param TabDocument $tabDocument
+     * @return $this
      */
-    public function setTabDocument(TabDocument $tabDocument): void
+    public function setTabDocument(TabDocument $tabDocument):self
     {
         $this->tabDocument = $tabDocument;
+        return $this;
     }
 
     /**
@@ -206,14 +208,20 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
     /**
-     * @param bool $private
+     * @param bool|null $private
+     * @return $this
      */
-    public function setPrivate(?bool $private): void
+    public function setPrivate(?bool $private):self
     {
         $this->private = $private;
+        return $this;
     }
 
 
+    /**
+     * @param $options
+     * @return array
+     */
     public function toJson( $options=false ){
         $defaultOptions = [
             'urlDelete' => false,
@@ -245,6 +253,8 @@ class ContractDocument extends AbstractVersionnedDocument
             'dateSend' => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
             'extension' => $this->getExtension(),
             'category' => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
+            'tab' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
+            'private' => $this->isPrivate(),
             'urlDelete' => $options['urlDelete'],
             'urlDownload' => $options['urlDownload'],
             'urlReupload' => $options['urlReupload'],
