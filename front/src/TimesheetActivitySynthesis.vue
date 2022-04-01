@@ -154,7 +154,7 @@
         filters: {
           duration(v){
             let h = Math.floor(v);
-            let m = v - h;
+            let m = Math.round(60 * (v - h));
             return h + "h" +m;
           }
         },
