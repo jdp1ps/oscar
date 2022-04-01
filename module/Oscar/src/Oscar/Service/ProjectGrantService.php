@@ -1959,7 +1959,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
-     * Retourne le contrat.
+     * Retourne le contrat/activité par son id
      *
      * @param $projectGrantId Identifiant du contrat.
      * @return Activity

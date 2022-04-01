@@ -47,6 +47,7 @@ class TypeOscar implements TypeDocumentInterface
     public function returnStatut(): bool
     {
         // TODO: Implement returnStatut() method.
+        return false;
     }
 
     /**

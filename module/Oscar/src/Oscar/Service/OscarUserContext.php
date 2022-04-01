@@ -738,6 +738,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /**
+     * Vérifie les privilèges sur une entité privilègeVérifié/entitéCiblée
+     *
      * @param $privilege
      * @param $entity
      */

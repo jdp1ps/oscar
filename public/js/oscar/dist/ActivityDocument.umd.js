@@ -107,7 +107,9 @@ var buildURL = __webpack_require__("30b5");
 var InterceptorManager = __webpack_require__("f6b4");
 var dispatchRequest = __webpack_require__("5270");
 var mergeConfig = __webpack_require__("4a7b");
+var validator = __webpack_require__("848b");
 
+var validators = validator.validators;
 /**
  * Create a new instance of Axios
  *
@@ -147,20 +149,71 @@ Axios.prototype.request = function request(config) {
     config.method = 'get';
   }
 
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
+  var transitional = config.transitional;
 
+  if (transitional !== undefined) {
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      forcedJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      clarifyTimeoutError: validators.transitional(validators.boolean, '1.0.0')
+    }, false);
+  }
+
+  // filter out skipped interceptors
+  var requestInterceptorChain = [];
+  var synchronousRequestInterceptors = true;
   this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return;
+    }
+
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
   });
 
+  var responseInterceptorChain = [];
   this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
   });
 
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
+  var promise;
+
+  if (!synchronousRequestInterceptors) {
+    var chain = [dispatchRequest, undefined];
+
+    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+    chain = chain.concat(responseInterceptorChain);
+
+    promise = Promise.resolve(config);
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+
+    return promise;
+  }
+
+
+  var newConfig = config;
+  while (requestInterceptorChain.length) {
+    var onFulfilled = requestInterceptorChain.shift();
+    var onRejected = requestInterceptorChain.shift();
+    try {
+      newConfig = onFulfilled(newConfig);
+    } catch (error) {
+      onRejected(error);
+      break;
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
   }
 
   return promise;
@@ -261,6 +314,7 @@ module.exports = function bind(fn, thisArg) {
 
 var utils = __webpack_require__("c532");
 var normalizeHeaderName = __webpack_require__("c8af");
+var enhanceError = __webpack_require__("387f");
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -284,12 +338,35 @@ function getDefaultAdapter() {
   return adapter;
 }
 
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils.trim(rawValue);
+    } catch (e) {
+      if (e.name !== 'SyntaxError') {
+        throw e;
+      }
+    }
+  }
+
+  return (encoder || JSON.stringify)(rawValue);
+}
+
 var defaults = {
+
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+
   adapter: getDefaultAdapter(),
 
   transformRequest: [function transformRequest(data, headers) {
     normalizeHeaderName(headers, 'Accept');
     normalizeHeaderName(headers, 'Content-Type');
+
     if (utils.isFormData(data) ||
       utils.isArrayBuffer(data) ||
       utils.isBuffer(data) ||
@@ -306,20 +383,32 @@ var defaults = {
       setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
       return data.toString();
     }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
+    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+      setContentTypeIfUnset(headers, 'application/json');
+      return stringifySafely(data);
     }
     return data;
   }],
 
   transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
+    var transitional = this.transitional;
+    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
       try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE');
+          }
+          throw e;
+        }
+      }
     }
+
     return data;
   }],
 
@@ -677,6 +766,13 @@ module.exports = function settle(resolve, reject, response) {
 
 /***/ }),
 
+/***/ "4a0c":
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"_args\":[[\"axios@0.21.4\",\"/home/marie201/projetsUnicaen/projetOscar/oscarSpartan/front\"]],\"_development\":true,\"_from\":\"axios@0.21.4\",\"_id\":\"axios@0.21.4\",\"_inBundle\":false,\"_integrity\":\"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==\",\"_location\":\"/axios\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"axios@0.21.4\",\"name\":\"axios\",\"escapedName\":\"axios\",\"rawSpec\":\"0.21.4\",\"saveSpec\":null,\"fetchSpec\":\"0.21.4\"},\"_requiredBy\":[\"#DEV:/\"],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz\",\"_spec\":\"0.21.4\",\"_where\":\"/home/marie201/projetsUnicaen/projetOscar/oscarSpartan/front\",\"author\":{\"name\":\"Matt Zabriskie\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"dependencies\":{\"follow-redirects\":\"^1.14.0\"},\"description\":\"Promise based HTTP client for the browser and node.js\",\"devDependencies\":{\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.3.0\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^23.0.0\",\"grunt-karma\":\"^4.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^4.0.2\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^6.3.2\",\"karma-chrome-launcher\":\"^3.1.0\",\"karma-firefox-launcher\":\"^2.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^4.3.6\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.8\",\"karma-webpack\":\"^4.0.2\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^8.2.1\",\"sinon\":\"^4.5.0\",\"terser-webpack-plugin\":\"^4.2.3\",\"typescript\":\"^4.0.5\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^4.44.2\",\"webpack-dev-server\":\"^3.11.0\"},\"homepage\":\"https://axios-http.com\",\"jsdelivr\":\"dist/axios.min.js\",\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"license\":\"MIT\",\"main\":\"index.js\",\"name\":\"axios\",\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/axios/axios.git\"},\"scripts\":{\"build\":\"NODE_ENV=production grunt build\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"examples\":\"node ./examples/server.js\",\"fix\":\"eslint --fix lib/**/*.js\",\"postversion\":\"git push && git push --tags\",\"preversion\":\"npm test\",\"start\":\"node ./sandbox/server.js\",\"test\":\"grunt test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\"},\"typings\":\"./index.d.ts\",\"unpkg\":\"dist/axios.min.js\",\"version\":\"0.21.4\"}");
+
+/***/ }),
+
 /***/ "4a7b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -805,7 +901,8 @@ module.exports = function dispatchRequest(config) {
   config.headers = config.headers || {};
 
   // Transform request data
-  config.data = transformData(
+  config.data = transformData.call(
+    config,
     config.data,
     config.headers,
     config.transformRequest
@@ -831,7 +928,8 @@ module.exports = function dispatchRequest(config) {
     throwIfCancellationRequested(config);
 
     // Transform response data
-    response.data = transformData(
+    response.data = transformData.call(
+      config,
       response.data,
       response.headers,
       config.transformResponse
@@ -844,7 +942,8 @@ module.exports = function dispatchRequest(config) {
 
       // Transform response data
       if (reason && reason.response) {
-        reason.response.data = transformData(
+        reason.response.data = transformData.call(
+          config,
           reason.response.data,
           reason.response.headers,
           config.transformResponse
@@ -854,6 +953,25 @@ module.exports = function dispatchRequest(config) {
 
     return Promise.reject(reason);
   });
+};
+
+
+/***/ }),
+
+/***/ "5f02":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
 };
 
 
@@ -970,6 +1088,119 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
     return combineURLs(baseURL, requestedURL);
   }
   return requestedURL;
+};
+
+
+/***/ }),
+
+/***/ "848b":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var pkg = __webpack_require__("4a0c");
+
+var validators = {};
+
+// eslint-disable-next-line func-names
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+  validators[type] = function validator(thing) {
+    return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+  };
+});
+
+var deprecatedWarnings = {};
+var currentVerArr = pkg.version.split('.');
+
+/**
+ * Compare package versions
+ * @param {string} version
+ * @param {string?} thanVersion
+ * @returns {boolean}
+ */
+function isOlderVersion(version, thanVersion) {
+  var pkgVersionArr = thanVersion ? thanVersion.split('.') : currentVerArr;
+  var destVer = version.split('.');
+  for (var i = 0; i < 3; i++) {
+    if (pkgVersionArr[i] > destVer[i]) {
+      return true;
+    } else if (pkgVersionArr[i] < destVer[i]) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator
+ * @param {string?} version
+ * @param {string} message
+ * @returns {function}
+ */
+validators.transitional = function transitional(validator, version, message) {
+  var isDeprecated = version && isOlderVersion(version);
+
+  function formatMessage(opt, desc) {
+    return '[Axios v' + pkg.version + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+  }
+
+  // eslint-disable-next-line func-names
+  return function(value, opt, opts) {
+    if (validator === false) {
+      throw new Error(formatMessage(opt, ' has been removed in ' + version));
+    }
+
+    if (isDeprecated && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        formatMessage(
+          opt,
+          ' has been deprecated since v' + version + ' and will be removed in the near future'
+        )
+      );
+    }
+
+    return validator ? validator(value, opt, opts) : true;
+  };
+};
+
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */
+
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== 'object') {
+    throw new TypeError('options must be an object');
+  }
+  var keys = Object.keys(options);
+  var i = keys.length;
+  while (i-- > 0) {
+    var opt = keys[i];
+    var validator = schema[opt];
+    if (validator) {
+      var value = options[opt];
+      var result = value === undefined || validator(value, opt, options);
+      if (result !== true) {
+        throw new TypeError('option ' + opt + ' must be ' + result);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw Error('Unknown option ' + opt);
+    }
+  }
+}
+
+module.exports = {
+  isOlderVersion: isOlderVersion,
+  assertOptions: assertOptions,
+  validators: validators
 };
 
 
@@ -1144,6 +1375,7 @@ module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
     var requestData = config.data;
     var requestHeaders = config.headers;
+    var responseType = config.responseType;
 
     if (utils.isFormData(requestData)) {
       delete requestHeaders['Content-Type']; // Let the browser set it
@@ -1164,23 +1396,14 @@ module.exports = function xhrAdapter(config) {
     // Set the request timeout in MS
     request.timeout = config.timeout;
 
-    // Listen for ready state
-    request.onreadystatechange = function handleLoad() {
-      if (!request || request.readyState !== 4) {
+    function onloadend() {
+      if (!request) {
         return;
       }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
+        request.responseText : request.response;
       var response = {
         data: responseData,
         status: request.status,
@@ -1194,7 +1417,30 @@ module.exports = function xhrAdapter(config) {
 
       // Clean up request
       request = null;
-    };
+    }
+
+    if ('onloadend' in request) {
+      // Use onloadend if available
+      request.onloadend = onloadend;
+    } else {
+      // Listen for ready state to emulate onloadend
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+
+        // The request errored out and we didn't get a response, this will be
+        // handled by onerror instead
+        // With one exception: request that using file: protocol, most browsers
+        // will return status as 0 even though it's a successful request
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+          return;
+        }
+        // readystate handler is calling before onerror or ontimeout handlers,
+        // so we should call onloadend on the next 'tick'
+        setTimeout(onloadend);
+      };
+    }
 
     // Handle browser request cancellation (as opposed to a manual cancellation)
     request.onabort = function handleAbort() {
@@ -1224,7 +1470,10 @@ module.exports = function xhrAdapter(config) {
       if (config.timeoutErrorMessage) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
-      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+      reject(createError(
+        timeoutErrorMessage,
+        config,
+        config.transitional && config.transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
         request));
 
       // Clean up request
@@ -1264,16 +1513,8 @@ module.exports = function xhrAdapter(config) {
     }
 
     // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType;
     }
 
     // Handle progress if needed
@@ -1387,6 +1628,7 @@ module.exports = function parseHeaders(headers) {
 
 
 var utils = __webpack_require__("c532");
+var defaults = __webpack_require__("2444");
 
 /**
  * Transform the data for a request or a response
@@ -1397,9 +1639,10 @@ var utils = __webpack_require__("c532");
  * @returns {*} The resulting transformed data
  */
 module.exports = function transformData(data, headers, fns) {
+  var context = this || defaults;
   /*eslint no-param-reassign:0*/
   utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
+    data = fn.call(context, data, headers);
   });
 
   return data;
@@ -1415,8 +1658,6 @@ module.exports = function transformData(data, headers, fns) {
 
 
 var bind = __webpack_require__("1d2b");
-
-/*global toString:true*/
 
 // utils is a library of generic helper functions non-specific to axios
 
@@ -1601,7 +1842,7 @@ function isURLSearchParams(val) {
  * @returns {String} The String freed of excess whitespace
  */
 function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
@@ -1839,6 +2080,9 @@ axios.all = function all(promises) {
   return Promise.all(promises);
 };
 axios.spread = __webpack_require__("0df6");
+
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__("5f02");
 
 module.exports = axios;
 
@@ -2222,10 +2466,12 @@ function InterceptorManager() {
  *
  * @return {Number} An ID used to remove interceptor later
  */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
   this.handlers.push({
     fulfilled: fulfilled,
-    rejected: rejected
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
   });
   return this.handlers.length - 1;
 };
@@ -2293,21 +2539,23 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=3378e2f0&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),(_vm.editData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Modification du document "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.editData = null}}},[_vm._v("X")])]),_c('label',{attrs:{"for":"typedocument"}},[_vm._v("Type de document")]),_c('div',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.editData.documentype_id),expression:"editData.documentype_id"}],attrs:{"name":"type","id":"typedocument"},on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.editData, "documentype_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0])}}},_vm._l((_vm.documentTypes),function(t,id){return _c('option',{key:id,domProps:{"value":id}},[_vm._v(_vm._s(t))])}),0)]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.editData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.performEdit()}}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Enregistrer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),_c('small',{staticClass:"text-light"},[_vm._v(_vm._s(document.categoryText)+" ~ ")]),_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])]),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-upload-outline"}),_vm._v(" Télécharger ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")]),_c('a',{staticClass:"btn btn-xs btn-default",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.handlerEdit(document)}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" Modifier ")])])])])})],2)}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5e98633e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=template&id=1c36b13b&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticStyle:{"position":"relative","min-height":"100px"}},[_c('ajax-oscar',{attrs:{"oscar-remote-data":_vm.remoterState}}),(_vm.deleteData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Suppression du fichier ? "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.deleteData = null}}},[_vm._v("X")])]),_c('p',{staticClass:"alert-danger alert"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" Souhaitez-vous supprimer le fichier "),_c('strong',[_vm._v(_vm._s(_vm.deleteData.fileName))]),_vm._v(" ? ")]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.deleteData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":_vm.deleteData.urlDelete}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Confirmer ")])])]):_vm._e(),(_vm.editData)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content"},[_c('h2',[_vm._v(" Modification du document "),_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.editData = null}}},[_vm._v("X")])]),_c('label',{attrs:{"for":"typedocument"}},[_vm._v("Type de document")]),_c('div',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.editData.documentype_id),expression:"editData.documentype_id"}],attrs:{"name":"type","id":"typedocument"},on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.$set(_vm.editData, "documentype_id", $event.target.multiple ? $$selectedVal : $$selectedVal[0])}}},_vm._l((_vm.documentTypes),function(t,id){return _c('option',{key:id,domProps:{"value":id}},[_vm._v(_vm._s(t))])}),0)]),_c('button',{staticClass:"btn btn-danger",on:{"click":function($event){_vm.editData = null}}},[_c('i',{staticClass:"icon-cancel-alt"}),_vm._v(" Annuler ")]),_c('a',{staticClass:"btn btn-success",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.performEdit()}}},[_c('i',{staticClass:"icon-valid"}),_vm._v(" Enregistrer ")])])]):_vm._e(),_c('div',[_c('div',{staticClass:"oscar-sorter"},[_c('i',{staticClass:" icon-sort"}),_vm._v(" Tier les résultats par : "),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('dateUpload'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('dateUpload')}}},[_vm._v(" Date d'upload "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('fileName'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('fileName')}}},[_vm._v(" Nom du fichier "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})]),_c('a',{staticClass:"oscar-sorter-item",class:_vm.cssSort('categoryText'),attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.order('categoryText')}}},[_vm._v(" Type de document "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == 1),expression:"sortDirection == 1"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(_vm.sortDirection == -1),expression:"sortDirection == -1"}],staticClass:"icon-angle-up"})])])]),_vm._l((_vm.tabs),function(tab){return _c('ul',{key:tab.id},[_c('li',{staticStyle:{"cursor":"pointer"},on:{"click":function($event){return _vm.activeTab(tab.id)}}},[_c('i',{staticClass:"picto icon-Activity"}),_vm._v(" "+_vm._s(tab.label)+" ")])])}),_vm._l((_vm.documentsPacked),function(document){return _c('article',{key:document.id,staticClass:"card xs"},[_c('div',{staticClass:"card-title"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + document.extension}),_c('small',{staticClass:"text-light"},[_vm._v(_vm._s(document.categoryText)+" ~ ")]),_c('strong',[_vm._v(_vm._s(document.fileName))]),_c('small',{staticClass:"text-light",attrs:{"title":document.fileSize + ' octet(s)'}},[_vm._v(" ("+_vm._s(_vm._f("filesize")(document.fileSize))+")")])]),_c('p',[_vm._v(" "+_vm._s(document.information)+" ")]),_c('div',{staticClass:"card-content"},[_c('p',{staticClass:"text-highlight"},[_vm._v(" Fichier "),_c('strong',[_vm._v(_vm._s(document.extension))]),_vm._v(" version "+_vm._s(document.version)+", téléversé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFull")(document.dateUpload)))]),(document.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(document.uploader.displayname))])]):_vm._e()]),(document.previous.length)?_c('div',{staticClass:"exploder",on:{"click":function($event){document.explode = !document.explode}}},[_vm._v(" Versions précédentes "),_c('i',{directives:[{name:"show",rawName:"v-show",value:(!document.explode),expression:"!document.explode"}],staticClass:"icon-angle-down"}),_c('i',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}],staticClass:"icon-angle-up"})]):_vm._e(),(document.previous.length)?_c('div',{directives:[{name:"show",rawName:"v-show",value:(document.explode),expression:"document.explode"}]},_vm._l((document.previous),function(sub){return _c('article',{key:sub.id,staticClass:"subdoc text-highlight"},[_c('i',{staticClass:"picto icon-doc",class:'doc' + sub.extension}),_c('strong',[_vm._v(_vm._s(sub.fileName))]),_vm._v(" version "),_c('em',[_vm._v(_vm._s(sub.version)+" ")]),_vm._v(", téléchargé le "),_c('time',[_vm._v(_vm._s(_vm._f("dateFullSort")(sub.dateUpload)))]),(sub.uploader)?_c('span',[_vm._v(" par "),_c('strong',[_vm._v(_vm._s(sub.uploader.displayname))])]):_vm._e(),_c('a',{attrs:{"href":sub.urlDownload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Télécharger cette version ")])])}),0):_vm._e(),_c('nav',{staticClass:"text-right show-over"},[(document.urlDownload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlDownload}},[_c('i',{staticClass:"icon-upload-outline"}),_vm._v(" Télécharger ")]):_vm._e(),(document.urlReupload)?_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":document.urlReupload}},[_c('i',{staticClass:"icon-download-outline"}),_vm._v(" Nouvelle version ")]):_vm._e(),_c('a',{staticClass:"btn btn-default btn-xs",on:{"click":function($event){$event.preventDefault();return _vm.deleteDocument(document)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer ")]),_c('a',{staticClass:"btn btn-xs btn-default",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();return _vm.handlerEdit(document)}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" Modifier ")])])])])})],2)}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=3378e2f0&
+// CONCATENATED MODULE: ./src/ActivityDocument.vue?vue&type=template&id=1c36b13b&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5f3b1288-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
-var AjaxOscarvue_type_template_id_3372c719_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"1em","right":"1em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('i',[_vm._v(_vm._s(_vm.oscarRemoteData.error))])]):_vm._e()])])}
-var AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns = []
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5e98633e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
+var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.oscarRemoteData.loading || _vm.oscarRemoteData.error),expression:"oscarRemoteData.loading || oscarRemoteData.error"}],staticClass:"oscar-ajax",class:{ 'has-error': _vm.oscarRemoteData.error != '', 'pending': _vm.oscarRemoteData.loading }},[_c('div',{staticClass:"oscar-ajax-content"},[(_vm.oscarRemoteData.loading)?_c('div',{staticClass:"loading-message"},[_c('i',{staticClass:"icon-spinner animate-spin animate"}),_vm._v(" "+_vm._s(_vm.oscarRemoteData.pendingMessage)+" ")]):_vm._e(),(_vm.oscarRemoteData.error)?_c('div',{staticClass:"error-message"},[_c('span',{staticStyle:{"font-weight":"bold","position":"absolute","top":"5em","right":"5em"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("x")]),_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.oscarRemoteData.errorMessage)+" ")]),_vm._v(" : "),_c('code',[_vm._v(_vm._s(_vm.oscarRemoteData.error))]),_c('br'),_c('a',{staticStyle:{"color":"white"},attrs:{"href":"#"},on:{"click":function($event){_vm.oscarRemoteData.error = false}}},[_vm._v("Fermer")])]):_vm._e()])])}
+var AjaxOscarvue_type_template_id_ab46e5da_scoped_true_staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=3372c719&scoped=true&
+// CONCATENATED MODULE: ./src/remote/AjaxOscar.vue?vue&type=template&id=ab46e5da&scoped=true&
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=script&lang=js&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/remote/AjaxOscar.vue?vue&type=script&lang=js&
+//
+//
 //
 //
 //
@@ -2448,11 +2696,11 @@ function normalizeComponent (
 
 var component = normalizeComponent(
   remote_AjaxOscarvue_type_script_lang_js_,
-  AjaxOscarvue_type_template_id_3372c719_scoped_true_render,
-  AjaxOscarvue_type_template_id_3372c719_scoped_true_staticRenderFns,
+  AjaxOscarvue_type_template_id_ab46e5da_scoped_true_render,
+  AjaxOscarvue_type_template_id_ab46e5da_scoped_true_staticRenderFns,
   false,
   null,
-  "3372c719",
+  "ab46e5da",
   null
   
 )
@@ -2469,9 +2717,10 @@ class OscarRemoteData_OscarRemoteData {
     constructor() {
         this.state = {
             loading: false,
+            debug: false,
             error: "",
             datas: null,
-            errorMessage: "Erreur AJAX",
+            errorMessage: "",
             pendingMessage: "Chargement des données"
         }
     }
@@ -2481,79 +2730,112 @@ class OscarRemoteData_OscarRemoteData {
      * @param pendingMessage
      * @returns {OscarRemoteData}
      */
-    setPendingMessage(pendingMessage){
+    setPendingMessage(pendingMessage) {
         this.state.pendingMessage = pendingMessage;
         return this;
     }
 
-    setErrorMessage(errorMessage){
+    setErrorMessage(errorMessage) {
         this.state.errorMessage = errorMessage;
         return this;
     }
 
-    getAxiosInstance(){
+    getAxiosInstance() {
         let instance = axios_default.a.create({});
         instance.defaults.headers.common['X_REQUESTED_WITH'] = 'XMLHttpRequest';
         return instance;
     }
 
-    performGet(url, handlerResponse = null, handlerError = null){
+    /**
+     * Permet d'activer/désactiver le mode debug
+     * @param bool
+     */
+    setDebug(b) {
+        this.state.debug = b;
+        return this;
+    }
+
+    debug() {
+        if (this.state.debug) {
+            console.log.apply(this, arguments);
+        }
+    }
+
+    performGet(url, handlerResponse = null, handlerError = null) {
+        this.debug("[ORD] GET " + url);
         this.state.loading = true;
         this.getAxiosInstance().get(url)
             .then(
                 response => {
+                    this.debug("   > response ", response);
                     this.state.datas = response.data;
-                    if( handlerResponse ){
+                    if (handlerResponse) {
                         handlerResponse(response);
+                    } else {
+                        this.debug(' > NO handerResponse given');
                     }
                 })
             .catch(
                 error => {
+                    this.debug("   > error ", error);
+                    this.debug(error);
+
                     this.state.error = error;
-                    if( handlerError ){
+                    if (handlerError) {
                         handlerError(error);
+                    } else {
+                        this.debug(' > NO handlerError given');
                     }
                 })
-            .finally( () => {
+            .finally(() => {
                 this.state.loading = false;
             })
     }
 
-    performPost(url, datas, handlerResponse = null, handlerError = null){
-        console.log("performPost", url, datas );
+    performPost(url, datas, handlerResponse = null, handlerError = null) {
         this.state.loading = true;
         this.getAxiosInstance().post(url, datas)
-            .then( response => {
-                if( handlerResponse ){
+            .then(response => {
+                if (handlerResponse) {
                     handlerResponse(response);
                 }
             })
-            .catch( error => {
-                if( handlerError ){
+            .catch(error => {
+                this.debug("[ERROR] " + error);
+                if (handlerError) {
                     handlerError(error);
+                } else {
+                    this.state.error = error;
                 }
             })
-            .finally( () => {
+            .finally(() => {
                 this.state.loading = false;
             })
     }
 
-    delete(url){
+    delete(url) {
         console.log("delete()", url)
     }
 
-    update(url, datas){
+    update(url, datas) {
         console.log("update()", url, datas)
     }
 
-    push(url, datas){
+    push(url, datas) {
         console.log("push()", url, datas)
     }
 
 }
 
 /* harmony default export */ var remote_OscarRemoteData = (OscarRemoteData_OscarRemoteData);
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=script&lang=js&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/ActivityDocument.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2704,11 +2986,10 @@ Depuis la racine OSCAR :
 cd front
 
 Pour compiler en temps réél :
-node node_module/.bin/gulp activityDocumentWatch
+node node_modules/.bin/gulp activityDocumentWatch
 
 Pour compiler :
-node node_module/.bin/gulp activityDocument
-
+node node_modules/.bin/gulp activityDocument
  */
 
 
@@ -2718,7 +2999,7 @@ node node_module/.bin/gulp activityDocument
 let oscarRemoteData = new remote_OscarRemoteData();
 
 function flashMessage(){
-    // TODO
+
 }
 
 /* harmony default export */ var ActivityDocumentvue_type_script_lang_js_ = ({
@@ -2735,16 +3016,17 @@ function flashMessage(){
 
     data(){
         return {
-            formData: null,
-            error: null,
-            deleteData: null,
-            editData: null,
-            documents: [],
-            loading: true,
-            sortField: 'dateUpload',
-            sortDirection: -1,
-            editable: true,
-            remoterState: oscarRemoteData.state
+          tabs: null,
+          formData: null,
+          error: null,
+          deleteData: null,
+          editData: null,
+          documents: [],
+          loading: true,
+          sortField: 'dateUpload',
+          sortDirection: -1,
+          editable: true,
+          remoterState: oscarRemoteData.state
         }
     },
 
@@ -2770,77 +3052,85 @@ function flashMessage(){
     },
 
     methods:{
-        deleteDocument(document) {
-            this.deleteData = document;
-        },
+      activeTab(tabId){
+        console.log(tabId)
+      } ,
 
-        order: function (field) {
-            if( this.sortField == field ){
-                this.sortDirection *= -1;
-            } else {
-                this.sortField = field;
-            }
-        },
+      deleteDocument(document) {
+          this.deleteData = document;
+      },
 
-        cssSort: function(compare){
-            return compare == this.sortField ? "active" : "";
-        },
+      order: function (field) {
+          if( this.sortField == field ){
+              this.sortDirection *= -1;
+          } else {
+              this.sortField = field;
+          }
+      },
 
-        handlerEdit(document){
-            console.log(document);
-            this.editData = {
-                'documentype_id': document.category.id,
-                'basename': document.basename,
-                'document': document
-            };
-        },
+      cssSort: function(compare){
+          return compare == this.sortField ? "active" : "";
+      },
 
-        performEdit(){
-            let documentId = this.editData.document.id;
-            let newType = this.editData.documentype_id;
-            this.editData = null;
-            let formData = new FormData();
-            formData.append('documentId', documentId);
-            formData.append('type', newType);
-            oscarRemoteData
-                .setPendingMessage("Modification du type de document")
-                .setErrorMessage("Impossible de modifier le type de document")
-                .performPost(this.urlDocumentType, formData, (response) => {
-                    this.fetch();
-                });
-        },
+      handlerEdit(document){
+          console.log(document);
+          this.editData = {
+              'documentype_id': document.category.id,
+              'basename': document.basename,
+              'document': document
+          };
+      },
 
-        handlerSuccess(success){
-            let data = success.data.datas;
-            let documentsOrdered = [];
-            let documents = {};
+      performEdit(){
+          let documentId = this.editData.document.id;
+          let newType = this.editData.documentype_id;
+          this.editData = null;
+          let formData = new FormData();
+          formData.append('documentId', documentId);
+          formData.append('type', newType);
+          oscarRemoteData
+              .setPendingMessage("Modification du type de document")
+              .setErrorMessage("Impossible de modifier le type de document")
+              .performPost(this.urlDocumentType, formData, (response) => {
+                  this.fetch();
+              });
+      },
 
-            data.forEach(function(doc){
-                doc.categoryText = doc.category ? doc.category.label : "";
-                doc.explode = true;
-                var filename = doc.fileName;
-                if( ! documents[filename] ){
-                    documents[filename] = doc;
-                    documents[filename].previous = [];
-                    documentsOrdered.push(doc);
-                } else {
-                    documents[filename].previous.push(doc);
-                }
-            });
-            this.documents = documentsOrdered;
-        },
+      handlerSuccess(success){
+          let data = success.data.datas;
+          let objectsTabs = success.data.tabs;
+          //console.log(objectsTabs);
+          this.tabs = objectsTabs;
+          //console.log(this.tabs);
+          let documentsOrdered = [];
+          let documents = {};
 
-        fetch(){
-            oscarRemoteData
-                .setPendingMessage("Chargement des documents")
-                .setErrorMessage("Impossible de charger les documents")
-                .performGet(this.url, this.handlerSuccess);
-        }
-    },
+          data.forEach(function(doc){
+              doc.categoryText = doc.category ? doc.category.label : "";
+              doc.explode = true;
+              var filename = doc.fileName;
+              if( ! documents[filename] ){
+                  documents[filename] = doc;
+                  documents[filename].previous = [];
+                  documentsOrdered.push(doc);
+              } else {
+                  documents[filename].previous.push(doc);
+              }
+          });
+          this.documents = documentsOrdered;
+      },
 
-    mounted(){
-        this.fetch();
-    }
+      fetch(){
+          oscarRemoteData
+              .setPendingMessage("Chargement des documents")
+              .setErrorMessage("Impossible de charger les documents")
+              .performGet(this.url, this.handlerSuccess);
+      }
+  },
+
+  mounted(){
+      this.fetch();
+  }
 
 });
 

@@ -9,6 +9,10 @@ namespace Oscar\Service;
 
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\QueryBuilder;
 use Jacksay\PhpFileExtension\Dictonary\ArchiveDictonary;
 use Jacksay\PhpFileExtension\Dictonary\DocumentDictionary;
 use Jacksay\PhpFileExtension\Dictonary\ImageDictonary;
@@ -21,6 +25,7 @@ use Oscar\Entity\AbstractVersionnedDocument;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
+use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
 use UnicaenApp\Service\EntityManagerAwareInterface;
@@ -69,7 +74,7 @@ class VersionnedDocumentService {
     /**
      * Retourne la requête pour obtenir les documents publiés.
      *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getDocumentsPublished(){
         return $this->getDocuments()->andWhere('d.status = :status')->setParameter('status', AbstractVersionnedDocument::STATUS_PUBLISH);
@@ -78,7 +83,7 @@ class VersionnedDocumentService {
     /**
      * Retourne tous les documents.
      *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getDocuments()
     {
@@ -92,12 +97,15 @@ class VersionnedDocumentService {
         return $this->currentPerson;
     }
 
+
     /**
      * Supprime l'enregistrement.
      *
      * @param $document
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws OscarException
      */
     public function deleteDocument( $document ){
 
@@ -243,9 +251,16 @@ class VersionnedDocumentService {
         return $this->entityManager;
     }
 
-    public function createDocument( $source, AbstractVersionnedDocument $doc )
+    /**
+     * @param $source
+     * @param AbstractVersionnedDocument $doc
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws \Exception
+     */
+    public function createDocument( $source, AbstractVersionnedDocument $doc ): bool
     {
-
         // Récupération de la version
         $exists = $this->getEntityManager()->getRepository($this->effectiveClass)->findBy([
             'fileName' => $doc->getFileName()
@@ -259,7 +274,6 @@ class VersionnedDocumentService {
         $realName = $doc->generatePath();
         $doc->setPath($realName);
         $directoryLocation = $this->documentHome;
-
         if( @move_uploaded_file($source, $directoryLocation.'/'.$realName) ){
             $this->getEntityManager()->persist($doc);
             $this->getEntityManager()->flush($doc);
@@ -268,37 +282,52 @@ class VersionnedDocumentService {
             throw new \Exception("NOT MOVABLE");
             return false;
         }
-
     }
 
 
     /**
      * @return TypeDocument[]
      */
-    public function getContractDocumentTypes()
+    public function getContractDocumentTypes(): array
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
     }
 
     /**
+     * @param $idDocumentType
      * @return TypeDocument
      */
-    public function getContractDocumentType( $idDocumentType )
+    public function getContractDocumentType( $idDocumentType ): TypeDocument
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->find($idDocumentType);
     }
 
     /**
+     * Retourne l'onglet document entity byId
      *
+     * @param string $idTabDocument
+     * @return TabDocument|null
      */
-    public function getDocument( $id )
+    public function getContractTabDocument(string $idTabDocument):?TabDocument
+    {
+        return $this->getEntityManager()->getRepository(TabDocument::class)->find($idTabDocument);
+    }
+
+    /**
+     * @param $id
+     * @return QueryBuilder
+     */
+    public function getDocument( $id ): QueryBuilder
     {
         return $this->baseQuery()
             ->where('d.id = :id')
             ->setParameter('id', $id);
     }
 
-    protected function baseQuery()
+    /**
+     * @return QueryBuilder
+     */
+    protected function baseQuery(): QueryBuilder
     {
         return $this->getEntityManager()->createQueryBuilder()
             ->select('d, p')
