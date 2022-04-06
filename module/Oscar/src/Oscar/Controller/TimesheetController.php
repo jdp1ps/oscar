@@ -24,6 +24,7 @@ use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
+use Oscar\Formatter\TimesheetPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\OscarVersion;
@@ -577,7 +578,12 @@ class TimesheetController extends AbstractOscarController
         $year = $this->params()->fromQuery('year', null);
         $from = $this->params()->fromQuery('from', null);
         $to = $this->params()->fromQuery('to', null);
+        $facet = $this->params()->fromQuery('facet', 'person');
         $format = $this->params()->fromQuery('format', OscarFormatterConst::FORMAT_IO_JSON);
+
+        if( $facet != 'person' ){
+            $facet = 'period';
+        }
 
         //
         $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
@@ -601,6 +607,7 @@ class TimesheetController extends AbstractOscarController
         try {
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
             $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($start, $end, $activity->getId());
+            $datas['facet'] = $facet;
 
         } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
@@ -610,6 +617,32 @@ class TimesheetController extends AbstractOscarController
         switch ($format) {
             case OscarFormatterConst::FORMAT_IO_JSON :
                 return $this->jsonOutput($datas);
+
+            case OscarFormatterConst::FORMAT_IO_HTML :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                die($html);
+
+            case OscarFormatterConst::FORMAT_IO_PDF :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
+                $pdfRendrer->convert($html, $datas['filename']);
+                die("terminé");
 
             default:
                 return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
@@ -692,7 +725,8 @@ class TimesheetController extends AbstractOscarController
             }
 
         } catch (\Exception $e) {
-            die("AÏE");
+            echo $e->getTraceAsString();
+            die("AÏE : " . $e->getMessage());
         }
     }
 

@@ -9523,6 +9523,7 @@ span[class*="status-4"] .icon:before{ content: '\e865 '}
   background: white;
   z-index: 1;
   position: relative;
+  align-items: center;
 }
 .period-selector .open .visualizer {
   border-radius: 4px 4px 0 0;

@@ -1,23 +1,30 @@
 <template>
     <section class="validations-admin">
-        <transition name="fade">
-            <div class="pending overlay" v-if="loading">
-                <div class="overlay-content">
-                    <i class="icon-spinner animate-spin"></i>
-                    {{ loading }}
-                </div>
-            </div>
-        </transition>
 
-        <transition name="fade">
-            <div class="pending overlay" v-if="error">
-                <div class="overlay-content">
-                    <i class="icon-attention-1"></i>
-                    {{ error }}
-                </div>
-            </div>
-        </transition>
+      <div v-if="initialdata">
+      <nav style="display: flex">
+        Période du
+        <div style="position: relative">
+          <period-selector v-model="period_from"
+                           :min="period_activity_start"
+                           :max="period_to"
+                           @change="handlerChangeRefresh"/>
+        </div>
 
+        à
+        <div style="position: relative">
+          <period-selector v-model="period_to"
+                           :min="period_from"
+                           :max="period_activity_end"
+                           @change="handlerChangeRefresh"/>
+        </div>
+
+        <a :href="url + '?format=pdf&from=' +this.period_from +'&to=' +this.period_to +'&facet=' +state" download>
+          <i class="doc-doc"></i>
+          Exporter
+        </a>
+
+      </nav>
 
       <section class="synthesis heading">
         <div class="label-line">
@@ -29,7 +36,7 @@
           </span>
         </div>
 
-        <div v-for="wp in synthesis.headings.current.workpackages" class="main research">
+        <div v-for="wp in initialdata.headings.current.workpackages" class="main research">
           <span class="value hours">{{ wp.label }}</span>
         </div>
 
@@ -37,11 +44,11 @@
           <span class="value hours">Total</span>
         </div>
 
-        <div v-for="prj in synthesis.headings.prjs.prjs" :title="prj.label"  class="research">
+        <div v-for="prj in initialdata.headings.prjs.prjs" :title="prj.label"  class="research">
           <span class="value hours">{{ prj.label }}</span>
         </div>
 
-        <div v-for="other in synthesis.headings.others" :title="other.label" :class="other.group">
+        <div v-for="other in initialdata.headings.others" :title="other.label" :class="other.group">
           <span class="value hours">{{ other.label }}</span>
         </div>
 
@@ -55,10 +62,6 @@
       <section v-for="entry, key in facet" class="synthesis">
         <div class="label-line">
           {{ entry.label }}
-          <a :href="'/feuille-de-temps/synthesisactivity?activity_id=' +synthesis.activity_id +'&format=pdf&period=' + key">
-            <i class="icon-file-pdf"></i>
-            Télécharger
-          </a>
         </div>
 
         <div v-for="wp in entry.datas.current.workpackages" :title="wp.code +' - ' +wp.label" class="main research">
@@ -86,34 +89,36 @@
       <section class="synthesis heading sum">
         <div class="label-line"> Total </div>
 
-        <div v-for="wp in synthesis.headings.current.workpackages" class="main research">
+        <div v-for="wp in initialdata.headings.current.workpackages" class="main research">
           <span class="value hours">{{ wp.total | duration }}</span>
         </div>
 
         <div class="main research total">
-          <span class="value hours">{{ synthesis.headings.current.total | duration }}</span>
+          <span class="value hours">{{ initialdata.headings.current.total | duration }}</span>
         </div>
 
-        <div v-for="prj in synthesis.headings.prjs.prjs" :title="prj.label"  class="research">
+        <div v-for="prj in initialdata.headings.prjs.prjs" :title="prj.label"  class="research">
           <span class="value hours">{{ prj.total | duration }}</span>
         </div>
 
-        <div v-for="other in synthesis.headings.others" :title="other.label" :class="other.group">
+        <div v-for="other in initialdata.headings.others" :title="other.label" :class="other.group">
           <span class="value hours">{{ other.total | duration }}</span>
         </div>
 
         <div class="total">
           <span class="value">
-            {{ synthesis.headings.total | duration }}
+            {{ initialdata.headings.total | duration }}
           </span>
         </div>
       </section>
-
+      </div>
     </section>
 </template>
 <script>
 
-    // node node_modules/.bin/vue-cli-service build --name TimesheetActivitySynthesis --dest public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/TimesheetActivitySynthesis.vue
+    // node node_modules/.bin/vue-cli-service build --name TimesheetActivitySynthesis --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/TimesheetActivitySynthesis.vue
+
+    import PeriodSelector from "./components/PeriodSelector";
 
     const STATE_PERIOD = "period";
     const STATE_PERSON = "person";
@@ -122,32 +127,37 @@
         name: 'TimesheetActivitySynthesis',
 
         props: {
-          initialdata: {
+          url: {
             default: null,
             required: true
           }
         },
 
         components: {
-
+          'period-selector': PeriodSelector
         },
 
         data() {
             return {
                 loading: null,
-                state: STATE_PERIOD
+                state: STATE_PERSON,
+                period_from: '',
+                period_to: '',
+                period_activity_start: '',
+                period_activity_end: '',
+                initialdata: null
             }
         },
 
         computed: {
-          synthesis(){
-            return this.initialdata;
-          },
           facet(){
+            if( !this.initialdata )
+              return null;
+
             if( this.state == STATE_PERIOD )
-              return this.synthesis.by_periods;
+              return this.initialdata.by_periods;
             else
-              return this.synthesis.by_persons;
+              return this.initialdata.by_persons;
           }
         },
 
@@ -160,6 +170,31 @@
         },
 
         methods: {
+          handlerExport(){
+            // somestuff here
+          },
+          handlerChangeRefresh(){
+            this.handlerRefresh();
+          },
+          handlerRefresh(){
+            console.log("start handlerRefresh()");
+            this.$http.get(this.url + '?from=' +this.period_from +"&to=" +this.period_to).then(
+              ok => {
+                console.log('onfulfilled', ok);
+                this.initialdata = ok.data;
+                this.period_from = ok.data.period_from;
+                this.period_to = ok.data.period_to;
+                this.period_activity_start = ok.data.period_activity_start;
+                this.period_activity_end = ok.data.period_activity_end;
+
+              },
+              ko => {
+                console.log('onrejected', ko);
+              }
+            );
+
+            console.log('fin handlerRefresh()');
+          },
 
             fetch(clear = true) {
                 // this.loading = "Chargement des données";
@@ -183,7 +218,8 @@
 
         mounted() {
           console.log('INITIALDATA', this.initialdata);
-            this.fetch(true)
+            this.handlerRefresh();
+
         }
     }
 </script>

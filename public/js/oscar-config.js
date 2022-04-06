@@ -86,7 +86,6 @@ requirejs.config({
         "ActivityRequest": "oscar/dist/ActivityRequest",
         "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin",
         "ConfigStringList": "oscar/dist/ConfigStringList",
-        "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
         "ActivityGant": "oscar/dist/ActivityGant",
         "Keyvalue": "oscar/dist/Keyvalue",
@@ -116,7 +115,7 @@ requirejs.config({
         "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
         "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
         "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd.min",
-        "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd.min",
+        "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd",
     },
     shim: {
         "bootstrap": {

@@ -119,18 +119,20 @@
         <div id="synthesis"></div>
 
         <script>
-            require(['vue', 'timesheetactivitysynthesis'], function(Vue, TimesheetActivitySynthesis){
-                console.log(TimesheetActivitySynthesis);
+            require(['vue', 'vue-resource', 'timesheetactivitysynthesis'], function(Vue, VueResource, TimesheetActivitySynthesis){
+                Vue.use(VueResource);
                 new Vue({
                     el: '#synthesis',
                     render(h){
-                        return h(TimesheetActivitySynthesis, { props: {initialdata: <?= json_encode($timesheetRepport) ?>}})
+                        return h(TimesheetActivitySynthesis, { props: {
+                            url: '<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>'
+                        }})
                     }
                 })
             })
         </script>
-
     </section>
+
     <section>
         <h2>
             <i class="icon-archive"></i>
@@ -199,5 +201,6 @@
             </ul>
         </div>
     </section>
+
     <?php endif; ?>
 </div>
