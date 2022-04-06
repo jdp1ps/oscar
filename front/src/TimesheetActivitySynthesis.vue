@@ -24,6 +24,8 @@
           Exporter
         </a>
 
+        <input type="file" @change="handlerFile" id="debug_file" />
+
       </nav>
 
       <section class="synthesis heading">
@@ -170,23 +172,35 @@
         },
 
         methods: {
+          handlerFile(e){
+            var input = this.$el.querySelector('#debug_file');
+            var reader = new FileReader();
+            reader.readAsText(input.files[0], "UTF-8");
+            reader.onload = function(evt) {
+              console.log(evt.target.result);
+              this.applyData(JSON.parse(evt.target.result));
+            }.bind(this);
+          },
           handlerExport(){
             // somestuff here
           },
           handlerChangeRefresh(){
             this.handlerRefresh();
           },
+
+          applyData(data){
+            this.initialdata = data;
+            this.period_from = data.period_from;
+            this.period_to = data.period_to;
+            this.period_activity_start = data.period_activity_start;
+            this.period_activity_end = data.period_activity_end;
+          },
+
           handlerRefresh(){
             console.log("start handlerRefresh()");
             this.$http.get(this.url + '?from=' +this.period_from +"&to=" +this.period_to).then(
               ok => {
-                console.log('onfulfilled', ok);
-                this.initialdata = ok.data;
-                this.period_from = ok.data.period_from;
-                this.period_to = ok.data.period_to;
-                this.period_activity_start = ok.data.period_activity_start;
-                this.period_activity_end = ok.data.period_activity_end;
-
+                this.applyData(ok.data);
               },
               ko => {
                 console.log('onrejected', ko);
@@ -217,9 +231,7 @@
         },
 
         mounted() {
-          console.log('INITIALDATA', this.initialdata);
             this.handlerRefresh();
-
         }
     }
 </script>

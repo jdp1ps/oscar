@@ -581,10 +581,6 @@ class TimesheetController extends AbstractOscarController
         $facet = $this->params()->fromQuery('facet', 'person');
         $format = $this->params()->fromQuery('format', OscarFormatterConst::FORMAT_IO_JSON);
 
-        if( $facet != 'person' ){
-            $facet = 'period';
-        }
-
         //
         $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
