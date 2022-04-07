@@ -152,9 +152,9 @@
                     let extract = this.min.match(regex);
                     let year = parseInt(extract[1]);
                     let month = parseInt(extract[2]);
-                    if( month == 12 ){
-                        year += 1;
-                    }
+                    // if( month == 12 ){
+                    //     year += 1;
+                    // }
                     return year;
                 }
                 return Number.MIN_SAFE_INTEGER;

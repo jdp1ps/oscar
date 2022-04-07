@@ -2,7 +2,7 @@
     <section class="validations-admin">
 
       <div v-if="initialdata">
-      <nav style="display: flex">
+      <nav style="display: flex; line-height: 1.5em; align-items: center; border-bottom: solid #999 thin; padding: .3em; margin-bottom: 1em">
         Période du
         <div style="position: relative">
           <period-selector v-model="period_from"
@@ -10,7 +10,6 @@
                            :max="period_to"
                            @change="handlerChangeRefresh"/>
         </div>
-
         à
         <div style="position: relative">
           <period-selector v-model="period_to"
@@ -19,12 +18,11 @@
                            @change="handlerChangeRefresh"/>
         </div>
 
-        <a :href="url + '?format=pdf&from=' +this.period_from +'&to=' +this.period_to +'&facet=' +state" download>
+        <a class="btn btn-default"
+            :href="url + '?format=pdf&from=' +this.period_from +'&to=' +this.period_to +'&facet=' +state" download>
           <i class="doc-doc"></i>
           Exporter
         </a>
-
-        <input type="file" @change="handlerFile" id="debug_file" />
 
       </nav>
 

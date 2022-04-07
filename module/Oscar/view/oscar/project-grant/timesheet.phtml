@@ -108,6 +108,12 @@
             Revenir sur la fiche
         </a>
     </h1>
+    <div>
+        <small>
+            du <strong><?= $this->moment($activity->getDateStart()) ?></strong>
+            au <strong><?= $this->moment($activity->getDateEnd()) ?></strong>
+        </small>
+    </div>
 
     <?php if($activity->isTimesheetAllowed()): ?>
     <section>

@@ -5,6 +5,30 @@
     <title>Feuille de temps</title>
     <style>
         <?php include __DIR__.'/common.css'; ?>
+
+        thead td, thead th, tbody {
+            font-size: 1.2em;
+        }
+
+        tr {
+            line-height: 1em;
+        }
+
+        thead tr, tfoot tr {
+            line-height: 1.4em;
+        }
+
+        tfoot th {
+            border-top: #333333 solid 1px;
+        }
+
+        td.none {
+            color: rgba(0,0,0,.5);
+            font-size: .8em;
+        }
+        td.valued {
+
+        }
     </style>
 </head>
 <?php
@@ -46,20 +70,22 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
 
 <table>
     <thead>
+        <tr>
         <th>Personne / périodes</th>
-        <?php foreach ($headings['current']['workpackages'] as $wp): ?>
-        <th class="project main research"><?= $wp['code'] ?></th>
-        <?php endforeach; ?>
-        <th class="project main research total">TOTAL</th>
+            <?php foreach ($headings['current']['workpackages'] as $wp): ?>
+            <th class="project main research"><?= $wp['code'] ?></th>
+            <?php endforeach; ?>
+            <th class="project main research total">TOTAL</th>
 
-        <?php foreach ($headings['prjs']['prjs'] as $prj): ?>
-        <th class="project research"><?= $prj['label'] ?></th>
-        <?php endforeach; ?>
+            <?php foreach ($headings['prjs']['prjs'] as $prj): ?>
+            <th class="project research"><?= $prj['label'] ?></th>
+            <?php endforeach; ?>
 
-        <?php foreach ($headings['others'] as $other): ?>
-            <th class="other <?= $other['group'] ?>"><?= $other['label'] ?></th>
-        <?php endforeach; ?>
-        <th class="other total">TOTAL</th>
+            <?php foreach ($headings['others'] as $other): ?>
+                <th class="<?= $other['group'] ?>"><?= $other['label'] ?></th>
+            <?php endforeach; ?>
+            <th class="total">TOTAL</th>
+        </tr>
     </thead>
 
     <tbody>
@@ -67,19 +93,18 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
         <tr class="person">
             <th><?= $line['label'] ?></th>
             <?php foreach ($line['datas']['current']['workpackages'] as $wp): ?>
-            <td class="project main research"><?= $duration($wp['total']) ?> </td>
+            <td class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($wp['total']) ?> </td>
             <?php endforeach; ?>
-            <td class="project main research total"><?= $duration($line['datas']['current']['total']) ?></td>
+            <td class="main research total <?= $line['datas']['current']['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($line['datas']['current']['total']) ?></td>
 
             <?php foreach ($line['datas']['prjs'] as $prj): ?>
-            <td class="project research"><?= $duration($prj['total']) ?></td>
+            <td class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></td>
             <?php endforeach; ?>
 
             <?php foreach ($line['datas']['others'] as $other): ?>
-                <td class="other <?= $other['group'] ?>"><?= $duration($other['total']) ?></td>
+                <td class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></td>
             <?php endforeach; ?>
-            <td class="other total"><?= $duration($line['total']) ?></td>
-
+            <td class="total <?= $line['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($line['total']) ?></td>
         </tr>
     <?php endforeach; ?>
     </tbody>
@@ -87,18 +112,18 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
     <tfoot>
     <th>TOTAUX</th>
     <?php foreach ($headings['current']['workpackages'] as $wp): ?>
-        <th class="project main research"><?= $duration($wp['total']) ?></th>
+        <th class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($wp['total']) ?></th>
     <?php endforeach; ?>
-    <th class="project main research total"><?= $duration($headings['current']['total']) ?></th>
+    <th class="main research total <?= $headings['current']['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($headings['current']['total']) ?></th>
 
     <?php foreach ($headings['prjs']['prjs'] as $prj): ?>
-        <th class="project research"><?= $duration($prj['total']) ?></th>
+        <th class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></th>
     <?php endforeach; ?>
 
     <?php foreach ($headings['others'] as $other): ?>
-        <th class="other <?= $other['group'] ?>"><?= $duration($other['total']) ?></th>
+        <th class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></th>
     <?php endforeach; ?>
-    <th class="other total"><?= $duration($headings['total']) ?></th>
+    <th class="total <?= $headings['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($headings['total']) ?></th>
     </tfoot>
 </table>
 </body>

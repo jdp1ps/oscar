@@ -1617,13 +1617,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
 
         $headings = [
-            'total_current'     => 0.0,
-            'total_prjs'        => 0.0,
-            'total_others'      => 0.0,
-            'total_active'      => 0.0,
-            'total_research'      => 0.0,
-            'total_off'      => 0.0,
-            'total'         => 0.0,
+            'total_current' => 0.0,
+            'total_prjs' => 0.0,
+            'total_others' => 0.0,
+            'total_active' => 0.0,
+            'total_research' => 0.0,
+            'total_off' => 0.0,
+            'total' => 0.0,
             'current' => [
                 'total' => 0.0,
                 'workpackages' => []
@@ -1672,28 +1672,48 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         ];
 
+        // Rangement des Hors-Lots par groupe
+        $otherByGroup = [
+            'research' => [],
+            'education' => [],
+            'abs' => [],
+            'other' => [],
+        ];
+
         foreach ($this->getOthersWP() as $other) {
-            $item = $other['code'];
             $group = $other['group'];
-            $label = $other['label'];
+            $code = $other['code'];
 
-            $othersModel[$item] = [
-                'label' => $label,
-                'group' => $group,
-                'total' => 0.0,
-            ];
+            if (!array_key_exists($group, $otherByGroup)) {
+                $otherByGroup[$group] = [];
+            }
 
-            $othersInfos['items'][$item] = [
-                'label' => $label,
-                'group' => $group,
-                'total' => 0.0,
-            ];
+            $otherByGroup[$group][$code] = $other;
+        }
 
-            $headings['others'][$item] = [
-                'label' => $label,
-                'group' => $group,
-                'total' => 0.0,
-            ];
+        foreach ($otherByGroup as $group => $items) {
+            foreach ($items as $other) {
+                $item = $other['code'];
+                $label = $other['label'];
+
+                $othersModel[$item] = [
+                    'label' => $label,
+                    'group' => $group,
+                    'total' => 0.0,
+                ];
+
+                $othersInfos['items'][$item] = [
+                    'label' => $label,
+                    'group' => $group,
+                    'total' => 0.0,
+                ];
+
+                $headings['others'][$item] = [
+                    'label' => $label,
+                    'group' => $group,
+                    'total' => 0.0,
+                ];
+            }
         }
 
         $output = [
@@ -1763,7 +1783,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
                 // Projet idoine
                 if ($timesheetActivityId == $activity->getId()) {
-
                     $datasPersons[$personId]['datas']["current"]['total'] += $timesheetDuration;
                     $datasPersons[$personId]['datas']["current"]['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
 
@@ -1772,9 +1791,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
                     $headings['current']['total'] += $timesheetDuration;
                     $headings['current']['workpackages'][$timesheetWorkpackageId]['total'] += $timesheetDuration;
-
-
-
                 } // Autre projet avec Feuille de temps
                 elseif ($timesheetActivityId != null) {
                     $infosProjects['total'] += $timesheetDuration;
@@ -1815,7 +1831,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
                     $headings['prjs']['total'] += $timesheetDuration;
                     $headings['prjs']['prjs'][$timesheetActivityId]['total'] += $timesheetDuration;
-
                 } // Autre
                 else {
                     $key = $t['itemkey'];
