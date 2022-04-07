@@ -253,7 +253,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'dateSend' => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
             'extension' => $this->getExtension(),
             'category' => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
-            'tab' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
+            'tabDocument' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
             'private' => $this->isPrivate(),
             'urlDelete' => $options['urlDelete'],
             'urlDownload' => $options['urlDownload'],
