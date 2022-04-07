@@ -78,11 +78,15 @@
 
       <!-- Informations par document -->
       <!-- Section Onglets -->
-        <ul v-for="tab in tabs" :key="tab.id">
-          <li style="cursor:pointer;" v-on:click="activeTab(tab.id)">
-            <i class="picto icon-Activity"></i> {{ tab.label }}
-          </li>
-        </ul>
+      <ul v-for="tab in tabsWithDocuments" :key="tab.id">
+        <li style="cursor:pointer;" v-on:click="activeTab(tab.id)">
+          <i class="picto icon-Activity"></i> {{ tab.label }}
+        </li>
+        <p v-for="document in tab.documents">
+            {{ document }}
+        </p>
+
+      </ul>
       <!-- Section boucle documents -->
         <article class="card xs" v-for="document in documentsPacked" :key="document.id">
             <div class="card-title">
@@ -93,6 +97,9 @@
             </div>
             <p>
                 {{ document.information }}
+            </p>
+            <p v-if="document.tabDocument">
+              ################## INFORMATIONS COMPLEMENTAIRES LE ID DU TAB : {{ document.tabDocument.id }} ########################
             </p>
             <div class="card-content">
                 <p class="text-highlight">
@@ -156,6 +163,7 @@
 
     Pour compiler en temps réél :
     node node_modules/.bin/gulp activityDocumentWatch
+    node node_modules/.bin/vue-cli-service build --name ActivityDocument --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib ./src/ActivityDocument.vue --watch
 
     Pour compiler :
     node node_modules/.bin/gulp activityDocument
@@ -185,7 +193,7 @@
 
         data(){
             return {
-              tabs: null,
+              tabsWithDocuments: null,
               formData: null,
               error: null,
               deleteData: null,
@@ -267,9 +275,9 @@
 
           handlerSuccess(success){
               let data = success.data.datas;
-              let objectsTabs = success.data.tabs;
-              //console.log(objectsTabs);
-              this.tabs = objectsTabs;
+              let tabsObjectsDocuments = success.data.tabsWithDocuments;
+              //console.log(tabsObjectsDocuments);
+              this.tabsWithDocuments = tabsObjectsDocuments;
               //console.log(this.tabs);
               let documentsOrdered = [];
               let documents = {};
@@ -287,6 +295,7 @@
                   }
               });
               this.documents = documentsOrdered;
+              console.log(this.documents);
           },
 
           fetch(){

@@ -1367,12 +1367,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $out = $this->baseJsonResponse();
 
-        // ID des tabs
+        // ID des tabs (onglets pour les documents)
         $tabsArray = [];
         $entitiesTabs = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
 
         foreach ($entitiesTabs as $tab){
-            $tabsArray [] = $tab->toJson();
+            $tabsArray [$tab->getId()] = $tab->toJson();
+            $tabsArray [$tab->getId()] ["documents"] = [];
+
         }
 
         $datas = [];
@@ -1381,27 +1383,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson(
                 [
-                    'urlDelete' => $deletable ?
-                        $this->url()->fromRoute('contractdocument/delete', ['id' => $doc->getId()])
-                        : false,
+                    'urlDelete' => $deletable ? $this->url()->fromRoute('contractdocument/delete', ['id' => $doc->getId()]) : false,
                     'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
-                    'urlReupload' => $uploadable ?
-                        $this->url()->fromRoute(
-                            'contractdocument/upload',
-                            ['idactivity' => $entity->getId()]
-                        ) . "?id=" . $doc->getId()
-                        : false,
-                    'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute(
-                        'person/show',
-                        ['id' => $doc->getPerson()->getId()]
-                    ) : false,
+                    'urlReupload' => $uploadable ? $this->url()->fromRoute('contractdocument/upload', ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId() : false,
+                    'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show', ['id' => $doc->getPerson()->getId()]) : false,
                 ]
             );
+            if (array_key_exists($doc->getTabDocument()->getId(), $tabsArray)){
+                $tabsArray[$doc->getTabDocument()->getId()]["documents"] = $docDt;
+            }
             $datas[] = $docDt;
         }
         $out['datas'] = $datas;
-        $out['tabs'] =  $tabsArray;;
-
+        $out['tabsWithDocuments'] =  $tabsArray;
         return new JsonModel($out);
     }
 
