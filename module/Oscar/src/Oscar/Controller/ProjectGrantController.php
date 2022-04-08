@@ -67,6 +67,7 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use PhpOffice\PhpWord\Settings;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
@@ -705,7 +706,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $activity = $this->getProjectGrantService()->getGrant($id);
 
+        Settings::setOutputEscapingEnabled(true);
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
+
 
         $documentDatas = $activity->documentDatas($baseDatas);
 

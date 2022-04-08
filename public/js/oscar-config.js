@@ -3,6 +3,9 @@
  *
  * Created by jacksay on 17/09/15.
  */
+
+let devext = window.MODE_DEV ? '' : '.min';
+
 requirejs.config({
     baseUrl: "/js/",
     paths: {
@@ -115,7 +118,7 @@ requirejs.config({
         "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
         "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
         "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd.min",
-        "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd",
+        "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd"+devext,
     },
     shim: {
         "bootstrap": {
