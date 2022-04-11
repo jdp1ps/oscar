@@ -222,6 +222,33 @@ class ValidationPeriodRepository extends EntityRepository
                 ]
             )->getQuery()->getResult();
     }
+    /**
+     * @param array $personIds
+     * @param string $periodStr
+     * @return \Doctrine\ORM\QueryBuilder
+     * @throws OscarException
+     */
+    public function getValidationPeriodsForPersonsAtPeriodBounds( array $personIds, string $from, string $to)
+    {
+        $start = PeriodInfos::getPeriodInfosObj($from);
+        $end = PeriodInfos::getPeriodInfosObj($to);
+
+        $query = $this->createQueryBuilder('v')
+            ->select('v')
+            ->where("v.declarer IN(:personIds) 
+                AND CONCAT(v.year, '-', v.month) >= :speriod 
+                AND CONCAT(v.year, '-', v.month) <= :fperiod 
+                " )
+            ->setParameters(
+                [
+                    'personIds' => $personIds,
+                    'speriod' => $start->getPeriodSimple(),
+                    'fperiod' => $end->getPeriodSimple()
+                ]
+            )->getQuery();
+
+        return $query->getResult();
+    }
 
     /**
      * Retourne LA procédure de validation pour : La période, l'activité et la personne.

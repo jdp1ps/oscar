@@ -451,12 +451,14 @@
                 </div>
             <?php endif; ?>
 
-            <?php if( $entity->isTimesheetAllowed() ): ?>
-            <a  href="<?=  $this->url('contract/timesheet', ['id' => $entity->getId()]) ?>"
-                class="btn btn-primary">
-                <i class="icon-calendar"></i>
-                Feuilles de temps
-            </a>
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity)): ?>
+                <?php if( $entity->isTimesheetAllowed() ): ?>
+                <a  href="<?=  $this->url('contract/timesheet', ['id' => $entity->getId()]) ?>"
+                    class="btn btn-primary">
+                    <i class="icon-calendar"></i>
+                    Feuilles de temps
+                </a>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php

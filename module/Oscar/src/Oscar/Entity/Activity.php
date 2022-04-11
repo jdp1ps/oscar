@@ -2206,7 +2206,7 @@ class Activity implements ResourceInterface
             if (!array_key_exists($roleStr, $organizations)) {
                 $organizations[$roleStr] = [];
             }
-            $organizations[$roleStr][] = (string)$organisationActivity->getOrganization();
+            $organizations[$roleStr][] = utf8_encode((string)$organisationActivity->getOrganization());
         }
 
         foreach ($organizations as $role => $ps) {

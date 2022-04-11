@@ -39,6 +39,74 @@
     .validators-todo span:last-child:after {
         content: '';
     }
+
+
+    .synthesis {
+        border-bottom: thin solid #333;
+        display: flex;
+        font-weight: 100;
+    }
+
+    .synthesis > * {
+        flex: 1;
+        text-align: right;
+        vertical-align: center;
+    }
+
+    .synthesis .label-line {
+        flex: 2;
+    }
+
+    synthesis .group {
+        display: flex;
+    }
+    synthesis .group > * {
+        flex: 1;
+    }
+
+    .synthesis .research {
+        background: #b5dae0;
+    }
+
+    .synthesis .abs {
+        background: #d5e3b1;
+    }
+
+    .synthesis .other {
+        background: #d6b4e4;
+    }
+
+    .synthesis .education {
+        background: #a5e2c6;
+    }
+
+    .synthesis .total {
+        font-weight: 500;
+    }
+
+    .synthesis.heading .total {
+        font-weight: 500;
+    }
+
+    .synthesis .value {
+        padding: .25em;
+        display: block;
+        border-left: thin solid rgba(255,255,255,.5);
+    }
+
+    .heading.sum .value, .heading.sum .total{
+        font-weight: bold;
+    }
+
+    .error {
+        background: #e34242;
+        color: white;
+    }
+    .error.none {
+        background: #e34242;
+        color: rgba(255,255,255,.5);
+    }
+
 </style>
 <div class="container">
     <h1>
@@ -49,8 +117,37 @@
             Revenir sur la fiche
         </a>
     </h1>
+    <div>
+        <small>
+            du <strong><?= $this->moment($activity->getDateStart()) ?></strong>
+            au <strong><?= $this->moment($activity->getDateEnd()) ?></strong>
+        </small>
+    </div>
 
     <?php if($activity->isTimesheetAllowed()): ?>
+    <section>
+        <h2>
+            <i class="icon-calendar"></i>
+            Synthèse
+        </h2>
+
+        <div id="synthesis"></div>
+
+        <script>
+            require(['vue', 'vue-resource', 'timesheetactivitysynthesis'], function(Vue, VueResource, TimesheetActivitySynthesis){
+                Vue.use(VueResource);
+                new Vue({
+                    el: '#synthesis',
+                    render(h){
+                        return h(TimesheetActivitySynthesis, { props: {
+                            url: '<?= $this->url('timesheet/synthesisactivitybounds', ['id' => $activity->getId()]) ?>'
+                        }})
+                    }
+                })
+            })
+        </script>
+    </section>
+
     <section>
         <h2>
             <i class="icon-archive"></i>
@@ -119,5 +216,6 @@
             </ul>
         </div>
     </section>
+
     <?php endif; ?>
 </div>

@@ -67,6 +67,7 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
+use PhpOffice\PhpWord\Settings;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Console\View\Renderer;
 use Zend\View\Model\JsonModel;
@@ -705,7 +706,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $activity = $this->getProjectGrantService()->getGrant($id);
 
+        Settings::setOutputEscapingEnabled(true);
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
+
 
         $documentDatas = $activity->documentDatas($baseDatas);
 
@@ -2999,7 +3002,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if( $this->isAjax() ){
 
-
             $action = $this->getRequest()->getQuery()->get('a', null);
 
             if( $this->getRequest()->isDelete() || $action == 'd' ){
@@ -3039,9 +3041,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $this->jsonOutput($response);
         }
 
+        $timesheetRepport = null;
+        if( $activity->isTimesheetAllowed() ){
+            $timesheetRepport = $this->getTimesheetService()->getSynthesisActivityPeriods(
+                $activity->getDateStartStr('Y-m'),
+                $activity->getDateEndStr('Y-m'),
+                $activity->getId()
+            );
+        }
+
         return [
             'activity' => $activity,
-            'timesheetAllow' => $activity->isTimesheetAllowed()
+            'timesheetAllow' => $activity->isTimesheetAllowed(),
+            'timesheetRepport' => $timesheetRepport
         ];
     }
 

@@ -83,7 +83,7 @@ th {
     vertical-align: center;
     font-weight: normal;
 }
-.main {
+.main, .current {
     background: #97c6d6;
 }
 .research {

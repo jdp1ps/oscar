@@ -20,9 +20,11 @@ use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
+use Oscar\Formatter\TimesheetPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\OscarVersion;
@@ -567,6 +569,83 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function synthesisActivityPeriodsBoundsAction()
+    {
+        $datas = [];
+        $activity_id = $this->params()->fromRoute('id', null);
+
+        // Analyse des critères
+        $year = $this->params()->fromQuery('year', null);
+        $from = $this->params()->fromQuery('from', null);
+        $to = $this->params()->fromQuery('to', null);
+        $facet = $this->params()->fromQuery('facet', 'person');
+        $format = $this->params()->fromQuery('format', OscarFormatterConst::FORMAT_IO_JSON);
+
+        //
+        $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        $start = $activity->getDateStartStr('Y-m');
+        $end = $activity->getDateEndStr('Y-m');
+
+        if( $year ){
+            $start = sprintf('%s-01', $year);
+            $end = sprintf('%s-12', $year);
+        }
+
+        if( $from ){
+            $start = $from;
+        }
+
+        if( $to ){
+            $end = $to;
+        }
+
+        try {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+            $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($start, $end, $activity->getId());
+            $datas['facet'] = $facet;
+
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
+
+
+        switch ($format) {
+            case OscarFormatterConst::FORMAT_IO_JSON :
+                return $this->jsonOutput($datas);
+
+            case OscarFormatterConst::FORMAT_IO_HTML :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                die($html);
+
+            case OscarFormatterConst::FORMAT_IO_PDF :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
+                $pdfRendrer->convert($html, $datas['filename']);
+                die("terminé");
+
+            default:
+                return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
+        }
+
+    }
+
     /**
      * Accès à la synthèse des déclaration pour une activité.
      *
@@ -630,8 +709,6 @@ class TimesheetController extends AbstractOscarController
             elseif ($format == "json") {
                 $output['format'] = 'json';
                 return $this->jsonOutput($output);
-
-                die();
             }
             else {
                 $output['format'] = 'html';
@@ -644,7 +721,8 @@ class TimesheetController extends AbstractOscarController
             }
 
         } catch (\Exception $e) {
-            die("AÏE");
+            echo $e->getTraceAsString();
+            die("AÏE : " . $e->getMessage());
         }
     }
 

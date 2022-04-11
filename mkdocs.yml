@@ -1,7 +1,3 @@
-site_name: OSCAR DOC
-nav:
-  - Accueil: index.md
-
-
-docs_dir: doc/
+site_name: Documentation OSCAR
 theme: readthedocs
+docs_dir: doc

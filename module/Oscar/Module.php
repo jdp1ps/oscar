@@ -13,6 +13,7 @@ use Oscar\Auth\UserAuthenticatedEventListener;
 use Oscar\Entity\Authentification;
 use UnicaenAuth\Authentication\Adapter\Ldap;
 use UnicaenAuth\Event\UserAuthenticatedEvent;
+use Zend\Authentication\Result;
 use Zend\Authentication\Result as AuthenticationResult;
 use Zend\EventManager\Event;
 use Zend\ModuleManager\ModuleManager;
@@ -67,13 +68,19 @@ class Module
     public function onLdapError(Event $event)
     {
         if ($event->getName() == Ldap::LDAP_AUTHENTIFICATION_FAIL) {
-            $messages = "";
-            foreach ($event->getParams() as $k => $m) {
-                $messages .= strval($m) . "\n";
+            $userMessage = "Problème d'authentification LDAP";
+            $log = "Problème d'authentification LDAP";
+
+            /** @var Result $messages */
+            $messages = $event->getParam('result');
+            if( $messages != null && get_class($messages) == Result::class ){
+                $log .= " : \n";
+                foreach ($messages->getMessages() as $message) {
+                    $log .= $message . "\n";
+                }
             }
-            $error = "[OSCAR] LDAP authentification FAIL " . $messages;
-            $this->logger->error($error);
-            error_log($error);
+            $this->logger->error($log);
+            error_log($log);
         }
     }
 

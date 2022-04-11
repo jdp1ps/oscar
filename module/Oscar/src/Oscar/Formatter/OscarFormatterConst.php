@@ -39,5 +39,9 @@ interface OscarFormatterConst
 
     const FORMAT_IO_JSON = 'json';
 
+    const FORMAT_IO_PDF = 'pdf';
+
+    const FORMAT_IO_HTML = 'html';
+
     const FORMAT_IO_XML = 'xml';
 }
