@@ -1624,6 +1624,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'total_research' => 0.0,
             'total_off' => 0.0,
             'total' => 0.0,
+            'has_invalid' => false,
             'current' => [
                 'total' => 0.0,
                 'workpackages' => []
@@ -1680,9 +1681,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'other' => [],
         ];
 
+        $othersValidKeys = [];
+
         foreach ($this->getOthersWP() as $other) {
             $group = $other['group'];
             $code = $other['code'];
+            $othersValidKeys[] = $code;
 
             if (!array_key_exists($group, $otherByGroup)) {
                 $otherByGroup[$group] = [];
@@ -1715,6 +1719,24 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ];
             }
         }
+
+        // Fix : Rangement des créneaux mal qualifiés
+        $othersModel['invalid'] = [
+            'label' => 'Invalid',
+            'group' => 'error',
+            'total' => 0.0,
+        ];
+        $othersInfos['items']['invalid'] = [
+            'label' => 'Invalid',
+            'group' => 'error',
+            'total' => 0.0,
+        ];
+
+        $headings['others']['invalid'] = [
+            'label' => 'Invalid',
+            'group' => 'error',
+            'total' => 0.0,
+        ];
 
         $output = [
             'period_from_label' => $startPeriod->getPeriodLabel(),
@@ -1834,6 +1856,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 } // Autre
                 else {
                     $key = $t['itemkey'];
+                    if( !in_array($key, $othersValidKeys) ){
+                        $key = 'invalid';
+                        $headings['has_invalid'] = true;
+                    }
                     $datasPersons[$personId]['datas']["others"][$key]['total'] += $timesheetDuration;
                     $datasPeriods[$timesheetPeriod]['datas']["others"][$key]['total'] += $timesheetDuration;
                     $headings['others'][$key]['total'] += $timesheetDuration;

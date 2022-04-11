@@ -48,7 +48,11 @@
           <span class="value hours">{{ prj.label }}</span>
         </div>
 
-        <div v-for="other in initialdata.headings.others" :title="other.label" :class="other.group">
+        <div v-for="other in initialdata.headings.others"
+             :title="other.label"
+             :class="other.group"
+             v-if="other.label != 'Invalid' || (other.label == 'Invalid' && initialdata.headings.has_invalid)"
+        >
           <span class="value hours">{{ other.label }}</span>
         </div>
 
@@ -76,7 +80,11 @@
           <span class="value hours">{{ prj.total | duration }}</span>
         </div>
 
-        <div v-for="other in entry.datas.others" :title="other.label" :class="other.group">
+        <div v-for="other in entry.datas.others"
+             :title="other.label"
+             :class="other.group"
+             v-if="other.label != 'Invalid' || (other.label == 'Invalid' && initialdata.headings.has_invalid)"
+        >
           <span class="value hours">{{ other.total | duration }}</span>
         </div>
 
@@ -101,7 +109,10 @@
           <span class="value hours">{{ prj.total | duration }}</span>
         </div>
 
-        <div v-for="other in initialdata.headings.others" :title="other.label" :class="other.group">
+        <div v-for="other in initialdata.headings.others"
+             :title="other.label"
+             :class="other.group"
+             v-if="other.label != 'Invalid' || (other.label == 'Invalid' && initialdata.headings.has_invalid)">
           <span class="value hours">{{ other.total | duration }}</span>
         </div>
 

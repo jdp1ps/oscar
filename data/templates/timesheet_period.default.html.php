@@ -29,6 +29,15 @@
         td.valued {
 
         }
+
+        .error {
+            background: #e34242;
+            color: white;
+        }
+        .error.none {
+            background: #e34242;
+            color: rgba(255,255,255,.5);
+        }
     </style>
 </head>
 <?php
@@ -81,7 +90,10 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
             <th class="project research"><?= $prj['label'] ?></th>
             <?php endforeach; ?>
 
-            <?php foreach ($headings['others'] as $other): ?>
+            <?php foreach ($headings['others'] as $other):
+                // On n'affiche pas la colonne "Invalid" si ça n'est pas utile
+                if( $other['label'] == 'Invalid' && ($headings['has_invalid'] == false) ) continue;
+                ?>
                 <th class="<?= $other['group'] ?>"><?= $other['label'] ?></th>
             <?php endforeach; ?>
             <th class="total">TOTAL</th>
@@ -101,7 +113,10 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
             <td class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></td>
             <?php endforeach; ?>
 
-            <?php foreach ($line['datas']['others'] as $other): ?>
+            <?php foreach ($line['datas']['others'] as $other):
+                // On n'affiche pas la colonne "Invalid" si ça n'est pas utile
+                if( $other['label'] == 'Invalid' && ($headings['has_invalid'] == false) ) continue;
+                ?>
                 <td class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></td>
             <?php endforeach; ?>
             <td class="total <?= $line['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($line['total']) ?></td>
@@ -120,7 +135,10 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
         <th class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></th>
     <?php endforeach; ?>
 
-    <?php foreach ($headings['others'] as $other): ?>
+    <?php foreach ($headings['others'] as $other):
+        // On n'affiche pas la colonne "Invalid" si ça n'est pas utile
+        if( $other['label'] == 'Invalid' && ($headings['has_invalid'] == false) ) continue;
+        ?>
         <th class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></th>
     <?php endforeach; ?>
     <th class="total <?= $headings['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($headings['total']) ?></th>
