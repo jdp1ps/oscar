@@ -343,7 +343,7 @@
                     <?php
                     if ($manage): ?>
                         <div class="btn-area">
-                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>"
+                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId(),'idTab'=>""]) ?>"
                                class="smoke">
                                 <i class="icon-book"></i>
                                 Téléverser un document
@@ -354,7 +354,7 @@
                     <nav>
                         <?php
                         foreach ($generatedDocuments as $key => $infos): ?>
-                            <a href="<?= $this->url(
+                             <a href="<?= $this->url(
                                 'contract/generatedocument',
                                 ['id' => $entity->getId(), 'doc' => $key]
                             ) ?>" class="btn btn-primary">
@@ -394,6 +394,7 @@
                                                 'contract/documents-json',
                                                 ['id' => $entity->getId()]
                                             ) ?>',
+                                            urlUploadNewDoc:'<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>',
                                             urlDocumentType: '<?= $this->url(
                                                 'contractdocument/document-change-type'
                                             ) ?>',

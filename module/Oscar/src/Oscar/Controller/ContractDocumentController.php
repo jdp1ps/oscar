@@ -216,7 +216,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     /**
      * Upload de document sur une activité
-     * /documents-des-contracts/televerser/idActivité/idDocument
+     *
+     * /documents-des-contracts/televerser/idActivité/idDocument/idTab
      *
      * @return array
      * @annotations Procédure générique pour l'envoi des fichiers.
@@ -228,6 +229,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             'error' => '',
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
+        $idTab = $this->params()->fromRoute('idtab');
+        //echo "ID ACTIVITE : " . $idActivity."<br>\n";
+        //echo "ID TAB : " . $idTab."\n";
+
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
