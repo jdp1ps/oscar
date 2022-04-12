@@ -1528,6 +1528,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $datas = [];
 
+        //Docs reliés à une activité
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $docDt = $doc->toJson(
@@ -1539,7 +1540,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ]
             );
             if (array_key_exists($doc->getTabDocument()->getId(), $tabsArray)){
-                $tabsArray[$doc->getTabDocument()->getId()]["documents"] = $docDt;
+                $tabsArray[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
             }
             $datas[] = $docDt;
         }
