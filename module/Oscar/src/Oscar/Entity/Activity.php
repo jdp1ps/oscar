@@ -2302,6 +2302,16 @@ class Activity implements ResourceInterface
         );
     }
 
+    public function getWorkpackageByCode( string $code )
+    {
+        foreach ($this->getWorkPackages() as $workPackage) {
+            if ($workPackage->getCode() == $code){
+                return $workPackage;
+            }
+        }
+        return null;
+    }
+
     public static function csvHeaders()
     {
         return array(

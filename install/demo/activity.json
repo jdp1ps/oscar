@@ -9,7 +9,7 @@
     "dateend": "",
     "datesigned": "2017-06-01",
     "pfi": "99PFI1234",
-    "datePFI":"2018-01-01",
+    "datePFI": "2018-01-01",
     "type": "ANR",
     "amount": "0.0",
     "financialImpact": "Recette",
@@ -23,7 +23,6 @@
         "date": "2018-01-31"
       }
     ],
-
     "organizations": {
       "Référent extérieur": [],
       "Laboratoire": [
@@ -36,7 +35,8 @@
         "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe", "Sarah Déclarant"
+        "John Doe",
+        "Sarah Déclarant"
       ]
     }
   },
@@ -54,10 +54,8 @@
     "amount": 15000,
     "financialImpact": "Aucune",
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [
@@ -78,7 +76,36 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Etude et analyse",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Albert Einstein",
+          "Marcel Grossmann"
+        ]
+      }
+    ]
   },
   {
     "uid": "A0003",
@@ -93,10 +120,8 @@
     "type": "ANR",
     "amount": 9990,
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [

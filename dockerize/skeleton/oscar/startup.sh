@@ -12,9 +12,9 @@ touch logs/oscar.log
 chmod 777 config/autoload/oscar-editable.yml
 chmod 777 logs/oscar.log
 
-cp -R -u -p /opt/oscar_config/local.php config/autoload/local.php
-cp -R -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
-cp -R -u -p /opt/oscar_config/unicaen-auth.local.php config/autoload/unicaen-auth.local.php
+cp -u -p /opt/oscar_config/local.php config/autoload/local.php
+cp -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
+cp -u -p /opt/oscar_config/unicaen-auth.local.php config/autoload/unicaen-auth.local.php
 
 # On attends que Postgresql soit UP
 until PGPASSWORD="azerty" psql -h "£CONTAINER_POSTGRESQL" -U "oscar" "oscar_dev" -c '\q'; do

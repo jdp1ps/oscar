@@ -31,6 +31,8 @@ use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\Role;
 use Oscar\Entity\TVA;
+use Oscar\Entity\WorkPackage;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Import\Data\DataExtractorFullname;
@@ -473,19 +475,19 @@ class ConnectorActivityJSON implements ConnectorInterface
             $dateStart = null;
             $dateEnd = null;
 
-            if ($data->currency) {
+            if (property_exists($data, 'currency')) {
                 $currency = $this->getCurrency($data->currency);
             } else {
                 $currency = $defaultCurrency;
             }
 
-            if ($data->currency) {
+            if (property_exists($data, 'tva')) {
                 $tva = $this->getTva($data->tva);
             } else {
                 $tva = null;
             }
 
-            if ($data->status) {
+            if (property_exists($data, 'status')) {
                 $status = (int)$data->status;
             } else {
                 $status = Activity::STATUS_ERROR_STATUS;
@@ -542,16 +544,18 @@ class ConnectorActivityJSON implements ConnectorInterface
             /** @var DisciplineRepository $disciplineRepo */
             $disciplineRepo = $this->entityManager->getRepository(Discipline::class);
 
-            foreach ($data->disciplines as $discipline) {
-                $disc = $disciplineRepo->findOneBy(['label' => $discipline]);
+            if( property_exists($data, 'disciplines') ){
+                foreach ($data->disciplines as $discipline) {
+                    $disc = $disciplineRepo->findOneBy(['label' => $discipline]);
 
-                if (!$disc) {
-                    $disc = new Discipline();
-                    $this->entityManager->persist($disc);
-                    $disc->setLabel($discipline);
-                    $this->entityManager->flush($disc);
+                    if (!$disc) {
+                        $disc = new Discipline();
+                        $this->entityManager->persist($disc);
+                        $disc->setLabel($discipline);
+                        $this->entityManager->flush($disc);
+                    }
+                    $activity->addDiscipline($disc);
                 }
-                $activity->addDiscipline($disc);
             }
 
             $this->entityManager->flush($activity);
@@ -670,7 +674,11 @@ class ConnectorActivityJSON implements ConnectorInterface
                             )
                         );
                     }
-                    $description = $milestone->description;
+
+                    $description = "";
+                    if( property_exists($milestone, 'description') ){
+                        $description = $milestone->description;
+                    }
                     if (!$activity->hasMilestoneAt($type, $date)) {
                         $milestoneActivity = new ActivityDate();
                         $this->entityManager->persist($milestoneActivity);
@@ -701,77 +709,120 @@ class ConnectorActivityJSON implements ConnectorInterface
 //                        $fullName, $role, $activity, $e->getMessage()));
                 }
             }
-            foreach ($data->payments as $paymentData) {
-                try {
-                    $amount = doubleval($paymentData->amount);
-                    if (!$amount) {
-                        throw new \Exception(
-                            sprintf(
-                                "La valeur de montant '%s' n'a pas put être convertie en nombre.",
-                                $paymentData->amount
-                            )
-                        );
+            if( property_exists($data, 'workpackages') ){
+                foreach ($data->workpackages as $workpackageData) {
+                    $code = $workpackageData->code;
+                    $workpackage = $activity->getWorkpackageByCode($code);
+                    if( !$workpackage ){
+                        $workpackage = new WorkPackage();
+                        $workpackage->setActivity($activity);
+                        $workpackage->setCode($workpackageData->code);
+                        $this->entityManager->persist($workpackage);
                     }
 
-                    try {
-                        $datePayment = $paymentData->date ?
-                            new \DateTime($paymentData->date) :
-                            null;
+                    $label = "";
+                    if( property_exists($workpackageData, 'label') ){
+                        $label = $workpackageData->label;
+                    }
+                    $workpackage->setLabel($label);
+                    $workpackage->setDescription("Imported WP");
+                    $this->entityManager->flush($workpackage);
 
-                        $datePredicted = $paymentData->predicted ?
-                            new \DateTime($paymentData->predicted) :
-                            null;
+                    // Traitement des déclarants
+                    foreach ($workpackageData->declarers as $fullName) {
+                        $datasPerson = (new DataExtractorFullname())->extract($fullName);
+                        if ($datasPerson) {
+                            $person = $this->getPersonOrCreate($datasPerson, $repport);
+                            if( !$workpackage->hasPerson($person) ){
+                                try {
+                                    $workpackagePerson = new WorkPackagePerson();
+                                    $this->entityManager->persist($workpackagePerson);
+                                    $workpackagePerson->setPerson($person)
+                                        ->setWorkPackage($workpackage);
+                                    $this->entityManager->flush($workpackagePerson);
+                                    $repport->addadded("Déclarant '$person' dans '$workpackage'");
+                                } catch (\Exception $e) {
+                                    $repport->adderror("Impossible d'ajouter le déclarant '$person' : " . $e->getMessage());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if( property_exists($data, 'payments') ){
+                foreach ($data->payments as $paymentData) {
+                    try {
+                        $amount = doubleval($paymentData->amount);
+                        if (!$amount) {
+                            throw new \Exception(
+                                sprintf(
+                                    "La valeur de montant '%s' n'a pas put être convertie en nombre.",
+                                    $paymentData->amount
+                                )
+                            );
+                        }
+
+                        try {
+                            $datePayment = $paymentData->date ?
+                                new \DateTime($paymentData->date) :
+                                null;
+
+                            $datePredicted = $paymentData->predicted ?
+                                new \DateTime($paymentData->predicted) :
+                                null;
+                        } catch (\Exception $e) {
+                            throw new \Exception(
+                                sprintf(
+                                    "Impossible de convertir '%s' en objet Date : %s",
+                                    $paymentData->date,
+                                    $e->getMessage()
+                                )
+                            );
+                        }
+
+                        if (!$datePayment && !$datePredicted) {
+                            throw new \Exception("Impossible de créer un versement sans date");
+                        }
+
+                        if ($datePredicted && !$datePayment) {
+                            $paymentStatus = ActivityPayment::STATUS_PREVISIONNEL;
+                        } else {
+                            $paymentStatus = ActivityPayment::STATUS_REALISE;
+                        }
+
+                        if (!$activity->hasPaymentAt($amount, $datePayment, $datePredicted)) {
+                            $payment = new ActivityPayment();
+                            $this->entityManager->persist($payment);
+                            $payment->setDatePayment($datePayment)
+                                ->setDatePredicted($datePredicted)
+                                ->setCurrency($defaultCurrency)
+                                ->setStatus($paymentStatus)
+                                ->setActivity($activity)
+                                ->setAmount($amount);
+                            $this->entityManager->flush($payment);
+
+                            $repport->addadded(
+                                sprintf(
+                                    "Ajout d'un versement de '%s' €, effectué le '%s' (Prévu le '%s) dans '%s'",
+                                    $amount,
+                                    $datePayment ? $datePayment->format('D M Y') : 'N.D',
+                                    $datePredicted ? $datePredicted->format('D M Y') : 'N.D',
+                                    $activity
+                                )
+                            );
+                        }
                     } catch (\Exception $e) {
-                        throw new \Exception(
+                        $repport->adderror(
                             sprintf(
-                                "Impossible de convertir '%s' en objet Date : %s",
+                                "Impossible d'ajouter le versement de '%s'€ (le : '%s') dans '%s' : %s",
+                                $paymentData->amount,
                                 $paymentData->date,
+                                $activity,
                                 $e->getMessage()
                             )
                         );
                     }
-
-                    if (!$datePayment && !$datePredicted) {
-                        throw new \Exception("Impossible de créer un versement sans date");
-                    }
-
-                    if ($datePredicted && !$datePayment) {
-                        $paymentStatus = ActivityPayment::STATUS_PREVISIONNEL;
-                    } else {
-                        $paymentStatus = ActivityPayment::STATUS_REALISE;
-                    }
-
-                    if (!$activity->hasPaymentAt($amount, $datePayment, $datePredicted)) {
-                        $payment = new ActivityPayment();
-                        $this->entityManager->persist($payment);
-                        $payment->setDatePayment($datePayment)
-                            ->setDatePredicted($datePredicted)
-                            ->setCurrency($defaultCurrency)
-                            ->setStatus($paymentStatus)
-                            ->setActivity($activity)
-                            ->setAmount($amount);
-                        $this->entityManager->flush($payment);
-
-                        $repport->addadded(
-                            sprintf(
-                                "Ajout d'un versement de '%s' €, effectué le '%s' (Prévu le '%s) dans '%s'",
-                                $amount,
-                                $datePayment ? $datePayment->format('D M Y') : 'N.D',
-                                $datePredicted ? $datePredicted->format('D M Y') : 'N.D',
-                                $activity
-                            )
-                        );
-                    }
-                } catch (\Exception $e) {
-                    $repport->adderror(
-                        sprintf(
-                            "Impossible d'ajouter le versement de '%s'€ (le : '%s') dans '%s' : %s",
-                            $paymentData->amount,
-                            $paymentData->date,
-                            $activity,
-                            $e->getMessage()
-                        )
-                    );
                 }
             }
         }
