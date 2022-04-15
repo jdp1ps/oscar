@@ -499,7 +499,7 @@ class NotificationService implements UseServiceContainer
                 $dateDiff = $moment->from($dateRappel->format('Y-m-d'));
                 $delayStr = $dateDiff->getRelative();
                 $hashs[] = $this->buildNotificationCore(
-                    $message . ' RAPPEL ' . $delayStr,
+                    $message . ' (' . $delayStr . ')',
                     Notification::OBJECT_ACTIVITY,
                     $activity->getId(),
                     $context,
