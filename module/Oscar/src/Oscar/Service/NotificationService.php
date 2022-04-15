@@ -451,6 +451,7 @@ class NotificationService implements UseServiceContainer
     public function updateNotificationCoreMilestone(Activity $activity): void
     {
         $hashs = [];
+        Moment::setLocale('fr_FR');
 
         /** @var ActivityDate $milestone */
         foreach ($activity->getMilestones() as $milestone) {
@@ -494,8 +495,11 @@ class NotificationService implements UseServiceContainer
 
             // Les rappels configurés dans le le type de jalon
             foreach ($milestone->getRecursivityDate() as $dateRappel) {
+                $moment = new Moment($milestone->getDateStartStr('Y-m-d'));
+                $dateDiff = $moment->from($dateRappel->format('Y-m-d'));
+                $delayStr = $dateDiff->getRelative();
                 $hashs[] = $this->buildNotificationCore(
-                    $message,
+                    $message . ' RAPPEL ' . $delayStr,
                     Notification::OBJECT_ACTIVITY,
                     $activity->getId(),
                     $context,
