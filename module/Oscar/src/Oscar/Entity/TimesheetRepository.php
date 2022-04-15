@@ -91,6 +91,21 @@ class TimesheetRepository extends EntityRepository
         return $qb->setParameter('person', $personId)->getQuery()->getSingleScalarResult();
     }
 
+    /**
+     * @param array $uids
+     * @return TimeSheet[]
+     */
+    public function getImportedByUid( array $uids ) :array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->select('t')
+            ->where('t.icsUid IN(:uids)');
+
+        return $qb->setParameter('uids', $uids)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getPeriodsPerson($personId)
     {
         $qb = $this->getEntityManager()->createQueryBuilder()

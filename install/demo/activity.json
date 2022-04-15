@@ -46,13 +46,13 @@
     "projectlabel": "Théorie de la relativité",
     "description": "Description le d'activité 2",
     "label": "Exemple d'activité 2",
-    "datestart": "2015-01-01",
-    "dateend": "2017-12-31",
-    "datesigned": "2015-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-01-05",
     "pfi": "",
     "type": "Colloques",
     "amount": 15000,
-    "financialImpact": "Aucune",
+    "financialImpact": "Recettes",
     "milestones": [
     ],
     "payments": [
@@ -112,9 +112,9 @@
     "acronym": "MECAQUAN",
     "projectlabel": "Mécanique quantique",
     "label": "Étude des quanta",
-    "datestart": "2012-01-01",
-    "dateend": "2020-12-31",
-    "datesigned": "2014-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-02-01",
     "financialImpact": "Dépense",
     "pfi": "",
     "type": "ANR",
@@ -142,6 +142,35 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Travaux préparatoires",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      }
+    ]
   }
 ]

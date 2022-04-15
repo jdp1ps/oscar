@@ -294,6 +294,25 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
+     * @param string $importedUid
+     * @param bool $throw
+     * @return Activity|null
+     * @throws OscarException
+     */
+    public function getActivityByImportedUid( string $importedUid, $throw = true ) :?Activity
+    {
+        $activity = $this->getActivityRepository()->findOneBy(['centaureId' => $importedUid]);
+        if (!$activity) {
+            if ($throw === true) {
+                throw new OscarException("Impossible de charger l'activité (UID = $importedUid)");
+            } else {
+                return null;
+            }
+        }
+        return $activity;
+    }
+
+    /**
      * @param int $id
      * @param bool $throw
      * @return Project|null

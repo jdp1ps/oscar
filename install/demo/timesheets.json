@@ -1,10 +1,205 @@
 [
   {
-    "declarer" : "",
-    "declarer_id" : 1,
-    "workpackage_code" : "",
-    "activity_acronym" : "",
-    "date": "",
-    "duration": ""
+    "uid": "imported-ts-01",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : "WP1",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-03",
+    "duration": 8.0,
+    "comment": "Activité importée"
+  },
+  {
+    "uid": "imported-ts-02",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : "WP1",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-04",
+    "duration": 4.0,
+    "comment": "Activité importée"
+  },
+  {
+    "uid": "imported-ts-03",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : "WP2",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-04",
+    "duration": 4.0,
+    "comment": "Activité importée"
+  },
+  {
+    "uid": "imported-ts-04",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : null,
+    "other_key" : "conges",
+    "activity_pfi" : null,
+    "activity_uid" : null,
+    "date": "2022-01-05",
+    "duration": 8.0,
+    "comment": ""
+  },
+  {
+    "uid": "imported-ts-05",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : null,
+    "other_key" : "research",
+    "activity_pfi" : null,
+    "activity_uid" : null,
+    "date": "2022-01-06",
+    "duration": 8.0,
+    "comment": ""
+  },
+  {
+    "uid": "imported-ts-06",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : "WP3",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-07",
+    "duration": 8.0,
+    "comment": "Activité importée"
+  },
+  {
+    "uid": "imported-ts-07",
+    "declarer" : "Albert Einstein",
+    "declarer_email" : "albert.einstein@jacksay.com",
+    "workpackage_code" : "WP3",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-10",
+    "duration": 8.0,
+    "comment": "Activité importée"
   }
+,
+  {
+    "uid": "imported-ts-08",
+    "declarer" : "Marcel Grossmann",
+    "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP1",
+    "other_key" : null,
+    "activity_pfi" : "",
+    "activity_uid" : "A0002",
+    "date": "2022-01-03",
+    "duration": 8.0,
+    "comment": "Activité importée"
+  }
+,
+  { "uid": "imported-ts-09",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP1", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-04", "duration": 8.0,
+    "comment": "Activité importée"
+  },
+  { "uid": "imported-ts-10",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP3", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-05", "duration": 8.0,
+    "comment": "Activité importée"
+  },
+  { "uid": "imported-ts-11",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP2", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-06", "duration": 8.0,
+    "comment": "Activité importée"
+  },
+  { "uid": "imported-ts-12",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP1", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-07", "duration": 2.0,
+    "comment": "Activité importée"
+  },
+  { "uid": "imported-ts-13",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP3", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-07", "duration": 6.0,
+    "comment": "Activité importée"
+  }
+
+
+  ,
+  { "uid": "imported-ts-14",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "teaching",
+    "date": "2022-01-10", "duration": 2.0,
+    "comment": "Cours"
+  },
+  { "uid": "imported-ts-15",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "teaching",
+    "date": "2022-01-11", "duration": 4.0,
+    "comment": "Cours"
+  },
+  { "uid": "imported-ts-16",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "teaching",
+    "date": "2022-01-12", "duration": 2.0,
+    "comment": "Cours"
+  },
+  { "uid": "imported-ts-17",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "teaching",
+    "date": "2022-01-13", "duration": 8.0,
+    "comment": "Cours"
+  },
+  { "uid": "imported-ts-18",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "teaching",
+    "date": "2022-01-14", "duration": 4.0,
+    "comment": "Cours"
+  }
+
+,
+  { "uid": "imported-ts-19",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "research",
+    "date": "2022-01-10", "duration": 6.0,
+    "comment": "Entretien"
+  },
+  { "uid": "imported-ts-20",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : null, "activity_pfi" : "", "activity_uid" : null,
+    "other_key" : "other",
+    "date": "2022-01-11", "duration": 4.0,
+    "comment": "Réunion de laboratoire"
+  },
+  { "uid": "imported-ts-21",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP2", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-12", "duration": 6.0,
+    "comment": ""
+  },
+
+  { "uid": "imported-ts-22",
+    "declarer" : "Marcel Grossmann", "declarer_email" : "marcel.grossmann@jacksay.com",
+    "workpackage_code" : "WP1", "activity_pfi" : "", "activity_uid" : "A0003",
+    "other_key" : null,
+    "date": "2022-01-14", "duration": 4.0,
+    "comment": ""
+  }
+
 ]
