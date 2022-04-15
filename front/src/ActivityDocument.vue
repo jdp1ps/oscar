@@ -105,12 +105,14 @@
                  <label>Choix des personnes ayant accès à ce document</label>
                 <h3>Ce document sera classé automatiquement dans l'onglet privé</h3>
                   <person-auto-completer @change="handlerSelectPersons"></person-auto-completer>
-                <!-- TODO MISE EN PAGE LISTING A REVOIR SELON CHARTE OSCAR -->
-                  <ul v-if="persons.length !== 0">
-                    <li v-for="p in persons" :key="p.personId">
-                        {{ p.personName }}<span @click="deleteP(p)"><i class="icon-trash"></i></span>
-                    </li>
-                  </ul>
+                  <span v-if="persons.length !== 0" v-for="p in persons" :key="p.personId" class="cartouche">
+                    <i class="icon-cube"></i>
+                    <span>{{ p.personName }}</span>
+                    <span v-if="p.affectation.trim() !=''" class="addon">
+                      {{ p.affectation }}<i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                    </span>
+                    <i v-if="p.affectation.trim() ===''" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                  </span>
               </span>
             </div>
 
@@ -431,12 +433,6 @@ export default {
       // Affectation valeur du tab dans lequel on se trouve
       this.tabId = tabId;
     },
-    // Suppression de la personne dans le tableau des personnes
-    deleteP(p) {
-      //console.log("personne : ", p);
-      this.persons.splice(this.persons.indexOf(p), 1);
-      //console.log("values this.persons : ", this.persons);
-    },
 
     deleteDocument(document) {
       this.deleteData = document;
@@ -465,14 +461,32 @@ export default {
 
     // Event Change sur composant pour hydrater tableau de la liste des personnes pour document privé
     handlerSelectPersons(person) {
+      //console.log(person);
       //console.log(arguments);
       //console.log(person.displayname);
       //console.log(person.id);
       let personSelected = {
         "personName": person.displayname,
-        "personId": person.id
+        "personId": person.id,
+        "affectation": person.affectation
       };
-      this.persons.push(personSelected);
+      let comparePersonId = person.id;
+      let isPresent = false;
+      this.persons.forEach(function(person){
+        if(person.personId === comparePersonId){
+          isPresent = true;
+        }
+      });
+      if (false === isPresent){
+        this.persons.push(personSelected);
+      }
+    },
+
+    // Suppression de la personne dans le tableau des personnes
+    handlerDeletePerson(person) {
+      //console.log("personne : ", p);
+      this.persons.splice(this.persons.indexOf(person), 1);
+      //console.log("values this.persons : ", this.persons);
     },
 
     /**
