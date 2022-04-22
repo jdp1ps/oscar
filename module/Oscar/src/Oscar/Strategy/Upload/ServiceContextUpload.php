@@ -75,7 +75,7 @@ class ServiceContextUpload
         // Choix stratégie et hydrater l'objet Type choisi avec la stratégie
         // GED ou OSCAR (POST OU PAS POST)
         $isPost = false;
-        // Mise à jour document id doc
+        // Mise à jour document si id doc est fournis (mise à jour nouvelle version doc)
         if ($this->docId) {
             $doc = new ContractDocument();
             if ($doc = $this->documentService->getDocument($this->docId)->getQuery()->getSingleResult()) {

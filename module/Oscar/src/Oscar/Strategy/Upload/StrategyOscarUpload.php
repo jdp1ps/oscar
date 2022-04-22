@@ -21,6 +21,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
     const PRIVATE                   = "private";
     const TAB_DOCUMENT              = "tab";
     const DATE_SEND                 = "dateSend";
+    const PERSONS                   = "persons";
     const NAME_INPUT_FILE           = "file";
 
     private $etat;
@@ -92,6 +93,19 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     $nameClass = $this->document->getDocumentService()->getEffectiveClass();
                     /** @var ContractDocument $document */
                     $document = new $nameClass;
+
+                    /**
+                    "dateDeposit" => "2022-03-31T00:00:00+02:00"
+                    "dateSend" => "2022-04-08T00:00:00+02:00"
+                    "private" => "true"
+                    "type" => "4"
+                    "tab" => "1"
+                    "informations" => "description"
+                    "persons" => "6,5"
+                    "baseUrlUpload" => "/documents-des-contracts/televerser/2/1"
+                    "init" => "true"
+                     */
+
                     $document
                         ->setVersion(1)
                         ->setDateUpdoad(new \DateTime())
@@ -100,14 +114,28 @@ class StrategyOscarUpload implements StrategyTypeInterface
                         ->setFileTypeMime($fileMime)
                         ->setInformation($this->datas['informations'])
                         ->setPerson($this->getDocument()->getOscarUserContext()->getCurrentPerson())
-                        ->setTabDocument($this->getDocument()->getDocumentService()->getContractTabDocument($this->datas[self::TAB_DOCUMENT]))
                         ->setTypeDocument($this->getDocument()->getDocumentService()->getContractDocumentType($this->datas[self::TYPE_FILE]))
                         ->setGrant($this->getDocument()->getActivity())
                         ->setDateDeposit($this->datas[self::DATE_DEPOSIT] ? new \DateTime($this->datas[self::DATE_DEPOSIT]):null)
-                        ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null)
-                        ->setPrivate($this->datas[self::PRIVATE] ?? false);
-                        $this->etat = true;
-                        $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
+                        ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null);
+
+                    // Si le document téléversé n'est pas notifié comme privé alors ajout du tab (onglet) sélectionné
+                    if (false === $this->datas[self::PRIVATE]){
+                            $document
+                                ->setTabDocument($this->getDocument()->getDocumentService()->getContractTabDocument($this->datas[self::TAB_DOCUMENT]))
+                                ->setPrivate(false);
+                                //->setPrivate($this->datas[self::PRIVATE] ?? false);;
+
+                        }else{
+                        // TODO traitement des datas personnes si personnes associées à la consultation du document car document privé (affichage restreint à certaines personnes)
+                            if (!is_null($this->datas[self::PERSONS])){
+                                $document ->setPrivate(true);
+                                // TODO AFFECTER PERSONNES (liste de ids)
+                            }
+                    }
+
+                    $this->etat = true;
+                    $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
                     if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){
                             $this->getDocument()->getNotificationService()->generateActivityDocumentUploaded($document);
                             $this->getDocument()->getActivityLogService()->addUserInfo(

@@ -37,6 +37,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
 use Zend\Http\Request;
+use Zend\Http\Response;
 use Zend\Json\Server\Exception\HttpException;
 use Zend\Mvc\Controller\Plugin\Redirect;
 use Zend\View\Model\JsonModel;
@@ -185,6 +186,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
 
     /**
+     * Modification type de document
+     *
      * @return JsonModel
      * @throws ORMException
      * @throws OptimisticLockException
@@ -194,6 +197,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
         /** @var Request $request */
         $request = $this->getRequest();
+        dd($request->getContent());
+
 
         if( $request->isPost() ){
             /** @var ContractDocument $document */
@@ -230,18 +235,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
         $idTab = $this->params()->fromRoute('idtab');
-
-        /**
-         * TODO WORK IN PROGRESS 11/04/2022 HM
-         */
-        echo "ID ACTIVITE : " . $idActivity."<br>\n";
-        echo "ID TAB : " . $idTab."\n";
-
-        if ($this->getRequest()->isPost()){
-            $datas = $this->getRequest()->getPost()->toArray();
-            dump($datas);
-        }
-        die("here");
 
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
@@ -293,14 +286,17 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                         throw new Exception("Erreur arrivé dans le cas par défaut switch case ? -> Méthode : ". __METHOD__ . " Fichier : " . __FILE__ . " Ligne : " . __LINE__);
                         break;
                 }
+            }else{
+                throw new Exception("Accès interdit en dehors de la soumission de données");
             }
             // Affichage template par défaut upload new doc -> view/oscar/contract-document/upload.phtml
-            return [
+            // Ancien code version formulaire Zend
+            /*return [
                 'activity' => $activity,
                 'data'  => $datas,
                 'types' => $this->getContractDocumentService()->getContractDocumentTypes(),
                 'tabs' => $this->getContractDocumentService()->getContractTabDocuments(),
-            ];
+            ];*/
 
         }catch (Exception $e){
             // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
