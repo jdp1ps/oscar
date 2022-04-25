@@ -17,6 +17,16 @@ return array(
         // ! EXPERIMENTAL !
         'generated-documents' => [],
 
+        'horslots' => [
+            ////////////////////////////////// EXEMPLE de CONFIGURATION DES HORS-LOTS
+            'conges' => [ 'code' => 'conges',  'label' => 'Congés', 'group' => 'abs', 'description' => 'Congès/RTT', 'icon' => true ],
+            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement', 'group' => 'education', 'description' => 'Cours', 'icon' => true ],
+            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie', 'group' => 'abs', 'description' => '', 'icon' => true ],
+            'research' => [ 'code' => 'research', 'label' => 'Autre recherche', 'group' => 'research', 'description' => 'Recherche hors-contrat', 'icon' => true ],
+            'other' => [ 'code' => 'other', 'label' => 'Divers', 'group' => 'other', 'description' => 'Autre activité', 'icon' => true ],
+        ],
+
+
         // Répartition horaire
         'declarationsDurations' => [
             'dayLength'     => [

@@ -56,7 +56,7 @@ class ProjectService implements UseServiceContainer
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getPersonService() :PersonService
+    public function getPersonService(): PersonService
     {
         return $this->getServiceContainer()->get(PersonService::class);
     }
@@ -302,15 +302,15 @@ class ProjectService implements UseServiceContainer
         return $this->getBaseQuery()->getQuery()->getResult();
     }
 
-    public function getProjectsByIds( array $projectIds ):array
+    public function getProjectsByIds(array $projectIds): array
     {
         return $this->getProjectRepository()->getByIds($projectIds);
     }
 
 
-    public function getFormatter( $format )
+    public function getFormatter($format)
     {
-        if( $format == OscarFormatterConst::FORMAT_IO_CSV ){
+        if ($format == OscarFormatterConst::FORMAT_IO_CSV) {
             $formatter = new ProjectToArrayFormatter();
             $rolesPerson = $this->getProjectGrantService()->getOscarUserContextService()
                 ->getAvailabledRolesPersonActivity();
@@ -318,7 +318,9 @@ class ProjectService implements UseServiceContainer
                 ->getAvailabledRolesOrganizationActivity();
             $milestones = $this->getProjectGrantService()->getMilestoneService()
                 ->getMilestoneTypeFlat();
-            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
+
+            $numerotations = $this->getProjectGrantService()->getOscarConfigurationService()->getNumerotationKeys();
+            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones, $numerotations);
             return $formatter;
         }
         throw new OscarException(sprintf(_("Formatteur de projet '%s' inconnue"), $format));
@@ -450,16 +452,14 @@ class ProjectService implements UseServiceContainer
     ///
     ///
     ///
-    public function replacePerson( Person $from, Person $to, Project $project ):void
+    public function replacePerson(Person $from, Person $to, Project $project): void
     {
         $date = new \DateTime();
         try {
-
             /** @var ProjectMember $projectMember */
-            foreach( $project->getPersons() as $projectMember ){
-                if( $projectMember->getPerson()->getId() == $from->getId() ){
-
-                    if ( $projectMember->isActive() ){
+            foreach ($project->getPersons() as $projectMember) {
+                if ($projectMember->getPerson()->getId() == $from->getId()) {
+                    if ($projectMember->isActive()) {
                         $role = $projectMember->getRoleObj();
                         $projectMember->setDateEnd($date);
                         $this->addProjectPerson($project, $to, $role, $date, null);
@@ -471,12 +471,19 @@ class ProjectService implements UseServiceContainer
                 }
             }
         } catch (\Exception $e) {
-          throw new OscarException(sprintf(_("Impossible de remplacer '%s' par '%s' dans le projet '%s'", $from, $to, $project)));
+            throw new OscarException(
+                sprintf(_("Impossible de remplacer '%s' par '%s' dans le projet '%s'", $from, $to, $project))
+            );
         }
     }
 
-    public function addProjectPerson( Project $project, Person $person, Role $role, ?\DateTime $start = null, ?\DateTime $end = null ):void
-    {
+    public function addProjectPerson(
+        Project $project,
+        Person $person,
+        Role $role,
+        ?\DateTime $start = null,
+        ?\DateTime $end = null
+    ): void {
         $this->getPersonService()->personProjectAdd($project, $person, $role, $start, $end);
     }
 
@@ -510,7 +517,6 @@ class ProjectService implements UseServiceContainer
         $dateStart,
         $dateEnd
     ): void {
-
         try {
             $update = $role->isPrincipal() != $projectPartner->getRoleObj()->isPrincipal();
 
@@ -525,7 +531,9 @@ class ProjectService implements UseServiceContainer
                 $this->getGearmanJobLauncherService()->triggerUpdateNotificationProject($projectPartner->getProject());
             }
 
-            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($projectPartner->getOrganization());
+            $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization(
+                $projectPartner->getOrganization()
+            );
             $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexProject($projectPartner->getProject());
         } catch (\Exception $e) {
             $msg = "Impossible de modifier l'organisation dans le projet";

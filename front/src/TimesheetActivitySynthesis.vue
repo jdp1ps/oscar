@@ -37,15 +37,15 @@
         </div>
 
         <div v-for="wp in initialdata.headings.current.workpackages" class="main research">
-          <span class="value hours">{{ wp.label }}</span>
+          <span class="header label">{{ wp.code }}</span>
         </div>
 
         <div class="main research total">
-          <span class="value hours">Total</span>
+          <span class="header label">Total</span>
         </div>
 
         <div v-for="prj in initialdata.headings.prjs.prjs" :title="prj.label"  class="research">
-          <span class="value hours">{{ prj.label }}</span>
+          <span class="header label">{{ prj.label }}</span>
         </div>
 
         <div v-for="other in initialdata.headings.others"
@@ -53,11 +53,11 @@
              :class="other.group"
              v-if="other.label != 'Invalid' || (other.label == 'Invalid' && initialdata.headings.has_invalid)"
         >
-          <span class="value hours">{{ other.label }}</span>
+          <span class="header label">{{ other.label.substr(0,16) }}</span>
         </div>
 
         <div class="total">
-          <span class="value">
+          <span class="header label">
             Total
           </span>
         </div>

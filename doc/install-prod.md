@@ -542,9 +542,10 @@ S'assurer que les dossiers :
  - `./data/`
  - Le dossier choisi pour l'index Lucene (si c'est l'indexeur choisi)
  - Le dossier de stockage des documents
- - Le fichier de log
+ - Le dossier de log `./logs`  
+ - Le fichier de log `./logs/oscar.log`
 
-Sont bien accessibles en écriture.
+sont bien accessibles en écriture.
 
 ### Unicaen App (ldap & mail)
 

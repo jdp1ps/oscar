@@ -9,7 +9,7 @@
     "dateend": "",
     "datesigned": "2017-06-01",
     "pfi": "99PFI1234",
-    "datePFI":"2018-01-01",
+    "datePFI": "2018-01-01",
     "type": "ANR",
     "amount": "0.0",
     "financialImpact": "Recette",
@@ -23,7 +23,6 @@
         "date": "2018-01-31"
       }
     ],
-
     "organizations": {
       "Référent extérieur": [],
       "Laboratoire": [
@@ -36,7 +35,8 @@
         "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe", "Sarah Déclarant"
+        "John Doe",
+        "Sarah Déclarant"
       ]
     }
   },
@@ -46,18 +46,16 @@
     "projectlabel": "Théorie de la relativité",
     "description": "Description le d'activité 2",
     "label": "Exemple d'activité 2",
-    "datestart": "2015-01-01",
-    "dateend": "2017-12-31",
-    "datesigned": "2015-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-01-05",
     "pfi": "",
     "type": "Colloques",
     "amount": 15000,
-    "financialImpact": "Aucune",
+    "financialImpact": "Recettes",
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [
@@ -78,25 +76,52 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Etude et analyse",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Albert Einstein",
+          "Marcel Grossmann"
+        ]
+      }
+    ]
   },
   {
     "uid": "A0003",
     "acronym": "MECAQUAN",
     "projectlabel": "Mécanique quantique",
     "label": "Étude des quanta",
-    "datestart": "2012-01-01",
-    "dateend": "2020-12-31",
-    "datesigned": "2014-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-02-01",
     "financialImpact": "Dépense",
     "pfi": "",
     "type": "ANR",
     "amount": 9990,
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [
@@ -117,6 +142,35 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Travaux préparatoires",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      }
+    ]
   }
 ]

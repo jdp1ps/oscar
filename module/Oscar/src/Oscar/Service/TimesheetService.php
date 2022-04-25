@@ -239,6 +239,15 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->getPersonTimesheetsCount($personId) > 0;
     }
 
+    public function getImportedTimesheetsByUid( array $uidImportedTs ) :array
+    {
+        $output = [];
+        foreach ( $this->getTimesheetRepository()->getImportedByUid($uidImportedTs) as $timesheet ){
+            $output[$timesheet->getIcsUid()] = $timesheet;
+        }
+        return $output;
+    }
+
 
     public function getDatasDeclarations()
     {

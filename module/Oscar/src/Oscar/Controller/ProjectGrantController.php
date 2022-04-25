@@ -2387,6 +2387,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     '((o1.organization = :id AND o1.roleObj = :roleObj) OR (o2.organization = :id AND o2.roleObj = :roleObj))'
                 );
 
+            $queryOrganisationRoleNorOrg = $this->getEntityManager()->createQueryBuilder()
+                ->select('a.id')
+                ->from(Activity::class, 'a', 'a.id')
+                ->leftJoin('a.project', 'p')
+                ->leftJoin('p.partners', 'o1')
+                ->leftJoin('a.organizations', 'o2')
+                ->leftJoin('p.members', 'm1')
+                ->leftJoin('a.persons', 'm2')
+                ->where(
+                    '(o1.roleObj = :roleObj OR o2.roleObj = :roleObj)'
+                );
+
             $queryOrganisations = $this->getEntityManager()->createQueryBuilder()
                 ->select('a.id')
                 ->from(Activity::class, 'a', 'a.id')
@@ -2581,25 +2593,62 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'ao' :
                     case 'so' :
                         $organizationId[] = $value1;
+
+                        $crit['val1Label'] = "Non déterminé";
+                        $organization = null;
+
+                        // Récupération de l'organisation
                         try {
                             $organization = $this->getOrganizationService()->getOrganization($value1);
                             $organizations[$organization->getId()] = $organization;
                             $crit['val1Label'] = (string)$organization;
-                            $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService(
-                            )->getRolesOrganizationInActivity()[$value2] : '';
-                            if ($value2 > 0) {
-                                $roleOrganisation = $this->getEntityManager()->getRepository(
-                                    OrganizationRole::class
-                                )->find($value2);
-                                $queryParam['roleObj'] = $roleOrganisation;
-                                $query = $queryOrganisationRole;
-                            } else {
-                                $query = $queryOrganisationNoRole;
-                            }
-                            $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
                         } catch (\Exception $e) {
-                            $crit['error'] = "Impossible de filtrer sur l'organisation (" . $e->getMessage() . ")";
+
                         }
+
+                        if ($value2 > 0) {
+                            $roleOrganisation = $this->getEntityManager()->getRepository(
+                                OrganizationRole::class
+                            )->find($value2);
+
+
+                            if( !$organization ){
+                                $query = $queryOrganisationRoleNorOrg;
+                                $queryParam = [
+                                    'roleObj' => $roleOrganisation
+                                ];
+                            } else {
+                                $query = $queryOrganisationRole;
+                                $queryParam['roleObj'] = $roleOrganisation;
+                            }
+                        } else {
+                            if($organization == null) {
+                                $crit['error'] = "Impossible de filtrer Organisation et/ou rôle requis.";
+                            }
+                            $query = $queryOrganisationNoRole;
+                        }
+
+                        $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
+
+//                        try {
+//                            $organization = $this->getOrganizationService()->getOrganization($value1);
+//                            $organizations[$organization->getId()] = $organization;
+//                            $crit['val1Label'] = (string)$organization;
+//                            $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService(
+//                            )->getRolesOrganizationInActivity()[$value2] : '';
+//                            if ($value2 > 0) {
+//                                $roleOrganisation = $this->getEntityManager()->getRepository(
+//                                    OrganizationRole::class
+//                                )->find($value2);
+//                                $queryParam['roleObj'] = $roleOrganisation;
+//                                $query = $queryOrganisationRole;
+//                            } else {
+//                                $query = $queryOrganisationNoRole;
+//                            }
+//                            $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
+//                        } catch (\Exception $e) {
+//                            $crit['error'] = "Impossible de filtrer sur l'organisation (" . $e->getMessage() . ")";
+//                        }
                         break;
 
                     // Filtre sur le statut de l'activité
