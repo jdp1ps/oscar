@@ -12,6 +12,11 @@ touch logs/oscar.log
 chmod 777 config/autoload/oscar-editable.yml
 chmod 777 logs/oscar.log
 
+mkdir -p /var/documents/activity
+chmod 777 /var/documents/activity
+mkdir -p /var/documents/public
+chmod 777 /var/documents/public
+
 cp -u -p /opt/oscar_config/local.php config/autoload/local.php
 cp -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
 cp -u -p /opt/oscar_config/unicaen-auth.local.php config/autoload/unicaen-auth.local.php
