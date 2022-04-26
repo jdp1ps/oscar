@@ -235,7 +235,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
         $idTab = $this->params()->fromRoute('idtab');
-
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 

@@ -34,9 +34,15 @@
 let tempo;
 
 export default {
+  // Ajout props pour config url si souhaité (respecter Api de retour)
+  props: {
+    url: {
+      default: "/person?l=m&q="
+    }
+  },
   data() {
     return {
-      url: "/person?l=m&q=",
+      //url: "/person?l=m&q=",
       persons: [],
       expression: "",
       loading: false,
