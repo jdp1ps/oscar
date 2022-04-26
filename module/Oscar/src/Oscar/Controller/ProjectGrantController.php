@@ -1376,6 +1376,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $tabsArray [$tab->getId()] ["documents"] = [];
 
         }
+        // Onglet non classés constante
+        $tabPrivate = [];
+
+        /*$tabPrivate ["private"] =
+            ['id' => "null",
+            'label' => "Non classés",
+            'description' => "description test"
+            ];
+        $tabPrivate ["private"] ["documents"] = [];*/
 
         $datas = [];
 
@@ -1390,13 +1399,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show', ['id' => $doc->getPerson()->getId()]) : false,
                 ]
             );
-            if (array_key_exists($doc->getTabDocument()->getId(), $tabsArray)){
-                $tabsArray[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
+
+            if(!is_null($doc->getTabDocument())){
+                if (array_key_exists($doc->getTabDocument()->getId(), $tabsArray)){
+                    $tabsArray[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
+                }
+            }else{
+                $tabPrivate ["documents"] [] = $docDt;
             }
             $datas[] = $docDt;
         }
         $out['datas'] = $datas;
         $out['tabsWithDocuments'] =  $tabsArray;
+        $out['tabPrivate'] = $tabPrivate;
         return new JsonModel($out);
     }
 

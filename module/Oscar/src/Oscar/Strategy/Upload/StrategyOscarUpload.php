@@ -7,6 +7,7 @@ namespace Oscar\Strategy\Upload;
 use Exception;
 use Oscar\Entity\AbstractVersionnedDocument;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 
 
@@ -93,7 +94,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     $nameClass = $this->document->getDocumentService()->getEffectiveClass();
                     /** @var ContractDocument $document */
                     $document = new $nameClass;
-
                     /**
                     "dateDeposit" => "2022-03-31T00:00:00+02:00"
                     "dateSend" => "2022-04-08T00:00:00+02:00"
@@ -105,7 +105,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     "baseUrlUpload" => "/documents-des-contracts/televerser/2/1"
                     "init" => "true"
                      */
-
                     $document
                         ->setVersion(1)
                         ->setDateUpdoad(new \DateTime())
@@ -118,22 +117,23 @@ class StrategyOscarUpload implements StrategyTypeInterface
                         ->setGrant($this->getDocument()->getActivity())
                         ->setDateDeposit($this->datas[self::DATE_DEPOSIT] ? new \DateTime($this->datas[self::DATE_DEPOSIT]):null)
                         ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null);
-
+                        //->setPrivate($this->datas[self::PRIVATE] ?? false);;
                     // Si le document téléversé n'est pas notifié comme privé alors ajout du tab (onglet) sélectionné
-                    if (false === $this->datas[self::PRIVATE]){
+                    if (false === boolval($this->datas[self::PRIVATE])){
                             $document
                                 ->setTabDocument($this->getDocument()->getDocumentService()->getContractTabDocument($this->datas[self::TAB_DOCUMENT]))
                                 ->setPrivate(false);
-                                //->setPrivate($this->datas[self::PRIVATE] ?? false);;
-
                         }else{
-                        // TODO traitement des datas personnes si personnes associées à la consultation du document car document privé (affichage restreint à certaines personnes)
-                            if (!is_null($this->datas[self::PERSONS])){
-                                $document ->setPrivate(true);
-                                // TODO AFFECTER PERSONNES (liste de ids)
+                            $document ->setPrivate(true);
+                            // Traitement des datas personnes si personnes associées à la consultation du document contexte métier document privé
+                            if (!is_null($this->datas[self::PERSONS]) && trim($this->datas[self::PERSONS]) !=""){
+                                $personsIds = explode("," , $this->datas[self::PERSONS]);
+                                foreach ($personsIds as $id){
+                                    $person = $this->getDocument()->getDocumentService()->getEntityManager()->getRepository(Person::class)->find($id);
+                                    $document->addPerson($person);
+                                }
                             }
                     }
-
                     $this->etat = true;
                     $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
                     if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){

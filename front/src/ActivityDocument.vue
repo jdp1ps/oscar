@@ -30,7 +30,7 @@
     <div class="overlay" v-if="editData">
       <div class="overlay-content">
         <h2>
-          Modification du document
+          Modification du document : <i class="icon-doc"></i> {{ editData.basename }}
           <span class="overlay-closer" @click="editData = null">X</span>
         </h2>
           <div class="row">
@@ -42,14 +42,37 @@
                 </select>
               </div>
             </div>
-
             <div class="col-md-6">
-              <label for="tabdocument">Onglet document</label>
-              <div>
-                <select name="tabdocument" id="tabdocument" v-model="editData.tabDocument_id">
-                  <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
-                </select>
+              <!-- PRIVE, SI PRIVE AJOUT PERSONNES MODIFICATION DE DOCUMENT -->
+              <div class="row" style="margin-top: 20px;">
+                <span v-if="editData.private === false">
+                <label for="tabdocument">Onglet document</label>
+                <div>
+                  <select name="tabdocument" id="tabdocument" v-model="editData.tabDocument_id">
+                    <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                  </select>
+                </div>
+              </span>
+                <div class="col-md-6">
+                  <label for="private">Document privé</label>
+                </div>
+                <div class="col-md-6">
+                  <input type="checkbox" name="private" id="privateModifDoc" class="form-control" v-model="editData.private">
+                </div>
               </div>
+              <span v-if="editData.private === true">
+                 <label>Choix des personnes ayant accès à ce document</label>
+                <h3>Ce document sera classé automatiquement dans l'onglet privé</h3>
+                  <person-auto-completer @change="handlerSelectPersons"></person-auto-completer>
+                  <span v-if="persons.length !== 0" v-for="p in persons" :key="p.personId" class="cartouche">
+                    <i class="icon-cube"></i>
+                    <span>{{ p.personName }}</span>
+                    <span v-if="p.affectation.trim() !=''" class="addon">
+                      {{ p.affectation }}<i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                    </span>
+                    <i v-if="p.affectation.trim() ===''" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                  </span>
+              </span>
             </div>
           </div>
         <!--
@@ -115,8 +138,8 @@
                 </div>
               </div>
               <span v-if="privateDocument === true">
+                <h4>Ce document sera classé automatiquement dans l'onglet privé</h4>
                  <label>Choix des personnes ayant accès à ce document</label>
-                <h3>Ce document sera classé automatiquement dans l'onglet privé</h3>
                   <person-auto-completer @change="handlerSelectPersons"></person-auto-completer>
                   <span v-if="persons.length !== 0" v-for="p in persons" :key="p.personId" class="cartouche">
                     <i class="icon-cube"></i>
@@ -266,6 +289,42 @@
       </article>
     </div>
 
+    <!-- TODO travail en cours sur la partie documents privés -->
+
+    <div class="steps-bar">
+      <div style="cursor: pointer;" v-if="tabPrivate" @click="openTabPrivate = !openTabPrivate" class="step done"> Documents Privés </div>
+      <!--<div class="step current"> Vérifier les affectations </div>-->
+    </div>
+    <div class="step-content" v-if="openTabPrivate === true">
+      <article class="card xs" v-for="docP in tabPrivate.documents" :key="docP.id">
+        <!--v-for="document in documentsPacked" :key="document.id">-->
+        <!--<article v-if="isTabActive === tp.id" class="card xs" v-for="docP in tp.documents" :key="docP.id">-->
+          <div class="card-title">
+            <i class="picto icon-doc" :class="'doc' + docP.extension"></i>
+            <small class="text-light">{{ docP.categoryText }} ~ </small>
+            <strong>{{docP.fileName}}</strong>
+            <small class="text-light" :title="docP.fileSize + ' octet(s)'">&nbsp;({{docP.fileSize | filesize}})</small>
+          </div>
+          <p>
+            {{ docP.information }}
+          </p>
+        <h5 v-if="docP.persons.length > 0">Personnes accédants à ces documents</h5>
+        <span class="cartouche"  v-for="person in docP.persons" :key="person.id">
+            {{ person.fullName }}
+        </span>
+
+        <div class="card-content">
+          <p class="text-highlight">
+            Fichier <strong>{{ docP.extension}}</strong>
+            version {{ docP.version }},
+            téléversé le
+            <time>{{ docP.dateUpload | dateFull }}</time>
+            <span v-if="docP.uploader"> par <strong>{{ docP.uploader.displayname }}</strong></span>
+          </p>
+        </div>
+      </article>
+    </div>
+
     <!-- Section boucle documents Originelle JACK -->
     <!--
       <article class="card xs" v-for="document in documentsPacked" :key="document.id">
@@ -400,6 +459,9 @@ export default {
         'baseUrlUpload': this.urlUploadNewDoc,
         'init': false
       },
+      // Documents privés
+      tabPrivate: null,
+      openTabPrivate:false,
       // Message boite modal pour l'utilisateur (erreurs pour exemple)
       message: null,
       // Onglet sélectionné
@@ -443,6 +505,7 @@ export default {
     },
     // Pour afficher les documents selon IdOnglet (idTab)
     isTabActive() {
+      this.openTabPrivate = false;
       return this.tabId;
     }
   },
@@ -540,7 +603,7 @@ export default {
       // Binding datas de l'objet pour le formulaire Upload
       this.uploadNewDocData.dateDeposit = this.dateDeposit;
       this.uploadNewDocData.dateSend = this.dateSend;
-      this.uploadNewDocData.private = this.privateDocument;
+      this.uploadNewDocData.private = (this.privateDocument === true)?"1":"0";
       this.uploadNewDocData.type = this.selectedIdTypeDocument;
       this.uploadNewDocData.informations = this.informationsDocument;
 
@@ -564,6 +627,10 @@ export default {
         fd.append('file', this.fileToDownload, this.fileToDownload.name);
       }else{
         this.message = "Aucun fichier sélectionner a téléverser !";
+        return;
+      }
+      if (this.uploadNewDocData.type === null){
+        this.message = "Vous devez qualifier le type de votre document !";
         return;
       }
       this.uploadDoc = null;
@@ -599,6 +666,7 @@ export default {
 
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
+      this.tabPrivate = success.data.tabPrivate;
       this.tabsWithDocuments = success.data.tabsWithDocuments;
       let data = success.data.datas;
       let documentsOrdered = [];

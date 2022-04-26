@@ -8,7 +8,11 @@
 namespace Oscar\Entity;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\ManyToMany;
 
 /**
  * @ORM\Entity()
@@ -47,10 +51,18 @@ class ContractDocument extends AbstractVersionnedDocument
     /**
      * Onglet où est affecté ce document
      *
-     * @var TabDocument
+     * @var ?TabDocument
      * @ORM\ManyToOne(targetEntity=TabDocument::class)
      */
-    private TabDocument $tabDocument;
+    private ?TabDocument $tabDocument = null;
+
+    /**
+     * Personnes associées pour visualiser le document (cas de figure document privé)
+     *
+     * @ManyToMany(targetEntity="Person", inversedBy="documents")
+     * @JoinTable(name="persons_documents")
+     */
+    private $persons;
 
     /**
      * Ce document est privé ou non false par défaut
@@ -76,6 +88,15 @@ class ContractDocument extends AbstractVersionnedDocument
      * @ORM\Column(type="date", nullable=true)
      */
     private $dateSend;
+
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->persons = new ArrayCollection();
+    }
+
+
 
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -182,9 +203,9 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
     /**
-     * @return TabDocument
+     * @return TabDocument|null
      */
-    public function getTabDocument(): TabDocument
+    public function getTabDocument(): ?TabDocument
     {
         return $this->tabDocument;
     }
@@ -214,6 +235,40 @@ class ContractDocument extends AbstractVersionnedDocument
     public function setPrivate(?bool $private):self
     {
         $this->private = $private;
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPersons()
+    {
+        return $this->persons;
+    }
+
+    /**
+     * @param Person $person
+     * @return ContractDocument
+     */
+    public function addPerson(Person $person): self
+    {
+        if (!$this->persons->contains($person)) {
+            $this->persons[] = $person;
+            $person->addDocument($this);
+        }
+        return $this;
+    }
+
+    /**
+     * @param Person $person
+     * @return $this
+     */
+    public function removePerson(Person $person): self
+    {
+        if ($this->persons->contains($person)) {
+            $this->persons->removeElement($person);
+            $person->removeDocument($this);
+        }
         return $this;
     }
 
@@ -255,11 +310,24 @@ class ContractDocument extends AbstractVersionnedDocument
             'category' => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
             'tabDocument' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
             'private' => $this->isPrivate(),
+            'persons' => $this->personsToJson(),
             'urlDelete' => $options['urlDelete'],
             'urlDownload' => $options['urlDownload'],
             'urlReupload' => $options['urlReupload'],
             'uploader' => $this->getPerson() ? $this->getPerson()->toJson(['urlPerson' => $options['urlPerson']]) : null,
         ];
+    }
+
+    private function personsToJson(){
+        $personsJson = [];
+        /* @var Person $person */
+        foreach ($this->getPersons() as $key => $person){
+            $entityPerson = [];
+            $entityPerson ["id"]  = $person->getId();
+            $entityPerson ["fullName"]  = $person->getFullname();
+            $personsJson [] = $entityPerson;
+        }
+        return $personsJson;
     }
 
     ////////////////////////////////////////////////////////////////////////////

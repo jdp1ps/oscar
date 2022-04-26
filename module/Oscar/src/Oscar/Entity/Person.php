@@ -8,7 +8,9 @@
 namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToMany;
 use Oscar\Utils\StringUtils;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 
@@ -210,6 +212,10 @@ class Person implements ResourceInterface
      */
     protected $customSettings;
 
+    /**
+     * @ManyToMany(targetEntity="ContractDocument", mappedBy="persons")
+     */
+    protected $documents;
 
     function __construct()    {
         $this->projectAffectations = new ArrayCollection();
@@ -224,6 +230,7 @@ class Person implements ResourceInterface
         $this->validatorActivitiesAdm = new ArrayCollection();
         $this->centaureId = [];
         $this->setDateCreated(new \DateTime());
+        $this->documents = new ArrayCollection();
     }
 
     /**
@@ -656,8 +663,6 @@ class Person implements ResourceInterface
         return $this;
     }
 
-
-
     /**
      * @return string
      */
@@ -977,4 +982,39 @@ class Person implements ResourceInterface
     public function getDateCachedStr(){
         return $this->getDateUpdatedStr();
     }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getDocuments()
+    {
+        return $this->documents;
+    }
+
+    /**
+     * @param ContractDocument $document
+     * @return Person
+     */
+    public function addDocument(ContractDocument $document): self
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents [] = $document;
+            $document->addPerson($this);
+        }
+        return $this;
+    }
+
+    /**
+     * @param ContractDocument $document
+     * @return $this
+     */
+    public function removeDocument(ContractDocument $document): self
+    {
+        if ($this->documents->contains($document)) {
+            $this->documents->removeElement($document);
+            $document->removePerson($this);
+        }
+        return $this;
+    }
+
 }
