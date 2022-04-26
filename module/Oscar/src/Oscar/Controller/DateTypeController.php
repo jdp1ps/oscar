@@ -16,6 +16,7 @@ use Oscar\Entity\DateType;
 use Oscar\Entity\DateTypeRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\DateTypeForm;
+use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
@@ -30,8 +31,29 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
 
     public function indexAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MILESTONETYPE_MANAGE);
+
+
+        $entities = [];
+        /** @var DateType $type */
+        foreach ($this->getEntityManager()->getRepository(DateType::class)->findAll() as $type) {
+            $roles = [];
+            foreach ($type->getRoles() as $role) {
+                $roles[] = $role->getRoleId();
+            }
+            $entities[] = [
+                'id' => $type->getId(),
+                'label' => $type->getLabel(),
+                'description' => $type->getDescription(),
+                'facet' => $type->getFacet(),
+                'finishable' => $type->isFinishable(),
+                'recursivity' => $type->getRecursivity(),
+                'roles' => $roles,
+                'used' => 0
+            ];
+        }
         return [
-            'entities' => $this->getEntityManager()->getRepository(DateType::class)->allWithUsage()
+            'entities' => $entities//$this->getEntityManager()->getRepository(DateType::class)->allWithUsage()
         ];
     }
 

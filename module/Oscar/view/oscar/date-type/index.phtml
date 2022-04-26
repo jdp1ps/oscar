@@ -63,12 +63,20 @@ $facet;
                     <?php endif; ?>
             </span>
 
+
+            <div class="roles">
+                <i class="icon-user"></i> Roles :
+                <?php foreach( $entity['roles'] as $r ): ?>
+                    <span class="cartouche primary"><?= $r ?></span>
+                <?php endforeach; ?>
+            </div>
+
             <span>
-                    <?php if( $entity['finishable'] ): ?>
-                        <i class="icon-ok-circled" title="Gestion de la complétude"></i>
-                        Ce type doit être marqué comme terminé
-                    <?php endif; ?>
-                </span>
+                <?php if( $entity['finishable'] ): ?>
+                    <i class="icon-ok-circled" title="Gestion de la complétude"></i>
+                    Ce type doit être marqué comme terminé
+                <?php endif; ?>
+            </span>
 
 
 

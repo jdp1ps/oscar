@@ -116,7 +116,7 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
                     'multiple' => 'multiple',
                 ],
                 'options' => [
-                    'label_attributes' => ['style'=>'display: block; vertical-align: middle']
+                    'label_attributes' => []
                 ]
             ]
         );

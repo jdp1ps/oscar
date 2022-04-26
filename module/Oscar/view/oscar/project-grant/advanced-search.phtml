@@ -182,6 +182,7 @@
             </nav>
         </article>
     </script>
+
     <script type="text/x-handlebars" id="discipline-criteria-tpl">
         <article class="criteria criteria-type card">
             <div class="icon-beaker"></div>
@@ -212,6 +213,25 @@
             <select class="select2 form-control val1 changer types" id="filter_country" multiple>
                 <?php foreach( $countries as $country ): ?>
                 <option value="<?= $country ?>"><?= $country ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="typeorga-tpl">
+        <article class="criteria criteria-typeorga card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
+                <?php foreach( $typeorgas as $typeorga ): ?>
+                <option value="<?= $typeorga ?>"><?= $typeorga ?></option>
                 <?php endforeach; ?>
             </select>
             <nav>
@@ -692,6 +712,10 @@
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
                     }
+                    else if(datas.type == 'tnt' ) {
+                        datas.label = "Type d'organisation";
+                        dom = $(tplTypeOrga(datas));
+                    }
                     else if(datas.type == 'at' || datas.type == 'st' ) {
                         datas.label = datas.type == 'as' ? 'Ayant le status'
                             : "N'a pas le status";
@@ -873,6 +897,7 @@
                     tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),
+                    tplTypeOrga = Handlebars.compile($('#typeorga-tpl').html()),
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),

@@ -2240,6 +2240,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'as' => 'Ayant le statut',
                 'ss' => 'N\'ayant pas le statut',
                 'cnt' => "Pays (d'une organisation)",
+                'tnt' => "Type d'organisation",
                 'af' => 'Ayant comme incidence financière',
                 'sf' => 'N\'ayant pas comme incidence financière',
                 'mp' => 'Montant prévu',
@@ -2713,6 +2714,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $parameters['countries'] = $value1;
                         }
                         break;
+                    case 'tnt' :
+                        if ($params[1]) {
+                            if (!isset($parameters['typeorga'])) {
+                                $parameters['typeorga'] = [];
+                            }
+                            $value1 = $crit['val1'] = explode(',', $params[1]);
+                            $qb->andWhere('orga1.type IN (:typeorga) OR orga2.type IN (:typeorga)');
+                            $parameters['typeorga'] = $value1;
+                        }
+                        break;
                     case 'aj':
                         $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
                         break;
@@ -2858,6 +2869,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'filtersType' => $filtersType,
                     'error' => $error,
                     'criteria' => $criterias,
+                    'typeorgas' => $this->getOrganizationService()->getOrganizationTypesSelect(),
                     'countries' => $this->getOrganizationService()->getCountriesList(),
                     'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),
                     'persons' => $persons,
