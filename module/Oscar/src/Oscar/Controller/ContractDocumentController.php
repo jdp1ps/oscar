@@ -197,7 +197,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
         /** @var Request $request */
         $request = $this->getRequest();
-        dd($request->getContent());
+        dump($request->getContent());
+        die("here");
 
 
         if( $request->isPost() ){
