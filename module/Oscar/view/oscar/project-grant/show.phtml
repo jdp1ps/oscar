@@ -341,7 +341,11 @@
                 <section id="documents" class="has-btn">
                     <h2><i class="icon-book"></i> Documents</h2>
                     <?php
-                    if ($manage): ?>
+                    /*
+                    if ($manage):
+                    */
+                    ?>
+                    <!--
                         <div class="btn-area">
                             <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId(),'idTab'=>""]) ?>"
                                class="smoke">
@@ -349,8 +353,10 @@
                                 Téléverser un document
                             </a>
                         </div>
+                        -->
+
                     <?php
-                    endif; ?>
+                    //endif; ?>
                     <nav>
                         <?php
                         foreach ($generatedDocuments as $key => $infos): ?>

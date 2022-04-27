@@ -329,6 +329,28 @@
             <time>{{ docP.dateUpload | dateFull }}</time>
             <span v-if="docP.uploader"> par <strong>{{ docP.uploader.displayname }}</strong></span>
           </p>
+
+          <nav class="text-right show-over">
+            <a class="btn btn-default btn-xs" :href="docP.urlDownload" v-if="docP.urlDownload">
+              <i class="icon-upload-outline"></i>
+              Télécharger
+            </a>
+
+            <a class="btn btn-default btn-xs" :href="docP.urlReupload" v-if="docP.urlReupload">
+              <i class="icon-download-outline"></i>
+              Nouvelle version
+            </a>
+
+            <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(docP)">
+              <i class="icon-trash"></i>
+              Supprimer
+            </a>
+            <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(docP)">
+              <i class="icon-pencil"></i>
+              Modifier
+            </a>
+          </nav>
+
         </div>
       </article>
     </div>
