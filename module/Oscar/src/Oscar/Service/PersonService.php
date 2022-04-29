@@ -903,7 +903,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function removeReferentOnPerson(Person $referent, Person $on)
     {
-       $this->removeAddReferent($on->getId(), null, $referent->getId());
+        $this->removeAddReferent($on->getId(), null, $referent->getId());
     }
 
 
@@ -1205,7 +1205,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 if ($organization->isPrincipal()) {
                     /** @var OrganizationPerson $personOrganization */
                     foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
-                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson()->getId();
+                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
+                        )->getId();
                     }
                 }
             }
@@ -1213,6 +1214,114 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         } catch (\Exception $e) {
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
         }
+    }
+
+    public function getPersonsHighDelay(string $period)
+    {
+        $declarers = $this->getDeclarersIdsBeforePeriod($period);
+        $output = [];
+
+        foreach ($declarers as $personId => $infos) {
+
+            /** @var Person $person */
+            $person = $infos['person'];
+            $personName = (string)$person;
+            $personId = $person->getId();
+            $personEmail = $person->getEmail();
+            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person);
+            $repport = $this->getHighDelayForPerson($personId);
+            $periods = [];
+
+            $output[$personId] = [
+                'person_id' => $personId,
+                'fullname' => $personName,
+                'email' => $personEmail,
+                'total_periods' => count($personPeriods),
+                'total_declarations' => count($repport),
+                'valid' => false,
+                'send' => true,
+                'notif' => true,
+                'require_alert_declarer' => count($repport) < count($personPeriods),
+                'require_alert_validator' => false,
+                'periods' => [],
+                'infos' => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
+            ];
+
+            foreach ($personPeriods as $pp) {
+                $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
+                $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
+
+                if ($pp >= $period) {
+                    continue;
+                }
+
+                if( $send === false ){
+                    $output[$personId]['send'] = false;
+                    $output[$personId]['send'] = false;
+                }
+
+                 if( $send === false ){
+                    $output[$personId]['send'] = false;
+                }
+
+                if( $send === true && $valid === false ){
+                    $output[$personId]['require_alert_validator'] = true;
+                }
+
+                // état de la période
+                $value = null;
+                $periodInfos = [
+                    'valid' => false,
+                    'send' => false,
+                    'conflict' => false
+                ];
+                if( array_key_exists($pp, $repport) ){
+                    $periodInfos['valid'] = $repport[$pp]['valid'];
+                    $periodInfos['send'] = $repport[$pp]['send'];
+                    $periodInfos['conflict'] = $repport[$pp]['conflict'];
+                }
+
+                if ($valid == false) {
+                    $output[$personId]['infos'] = "Il y'a des déclarations non-terminée";
+                    $output[$personId]['valid'] = false;
+                }
+                $periods[$pp] = $periodInfos;
+
+                $output[$personId]['periods'] = $periods;
+            }
+
+            $output[$personId]['periods'] = $periods;
+        }
+
+        return $output;
+    }
+
+    public function getHighDelayForPerson(int $personId)
+    {
+        $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId);
+        $output = [];
+        foreach ($highdelays as $highdelay) {
+            $period = $highdelay['period'];
+            $nbr = $highdelay['nbr'];
+            $prj = $highdelay['prj'];
+            $sci = $highdelay['sci'];
+            $adm = $highdelay['adm'];
+            $valid = ($prj + $sci + $adm) == ($nbr * 3);
+            $send = $nbr > 0;
+            $rejprj = $highdelay['rejprj'];
+            $rejsci = $highdelay['rejsci'];
+            $rejadm = $highdelay['rejadm'];
+            $reject = ($rejprj + $rejsci + $rejadm) > 0;
+            $conflict = $highdelay['rejprj'] > 0;
+            // TODO Ajouter la détection des conflits
+            $output[$highdelay['period']] = [
+                'period' => $period,
+                'valid' => $valid,
+                'send' => $send,
+                'reject' => $reject,
+            ];
+        }
+        return $output;
     }
 
 
@@ -1556,9 +1665,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param string $periodStr
      * @return int[]
      */
-    public function getDeclarersIdsPeriod(string $periodStr): array
+    public function getDeclarersIdsBeforePeriod(string $periodStr): array
     {
-        return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
+        $ids = $this->getPersonRepository()->getIdsDeclarersBeforePeriod($periodStr);
+        $output = [];
+        foreach ($ids as $id) {
+            $output[$id] = [
+                'person' => $this->getPersonById($id),
+                'periods' => []
+            ];
+        }
+        return $output;
     }
 
     /**
@@ -1868,7 +1985,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param string $format
      * @return array
      */
-    public function getAvailableRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT) :array
+    public function getAvailableRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT): array
     {
         return $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray($format);
     }

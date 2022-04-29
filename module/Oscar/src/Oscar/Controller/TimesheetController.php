@@ -33,6 +33,7 @@ use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\PeriodInfos;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Console\View\Renderer;
@@ -567,6 +568,23 @@ class TimesheetController extends AbstractOscarController
         return [
             'person' => $person
         ];
+    }
+
+    public function highDelayAction()
+    {
+        $format = $this->params()->fromQuery('f', OscarFormatterConst::FORMAT_IO_HTML);
+        if( $this->isAjax() || $format == OscarFormatterConst::FORMAT_IO_JSON ){
+
+            // Critères
+            $period = $this->params()->fromQuery('period', date('Y-m'));
+            $period = PeriodInfos::getPeriodInfosObj($period)->prevMonth();
+            $datas = $this->baseJsonResponse();
+
+            // Liste des personnes avec des retards anciens (Personne => Période)
+            $datas['highdelays'] = $this->getPersonService()->getPersonsHighDelay($period->getPeriodCode());
+            return $this->jsonOutput($datas);
+        }
+        return [];
     }
 
     public function synthesisActivityPeriodsBoundsAction()

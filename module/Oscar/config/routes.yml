@@ -163,6 +163,13 @@ timesheet:
     may_terminate: false
 
     child_routes:
+        highdelay:
+            type: segment
+            options:
+                route: /highdelay
+                defaults:
+                    action: highDelay
+
         synthesisactivity:
             type: segment
             options:

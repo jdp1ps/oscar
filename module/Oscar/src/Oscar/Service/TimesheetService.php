@@ -2904,7 +2904,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 DateTimeUtils::allperiodsBetweenTwo($bounds['dateStart'], $bounds['dateEnd'])
             );
         }
-        return $periods;
+        return array_unique($periods);
     }
 
     public function getPeriodsValidator(Person $validator): array

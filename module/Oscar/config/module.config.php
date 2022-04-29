@@ -262,7 +262,10 @@ return array(
                 [
                     'controller' => 'Timesheet',
                     'action' => [
+
+                        'highDelay',
                         'indexPersonActivity',
+
                         'sauvegarde',
                         'declaration',
                         'validations',
