@@ -211,10 +211,10 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
     /**
-     * @param TabDocument $tabDocument
+     * @param ?TabDocument $tabDocument
      * @return $this
      */
-    public function setTabDocument(TabDocument $tabDocument):self
+    public function setTabDocument(?TabDocument $tabDocument):self
     {
         $this->tabDocument = $tabDocument;
         return $this;
@@ -318,13 +318,17 @@ class ContractDocument extends AbstractVersionnedDocument
         ];
     }
 
+    /**
+     * @return array
+     */
     private function personsToJson(){
         $personsJson = [];
         /* @var Person $person */
         foreach ($this->getPersons() as $key => $person){
             $entityPerson = [];
-            $entityPerson ["id"]  = $person->getId();
-            $entityPerson ["fullName"]  = $person->getFullname();
+            $entityPerson ["personId"]  = $person->getId();
+            $entityPerson ["personName"]  = $person->getFullname();
+            $entityPerson ["affectation"] = $person->getLdapAffectation() ? $person->getLdapAffectation() : "";
             $personsJson [] = $entityPerson;
         }
         return $personsJson;

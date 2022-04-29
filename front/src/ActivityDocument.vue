@@ -38,7 +38,7 @@
             <label for="typedocument">Type de document</label>
             <div>
               <select name="type" id="typedocument" v-model="editData.documentype_id">
-                <option :value="id" v-for="(t, id) in documentTypes" :key="id">{{ t }}</option>
+                <option :selected="editData.documentype_id == id" :value="id" v-for="(t, id) in documentTypes" :key="id">{{ t }}</option>
               </select>
             </div>
           </div>
@@ -49,7 +49,7 @@
                 <label for="tabdocument">Onglet document</label>
                 <div>
                   <select name="tabdocument" id="tabdocument" v-model="editData.tabDocument_id">
-                    <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                    <option :selected="editData.tabDocument_id == id" :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
                   </select>
                 </div>
               </span>
@@ -68,11 +68,10 @@
                   <span v-if="persons.length !== 0" v-for="p in persons" :key="p.personId" class="cartouche">
                     <i class="icon-cube"></i>
                     <span>{{ p.personName }}</span>
-                    <span v-if="p.affectation.trim() !=''" class="addon">
-                      {{ p.affectation }}<i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                    <span v-if="p.affectation.trim() !==''" class="addon">
+                      {{ p.affectation }}
                     </span>
-                    <i v-if="p.affectation.trim() ===''" @click="handlerDeletePerson(p)"
-                       class="icon-trash icon-clickable"></i>
+                    <i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
                   </span>
               </span>
           </div>
@@ -147,7 +146,7 @@
                     <i class="icon-cube"></i>
                     <span>{{ p.personName }}</span>
                     <span v-if="p.affectation.trim() !=''" class="addon">
-                      {{ p.affectation }}<i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                      {{ p.affectation }}
                     </span>
                     <i v-if="p.affectation.trim() ===''" @click="handlerDeletePerson(p)"
                        class="icon-trash icon-clickable"></i>
@@ -174,16 +173,18 @@
       </div>
     </div>
 
-    <!-- MODAL DE MESSAGE D'ERREUR NOUVEAU DOCUMENT -->
-    <div class="overlay" v-if="message">
+    <!-- MODAL DE ERRORMESSAGES -->
+    <div class="overlay" v-if="errorMessages.length !==0">
       <div class="overlay-content">
         <h2>
-          <span class="overlay-closer" @click="message = null">X</span>
+          <span class="overlay-closer" @click="errorMessages = []">X</span>
         </h2>
-        <h3>
-          {{ message }}
-        </h3>
-        <button class="btn btn-danger" @click="message = null">
+        <ul>
+          <li v-for="message in errorMessages">
+            {{ message }}
+          </li>
+        </ul>
+        <button class="btn btn-danger" @click="errorMessages = []">
           <i class="icon-cancel-alt"></i> Annuler
         </button>
       </div>
@@ -214,11 +215,12 @@
     </div>
 
 
-    <!-- ############################### INFORMATIONS PAR DOCUMENT / ONGLET ASSOCIÉ ################################### -->
+    <!-- ############################### INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ################################### -->
     <div v-for="tab in tabsWithDocuments" :key="tab.id">
       <div style="cursor:pointer; margin-top: 10px;" :class="cssStepCurrent(tab.id)" v-on:click="activeTab(tab.id)" class="step">
         <span>
-          <i class="picto icon-doc"></i>{{ tab.label }}
+          <strong><i class="picto icon-doc"></i>{{ tab.label }}</strong><br/>
+          <i class="picto icon-comment"></i>{{ tab.description }}
         </span>
         <span v-on:click="handlerUploadNewDoc(tab.id)" class="stepHandler">
                  Téléverser un document
@@ -305,8 +307,6 @@
     </div>
     <div class="step-content" v-if="openTabPrivate === true">
       <article class="card xs" v-for="docP in tabPrivate.documents" :key="docP.id">
-        <!--v-for="document in documentsPacked" :key="document.id">-->
-        <!--<article v-if="isTabActive === tp.id" class="card xs" v-for="docP in tp.documents" :key="docP.id">-->
         <div class="card-title">
           <i class="picto icon-doc" :class="'doc' + docP.extension"></i>
           <small class="text-light">{{ docP.categoryText }} ~ </small>
@@ -317,8 +317,8 @@
           {{ docP.information }}
         </p>
         <h5 v-if="docP.persons.length > 0">Personnes accédants à ces documents</h5>
-        <span class="cartouche" v-for="person in docP.persons" :key="person.id">
-            {{ person.fullName }}
+        <span class="cartouche" v-for="person in docP.persons" :key="person.personId">
+            {{ person.personName }}
         </span>
 
         <div class="card-content">
@@ -329,7 +329,6 @@
             <time>{{ docP.dateUpload | dateFull }}</time>
             <span v-if="docP.uploader"> par <strong>{{ docP.uploader.displayname }}</strong></span>
           </p>
-
           <nav class="text-right show-over">
             <a class="btn btn-default btn-xs" :href="docP.urlDownload" v-if="docP.urlDownload">
               <i class="icon-upload-outline"></i>
@@ -445,10 +444,8 @@ import PersonAutoCompleter from "./components/PersonAutoCompleter";
 import axios from "axios";
 
 let oscarRemoteData = new OscarRemoteData();
-
-function flashMessage() {
-  // TODO pas implémenté ? HM => SB ça sert à rien ça Jack ?
-}
+// Traitement spécifique de l'onglet Privé
+const PRIVATE = "private";
 
 export default {
 
@@ -493,7 +490,7 @@ export default {
       tabPrivate: null,
       openTabPrivate: false,
       // Message boite modal pour l'utilisateur (erreurs pour exemple)
-      message: null,
+      errorMessages: [],
       // Onglet sélectionné
       tabId: null,
       // Données des documents par ID_onglets (idTab retour Json)
@@ -529,8 +526,7 @@ export default {
             return 1 * this.sortDirection;
           return 0;
         }.bind(this));
-      }
-      ;
+      };
       return out;
     },
     // Pour afficher les documents selon IdOnglet (idTab)
@@ -567,22 +563,31 @@ export default {
     },
 
     cssStepCurrentPrivate() {
-      //console.log("Valeur this.openTabPrivate : ", this.openTabPrivate);
       return this.openTabPrivate === true ? "private" : "";
     },
 
+    // Modification d'un document
     handlerEdit(document) {
-      console.log(document);
+      let valueTabDocument = document.tabDocument;
+      if (valueTabDocument === null || valueTabDocument === undefined || valueTabDocument.trim === ''){
+        valueTabDocument = PRIVATE;
+      }else{
+        valueTabDocument = valueTabDocument.id;
+      }
+      this.persons = [];
+      document.persons.forEach( (p) =>{
+        this.persons.push(p);
+      });
       this.editData = {
         'documentype_id': document.category.id,
         'basename': document.basename,
         'document': document,
-        'tabDocument_id': document.tabDocument.id,
+        'tabDocument_id': valueTabDocument,
         'private': document.private
       };
     },
 
-    // Event Change sur composant pour hydrater tableau de la liste des personnes pour document privé
+    // Event Change sur composant "person-auto-completer" pour hydrater tableau de la liste des personnes pour document privé
     handlerSelectPersons(person) {
       let personSelected = {
         "personName": person.displayname,
@@ -639,7 +644,7 @@ export default {
 
     // Méthode Upload soumission formulaire téléversement nouveau Document ("submit button")
     performUpload() {
-      // Binding datas de l'objet pour le formulaire Upload
+      // Match datas de l'objet pour le formulaire Upload
       this.uploadNewDocData.dateDeposit = this.dateDeposit;
       this.uploadNewDocData.dateSend = this.dateSend;
       this.uploadNewDocData.private = (this.privateDocument === true) ? "1" : "0";
@@ -665,14 +670,16 @@ export default {
       if (this.fileToDownload !== null) {
         fd.append('file', this.fileToDownload, this.fileToDownload.name);
       } else {
-        this.message = "Aucun fichier sélectionner a téléverser !";
-        return;
+        this.errorMessages.push("Aucun fichier sélectionner a téléverser !");
       }
       if (this.uploadNewDocData.type === null) {
-        this.message = "Vous devez qualifier le type de votre document !";
+        this.errorMessages.push("Vous devez qualifier le type de votre document !");
+      }
+      if(this.errorMessages.length !==0){
         return;
       }
       this.uploadDoc = null;
+      this.persons = [];
       // Objet JS Appel Ajax
       oscarRemoteData
           .setPendingMessage("Téléversement nouveau document")
@@ -681,20 +688,74 @@ export default {
               this.uploadNewDocData.baseUrlUpload,
               fd,
               (response) => {
+                this.persons = [];
                 this.fetch();
               });
     },
 
-    // Modification du type de document / changement onglet
+    // Modification du type de document / changement onglet, privé ou pas personnes ou pas
     performEdit() {
+     /* console.log("Valeurs de l'édition : ", this.editData);
+      console.log("Valeurs des personnes éventuelles : ", this.persons);*/
+
+      // Fenêtre messages d'erreurs avant soumission Form
+      this.errorMessages = [];
+      // Personnes éventuellement associés
+      let persons = [];
+      // Onglet pour le document
+      let newTabDoc = "";
+
+      /**
+        Document privé ou non
+        Conversion, envoie post 0 ou 1 ("true" ou "false" sont transmis en tant que chaine en http(s))
+       */
+      let privateBool = true;
+      if(this.editData.private === true){
+        privateBool = 1;
+        if (this.persons.length !== 0){
+          this.persons.forEach( (p)=>{
+            persons.push(p.personId);
+          });
+        }
+
+      }else {
+        console.log("VALEUR this.editData.tabDocument_id : ",this.editData.tabDocument_id);
+        privateBool = 0;
+        // Mauvais statut Onglet (soit statut défaut soit aucune valeur)
+        if (this.editData.tabDocument_id === PRIVATE || this.editData.tabDocument_id === ""){
+          this.errorMessages.push("Vous devez sélectionner un onglet pour la modification (ce n'est pas un document qualifié privé)");
+        }else{
+          newTabDoc = this.editData.tabDocument_id;
+        }
+      }
+
+      // Fenêtre de message d'erreur
+      if (this.errorMessages.length !== 0){
+        return;
+      }
+
+      // Id du doc
       let documentId = this.editData.document.id;
+      // Category du document (type)
       let newType = this.editData.documentype_id;
-      let newTabDoc = this.editData.tabDocument_id;
+
+      /*console.log("Valeur privateBool : ", privateBool);
+      console.log("Valeur documentId : ", documentId);
+      console.log("Valeur newType : ", newType);
+      console.log("Valeur newTabDoc : ", newTabDoc);
+      console.log("Valeur persons : ", persons);*/
+
+      // Initialisation des données de Vue
       this.editData = null;
+      this.persons = [];
+
       let formData = new FormData();
       formData.append('documentId', documentId);
       formData.append('type', newType);
       formData.append('tabDocument', newTabDoc);
+      formData.append('private', privateBool);
+      formData.append('persons', persons);
+      // Objet JS Appel Ajax
       oscarRemoteData
           .setPendingMessage("Modification du type de document")
           .setErrorMessage("Impossible de modifier le type de document")
@@ -707,6 +768,7 @@ export default {
     handlerSuccess(success) {
       this.tabPrivate = success.data.tabPrivate;
       this.tabsWithDocuments = success.data.tabsWithDocuments;
+
       let data = success.data.datas;
       let documentsOrdered = [];
       let documents = {};
@@ -714,7 +776,8 @@ export default {
       data.forEach(function (doc) {
         doc.categoryText = doc.category ? doc.category.label : "";
         doc.explode = true;
-        var filename = doc.fileName;
+        //var filename = doc.fileName;
+        let filename = doc.fileName;
         if (!documents[filename]) {
           documents[filename] = doc;
           documents[filename].previous = [];
@@ -724,7 +787,6 @@ export default {
         }
       });
       this.documents = documentsOrdered;
-      //console.log(this.documents);
     },
 
     fetch() {
@@ -733,7 +795,6 @@ export default {
           .setPendingMessage("Chargement des documents")
           .setErrorMessage("Impossible de charger les documents")
           .performGet(this.url, this.handlerSuccess);
-      console.log("Je suis appelé méthode fetch");
     }
   },
 

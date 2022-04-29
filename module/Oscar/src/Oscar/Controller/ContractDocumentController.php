@@ -16,6 +16,8 @@ use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Oscar\Constantes\Constantes;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Person;
+use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
@@ -138,6 +140,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
+     * Suppression d'un document
+     *
      * @return void
      * @throws ORMException
      * @throws OptimisticLockException
@@ -186,7 +190,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
 
     /**
-     * Modification type de document
+     * Modification document (onglets, type, privé/oui/non ...)
      *
      * @return JsonModel
      * @throws ORMException
@@ -197,27 +201,66 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
         /** @var Request $request */
         $request = $this->getRequest();
-        dump($request->getContent());
-        die("here");
-
-
         if( $request->isPost() ){
+            dump($request->getPost());
+            /*array:5 [
+            "documentId" => "32"
+            "type" => "3"
+            "tabDocument" => ""
+            "private" => "1"
+            "persons" => "6"
+            ]*/
+
+            // Récup document
             /** @var ContractDocument $document */
             $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($request->getPost('documentId'));
             $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $document->getGrant());
+
+            // Traitement métier et Posts
+            // Type de doc
             $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($request->getPost('type'));
             if( !$type ){
                 $this->getResponseBadRequest("Type de document invalide");
-            } else {
-                $document->setTypeDocument($type);
-                $this->getEntityManager()->flush();
-                $response = new JsonModel(['response' => 'ok']);
             }
+            // Privé ou non traitements métiers
+            $privateDocument = $request->getPost('private');
+            // Si Document non privée
+            // Suppression persons éventuelles et affectation à un onglet (vérifier si cet onglet existe comme type)
+            if (false === boolval($privateDocument)){
+                $document->setPrivate(false);
+                foreach ($document->getPersons() as $person){
+                    $document->removePerson($person);
+                }
+                $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($request->getPost('tabDocument'));
+                if( !$tabDocument ){
+                    $this->getResponseBadRequest("Onglet de document invalide");
+                }
+                $document->setTabDocument($tabDocument);
+
+            }else{
+                // Cas Document privé
+                // Récupérer persons dans la bd via id(s) post et ajouter s'ils ne sont pas associés au document
+                // Suppression éventuelle onglet associé au cas où le doc aurait été "public" avant
+                $document->setPrivate(true);
+                $document->setTabDocument(null);
+                if (trim($request->getPost('persons')) !== "") {
+                    $idsPersons = explode(",", $request->getPost('persons'));
+                    if (count($idsPersons) > 0) {
+                        $persons = [];
+                        foreach ($idsPersons as $idPerson) {
+                            $person = $this->getEntityManager()->getRepository(Person::class)->find($idPerson);
+                            $document->addPerson($person);
+                        }
+                    }
+                }
+            }
+            $document->setTypeDocument($type);
+            $this->getEntityManager()->flush();
+            $response = new JsonModel(['response' => 'ok']);
+
             return $response;
         }
-
         throw new \HttpException();
-
     }
 
     /**
