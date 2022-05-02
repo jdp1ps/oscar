@@ -1250,13 +1250,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             foreach ($personPeriods as $pp) {
                 $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
                 $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
+                $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
 
                 if ($pp >= $period) {
                     continue;
                 }
 
                 if( $send === false ){
-                    $output[$personId]['send'] = false;
                     $output[$personId]['send'] = false;
                 }
 
@@ -1272,11 +1272,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $value = null;
                 $periodInfos = [
                     'valid' => false,
+                    'valid_prj' => false,
+                    'valid_sci' => false,
+                    'valid_adm' => false,
                     'send' => false,
-                    'conflict' => false
+                    'conflict' => false,
+                    'step' => $step
                 ];
                 if( array_key_exists($pp, $repport) ){
                     $periodInfos['valid'] = $repport[$pp]['valid'];
+                    $periodInfos['valid_prj'] = $repport[$pp]['valid_prj'];
+                    $periodInfos['valid_sci'] = $repport[$pp]['valid_sci'];
+                    $periodInfos['valid_adm'] = $repport[$pp]['valid_adm'];
                     $periodInfos['send'] = $repport[$pp]['send'];
                     $periodInfos['conflict'] = $repport[$pp]['conflict'];
                 }
@@ -1301,24 +1308,41 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId);
         $output = [];
         foreach ($highdelays as $highdelay) {
+
             $period = $highdelay['period'];
             $nbr = $highdelay['nbr'];
             $prj = $highdelay['prj'];
             $sci = $highdelay['sci'];
             $adm = $highdelay['adm'];
+
+            $step = 0;
+            if( $prj == $nbr ) {
+                $step = 1;
+            }
+            if( $sci == $nbr ) {
+                $step = 2;
+            }
+            if( $adm == $nbr ) {
+                $step = 3;
+            }
+
             $valid = ($prj + $sci + $adm) == ($nbr * 3);
             $send = $nbr > 0;
             $rejprj = $highdelay['rejprj'];
             $rejsci = $highdelay['rejsci'];
             $rejadm = $highdelay['rejadm'];
             $reject = ($rejprj + $rejsci + $rejadm) > 0;
-            $conflict = $highdelay['rejprj'] > 0;
+
             // TODO Ajouter la détection des conflits
             $output[$highdelay['period']] = [
                 'period' => $period,
                 'valid' => $valid,
                 'send' => $send,
                 'reject' => $reject,
+                'valid_prj' => $prj == $nbr,
+                'valid_sci' => $sci == $nbr,
+                'valid_adm' => $adm == $nbr,
+                'step' => $step
             ];
         }
         return $output;
