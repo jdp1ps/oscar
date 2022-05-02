@@ -897,7 +897,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
         return [
             'code' => 'invalid',
-            'label' => $code . ' (invalide)',
+            'label' => 'ERROR (invalide)',
             'description' => 'Créneaux érroné',
             'icon' => true,
         ];
@@ -3893,7 +3893,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $icsUidList[$icsUid] = $t->getIcsFileName();
             }
 
-            if (!$t->getActivity()) {
+            if (!$t->getActivity() || !$t->getWorkpackage()) {
                 $otherInfo = $this->getOthersWPByCode($t->getLabel());
                 $label = $otherInfo['label'];
                 $code = $otherInfo['code'];
@@ -4211,7 +4211,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $groupFamily = 'research';
             $day = $timesheet->getDateFrom()->format('d');
 
-            if ($timesheet->getActivity()) {
+            if ($timesheet->getActivity() && $timesheet->getWorkpackage()) {
                 $path = 'activities';
                 $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
                 $groupType = 'activity';
