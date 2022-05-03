@@ -1216,9 +1216,32 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
     }
 
+    /**
+     * Retourne la liste des validateurs EFFECTIFS impliqués dans la validatation des heures du déclarant pour la
+     * période.
+     *
+     * @param int $delcarerId
+     * @param string $periodCod
+     * @return array
+     */
+    public function getValidatorsIdsPersonPeriod( int $declarerId, string $periodCode ) :array
+    {
+        $output = [];
+        $validations = $this->getTimesheetService()->getValidationsPeriodPersonAt($declarerId, $periodCode);
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation) {
+            /** @var Person $validator */
+            foreach ($validation->getCurrentValidators() as $validator) {
+                $output[$validator->getId()] = $validator->getFullname();
+            }
+        }
+        return $output;
+    }
+
     public function getPersonsHighDelay(string $period)
     {
         $declarers = $this->getDeclarersIdsBeforePeriod($period);
+
         $output = [];
 
         foreach ($declarers as $personId => $infos) {
@@ -1230,6 +1253,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $personEmail = $person->getEmail();
             $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person);
             $repport = $this->getHighDelayForPerson($personId);
+            $validatorsPerson = [];
             $periods = [];
 
             $output[$personId] = [
@@ -1251,6 +1275,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
                 $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
                 $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
+                $validators = [];
 
                 if ($pp >= $period) {
                     continue;
@@ -1258,6 +1283,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
                 if( $send === false ){
                     $output[$personId]['send'] = false;
+                } else {
+                    $validators = $this->getValidatorsIdsPersonPeriod($personId, $pp);
+                    foreach ($validators as $idValidator=>$validatorFullName){
+                        $validatorsPerson[$idValidator] = $validatorFullName;
+                    }
                 }
 
                  if( $send === false ){
@@ -1277,7 +1307,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     'valid_adm' => false,
                     'send' => false,
                     'conflict' => false,
-                    'step' => $step
+                    'step' => $step,
+                    'validators' => $validators
                 ];
                 if( array_key_exists($pp, $repport) ){
                     $periodInfos['valid'] = $repport[$pp]['valid'];
@@ -1298,6 +1329,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
 
             $output[$personId]['periods'] = $periods;
+            $output[$personId]['validators'] = $validatorsPerson;
         }
 
         return $output;

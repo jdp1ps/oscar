@@ -85,11 +85,24 @@ class OscarTimesheetHighDelayCommand extends OscarAdvancedCommandAbstract
         $datas = $this->getPersonService()->getPersonsHighDelay($period->getPeriodCode());
 
         foreach ($datas as $personDt) {
-            if( $personDt['send'] == true ){
-                continue;
+            $this->getIO()->title("Traitement pour " . $personDt['fullname']);
+            if( $personDt['require_alert_declarer'] == true ){
+                $this->getIO()->writeln("<green> > Envoi : Déclarant</green>");
+            } else {
+                $this->getIO()->writeln("<info> - pas d'envoi pour le déclarant</info>");
             }
-            var_dump($personDt);
 
+            if( $personDt['require_alert_validator'] == true ){
+                if( count($personDt['validators']) ){
+                    foreach ($personDt['validators'] as $i=>$name) {
+                        $this->getIO()->writeln("<green> > Envoi validateur : $name</green>");
+                    }
+                } else {
+                    $this->getIO()->error("Pas de validateur pour ce déclarant");
+                }
+            } else {
+                $this->getIO()->writeln("pas d'envoi pour le déclarant");
+            }
         }
 
 

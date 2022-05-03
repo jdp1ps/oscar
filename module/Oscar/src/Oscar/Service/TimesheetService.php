@@ -5182,6 +5182,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
     }
 
+    public function getValidationsPeriodPersonAt( int $declarerId, string $periodCode ) :array
+    {
+        return $this->getValidationPeriodRepository()->getValidationPeriodForPersonAtPeriod($declarerId, $periodCode);
+    }
+
     /**
      * Ajout d'un validateur désigné à une activité de recherche.
      *

@@ -9,12 +9,35 @@
       </div>
     </div>
     <article class="card" v-for="entry in entries">
-      <h2 class="card-title">{{ entry.fullname }}</h2>
-      <div>
-        <i class="icon-calendar"></i> Nombre de période : <strong>{{ entry.total_periods }}</strong><br>
-        <i class="icon-docs"></i> Déclaration(s) : <strong>{{ entry.total_declarations }}</strong>
+      <h2>
+        {{ entry.fullname }}
+        <span class="cartouche xs warning">
+          {{ entry.total_declarations }} / {{ entry.total_periods }}
+        </span>
+      </h2>
+<!--      <div>-->
+<!--        <i class="icon-calendar"></i> Nombre de période : <strong>{{ entry.total_periods }}</strong><br>-->
+<!--        <i class="icon-docs"></i> Déclaration(s) : <strong>{{ entry.total_declarations }}</strong><br>-->
+
+
+<!--      </div>-->
+      <div class="validators">
+        <h3>
+          <i class="icon-user"></i>
+          Validateur(s) impliqué(s) :
+        </h3>
+        <div v-if="entry.send == true && entry.validators.length == 0" class="alert alert-danger">
+          <i class="icon-attention-1"></i>
+          Aucun validateur n'est désigné pour valider ces déclarations, rendez-vous dans la fiche activité afin de vérifier que des validateurs sont bien désignés, ainsi que dans la fiche personne pour les créneaux Hors-lot
+        </div>
+        <ul v-else>
+          <li v-for="v in entry.validators">{{ v }}</li>
+        </ul>
       </div>
       <div class="periods">
+        <h3>
+          <i class="icon-calendar"></i>
+          Période(s)</h3>
         <span v-for="(p, key) in entry.periods" class="cartouche xs" :class="{
           'success': p.valid == true,
           'danger': p.conflict == true,
