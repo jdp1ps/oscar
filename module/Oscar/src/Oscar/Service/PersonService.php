@@ -1689,6 +1689,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param string $periodStr
      * @return int[]
      */
+    public function getDeclarersIdsPeriod(string $periodStr): array
+    {
+        return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
+    }
+
+
+    /**
+     * @param string $periodStr
+     * @return int[]
+     */
     public function getDeclarersIdsBeforePeriod(string $periodStr): array
     {
         $ids = $this->getPersonRepository()->getIdsDeclarersBeforePeriod($periodStr);
