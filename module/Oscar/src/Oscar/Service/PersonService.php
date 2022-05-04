@@ -1248,18 +1248,28 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             /** @var Person $person */
             $person = $infos['person'];
+
             $personName = (string)$person;
             $personId = $person->getId();
             $personEmail = $person->getEmail();
             $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person);
             $repport = $this->getHighDelayForPerson($personId);
             $validatorsPerson = [];
+            $validatorsOthers = [];
+
+            $validatorsOthersPerson = $this->getReferentsPerson($personId);
+
+            /** @var Referent $v */
+            foreach ($validatorsOthersPerson as $v){
+                $validatorsOthers[$v->getReferent()->getId()] = $v->getReferent()->getFullname();
+            }
             $periods = [];
 
             $output[$personId] = [
                 'person_id' => $personId,
                 'fullname' => $personName,
                 'email' => $personEmail,
+                'np1' => $validatorsOthers,
                 'total_periods' => count($personPeriods),
                 'total_declarations' => count($repport),
                 'valid' => false,
@@ -1316,7 +1326,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $periodInfos['valid_sci'] = $repport[$pp]['valid_sci'];
                     $periodInfos['valid_adm'] = $repport[$pp]['valid_adm'];
                     $periodInfos['send'] = $repport[$pp]['send'];
-                    $periodInfos['conflict'] = $repport[$pp]['conflict'];
+                    $periodInfos['conflict'] = $repport[$pp]['reject'];
                 }
 
                 if ($valid == false) {

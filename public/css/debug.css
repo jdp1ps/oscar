@@ -7843,6 +7843,10 @@ body::-webkit-scrollbar-thumb {
   background: #88df5d;
 }
 
+.cartouche.error {
+  background-color: #cb0b05;
+}
+
 .activity-span .project-link {
   font-weight: 100;
   font-size: 0.75em;
@@ -11098,6 +11102,10 @@ time.date-missing {
   box-shadow: 0 -8px 8px rgba(0, 0, 0, 0.25);
   font-size: 0.75em;
 }
+.cartouche.error {
+  background-color: #cb0b05;
+}
+
 pre.alert-danger, pre.alert-info {
   white-space: pre-wrap;
 }

@@ -26,12 +26,17 @@
           <i class="icon-user"></i>
           Validateur(s) impliqué(s) :
         </h3>
+        <div class="alert alert-danger" v-if="entry.np1.length == 0"><i class="icon-attention-1"></i>
+          Aucun <em>N+1</em> (validateur hors-lot) n'est assigné à ce déclarant, vous pouvez lui en assigner un (ou plusieurs) depuis la fiche personne.
+        </div>
+
         <div v-if="entry.send == true && entry.validators.length == 0" class="alert alert-danger">
           <i class="icon-attention-1"></i>
           Aucun validateur n'est désigné pour valider ces déclarations, rendez-vous dans la fiche activité afin de vérifier que des validateurs sont bien désignés, ainsi que dans la fiche personne pour les créneaux Hors-lot
         </div>
         <ul v-else>
-          <li v-for="v in entry.validators">{{ v }}</li>
+          <li v-for="v in entry.validators"><i class="icon-cube"></i> {{ v }}</li>
+          <li v-for="v in entry.np1"><i class="icon-tag"></i> {{ v }}</li>
         </ul>
       </div>
       <div class="periods">
@@ -39,11 +44,11 @@
           <i class="icon-calendar"></i>
           Période(s)</h3>
         <span v-for="(p, key) in entry.periods" class="cartouche xs" :class="{
+          'error ': p.conflict,
           'success': p.valid == true,
-          'danger': p.conflict == true,
-          'danger': p.send == false,
+          'danger': p.send == false && p.conflict != true,
           'secondary2': p.send == true && p.valid_prj == true && p.valid_sci == false,
-          'warning': p.send == true && p.valid_prj == true && p.valid_sci == true,
+          'warning': p.conflict != true && (p.send == true && p.valid_prj == true && p.valid_sci == true),
         }" @click.shift="debug = p">
           <span v-if="p.valid == true"><i class="icon-ok-circled"title="Validée"></i></span>
           <span v-else-if="p.conflict == true"><i class="icon-hammer"title="Conflit à régler (demandeur)"></i></span>

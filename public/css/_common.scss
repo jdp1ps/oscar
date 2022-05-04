@@ -1389,6 +1389,9 @@ $twRadius: 4px;
     background: lighten($colorGreen,25%);
   }
 }
+.cartouche.error {
+  background-color: $brand-error;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // X. Liens PROJET/ACTIVITÉ
@@ -4920,6 +4923,10 @@ $oscar-line: dotted thin $colorGreyLight;
   .cell {
 
   }
+}
+
+.cartouche.error {
+  background-color: $brand-error;
 }
 
 pre.alert-danger, pre.alert-info {
