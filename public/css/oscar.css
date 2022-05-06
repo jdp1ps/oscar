@@ -11851,4 +11851,70 @@ pre.alert-danger, pre.alert-info {
   background: rgba(69, 87, 144, 0.1);
 }
 
+.compact-state {
+  display: inline-block;
+  background: #777777;
+  color: #ededed;
+  margin: 0;
+  padding: 0 0.3em;
+  line-height: 1.2em;
+  border-radius: 4px;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+.compact-state * {
+  display: inline-block;
+}
+.compact-state .info-text {
+  /*display: none;*/
+  position: absolute;
+  white-space: nowrap;
+  width: 0;
+  overflow: hidden;
+  border-radius: 0 4px 4px 0;
+}
+.compact-state:hover .info-text {
+  display: inline-block;
+  width: auto;
+  padding: 0 0.3em 0 0;
+}
+
+.highdelay-line {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+}
+.highdelay-line.error .compact-state {
+  background-color: #cb0b05;
+}
+.highdelay-line.error .compact-state .info-text {
+  background-color: #cb0b05;
+}
+.highdelay-line.danger .compact-state {
+  background-color: #d9534f;
+}
+.highdelay-line.danger .compact-state .info-text {
+  background-color: #d9534f;
+}
+.highdelay-line.secondary2 .compact-state {
+  background-color: #ff6600;
+}
+.highdelay-line.secondary2 .compact-state .info-text {
+  background-color: #ff6600;
+}
+.highdelay-line .state-info {
+  flex: 0 0 42px;
+}
+
+.highdelay-line > * {
+  flex: 1 1;
+}
+
+.highdelay-line:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.highdelay .card .card-title .profile {
+  flex: 0 0 50px;
+}
+
 /*# sourceMappingURL=oscar.css.map */

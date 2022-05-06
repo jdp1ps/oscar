@@ -49,6 +49,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Zend\Mvc\Controller\Plugin\Url;
 
 /**
  * Gestion des Personnes :
@@ -1217,7 +1218,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Retourne la liste des validateurs EFFECTIFS impliqués dans la validatation des heures du déclarant pour la
+     * Retourne la liste des validateurs EFFECTIFS impliqués dans la validation des heures du déclarant pour la
      * période.
      *
      * @param int $delcarerId
@@ -1238,7 +1239,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $output;
     }
 
-    public function getPersonsHighDelay(string $period)
+    /**
+     * Retourne la liste des déclarants impliqués dans des retards pour une période (périodes précédentes inclues).
+     * Les données tiennent compte des retards de validation.
+     *
+     * @param string $period
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getPersonsHighDelay(string $period, ?Url $urlHelper = null)
     {
         $declarers = $this->getDeclarersIdsBeforePeriod($period);
 
@@ -1265,9 +1275,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
             $periods = [];
 
+            $urlShow = false;
+            if( $urlHelper ){
+                $urlShow = $urlHelper->fromRoute('person/show', ['id' => $personId]);
+            }
+
             $output[$personId] = [
                 'person_id' => $personId,
                 'fullname' => $personName,
+                'emailmd5' => $person->getMd5Email(),
+                'url_show' => $urlShow,
                 'email' => $personEmail,
                 'np1' => $validatorsOthers,
                 'total_periods' => count($personPeriods),

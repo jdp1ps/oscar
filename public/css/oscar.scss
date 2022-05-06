@@ -41,3 +41,77 @@ $colorGreyBlack: #222;
 
 // Update 2020-11-04
 @import "_common.scss";
+
+.compact-state {
+  display: inline-block;
+  background: #777777;
+  color: #ededed;
+  margin: 0;
+  padding: 0 .3em;
+  line-height: 1.2em;
+  border-radius: 4px;
+  text-shadow: -1px 1px 0 rgba(0,0,0,.3);
+  position: relative;
+  * {
+    display: inline-block;
+  }
+  .info-text {
+    /*display: none;*/
+    position: absolute;
+    white-space: nowrap;
+    width: 0;
+    overflow: hidden;
+    border-radius: 0 4px 4px 0;
+  }
+
+  // EVENTS
+  &:hover {
+    .info-text {
+      display: inline-block;
+      width: auto;
+      padding: 0 .3em 0 0;
+    }
+  }
+}
+
+.highdelay-line {
+  display: flex;
+  background: rgba(0,0,0,.2);
+
+  &.error .compact-state {
+    background-color: $brand-error;
+    .info-text {
+      background-color: $brand-error;
+    }
+  }
+
+  &.danger .compact-state {
+    background-color: $brand-danger;
+    .info-text {
+      background-color: $brand-danger;
+    }
+  }
+
+  &.secondary2 .compact-state {
+    background-color: $brand-secondary2;
+    .info-text {
+      background-color: $brand-secondary2;
+    }
+  }
+
+  .state-info {
+    flex: 0 0 42px;
+  }
+}
+.highdelay-line > * {
+  flex: 1 1;
+}
+.highdelay-line:nth-child(odd) {
+  background: rgba(0,0,0,.1);
+}
+
+.highdelay .card .card-title {
+  .profile {
+    flex: 0 0 50px;
+  }
+}

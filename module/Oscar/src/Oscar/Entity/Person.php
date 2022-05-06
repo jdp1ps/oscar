@@ -574,6 +574,11 @@ class Person implements ResourceInterface
         return $this->email;
     }
 
+    public function getMd5Email() :string
+    {
+        return md5($this->getEmail());
+    }
+
     /**
      * @param string $email
      */
