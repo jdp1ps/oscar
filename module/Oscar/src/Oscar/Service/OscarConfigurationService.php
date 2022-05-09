@@ -403,6 +403,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->saveEditableConfKey('validatorsRelanceJour2', $value);
     }
 
+    public function getHighDelayRelance()
+    {
+        return $this->getEditableConfKey('highdelayRelance', "");
+    }
+
+    public function setHighDelayRelance($value)
+    {
+        return $this->saveEditableConfKey('highdelayRelance', $value);
+    }
+
 
     public function setTheme($theme)
     {

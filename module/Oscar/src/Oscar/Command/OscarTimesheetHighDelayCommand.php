@@ -88,6 +88,7 @@ class OscarTimesheetHighDelayCommand extends OscarAdvancedCommandAbstract
             $this->getIO()->title("Traitement pour " . $personDt['fullname']);
             if( $personDt['require_alert_declarer'] == true ){
                 $this->getIO()->writeln("<green> > Envoi : Déclarant</green>");
+                $result = $this->getTimesheetService()->recallHighDelayDeclarer($personDt['person_id']);
             } else {
                 $this->getIO()->writeln("<info> - pas d'envoi pour le déclarant</info>");
             }
@@ -101,7 +102,7 @@ class OscarTimesheetHighDelayCommand extends OscarAdvancedCommandAbstract
                     $this->getIO()->error("Pas de validateur pour ce déclarant");
                 }
             } else {
-                $this->getIO()->writeln("pas d'envoi pour le déclarant");
+                $this->getIO()->writeln("<info> - pas d'envoi pour le validateur</info>");
             }
         }
 

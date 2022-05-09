@@ -1414,6 +1414,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'validatorsRelanceJour1' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour1(),
             'validatorsRelance2' => $this->getOscarConfigurationService()->getValidatorsRelance2(),
             'validatorsRelanceJour2' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
+            'highdelayRelance' => $this->getOscarConfigurationService()->getHighDelayRelance(),
         ];
 
         switch ($method) {
@@ -1431,6 +1432,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $validatorsRelanceJour2 = (int)$this->params()->fromPost('validatorsRelanceJour2');
                 $declarersRelanceConflitMessage = $this->params()->fromPost('declarersRelanceConflitMessage');
                 $declarersRelanceConflitJour = (int)$this->params()->fromPost('declarersRelanceConflitJour');
+                $highdelayRelance = $this->params()->fromPost('highdelayRelance');
 
                 $this->getOscarConfigurationService()->setDeclarersRelance1($declarersRelance1);
                 $this->getOscarConfigurationService()->setDeclarersRelanceJour1($declarersRelanceJour1);
@@ -1440,10 +1442,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getOscarConfigurationService()->setValidatorsRelanceJour1($validatorsRelanceJour1);
                 $this->getOscarConfigurationService()->setValidatorsRelance2($validatorsRelance2);
                 $this->getOscarConfigurationService()->setValidatorsRelanceJour2($validatorsRelanceJour2);
-                $this->getOscarConfigurationService()->setDeclarersRelanceConflitMessage(
-                    $declarersRelanceConflitMessage
-                );
+                $this->getOscarConfigurationService()->setDeclarersRelanceConflitMessage($declarersRelanceConflitMessage);
                 $this->getOscarConfigurationService()->setDeclarersRelanceConflitJour($declarersRelanceConflitJour);
+                $this->getOscarConfigurationService()->setHighDelayRelance($highdelayRelance);
 
                 return $this->redirect()->toRoute('administration/messages');
         }

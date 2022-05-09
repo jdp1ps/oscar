@@ -3131,6 +3131,34 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->getEntityManager()->getRepository(RecallDeclaration::class);
     }
 
+    public function recallHighDelayDeclarer( int $declarerId, ?\DateTime $processDate = null ) :void
+    {
+        if( $processDate == null ){
+            $processDate = new \DateTime();
+        }
+        $declarer = $this->getPersonService()->getPersonById($declarerId, true);
+
+        $messageTemplate = $this->getOscarConfigurationService()->getHighDelayRelance();
+        $find = ["{PERSON}", "{PERIOD}"];
+        $replace = ["$declarer"];
+        $body = str_ireplace($find, $replace, $messageTemplate);
+
+        $message = $this->getPersonService()->getMailingService()->newMessage(
+            "Retard de feuille de temps à régulariser"
+        );
+        $message->setTo($declarer->getEmail());
+        $message->setBody($body);
+
+        try {
+            $this->getPersonService()->getMailingService()->send($message);
+            // Enregistrement du rappel
+
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
+
+    }
+
     /**
      * Procédure de rappel des validateurs.
      *
