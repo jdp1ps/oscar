@@ -1262,7 +1262,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $personName = (string)$person;
             $personId = $person->getId();
             $personEmail = $person->getEmail();
-            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person);
+            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person, true);
             $repport = $this->getHighDelayForPerson($personId);
             $validatorsPerson = [];
             $validatorsOthers = [];
@@ -1298,7 +1298,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 'infos' => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
             ];
 
-            foreach ($personPeriods as $pp) {
+            foreach ($personPeriods as $pp=>$periodDetails) {
                 $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
                 $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
                 $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
@@ -1335,7 +1335,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     'send' => false,
                     'conflict' => false,
                     'step' => $step,
-                    'validators' => $validators
+                    'validators' => $validators,
+                    'activities' => $periodDetails['activities']
                 ];
                 if( array_key_exists($pp, $repport) ){
                     $periodInfos['valid'] = $repport[$pp]['valid'];
@@ -1362,6 +1363,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $output;
     }
 
+    /**
+     * Retourne le détails des informations sur les retards importans de déclaration.
+     *
+     * @param int $personId
+     * @return array
+     */
     public function getHighDelayForPerson(int $personId)
     {
         $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId);

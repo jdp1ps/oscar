@@ -2894,17 +2894,41 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      *
      * @param Person $declarer
      */
-    public function getPeriodsPerson(Person $declarer)
+    public function getPeriodsPerson(Person $declarer, $details = false)
     {
         $periodsBounds = $this->getTimesheetRepository()->getPeriodsPerson($declarer->getId());
         $periods = [];
+        $output = [];
         foreach ($periodsBounds as $bounds) {
+
             $periods = array_merge(
                 $periods,
                 DateTimeUtils::allperiodsBetweenTwo($bounds['dateStart'], $bounds['dateEnd'])
             );
+
+            $activityId = $bounds['id'];
+            $activityLabel = $bounds['label'];
+            $activityAcronym = $bounds['acronym'];
+
+            $periodsActivities = DateTimeUtils::allperiodsBetweenTwo($bounds['dateStart'], $bounds['dateEnd']);
+            foreach ($periodsActivities as $period) {
+                if( !array_key_exists($period, $output) ){
+                    $output[$period] = [
+                        'period' => $period,
+                        'activities' => []
+                    ];
+                }
+                $output[$period]['activities'][$activityId] = [
+                    'id' => $activityId,
+                    'label' => $activityLabel,
+                    'acronym' => $activityAcronym
+                ];
+            }
         }
-        return array_unique($periods);
+        if( $details == false )
+            return array_unique($periods);
+        else
+            return $output;
     }
 
     public function getPeriodsValidator(Person $validator): array

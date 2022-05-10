@@ -109,14 +109,16 @@ class TimesheetRepository extends EntityRepository
     public function getPeriodsPerson($personId)
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('a.dateStart', 'a.dateEnd')
+            ->select('a.dateStart', 'a.dateEnd', 'a.id', 'a.label', 'p.acronym')
             ->from(Activity::class, 'a')
             ->innerJoin('a.workPackages', 'awp')
+            ->innerJoin('a.project', 'p')
             ->innerJoin('awp.persons', 'wpp')
             ->where('wpp.person = :personId')
             ->setParameters(['personId' => $personId]);;
 
-        return $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        $datas = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        return $datas;
     }
 
     public function getTimesheetTotalByPeriodPerson($personId)

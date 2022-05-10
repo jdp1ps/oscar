@@ -525,7 +525,9 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             "person_id" => $personId
 ]       );
 
-        return $result->fetchAllAssociative();
+        $datas = $result->fetchAllAssociative();
+
+        return $datas;
     }
 
     public function getIdsDeclarersBeforePeriod( string $period ): array

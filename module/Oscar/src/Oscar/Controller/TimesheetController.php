@@ -667,7 +667,7 @@ class TimesheetController extends AbstractOscarController
     public function highDelayAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
-        
+
         $format = $this->params()->fromQuery('f', OscarFormatterConst::FORMAT_IO_HTML);
         if ($this->isAjax() || $format == OscarFormatterConst::FORMAT_IO_JSON) {
             // Critères

@@ -66,7 +66,7 @@
           'error ': p.conflict,
           'success': p.valid == true,
           'danger': p.send == false && p.conflict != true,
-          'secondary2': p.send == true && p.valid_prj == true && p.valid_sci == false,
+          'secondary2': p.send == true && p.valid_adm == false,
           'warning': p.conflict != true && (p.send == true && p.valid_prj == true && p.valid_sci == true),
         }" @click.shift="debug = p">
 
@@ -96,6 +96,11 @@
                 <span class="info-text">En attente de validation administrative</span>
               </span>
             </span>
+            <span v-else>
+              <span class="compact-state"><i class="icon-cube" title="En attente de validation projet"></i>
+                <span class="info-text">En attente de validation projet</span>
+              </span>
+            </span>
           </span>
 
               <span class="period-label">{{ key | period }}</span>
@@ -104,6 +109,13 @@
                 Validation : <small style="font-weight: bold">({{ p.step }} / 3)</small>
                 <span class="danger" v-if="p.send == true && p.validators.length == 0">
                   <i class="icon-attention-1"></i> Pas de validateur
+                </span>
+              </span>
+
+              <span>
+                <span class="cartouche default xs" v-for="a in p.activities">
+                  <i class="icon-cube"></i>
+                  {{ a.acronym }}
                 </span>
               </span>
             </div>
