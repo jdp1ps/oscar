@@ -37,20 +37,68 @@
               Aucun <em>N+1</em> (validateur hors-lot) n'est assigné à ce déclarant, vous pouvez lui en assigner un (ou
               plusieurs) depuis la fiche personne.
             </div>
-
             <div v-if="entry.send == true && entry.validators.length == 0" class="alert alert-danger">
               <i class="icon-attention-1"></i>
               Aucun validateur n'est désigné pour valider ces déclarations, rendez-vous dans la fiche activité afin de
               vérifier que des validateurs sont bien désignés.
             </div>
-            <ul v-else>
-              <li v-for="v in entry.validators"><i class="icon-cube"></i> {{ v }}</li>
-              <li v-for="v in entry.np1">
-                <i class="icon-tag"></i>
-                <strong>{{ v }}</strong>
-                <small> (Validateur Hors-Lot)</small>
-              </li>
-            </ul>
+            <div v-else>
+              <p class="info-area">
+                Les validateurs ci-dessous sont ceux qui sont impliqués personnellement dans les validations en cours.
+              </p>
+              <ul>
+                <li v-for="v in entry.validators"><i class="icon-cube"></i> {{ v }}</li>
+                <li v-for="v in entry.np1">
+                  <i class="icon-tag"></i>
+                  <strong>{{ v }}</strong>
+                  <small> (Validateur Hors-Lot)</small>
+                </li>
+              </ul>
+            </div>
+            <hr>
+            <h4>
+              <i class="icon-cubes"></i>
+              Activités
+            </h4>
+            <p class="info-area">
+              Liste des activités où <strong>{{ entry.fullname }}</strong> a été identifié comme déclarant.
+              Vous pouvez voir les validateurs désignés pour valider les futurs déclarations envoyées.
+            </p>
+            <article v-for="activity in entry.activities" class="card xs">
+              <h5>
+                <i class="icon-cubes"></i>
+                <strong>[{{ activity.acronym }}]</strong>
+                <em>{{ activity.label }}</em>
+              </h5>
+
+              <div v-if="activity.validators.prj.length != 0">
+                <i class="icon-cube"></i>
+                <strong v-for="p in activity.validators.prj" class="cartouche">{{ p }}</strong>
+              </div>
+              <div v-else class="bg-danger">
+                <i class="icon-attention-1"></i>
+                Pas de validateur projet
+              </div>
+
+              <div v-if="activity.validators.sci.length != 0">
+                <i class="icon-beaker"></i>
+                <strong v-for="p in activity.validators.sci" class="cartouche">{{ p }}</strong>
+              </div>
+              <div v-else class="bg-danger">
+                <i class="icon-attention-1"></i>
+                Pas de validateur scientifique
+              </div>
+
+              <div v-if="activity.validators.adm.length != 0">
+                <i class="icon-book"></i>
+                <strong v-for="p in activity.validators.adm" class="cartouche">{{ p }}</strong>
+              </div>
+              <div v-else class="bg-danger">
+                <i class="icon-attention-1"></i>
+                Pas de validateur administratif
+              </div>
+
+            </article>
           </div>
         </div>
         <div class="col-md-9">

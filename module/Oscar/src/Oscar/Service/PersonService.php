@@ -1266,6 +1266,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $repport = $this->getHighDelayForPerson($personId);
             $validatorsPerson = [];
             $validatorsOthers = [];
+            $personActivities = [];
 
             $validatorsOthersPerson = $this->getReferentsPerson($personId);
 
@@ -1303,6 +1304,29 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
                 $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
                 $validators = [];
+
+                foreach ($periodDetails['activities'] as $activityInfos) {
+                    $activityId = $activityInfos['id'];
+                    if( !array_key_exists($activityId, $personActivities) ){
+                        $personActivities[$activityId] = $activityInfos;
+                        $activityValidators = [
+                            'prj' => [],
+                            'sci' => [],
+                            'adm' => [],
+                        ];
+                        $activity = $this->getProjectGrantService()->getActivityById($activityId);
+                        foreach ($activity->getValidatorsPrj() as $val) {
+                            $activityValidators['prj'][$val->getId()] = (string)$val;
+                        }
+                        foreach ($activity->getValidatorsSci() as $val) {
+                            $activityValidators['sci'][$val->getId()] = (string)$val;
+                        }
+                        foreach ($activity->getValidatorsAdm() as $val) {
+                            $activityValidators['adm'][$val->getId()] = (string)$val;
+                        }
+                        $personActivities[$activityId]['validators'] = $activityValidators;
+                    }
+                }
 
                 if ($pp >= $period) {
                     continue;
@@ -1354,6 +1378,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $periods[$pp] = $periodInfos;
 
                 $output[$personId]['periods'] = $periods;
+                $output[$personId]['activities'] = $personActivities;
             }
 
             $output[$personId]['periods'] = $periods;

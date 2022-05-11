@@ -110,6 +110,15 @@ $colorGreyBlack: #222;
   background: rgba(0,0,0,.1);
 }
 
+.info-area {
+  border-radius: 4px;
+  background: $brand-info;
+  color: white;
+  padding: .25em .5em;
+  font-size: .8em;
+  text-shadow: -1px 1px 1px rgba(0,0,0,.3);
+}
+
 .highdelay .card .card-title {
   .profile {
     flex: 0 0 50px;
