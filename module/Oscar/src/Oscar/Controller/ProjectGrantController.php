@@ -669,7 +669,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $formatter = new ActivityToJsonFormatter();
         $json = $formatter->format($activity);
         return $this->jsonOutput($json);
-        die("TODO : $activity");
     }
 
     /**
@@ -935,20 +934,49 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function deleteAction()
     {
         try {
-            $projectGrant = $this->getActivityFromRoute();
+            $activity = $this->getActivityFromRoute();
+
             $this->getOscarUserContextService()->check(
                 Privileges::ACTIVITY_DELETE,
-                $projectGrant
+                $activity
             );
-            $project = $projectGrant->getProject();
-            $this->getLoggerService()->info(sprintf('Suppression de %s - %s', $projectGrant, $projectGrant->getId()));
-            $activity_id = $projectGrant->getId();
+
+            $this->getLoggerService()->info(sprintf('Suppression de %s - %s', $activity, $activity->getId()));
+
+            $project = $activity->getProject();
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Récupération des informations annexes
+
+            // On supprime les créneaux
+            $this->getTimesheetService()->removeTimesheetActivity($activity);
+
+            // Suppression des documents
+            $documents = $activity->getDocuments();
+            if( count($documents) ){
+
+                $documentPathRoot = $this->getOscarConfigurationService()->getDocumentDropLocation();
+
+                /** @var ContractDocument $d */
+                foreach ($documents as $d) {
+                    $path = $documentPathRoot.'/'.$d->getPath();
+                    if( file_exists($path) ){
+                        unlink($path);
+                    }
+                    $this->getLoggerService()->info("Suppression du document '$d'");
+                    $this->getLoggerService()->info("Fichier '$path'");
+                    $this->getEntityManager()->remove($d);
+                }
+                $this->getEntityManager()->flush();
+            }
+
+
             try {
-                $this->getActivityService()->searchDelete($activity_id);
+                $this->getActivityService()->searchDelete($activity->getId());
             } catch (\Exception $e) {
             }
-            $this->getEntityManager()->remove($projectGrant);
 
+            $this->getEntityManager()->remove($activity);
             $this->getEntityManager()->flush();
 
             if (!$project) {
@@ -958,7 +986,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 $this->redirect()->toRoute(
                     'project/show',
-                    ['id' => $projectGrant->getProject()->getId()]
+                    ['id' => $activity->getProject()->getId()]
                 );
             }
         } catch (\Exception $e) {

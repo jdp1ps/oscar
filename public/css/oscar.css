@@ -11913,13 +11913,27 @@ pre.alert-danger, pre.alert-info {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.info-area {
+.highdelay .activity {
+  border: solid thin #999999;
+}
+
+.danger-area, .info-area {
   border-radius: 4px;
   background: #5bc0de;
   color: white;
   padding: 0.25em 0.5em;
+  margin: 0.3em 0;
   font-size: 0.8em;
   text-shadow: -1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+.danger-area a, .info-area a {
+  color: white;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.danger-area {
+  background: #d9534f;
 }
 
 .highdelay .card .card-title .profile {

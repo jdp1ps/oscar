@@ -500,7 +500,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * (ATTENTION : Si aucune déclaration n'a été envoyée, il n'y a pas de résultats)
      * @param int $personId
      */
-    public function getRepportDeclarationPerson( int $personId )
+    public function getRepportDeclarationPerson( int $personId, bool $includenonActive = false )
     {
         $sql = "SELECT
             declarer_id AS declarer_id,
@@ -515,10 +515,11 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             SUM(CASE WHEN  vp.rejectsciat IS NULL THEN 0 ELSE 1 END) AS rejsci,
             SUM(CASE WHEN  vp.rejectadmat IS NULL THEN 0 ELSE 1 END) AS rejadm
         
-            FROM validationperiod vp WHERE vp.declarer_id = :person_id
+            FROM validationperiod vp WHERE vp.declarer_id = :person_id 
 
             GROUP BY declarer_id, period
             ORDER BY period";
+
         $query = $this->getEntityManager()->getConnection()->prepare($sql);
 
         $result = $query->executeQuery([
@@ -530,7 +531,13 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return $datas;
     }
 
-    public function getIdsDeclarersBeforePeriod( string $period ): array
+    /**
+     * Retourne les ID des déclarants avant la période donnée.
+     *
+     * @param string $period
+     * @return array
+     */
+    public function getIdsDeclarersBeforePeriod( string $period, bool $includeNonActive = false ): array
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('DISTINCT(p.id) id')
@@ -538,18 +545,21 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             ->innerJoin('p.workPackages', 'wpp')
             ->groupBy('p.id');
 
-        $parametersQuery = [];
-
-
         $extract = DateTimeUtils::periodBounds($period);
         $end = $extract['end'];
 
         $qb->innerJoin('wpp.workPackage', 'wp')
             ->innerJoin('wp.activity', 'a')
             ->where('a.dateStart < :periodEnd');
+
         $parametersQuery = [
             'periodEnd' => $end
         ];
+
+        if( $includeNonActive == false ){
+            $qb->andWhere('a.status = :status');
+            $parametersQuery['status'] = Activity::STATUS_ACTIVE;
+        }
 
         $qb->setParameters($parametersQuery);
 

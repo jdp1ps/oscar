@@ -664,11 +664,20 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    /**
+     * url(/feuille-de-temps/highdelay)
+     * @return array|JsonModel
+     * @throws OscarException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function highDelayAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
 
         $format = $this->params()->fromQuery('f', OscarFormatterConst::FORMAT_IO_HTML);
+        $includeNonActive = $this->params()->fromQuery('a', 'off');
+
         if ($this->isAjax() || $format == OscarFormatterConst::FORMAT_IO_JSON) {
             // Critères
             $period = $this->params()->fromQuery('period', date('Y-m'));
@@ -676,9 +685,11 @@ class TimesheetController extends AbstractOscarController
             $datas = $this->baseJsonResponse();
 
             // Liste des personnes avec des retards anciens (Personne => Période)
+            $datas['include_nonactive'] = $includeNonActive == 'on';
             $datas['highdelays'] = $this->getPersonService()->getPersonsHighDelay(
                 $period->getPeriodCode(),
-                $this->url()
+                $this->url(),
+                $includeNonActive == 'on'
             );
             return $this->jsonOutput($datas);
         }

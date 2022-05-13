@@ -61,13 +61,13 @@ class WorkPackage
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="WorkPackagePerson", mappedBy="workPackage", cascade={"REMOVE"})
+     * @ORM\OneToMany(targetEntity="WorkPackagePerson", mappedBy="workPackage", cascade={"remove"})
      */
     protected $persons;
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="TimeSheet", mappedBy="workpackage")
+     * @ORM\OneToMany(targetEntity="TimeSheet", mappedBy="workpackage", cascade={"remove"})
      */
     private $timesheets;
 

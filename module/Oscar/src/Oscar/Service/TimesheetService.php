@@ -2890,15 +2890,53 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
     /**
+     * Suppression de tous les créneaux liés à une activité.
+     *
+     * @param Activity $activity
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function removeTimesheetActivity( Activity $activity ) :void
+    {
+        foreach ($activity->getTimesheets() as $t) {
+            $this->getEntityManager()->remove($t);
+        }
+
+        // Au cas ou
+        foreach ($this->getTimesheetRepository()->findBy(['activity' => $activity]) as $t) {
+            $this->getEntityManager()->remove($t);
+        }
+
+        // Récupération des déclarants
+        $declarers = $activity->getDeclarers();
+        $personsId = [];
+        foreach ($declarers as $d) {
+            $personsId[] = $d->getId();
+        }
+
+        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriodBounds(
+            $personsId,
+            $activity->getDateStartStr('Y-m'),
+            $activity->getDateEndStr('Y-m')
+        );
+
+        foreach ($validations as $v) {
+            $this->getEntityManager()->remove($v);
+        }
+
+        $this->getEntityManager()->flush();
+    }
+
+    /**
      * Retourne la liste des périodes où la personnes est idéntifiée comme déclarant.
      *
      * @param Person $declarer
      */
-    public function getPeriodsPerson(Person $declarer, $details = false)
+    public function getPeriodsPerson(Person $declarer, $details = false, $includeNonActive = false)
     {
-        $periodsBounds = $this->getTimesheetRepository()->getPeriodsPerson($declarer->getId());
+        $periodsBounds = $this->getTimesheetRepository()->getPeriodsPerson($declarer->getId(), $includeNonActive);
         $periods = [];
         $output = [];
+
         foreach ($periodsBounds as $bounds) {
 
             $periods = array_merge(
@@ -2971,7 +3009,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     {
         // Récupéation des périodes avec un validation identifiée
 
-        $periods = array_flip($this->getPeriodsPerson($declarer));
+        $periods = array_flip($this->getPeriodsPerson($declarer, false, true));
         $periodValidations = $this->getValidationPeriodRepository()->getValidationPeriodsPerson($declarer->getId());
 
         /** @var ValidationPeriod $periodValidation */
@@ -3160,7 +3198,29 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         if( $processDate == null ){
             $processDate = new \DateTime();
         }
+
         $declarer = $this->getPersonService()->getPersonById($declarerId, true);
+
+
+        $periodInfos = PeriodInfos::getPeriodInfosObj($processDate->format('Y-m'));
+
+//        // Récupération de l'historique des rappels
+//        $recalls = $this->getRecallDeclarationRepository()->getRecallDeclarationsPersonPeriod(
+//            $declarerId,
+//            $periodInfos->getYear(),
+//            $periodInfos->getMonth()
+//        );
+//
+//        $result['lastSend'] = "Aucun";
+//        $result['recalls'] = 0;
+//        $result['since_last'] = 0;
+//        $result['days_beetween'] = '#';
+//
+//        if (count($recalls) != 0) {
+//            $recallSend = $recalls[0];
+//        } else {
+//            $this->getLoggerService()->debug("Maj du RAPPEL");
+//        }
 
         $messageTemplate = $this->getOscarConfigurationService()->getHighDelayRelance();
         $find = ["{PERSON}", "{PERIOD}"];
@@ -3337,11 +3397,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $result = $this->getPersonRecallDeclarationPeriod($declarerId, $period);
         $result['mailSend'] = false;
         $periodInfos = PeriodInfos::getPeriodInfosObj($period);
-        $recallSend = null;
-
 
         // Ancienne relance
-
         /** @var RecallDeclarationRepository $recallDeclarationRepository */
         $recallDeclarationRepository = $this->getRecallDeclarationRepository();
 

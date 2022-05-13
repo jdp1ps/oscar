@@ -1225,7 +1225,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param string $periodCod
      * @return array
      */
-    public function getValidatorsIdsPersonPeriod( int $declarerId, string $periodCode ) :array
+    public function getValidatorsIdsPersonPeriod(int $declarerId, string $periodCode): array
     {
         $output = [];
         $validations = $this->getTimesheetService()->getValidationsPeriodPersonAt($declarerId, $periodCode);
@@ -1233,7 +1233,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         foreach ($validations as $validation) {
             /** @var Person $validator */
             foreach ($validation->getCurrentValidators() as $validator) {
-                $output[$validator->getId()] = $validator->getFullname();
+                $output[$validator->getId()] = [
+                    'id' => $validator->getId(),
+                    'fullname' => $validator->getFullname(),
+                    'email' => $validator->getEmail(),
+                    'current' =>"foo"
+                ];
             }
         }
         return $output;
@@ -1241,29 +1246,32 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     /**
      * Retourne la liste des déclarants impliqués dans des retards pour une période (périodes précédentes inclues).
-     * Les données tiennent compte des retards de validation.
+     * Les données tiennent compte des retards de validation et propose des données de synthèse sur les retards.
      *
-     * @param string $period
+     * @param string $period (YYYY-MM)
+     * @param Url $urlHelper Plugin pour générer les URL (optionnel)
+     * @param bool $includeNonActive Inclus les données des activités autres que le status ACTIVE(101)
+     *
      * @return array
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getPersonsHighDelay(string $period, ?Url $urlHelper = null)
+    public function getPersonsHighDelay(string $period, ?Url $urlHelper = null, bool $includeNonActive = false)
     {
-        $declarers = $this->getDeclarersIdsBeforePeriod($period);
+        // Liste des déclarants
+        $declarers = $this->getDeclarersIdsBeforePeriod($period, $includeNonActive);
 
         $output = [];
 
         foreach ($declarers as $personId => $infos) {
-
             /** @var Person $person */
             $person = $infos['person'];
 
             $personName = (string)$person;
             $personId = $person->getId();
             $personEmail = $person->getEmail();
-            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person, true);
-            $repport = $this->getHighDelayForPerson($personId);
+            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person, true, $includeNonActive);
+            $repport = $this->getHighDelayForPerson($personId, $includeNonActive);
             $validatorsPerson = [];
             $validatorsOthers = [];
             $personActivities = [];
@@ -1271,13 +1279,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $validatorsOthersPerson = $this->getReferentsPerson($personId);
 
             /** @var Referent $v */
-            foreach ($validatorsOthersPerson as $v){
-                $validatorsOthers[$v->getReferent()->getId()] = $v->getReferent()->getFullname();
+            foreach ($validatorsOthersPerson as $v) {
+                $validatorsOthers[$v->getReferent()->getId()] = [
+                    'fullname' => $v->getReferent()->getFullname(),
+                    'email' => $v->getReferent()->getEmail()
+                ];
             }
+
             $periods = [];
 
             $urlShow = false;
-            if( $urlHelper ){
+            if ($urlHelper) {
                 $urlShow = $urlHelper->fromRoute('person/show', ['id' => $personId]);
             }
 
@@ -1299,7 +1311,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 'infos' => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
             ];
 
-            foreach ($personPeriods as $pp=>$periodDetails) {
+            foreach ($personPeriods as $pp => $periodDetails) {
+
+                if ($pp >= $period) {
+                    continue;
+                }
+
                 $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
                 $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
                 $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
@@ -1307,45 +1324,60 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
                 foreach ($periodDetails['activities'] as $activityInfos) {
                     $activityId = $activityInfos['id'];
-                    if( !array_key_exists($activityId, $personActivities) ){
+
+                    if (!array_key_exists('url_timesheet', $activityInfos) && $urlHelper) {
+                        $activityInfos['url_timesheet'] = $urlHelper->fromRoute(
+                            'contract/timesheet',
+                            ['id' => $activityId]
+                        );
+                    }
+
+                    if (!array_key_exists($activityId, $personActivities)) {
                         $personActivities[$activityId] = $activityInfos;
                         $activityValidators = [
                             'prj' => [],
                             'sci' => [],
                             'adm' => [],
                         ];
+
                         $activity = $this->getProjectGrantService()->getActivityById($activityId);
+
                         foreach ($activity->getValidatorsPrj() as $val) {
-                            $activityValidators['prj'][$val->getId()] = (string)$val;
+                            $activityValidators['prj'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
                         }
                         foreach ($activity->getValidatorsSci() as $val) {
-                            $activityValidators['sci'][$val->getId()] = (string)$val;
+                            $activityValidators['sci'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
                         }
                         foreach ($activity->getValidatorsAdm() as $val) {
-                            $activityValidators['adm'][$val->getId()] = (string)$val;
+                            $activityValidators['adm'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
                         }
                         $personActivities[$activityId]['validators'] = $activityValidators;
                     }
                 }
 
-                if ($pp >= $period) {
-                    continue;
-                }
-
-                if( $send === false ){
+                if ($send === false) {
                     $output[$personId]['send'] = false;
                 } else {
                     $validators = $this->getValidatorsIdsPersonPeriod($personId, $pp);
-                    foreach ($validators as $idValidator=>$validatorFullName){
+                    foreach ($validators as $idValidator => $validatorFullName) {
                         $validatorsPerson[$idValidator] = $validatorFullName;
                     }
                 }
 
-                 if( $send === false ){
+                if ($send === false) {
                     $output[$personId]['send'] = false;
                 }
 
-                if( $send === true && $valid === false ){
+                if ($send === true && $valid === false) {
                     $output[$personId]['require_alert_validator'] = true;
                 }
 
@@ -1362,7 +1394,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     'validators' => $validators,
                     'activities' => $periodDetails['activities']
                 ];
-                if( array_key_exists($pp, $repport) ){
+                if (array_key_exists($pp, $repport)) {
                     $periodInfos['valid'] = $repport[$pp]['valid'];
                     $periodInfos['valid_prj'] = $repport[$pp]['valid_prj'];
                     $periodInfos['valid_sci'] = $repport[$pp]['valid_sci'];
@@ -1389,17 +1421,17 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * Retourne le détails des informations sur les retards importans de déclaration.
+     * Retourne le détails des informations sur les retards importants de déclaration pour une personne.
      *
      * @param int $personId
+     * @param bool $includeNonActive (Inclus des activités inactives)
      * @return array
      */
-    public function getHighDelayForPerson(int $personId)
+    public function getHighDelayForPerson(int $personId, bool $includeNonActive = false)
     {
-        $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId);
+        $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId, $includeNonActive);
         $output = [];
         foreach ($highdelays as $highdelay) {
-
             $period = $highdelay['period'];
             $nbr = $highdelay['nbr'];
             $prj = $highdelay['prj'];
@@ -1407,13 +1439,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $adm = $highdelay['adm'];
 
             $step = 0;
-            if( $prj == $nbr ) {
+            if ($prj == $nbr) {
                 $step = 1;
             }
-            if( $sci == $nbr ) {
+            if ($sci == $nbr) {
                 $step = 2;
             }
-            if( $adm == $nbr ) {
+            if ($adm == $nbr) {
                 $step = 3;
             }
 
@@ -1787,12 +1819,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
 
     /**
+     * Liste des déclarants pour la période.
+     *
      * @param string $periodStr
      * @return int[]
      */
-    public function getDeclarersIdsBeforePeriod(string $periodStr): array
+    public function getDeclarersIdsBeforePeriod(string $periodStr, bool $includeNonActive = false): array
     {
-        $ids = $this->getPersonRepository()->getIdsDeclarersBeforePeriod($periodStr);
+        $ids = $this->getPersonRepository()->getIdsDeclarersBeforePeriod($periodStr, $includeNonActive);
         $output = [];
         foreach ($ids as $id) {
             $output[$id] = [

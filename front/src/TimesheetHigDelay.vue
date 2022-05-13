@@ -8,6 +8,12 @@
         </pre>
       </div>
     </div>
+    <nav>
+      <select v-model="includeNonActive" @change="updateActive">
+        <option value="on">Affiche les activités non-active</option>
+        <option value="off">Activités "Active" uniquement</option>
+      </select>
+    </nav>
     <article class="card" v-for="entry in entries">
       <h2 class="card-title">
         <span class="profile">
@@ -33,24 +39,25 @@
               <i class="icon-user"></i>
               Validateur(s) impliqué(s) :
             </h4>
-            <div class="alert alert-danger" v-if="entry.np1.length == 0"><i class="icon-attention-1"></i>
-              Aucun <em>N+1</em> (validateur hors-lot) n'est assigné à ce déclarant, vous pouvez lui en assigner un (ou
-              plusieurs) depuis la fiche personne.
+            <div class="danger-area" v-if="entry.np1.length == 0"><i class="icon-attention-1"></i>
+              Aucun <em>N+1</em> (validateur hors-lot) n'est assigné à ce déclarant.
+              <span v-if="entry.url_show">
+                <a :href="entry.url_show">
+                  Corriger depuis la fiche
+                </a>
+              </span>
             </div>
-            <div v-if="entry.send == true && entry.validators.length == 0" class="alert alert-danger">
+            <div v-if="entry.send == true && entry.validators.length == 0" class="danger-area">
               <i class="icon-attention-1"></i>
               Aucun validateur n'est désigné pour valider ces déclarations, rendez-vous dans la fiche activité afin de
               vérifier que des validateurs sont bien désignés.
             </div>
             <div v-else>
-              <p class="info-area">
-                Les validateurs ci-dessous sont ceux qui sont impliqués personnellement dans les validations en cours.
-              </p>
               <ul>
-                <li v-for="v in entry.validators"><i class="icon-cube"></i> {{ v }}</li>
+                <li v-for="(v, i) in entry.validators"><i class="icon-cube"></i> {{ v.fullname }}</li>
                 <li v-for="v in entry.np1">
                   <i class="icon-tag"></i>
-                  <strong>{{ v }}</strong>
+                  <strong>{{ v.fullname }}</strong>
                   <small> (Validateur Hors-Lot)</small>
                 </li>
               </ul>
@@ -60,20 +67,25 @@
               <i class="icon-cubes"></i>
               Activités
             </h4>
-            <p class="info-area">
-              Liste des activités où <strong>{{ entry.fullname }}</strong> a été identifié comme déclarant.
-              Vous pouvez voir les validateurs désignés pour valider les futurs déclarations envoyées.
-            </p>
-            <article v-for="activity in entry.activities" class="card xs">
+<!--            <p class="info-area">-->
+<!--              Liste des activités où <strong>{{ entry.fullname }}</strong> a été identifié comme déclarant.-->
+<!--              Vous pouvez voir les validateurs désignés pour valider les futurs déclarations envoyées.-->
+<!--            </p>-->
+            <article v-for="activity in entry.activities" class="card xs activity">
               <h5>
-                <i class="icon-cubes"></i>
-                <strong>[{{ activity.acronym }}]</strong>
-                <em>{{ activity.label }}</em>
+                <span>
+                  <i class="icon-cubes"></i>
+                  <strong>[{{ activity.acronym }}]</strong>
+                  <em>{{ activity.label }}</em>
+                </span>
+                <a :href="activity.url_timesheet" v-if="activity.url_timesheet">
+                  Configurer
+                </a>
               </h5>
 
               <div v-if="activity.validators.prj.length != 0">
                 <i class="icon-cube"></i>
-                <strong v-for="p in activity.validators.prj" class="cartouche">{{ p }}</strong>
+                <strong v-for="p in activity.validators.prj" class="cartouche">{{ p.fullname }}</strong>
               </div>
               <div v-else class="bg-danger">
                 <i class="icon-attention-1"></i>
@@ -82,7 +94,7 @@
 
               <div v-if="activity.validators.sci.length != 0">
                 <i class="icon-beaker"></i>
-                <strong v-for="p in activity.validators.sci" class="cartouche">{{ p }}</strong>
+                <strong v-for="p in activity.validators.sci" class="cartouche">{{ p.fullname }}</strong>
               </div>
               <div v-else class="bg-danger">
                 <i class="icon-attention-1"></i>
@@ -91,7 +103,7 @@
 
               <div v-if="activity.validators.adm.length != 0">
                 <i class="icon-book"></i>
-                <strong v-for="p in activity.validators.adm" class="cartouche">{{ p }}</strong>
+                <strong v-for="p in activity.validators.adm" class="cartouche">{{ p.fullname }}</strong>
               </div>
               <div v-else class="bg-danger">
                 <i class="icon-attention-1"></i>
@@ -209,7 +221,8 @@ export default {
     return {
       /** Liste des données (Personne,periode) **/
       entries: [],
-      debug: null
+      debug: null,
+      includeNonActive: 'off'
     }
   },
 
@@ -224,7 +237,7 @@ export default {
   methods: {
 
     fetch() {
-      this.$http.get(this.url).then(
+      this.$http.get(this.url +'?a=' +this.includeNonActive).then(
           ok => {
             this.entries = ok.data.highdelays;
           },
@@ -232,6 +245,10 @@ export default {
             console.log(ko);
           }
       )
+    },
+
+    updateActive() {
+      this.fetch();
     }
   },
 

@@ -106,7 +106,14 @@ class TimesheetRepository extends EntityRepository
             ->getResult();
     }
 
-    public function getPeriodsPerson($personId)
+    /**
+     * Retourne la liste des périodes de déclaration de la personne.
+     *
+     * @param int $personId
+     * @param bool $incudeNonActive
+     * @return int|mixed|string
+     */
+    public function getPeriodsPerson(int $personId, bool $incudeNonActive = false )
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('a.dateStart', 'a.dateEnd', 'a.id', 'a.label', 'p.acronym')
@@ -114,11 +121,20 @@ class TimesheetRepository extends EntityRepository
             ->innerJoin('a.workPackages', 'awp')
             ->innerJoin('a.project', 'p')
             ->innerJoin('awp.persons', 'wpp')
-            ->where('wpp.person = :personId')
-            ->setParameters(['personId' => $personId]);;
+            ->where('wpp.person = :personId');
 
-        $datas = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
-        return $datas;
+        $parameters = [
+            'personId' => $personId
+        ];
+
+        if( $incudeNonActive == false ){
+            $qb->andWhere('a.status = :status');
+            $parameters['status'] = Activity::STATUS_ACTIVE;
+        }
+
+        return $qb->setParameters($parameters)
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
     public function getTimesheetTotalByPeriodPerson($personId)
