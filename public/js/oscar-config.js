@@ -87,7 +87,7 @@ requirejs.config({
         "PersonsList" : "oscar/dist/PersonsList",
         "Tva": "oscar/dist/Tva",
         "ActivityRequest": "oscar/dist/ActivityRequest",
-        "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin",
+        "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin.umd",
         "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
         "ActivityGant": "oscar/dist/ActivityGant",
