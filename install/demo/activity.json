@@ -9,6 +9,7 @@
     "dateend": "",
     "datesigned": "2017-06-01",
     "pfi": "99PFI1234",
+    "status": 101,
     "datePFI": "2018-01-01",
     "type": "ANR",
     "amount": "0.0",
@@ -50,6 +51,7 @@
     "dateend": "2022-12-31",
     "datesigned": "2021-01-05",
     "pfi": "",
+    "status": 101,
     "type": "Colloques",
     "amount": 15000,
     "financialImpact": "Recettes",
@@ -117,6 +119,7 @@
     "datesigned": "2021-02-01",
     "financialImpact": "Dépense",
     "pfi": "",
+    "status": 101,
     "type": "ANR",
     "amount": 9990,
     "milestones": [

@@ -483,14 +483,14 @@ Pour activer le système de rappel (En production), vous pouvez simplement **dé
 
 ### Tâche planifiée
 
-La commande : 
+#### Rappel déclaration
+
+Pour visualiser les rappels qui seront distribués.
 
 ```bash
 # Prévisualisation des rappels
 php bin/oscar.php timesheets:recalls --preview
 ```
-
-Permet de visualiser les rappels qui seront distribués.
 
 Pour déclencher la distribution effective, utilisez la même commande sans l'option `--preview`
 
@@ -498,6 +498,20 @@ Pour déclencher la distribution effective, utilisez la même commande sans l'op
 # Procédure de rappel des feuilles de temps
 php bin/oscar.php timesheets:recalls
 ```
+
+> Le système mémorise les rappels pour éviter de *spamer* les utilisateurs
+
+#### Retards importants
+
+Les rappels pour les retards importants sont gérés par une procédure dédiée. Chaque execution du script déclenche un rappel.
+Par exemple, pour faire une rappel une fois par semaine, le CRON devra être planifé à une fois par semaine.
+
+```bash
+# Rappel pour les retards importants
+php bin/oscar.php timesheets:high-delay --send
+```
+
+
 
 
 
