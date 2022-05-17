@@ -41,6 +41,7 @@ use Oscar\Formatter\ActivityPaymentFormatter;
 use Oscar\Formatter\ActivityToJsonFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
 use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
 use Oscar\Hydrator\PcruInfosFormHydrator;
@@ -414,8 +415,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             'asAdmin' => $asAdmin,
-            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(),
-            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity()
+            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
+            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE)
         ];
     }
 

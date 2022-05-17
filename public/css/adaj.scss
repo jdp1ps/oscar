@@ -5,11 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
-
 $brand-primary: #24587A !default;
 $brand-complementary: #472B83 !default;
 $bg-image: 'adaj.jpg' !default;
-
 
 $brand-secondary1: #290671;
 $brand-secondary2: #369100;
@@ -21,7 +19,6 @@ $brand-error: #cb0b05 !default;
 
 $colorGreyUltraLight: #AAA;
 $colorGreyLight: #888;
-
 
 $font-size-smallest: 9px;
 $font-size-smaller: 10px;
@@ -37,6 +34,7 @@ $grid-float-breakpoint: 1024px;
 $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
+
 
 @import "_common.scss";
 

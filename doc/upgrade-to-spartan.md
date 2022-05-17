@@ -156,7 +156,7 @@ Configuration de l'authentification
 
 ```php
 <?php
-// config/autoload/local.php
+// config/autoload/unicaen-auth.local.php
 $settings = array(
     // Authentification via LDAP/BDD
     'local' => [
