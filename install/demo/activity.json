@@ -175,5 +175,40 @@
         ]
       }
     ]
+  },
+  {
+    "uid": "A0004",
+    "acronym": "TESTPCRU",
+    "projectlabel": "Projet PCRUifié",
+    "label": "Contrat vers PCRU",
+    "datestart": "2022-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2022-01-05",
+    "financialImpact": "Dépense",
+    "pfi": "2022PFI04079",
+    "status": 101,
+    "type": "ANR",
+    "amount": 15250,
+    "milestones": [
+    ],
+    "payments": [
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "Groupe Olympia"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Max Plank"
+      ],
+      "Chercheur": [
+        "Erwin Schrödinger"
+      ],
+      "Ingénieur": [
+        "Sarah Déclarant"
+      ]
+    },
+    "workpackages": []
   }
 ]

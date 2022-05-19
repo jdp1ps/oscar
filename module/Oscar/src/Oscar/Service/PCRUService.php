@@ -7,6 +7,7 @@ namespace Oscar\Service;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPcruInfosRepository;
 use Oscar\Entity\ActivityRepository;
@@ -27,6 +28,8 @@ use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\PCRUCvsFile;
+use Oscar\Validator\PCRUPartnerValidator;
+use Oscar\Validator\PCRUUnitValidator;
 use Oscar\Validator\PCRUValidator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -162,7 +165,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         // Contrôle des informations
         $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
         $validation = $pcruValidation->validate($pcruInfos);
-        if (count($pcruValidation->getError()) > 0) {
+        if (count($pcruValidation->getErrors()) > 0) {
             throw new OscarException(
                 "Impossible d'activer PCRU pour cette activité, des données sont manquantes/erronées"
             );
@@ -479,6 +482,24 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());
         }
 
+        // Contrôle des organisations
+        $validatorPartner = new PCRUPartnerValidator();
+        foreach ($activity->getOrganizationsWithOneRoleIn($this->getOscarConfigurationService()->getPcruPartnerRoles()) as $partner) {
+            if( !$validatorPartner->isValid($partner) ){
+                var_dump($partner->getCodePCRU());
+                $msg = implode(',', $validatorPartner->getMessages());
+                $pcruInfos->addError(sprintf($msg, $partner));
+                die();
+            }
+        }
+
+        $validatorUnit = new PCRUUnitValidator();
+        foreach ($activity->getOrganizationsWithOneRoleIn($this->getOscarConfigurationService()->getPcruUnitRoles()) as $partner) {
+            if( !$validatorUnit->isValid($partner) ){
+                $msg = implode(',', $validatorUnit->getMessages());
+                $pcruInfos->addError(sprintf($msg, $partner));
+            }
+        }
 
         return [
             'validations' => $validation,

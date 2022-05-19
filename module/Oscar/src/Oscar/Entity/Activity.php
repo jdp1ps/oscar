@@ -1789,6 +1789,7 @@ class Activity implements ResourceInterface
     }
 
     private $_cacheOrganizationsByRole;
+    private $_cacheOrganizationsByRoles;
 
     public function getOrganizationsWithOneRole(array $roleIds): array
     {
@@ -1805,6 +1806,42 @@ class Activity implements ResourceInterface
         return $structures;
     }
 
+    public function getOrganizationsWithOneRoleIn(array $roles, $deep = true) {
+        if ($this->_cacheOrganizationsByRoles === null) {
+            $this->_cacheOrganizationsByRoles = [];
+            /** @var ActivityOrganization $relation */
+            foreach ($this->getOrganizations() as $relation) {
+                $role = $relation->getRole();
+                $organization = $relation->getOrganization();
+                $organizationId = $organization->getId();
+
+                if (!array_key_exists($role, $this->_cacheOrganizationsByRoles)) {
+                    $this->_cacheOrganizationsByRoles[$role] = [];
+                }
+
+                $this->_cacheOrganizationsByRoles[$role][$organizationId] = $organization;
+            }
+            if ($this->getProject()) {
+                foreach ($this->getProject()->getOrganizations() as $relation) {
+                    $role = $relation->getRole();
+                    $organization = $relation->getOrganization();
+                    $organizationId = $organization->getId();
+                    if (!array_key_exists($role, $this->_cacheOrganizationsByRoles)) {
+                        $this->_cacheOrganizationsByRoles[$role] = [];
+                    }
+                    $this->_cacheOrganizationsByRoles[$role][$organizationId] = $organization;
+                }
+            }
+        }
+        $output = [];
+        foreach ($roles as $role) {
+            if (isset($this->_cacheOrganizationsByRoles[$role])) {
+                $output = array_merge($output, $this->_cacheOrganizationsByRoles[$role]);
+            }
+        }
+        return $output;
+    }
+
     public function getOrganizationsWithRole($role, $deep = true)
     {
         if ($this->_cacheOrganizationsByRole === null) {
@@ -1818,6 +1855,9 @@ class Activity implements ResourceInterface
             }
             if ($this->getProject()) {
                 foreach ($this->getProject()->getOrganizations() as $partner) {
+                    if (!isset($this->_cacheOrganizationsByRole[$partner->getRole()])) {
+                        $this->_cacheOrganizationsByRole[$partner->getRole()] = [];
+                    }
                     $this->_cacheOrganizationsByRole[$partner->getRole()][] = $partner;
                 }
             }

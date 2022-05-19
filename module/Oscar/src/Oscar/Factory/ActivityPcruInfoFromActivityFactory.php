@@ -10,6 +10,7 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\Organization;
 use Oscar\Entity\PcruTypeContract;
 use Oscar\Entity\PcruTypeContractRepository;
 use Oscar\Exception\OscarException;
@@ -63,7 +64,7 @@ class ActivityPcruInfoFromActivityFactory
 
         // Récupération des laboratoires
 
-        $structures = $activity->getOrganizationsWithOneRole($roleStructureToFind);
+        $structures = $activity->getOrganizationsWithOneRoleIn($roleStructureToFind);
 
         if (count($structures) == 0) {
             $activityPcruInfos->addError(
@@ -72,23 +73,24 @@ class ActivityPcruInfoFromActivityFactory
         }
 
         $organizationsParsed = [];
+
         /** @var ActivityOrganization $unite */
-        foreach ($activity->getOrganizationsWithRole($roleStructureToFind) as $unite) {
-            $organizationsParsed[] = (string)$unite->getOrganization();
-            if ($unite->getOrganization()->getLabintel()) {
-                $codeUniteLabintel = $unite->getOrganization()->getLabintel();
-                $sigleUnit = $unite->getOrganization()->getShortName();
+        foreach ($activity->getOrganizationsWithOneRoleIn($roleStructureToFind) as $unite) {
+            $organizationsParsed[] = (string)$unite;
+            if ($unite->getLabintel()) {
+                $codeUniteLabintel = $unite->getLabintel();
+                $sigleUnit = $unite->getShortName();
             }
         }
 
         $partners = [];
-        /** @var ActivityOrganization $partner */
-        foreach ($activity->getOrganizationsWithRole($rolePartnerToFind) as $partner) {
-            if ($partner->getOrganization()->getCodePcru()) {
+        /** @var Organization $partner */
+        foreach ($activity->getOrganizationsWithOneRoleIn($rolePartnerToFind) as $partner) {
+            if ($partner->getCodePcru()) {
                 if ($idPartenairePrincipal == "") {
-                    $idPartenairePrincipal = $partner->getOrganization()->getCodePcru();
+                    $idPartenairePrincipal = $partner->getCodePcru();
                 } else {
-                    $partners[] = $partner->getOrganization()->getCodePcru();
+                    $partners[] = $partner->getCodePcru();
                 }
             }
         }

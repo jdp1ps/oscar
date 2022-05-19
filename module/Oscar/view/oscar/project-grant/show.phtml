@@ -416,6 +416,11 @@
         </div>
 
         <div class="col-md-4">
+            <pre>
+                <?php
+                var_dump($pcruEnabled)
+                ?>
+            </pre>
             <?php
             // -------------------------------------------------------------------------------------------------- PCRU
             if ($pcruEnabled && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PCRU, $entity)):?>
