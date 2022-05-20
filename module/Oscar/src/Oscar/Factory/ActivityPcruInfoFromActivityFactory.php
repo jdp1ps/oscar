@@ -178,8 +178,8 @@ class ActivityPcruInfoFromActivityFactory
     {
         return [
             'Objet' => "Intitulé de l'activité",
-            'CodeUniteLabintel' => 'Code LABINTEL (extrait depuis la fiche organisation du laboratoire)',
-            'SigleUnite' => 'Extrait depuis la fiche organisation du laboratoire (nom court)',
+            'CodeUniteLabintel' => 'Code LABINTEL (extrait depuis la fiche organisation)',
+            'SigleUnite' => 'Extrait depuis la fiche organisation (nom court)',
             'NumContratTutelleGestionnaire' => 'N°Oscar',
             'Equipe' => 'off',
             'TypeContrat' => '',
