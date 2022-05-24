@@ -90,7 +90,7 @@ requirejs.config({
         "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin.umd",
         "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
-        "ActivityGant": "oscar/dist/ActivityGant",
+        "ActivityGant": "oscar/dist/ActivityGant.umd",
         "Keyvalue": "oscar/dist/Keyvalue",
         "DocumentSectionAdmin": "oscar/dist/DocumentSectionAdmin",
         "SpentGroupAdmin": "oscar/dist/SpentGroupAdmin",

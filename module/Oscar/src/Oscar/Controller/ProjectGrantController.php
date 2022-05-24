@@ -35,6 +35,7 @@ use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Factory\ActivityGantJson;
 use Oscar\Form\ActivityInfosPcruForm;
 use Oscar\Form\ProjectGrantForm;
 use Oscar\Formatter\ActivityPaymentFormatter;
@@ -1114,11 +1115,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function gantAction()
     {
         $format = $this->params()->fromQuery('format', 'html');
+        $ids = $this->params()->fromQuery('ids', '');
 
         if ($this->isAjax() || $format == 'json') {
             switch ($this->getHttpXMethod()) {
                 case 'GET' :
-                    die("DONNÉES");
+                    $out = $this->baseJsonResponse();
+                    $out['activities'] = [];
+                    $activities = $this->getActivityService()->getActivitiesByIds(explode(',',$ids));
+                    $format = new ActivityGantJson();
+                    $out['activities'] = $format->formatAll($activities);
+                    return $this->jsonOutput($out);
 
                 default:
                     return $this->getResponseBadRequest("Méthode inconnue");

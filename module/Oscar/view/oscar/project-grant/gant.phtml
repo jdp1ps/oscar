@@ -6,7 +6,44 @@
  * Time: 11:43
  */
 ?>
+<style>
+    .bordered-area {
+        border: solid #0a3783 4px;
+        padding: 1em;
+        overflow: scroll;
+    }
+    .activity {
+        min-height: 50px;
+        background: rgba(124, 181, 198, .7);
+        border: thin solid rgb(20, 34, 45);
+        border-left-width: 4px;
+        border-right-width: 4px;
+        margin: .25em 0;
+        position: absolute;
+    }
 
+    .milestone {
+        position: absolute;
+        border-left: 2px dotted rgba(20, 34, 45, .7);
+        min-height: 70px;
+        font-size: .9em;
+        padding-left: .3em;
+    }
+
+    .header-year {
+        position: absolute;
+        bottom: 0;
+    }
+    .header-year-div {
+        position: absolute;
+        border-left: dashed #777777 thin;
+        top: 0;
+        bottom: 0;
+        padding: 0 .3em;
+        font-weight: bold;
+        color: #BBB;
+    }
+</style>
 <div class="container">
     <div id="app"></div>
     <script>
@@ -17,9 +54,9 @@
             new Vue({
                 el: "#app",
                 render(h){
-                    return h(ActivityGant.default, {
+                    return h(ActivityGant, {
                         props: {
-                            url: 'http://localhost:8080/activites-de-recherche/api'/*,
+                            url: ''/*,
                             activities: []
                             /****/
                         }
