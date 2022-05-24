@@ -45,9 +45,9 @@ class ActivityGantJson
         ];
 
         $minDate = $this->normalizeTime(time());
-        $maxDate = $this->normalizeTime(time());
-        $minDateStr = $this->normalizeTime(date("Y-m-d"));
-        $maxDateStr = $this->normalizeTime(date("Y-m-d"));
+        $maxDate = 0;
+        $minDateStr = date("Y-m-d");
+        $maxDateStr = date("Y-m-d");
 
         /** @var Activity $activity */
         foreach ($activities as $activity) {
@@ -72,6 +72,9 @@ class ActivityGantJson
                 if( $maxDate < $activityEndTime ){
                     $maxDate = $activityEndTime;
                     $maxDateStr = $activityEnd;
+			if( $activityEnd == 0 ){
+				throw new \Exception("date end error with $activity");
+			}
                 }
             }
 
@@ -83,6 +86,11 @@ class ActivityGantJson
         $out['max_time'] = $maxDate;
         $out['min_date_str'] = $minDateStr;
         $out['max_date_str'] = $maxDateStr;
+
+	if( $maxDate == 0 ){
+        	throw new \Exception("max date str = 0");
+        }
+
         return $out;
     }
 
