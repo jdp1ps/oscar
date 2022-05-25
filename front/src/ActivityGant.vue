@@ -72,8 +72,6 @@
 
     </div>
     <hr>
-    <code>{{ url }}</code>
-    <pre>{{ activities }}</pre>
   </div>
 </template>
 <script>
