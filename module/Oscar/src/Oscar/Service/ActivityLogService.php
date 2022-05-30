@@ -115,9 +115,10 @@ class ActivityLogService implements UseServiceContainer {
 
     public function addUserInfo($message, $context = LogActivity::CONTEXT_APPLICATION, $contextId = -1, $level = LogActivity::LEVEL_ADMIN)
     {
-        $this->getLoggerService()->info($message);
         $person = $this->getCurrentPerson();
+
         $personText = "Anonymous";
+
         if( is_string($person) ){
             $personText = $person;
         } elseif( $person ) {
@@ -126,6 +127,7 @@ class ActivityLogService implements UseServiceContainer {
             $personText = $this->getDbUser()->getId().':'.$this->getDbUser()->getDisplayName();
         }
         $message = sprintf($personText.' %s', $message);
+        $this->getLoggerService()->info($message);
         return $this->addInfo($message, $this->getDbUser(), $level, $context, $contextId);
     }
 
