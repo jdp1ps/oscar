@@ -640,6 +640,10 @@ class NotificationService implements UseServiceContainer
                 die("idActivityDate : $idActivityDate --- " . $na->getContext());
             }
 
+            if( !$activityDate ){
+                continue;
+            }
+
             //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
             $rolesActivityDate  = $activityDate->getType()->getRoles();
 
