@@ -1,8 +1,6 @@
 <template>
   <div class="activity-gant">
-    <h1>GANT</h1>
-    min : <code>{{ min }}</code> ~ {{ min_date }}<br>
-    max : <code>{{ max }}</code> ~ {{ max_date }}<br>
+    <h1>VUE GANTT (beta)</h1>
 
     <div class="bordered-area">
       <div class="render" style="position: relative; background: rgba(255,255,255,.7)"
@@ -10,8 +8,8 @@
 
         <div v-for="year in yearheader" :style="{left: (dayWidth * year.left)+'px'}" class="header-year-div">
           {{ year.label }}
-          <div class="months">
-            <span>Jan</span>
+          <div class="months">&nbsp;
+<!--            <span>Jan</span>
             <span>Fev</span>
             <span>Mar</span>
             <span>Avr</span>
@@ -22,10 +20,9 @@
             <span>Sep</span>
             <span>Oct</span>
             <span>Nov</span>
-            <span>Dec</span>
+            <span>Dec</span>-->
           </div>
         </div>
-
 
         <div v-for="(a, i) in activities" class="activity" style=""
              :style="{
