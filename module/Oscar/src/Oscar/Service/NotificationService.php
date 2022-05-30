@@ -629,9 +629,16 @@ class NotificationService implements UseServiceContainer
         foreach ($notificationsActivity as $na) {
             $contextNotification = explode(":", $na->getContext());
 
+            if( count($contextNotification) < 2 ){
+                continue;
+            }
             //ActivityDate = Jalon donc Milestone (ancienne nomenclature, terminologie métier)
-            $idActivityDate = $contextNotification [1];
-            $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
+            $idActivityDate = $contextNotification[1];
+            try {
+                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
+            } catch (\Exception $e) {
+                die("idActivityDate : $idActivityDate --- " . $na->getContext());
+            }
 
             //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
             $rolesActivityDate  = $activityDate->getType()->getRoles();
