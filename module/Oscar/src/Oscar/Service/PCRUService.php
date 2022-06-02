@@ -461,7 +461,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $pcruInfos = $this->getPcruInfosActivity($activity);
         $preview = false;
 
-
         if (!$pcruInfos) {
             $preview = true;
             $factory = new ActivityPcruInfoFromActivityFactory(
@@ -486,10 +485,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         $validatorPartner = new PCRUPartnerValidator();
         foreach ($activity->getOrganizationsWithOneRoleIn($this->getOscarConfigurationService()->getPcruPartnerRoles()) as $partner) {
             if( !$validatorPartner->isValid($partner) ){
-                var_dump($partner->getCodePCRU());
                 $msg = implode(',', $validatorPartner->getMessages());
                 $pcruInfos->addError(sprintf($msg, $partner));
-                die();
             }
         }
 

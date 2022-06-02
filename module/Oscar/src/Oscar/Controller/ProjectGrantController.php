@@ -3251,6 +3251,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         $return = $this->getProjectGrantService()->getPCRUService()->getPreview($activity);
+
         $return['contratSignedType'] = $this->getOscarConfigurationService()
             ->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
 
