@@ -8,27 +8,44 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 class DateTypeRepository extends EntityRepository
 {
-    public function allWithUsage(){
-        $dql = "SELECT d.id, d.label, d.description, d.facet, d.finishable, d.recursivity, count(m.id) as used 
-          FROM Oscar\Entity\DateType d 
-          LEFT JOIN d.roles r
-          LEFT JOIN d.milestones m 
-          GROUP BY d.id 
-          ORDER BY d.facet, d.label";
-        $query = $this->getEntityManager()->createQuery($dql);
-        return $query->getArrayResult();
-    }
-
-    public function getAllCounted()
+    public function allArray()
     {
-        return $this->createQueryBuilder('d')
-            ->select('d')
-            ->from(DateType::class, 'd')
-        ->getQuery()->getResult();
-    }
+        try {
+            $rsm = new ResultSetMapping();
+            $rsm->addScalarResult('id', 'id');
+            $rsm->addScalarResult('label', 'label');
+            $rsm->addScalarResult('description', 'description');
+            $rsm->addScalarResult('recursivity', 'recursivity');
+            $rsm->addScalarResult('finishable', 'finishable');
+            $rsm->addScalarResult('facet', 'facet');
+            $rsm->addScalarResult('roles', 'roles');
+            $rsm->addScalarResult('used', 'used');
+            $sql = 'select d.id, d.label, d.description, 
+                        d.finishable , d.recursivity, d.facet, 
+                        count(a.id) as used, array_agg(distinct ur.role_id) as roles from datetype d
+                    left join activitydate a ON a.type_id = d.id
+                    left join role_datetype rd on rd.datetype_id = d.id 
+                    left join user_role ur on ur.id = rd.role_id 
+                    group by d.id
+                    order by facet;';
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $results = $query->getResult();
 
+            foreach ($results as &$row) {
+                if ($row['roles'] == '{NULL}') {
+                    $row['roles'] = [];
+                } else {
+                    $rolesStr = '[' . substr($row['roles'], 1, strlen($row['roles']) - 2) . ']';
+                    $row['roles'] = json_decode($rolesStr, false);
+                }
+            }
+            return $results;
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
 }

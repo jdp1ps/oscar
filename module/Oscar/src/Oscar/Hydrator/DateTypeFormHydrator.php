@@ -56,6 +56,7 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
      */
     public function hydrate(array $data, $object): DateType
     {
+        $object->resetRoles();
         foreach ($data['roles'] as $idRole){
             $entityRole = $this->em->getRepository(Role::class)->findOneBy(["id"=>$idRole]);
             $object->addRole($entityRole);

@@ -33,27 +33,10 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MILESTONETYPE_MANAGE);
 
+        $entities = $this->getEntityManager()->getRepository(DateType::class)->allArray();
 
-        $entities = [];
-        /** @var DateType $type */
-        foreach ($this->getEntityManager()->getRepository(DateType::class)->findAll() as $type) {
-            $roles = [];
-            foreach ($type->getRoles() as $role) {
-                $roles[] = $role->getRoleId();
-            }
-            $entities[] = [
-                'id' => $type->getId(),
-                'label' => $type->getLabel(),
-                'description' => $type->getDescription(),
-                'facet' => $type->getFacet(),
-                'finishable' => $type->isFinishable(),
-                'recursivity' => $type->getRecursivity(),
-                'roles' => $roles,
-                'used' => 0
-            ];
-        }
         return [
-            'entities' => $entities//$this->getEntityManager()->getRepository(DateType::class)->allWithUsage()
+            'entities' => $entities
         ];
     }
 
@@ -82,10 +65,12 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
             }
         }
 
-        $view = new ViewModel([
-            'entity' => $entity,
-            'form' => $form,
-        ]);
+        $view = new ViewModel(
+            [
+                'entity' => $entity,
+                'form' => $form,
+            ]
+        );
 
         $view->setTemplate('oscar/date-type/form.phtml');
         return $view;
@@ -104,18 +89,20 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
         $id = $this->params()->fromRoute('id');
         $dateType = $this->getEntityManager()->getRepository(DateType::class)->find($id);
 
-        $jalons = $this->getEntityManager()->getRepository(ActivityDate::class)->findBy([
-            'type' => $dateType
-        ]);
+        $jalons = $this->getEntityManager()->getRepository(ActivityDate::class)->findBy(
+            [
+                'type' => $dateType
+            ]
+        );
 
-        if( count($jalons) > 0 ){
+        if (count($jalons) > 0) {
             throw new OscarException("Impossible de supprimer un type de jalon utilisé dans les activités");
         } else {
             try {
                 $this->getEntityManager()->remove($dateType);
                 $this->getEntityManager()->flush();
                 return $this->redirect()->toRoute('datetype');
-            } catch ( ForeignKeyConstraintViolationException $e ){
+            } catch (ForeignKeyConstraintViolationException $e) {
                 throw new OscarException("Oscar n'a pas pu supprimer le type de jalon : " . $e->getMessage());
             }
         }
@@ -133,10 +120,14 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
         $entity = $this->getEntityManager()->getRepository(DateType::class)->find($this->params()->fromRoute('id'));
         $rolesCheck = $entity->getRoles();
         $arrayRoles = [];
-        foreach ($rolesCheck as $role){
+        foreach ($rolesCheck as $role) {
             $arrayRoles [] = $role->getId();
         }
-        $form = new DateTypeForm($this->getOscarUserContextService()->getOscarRoles(), $this->getEntityManager(), $arrayRoles);
+        $form = new DateTypeForm(
+            $this->getOscarUserContextService()->getOscarRoles(),
+            $this->getEntityManager(),
+            $arrayRoles
+        );
         $request = $this->getRequest();
         $form->setAttribute('action', $this->url()->fromRoute('datetype/edit', ['id' => $entity->getId()]));
         $form->bind($entity);
@@ -152,13 +143,14 @@ class DateTypeController extends AbstractOscarController implements UseOscarUser
             }
         }
 
-        $view = new ViewModel([
-            'entity' => $entity,
-            'form' => $form,
-        ]);
+        $view = new ViewModel(
+            [
+                'entity' => $entity,
+                'form' => $form,
+            ]
+        );
 
         $view->setTemplate('oscar/date-type/form.phtml');
         return $view;
     }
-
 }

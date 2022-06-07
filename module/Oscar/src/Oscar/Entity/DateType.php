@@ -223,6 +223,15 @@ class DateType implements ITrackable
         return $this;
     }
 
+    /**
+     * @return $this
+     */
+    public function resetRoles() :self
+    {
+        $this->roles = new ArrayCollection();
+        return $this;
+    }
+
 
     function __toString()
     {

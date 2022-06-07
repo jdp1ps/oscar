@@ -128,6 +128,8 @@ class ActivityDateController extends AbstractOscarController
                     case 'POST':
                         $action = $this->params()->fromPost('action', 'update');
 
+
+
                         if ($action == 'create') {
                             $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
                             $milestone = $this->getMilestoneService()->createFromArray([
@@ -164,7 +166,6 @@ class ActivityDateController extends AbstractOscarController
 
                         } // Mise à jour
                         else if ($action == 'update') {
-
                             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
                             $typeId = $this->params()->fromPost('type');
                             $comment = $this->params()->fromPost('comment');
