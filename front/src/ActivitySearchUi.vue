@@ -38,6 +38,14 @@
     import OscarGrowl from './OscarGrowl.vue';
     import OscarBus from './OscarBus.js';
 
+    /******************************************************************************************************************/
+    /* ! DEVELOPPEUR
+    Depuis la racine OSCAR :
+    cd front
+    Pour compiler en temps réél :
+    node node_modules/.bin/vue-cli-service build --name ActivitySearchUi --dest ../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib src/ActivitySearchUi.vue --watch
+     */
+
     //node node_modules/.bin/poi watch --format umd --moduleName  ActivitySearchUi --filename.css ActivitySearchUi.css --filename.js ActivitySearchUi.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySearchUi.vue
 
 

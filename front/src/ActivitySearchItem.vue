@@ -28,7 +28,7 @@
                     <span class="currency">{{ activity.amount.currency }}</span>
                 </span>
             </span>
-        </h3>amount
+        </h3>
 
         <div class="card-content">
             <div class="row metas">

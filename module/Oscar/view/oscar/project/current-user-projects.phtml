@@ -27,7 +27,7 @@
 
             new Vue({
                 render: function (h) {
-                    return h(ActivitySearchUi.default, {
+                    return h(ActivitySearchUi, {
                         props: {
                             url: '<?= $this->url('contract/api') ?>',
                             first: true,
