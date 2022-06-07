@@ -87,7 +87,13 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
 
         foreach ($declarers as $declarer) {
 
-            $result = $this->getTimesheetService()->recallProcess($declarer->getId(), $period->getPeriodCode(), $processDate, $force, $preview);
+            try {
+                $result = $this->getTimesheetService()->recallProcess(
+                    $declarer->getId(), $period->getPeriodCode(), $processDate, $force, $preview);
+            } catch (\Exception $e) {
+                $this->getIO()->error($e->getMessage());
+                continue;
+            }
             if( $result['mailSend'] ){
                 $snd = "<green>Mail envoyé</green>";
             } else {

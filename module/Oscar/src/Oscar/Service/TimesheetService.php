@@ -3505,20 +3505,27 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             } else {
                 if ($recallSend == null) {
                     $recallSend = new RecallDeclaration();
-                    $this->getEntityManager()->persist($recallSend);
                     $recallSend->setStartProcess($processDate);
+                    $this->getEntityManager()->persist($recallSend);
                 }
 
-                $repport = $this->sendMailRecallDeclarer(
-                    $declarer,
-                    $periodInfos->getPeriodCode(),
-                    $message,
-                    $recallSend,
-                    $processDate,
-                    $force
-                );
-                $result['mailSend'] = true;
-                $result = array_merge($result, $repport);
+                try {
+                    $repport = $this->sendMailRecallDeclarer(
+                        $declarer,
+                        $periodInfos->getPeriodCode(),
+                        $message,
+                        $recallSend,
+                        $processDate,
+                        $force
+                    );
+
+                    $result['mailSend'] = true;
+                    $result = array_merge($result, $repport);
+                } catch (\Exception $e) {
+                    $this->getEntityManager()->detach($recallSend);
+                    $result['recall_info'] = "Erreur d'envoi de mail : " . $e->getMessage();
+                }
+
             }
         }
 
@@ -3578,6 +3585,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             return $recallDeclaration->getRepport();
         } catch (\Exception $e) {
+            var_dump($period);
+            var_dump($periodInfos->getMonth());
+            var_dump($periodInfos->getYear());
             throw new OscarException(
                 "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period : " . $e->getMessage(
                 )
