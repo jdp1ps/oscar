@@ -9,6 +9,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
 
@@ -179,5 +180,25 @@ class ActivityRepository extends EntityRepository
         $qb = $this->createQueryBuilder('a')
             ->where('a.dateStart > a.dateEnd');
         return $qb->getQuery()->getResult();
+    }
+
+
+    public function getActivityIdsWithWorkpackage() :array
+    {
+        return array_map(
+            'current',
+           $this->getQueryActivityIdsWithWorkpackage()
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    public function getQueryActivityIdsWithWorkpackage() :QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->innerJoin('a.workPackages', 'wp');
+
+        return $qb;
     }
 }

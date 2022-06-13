@@ -290,7 +290,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $activity = $this->getEntityManager()->getRepository(Activity::class)->find(
                     $declaration->getObjectId()
                 );
-                $label = (string)$activity->getFullLabel();
+
+                if( !$activity ){
+                    $label = 'invalid';
+                } else {
+                    $label = (string)$activity->getFullLabel();
+                }
             } else {
                 $label = $this->getOthersWPByCode($object)['label'];
             }

@@ -2289,6 +2289,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'ads' => 'Date de signature',
                 'adp' => 'Date d\'ouverture du PFI dans SIFAC',
                 'pp' => 'Activités sans projet',
+                'fdt' => 'Activités soumise à feuille de temps',
                 'ds' => 'Ayant pour discipline',
 
                 // Ajout d'un filtre sur les jalons
@@ -2556,9 +2557,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $qb->andWhere(implode(' AND ', $clause));
                         }
                         break;
+
                     case 'pp' :
                         $qb->andWhere('c.project IS NULL');
                         break;
+
+                    // Filtre sur les activités ayant des feuilles de temps (Lot de travail)
+                    case 'fdt' :
+                        $ids = $this->getProjectGrantService()->getActivityRepository()->getActivityIdsWithWorkpackage();
+                        break;
+
                     // Personne (plusieurs)
                     case 'pm' :
                         $value1 = explode(',', $params[1]);
@@ -2800,7 +2808,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
                 }
                 $criterias[] = $crit;
-                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om') {
+                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'fdt') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
                     } else {
