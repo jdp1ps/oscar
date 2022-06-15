@@ -579,7 +579,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPcruContractType(): string
     {
         //->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
-        return $roleRSToFind = $this->getEditableConfKey('pcru_contrat_type', "Contrat Version Définitive Signée");
+        return $roleRSToFind = $this->getEditableConfKey('pcru_contract_type', "Contrat Version Définitive Signée");
     }
 
     /**

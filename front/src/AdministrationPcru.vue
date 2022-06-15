@@ -223,10 +223,10 @@ Depuis la racine OSCAR :
 cd front
 
 Pour compiler en temps réél :
-node node_modules/.bin/gulp administrationPcruWatch
+node node_modules/.bin/vue-cli-service build --name AdministrationPcru --dest ./../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib ./src/AdministrationPcru.vue --watch
 
 Pour compiler :
-node node_modules/.bin/gulp administrationPcru
+node node_modules/.bin/vue-cli-service build --name AdministrationPcru --dest ./../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib ./src/AdministrationPcru.vue
 
  */
 
@@ -271,6 +271,7 @@ export default {
       formData.append('pcru_partner_roles', this.configuration.pcru_partner_roles);
       formData.append('pcru_unit_roles', this.configuration.pcru_unit_roles);
       formData.append('pcru_incharge_role', this.configuration.pcru_incharge_role);
+      formData.append('pcru_contract_type', this.configuration.pcru_contract_type);
 
       this.$http.post(this.url, formData).then(ok=>{
         this.fetch();

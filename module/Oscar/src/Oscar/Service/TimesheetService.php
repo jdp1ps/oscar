@@ -1034,13 +1034,26 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             // Déclarations sur des activités
             if ($period->getObject() == 'activity') {
-                /** @var Activity $activity */
-                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
-                $activityDatas = [
-                    'label' => $activity->getFullLabel(),
-                    'workpackages' => [],
-                    'comment' => $period->getComment()
-                ];
+                try {
+                    /** @var Activity $activity */
+                    $activity = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId());
+                    $msg = "";
+
+                    if( !$activity ){
+                        $msg = sprintf(
+                            "Une procédure de validation semble correspondre à une activité de recherche supprimée (activity ID : %s)",
+                            $period->getObjectId());
+                        $this->getLoggerService()->error($msg);
+                        throw new OscarException($msg);
+                    }
+                    $activityDatas = [
+                        'label' => $activity->getFullLabel(),
+                        'workpackages' => [],
+                        'comment' => $period->getComment()
+                    ];
+                } catch (\Exception $e) {
+                    throw new OscarException($e->getMessage());
+                }
 
                 /** @var WorkPackage $workpackage */
                 foreach ($activity->getWorkPackages() as $workpackage) {
@@ -2977,7 +2990,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     public function getPeriodsValidator(Person $validator): array
     {
         $qb = $this->getEntityManager()->createQuery(
-            "SELECT DISTINCT vp.id, vp.year, vp.month, vp.object, 
+            "SELECT DISTINCT 
+                    vp.id, 
+                    vp.year, 
+                    vp.month, 
+                    vp.object, 
                     vp.validationActivityById,
                     vp.validationSciById,
                     vp.validationAdmById
@@ -3530,7 +3547,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $this->getEntityManager()->detach($recallSend);
                     $result['recall_info'] = "Erreur d'envoi de mail : " . $e->getMessage();
                 }
-
             }
         }
 
