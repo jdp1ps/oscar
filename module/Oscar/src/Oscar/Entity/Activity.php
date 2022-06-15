@@ -2214,6 +2214,10 @@ class Activity implements ResourceInterface
         $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
         $datas['note-financiere'] = $this->getNoteFinanciere();
 
+        // Info Projet
+        $datas['project-label'] = $this->getProject() ? $this->getProject()->getLabel() : '';
+        $datas['project-acronym'] = $this->getProject() ? $this->getProject()->getAcronym() : '';
+
         $datas['type'] = (string)$this->getActivityType();
 
         $sluger = Slugify::create();
