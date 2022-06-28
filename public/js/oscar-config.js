@@ -119,7 +119,9 @@ requirejs.config({
         "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
         "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd.min",
         "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd"+devext,
-        "timesheethighdelay": "oscar/dist/TimesheetHighDelay.umd"+devext
+        "timesheethighdelay": "oscar/dist/TimesheetHighDelay.umd"+devext,
+        "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
+        "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min"
     },
     shim: {
         "bootstrap": {

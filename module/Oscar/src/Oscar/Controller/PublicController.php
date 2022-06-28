@@ -170,7 +170,11 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     public function testAction()
     {
         if( DEBUG_OSCAR ){
-            return [];
+            $json = $this->getPersonService()->getProjectGrantService()->getActivityTypes(true);
+            return [
+                "json" => $json,
+                "tree" => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
+            ];
         }
         die("to test");
     }

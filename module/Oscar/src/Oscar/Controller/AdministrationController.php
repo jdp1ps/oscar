@@ -275,6 +275,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if ($this->getHttpXMethod() == "POST") {
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
+                case OscarConfigurationService::allow_node_selection:
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->setAllowNodeSelection($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 case OscarConfigurationService::allow_numerotation_custom:
                     $value = $this->params()->fromPost('parameter_value') == "on";
                     $this->getOscarConfigurationService()->setNumerotationEditable($value);
@@ -368,6 +373,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             OscarConfigurationService::pfi_strict => $this->getOscarConfigurationService()->isPfiStrict(),
             OscarConfigurationService::pfi_strict_format => $pfiFixed,
             "pfi_default_format" => $this->getOscarConfigurationService()->getConfiguration('validation.pfi'),
+            "allow_node_selection" => $this->getOscarConfigurationService()->isAllowNodeSelection(),
         ];
     }
 
@@ -1417,6 +1423,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'validatorsRelance2' => $this->getOscarConfigurationService()->getValidatorsRelance2(),
             'validatorsRelanceJour2' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
             'highdelayRelance' => $this->getOscarConfigurationService()->getHighDelayRelance(),
+            'highdelayRelanceJour' => $this->getOscarConfigurationService()->getHighDelayRelanceJour(),
         ];
 
         switch ($method) {
@@ -1435,6 +1442,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $declarersRelanceConflitMessage = $this->params()->fromPost('declarersRelanceConflitMessage');
                 $declarersRelanceConflitJour = (int)$this->params()->fromPost('declarersRelanceConflitJour');
                 $highdelayRelance = $this->params()->fromPost('highdelayRelance');
+                $highdelayRelanceJour = intval($this->params()->fromPost('highdelayRelanceJour'));
 
                 $this->getOscarConfigurationService()->setDeclarersRelance1($declarersRelance1);
                 $this->getOscarConfigurationService()->setDeclarersRelanceJour1($declarersRelanceJour1);
@@ -1449,6 +1457,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 );
                 $this->getOscarConfigurationService()->setDeclarersRelanceConflitJour($declarersRelanceConflitJour);
                 $this->getOscarConfigurationService()->setHighDelayRelance($highdelayRelance);
+                $this->getOscarConfigurationService()->setHighDelayRelanceJour($highdelayRelanceJour);
 
                 return $this->redirect()->toRoute('administration/messages');
         }

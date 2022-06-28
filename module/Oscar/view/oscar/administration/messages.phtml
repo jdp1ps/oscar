@@ -5,7 +5,7 @@
             <div class="col-md-4">
                 <h3><i class="icon-calendar"></i> Déclarants, première relance</h3>
                 <p>
-                    Envoyée à <strong>J+</strong>
+                    Envoyée à partir du jour <strong>J</strong> de la période
                     <input type="number" name="declarersRelanceJour1" value="<?= $declarersRelanceJour1 ?>"/>
                 </p>
                 <textarea name="declarersRelance1" id="" cols="30" rows="10"
@@ -58,9 +58,9 @@
         <div class="row">
             <div class="col-md-4">
                 <h3><i class="icon-calendar"></i> Retards importants (message général)</h3>
-                <p>
+                <p style="display: none">
                     Jour entre chaque rappel
-                    <input type="number" name="highdelayRelance" value="<?= $highdelayRelance ?>"/>
+                    <input type="number" name="highdelayRelanceJour" value="<?= $highdelayRelanceJour ?>"/>
                 </p>
                 <textarea name="highdelayRelance" id="" cols="30" rows="10"
                           class="form-control"><?= $highdelayRelance ?></textarea>

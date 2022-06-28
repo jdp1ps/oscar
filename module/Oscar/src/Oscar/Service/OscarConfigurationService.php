@@ -34,6 +34,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const auth_person_normalize = 'authPersonNormalize';
     const pfi_strict = 'pfi_strict';
     const pfi_strict_format = 'pfi_strict_format';
+    const allow_node_selection = 'allow_node_selection';
 
 
     const theme = 'theme';
@@ -66,6 +67,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPfiRegex() :string
     {
         return $this->getEditableConfKey(self::pfi_strict_format, "");
+    }
+
+    public function isAllowNodeSelection() :bool
+    {
+        return $this->getEditableConfKey(self::allow_node_selection, "1") == "1";
+    }
+
+    public function setAllowNodeSelection( bool $allow ) :void
+    {
+        $this->saveEditableConfKey(self::allow_node_selection, $allow === true ? "1" : "0");
     }
 
 
@@ -411,6 +422,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function setHighDelayRelance($value)
     {
         return $this->saveEditableConfKey('highdelayRelance', $value);
+    }
+
+    public function getHighDelayRelanceJour() :int
+    {
+        return $this->getEditableConfKey('highdelayRelanceJour', 3);
+    }
+
+    public function setHighDelayRelanceJour( int $value)
+    {
+        return $this->saveEditableConfKey('highdelayRelanceJour', $value);
     }
 
 

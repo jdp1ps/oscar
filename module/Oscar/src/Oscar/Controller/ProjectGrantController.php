@@ -800,7 +800,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'hidden' => $hidden,
                 'form' => $form,
                 'activity' => $projectGrant,
-                'numbers_keys' => $numerotationKeys
+                'numbers_keys' => $numerotationKeys,
+                'allowNodeSelection' => $this->getOscarConfigurationService()->isAllowNodeSelection(),
+                "tree" => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
             ]
         );
         $view->setTemplate('oscar/project-grant/form');
@@ -1372,7 +1374,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'activity' => $projectGrant,
                 'project' => $project,
                 'numerotationKeys' => $numerotationKeys,
-                'numbers_keys' => $numerotationKeys
+                'numbers_keys' => $numerotationKeys,
+                'allowNodeSelection' => $this->getOscarConfigurationService()->isAllowNodeSelection(),
+                "tree" => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
             ]
         );
 

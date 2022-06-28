@@ -11998,4 +11998,75 @@ pre.alert-danger, pre.alert-info {
   flex: 0 0 50px;
 }
 
+.type-tree-selector {
+  position: relative;
+}
+.type-tree-selector .search-area {
+  display: flex;
+  align-items: center;
+}
+.type-tree-selector .search-area .search {
+  flex: 1;
+}
+.type-tree-selector .search-area .icon {
+  flex: 0 0;
+}
+.type-tree-selector .item-label {
+  font-weight: 600;
+}
+.type-tree-selector .item .item-label {
+  /* font-weight: lighter;*/
+  cursor: pointer;
+}
+.type-tree-selector .item .item .item-label {
+  font-weight: 400;
+}
+.type-tree-selector .item {
+  font-size: 0.95em;
+  padding: 0;
+  margin: 0px 8px 0 2px;
+  padding: 1px 4px;
+  font-weight: lighter;
+  background: none;
+  border-radius: 4px;
+}
+.type-tree-selector .item-label:hover {
+  background: #aeddec;
+}
+.type-tree-selector .item.selected {
+  color: white;
+  background: #0997c1;
+}
+.type-tree-selector .value-area {
+  cursor: pointer;
+  border: #777777;
+  background: white;
+  border-radius: 2px;
+  padding: 2px 4px;
+  display: flex;
+}
+.type-tree-selector .value-area span {
+  flex: 1;
+}
+.type-tree-selector .value-area i {
+  flex: 0 0 1.5em;
+}
+.type-tree-selector .input-search {
+  width: 100%;
+}
+.type-tree-selector .children {
+  background: none;
+}
+.type-tree-selector .types-selector {
+  z-index: 2;
+  position: absolute;
+  background: white;
+  max-width: 350px;
+  max-height: 250px;
+  min-width: 100%;
+  overflow: hidden;
+  overflow-y: scroll;
+  box-shadow: 0 0.5em 0.5em rgba(0, 0, 0, 0.3);
+}
+
 /*# sourceMappingURL=oscar.css.map */
