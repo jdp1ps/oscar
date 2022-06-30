@@ -16,4 +16,5 @@ RUN if [ "$proxy_environnement" != "" ]; \
 #RUN apt-get install -y nano
 
 # Install bdd fichier SQL
-COPY oscar-install.sql /docker-entrypoint-initdb.d/
+COPY oscar-install.sql /opt/
+COPY init-db.sql /docker-entrypoint-initdb.d/

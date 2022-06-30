@@ -36,7 +36,7 @@ RUN apt-get install -y\
 
 # PROXY (wget)
 # Des doutes sur le fonctionnement, perso j'ai eu des soucis derrière le proxy unicaen (HM)
-COPY etc/apt/wgetrc /etc/apt/wgetrc
+COPY etc/wgetrc /etc/wgetrc
 
 # INSTALL PACKAGES OS
 RUN apt-get install -y \
