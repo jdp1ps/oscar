@@ -161,6 +161,7 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
                 $logger->info(sprintf(' ~ Email pour %s non distribué (Pas d\'exception)', StringUtils::formatMail($msg->getTo())));
             }
         } else {
+            $logger->info("Envoi de mail " . implode(',', $msg->getTo()));
             $this->getMailer()->send($msg);
         }
     }

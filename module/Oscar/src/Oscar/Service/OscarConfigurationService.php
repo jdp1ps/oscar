@@ -464,6 +464,28 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// MAILS D'envoi/rejet
+    public function getEmailRejectBody() :string
+    {
+        return $this->getOptionalConfiguration('email_reject_body', "Bonjour {PERSON},\r\nVotre déclaration pour la période {PERIOD} a été rejetée.\r\nMerci de corriger votre déclaration");
+    }
+
+    public function getEmailRejectSubject() :string
+    {
+        return $this->getOptionalConfiguration('email_reject_subject', "Déclaration rejetée");
+    }
+
+    public function getEmailToValidatetBody() :string
+    {
+        return $this->getOptionalConfiguration('email_tovalidate_body', "Bonjour,\r\nUne déclaration de {PERSON} pour la période {PERIOD} attend votre validation.\r\nMerci");
+    }
+
+    public function getEmailToValidateSubject() :string
+    {
+        return $this->getOptionalConfiguration('email_tovalidate_subject', "Déclaration à valider");
+    }
+
     /**
      * Retourne l'emplacement où sont stoqués les documents publiques.
      * @return string

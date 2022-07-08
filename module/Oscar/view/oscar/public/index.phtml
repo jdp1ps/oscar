@@ -125,9 +125,11 @@
                             <?php endif; ?>
 
                             <?php if( $isValidator ): ?>
-                                    <a href="<?= $this->url('timesheet/validations') ?>" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
+                                    <a href="<?= $this->url('timesheet/validations') ?>"
+                                       class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
                                         <i class="icon-pencil"></i>
                                         Validation des feuilles de temps
+                                        <?php /*<span class="label"><?= count($validations) ?></span> */ ?>
                                     </a>
                             <?php endif; ?>
 
