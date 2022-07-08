@@ -2034,6 +2034,7 @@ class TimesheetController extends AbstractOscarController
 
     public function validationsAction()
     {
+
         if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             $serviceTimesheet = $this->getTimesheetService();

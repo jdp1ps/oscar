@@ -176,7 +176,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 "tree" => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
             ];
         }
-        die("to test");
+        die("DEV ONLY");
     }
 
     /**
@@ -193,9 +193,8 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $isRequestValidator = false;
         $requestValidations = false;
         $periodsRejected = [];
-
         if ($person) {
-            /** @var TimesheetService $timeSheetService */
+
             $timeSheetService = $this->getTimesheetService();
 
             try {
@@ -206,7 +205,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 $this->getLoggerService()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
             }
 
-                $serviceDemandeActivite = $this->getActivityRequestService();
+            $serviceDemandeActivite = $this->getActivityRequestService();
 
             try {
                 /** @var ActivityRequestService $serviceDemandeActivite */
@@ -226,7 +225,6 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 }
 
            } catch (\Exception $e) {
-                die($e->getMessage());
                 $this->getLoggerService()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
             }
         }

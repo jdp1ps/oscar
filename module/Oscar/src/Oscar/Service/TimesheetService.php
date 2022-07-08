@@ -442,7 +442,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 ->setRejectActivityMessage($message);
         }
 
-        $this->getEntityManager()->flush($validationPeriod);
+        $this->getEntityManager()->flush();
+
+        $this->mailPeriodRejected($declarant);
 
         return true;
     }
@@ -3606,9 +3608,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             return $recallDeclaration->getRepport();
         } catch (\Exception $e) {
-            var_dump($period);
-            var_dump($periodInfos->getMonth());
-            var_dump($periodInfos->getYear());
             throw new OscarException(
                 "Un problème est survenu lors de la procédure de rappel pour $declarer pour la période $period : " . $e->getMessage(
                 )
@@ -5513,7 +5512,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $fromMonth = $from->format('Y-m');
         $toMonth = $to->format('Y-m');
 
-        $this->getLoggerService()->debug("Envois de la période : $fromMonth - $toMonth");
+        $this->getLoggerService()->info("Envois de la période : $fromMonth - $toMonth");
 
         if ($fromMonth != $toMonth) {
             throw new Exception("La période à traiter n'est pas un mois...");
@@ -5565,6 +5564,10 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $declarations = [];
 
+        // Liste des déclarations pour lesquelles des
+        // mails doivent être envoyés
+        $validationPeriodsMailed = [];
+
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {
             $objectGroup = ValidationPeriod::GROUP_OTHER;
@@ -5600,7 +5603,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 // saveComment( Person $person, $objectKey, $year, $month, $content )
                 $this->saveComment($sender, $key, $annee, $mois, $comment);
 
-                $declarations[$key]['declaration'] = $this->createDeclaration(
+                $declaration = $this->createDeclaration(
                     $sender,
                     $annee,
                     $mois,
@@ -5609,12 +5612,18 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $objectGroup,
                     $comment
                 );
+
+                $declarations[$key]['declaration'] = $declaration;
+                $validationPeriodsMailed[] = $declaration;
+
             }
             $timesheet->setValidationPeriod($declarations[$key]['declaration']);
         }
-
         $this->getEntityManager()->flush($timesheets);
+
+        $this->mailPrepareInfosForPeriodToValidate($validationPeriodsMailed, $sender);
     }
+
 
     /**
      * Retourne les validateurs PRJ (étape 1) pour l'activité.
@@ -5739,22 +5748,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     {
         $query = $this->getEntityManager()->getRepository(ValidationPeriod::class)
             ->createQueryBuilder('vp')
-            //->leftJoin('vp.validatorsPrj', 'vprj')
-            //->leftJoin('vp.validatorsSci', 'vsci')
-            ->leftJoin('vp.validatorsAdm', 'vsci');
-//            ->leftJoin('vp.validatorsPrj', 'vprj')
-//            //->leftJoin('vp.validatorsSci', 'vsci')
-//            ->leftJoin('vp.validatorsAdm', 'vadm')
-//            ->where('vp.validatorsPrj = :person OR vp.validatorsSci = :person OR vp.validatorsAdm = :person')
-        //->setParameter('person', $person);
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where('vprj = :person OR vsci = :person OR vadm = :person')
+            ->setParameter('person', $person);
 
         $validations = [];
 
         /** @var ValidationPeriod $validation */
         foreach ($query->getQuery()->getResult() as $validation) {
-//            if ($validation->isValidator($person)) {
-//                $validations[] = $validation;
-//            }
+            if ($validation->isValidator($person)) {
+                $validations[] = $validation;
+            }
         }
 
         return $validations;
@@ -5852,20 +5858,179 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// MAILS INSTANT
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    const MAIL_PERIOD_TYPE_REJECT        = 'reject';
+    const MAIL_PERIOD_TYPE_TO_VALIDATE    = 'validate';
+
+    protected function genericMailPeriod( ValidationPeriod $validationPeriod, string $type ):void
+    {
+//        $recipientsPerson = [];
+//        $periodInfos = PeriodInfos::getPeriodInfosObj($validationPeriod->getPeriod());
+//        $periodLabel = $periodInfos->getPeriodLabel();
+//
+//        switch ($type) {
+//            case self::MAIL_PERIOD_TYPE_REJECT:
+//                $recipientsPerson[] = $validationPeriod->getDeclarer();
+//                $messageTemplate = $this->getOscarConfigurationService()->getEmailRejectBody();
+//                $subject = $this->getOscarConfigurationService()->getEmailRejectSubject();
+//                break;
+//
+//            case self::MAIL_PERIOD_TYPE_TO_VALIDATE:
+//                $recipientsPerson = $validationPeriod->getCurrentValidators();
+//                $messageTemplate = $this->getOscarConfigurationService()->getEmailToValidatetBody();
+//                $subject = $this->getOscarConfigurationService()->getEmailToValidateSubject();
+//                break;
+//
+//            default:
+//                throw new OscarException(sprintf("Type de mail inconnu : '%s'",  $type));
+//        }
+//        if( count($recipientsPerson) == 0 ){
+//            $this->getLoggerService()->error(sprintf("Aucun validateur nommé pour la période : '%s'", $validationPeriod));
+//        } else {
+//            $this->getLoggerService()->info(sprintf("%s validateur(s) à mailer : " . count($recipientsPerson)));
+//        }
+//
+//        // Envoi des mails
+//        $declarer = (string)$validationPeriod->getDeclarer();
+//        $find = ["{PERSON}", "{PERIOD}"];
+//        foreach ($recipientsPerson as $person) {
+//            // Replace
+//            $replace = [$declarer, $periodLabel];
+//            $body = str_ireplace($find, $replace, $messageTemplate);
+//            $recipient = (string)$person;
+//            $recipientEmail = $person->getEmail();
+//
+//            $message = $this->getPersonService()->getMailingService()->newMessage($subject);
+//            $message->setTo($person->getEmail());
+//            $message->setBody($body);
+//
+//            try {
+//                $this->getLoggerService()->info(sprintf(
+//                    "MAIL - FEUILLE de TEMPS (%s) pour %s(%s)",
+//                    $type, $recipient, $recipientEmail));
+//                $this->getPersonService()->getMailingService()->send($message);
+//            } catch (\Exception $e) {
+//                $this->getLoggerService()->error(sprintf(
+//                    "L'envoi du mail à '%s(%s)' a échoué : '%s'", $recipient, $recipientEmail,  $e->getMessage()));
+//            }
+//        }
+    }
+
+
+    /**
+     * @param ValidationPeriod[] $validationPeriods
+     * @param Person $sender
+     * @throws OscarException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    protected function mailPrepareInfosForPeriodToValidate( array $validationPeriods, Person $sender ):void
+    {
+        $validators = [];
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            /** @var Person $person */
+            foreach ($validationPeriod->getCurrentValidators() as $person) {
+                $validators[$person->getEmail()] = (string)$person;
+            }
+        }
+
+        // TODO Envoi de mail
+        $this->sendMailsToValidate($validators, $sender->getFullname());
+    }
+
+    /**
+     * MAIL : Envois d'un mail invitant à valider.
+     *
+     * @param array $recipients
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    protected function sendMailsToValidate( array $recipients, string $declarer ) :void
+    {
+        $messageTemplate = "Bonjour {PERSON}\r\nLe déclarant $declarer a soumis une déclaration sur Oscar et nécessite une validation.\r\nMerci";
+        $subject = "Déclaration de temps à valider - $declarer";
+        $find = ["{PERSON}"];
+
+        foreach ($recipients as $email=>$fullname) {
+            $replace = [$fullname];
+            $body = str_ireplace($find, $replace, $messageTemplate);
+
+            // Replace
+            $message = $this->getPersonService()->getMailingService()->newMessage($subject);
+            $message->setTo($email);
+            $message->setBody($body);
+
+            try {
+                $this->getLoggerService()->info(sprintf(
+                    "MAIL - FEUILLE de TEMPS pour %s(%s)", $fullname, $email)
+                );
+                $this->getPersonService()->getMailingService()->send($message);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error(
+                    sprintf("L'envoi du mail à '%s(%s)' a échoué : '%s'", $fullname, $email,  $e->getMessage())
+                );
+            }
+        }
+    }
+
+    protected function mailPeriodRejected( Person $declarer, string $periodLabel ):void
+    {
+        $this->getLoggerService()->info(sprintf("mailPeriodRejected %s", $declarer));
+        // Envoi des mails
+        $messageTemplate = $this->getOscarConfigurationService()->getEmailRejectBody();
+        $subject = $this->getOscarConfigurationService()->getEmailRejectSubject();
+        $find = ["{PERSON}", "{PERIOD}"];
+        $replace = [(string)$declarer, $periodLabel];
+        $body = str_ireplace($find, $replace, $messageTemplate);
+
+        $recipient = (string)$declarer;
+        $recipientEmail = $declarer->getEmail();
+
+        $message = $this->getPersonService()->getMailingService()->newMessage($subject);
+        $message->setTo($recipientEmail);
+        $message->setBody($body);
+
+        try {
+            $this->getPersonService()->getMailingService()->send($message);
+        } catch (\Exception $e) {
+            $this->getLoggerService()->error(sprintf(
+                                                 "L'envoi du mail à '%s(%s)' a échoué : '%s'", $recipient, $recipientEmail,  $e->getMessage()));
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public function reject(ValidationPeriod $period, Person $validateur, $message = "")
     {
         if ($period->getObject() == ValidationPeriod::OBJECT_ACTIVITY) {
-            $obj = $this->getEntityManager()->getRepository(Activity::class)->find($period->getObjectId())->log();
+            $obj = $this->getEntityManager()->getRepository(Activity::class)
+                ->find($period->getObjectId())->log();
         } else {
             $obj = $period->getLabel();
         }
 
+        /** @var Person $declarer */
+        $declarer = $period->getDeclarer();
+        $periodLabel = PeriodInfos::getPeriodInfosObj($period->getPeriod())->getPeriodLabel();
+
         if ($period->isValidator($validateur)) {
+
+            // On récupère les autres ValidationPeriod (Même mois, même déclarant) pour les passer en rejeté
             $validationPeriods = $this->getValidationPeriods(
                 $period->getYear(),
                 $period->getMonth(),
                 $period->getDeclarer()
             );
+
+            if( count($validationPeriods) == 0 ){
+                throw new OscarException("Aucune ValidationPeriod");
+            }
 
             /** @var ValidationPeriod $validationPeriod */
             foreach ($validationPeriods as $validationPeriod) {
@@ -5875,14 +6040,18 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $msg = sprintf("a rejeté de la déclaration %s", $period);
 
             /** @var ActivityLogService $als */
+
+            $this->getEntityManager()->flush($validationPeriods);
+            $this->mailPeriodRejected($declarer, $periodLabel);
+            $this->notificationsValidationPeriod($period);
+
+
             $als = $this->getActivityLogService();
             $als->addUserInfo($msg, 'Activity', $period->getObjectId());
 
-            $this->getEntityManager()->flush($validationPeriods);
-            $this->notificationsValidationPeriod($period);
             return true;
         } else {
-            throw new OscarException("Vous n'êtes pas autorisé à valider pour cette étape de validation");
+            throw new OscarException("Vous n'êtes pas autorisé à valider/rejeter pour cette étape de validation");
         }
     }
 
