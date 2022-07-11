@@ -268,7 +268,6 @@ return array(
 
                         'sauvegarde',
                         'declaration',
-                        'validations',
                         'resume',
                         "declaration2",
                         "indexActivity",
@@ -290,7 +289,9 @@ return array(
                         'synthesisActivityPeriod',
                         'synthesisActivityPeriodsBounds',
                         'exportActivityDates',
-                        'checkperiod'
+                        'checkperiod',
+                        'validations',
+                        'validations2',
                     ],
                     'roles' => ['user']
                 ],

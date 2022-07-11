@@ -325,6 +325,13 @@ timesheet:
                 defaults:
                     action: validations
 
+        validations2:
+            type: segment
+            options:
+                route: /validations2
+                defaults:
+                    action: validations2
+
         validationhwpperson:
             type: segment
             options:

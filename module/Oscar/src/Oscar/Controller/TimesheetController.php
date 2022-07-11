@@ -2032,6 +2032,18 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
+    public function validations2Action()
+    {
+        if( $this->isAjax() || $this->params()->fromQuery('f', null) == 'json' ){
+            $json = $this->baseJsonResponse();
+            $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator($this->getCurrentPerson());
+            return $this->jsonOutput($json);
+        }
+        return [
+
+        ];
+    }
+
     public function validationsAction()
     {
 

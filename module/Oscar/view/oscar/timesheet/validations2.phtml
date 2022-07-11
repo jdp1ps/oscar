@@ -1,0 +1,37 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 29/08/18
+ * Time: 10:53
+ */
+?>
+<link rel="stylesheet" href="/js/oscar/dist/ValidationPeriod.css" />
+<section class="container-fluid">
+    <div id="app"></div>
+    <script>
+        require(['vue', 'vue-resource', 'ValidationUI', 'mm'], function(Vue, VueResource, ValidationUI, moment){
+            Vue.use(VueResource);
+
+            Vue.filter('duration2', function(duree, total){
+                let h = Math.floor(duree);
+                let m = Math.round((duree - h)*60);
+                if( m < 10 ) m = '0'+m;
+                return h +':' +m;
+            });
+
+            Vue.filter('duration', function (v){
+                return v.toFixed(2);
+            });
+            Vue.filter('period', function(str){
+                return moment(str+'-01').format('MMMM YYYY');
+            });
+            new Vue({
+                el: "#app",
+                render: function(h){
+                    return h(ValidationUI, { props: {url: ''}})
+                }
+            })
+        });
+    </script>
+</section>

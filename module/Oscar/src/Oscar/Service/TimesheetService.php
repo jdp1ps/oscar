@@ -943,6 +943,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
     }
 
+    public function getDatasValidationsForValidator( Person $validator ):array
+    {
+        return $this->getValidationPeriodRepository()->getValidationPeriodForValidator($validator->getId());
+    }
+
 
     public function getValidationsForValidator2(Person $validator, $declarer = null, $period = null)
     {
