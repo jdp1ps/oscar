@@ -121,7 +121,8 @@ requirejs.config({
         "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd"+devext,
         "timesheethighdelay": "oscar/dist/TimesheetHighDelay.umd"+devext,
         "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
-        "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min"
+        "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min",
+        "ValidationUI": "oscar/dist/ValidationUI.umd.min"
     },
     shim: {
         "bootstrap": {

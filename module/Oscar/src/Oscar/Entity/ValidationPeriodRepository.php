@@ -178,6 +178,56 @@ class ValidationPeriodRepository extends EntityRepository
            ->getResult();
     }
 
+    /**
+     * @param int $validatorId Identifiant Person
+     * @return array
+     */
+    public function getValidationPeriodForValidator( int $validatorId ):array
+    {
+        $query = $this->createQueryBuilder('vp')
+            ->select('vp')
+            ->innerJoin('vp.declarer', 'declarer')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where("vprj = :person OR vsci = :person OR vadm = :person")
+            ->setParameter('person', $validatorId)
+            ->getQuery();
+
+        $out = [];
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($query->getResult() as $validationPeriod) {
+            $validable = false;
+
+            // Activity
+            $activity_id = null;
+            $activity_acronym = "";
+            if( $validationPeriod->isActivityValidation() ){
+                $activity_id = $validationPeriod->getObjectId();
+                $activity_acronym = "ACRONYM";
+            }
+
+            foreach ($validationPeriod->getCurrentValidators() as $validator){
+                if( $validator->getId() == $validatorId ){
+                    $validable = true;
+                }
+            }
+
+            $out[] = [
+                'id' => $validationPeriod->getId(),
+                'declarer_id' => $validationPeriod->getDeclarer()->getId(),
+                'fullname' => (string) $validationPeriod->getDeclarer(),
+                'declarer_affectation' => $validationPeriod->getDeclarer()->getLdapAffectation(),
+                'period' => $validationPeriod->getPeriod(),
+                'statut' => $validationPeriod->getStatus(),
+                'validable' => $validable,
+                'activity_id' => $activity_id,
+                'activity_acronym' => $activity_acronym
+            ];
+        }
+
+        return $out;
+    }
 
 
     /**
