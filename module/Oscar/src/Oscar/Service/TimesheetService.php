@@ -948,7 +948,251 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->getValidationPeriodRepository()->getValidationPeriodForValidator($validator->getId());
     }
 
+    public function validationProcess( Person $validator, int $declarer_id, string $period ):void
+    {
+        $declarer = $this->getPersonService()->getPerson($declarer_id);
+        $periodObj = PeriodInfos::getPeriodInfosObj($period);
+        $queryValidationPeriod = $this->getValidationPeriodRepository()->getValidationsDeclarerPeriod($declarer->getId(), $periodObj->getYear(), $periodObj->getMonth());
+        $validationPeriods = $queryValidationPeriod->getResult();
 
+        if( count($validationPeriods) == 0 ){
+            throw new OscarException("Aucun processus de validation pour '$declarer' pour la période '$period'");
+        }
+
+        $done = 0;
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            if( $validationPeriod->isValidator($validator) ){
+                $this->validation($validationPeriod, $validator);
+                $done++;
+            }
+        }
+
+        if( $done == 0 ){
+            throw new \Exception("Rien n'a été validé");
+        }
+    }
+
+    public function rejectProcess( Person $validator, int $declarer_id, string $period, string $message ):void
+    {
+        $declarer = $this->getPersonService()->getPerson($declarer_id);
+        $periodObj = PeriodInfos::getPeriodInfosObj($period);
+        $queryValidationPeriod = $this->getValidationPeriodRepository()->getValidationsDeclarerPeriod($declarer->getId(), $periodObj->getYear(), $periodObj->getMonth());
+        $validationPeriods = $queryValidationPeriod->getResult();
+
+        if( count($validationPeriods) == 0 ){
+            throw new OscarException("Aucun processus de validation pour '$declarer' pour la période '$period'");
+        }
+
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($validationPeriods as $validationPeriod) {
+            if( $validationPeriod->isValidator($validator) ){
+                $this->reject($validationPeriod, $validator, $message);
+                return;
+            }
+        }
+        throw new \Exception("Rien n'a été rejeté");
+    }
+
+    /**
+     * Retourne les données pour la validation d'une période pour un déclarant.
+     *
+     * @param int $declarer_id
+     * @param string $period
+     * @return array
+     * @throws OscarException
+     */
+    public function getDatasValidationDeclarerPeriod( int $validator_id, int $declarer_id, string $period )
+    {
+        $declarer = $this->getPersonService()->getPerson($declarer_id);
+        $periodObj = PeriodInfos::getPeriodInfosObj($period);
+
+        $year = $periodObj->getYear();
+        $month = $periodObj->getMonth();
+
+        // Données des activités
+        $activitiesInfos = [];
+        $horsLotsInfos = [];
+        $activitiesTmp = [];
+        $totalGroupInfos = [];
+
+        // Données Hors-lot
+        $horsLots = $this->getOthersWP();
+
+        $daysDetails = $this->getDaysPeriodInfosPerson(
+            $declarer,
+            $year,
+            $month
+        );
+
+        // Récupération des données à traiter
+        $queryValidationPeriod = $this->getValidationPeriodRepository()->getValidationsDeclarerPeriod($declarer->getId(), $periodObj->getYear(), $periodObj->getMonth());
+
+        $vps = $queryValidationPeriod->getResult();
+
+        /** @var ValidationPeriod $v */
+        foreach ($vps as $v) {
+
+            if( $v->isActivityValidation() ){
+                if( !array_key_exists($v->getObjectId(), $activitiesTmp) ){
+                    $activitiesTmp[$v->getObjectId()] = $this->getActivityService()->getActivityById($v->getObjectId());
+                }
+                /** @var Activity $activity */
+                $activity = $activitiesTmp[$v->getObjectId()];
+
+                $detailsWorkPackages = [];
+
+                /** @var WorkPackage $workPackage */
+                foreach ($activity->getWorkPackages() as $workPackage) {
+                    $detailsWorkPackages[$workPackage->getId()] = [
+                        'workpackage_id' => $workPackage->getId(),
+                        'workpackage_code' => $workPackage->getCode(),
+                        'workpackage_label' => $workPackage->getLabel(),
+                        'workpackage_total' => 0.0,
+                        'by_days' => []
+                    ];
+                }
+
+                $activitiesInfos[$activity->getId()] = [
+                    'activity_id' => $activity->getId(),
+                    'activity_acronym' => $activity->getAcronym(),
+                    'activity_label' => $activity->getLabel(),
+                    'comment' => $v->getComment(),
+                    'valid' => $v->isValid(),
+                    'status' => $v->getStatus(),
+                    'total' => 0.0,
+                    'details_workspackages' => $detailsWorkPackages,
+                    'by_days' => []
+                ];
+            } else {
+                $codeHL = $v->getObject();
+                $group = $groupHL = $v->getObjectGroup();
+
+                $label = "Invalide";
+
+                if( array_key_exists($codeHL, $horsLots) ){
+                    $group = $horsLots[$codeHL]['group'];
+                    $label = $horsLots[$codeHL]['label'];
+                }
+
+                if( !array_key_exists($group, $horsLotsInfos) ){
+                    $horsLotsInfos[$group] = [
+                        'total' => 0.0,
+                        'subs' => []
+                    ];
+                }
+
+                if( !array_key_exists($codeHL, $horsLotsInfos[$group]['subs']) ){
+                    $horsLotsInfos[$group]['subs'][$codeHL] = [
+                        'total' => 0.0,
+                        'label' => $label,
+                        'comment' => $v->getComment(),
+                        'valid' => $v->isValid(),
+                        'status' => $v->getStatus(),
+                        'by_days' => []
+                    ];
+                }
+            }
+        }
+
+        $out = [
+          'datas' => [
+              'activities' => $activitiesInfos,
+              'horslots' => $horsLotsInfos,
+              'total' => 0.0
+          ],
+          'infos' => [
+              'period' => $periodObj->toArray(),
+              'declarer' => $declarer->toJson(),
+              'horslots' => $horsLots,
+              'days' => $daysDetails
+          ]
+        ];
+
+        $queryTimesheet = $this->getEntityManager()->getRepository(TimeSheet::class)
+            ->createQueryBuilder('t')
+            ->where("t.person = :declarer AND t.dateFrom >= :datefrom AND t.dateTo <= :dateto");
+
+        $queryTimesheet->setParameter('declarer', $declarer_id);
+        $queryTimesheet->setParameter('datefrom', $periodObj->getStart()->format('Y-m-d 00:00:00'));
+        $queryTimesheet->setParameter('dateto', $periodObj->getEnd()->format('Y-m-d 23:59:59'));
+
+        $timesheets = $queryTimesheet->getQuery()->getResult();
+
+        /** @var TimeSheet $t */
+        foreach ($timesheets as $t) {
+            $start = $t->getDateFrom();
+            $duration = $t->getDuration();
+            $day = intval($start->format('d'));
+
+            if( $t->getActivity() ){
+                $activity_id = $t->getActivity()->getId();
+                $wp = $t->getWorkpackage();
+                if( $wp ){
+                    $workpackage_id = $wp->getId();
+                    $out['datas']['activities'][$activity_id]['total'] += $duration;
+                    $out['datas']['activities'][$activity_id]['details_workspackages'][$workpackage_id]['workpackage_total'] += $duration;
+                    $out['datas']['activities'][$activity_id]['details_workspackages'][$workpackage_id]['by_days'][$day] += $duration;
+
+                } else {
+                    $this->getLoggerService()->error(
+                        sprintf(
+                            "Un créneau pour '$declarer' n'a pas de Lot de travail (timesheet:id:%s)",
+                            $t->getId()
+                        )
+                    );
+                }
+            } else {
+                $group = 'invalid';
+                $code = $t->getLabel();
+
+                if( array_key_exists($code, $horsLots) ){
+                    $group = $horsLots[$code]['group'];
+                    $label = $horsLots[$code]['label'];
+                } else {
+die("nop");
+                    // Cas 'étrange' : Le créneau Hors-Lots est qualifié
+                    // mais absent de la configuration, cela peut être lié à
+                    // un changement dans la configuration.
+                    $group = 'error';
+                    $label = 'Horslot inconnue';
+                    if( !array_key_exists($group, $out['datas']['horslots']) ){
+                        $out['datas']['horslots'][$group]['subs'][$code] = [
+                            'total' => 0.0,
+                            'label' => $label,
+                            'by_days' => []
+                        ];
+                    }
+
+                }
+
+                if( !array_key_exists($group, $out['datas']['horslots']) ){
+                    die("Pas de prétableau pour le group : $group");
+                }
+                if( !array_key_exists($code, $out['datas']['horslots'][$group]['subs']) ){
+                    echo "<pre> <strong>[ $group / $code ]</strong>\n";
+                    die("Pas de prétableau pour $code");
+                }
+
+                $out['datas']['horslots'][$group]['subs'][$code]['total'] += $duration;
+                $out['datas']['horslots'][$group]['subs'][$code]['by_days'][$day] += $duration;
+            }
+            $out['infos']['days'][$day]['duration'] += $duration;
+            $out['datas']['total'] += $duration;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Retourne les informations de validation d'un validateur.
+     *
+     * @param Person $validator
+     * @param null $declarer
+     * @param null $period
+     * @return array
+     * @throws OscarException
+     */
     public function getValidationsForValidator2(Person $validator, $declarer = null, $period = null)
     {
         $timesheetFormatter = new TimesheetsMonthFormatter();
@@ -967,7 +1211,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ->getQuery();
 
         $periods = $queryValidationPeriod->getResult();
-
         $group = [];
         $periodIds = [];
         $output = [];

@@ -220,3 +220,23 @@ $colorGreyBlack: #222;
   }
 }
 
+.card {
+  &.light {
+    background-color: rgba(255,255,255,.5) !important;
+  }
+
+  &.clickable {
+    cursor: pointer;
+  }
+
+  &.card-synthesis {
+    display: flex;
+    >span {
+      flex: 2;
+    }
+    >.card-synthesis-left {
+      flex: 0 1 auto;
+    }
+  }
+}
+

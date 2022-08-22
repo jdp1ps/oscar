@@ -12069,4 +12069,20 @@ pre.alert-danger, pre.alert-info {
   box-shadow: 0 0.5em 0.5em rgba(0, 0, 0, 0.3);
 }
 
+.card.light {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+.card.clickable {
+  cursor: pointer;
+}
+.card.card-synthesis {
+  display: flex;
+}
+.card.card-synthesis > span {
+  flex: 2;
+}
+.card.card-synthesis > .card-synthesis-left {
+  flex: 0 1 auto;
+}
+
 /*# sourceMappingURL=oscar.css.map */
