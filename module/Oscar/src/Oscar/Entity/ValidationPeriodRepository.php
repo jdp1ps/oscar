@@ -170,12 +170,63 @@ class ValidationPeriodRepository extends EntityRepository
         return $out;
     }
 
+    /**
+     * @param int $declarer_id
+     * @param int $year
+     * @param int $month
+     * @return \Doctrine\ORM\Query
+     */
+    public function getValidationsDeclarerPeriod( int $declarer_id, int $year, int $month )
+    {
+        return $this->createQueryBuilder('vp')
+            ->select('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where("vp.declarer = :declarer_id 
+                AND vp.month = :month 
+                AND vp.year = :year"
+            )
+            /* //->setParameter('person', $validator_id) */
+            ->setParameter('declarer_id', $declarer_id)
+            ->setParameter('month', $month)
+            ->setParameter('year', $year)
+            ->getQuery();
+    }
+
     public function getValidationsPeriodPerson( $personId ){
        return $this->createQueryBuilder('vp')
             ->where('vp.declarer = :person')
             ->setParameters(['person' => $personId])
            ->getQuery()
            ->getResult();
+    }
+
+    /**
+     * @param $status
+     * @return string
+     */
+    public static function getStatusText( $status ) :string
+    {
+        return self::getStatusTexts()[$status];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusTexts() :array
+    {
+        static $STATUS_TEXTS;
+        if( $STATUS_TEXTS === null ){
+            $STATUS_TEXTS = [
+                'send-prj' => 'Validation projet',
+                'send-sci' => 'Validation scientifique',
+                'send-adm' => 'Validation administrative',
+                'conflict' => 'Conflit à résoudre',
+                'valid' => 'Validé',
+            ];
+        }
+        return $STATUS_TEXTS;
     }
 
     /**
@@ -204,10 +255,23 @@ class ValidationPeriodRepository extends EntityRepository
             $activity_acronym = "";
             if( $validationPeriod->isActivityValidation() ){
                 $activity_id = $validationPeriod->getObjectId();
-                $activity_acronym = "ACRONYM";
+                $activity_acronym = "MISSING ACRONYM";
+                try {
+                    $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+                    $activity_acronym = $activity->getAcronym();
+                } catch (\Exception $e) {
+
+                }
             }
 
+            $validators = [];
+
+            /** @var Person $validator */
             foreach ($validationPeriod->getCurrentValidators() as $validator){
+                $validator_fullname = $validator->getFullName();
+                if( !in_array($validator_fullname, $validators) ){
+                    array_push($validators, $validator_fullname);
+                }
                 if( $validator->getId() == $validatorId ){
                     $validable = true;
                 }
@@ -216,10 +280,12 @@ class ValidationPeriodRepository extends EntityRepository
             $out[] = [
                 'id' => $validationPeriod->getId(),
                 'declarer_id' => $validationPeriod->getDeclarer()->getId(),
-                'fullname' => (string) $validationPeriod->getDeclarer(),
+                'declarer_fullname' => (string) $validationPeriod->getDeclarer(),
                 'declarer_affectation' => $validationPeriod->getDeclarer()->getLdapAffectation(),
+                'validators' => $validators,
                 'period' => $validationPeriod->getPeriod(),
                 'statut' => $validationPeriod->getStatus(),
+                'statut_test' => self::getStatusText($validationPeriod->getStatus()),
                 'validable' => $validable,
                 'activity_id' => $activity_id,
                 'activity_acronym' => $activity_acronym

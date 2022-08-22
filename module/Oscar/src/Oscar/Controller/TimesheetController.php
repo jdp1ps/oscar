@@ -9,6 +9,7 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Organization;
@@ -2034,11 +2035,65 @@ class TimesheetController extends AbstractOscarController
 
     public function validations2Action()
     {
+        if( $this->getHttpXMethod() == 'POST' ){
+            try {
+                $action = $this->params()->fromPost('action');
+                switch($action){
+                    case 'validate':
+                        $declarer_id = $this->params()->fromPost('declarer');
+                        $period = $this->params()->fromPost('period');
+                        $validator = $this->getCurrentPerson();
+
+                        $this->getTimesheetService()->validationProcess(
+                            $validator,
+                            $declarer_id,
+                            $period
+                        );
+                        break;
+
+                    case 'reject':
+                        $declarer_id = $this->params()->fromPost('declarer');
+                        $period = $this->params()->fromPost('period');
+                        $message = $this->params()->fromPost('message');
+                        $validator = $this->getCurrentPerson();
+
+                        $this->getTimesheetService()->rejectProcess(
+                            $validator,
+                            $declarer_id,
+                            $period,
+                            $message
+                        );
+                        break;
+                }
+            } catch (\Exception $e) {
+                throw new \HttpException($e->getMessage());
+            }
+            $this->redirect()->toRoute('timesheet/validations2');
+        }
+
+
+        // Lecture des informations
         if( $this->isAjax() || $this->params()->fromQuery('f', null) == 'json' ){
             $json = $this->baseJsonResponse();
-            $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator($this->getCurrentPerson());
+            $action = $this->params()->fromQuery('action', '');
+            if($action == 'details'){
+                $period = $this->params()->fromQuery('period', null);
+                $declarer_id = $this->params()->fromQuery('declarer_id', null);
+                $json['declarer'] = $declarer_id;
+                $json['period'] = $period;
+                $json['validation'] = $this->getTimesheetService()->getDatasValidationDeclarerPeriod(
+                    $this->getCurrentPerson()->getId(),
+                    $declarer_id,
+                    $period);
+            } else {
+                $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator($this->getCurrentPerson());
+            }
             return $this->jsonOutput($json);
         }
+
+
+
+
         return [
 
         ];

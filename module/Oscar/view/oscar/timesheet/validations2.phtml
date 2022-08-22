@@ -7,21 +7,91 @@
  */
 ?>
 <link rel="stylesheet" href="/js/oscar/dist/ValidationPeriod.css" />
+<style>
+    .validation-area {
+        background: #eee;
+        font-size: 14px;
+    }
+
+    .validation-area .line {
+        display: flex;
+    }
+
+    .validation-area .line.heading {
+        background: #999;
+    }
+
+    .validation-area .line > * {
+        flex: 1 0;
+        text-align: right;
+        align-items: center;
+        justify-items: center;
+        padding: 0 2px;
+    }
+    .validation-area .line > *:nth-child(even) {
+        background: rgba(255,255,255,.2);
+    }
+
+    .validation-area .line .line-head, .validation-area .line .total  {
+        flex: 3 0;
+        white-space: nowrap;
+        overflow-x: hidden;
+        hyphens: auto;
+        text-shadow: -1px 1px 0 rgba(255,255,255,.3);
+    }
+
+    .validation-area .line .line-head  {
+        text-align: center;
+    }
+
+    .validation-area .line:not(.heading):hover  {
+        background: #0b97c4;
+    }
+
+    .validation-area .none  {
+        color: rgba(0,0,0,.7);
+        font-weight: 100;
+    }
+
+    .validation-area .valued  {
+        font-weight: 600;
+    }
+
+    .validation-area .activity  {
+        border: thin dotted #555555;
+    }
+
+    .validation-area.research {
+        background-color: #7aaaef;
+    }
+
+    .validation-area.research {
+        background: #8bd1dd;
+    }
+    .validation-area.education {
+        background: #a6e3c7;
+    }
+    .validation-area.abs {
+        background: #d6e4b2;
+    }
+    .validation-area.other {
+        background: #d7b5e5;
+    }
+
+
+
+</style>
 <section class="container-fluid">
     <div id="app"></div>
     <script>
         require(['vue', 'vue-resource', 'ValidationUI', 'mm'], function(Vue, VueResource, ValidationUI, moment){
             Vue.use(VueResource);
 
-            Vue.filter('duration2', function(duree, total){
-                let h = Math.floor(duree);
-                let m = Math.round((duree - h)*60);
+            Vue.filter('duration', function (v){
+                let h = Math.floor(v);
+                let m = Math.round((v - h)*60);
                 if( m < 10 ) m = '0'+m;
                 return h +':' +m;
-            });
-
-            Vue.filter('duration', function (v){
-                return v.toFixed(2);
             });
             Vue.filter('period', function(str){
                 return moment(str+'-01').format('MMMM YYYY');

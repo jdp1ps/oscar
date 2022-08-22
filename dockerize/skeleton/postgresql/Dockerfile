@@ -17,4 +17,4 @@ RUN if [ "$proxy_environnement" != "" ]; \
 
 # Install bdd fichier SQL
 COPY oscar-install.sql /opt/
-COPY init-db.sql /docker-entrypoint-initdb.d/
+COPY init-db.sh /docker-entrypoint-initdb.d/
