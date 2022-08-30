@@ -79,6 +79,22 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $this->personService = $personService;
     }
 
+    public function getTypesIdsByLabel(?array $labels) :array {
+        $types = [];
+        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(
+            ['root' => null],
+            ['label' => 'DESC']
+        );
+
+        /** @var OrganizationType $type */
+        foreach ($result as $type) {
+            if( in_array($type->getLabel(), $labels) ){
+                $types[] = $type->getId();
+            }
+        }
+        return $types;
+    }
+
 
     private $cacheCountries = null;
     private $cacheConnectors = null;

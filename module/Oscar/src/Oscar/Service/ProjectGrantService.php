@@ -511,7 +511,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 if ($r['numbers']) {
                     foreach ($r['numbers'] as $key => $value) {
                         if (!$value) {
-                            echo "$key\n";
+                            //echo "$key\n";
                         }
                         if (!in_array($key, $customNum)) {
                             $customNum[] = $key;

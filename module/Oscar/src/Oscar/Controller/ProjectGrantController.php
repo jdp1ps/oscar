@@ -685,6 +685,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
 
         if ($doc == "dump") {
+
             echo "<table border='1'>";
             $activity = $this->getProjectGrantService()->getGrant($id);
             foreach ($activity->documentDatas($baseDatas) as $key => $value) {
@@ -2768,8 +2769,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 $parameters['typeorga'] = [];
                             }
                             $value1 = $crit['val1'] = explode(',', $params[1]);
-                            $qb->andWhere('orga1.type IN (:typeorga) OR orga2.type IN (:typeorga)');
-                            $parameters['typeorga'] = $value1;
+                            $typeIds = $this->getOrganizationService()->getTypesIdsByLabel($value1);
+                            $qb->andWhere('orga1.typeObj IN (:typeorga) OR orga2.typeObj IN (:typeorga)');
+                            $parameters['typeorga'] = $typeIds;
                         }
                         break;
                     case 'aj':

@@ -35,6 +35,38 @@ class RoleRepository extends EntityRepository
      * @param string $format
      * @return array
      */
+    public function getRolesAtOrganizationArray( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE) :array
+    {
+        $return = [];
+        $roles = $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
+
+        if( $format == OscarFormatterConst::FORMAT_ARRAY_OBJECT ){
+            return $roles;
+        }
+
+        if( $format == OscarFormatterConst::FORMAT_ARRAY_FLAT ){
+            return array_map(function($role){ return $role->getRoleId(); }, $roles);
+        }
+
+        /** @var Role $role */
+        foreach( $roles as $role ){
+            switch ($format) {
+                case OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT:
+                    $return[$role->getRoleId()] = $role;
+                    break;
+                case OscarFormatterConst::FORMAT_ARRAY_ID_VALUE:
+                    $return[$role->getRoleId()] = $role->getRoleId();
+                    break;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string $format
+     * @return array
+     */
     public function getRolesAtActivityArray( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE) :array
     {
         $return = [];
@@ -129,7 +161,7 @@ class RoleRepository extends EntityRepository
     {
         static $rolesByRoleId;
         if( $rolesByRoleId === null ){
-            $rolesByRoleId = $this->getRolesAtActivityArray(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE);
+            $rolesByRoleId = $this->getRolesAtOrganizationArray(OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT);
         }
         return $rolesByRoleId;
     }
