@@ -492,7 +492,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ];
         }
 
-
         return $datas;
     }
 
