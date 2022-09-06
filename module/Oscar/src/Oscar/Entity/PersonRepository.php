@@ -24,6 +24,13 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
 
+    public function removeOrganizationPersons( array $organizationsRoles ):void
+    {
+        foreach ($organizationsRoles as $organizationsRole) {
+            $this->getEntityManager()->remove($organizationsRole);
+        }
+    }
+
 
     public function getReferentsIdsPerson(int $person): array
     {
