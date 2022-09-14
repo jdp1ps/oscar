@@ -1150,7 +1150,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     $group = $horsLots[$code]['group'];
                     $label = $horsLots[$code]['label'];
                 } else {
-die("nop");
                     // Cas 'étrange' : Le créneau Hors-Lots est qualifié
                     // mais absent de la configuration, cela peut être lié à
                     // un changement dans la configuration.
@@ -1345,9 +1344,14 @@ die("nop");
             foreach ($timesheets as $timesheet) {
                 $dayStr = $timesheet->getDateFrom()->format('j');
                 $activity = $timesheet->getActivity();
-                if ($activity) {
+                $workpackage = $timesheet->getWorkpackage();
+
+                // TODO : Référencer l'anomalie - Un créneau avec une activité n'a pas de lot ???
+
+                if ($activity && $workpackage) {
+
                     $main = $activity->getId();
-                    $sub = $timesheet->getWorkpackage()->getCode();
+                    $sub = $workpackage->getCode();
 
                     if (array_key_exists($main, $periodPersonDatas['declarations_activities'])) {
                         $periodPersonDatas['declarations_activities'][$main]['workpackages'][$sub]['timesheets'][$dayStr] += $timesheet->getDuration(

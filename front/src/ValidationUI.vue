@@ -195,13 +195,21 @@
     <div class="row" v-if="synthesis">
 
       <!------------------------------------------------------------------------------------------------------------ -->
-      <div class="col-md-4">
+      <div class="col-md-3">
         FILTRES :
         <strong class="cartouche" v-if="selectedPerson" @click="handlerRemoveSelectedPerson()">
           <i class="icon-user"></i>
           {{ selectedPerson.fullname }}
           <i class="icon-trash"></i>
         </strong>
+
+        <strong class="cartouche" v-if="selectedActivity" @click="handlerRemoveSelectedActivity()">
+          <i class="icon-cubes"></i>
+          {{ selectedActivity.name }}
+          <i class="icon-trash"></i>
+        </strong>
+
+        <hr>
 
         <!-- Filtres DECLARANTS -->
         <h4>
@@ -227,7 +235,9 @@
         <h4>
           <i class="icon-cubes"></i>
           Projets</h4>
-        <article v-for="p in categories.activities" class="card xs">
+        <article v-for="p in categories.activities"
+                 @click="handlerAddSelectedActivity(p)"
+                 class="card xs">
           <strong>{{ p.activity_acronym }}</strong>
           <span class="cartouche" :class="{'green': p.unvalidated == 0}">
               {{ p.total - p.unvalidated }} / {{ p.total }}
@@ -235,25 +245,37 @@
         </article>
       </div>
       <!------------------------------------------------------------------------------------------------------------ -->
-      <div class="col-md-8">
+      <div class="col-md-9">
         <section v-for="year, year_label in stackedDatas">
           <h4>
             Année {{ year_label }}
           </h4>
 
-          <article v-for="vp in year.validations" class="card card-synthesis line" @click.ctrl="debug(vp)">
-              <span>
-                <i class="" :class="'icon-'+vp.statut"></i>
-                <strong>{{ vp.label | period }}</strong>
-                <i class="icon-user"></i>
-                <em>{{ vp.declarer_fullname }}</em>
+          <article v-for="vp in year.validations" class="card card-synthesis line"
+                   v-if="selectedActivity == null || vp.activity_in.indexOf(selectedActivity.id) >= 0"
+                   :class="'validation-step-' + vp.statusKey"
+                   @click.ctrl="debug(vp)">
+              <i :class="'icon-' + vp.statusKey" :title="vp.statusText"></i>
+              <span class="declarer">
+                <strong class="period">{{ vp.label | period }}</strong>
+                <span class="person">
+                  <i class="icon-user"></i>
+                  <em>{{ vp.declarer_fullname }}</em>
+                </span>
               </span>
-              <span>
+              <span v-if="vp.projects">
+                <span v-for="p in vp.projects" class="cartouche">
+                  <i class="icon-cubes"></i>
+                  {{ p }}
+                </span>
+              </span>
+              <span v-if="vp.statusKey != 'conflict' && vp.statusKey != 'valid' ">
                 Validateurs : <span class="cartouche" v-for="v in vp.validators">{{ v }}</span>
               </span>
-              <span v-if="vp.validable">
-                <button class="btn btn-default" @click="handlerDetail(vp)">
-                  Détails
+              <span v-if="vp.validable" class="buttons">
+                <button class="btn btn-default btn-info" @click="handlerDetail(vp)">
+                  <i class="icon-zoom-in-outline"></i>
+                  Vérifier et valider
                 </button>
               </span>
           </article>
@@ -288,6 +310,7 @@ export default {
       group: 'person',
       tabopen: 'person',
       selectedPerson: null,
+      selectedActivity: null,
       details: null,
       loadingDetails: null,
       selectedPeriod: null,
@@ -304,10 +327,39 @@ export default {
 
     stackedDatas() {
 
+      let statutOrder = {
+        'error': 0,
+        'conflict': 1,
+        'send-prj': 2,
+        'send-sci': 3,
+        'send-adm': 4,
+        'valid': 5
+      };
+
+      let statutTextOrder = [
+        "Erreur technique",
+        "En conflit",
+        "Validation projet",
+        "Validation scientifique",
+        "Validation administrative",
+        "Validé"
+      ];
+
+      let statutKeys = [
+        "error",
+        "conflict",
+        "send-prj",
+        "send-sci",
+        "send-adm",
+        "valid"
+      ];
+
       let out = {};
       this.synthesis.forEach(e => {
+
         let declarer_id = e.declarer_id;
         let activity_id = e.activity_id;
+        let project = e.activity_acronym;
         let spt = e.period.split('-');
         let year = spt[0];
         let month = spt[1];
@@ -315,6 +367,9 @@ export default {
         let validable = e.validable;
         let declarer = e.declarer_fullname;
         let period_person_agg = period + '-' + declarer_id;
+        let statutInt = statutOrder[e.statut];
+        let statutText = statutTextOrder[statutInt];
+        let statutKey = statutKeys[statutInt];
 
         if (this.selectedPerson && this.selectedPerson.id != declarer_id) {
           return;
@@ -330,19 +385,33 @@ export default {
           out[year].validations[period_person_agg] = {
             'label': period,
             'declarer_id': declarer_id,
+            'activity_in': [],
+            'projects': [],
             'period': period,
             'declarer_fullname': declarer,
             'validable': false,
             'validators': [],
-            'foo': 'bar',
             'status' : '',
+            'statusText' : '',
+            'statusKey' : '',
+            'statusInt' : 5,
             'validations': []
           };
+        }
+
+        if( activity_id ){
+          out[year].validations[period_person_agg].activity_in.push(activity_id);
         }
 
         if (validable == true) {
           out[year].validations[period_person_agg].validable = true;
         }
+
+        // Gestion des statut calculés
+        console.log(statutInt, ' /// ', out[year].validations[period_person_agg].statusInt);
+        statutInt = Math.min(statutInt, out[year].validations[period_person_agg].statusInt);
+        statutText = statutTextOrder[statutInt];
+        statutKey = statutKeys[statutInt];
 
         out[year].validations[period_person_agg].validations.push(e);
         e.validators.forEach(validator => {
@@ -350,7 +419,14 @@ export default {
             out[year].validations[period_person_agg].validators.push(validator);
           }
         });
-        console.log(out[year].validations[period_person_agg].validators);
+
+        if( project && out[year].validations[period_person_agg].projects.indexOf(project) == -1 ){
+          out[year].validations[period_person_agg].projects.push(project);
+        }
+
+        out[year].validations[period_person_agg].statusText = statutText;
+        out[year].validations[period_person_agg].statusInt = statutInt;
+        out[year].validations[period_person_agg].statusKey = statutKey;
 //        out[year].validations[period_person_agg].validators = out[year].validations[period_person_agg].validators.concat(e.validators);
 
       });
@@ -430,7 +506,6 @@ export default {
 
     /** Selection d'une personne (Filtre les lignes de déclaration **/
     handlerAddSelectedPerson(declarer) {
-      console.log('handlerAddSelectedPerson', declarer, this.selectedPerson);
       if (this.selectedPerson && this.selectedPerson.id == declarer.declarer_id) {
         this.selectedPerson = null;
         this.details = null;
@@ -442,8 +517,26 @@ export default {
       }
     },
 
+    /** Selection d'une personne (Filtre les lignes de déclaration **/
+    handlerAddSelectedActivity(activity) {
+      console.log(activity);
+      if (this.selectedActivity && this.selectedActivity.id == activity.id) {
+        this.selectedActivity = null;
+        this.details = null;
+      } else {
+        this.selectedActivity = {
+          id: activity.activity_id,
+          name: activity.activity_acronym
+        };
+      }
+    },
+
     handlerRemoveSelectedPerson() {
       this.selectedPerson = null;
+    },
+
+    handlerRemoveSelectedActivity(){
+      this.selectedActivity = null;
     },
 
     handlerReject(details) {

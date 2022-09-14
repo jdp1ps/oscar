@@ -12076,13 +12076,32 @@ pre.alert-danger, pre.alert-info {
   cursor: pointer;
 }
 .card.card-synthesis {
+  border-left: solid 4px #999;
   display: flex;
+}
+.card.card-synthesis.validation-step-conflict {
+  border-left-color: #DD423E;
+}
+.card.card-synthesis.validation-step-valid {
+  border-left-color: #499D1F;
 }
 .card.card-synthesis > span {
   flex: 2;
 }
+.card.card-synthesis > .declarer {
+  flex: 1;
+}
+.card.card-synthesis > .buttons {
+  flex: 0 0;
+}
 .card.card-synthesis > .card-synthesis-left {
   flex: 0 1 auto;
+}
+.card.card-synthesis .period {
+  display: inline-block;
+}
+.card.card-synthesis .person {
+  display: inline-block;
 }
 
 /*# sourceMappingURL=oscar.css.map */

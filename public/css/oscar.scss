@@ -230,12 +230,39 @@ $colorGreyBlack: #222;
   }
 
   &.card-synthesis {
+
+    border-left: solid 4px $colorGreyMedium;
+
+    &.validation-step-conflict {
+      border-left-color: $colorRed;
+    }
+    &.validation-step-valid {
+      border-left-color: $colorGreen;
+    }
+
     display: flex;
+
     >span {
       flex: 2;
     }
+
+    >.declarer {
+      flex: 1;
+    }
+
+    >.buttons {
+      flex: 0 0;
+    }
+
     >.card-synthesis-left {
       flex: 0 1 auto;
+    }
+
+    .period {
+      display: inline-block;
+    }
+    .person {
+      display: inline-block;
     }
   }
 }
