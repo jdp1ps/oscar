@@ -86,6 +86,7 @@ class OscarTimesheetRecallsCommand extends OscarAdvancedCommandAbstract
         );
 
         foreach ($declarers as $declarer) {
+//            if( $declarer->getId() != 5063 ) continue;
 
             try {
                 $result = $this->getTimesheetService()->recallProcess(

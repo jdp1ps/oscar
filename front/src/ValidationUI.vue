@@ -208,7 +208,6 @@
           {{ selectedActivity.name }}
           <i class="icon-trash"></i>
         </strong>
-
         <hr>
 
         <!-- Filtres DECLARANTS -->
@@ -237,6 +236,7 @@
           Projets</h4>
         <article v-for="p in categories.activities"
                  @click="handlerAddSelectedActivity(p)"
+                 :class="{'light': selectedActivity && p.activity_id != selectedActivity.id }"
                  class="card xs">
           <strong>{{ p.activity_acronym }}</strong>
           <span class="cartouche" :class="{'green': p.unvalidated == 0}">
@@ -244,7 +244,7 @@
             </span>
         </article>
       </div>
-      <!------------------------------------------------------------------------------------------------------------ -->
+      <!---------------------------------------------------------------------------- -->
       <div class="col-md-9">
         <section v-for="year, year_label in stackedDatas">
           <h4>
@@ -408,7 +408,6 @@ export default {
         }
 
         // Gestion des statut calculés
-        console.log(statutInt, ' /// ', out[year].validations[period_person_agg].statusInt);
         statutInt = Math.min(statutInt, out[year].validations[period_person_agg].statusInt);
         statutText = statutTextOrder[statutInt];
         statutKey = statutKeys[statutInt];
@@ -427,8 +426,6 @@ export default {
         out[year].validations[period_person_agg].statusText = statutText;
         out[year].validations[period_person_agg].statusInt = statutInt;
         out[year].validations[period_person_agg].statusKey = statutKey;
-//        out[year].validations[period_person_agg].validators = out[year].validations[period_person_agg].validators.concat(e.validators);
-
       });
       return out;
     },
@@ -448,6 +445,7 @@ export default {
           let month = spt[1];
           let validable = e.validable;
           let light = false;
+          console.log(e.activity_id, '///', e.activity_acronym);
 
           if (this.selectedPerson && this.selectedPerson.id != declarer_id) {
             light = true;
@@ -557,7 +555,6 @@ export default {
           ok => {
             this.loadingDetails = false;
             this.details = ok.data;
-            console.log("tutu")
           },
           ko => {
 
@@ -569,10 +566,9 @@ export default {
       this.$http.get(this.url).then(
           ok => {
             this.synthesis = ok.data.synthesis;
-            console.log(ok);
           },
           ko => {
-            console.log(ko)
+            // todo Erreur de chargement
           })
     },
 

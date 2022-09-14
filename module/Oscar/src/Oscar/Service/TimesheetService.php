@@ -3754,6 +3754,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $result['needSend'] = false;
                 $result['recall_info'] = "Pas de relance (delai avant relance)";
             }
+
         } else {
             throw new OscarException("Doublon présent pour le système de contrôle des rappels pour $declarer");
         }
@@ -3764,9 +3765,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $result['blocked'] = false;
 
+        if( !$result['needSend'] ) {
+            $result['recall_info'] = "Déclaration envoyée";
+        }
+
         // Test Liste
-        if (!$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer)) {
-            $result['recall_info'] = "Restriction par liste activé";
+        if ($result['needSend'] && !$this->getPersonService()->declarerCanReceiveTimesheetMail($declarer)) {
+            $result['recall_info'] = "Non envoyée (Restriction par liste activé)";
             $result['ignoreForced'] = true;
             $result['needSend'] = false;
             $result['blocked'] = true;
