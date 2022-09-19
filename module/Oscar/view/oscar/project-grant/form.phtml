@@ -85,7 +85,7 @@
                         });
                     })
                 </script>
-                <?php echo $this->formElementErrors($form->get('activityType')); ?>
+                <?php echo $this->formElementErrors($form->get('activityType'), ["class" => "alert alert-danger"]); ?>
             </div>
             <div class="col-md-3">
                 <?php if( !in_array('disciplines', $hidden)): ?>
