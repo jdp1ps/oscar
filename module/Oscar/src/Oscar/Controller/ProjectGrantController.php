@@ -1253,7 +1253,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
 
         if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CREATE)) {
-            if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(Privileges::ACTIVITY_CREATE)) {
+            if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(
+                Privileges::ACTIVITY_CREATE)) {
                 throw new UnAuthorizedException(_("Vous n'avez pas les droits pour créer une nouvelle activité"));
             }
             $organisationsUser = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(
