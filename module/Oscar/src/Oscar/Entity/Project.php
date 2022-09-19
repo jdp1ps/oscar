@@ -188,7 +188,13 @@ class Project implements ResourceInterface
         }
         $amount = 0.0;
         foreach ($this->getActivities() as $activity) {
-            $amount += $activity->getAmount();
+            // PATCH : Lors du calcule du total d'un projet, les recettes sont ajoutées, les dépenses soustraites, et les autres sont ignorées.
+            if( $activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_TAKE ){
+                $amount += $activity->getAmount();
+            }
+            elseif ($activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_COST ){
+                $amount -= $activity->getAmount();
+            }
         }
         return $amount;
     }

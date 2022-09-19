@@ -29,8 +29,9 @@ class Activity implements ResourceInterface
     ///////////////////////////////////////////////////////////////////// STATUS
     // 100 Statuts actifs
     const STATUS_ACTIVE = 101;
-
     const STATUS_PROGRESS = 102;
+    const STATUS_ACCEPTED = 106;
+
     /** Activité en cours de réalisation (dossier) */
     const STATUS_DEPOSIT = 103;
     const STATUS_MONTAGE = 104;
@@ -83,6 +84,7 @@ class Activity implements ResourceInterface
                 self::STATUS_ABORDED => 'Dossier abandonné',
                 self::STATUS_DISPUTE => 'Litige',
                 self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_ACCEPTED => 'Accepté',
                 self::STATUS_TERMINATED => 'Résilié',
                 self::STATUS_CLOSED => 'Terminé',
                 self::STATUS_MONTAGE => 'Montage',
