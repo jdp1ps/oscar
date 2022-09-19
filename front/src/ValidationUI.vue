@@ -194,23 +194,33 @@
 
     <div class="row" v-if="synthesis">
 
+      <div class="col-md-12">
+        <div class="col-md-3">
+          FILTRES :
+          <strong class="cartouche" v-if="selectedPerson" @click="handlerRemoveSelectedPerson()">
+            <i class="icon-user"></i>
+            {{ selectedPerson.fullname }}
+            <i class="icon-trash"></i>
+          </strong>
+
+          <strong class="cartouche" v-if="selectedActivity" @click="handlerRemoveSelectedActivity()">
+            <i class="icon-cubes"></i>
+            {{ selectedActivity.name }}
+            <i class="icon-trash"></i>
+          </strong>
+        </div>
+        <div class="col-md-9">
+          --- {{ years }}
+          <select v-model="selectedYear" class="select">
+            <option value="">Toutes les années</option>
+            <option :value="y" v-for="y in years">{{ y }}</option>
+          </select>
+        </div>
+      </div>
+
       <!------------------------------------------------------------------------------------------------------------ -->
       <div class="col-md-3">
-        FILTRES :
-        <strong class="cartouche" v-if="selectedPerson" @click="handlerRemoveSelectedPerson()">
-          <i class="icon-user"></i>
-          {{ selectedPerson.fullname }}
-          <i class="icon-trash"></i>
-        </strong>
-
-        <strong class="cartouche" v-if="selectedActivity" @click="handlerRemoveSelectedActivity()">
-          <i class="icon-cubes"></i>
-          {{ selectedActivity.name }}
-          <i class="icon-trash"></i>
-        </strong>
-        <hr>
-
-        <!-- Filtres DECLARANTS -->
+                <!-- Filtres DECLARANTS -->
         <h4>
           <i class="icon-user"></i>
           Déclarants</h4>
@@ -246,7 +256,12 @@
       </div>
       <!---------------------------------------------------------------------------- -->
       <div class="col-md-9">
-        <section v-for="year, year_label in stackedDatas">
+        <div v-if="Object.keys(stackedDatas).length === 0" class="alert alert-info">
+          Rien à valider
+          <span v-if="selectedPerson"> pour <strong>{{ selectedPerson.fullname }}</strong></span>
+          <span v-if="selectedYear"> en <strong>{{ selectedYear }}</strong></span>
+        </div>
+        <section v-for="year, year_label in stackedDatas" v-if="year.validations">
           <h4>
             Année {{ year_label }}
           </h4>
@@ -314,12 +329,29 @@ export default {
       details: null,
       loadingDetails: null,
       selectedPeriod: null,
+      selectedYear: '',
       debug_dt: null,
-      reject_dt: null
+      reject_dt: null,
+      displayAll: false
     }
   },
 
   computed: {
+
+    /**
+     * Liste des ANNEES proposées dans le jeu de données
+     * @return String[]
+     */
+    years(){
+      let years = [];
+      this.synthesis.forEach(e => {
+        let spt = e.period.split('-');
+        let year = spt[0];
+        if( years.indexOf(year) < 0 ) years.push(year);
+      });
+      return years.sort();
+    },
+
     headerDays() {
       let headers = [];
       return this.details.validation.infos.days;
@@ -370,6 +402,14 @@ export default {
         let statutInt = statutOrder[e.statut];
         let statutText = statutTextOrder[statutInt];
         let statutKey = statutKeys[statutInt];
+
+        if( this.displayAll == false && validable === false ){
+          return;
+        }
+
+        if (this.selectedYear && this.selectedYear != year) {
+          return;
+        }
 
         if (this.selectedPerson && this.selectedPerson.id != declarer_id) {
           return;

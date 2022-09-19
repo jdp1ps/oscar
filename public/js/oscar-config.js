@@ -74,7 +74,6 @@ requirejs.config({
         "VueFilters" : "oscar/dist/VueFilters",
         "OrganizationType" : "oscar/dist/OrganizationType",
         "DisciplineUI" : "oscar/dist/DisciplineUI",
-        "TimesheetMonth" : "oscar/dist/TimesheetMonth",
         "ValidationActivityVue" : "oscar/dist/ValidationActivityVue",
         "ValidationPeriod" : "oscar/dist/ValidationPeriod",
         "DeclarersList" : "oscar/dist/DeclarersList",
@@ -122,6 +121,7 @@ requirejs.config({
         "timesheethighdelay": "oscar/dist/TimesheetHighDelay.umd"+devext,
         "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
         "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min",
+        "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
         "ValidationUI": "oscar/dist/ValidationUI.umd.min"
     },
     shim: {
