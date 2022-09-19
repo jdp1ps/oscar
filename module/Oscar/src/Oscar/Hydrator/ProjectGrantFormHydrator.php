@@ -127,6 +127,9 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
 
     protected function getActivityType( $typeId )
     {
+        // Fix : Afficher l'erreur de champs vide si la valeur encoyée est une chaîne vide
+        $typeId = intval($typeId);
+
         return $this->getProjectGrantService()->getActivityTypeById($typeId);
     }
 
