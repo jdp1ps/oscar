@@ -12077,6 +12077,7 @@ pre.alert-danger, pre.alert-info {
 }
 .card.card-synthesis {
   border-left: solid 4px #999;
+  margin: 0 0 2px;
   display: flex;
 }
 .card.card-synthesis.validation-step-conflict {
@@ -12084,6 +12085,16 @@ pre.alert-danger, pre.alert-info {
 }
 .card.card-synthesis.validation-step-valid {
   border-left-color: #499D1F;
+}
+.card.card-synthesis.light {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+.card.card-synthesis.light strong {
+  font-weight: 300;
+}
+.card.card-synthesis.light small {
+  font-weight: 100;
 }
 .card.card-synthesis > span {
   flex: 2;

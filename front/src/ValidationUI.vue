@@ -209,13 +209,18 @@
             <i class="icon-trash"></i>
           </strong>
         </div>
+
         <div class="col-md-9">
-          --- {{ years }}
           <select v-model="selectedYear" class="select">
             <option value="">Toutes les années</option>
             <option :value="y" v-for="y in years">{{ y }}</option>
           </select>
+          <label for="showAll" class="form-checker-label">
+            Afficher les déclarations déjà traitées
+            <input type="checkbox" id="showAll" v-model="displayAll" class="checkbox-inline" />
+          </label>
         </div>
+
       </div>
 
       <!------------------------------------------------------------------------------------------------------------ -->
@@ -246,10 +251,13 @@
           Projets</h4>
         <article v-for="p in categories.activities"
                  @click="handlerAddSelectedActivity(p)"
-                 :class="{'light': selectedActivity && p.activity_id != selectedActivity.id }"
-                 class="card xs">
-          <strong>{{ p.activity_acronym }}</strong>
-          <span class="cartouche" :class="{'green': p.unvalidated == 0}">
+                 :class="{'light': selectedActivity && p.activity_id !== selectedActivity.id }"
+                 class="card xs card-synthesis clickable">
+          <span>
+            <strong v-if="p.activity_acronym">{{ p.activity_acronym }}</strong>
+            <strong v-else><em>Hors-Lot</em></strong>
+            </span>
+          <span class="cartouche card-synthesis-left" :class="{'green': p.unvalidated == 0}">
               {{ p.total - p.unvalidated }} / {{ p.total }}
             </span>
         </article>
@@ -390,7 +398,7 @@ export default {
       this.synthesis.forEach(e => {
 
         let declarer_id = e.declarer_id;
-        let activity_id = e.activity_id;
+        let activity_id = e.activity_id ? e.activity_id : '';
         let project = e.activity_acronym;
         let spt = e.period.split('-');
         let year = spt[0];
@@ -439,7 +447,7 @@ export default {
           };
         }
 
-        if( activity_id ){
+        if( out[year].validations[period_person_agg].activity_in.indexOf(activity_id) < 0 ){
           out[year].validations[period_person_agg].activity_in.push(activity_id);
         }
 
@@ -479,7 +487,7 @@ export default {
       if (this.synthesis) {
         this.synthesis.forEach(e => {
           let declarer_id = e.declarer_id;
-          let activity_id = e.activity_id;
+          let activity_id = e.activity_id ? e.activity_id : '';
           let spt = e.period.split('-');
           let year = spt[0];
           let month = spt[1];
@@ -557,14 +565,17 @@ export default {
 
     /** Selection d'une personne (Filtre les lignes de déclaration **/
     handlerAddSelectedActivity(activity) {
-      console.log(activity);
-      if (this.selectedActivity && this.selectedActivity.id == activity.id) {
+
+      let id = activity.activity_id ? activity.activity_id : '';
+      let label = activity.activity_acronym ? activity.activity_acronym : 'Hors_Lots';
+
+      if (this.selectedActivity && this.selectedActivity.id == id) {
         this.selectedActivity = null;
         this.details = null;
       } else {
         this.selectedActivity = {
-          id: activity.activity_id,
-          name: activity.activity_acronym
+          id: id,
+          name: label
         };
       }
     },
