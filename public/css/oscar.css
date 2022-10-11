@@ -2,13 +2,48 @@
 /* ! Oscar © 2015, Université de Caen, Basse-Normandie
  * Stéphane Bouvry <stephane.bouvry@unicaen.fr>
  */
+@import url("../js/vendor/open-sans-fontface/open-sans.css");
+@import url(../js/vendor/select2/dist/css/select2.min.css);
+@import url(select2-bootstrap.css);
+@import "vue-select.css";
+.result-item {
+  border-bottom: thin solid #999999;
+}
+.result-item code, .result-item span, .result-item strong, .result-item em {
+  margin: 0 0.25em;
+}
+.result-item code {
+  background: #ceedff;
+  padding: 2px;
+  font-size: 0.8em;
+  line-height: inherit;
+  border-radius: 4px;
+}
+.result-item .location, .result-item .infos {
+  font-size: 0.7em;
+  font-weight: 200;
+}
+.result-item h4 {
+  color: #111 !important;
+}
+.result-item:hover code {
+  color: black;
+}
+.result-item.organization-closed {
+  border-left: solid 4px red;
+}
+.result-item.organization-closed div {
+  opacity: 0.5;
+}
+.result-item.organization-closed h4 {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
 /**
  * Calcule du pourcentage d'une partie d'une couleur RGB.
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
-@import url("../js/vendor/open-sans-fontface/open-sans.css");
-@import url(../js/vendor/select2/dist/css/select2.min.css);
-@import url(select2-bootstrap.css);
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
@@ -12635,6 +12670,51 @@ article.wp h3 {
 
 .week:last-child .days {
   justify-content: flex-start;
+}
+
+.superselect {
+  display: inline-block;
+  position: relative;
+  background: white;
+  border-radius: 4px;
+  padding: 0.25em;
+  line-height: 1.428571429em;
+}
+.superselect em {
+  opacity: 0.5;
+}
+.superselect .cartouche {
+  font-size: 0.8em;
+}
+.superselect .selector {
+  position: absolute;
+  z-index: 1000;
+  background: white;
+  padding: 1em;
+  min-width: 100%;
+  box-shadow: -4px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card.criteria {
+  display: flex;
+  line-height: 2em;
+}
+.card.criteria > * {
+  flex: 3;
+}
+.card.criteria .filter-label {
+  flex: 1;
+}
+.card.criteria .nav-actions {
+  flex: 0 0 32px;
+}
+.card.criteria .alert.alert-danger {
+  margin: 0.25em;
+  padding: 0.3em 1em;
+  background: #d9534f;
+  color: white;
+  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.5);
+  font-size: 0.8em;
 }
 
 /*# sourceMappingURL=oscar.css.map */

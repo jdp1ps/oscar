@@ -67,21 +67,58 @@ class PersonElasticSearch implements PersonSearchStrategy
 
     public function search($search, $limit=10000)
     {
+//        $params = [
+//            'index' => $this->getIndex(),
+//            'type' => $this->getType(),
+//            'body' => [
+//                'size' => 10000,
+//                'query' => [
+//                    'query_string' => [
+//                        'query' => sprintf('%s OR  %s*', $search, $search)
+//                    ]
+//                ]
+//            ]
+//        ];
+        $ext = explode(' ', $search);
+        $searchPlus = [$search, $search.'*'];
+        $searchQuery = implode(' OR ', $searchPlus);
+
+        //die($searchQuery);
+
         $params = [
             'index' => $this->getIndex(),
             'type' => $this->getType(),
             'body' => [
-                'size' => $limit,
+                'size' => 10000,
                 'query' => [
-                    'multi_match' => [
-                        'query' => $search,
-                        'type' => 'phrase_prefix',
-                        'fields' => ['fullname^3','lastname^5', 'firstname^2', 'email', 'affectation^3', 'location^3', 'organizations', 'activities', 'connectors'],
-                       /* 'max_expansions' => 20,*/
-                        /*'fuzziness' => 1*/
+                    'query_string' => [
+                        'query' => $searchQuery,
+                        'fields' => [
+                            'fullname^4',
+                            'lastname^10',
+                            'firstname^2',
+                            'email',
+                            'location^5',
+                            'affectation^5',
+                            'organizations^5',
+                            'activities^5',
+                            'connectors']
                     ]
                 ]
             ]
+
+//            'body' => [
+//                'size' => $limit,
+//                'query' => [
+//                    'multi_match' => [
+//                        'query' => $searchQuery,
+//                        'type' => 'phrase_prefix',
+//                        'fields' => ['fullname^6','lastname^5', 'firstname^2', 'email', 'affectation^3', 'location^3', 'organizations', 'activities', 'connectors'],
+//                       /* 'max_expansions' => 20,*/
+//                        /*'fuzziness' => 1*/
+//                    ]
+//                ]
+//            ]
         ];
 
         $response = $this->getClient()->search($params);

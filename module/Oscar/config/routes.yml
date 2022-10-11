@@ -906,6 +906,13 @@ contract:
                 defaults:
                     action: timesheet
 
+        sdfjkhsdfjk:
+            type: segment
+            options:
+                route: /foo
+                defaults:
+                    action: searchActivity
+
         advancedsearch:
             type: segment
             options:

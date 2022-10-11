@@ -39,6 +39,8 @@ $colorGreyBlack: #222;
 
 
 
+@import "modules/oscar-autocompleter.scss";
+
 // Update 2020-11-04
 @import "_common.scss";
 
@@ -833,3 +835,53 @@ $weekHightlightColor: #80b7ec;
 .week:last-child .days {
   justify-content: flex-start;
 }
+
+.superselect {
+  display: inline-block;
+  position: relative;
+  background: white;
+  border-radius: 4px;
+  padding: .25em;
+  line-height: 1.428571429em;
+  em {
+    opacity: .5;
+  }
+  .cartouche {
+    font-size: .8em;
+  }
+//  height: ;
+  .selector {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    padding: 1em;
+    min-width: 100%;
+    box-shadow: -4px 4px 8px rgba(0,0,0,.2);
+  }
+}
+
+.card.criteria {
+  display: flex;
+  line-height: 2em;
+  >*{
+    flex: 3;
+  }
+  .filter-label {
+    flex: 1;
+  }
+  .nav-actions {
+    flex: 0 0 32px;
+  }
+
+  .alert.alert-danger {
+    margin: .25em;
+    padding: .3em 1em;
+    background: $brand-danger;
+    color: white;
+    text-shadow: -1px 1px 0 rgba(0,0,0,.5);
+    font-size: .8em;
+  }
+;
+}
+
+@import "vue-select.css";

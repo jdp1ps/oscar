@@ -164,6 +164,7 @@ return array(
                         'pcru',
                         'pcruInfos',
                         "pcruList",
+                        "apiUi",
                         "timesheet"
                     ],
 
@@ -171,7 +172,7 @@ return array(
                 ],
                 [
                     'controller' => 'Activity',
-                    'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
+                    'action' => ['advancedSearch','exportJSON', 'almostDone', 'almostStart'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [

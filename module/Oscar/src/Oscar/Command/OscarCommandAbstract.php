@@ -18,6 +18,7 @@ abstract class OscarCommandAbstract extends Command
 {
 
 
+    const COMMAND_ACTIVITY_SEARCH = 'activity:search';
     const COMMAND_ACTIVITY_SEARCH_REINDEX = 'activity:search:reindex';
     const COMMAND_ACTIVITY_SEARCH_REINDEX_ALL = 'activity:search-rebuild';
     const COMMAND_ACTIVITY_NOTIFICATION_UPDATE = 'activity:notification:update';

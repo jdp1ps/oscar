@@ -145,10 +145,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $what
      * @return Person[]
      */
-    public function search($what)
+    public function search($what) :array
     {
-        $ids = $this->getSearchEngineStrategy()->search($what);
-        return $this->getPersonRepository()->getPersonsByIds($ids);
+        return $this->getPersonRepository()->getPersonsByIds($this->searchIds($what));
+    }
+
+    const SEARCH_ID_PATTERN = '/id:(([0-9]+,?)*)/';
+
+    public function searchIds($what) :array {
+        if( preg_match_all(self::SEARCH_ID_PATTERN, $what, $matches, PREG_SET_ORDER, 0) ){
+            $idsStr = $matches[0][1];
+            if($idsStr){
+                return explode(',', $idsStr);
+            }
+        }
+        return $this->getSearchEngineStrategy()->search($what);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1904,45 +1915,57 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $query->addOrderBy('p.' . $filters['order_by'], 'ASC');
         }
 
+//        if( preg_match('/id:([0-9]*)/m', $search, $matches) ){
+//            $id = $matches[1];
+//            $ids = [
+//                $this->getPerson($id)->getId()
+//            ];
+//            if (array_key_exists('ids', $filters)) {
+//                $filters['ids'] = array_intersect($filters['ids'], $ids);
+//            } else {
+//                $filters['ids'] = $ids;
+//            }
+//        }
+
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
-        if (preg_match('/(([a-z]*):(.*))/', $search, $matches)) {
-            $connector = $matches[2];
-            $connectorValue = $matches[3];
-            try {
-                $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery(
-                    $connector,
-                    $connectorValue
-                );
-            } catch (\Exception $e) {
-                $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
-                throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
+        if( $search != "" ){
+            // Recherche via les IDS
+            if( preg_match_all(self::SEARCH_ID_PATTERN, $search, $matches, PREG_SET_ORDER, 0) ){
+                //
             }
-        } // RECHERCHE sur le nom/prenom/email
-        else {
-            if ($search != "") {
+            // Recherche via le connecteur
+            elseif (preg_match('/(([a-z]*):(\w*))/', $search, $matches) ){
+                $connector = $matches[2];
+                $connectorValue = $matches[3];
                 try {
-                    $ids = $this->getSearchEngineStrategy()->search($search);
-
-                    if (array_key_exists('ids', $filters)) {
-                        $filters['ids'] = array_intersect($filters['ids'], $ids);
-                    } else {
-                        $filters['ids'] = $ids;
-                    }
-                } catch (\Exception $e) {
-                    die("what ??? " . $e->getMessage());
-                    $this->getLoggerService()->error(
-                        sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
+                    $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery(
+                        $connector,
+                        $connectorValue
                     );
-                    // Ancienne méthode
-                    $searchR = str_replace('*', '%', $search);
-                    $query->where(
-                        'lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search'
-                    )
-                        ->setParameter('search', '%' . strtolower($searchR) . '%');
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
+                    throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
                 }
             }
+
+            try {
+                $ids = $this->searchIds($search);
+
+
+                if (array_key_exists('ids', $filters)) {
+                    $filters['ids'] = array_intersect($filters['ids'], $ids);
+                } else {
+                    $filters['ids'] = $ids;
+                }
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error(
+                    sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
+                );
+                throw new OscarException("Méthode de recherche des personnes non-disponible : %s", $e->getMessage());
+            }
         }
+
 
         // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {

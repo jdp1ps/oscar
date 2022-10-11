@@ -73,6 +73,10 @@ class JSONFormatter
     public function formatActivity( Activity $activity, $compact=true ){
         $datas = $activity->toArray();
 
+        // Date de création
+        $datas['dateCreated'] =
+            $activity->getDateCreated() ? $activity->getDateCreated()->format('Y-m-d') : '';
+
         $datas['amount'] = null;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity) ) {

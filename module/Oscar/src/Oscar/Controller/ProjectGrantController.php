@@ -192,14 +192,29 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $this->activityRequestService = $activityRequestService;
     }
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     public function apiUiAction()
     {
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_INDEX);
-        return [];
+
+        // Récupération des filtres
+
+        return [
+            'filters' => $this->getProjectGrantService()->getActivitiesSearchCriteria(),
+            'sorts' => $this->getProjectGrantService()->getActivitiesSearchSort(),
+            'directions' => $this->getProjectGrantService()->getActivitiesSearchDirection(),
+            'direction' => $this->params()->fromQuery('d', 'desc'),
+            'sorter' => $this->params()->fromQuery('t', 'hit'),
+            'status' => $this->getProjectGrantService()->getActivitiesSearchStatus(),
+            'options_pays' => $this->getOrganizationService()->getCountriesList(),
+            'roles_person' => $this->getPersonService()
+                ->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
+            'roles_organizations' => $this->getOrganizationService()
+                ->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
+            'used_filters' => $this->params()->fromQuery('f', []),
+            'used_status' => $this->params()->fromQuery('st', []),
+            'search' => $this->params()->fromQuery('q')
+        ];
     }
 
     /**
@@ -208,70 +223,125 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function apiAction()
     {
-        // On test les droits de la personne
-        // On test les droits de la personne
+        // On test les droits de la personne / restrictions
         $person = $this->getCurrentPerson();
+        $idsPerson = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
+        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX) ){
+            $restricted_ids = false;
+        } else {
+            // TRAITEMENT des RESTRICTIONS
+        }
 
         ////////////////////////////////////////////////////////////////////////
         // Paramètres envoyés à l'API
         $q = $this->params()->fromQuery('q', '');
         $page = (int)$this->params()->fromQuery('p', 1);
         $rbp = (int)$this->params()->fromQuery('rbp', 20);
+        $sort = $this->params()->fromQuery('t', null);
+        $direction = $this->params()->fromQuery('d', 'desc');
+        $status = $this->params()->fromQuery('st', '');
+        $filters = $this->params()->fromQuery('f', []);
 
-
-        // IDS des activités de la personne
-        $idsPerson = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
-
-
-        if (!$q) {
-            $activityIds = $idsPerson;
-            $totalQuery = count($activityIds);
-        } else {
-            $activityIds = array_intersect($this->getActivityService()->search($q), $idsPerson);
-            $totalQuery = count($activityIds);
+        if( !array_key_exists($sort, $this->getProjectGrantService()->getActivitiesSearchSort()) ){
+            $sort = 'hit';
         }
 
-
-        $totalPages = ceil($totalQuery / $rbp);
-        $error = null;
-        ////////////////////////////////////////////////////////////////////////
-
-        if ($page > $totalPages) {
-            $error = "La page demandé dépasse des résultats possibles";
+        if( !array_key_exists($direction, $this->getProjectGrantService()->getActivitiesSearchDirection()) ){
+            $direction = 'desc';
         }
 
-        // Formatteur > JSON
+        // Contrôle des filtres
+
+        if( $status ){
+            $filters[] = 's;'.$status.';-1';
+        }
+
+        // Options des recheches
+        $options = [
+            'sort' => $sort,
+            'direction' => $direction,
+            'page' => $page,
+            'result_by_page' => $rbp,
+            'filters' => $filters,
+            'restricted_ids' => $restricted_ids
+        ];
+
+        // Recherche
+        $resultSearch = $this->getProjectGrantService()->searchActivities($q, $options);
         $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
 
-        // Récupération des activités effective
-        $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
-        $totalQueryPage = count($activities);
-
-        // Réponse
         $datas = [];
+        $activityIds = [];
 
-        // Mise en forme
-        foreach ($activities as $activity) {
+        foreach ($resultSearch['activities'] as $activity) {
+            $activityIds[] = $activity->getId();
             $datas[] = $jsonFormatter->format($activity, false);
         }
 
-        return $this->ajaxResponse(
-            [
-                'oscar' => OscarVersion::getBuild(),
-                'date' => date('Y-m-d H:i:s'),
-                'code' => 200,
-                'totalResultQuery' => $totalQuery,
-                'totalResultPage' => $totalQueryPage,
-                'totalPages' => $totalPages,
-                'page' => $page,
-                'error' => $error,
-                'resultByPage' => $rbp,
-                'datas' => [
-                    'ids' => $activityIds,
-                    'content' => $datas
-                ]
+        $output = [
+            'oscar' => OscarVersion::getBuild(),
+            'date' => date('Y-m-d H:i:s'),
+            'code' => 200,
+            'filters_infos' => $resultSearch['filters_infos'],
+            'page' => $resultSearch['page'],
+            'resultsByPage' => $resultSearch['result_by_page'],
+            'result_total' => $resultSearch['total'],
+            'datas' => [
+                'ids' => $activityIds,
+                'content' => $datas
             ]
-        );
+        ];
+//
+//        if (!$q) {
+//            $activityIds = $idsPerson;
+//            $totalQuery = count($activityIds);
+//        } else {
+//            $activityIds = array_intersect($this->getActivityService()->search($q), $idsPerson);
+//            $totalQuery = count($activityIds);
+//        }
+//
+//
+//        $totalPages = ceil($totalQuery / $rbp);
+//        $error = null;
+//        ////////////////////////////////////////////////////////////////////////
+//
+//        if ($page > $totalPages) {
+//            $error = "La page demandé dépasse des résultats possibles";
+//        }
+//
+//        // Formatteur > JSON
+//        $jsonFormatter = new JSONFormatter($this->getOscarUserContextService());
+//
+//        // Récupération des activités effective
+//        $activities = $this->getActivityService()->getActivitiesByIds($activityIds, $page, $rbp);
+//        $totalQueryPage = count($activities);
+//
+//        // Réponse
+//        $datas = [];
+//
+//        // Mise en forme
+//        foreach ($activities as $activity) {
+//            $datas[] = $jsonFormatter->format($activity, false);
+//        }
+
+        return $this->ajaxResponse($output);
+//
+//            [
+//                'oscar' => OscarVersion::getBuild(),
+//                'date' => date('Y-m-d H:i:s'),
+//                'code' => 200,
+//                'totalResultQuery' => $totalQuery,
+//                'totalResultPage' => $totalQueryPage,
+//                'totalPages' => $totalPages,
+//                'page' => $page,
+//                'error' => $error,
+//                'resultByPage' => $rbp,
+//                'datas' => [
+//                    'ids' => $activityIds,
+//                    'content' => $datas
+//                ]
+//            ]
+//        );
     }
 
     public function adminDemandeAction()
@@ -1089,12 +1159,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Récupération des IDS
         if ($request->isPost()) {
             $paramID = $this->params()->fromPost('ids', '');
+            if( !$paramID ){
+                return $this->getResponseBadRequest();
+            }
         } else {
-            $paramID = $this->params()->fromQuery('ids', '');
+            return $this->getResponseUnauthorized();
         };
 
         $datas = new ExportDatas($this->getProjectGrantService(), $this->getOscarUserContextService());
         $dt = $datas->output($paramID, $fields, $perimeter);
+
         $csv = uniqid('oscar_export_activities_') . '.csv';
         $csvPath = sprintf('/tmp/%s', $csv);
         $handler = fopen($csvPath, 'w');
@@ -2238,6 +2312,28 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
+     * @return array
+     */
+    public function searchActivityAction()
+    {
+        $search = $this->params()->fromQuery('q', "");
+        $options = [];
+
+        try {
+            $activities = $this->getProjectGrantService()->searchActivities($search, $options);
+        } catch (\Exception $e) {
+            return $this->getResponseBadRequest($e->getMessage());
+        }
+
+        $view = new ViewModel([
+            'search' => $search,
+            'activities' => $activities,
+        ]);
+        $view->setTemplate('oscar/activity/search.phtml');
+        return $view;
+    }
+
+    /**
      * @param \Doctrine\ORM\QueryBuilder $qb
      * @return ViewModel
      * @throws \Exception
@@ -2300,7 +2396,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 // Ajout d'un filtre sur les jalons
                 'aj' => 'Ayant le jalon'
-
             ];
 
             // Correspondance des champs de type date
@@ -2883,6 +2978,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 if ($projectview == 'on') {
                     $qb->select('pr');
+                    $qb->orderBy('c.' . $sort, $sortDirection);
                 } else {
                     $qb->select('c, pr, m1, p1, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis');
                     $qb->orderBy('c.' . $sort, $sortDirection);

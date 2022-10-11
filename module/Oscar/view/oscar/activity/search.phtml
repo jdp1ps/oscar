@@ -1,0 +1,1038 @@
+<section class="container">
+    <?php if( $organizationsPerimeter ): ?>
+        <h1>
+            <i class="icon-cube"></i>
+            <?= $this->translate("Activités de recherche dans vos structures") ?> :
+        </h1>
+    <?php else: ?>
+        <h1><i class="icon-cube"></i><?= $this->translate("Activités de recherche") ?> <?= ($projectview ? ' (Projets)' : '') ?></h1>
+    <?php endif; ?>
+    <style>
+        .criteria {
+            padding: 4px 16px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .criteria > * {
+            margin-right: 4px;
+        }
+
+        .criteria > nav {
+            justify-self: flex-end;
+        }
+
+        .criteria.ap .icon-building-filled, .criteria.sp .icon-building-filled {
+            display: none;
+        }
+
+        .criteria.ao .icon-user, .criteria.so .icon-user {
+            display: none;
+        }
+    </style>
+
+    <?php /*
+        ----------------------------------
+        TEMPLATE des critères de type date
+        ----------------------------------
+    */ ?>
+    <script type="text/x-handlebars" id="persons-criteria-tpl">
+        <article class="criteria date card">
+            <div class="icon-group"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+
+            <select class="select2persons changer val1" multiple>
+                <?php foreach($filterPersons as $id=>$label): ?>
+                <option value="<?= $id ?>" selected><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="organizations-criteria-tpl">
+        <article class="criteria date card">
+            <div class="icon-building-filled"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+
+            <select class="select2organizations changer val1" multiple>
+                <?php foreach($filterOrganizations as $id=>$label): ?>
+                <option value="<?= $id ?>" selected><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="date-criteria-tpl">
+        <article class="criteria date card">
+            <div class="icon-calendar"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <small>Entre</small>
+            <input class="changer datepicker val1" value="{{val1}}" />
+            <small>et</small>
+            <input class="changer datepicker val2" value="{{val2}}" />
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <?php /*
+        --------------------------------
+        TEMPLATE des critères des status
+        --------------------------------
+    */ ?>
+    <script type="text/x-handlebars" id="status-criteria-tpl">
+        <article class="criteria criteria-{{type}} card">
+            <div class="icon-help-circled"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="changer val1 status">
+                <?php foreach(\Oscar\Entity\Activity::getStatusSelect() as $key=>$label ): ?>
+                <option value="<?= $key ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+             <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="finance-criteria-tpl">
+        <article class="criteria criteria-{{type}} card">
+            <div class="icon-calculator"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="changer val1 status">
+                <?php foreach(\Oscar\Entity\Activity::getFinancialImpactValues() as $key=>$label ): ?>
+                <option value="<?= $key ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+             <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="number-criteria-tpl">
+        <article class="criteria criteria-{{type}} card">
+            <div class="icon-calculator"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <input type="text" value="{{val1}}" class="changer val1">
+            <strong>&lt;</strong>
+            <small>{{typeLabel}}</small>
+            <strong>&lt;</strong>
+            <input type="text" value="{{val2}}"class=" changer val2">
+             <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+
+
+    <?php /*
+        ---------------------------------------------
+        TEMPLATE des critères des types de convention
+        ---------------------------------------------
+    */ ?>
+    <script type="text/x-handlebars" id="type-criteria-tpl">
+        <article class="criteria criteria-type card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_status">
+                <option></option>
+                <?php foreach ($types as $id => $label): ?>
+                    <option
+                        value="<?= $id ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="discipline-criteria-tpl">
+        <article class="criteria criteria-type card">
+            <div class="icon-beaker"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_discipline">
+                <option></option>
+                <?php foreach ($disciplines as $id => $label): ?>
+                    <option
+                        value="<?= $id ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="country-tpl">
+        <article class="criteria criteria-country card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_country" multiple>
+                <?php foreach( $countries as $country ): ?>
+                <option value="<?= $country ?>"><?= $country ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="typeorga-tpl">
+        <article class="criteria criteria-typeorga card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
+                <?php foreach( $typeorgas as $typeorga ): ?>
+                <option value="<?= $typeorga ?>"><?= $typeorga ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="milestones-criteria-tpl">
+        <article class="criteria criteria-{{type}} card">
+            <div class="icon-calendar"></div>
+            <small>{{typeLabel}}</small>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <select class="select2 form-control val1 changer types" id="filter_jalon">
+                <?php foreach( $filterJalons as $jalon ): ?>
+                    <option value="<?= $jalon['id'] ?>"><?= $jalon['label'] ?></option>
+                <?php endforeach; ?>
+            </select>
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="static-criteria-tpl">
+        <article class="criteria criteria-static card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <?php /*
+        -----------------------------------------
+        TEMPLATE des critères Person/Organization
+        -----------------------------------------
+    */ ?>
+    <script type="text/x-handlebars" id="criteria-tpl">
+        <article class="criteria {{type}} card">
+            <div class="icon-user"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <div class="icon-building-filled"></div>
+
+            <input type="hidden" name="criteria[]" class="criteria"
+                   value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 changer val1">
+                <option value="{{val1}}">{{val1Label}}</option>
+            </select>
+            <small>avec le rôle</small>
+            <select class="role changer val2 rolePerson">
+                <option value="-1" selected>Ignorer le rôle</option>
+                <?php foreach ($this->grant()->getAllRoleIdPersonInActivity() as $key => $label): ?>
+                    <option value="<?= $key ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select class="role changer val2 roleOrganization">
+                <option value="-1" selected>Tous</option>
+                <?php foreach ($this->grant()->getAllRoleIdOrganizationInActivity() as $key => $label): ?>
+                    <option value="<?= $key ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <form action="<?= $this->url() ?>" method="get" class="form" id="search">
+
+        <div class="input-group input-group-lg">
+            <input placeholder="Rechercher dans l'intitulé, code PFI...&hellip;"
+                   type="search"
+                   class="form-control input-lg"
+                   name="q"
+                   value="<?= htmlentities($search) ?>"/>
+
+            <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" onclick="$('#aide').toggle()" title="Tous savoir sur les expressions de recherche ?"><i class="icon-lifebuoy-1"></i></button>
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </span>
+        </div>
+        <div id="aide" style="display: none" class="alert alert-info alert-help">
+            <h3><i class="icon-lifebuoy-1"></i> Rechercher dans les activités</h3>
+            <p>La recherche va analyser le contenu de votre recherche en isolant les <strong>termes</strong>,
+                par défaut les termes sont des contenus approchant,
+                par exemple la recherche <q>reseau normand</q> va rechercher les mots <em>reseau</em> et <em>normand</em> en classant les résultats par pertinence (d'abord les activités contenant les 2 termes stricts, puis celle contenant au moins un des 2 termes)</p>
+
+            <p>Vous pouvez utiliser des <em>expressions de recherche</em> en spécifiant les <strong>termes</strong> plus finement : </p>
+            <ul>
+                <li><strong>"Recherche stricte"</strong>, vous pouvez entourer de guillemets double un terme, par exemple en entourant votre recherche de guillemets double <em>"reseau normand"</em>, le moteur cherchera ce terme précis</li>
+                <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>
+                <li><strong>ET/OU</strong> Les mots clefs <strong>OR</strong> et <strong>AND</strong> permettent de préciser les termes à rechercher : NORMAND* OR RESEAU, cherchera les activités contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
+                <li><strong>PFI</strong> Saisissez directement le PFI.</li>
+                <li><strong>XXXX<?= $this->options()->oscarNumSeparator() ?></strong> Recherche sur le système de numérotation Oscar (2017<?= $this->options()->oscarNumSeparator() ?>...).</li>
+                <li><strong>num=valeur</strong> Permet de chercher sur la numérotation libre proposée dans les activités de recherche.</li>
+            </ul>
+        </div>
+        <?php if( $error ): ?>
+            <div class="alert alert-danger">
+                <?= $error ?>
+            </div>
+        <?php endif;?>
+
+        <?php if( $organizationsPerimeter ): $include = isset($include) ? $include : []; ?>
+            <h3><i class="icon-building-filled"></i>
+                Vos structures</h3>
+            <p class="help">
+                Vous pouvez utiliser les filtres ci-dessous pour réduire les résultats aux structures sous votre responsabilité.
+            </p>
+
+            <?php foreach($this->grant()->getCurrentPerson()->getOrganizations() as $affectation ): ?>
+                <?php if( $affectation->isPrincipal() ): ?>
+                    <span class="cartouche <?= $affectation->isPrincipal() ? 'primary' : '' ?>">
+                        <input name="include[]" class="inline-checkbox" value="<?= $affectation->getOrganization()->getId() ?>" type="checkbox" <?= in_array($affectation->getOrganization()->getId(), $include) ? ' checked="checked"' : '' ?>>
+                        <?= $affectation->getOrganization()->getId() . $affectation->getOrganization() ?>
+                        <span class="addon">
+                            <?= $affectation->getRole() ?>
+                        </span>
+                    </span>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            </p>
+            <hr>
+            <nav>
+                <?php if( $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::ACTIVITY_CREATE)) : ?>
+                    <a class="btn btn-primary" href="<?= $this->url('contract/new') ?>"><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a>
+                <?php endif; ?>
+                <?php if( $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
+                    <a class="btn btn-primary" href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
+
+        <h3><i class="icon-sliders"></i>
+            Critères de recherche
+
+            <small class="dropdown" id="memorizer">
+                <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span id="memorized-label">Critères enregistrés&hellip;</span>
+                    <span class="caret"></span>
+                </a>
+                <a href="" id="memorized-delete">
+                    <i class="icon-trash"></i>
+                </a>
+                <ul class="dropdown-menu" id="memorized-list">
+
+                    <li class="divider"></li>
+                    <li><a href="#" id="memorized-save"><i class="icon-floppy"></i>Mémoriser les critères actuels</a></li>
+                </ul>
+            </small>
+        </h3>
+        <div class="criteria-add row">
+
+            <div class="col-md-4">
+                <small>Filtres</small>
+                <select name="" id="criteria-adder" class="form-control">
+                    <option value="">Ajouter un filtre...</option>
+                    <?php foreach ($filtersType as $key => $label): ?>
+                        <option value="<?= $key ?>"><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <small>Affichage en mode projet</small><br>
+                <div class="material-switch">
+                    <input id="projectview"
+                           name="projectview"
+                           value="on"
+                           type="checkbox"  <?= $projectview == 'on' ? 'checked' : '' ?> />
+                    <label for="projectview" class="label-primary"></label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <small>Trier par</small>
+                <select name="sort" class="form-control">
+                    <?php foreach ($sortCriteria as $key => $label): ?>
+                        <option value="<?= $key ?>"<?= $sort == $key ? ' selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <small>Ignorer si la valeur est nulle</small>
+                <br>
+
+                <div class="material-switch">
+                    <input id="sortIgnoreNull" value="on"
+                           name="sortIgnoreNull"
+                           type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?> />
+                    <label for="sortIgnoreNull" class="label-primary"></label>
+                </div>
+                <?php /*
+                <label for="sortIgnoreNull">Ignorer si non-renseignée</label>
+                <input id="sortIgnoreNull" name="sortIgnoreNull" type="checkbox" <?= $sortIgnoreNull ? ' checked="checked"': '' ?>/>
+                */ ?>
+            </div>
+            <div class="col-md-2">
+                <small>Ordre</small>
+                <select name="sortDirection" class="form-control">
+                    <option value="asc"<?= $sortDirection == 'asc' ? ' selected' : '' ?>>Croissant</option>
+                    <option value="desc"<?= $sortDirection == 'desc' ? ' selected' : '' ?>>Décroissant</option>
+                </select>
+            </div>
+
+        </div>
+
+        <section id="criterias">
+            <!-- JS -->
+        </section>
+
+        <hr style="opacity: .3">
+
+        <nav class="text-right">
+            <a class="btn btn-default" href="<?= $this->url('contract/advancedsearch') ?>">
+                <i class="icon-trash"></i>
+                Réinitialiser les critères</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="icon-cw-outline"></i>
+                Actualiser</button>
+        </nav>
+    </form>
+
+    <div id="activities" style="opacity: 0">
+        <?php if($activities && count($activities) > 0): ?>
+        <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
+
+
+        <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity):
+            if( $projectview == true ) {
+                echo $this->partial('/oscar/project/project-item-openable.phtml', ['project' => $activity]);
+            } else {
+                echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]);
+            }
+        endforeach; /**/?>
+        <?php
+        if( stripos($_SERVER['REQUEST_URI'], '?') === false ){
+            $url = $_SERVER['REQUEST_URI'].'?';
+        } else {
+            $url = $_SERVER['REQUEST_URI'];
+        }
+        echo $this->pager($activities, preg_replace("/&page=[0-9]*/", '', $url) . '&page=%s') ?>
+    </div>
+<?php if ($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EXPORT)): ?>
+    <nav class="btn-group card" id="bottom-flash-menu">
+        <div class="menu-handler">
+            Options <i class="icon-cog"></i>
+        </div>
+        <?php $perimeter = $organizationsPerimeter ? '?perimeter=1' : '' ?>
+
+        <div id="exporter"></div>
+        <script>
+            require(['vue', 'ActivitiesExport'], function(Vue, ActivitiesExport){
+
+                new Vue({
+                    render(h){
+                        return h(ActivitiesExport.default, { props: {
+                                ids: [<?= $exportIds ?>],
+                                fields: <?= json_encode($fieldsCSV) ?>,
+                                urlPost: '<?= $this->url('contract/csv') . $perimeter ?>'
+                            }})
+                    }
+                }).$mount('#exporter');
+
+            });
+        </script>
+        <hr>
+        <form action="<?= $this->url('contract/csvpayments') . $perimeter ?>" class=" export-all-area" method="post">
+            <input type="hidden" name="ids" value="<?= $exportIds ?>">
+            <button type="submit" href="#" class="btn btn-default btn-xs">
+                <i class="icon-bank"></i>
+                Exporter les versements
+            </button>
+        </form>
+
+        <?php if($projectview == 'on' && count($projectsIds) > 0): ?>
+            <form action="<?= $this->url('project/export-many') ?>" method="post">
+                <input type="hidden" value="<?= implode(',', $projectsIds) ?>" name="ids" />
+                <button type="submit" class="btn btn-primary" name="format" value="csv">
+                    <i class="icon-download"></i>
+                    Exporter les projets (CSV)
+                </button>
+            </form>
+        <?php endif; ?>
+
+        <form action="<?= $this->url('contract/exportjson') ?>" class=" export-selection-area" method="post">
+            <input type="hidden" name="ids" value="<?= $exportIds ?>">
+            <button type="submit" href="#" class="btn btn-primary btn-xs">
+                <i class="icon-cube"></i>
+                Export JSON
+            </button>
+        </form>
+
+        <form action="<?= $this->url('contract/gant') ?>" class=" export-selection-area" method="get">
+            <input type="hidden" name="ids" value="<?= $exportIds ?>">
+            <button type="submit" href="#" class="btn btn-primary btn-xs">
+                <i class="icon-cube"></i>
+                Vue GANTT (beta)
+            </button>
+        </form>
+        <hr />
+        <div class="form-checker">
+            <div class="form-checker-handler">
+                &nbsp;
+            </div>
+            <div class="form-checker-label">
+                Vue compacte
+            </div>
+        </div>
+
+    </nav>
+    <script>
+        // Patch JS crado
+        Array.prototype.remove = function(value) {
+            console.log('Remove', value);
+            for( var i = this.length-1; i >= 0 ; i-- ){
+                if( this[i] == value )
+                    this.splice(i, 1);
+            };
+            return this;
+        };
+
+        require(['domReady', 'jquery'], function(domready, $){
+            domready(function(){
+                /**
+                 * Permute l'affichage détaillé / pas détaillé
+                 */
+                function toggleCompact(){
+                    $('.form-checker').toggleClass('checked');
+                    $('.activity .card-content').toggle();
+                    if( $('.form-checker').hasClass('checked') ){
+                        localStorage.setItem('activity_compact', 'on');
+                    } else {
+                        localStorage.removeItem('activity_compact');
+                    }
+                }
+
+                $('.form-checker').on('click', function(e){
+                    toggleCompact();
+                });
+
+                if( localStorage && localStorage.getItem('activity_compact') ){
+                    $('.form-checker').addClass('selected');
+                    toggleCompact();
+                }
+
+                $('body').on('mouseup', '[data-selectable].activity', function(e){
+
+                    var clickedActivity = $(e.currentTarget),
+                        ids = [];
+
+                    $('[data-selectable].selected').each(function(i, item){
+                        ids.push($(item).data('id'));
+                    });
+
+                    // Au moment de la résolution de ce script, le DOM n'est pas actualisé
+                    // Donc si l'activité n'a pas la class CSS, elle va l'avoir au prochain
+                    // "tick" de rafraichissement du DOM. D'où le script qui suit.
+                    if( !clickedActivity.hasClass('selected') ){
+                        ids.push(clickedActivity.data('id'))
+                    } else {
+                        ids.remove(clickedActivity.data('id'));
+                    }
+
+                    // On check le nombre d'ID selectionnés et on actualise le formulaire
+                    // d'exportation (et la visibilité si besoin).
+                    if( ids.length ){
+                        $('.export-selection-area').find('[name=ids]').val(ids.join(','));
+                        $('.export-selection-area').find('.total').text(ids.length);
+                        $('.export-selection-area').show();
+                    } else {
+                        $('.export-selection-area').hide();
+                    }
+                });
+
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php else: ?>
+
+
+<?php endif; ?>
+
+    <?php if( $activities != null && count($activities) == 0 ): ?>
+        <div class="alert-info alert">
+            <?php if ($search == 'Pourquoi la vie, l\'univers et le reste'): ?>
+                <h1 style="text-align: center; font-size: 72px">42</h1>
+            <?php elseif ($search == '42'): ?>
+                <small>Vous avez trouvé la réponse à la grande question sur la
+                    vie, l'univers et le reste... Peut-être que votre question
+                    est mal posée...
+                </small>
+
+            <?php else: ?>
+                La recherche n'a donnée aucun résultat...
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+
+    <script>
+
+        formatRepo = function (repo) {
+            if (repo.loading) return repo.text;
+
+            var markup = '<div class="clearfix">';
+            markup += repo.label || repo.text;
+            markup += '</div>';
+
+            return markup;
+        };
+
+        formatRepoSelection = function (repo) {
+            return repo.label || repo.text;
+        };
+
+        require(['domReady','select2', 'datepicker', 'hbs', 'bootbox'], function (domready,a,b,Handlebars,bootbox) {
+            domready(function(){
+                $('#activities').animate({'opacity': 1});
+                var labelsType = <?= json_encode($filtersType) ?>,
+                    baseParam = function () {
+                        return {
+                            placeholder: 'Rechercher...',
+                            width: '250px',
+                            ajax: {
+                                dataType: 'json',
+                                delay: 250,
+
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    console.log(data);
+                                    return {results: data.datas};
+                                },
+                                cache: true
+                            },
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            minimumInputLength: 3,
+                            id: function (dt) {
+                                return dt.uid;
+                            },
+                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+
+                        };
+                    };
+
+                var addcriterie = function (datas) {
+                    console.log("ADD", datas);
+                    datas.typeLabel = (labelsType[datas.type]);
+                    datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
+
+                    var dom, applyChange;
+
+                    if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
+                        dom = $(tpl(datas));
+                    }
+                    else if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
+                        dom = $(tplDate(datas));
+                    }
+                    else if(datas.type == 'as' || datas.type == 'ss' ) {
+                        datas.label = datas.type == 'as' ? 'Ayant le status'
+                            : "N'a pas le status";
+                        dom = $(tplStatus(datas));
+                    }
+                    else if(datas.type == 'cnt' ) {
+                        datas.label = "Pays d'une des organisations";
+                        dom = $(tplCountry(datas));
+                    }
+                    else if(datas.type == 'tnt' ) {
+                        datas.label = "Type d'organisation";
+                        dom = $(tplTypeOrga(datas));
+                    }
+                    else if(datas.type == 'at' || datas.type == 'st' ) {
+                        datas.label = datas.type == 'as' ? 'Ayant le status'
+                            : "N'a pas le status";
+                        dom = $(tplType(datas));
+                    }
+                    else if(datas.type == 'af' || datas.type == 'sf' ) {
+                        datas.label = datas.type == 'as' ? 'Ayant pour incidence financière'
+                            : "N'a pas pour incidence financière";
+                        dom = $(tplFinance(datas));
+                    }
+                    else if(datas.type == 'pp' ) {
+                        dom = $(tplStatic(datas));
+                    }
+                    else if(datas.type == 'fdt' ) {
+                        dom = $(tplStatic(datas));
+                    }
+                    else if(datas.type == 'mp' ) {
+                        dom = $(tplNumber(datas));
+                    }
+                    else if(datas.type == 'om' ) {
+                        dom = $(tplOrganizations(datas));
+                    }
+                    else if(datas.type == 'pm' ) {
+                        dom = $(tplPersons(datas));
+                    }
+                    else if(datas.type == 'aj' ){
+                        dom = $(tplMilestone(datas));
+                    }
+                    else if(datas.type == 'ds'){
+                        dom = $(tplDiscipline(datas));
+                    }
+                    else {
+                        console.error("le type", datas.type, "n'est pas pris en charge", datas);
+                        return;
+                    }
+
+                    applyChange = function(){
+                        console.log('applyChange');
+                        var filter = dom;
+                        filter.find('.criteria').val(datas.type
+                            + ';' + filter.find('.val1').val()
+                            + ';' + filter.find('.val2').val());
+                    };
+
+
+                    $("#criterias").append(dom);
+
+                    var formatRepo = function (repo) {
+                        if (repo.loading) return repo.text;
+
+                        var markup = '<div class="clearfix">';
+                        markup += repo.label || repo.text;
+                        markup += '</div>';
+
+                        return markup;
+                    };
+
+                    /**
+                     * Fonction de mise en forme de la donnée choisie.
+                     *
+                     * @param repo
+                     * @returns {*}
+                     */
+                    var formatRepoSelection = function (repo) {
+                        return repo.label || repo.text;
+                    };
+
+                    dom.find('.status, .types, .country').val(datas.val1);
+                    dom.find('.select2').select2();
+                    dom.find('.select2persons').select2({
+                            placeholder: 'Rechercher une personne...',
+                            width: '100%',
+                            allowClear: true,
+                            ajax: {
+                                url: '<?= $this->url('person/search') ?>',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    console.log(data);
+                                    return {results: data.datas};
+                                },
+                                cache: true
+                            },
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            minimumInputLength: 3,
+                            id: function (dt) {
+                                return dt.uid;
+                            },
+                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                        }
+                    );
+
+                    dom.find('.select2organizations').select2({
+                            placeholder: 'Rechercher une organisation...',
+                            width: '100%',
+                            allowClear: true,
+                            ajax: {
+                                url: '<?= $this->url('organization/search') ?>',
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    return {results: data.datas};
+                                },
+                                cache: true
+                            },
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            minimumInputLength: 3,
+                            id: function (dt) {
+                                console.log("id(",dt,")");
+                                return dt.uid;
+                            },
+                            templateResult: formatRepo, // omitted for brevity, see the source of this page
+                            templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                        }
+                    );
+
+                    if( datas.val2 ){
+                        dom.find('.role').val(datas.val2);
+                    }
+
+                    if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
+                        $('.datepicker').datepicker({
+                            format: "yyyy-mm-dd",
+                            todayBtn: "linked",
+                            clearBtn: true,
+                            language: "fr",
+                            autoclose: true,
+                            toggleActive: true
+                        }).on('changeDate', function(){
+                            applyChange();
+                        });
+                    }
+
+                    // Détection des changements pour mettre à jour le select
+                    dom.on('change', '.changer', function (e) {
+                        applyChange();
+                    });
+
+                    // Détection de la suppression du critère
+                    dom.on('click', '.delete', function (e) {
+                        e.preventDefault();
+                        dom.fadeOut(300, function () {
+                            dom.remove();
+                        });
+                    });
+
+                    var param = baseParam();
+
+                    if (datas.type == 'ap' || datas.type == 'sp') {
+                        dom.find('.roleOrganization').remove();
+                        param.ajax.url = '<?= $this->url('person') ?>';
+                        $(dom).find('.select2').select2(param);
+                    }
+
+                    if (datas.type == 'ao' || datas.type == 'so') {
+                        dom.find('.rolePerson').remove();
+                        param.ajax.url = '<?= $this->url('organization') ?>';
+                        $(dom).find('.select2').select2(param);
+                    }
+
+                };
+
+                // Gabarits pour les critères
+                var tpl = Handlebars.compile($('#criteria-tpl').html()),
+                    tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
+                    tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
+                    tplCountry = Handlebars.compile($('#country-tpl').html()),
+                    tplTypeOrga = Handlebars.compile($('#typeorga-tpl').html()),
+                    tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
+                    tplType = Handlebars.compile($('#type-criteria-tpl').html()),
+                    tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),
+                    tplStatic = Handlebars.compile($('#static-criteria-tpl').html()),
+                    tplNumber = Handlebars.compile($('#number-criteria-tpl').html()),
+                    tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
+                    tplOrganizations= Handlebars.compile($('#organizations-criteria-tpl').html()),
+                    tplMilestone = Handlebars.compile($('#milestones-criteria-tpl').html()),
+                    id = 1;
+
+                //
+                $('#criteria-adder').on('change', function (e) {
+                    addcriterie({
+                        id: id++,
+                        type: $(this).val(),
+                        typeLabel: labelsType[$(this).val()],
+                        val1: null,
+                        labelVal1: null,
+                        val2: null,
+                        labelVal2: null
+                    });
+                    $(this).val('');
+                });
+
+                var btnSave = $('#memorized-save'),
+                    lsName = 'search_activity_criteria',
+                    emptyLabel = 'critères enregistrés…',
+                    saved = localStorage.getItem(lsName),
+                    btnDelete = $("#memorized-delete"),
+                    memorizedLabel = $("#memorized-label"),
+                    memorized = $("#memorized-list"),
+                    form = $('#search'),
+                    /** Sauve les critères actifs **/
+                    saveMemorized,
+
+                    /** Supprimer les critères actifs **/
+                    deleteActiveMemorized
+                ;
+
+                if (!saved) {
+                    saved = [];
+                } else {
+                    saved = JSON.parse(saved);
+                }
+
+                /**
+                 * Suppression des critères de recherche actifs.
+                 */
+                btnDelete.on('click', function(e){
+                    e.preventDefault();
+                    var newSaved = [];
+                    memorized.find('.mem').each(function (i, item) {
+                        var crit = $(item),
+                            link = $(crit.find('a')),
+                            datas = {
+                                url: link.attr('href'),
+                                label: link.text()
+                            };
+                        if(!crit.hasClass('active')){
+                            newSaved.push(datas);
+                        }
+                    });
+                    localStorage.setItem(lsName, JSON.stringify(newSaved));
+                    saved = newSaved;
+                    drawMemorized();
+                })
+
+                // btnSave.addClass('disabled');
+                memorized.on('click', '#memorized-save', function(e){
+                    var url = '?' + form.serialize();
+                    bootbox.prompt({
+                        title: "Nom pour le filtre",
+                        value: memorizedLabel.text() == emptyLabel ? "" : memorizedLabel.text(),
+                        callback: function (result) {
+                            if (result === null) {
+                            } else {
+                                var override = false;
+                                saved.forEach(function (item) {
+                                    if (item.label == result) {
+                                        item.url = url;
+                                        override = true;
+                                    }
+                                });
+                                if (!override) {
+                                    saved.push({
+                                        label: result,
+                                        url: url
+                                    });
+                                }
+                                localStorage.setItem(lsName, JSON.stringify(saved));
+                                drawMemorized();
+                            }
+                        }
+                    });
+                });
+
+
+                function drawMemorized(){
+                    // La recherche en cours
+                    var current = '?' + form.serialize(),
+                        hasSelect = false,
+                        selected;
+                    memorized.empty();
+                    saved.forEach(function (item) {
+                        selected = '';
+                        if (current == item.url) {
+                            hasSelect = true;
+                            selected = " active";
+                            btnDelete.removeClass('disabled');
+                            memorizedLabel.text(item.label);
+                        }
+                        memorized.append('<li class="'+selected+' mem"><a href="' + item.url + '">' + item.label + '</a></li>');
+                    });
+                    if( !hasSelect ){
+                        memorizedLabel.text(emptyLabel);
+                    }
+                    memorized.append('<li class="divider"></li><li><a href="#" id="memorized-save"><i class="icon-floppy"></i>Mémoriser les critères actuels</a></li>');
+
+                }
+
+                <?php foreach( $criteria as $c ): ?>
+                addcriterie(<?= json_encode($c) ?>);
+                <?php endforeach; ?>
+                drawMemorized();
+            });
+        });
+    </script>

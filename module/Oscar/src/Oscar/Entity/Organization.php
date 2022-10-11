@@ -66,9 +66,10 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function isConnected($connectors = null)
     {
-
         foreach ($this->getConnectors() as $connector => $value) {
-            if ($connectors != null && !in_array($connector, $connectors)) continue;
+            if ($connectors != null && !in_array($connector, $connectors)) {
+                continue;
+            }
             if ($value) {
                 return true;
             }
@@ -79,7 +80,9 @@ class Organization implements ResourceInterface, IConnectedObject
     public static function getTypesSlug($typeStr)
     {
         static $slugs;
-        if (!$slugs) $slugs = [];
+        if (!$slugs) {
+            $slugs = [];
+        }
         if (!array_key_exists($typeStr, $slugs)) {
             $slugs[$typeStr] = Slugify::create()->slugify($typeStr);
         }
@@ -342,10 +345,17 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->setDateCreated(new \DateTime());
     }
 
-    public function getCodePcru(){
-        if( $this->getSiret() ) return $this->getSiret();
-        if( $this->getTvaintra() ) return $this->getTvaintra();
-        if( $this->getDuns() ) return $this->getDuns();
+    public function getCodePcru()
+    {
+        if ($this->getSiret()) {
+            return $this->getSiret();
+        }
+        if ($this->getTvaintra()) {
+            return $this->getTvaintra();
+        }
+        if ($this->getDuns()) {
+            return $this->getDuns();
+        }
         return null;
     }
 
@@ -508,7 +518,6 @@ class Organization implements ResourceInterface, IConnectedObject
         $responsables = [ProjectMember::ROLE_RESPONSABLE];
         /** @var OrganizationPerson $member */
         foreach ($this->getPersons() as $member) {
-
             if ($member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables)) {
                 return true;
             }
@@ -588,7 +597,6 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     public function getDateEnd()
     {
-
         return $this->dateEnd;
     }
 
@@ -1101,9 +1109,24 @@ class Organization implements ResourceInterface, IConnectedObject
     {
         return [
             'id' => $this->getId(),
-            'label' => $this->displayName(true),
+            'code' => $this->getCode(),
+            'shortname' => $this->getShortName(),
+            'label' => $this->getLabelCompact(),
+            'longname' => $this->getFullName(),
+            'city' => $this->getCity(),
+            'country' => $this->getCountry(),
+            'email' => $this->getEmail(),
+            'phone' => $this->getPhone(),
             'closed' => $this->isClose()
         ];
+    }
+
+    public function getLabelCompact(): string
+    {
+        $out = $this->isClose() ? '!fermé! ' : '';
+        $out .= $this->getCode() ? '[' . $this->getCode() . '] ' : '';
+        $out .= $this->getShortName() ? $this->getShortName() : $this->getFullName();
+        return $out;
     }
 
     public function log()
@@ -1130,7 +1153,9 @@ class Organization implements ResourceInterface, IConnectedObject
     public function getDateUpdatedStr()
     {
         if ($this->cGetDateUpdated == null) {
-            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
+            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format(
+                'c'
+            ) : $this->getDateCreatedStr();
         }
         return $this->cGetDateUpdated;
     }
