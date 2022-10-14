@@ -199,6 +199,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         // Récupération des filtres
 
+        $typesOrganization = $this->getOrganizationService()
+            ->getOrganizationTypesSelect();
+
+
         return [
             'filters' => $this->getProjectGrantService()->getActivitiesSearchCriteria(),
             'sorts' => $this->getProjectGrantService()->getActivitiesSearchSort(),
@@ -211,10 +215,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
             'roles_organizations' => $this->getOrganizationService()
                 ->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
+            'options_organization_types' => $this->getOrganizationService()
+                ->getOrganizationTypesSelect(),
             'used_filters' => $this->params()->fromQuery('f', []),
             'used_status' => $this->params()->fromQuery('st', []),
             'search' => $this->params()->fromQuery('q')
         ];
+
+
     }
 
     /**
@@ -2410,6 +2418,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // Critères de trie
             $sortCriteria = [
+            //    'hit' => 'Pertinence (Recherche textuelle)',
                 'dateCreated' => 'Date de création',
                 'dateStart' => 'Date début',
                 'dateEnd' => 'Date fin',
@@ -2978,12 +2987,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 if ($projectview == 'on') {
                     $qb->select('pr');
-                    $qb->orderBy('c.' . $sort, $sortDirection);
+                    if( $sort != 'hit' ){
+                        $qb->orderBy('c.' . $sort, $sortDirection);
+                    }
                 } else {
                     $qb->select('c, pr, m1, p1, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis');
-                    $qb->orderBy('c.' . $sort, $sortDirection);
-                    if ($sortIgnoreNull) {
-                        $qb->andWhere('c.' . $sort . ' IS NOT NULL');
+                    if( $sort != 'hit' ){
+                        $qb->orderBy('c.' . $sort, $sortDirection);
+                        if ($sortIgnoreNull) {
+                            $qb->andWhere('c.' . $sort . ' IS NOT NULL');
+                        }
                     }
                 }
                 $activities = new UnicaenDoctrinePaginator($qb, $page);

@@ -25,6 +25,7 @@ use Oscar\Entity\ContractType;
 use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\PcruPoleCompetitivite;
 use Oscar\Entity\PcruPoleCompetitiviteRepository;
@@ -172,7 +173,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
-    public function checkPFIRegex( $regex ) :array
+    public function checkPFIRegex($regex): array
     {
         $out = [
             'warnings' => [],
@@ -186,8 +187,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         $pfi = $this->getActivityRepository()->getDistinctPFI();
         foreach ($pfi as $pfiTested) {
-            if( $pfiTested == "" ) continue;
-            if( preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)){
+            if ($pfiTested == "") {
+                continue;
+            }
+            if (preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)) {
                 $out['valids'][] = $pfiTested;
             } else {
                 $badPfi = "Un ou plusieurs PFI ne correspondent pas au format attendu";
@@ -195,10 +198,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
             $out['count']++;
         }
-        if($badPfi){
+        if ($badPfi) {
             $out['error'][] = $badPfi;
         }
-        if(!$regex){
+        if (!$regex) {
             $out['error'][] = "Aucune regex renseignée";
         }
 
@@ -260,19 +263,19 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param Person $to
      * @param Activity $activity
      */
-    public function replacePerson(Person $from, Person $to, Activity $activity) :void
+    public function replacePerson(Person $from, Person $to, Activity $activity): void
     {
-       $date = new \DateTime();
+        $date = new \DateTime();
 
-       /** @var ActivityPerson $activityPerson */
+        /** @var ActivityPerson $activityPerson */
         foreach ($activity->getPersons() as $activityPerson) {
-           if( $activityPerson->getPerson()->getId() == $from->getId() ){
-               $roleObj = $activityPerson->getRoleObj();
-               $this->getPersonService()->personActivityAdd($activity, $to, $roleObj, $date);
-               $activityPerson->setDateEnd($date);
-               $this->getEntityManager()->flush($activityPerson);
-           }
-       }
+            if ($activityPerson->getPerson()->getId() == $from->getId()) {
+                $roleObj = $activityPerson->getRoleObj();
+                $this->getPersonService()->personActivityAdd($activity, $to, $roleObj, $date);
+                $activityPerson->setDateEnd($date);
+                $this->getEntityManager()->flush($activityPerson);
+            }
+        }
     }
 
 
@@ -301,7 +304,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return Activity|null
      * @throws OscarException
      */
-    public function getActivityByImportedUid( string $importedUid, $throw = true ) :?Activity
+    public function getActivityByImportedUid(string $importedUid, $throw = true): ?Activity
     {
         $activity = $this->getActivityRepository()->findOneBy(['centaureId' => $importedUid]);
         if (!$activity) {
@@ -321,7 +324,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getProjectById( int $id, bool $throw = true ) :?Project
+    public function getProjectById(int $id, bool $throw = true): ?Project
     {
         return $this->getProjectService()->getProject($id, $throw);
     }
@@ -448,9 +451,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param string $search
      * @param array $options
      */
-    public function searchActivities( string $search, array $options ) :array
+    public function searchActivities(string $search, array $options): array
     {
-
         //
         $sort = 'hit';
         $direction = 'desc';
@@ -459,17 +461,17 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $ids_search = null;
         $restricted_ids = null;
 
-        if( array_key_exists('restricted_ids', $options) ){
+        if (array_key_exists('restricted_ids', $options)) {
             $restricted_ids = $options['restricted_ids'];
         }
 
         // Critère de trie
-        if( array_key_exists('sort', $options) ){
+        if (array_key_exists('sort', $options)) {
             $sort = $options['sort'];
         }
 
         // Ordre de trie
-        if( array_key_exists('direction', $options) ){
+        if (array_key_exists('direction', $options)) {
             $direction = $options['direction'];
         }
 
@@ -493,12 +495,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         $step = $begin = microtime(true);
 
-        if( $restricted_ids === false && count($options['filters']) == 0 ){
+        if ($restricted_ids === false && count($options['filters']) == 0) {
             $restricted_ids = $this->getActivityRepository()->getActivitiesIdsAll();
         }
 
         // Recherche textuel via Elastic
-        if( $search ){
+        if ($search) {
             try {
                 $output['search_text'] = $search;
                 $ids_search = $this->search($search);
@@ -510,8 +512,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $step = microtime(true);
         }
 
-        if( $restricted_ids ){
-            if( $ids_search === null ){
+        if ($restricted_ids) {
+            if ($ids_search === null) {
                 $ids_search = $restricted_ids;
             } else {
                 $ids_search = array_intersect($ids_search, $restricted_ids);
@@ -519,7 +521,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
 
         // Critères des filtres
-        if( array_key_exists('filters', $options) ){
+        if (array_key_exists('filters', $options)) {
             $criteriaDef = $this->getActivitiesSearchCriteria();
             foreach ($options['filters'] as $filterStr) {
                 $filter_info = [
@@ -533,7 +535,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 $params = explode(';', $filterStr);
                 $type = $params[0];
 
-                if( !array_key_exists($type, $criteriaDef) && $type != 's' ){
+                if (!array_key_exists($type, $criteriaDef) && $type != 's') {
                     $this->getLoggerService()->error("Mauvais filtre '$type'");
                     $filter_info['error'] = "Filtre '$type' inconnu";
                     $output['filters_infos'][] = $filter_info;
@@ -551,30 +553,29 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
                 try {
                     switch ($type) {
-
                         case 'ao' :
-                            if( !$value1 ){
+                            if (!$value1) {
                                 throw new OscarException("Vous devez préciser une structure");
                             }
                             $ids = $this->getActivityRepository()->getIdsForOrganizationWithRole($value1, $value2);
                             break;
 
                         case 'so' :
-                            if( !$value1 ){
+                            if (!$value1) {
                                 throw new OscarException("Vous devez préciser une structure");
                             }
                             $ids = $this->getActivityRepository()->getIdsWithoutOrganizationWithRole($value1, $value2);
                             break;
 
                         case 'sp' :
-                            if( !$value1 ){
+                            if (!$value1) {
                                 throw new OscarException("Vous devez préciser une personne");
                             }
                             $ids = $this->getActivityRepository()->getIdsWithoutPersonWithRole($value1, $value2);
                             break;
 
                         case 'ap' :
-                            if( !$value1 ){
+                            if (!$value1) {
                                 throw new OscarException("Vous devez préciser une personne");
                             }
                             $ids = $this->getActivityRepository()->getIdsForPersonWithRole($value1, $value2);
@@ -585,13 +586,33 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                             try {
                                 $idsPerson = StringUtils::intArray($params[1]);
                             } catch (\Exception $e) {
-                                throw new \Exception("Mauvais format : " . $e->getMessage() );
+                                throw new \Exception("Mauvais format : " . $e->getMessage());
                             }
                             $ids = $this->getActivityRepository()->getIdsForPersons($idsPerson);
                             break;
 
                         case 'cnt' :
-                            $ids = [];
+                            $pays = explode(',', $params[1]);
+
+                            // IDS des organizations
+                            /** @var OrganizationRepository $organizationRepository */
+                            $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+                            $organizationIds = $organizationRepository->getIdWithCountries($pays);
+
+                            $ids = $this->getActivityRepository()
+                                ->getActivitiesIdsForOrganizations($organizationIds, false);
+                            break;
+
+                        case 'tnt' :
+                            // Activités impliquant certains types d'organisation
+                            $types = explode(',', $params[1]);
+
+                            // IDS des organizations
+                            /** @var OrganizationRepository $organizationRepository */
+                            $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+                            $organizationIds = $organizationRepository->getIdWithTypes($types);
+                            $ids = $this->getActivityRepository()
+                                ->getActivitiesIdsForOrganizations($organizationIds, false);
                             break;
 
                         case 's' :
@@ -599,6 +620,38 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                             $filter_info['param'] = $value1;
                             $filter_info['debug'] = $statusarray;
                             $ids = $this->getActivityRepository()->getIdsWithStatus($statusarray);
+                            break;
+
+                        // Critère liè aux DATES
+                        case 'add' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates($dateDebut, $dateFin, 'dateStart');
+                            break;
+
+                        case 'adf' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates($dateDebut, $dateFin, 'dateEnd');
+                            break;
+
+                        case 'adc' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates(
+                                $dateDebut,
+                                $dateFin,
+                                'dateCreated'
+                            );
+                            break;
+                        case 'adm' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates(
+                                $dateDebut,
+                                $dateFin,
+                                'dateUpdated'
+                            );
                             break;
 
 
@@ -610,14 +663,18 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                     $filter_info['total'] = count($ids);
                     $filter_info['time'] = microtime(true) - $step;
 
-                    $this->getLoggerService()->info(sprintf("Filter result '%' take %s ms with %s result(s)",
-                        $filterStr,
-                        $filter_info['time'],
-                        $filter_info['total']));
+                    $this->getLoggerService()->info(
+                        sprintf(
+                            "Filter result '%' take %s ms with %s result(s)",
+                            $filterStr,
+                            $filter_info['time'],
+                            $filter_info['total']
+                        )
+                    );
 
                     $step = microtime(true);
 
-                    if( $ids_search === null ){
+                    if ($ids_search === null) {
                         $ids_search = $ids;
                     } else {
                         $ids_search = array_intersect($ids_search, $ids);
@@ -630,47 +687,54 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
         }
 
-        $start = ($page-1)*$resultByPage;
+        $start = ($page - 1) * $resultByPage;
         $output['total'] = count($ids_search);
         $idsKeep = array_slice($ids_search, $start, $resultByPage);
 
-        if( count($idsKeep) > 0 ){
+        if (count($idsKeep) > 0) {
             $queryBuilder = $this->getActivityRepository()->getBaseQueryBuilderByIdsPaged(
-                $idsKeep, $page, $resultByPage);
+                $idsKeep,
+                $page,
+                $resultByPage
+            );
 
-            if( $sort == "hit" ){
+            if ($sort == "hit") {
                 $resultRaw = $queryBuilder->getQuery()->getResult();
-                $pertinenceFunction = function( $a1, $a2) use ($idsKeep){
+                $pertinenceFunction = function ($a1, $a2) use ($idsKeep) {
                     $a1ID = array_search($a1->getId(), $idsKeep);
                     $a2ID = array_search($a2->getId(), $idsKeep);
                     return $a1ID > $a2ID;
                 };
                 usort($resultRaw, $pertinenceFunction);
             } else {
-                $queryBuilder->orderBy('c.'.$sort, $direction);
+                $queryBuilder->orderBy('c.' . $sort, $direction);
                 $resultRaw = $queryBuilder->getQuery()->getResult();
             }
 
             $output['activities'] = $resultRaw;
             $output['total_page'] = count($resultRaw);
             $output['total_page_time'] = microtime(true) - $step;
-
         }
 
         $output['total_time'] = microtime(true) - $begin;
-        $this->getLoggerService()->info(sprintf(
-            "Recherche '%s' (took %s ms)",
-            $output['search_text'],
-            $output['total_time']));
+        $this->getLoggerService()->info(
+            sprintf(
+                "Recherche '%s' (took %s ms)",
+                $output['search_text'],
+                $output['total_time']
+            )
+        );
 
         return $output;
     }
 
-    protected function debug__displayIds( array $ids ){
+    protected function debug__displayIds(array $ids)
+    {
         echo " = ";
         $sep = "";
         foreach ($ids as $id) {
-            echo "$sep$id"; $sep=',';
+            echo "$sep$id";
+            $sep = ',';
         }
         echo "\n---\n";
     }
@@ -681,10 +745,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      *
      * @return string[]
      */
-    public function getActivitiesSearchSort() :array
+    public function getActivitiesSearchSort(): array
     {
         static $_activitiesSearchSort;
-        if( $_activitiesSearchSort === null ){
+        if ($_activitiesSearchSort === null) {
             $_activitiesSearchSort = [
                 'hit' => 'Pertinence',
                 'dateUpdated' => 'Date de mise à jour',
@@ -703,10 +767,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $_activitiesSearchSort;
     }
 
-    public function getActivitiesSearchStatus() :array
+    public function getActivitiesSearchStatus(): array
     {
         return Activity::getStatusSelect();
-
     }
 
     /**
@@ -714,10 +777,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      *
      * @return string[]
      */
-    public function getActivitiesSearchDirection() :array
+    public function getActivitiesSearchDirection(): array
     {
         static $_activitiesSearchDirection;
-        if( $_activitiesSearchDirection === null ){
+        if ($_activitiesSearchDirection === null) {
             $_activitiesSearchDirection = [
                 'asc' => 'Croissant',
                 'desc' => 'Décroissant',
@@ -731,9 +794,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      *
      * @return string[]
      */
-    public function getActivitiesSearchCriteria() :array {
+    public function getActivitiesSearchCriteria(): array
+    {
         static $activitiesSearchCriteria;
-        if( $activitiesSearchCriteria === null ){
+        if ($activitiesSearchCriteria === null) {
             $activitiesSearchCriteria = [
                 'ap' => "Impliquant la personne",
                 'sp' => "N'impliquant pas la personne",
@@ -971,7 +1035,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $datas;
     }
 
-    public function getMilestoneTypesArray() :array
+    public function getMilestoneTypesArray(): array
     {
         $milestones = [];
         /** @var DateType $milestoneType */
@@ -981,12 +1045,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $milestones;
     }
 
-    protected function getRoleRepository() : RoleRepository
+    protected function getRoleRepository(): RoleRepository
     {
         return $this->getEntityManager()->getRepository(Role::class);
     }
 
-    public function getRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT) :array
+    public function getRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
     {
         return $this->getRoleRepository()->getRolesAtActivityArray($format);
     }
@@ -1494,7 +1558,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $out;
     }
 
-    public function getAvailableDocumentTypes( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT ) :array
+    public function getAvailableDocumentTypes(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT): array
     {
         return OscarFormatterFactory::getFormatter($format)->format($this->getDocumentTypes());
     }
@@ -1926,7 +1990,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return null|object
      * @throws \Exception
      */
-    public function getActivityDate(int $id, $throw = true) :ActivityDate
+    public function getActivityDate(int $id, $throw = true): ActivityDate
     {
         $activityDate = $this->getActivityDateRepository()->find($id);
         if ($throw === true && !$activityDate) {
@@ -1943,7 +2007,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return bool
      * @throws \Exception
      */
-    public function deleteActivityDate(ActivityDate $activityDate, $throw = true) :void
+    public function deleteActivityDate(ActivityDate $activityDate, $throw = true): void
     {
         try {
             $this->getEntityManager()->remove($activityDate);
@@ -2322,7 +2386,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->getSingleResult();
     }
 
-    public function getBaseDataTemplate() :array
+    public function getBaseDataTemplate(): array
     {
         //
         $datas = [
@@ -2686,7 +2750,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /**
      * @return array
      */
-    public function getDocumentTypes() :array
+    public function getDocumentTypes(): array
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
     }
@@ -2783,7 +2847,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /// REPOSITORY ACCESS
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function getActivityDateRepository() :ActivityDateRepository
+    public function getActivityDateRepository(): ActivityDateRepository
     {
         return $this->getEntityManager()->getRepository(ActivityDate::class);
     }

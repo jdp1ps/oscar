@@ -9,7 +9,7 @@
     </span>
 
     <div v-show="mode == 'edit'" class="selector">
-      <input type="text" :value="sendValue" :name="name" />
+      <input type="hidden" :value="sendValue" :name="name" />
       <div v-for="label, key in options">
         <label :for="'choose-' +key">
           <input type="checkbox" v-model="selected"

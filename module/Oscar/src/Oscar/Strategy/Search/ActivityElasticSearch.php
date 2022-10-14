@@ -171,7 +171,20 @@ class ActivityElasticSearch implements ActivitySearchStrategy
                 'size' => 10000,
                 'query' => [
                     'query_string' => [
-                        'query' => sprintf('%s OR  %s*', $search, $search)
+                        'query' => sprintf('%s OR  %s*', $search, $search),
+                        'fields' => [
+                            'acronym^10',
+                            'numerotation^9',
+                            'eotp^9',
+                            'numbers^9',
+                            'oscar^9',
+                            'label^7',
+                            'description^7',
+                            'project^5',
+                            'disciplines^5',
+                            'activitytype^2',
+                            'partners^5',
+                            'members^5']
                     ]
                 ]
             ]

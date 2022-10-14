@@ -26,6 +26,7 @@
                 return h(ActivitySearchUi, {
                     props: {
                         url: '<?= $this->url('contract/api') ?>',
+                        moment: moment,
                         sortters: <?= json_encode($sorts) ?>,
                         filters: <?= json_encode($filters) ?>,
                         directions: <?= json_encode($directions) ?>,
@@ -36,6 +37,7 @@
                         roles_organizations: <?= json_encode($roles_organizations) ?>,
                         options_pays: <?= json_encode($options_pays) ?>,
                         used_filters: <?= json_encode($used_filters) ?>,
+                        options_organization_types: <?= json_encode($options_organization_types) ?>,
                         used_status: <?= json_encode($used_status) ?>,
                         search: <?= json_encode($search) ?>
                     }

@@ -238,6 +238,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 ->select('o.country')
                 ->from(Organization::class, 'o')
                 ->distinct('o.country')
+                ->where('o.country IS NOT NULL AND o.country != \'\'')
                 ->getQuery()
                 ->getScalarResult();
             foreach ($countries as $r) {
@@ -337,7 +338,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
         foreach ($types as $type) {
-            $options[$type->getId()] = $type;
+            $options[$type->getId()] = (string) $type;
         }
         return $options;
     }

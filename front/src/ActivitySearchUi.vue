@@ -6,6 +6,18 @@
         {{ error }}
       </div>
     </div>
+
+    <div class="overlay" v-if="debug">
+      <div class="overlay-content">
+        <a href="#" @click="debug = ''">
+          <i class="icon-bug"></i>
+          Fermer</a>
+        <pre>
+          {{ debug }}
+        </pre>
+      </div>
+    </div>
+
     <transition name="fade">
       <div class="vue-loader" v-show="loaderMsg">
         <div class="content-loader">
@@ -20,15 +32,7 @@
       {{ title }}
     </h1>
 
-
-    <hr>
-
-    <hr>
-    {{ filters_obj }}
-
     <form action="">
-
-
       <div class="input-group input-group-lg">
         <input placeholder="Rechercher dans l'intitulé, code PFI...…"
                class="form-control input-lg" name="q"
@@ -37,6 +41,7 @@
             <button type="submit" class="btn btn-primary">Rechercher</button>
         </span>
       </div>
+
       <h3>Critères de recherche</h3>
       <div class="row">
         <div class="col-md-4">
@@ -116,9 +121,45 @@
         <a-s-filter-select v-else-if="f.type == 'cnt'" :type="'cnt'"
                            :value1="f.value1"
                            :label="'Pays (d\'une organisation)'"
+                           :icon="'icon-flag'"
+                           :error="f.error"
+                           :options="options_pays"
+                           @delete="handlerDeleteFilter(f)"/>
 
+        <select-key-value v-else-if="f.type == 'tnt'" :type="'tnt'"
+                           :value1="f.value1"
+                           :label="'Type d\'organisation'"
+                           :icon="'icon-tag'"
+                           :error="f.error"
+                           :options="options_organization_types"
+                           @delete="handlerDeleteFilter(f)"/>
+
+        <single-date-field v-else-if="f.type == 'add'" :type="f.type"
+                           :moment="moment"
+                           :value1="f.value1"
+                           :value2="f.value2"
+                           :label="'Date de début'"
                            :error="f.error"
                            @delete="handlerDeleteFilter(f)"/>
+
+        <single-date-field v-else-if="f.type == 'adf'" :type="f.type"
+                           :moment="moment" :error="f.error"
+                           :value1="f.value1" :value2="f.value2"
+                           :label="'Date de fin'"
+                           @delete="handlerDeleteFilter(f)"/>
+
+        <single-date-field v-else-if="f.type == 'adc'" :type="f.type"
+                           :moment="moment" :error="f.error"
+                           :value1="f.value1" :value2="f.value2"
+                           :label="'Date de Création'"
+                           @delete="handlerDeleteFilter(f)"/>
+
+        <single-date-field v-else-if="f.type == 'adm'" :type="f.type"
+                           :moment="moment" :error="f.error"
+                           :value1="f.value1" :value2="f.value2"
+                           :label="'Date de Mise à jour'"
+                           @delete="handlerDeleteFilter(f)"/>
+
 
         <div v-else class="card critera">
           non géré {{ f }}
@@ -135,16 +176,15 @@
       </nav>
 
     </form>
-    <pre>{{ urlSearch }} </pre>
 
     <section v-if="search !== null">
       <h2 class="text-right">{{ totalResultQuery }} résultat(s)</h2>
       <transition-group name="list" tag="div">
-        <activity :activity="activity" v-for="activity in activities" :key="activity.id" :compact="ui_vuecompact"/>
+        <activity :activity="activity" v-for="activity in activities"
+                  @debug="catchDebug"
+                  :key="activity.id" :compact="ui_vuecompact"/>
       </transition-group>
     </section>
-
-    <pre>{{ filters_obj }}</pre>
 
   </div>
 </template>
@@ -159,6 +199,8 @@ import vSelect from 'vue-select';
 import ASFilterPerson from "./searchfilters/ASFilterPerson";
 import ASFilterOrganization from "./searchfilters/ASFilterOrganization";
 import ASFilterSelect from "./searchfilters/ASFilterSelect";
+import SelectKeyValue from "./searchfilters/SelectKeyValue";
+import SingleDateField from "./searchfilters/SingleDateField";
 
 // import OscarGrowl from './OscarGrowl.vue';
 // import OscarBus from './OscarBus.js';
@@ -180,6 +222,7 @@ export default {
     first: {required: true, typ: Boolean},
     title: {default: "Activités de recherche"},
     sortters: {required: true},
+    moment: {require: true },
     filters: {required: true},
     directions: {required: true},
     direction: { default: 'desc' },
@@ -190,6 +233,7 @@ export default {
     search: { require: false },
     selected_status: { default: [] },
     options_pays: { default: [] },
+    options_organization_types: { default: [] },
     used_filters: { require: false, default: []},
     used_status: { require: false, default: []},
 
@@ -204,7 +248,9 @@ export default {
     vSelect,
     OrganizationAutoCompleter,
     ASFilterPerson,
-    ASFilterSelect
+    ASFilterSelect,
+    SelectKeyValue,
+    SingleDateField
   },
 
   data() {
@@ -217,7 +263,8 @@ export default {
       activities: [],
       ui_vuecompact: true,
       filters_obj: [],
-      selecting_filter: ""
+      selecting_filter: "",
+      debug: ''
     }
   },
 
@@ -245,6 +292,9 @@ export default {
   },
 
   methods: {
+    catchDebug(arg){
+      this.debug = arg;
+    },
 
     ///////////////////////////////////////////////////////////
     // Capture des interactions
@@ -358,6 +408,7 @@ export default {
 
     // Filtres
     this.used_filters.forEach(filterStr => {
+      console.log("Traitement du filtre ", filterStr);
       let spt = filterStr.split(';');
       let obj = {
         type: spt[0],

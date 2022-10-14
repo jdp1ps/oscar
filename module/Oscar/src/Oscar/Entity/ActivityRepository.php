@@ -305,6 +305,38 @@ class ActivityRepository extends EntityRepository
         );
     }
 
+    public function getBeetween2Dates( string $from, string $to, string $field ) :array {
+
+        if( !$from && !$to ){
+            throw new OscarException("Le filtrage par date implique des dates");
+        }
+
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id');
+
+        $parameters = [
+
+        ];
+
+        if( $from ){
+            $qb->andWhere('a.'.$field . ' >= :from');
+            $parameters['from'] = $from;
+        }
+
+        if( $to ){
+            $qb->andWhere('a.'.$field . ' <= :to');
+            $parameters['to'] = $to;
+        }
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
     public function getActivitiesIdsAll() :array {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id');

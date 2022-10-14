@@ -1,5 +1,5 @@
 <template>
-  <article class="card" :class="'activity-item-' +activity.statutId">
+  <article class="card" :class="'activity-item-' +activity.statutId" @click.shift="handlerDebug(activity)">
     <h3 class="card-title">
             <span class="picto" :class="'status-'+activity.statutId">
                 <i class="icon"></i>
@@ -32,6 +32,16 @@
 
     <div class="card-content">
       <div class="row metas">
+        <div class="col-md-12">
+          <span class="number">
+            <small class="key number-label">N°OSCAR</small>
+            <strong class="value number-value">{{ activity.numOscar }} </strong>
+          </span>
+          <span class="number">
+            <small class="key number-label">PFI</small>
+            <strong class="value number-value">{{ activity.PFI }} </strong>
+          </span>
+        </div>
         <div class="col-sm-12">
           Signature :
           <strong v-if="activity.dateSigned">{{ activity.dateSigned | fullDate }}</strong>
@@ -115,6 +125,12 @@ export default {
   props: {
     activity: {required: true},
     compact: {type: Boolean, default: false}
+  },
+  methods: {
+    handlerDebug(dt){
+      console.log(dt);
+      this.$emit('debug', dt);
+    }
   }
 }
 </script>

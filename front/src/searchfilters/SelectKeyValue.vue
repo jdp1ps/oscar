@@ -11,6 +11,9 @@
             v-model="valueObj.value1"
             :placeholder="placeholder"
             multiple
+            label="label"
+            multiple
+            :reduce="item => item.id"
             :options="chooses"
              />
       <div class="alert alert-danger" v-if="error">
@@ -52,12 +55,14 @@ export default {
 
   computed: {
     chooses(){
+       console.log("build chooses : ", this.options);
       let out = [];
-      this.options.forEach(item => {
-        if( item ){
-          out.push(item)
-        }
-      })
+      Object.keys(this.options).forEach(key => {
+        out.push({
+          id: key,
+          label: this.options[key]
+        })
+      });
       return out;
     }
   },

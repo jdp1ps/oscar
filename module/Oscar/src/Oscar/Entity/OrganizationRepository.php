@@ -77,6 +77,51 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         return array_map('current', $result);
     }
 
+    /**
+     * @param array $countries
+     * @return array
+     */
+    public function getIdWithCountries( array $countries ):array
+    {
+        $parameters = [
+            'countries' => $countries
+        ];
+
+        $query = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->where('o.country IN(:countries)');
+
+
+        $query->setParameters($parameters);
+
+        $result = $query->getQuery()->getResult();
+        return array_map('current', $result);
+    }
+
+    /**
+     * Retourne les IDS des structures ayant pour type.
+     *
+     * @param array $typesIDs
+     * @return array
+     */
+    public function getIdWithTypes( array $typesIDs ):array
+    {
+        $parameters = [
+            'types' => $typesIDs
+        ];
+
+        $query = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->where('o.typeObj IN(:types)');
+
+
+        $query->setParameters($parameters);
+
+        $result = $query->getQuery()->getResult();
+        return array_map('current', $result);
+    }
+
+
 
     public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
         $personOrganization = new OrganizationPerson();

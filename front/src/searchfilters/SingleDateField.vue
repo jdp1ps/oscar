@@ -2,21 +2,33 @@
   <!-- Impliquant la personne -->
   <div class="criteria card" :class="valueObj.type + error ? ' has-error' : ''">
     <span class="filter-label">
-      <i :class="icon"></i>
+      <i class="icon-calendar"></i>
       {{ label }}
-      <input type="text" name="f[]" :value="valueObj.type +';' +valueObj.value1.join(',') +';' + valueObj.value2"/>
+      <input type="hidden" name="f[]" :value="valueObj.type +';' +valueObj.value1 +';' + valueObj.value2"/>
     </span>
-    <span>
-      <v-select
-            v-model="valueObj.value1"
-            :placeholder="placeholder"
-            multiple
-            :options="chooses"
-             />
+
+    <span class="date-input">
+      <span>
+        Entre / à partir
+      </span>
+      <span>
+        <datepicker :moment="moment" v-model="valueObj.value1" />
+      </span>
+    </span>
+
+    <span class="date-input">
+      <span>
+        Jusqu'à
+      </span>
+      <span>
+        <datepicker :moment="moment" v-model="valueObj.value2" :format="'YYYY-mm-dd'" />
+      </span>
+    </span>
+
       <div class="alert alert-danger" v-if="error">
        {{ error }}
       </div>
-    </span>
+
     <span class="nav-actions" @click.prevent="$emit('delete')">
       <i class="icon-trash"></i>
     </span>
@@ -24,10 +36,11 @@
 </template>
 <script>
 
-import vSelect from 'vue-select';
+import Datepicker from "../components/Datepicker";
 
 export default {
   props: {
+    moment: {require: true},
     value: {require: true},
     value1: {require: true},
     value2: {require: true},
@@ -44,38 +57,35 @@ export default {
     return {
       valueObj: {
         type: this.type,
-        value1: this.value1.split(','),
+        value1: this.value1,
         value2: this.value2
       }
     }
   },
 
   computed: {
-    chooses(){
-      let out = [];
-      this.options.forEach(item => {
-        if( item ){
-          out.push(item)
-        }
-      })
-      return out;
-    }
+
   },
 
   components: {
-    vSelect
+    Datepicker
+    //Datepicker
   },
 
   methods: {
     setValue(val) {
-      let split = val.split(';');
-      this.valueObj.type = split[0];
-      this.valueObj.value1 = split[1];
-      this.valueObj.value2 = split[2] ? split[2] : '';
+      console.log('setValue', val);
+      if( val ){
+        let split = val.split(';');
+        this.valueObj.type = split[0];
+        this.valueObj.value1 = split[1];
+        this.valueObj.value2 = split[2] ? split[2] : '';
+      }
     }
   },
 
   mounted() {
+    console.log("Datepicker mounted");
     if (this.value) {
       this.setValue(this.value);
     }
