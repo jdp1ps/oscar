@@ -2066,11 +2066,10 @@ class TimesheetController extends AbstractOscarController
                         break;
                 }
             } catch (\Exception $e) {
-                throw new \HttpException($e->getMessage());
+                throw new OscarException($e->getMessage());
             }
             $this->redirect()->toRoute('timesheet/validations2');
         }
-
 
         // Lecture des informations
         if( $this->isAjax() || $this->params()->fromQuery('f', null) == 'json' ){
@@ -2090,9 +2089,6 @@ class TimesheetController extends AbstractOscarController
             }
             return $this->jsonOutput($json);
         }
-
-
-
 
         return [
 

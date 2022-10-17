@@ -1006,6 +1006,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     {
         $declarer = $this->getPersonService()->getPerson($declarer_id);
         $periodObj = PeriodInfos::getPeriodInfosObj($period);
+        $validator = $this->getPersonService()->getPerson($validator_id);
 
         $year = $periodObj->getYear();
         $month = $periodObj->getMonth();
@@ -1026,12 +1027,18 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         );
 
         // Récupération des données à traiter
-        $queryValidationPeriod = $this->getValidationPeriodRepository()->getValidationsDeclarerPeriod($declarer->getId(), $periodObj->getYear(), $periodObj->getMonth());
+        $queryValidationPeriod = $this->getValidationPeriodRepository()
+            ->getValidationsDeclarerPeriod($declarer->getId(), $periodObj->getYear(), $periodObj->getMonth());
 
         $vps = $queryValidationPeriod->getResult();
+        $validable = false;
 
         /** @var ValidationPeriod $v */
         foreach ($vps as $v) {
+
+            if( $v->isValidator($validator) ){
+                $validable = true;
+            }
 
             if( $v->isActivityValidation() ){
                 if( !array_key_exists($v->getObjectId(), $activitiesTmp) ){
@@ -1096,16 +1103,17 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         }
 
         $out = [
-          'datas' => [
-              'activities' => $activitiesInfos,
-              'horslots' => $horsLotsInfos,
-              'total' => 0.0
-          ],
           'infos' => [
+              'validable' => $validable,
               'period' => $periodObj->toArray(),
               'declarer' => $declarer->toJson(),
               'horslots' => $horsLots,
               'days' => $daysDetails
+          ],
+          'datas' => [
+              'activities' => $activitiesInfos,
+              'horslots' => $horsLotsInfos,
+              'total' => 0.0
           ]
         ];
 
@@ -1162,12 +1170,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                             'by_days' => []
                         ];
                     }
-
                 }
 
                 if( !array_key_exists($group, $out['datas']['horslots']) ){
                     die("Pas de prétableau pour le group : $group");
                 }
+
                 if( !array_key_exists($code, $out['datas']['horslots'][$group]['subs']) ){
                     echo "<pre> <strong>[ $group / $code ]</strong>\n";
                     die("Pas de prétableau pour $code");

@@ -172,12 +172,13 @@
           </footer>
 
           <hr>
+
           <nav class="text-center">
-            <button class="btn btn-danger" @click="handlerReject(details)">
-              <i class="icon-cancel-alt"></i>
+            <button class="btn btn-danger" @click="handlerReject(details)" v-if="details.validation.infos.validable">
+              <i class="icon-minus-circled"></i>
               Refuser
             </button>
-            <form action="" method="post" class="form-inline">
+            <form action="" method="post" class="form-inline" v-if="details.validation.infos.validable">
               <input type="hidden" name="period" :value="details.period"/>
               <input type="hidden" name="action" value="validate"/>
               <input type="hidden" name="declarer" :value="details.declarer"/>
@@ -186,11 +187,14 @@
                 Valider la déclaration pour cette période
               </button>
             </form>
+            <button class="btn btn-default" @click.prevent="loadingDetails = null; details = null">
+              <i class="icon-cancel-alt"></i>
+              Retour
+            </button>
           </nav>
         </div>
       </div>
     </div>
-
 
     <div class="row" v-if="synthesis">
 
@@ -295,10 +299,17 @@
               <span v-if="vp.statusKey != 'conflict' && vp.statusKey != 'valid' ">
                 Validateurs : <span class="cartouche" v-for="v in vp.validators">{{ v }}</span>
               </span>
+
               <span v-if="vp.validable" class="buttons">
                 <button class="btn btn-default btn-info" @click="handlerDetail(vp)">
                   <i class="icon-zoom-in-outline"></i>
                   Vérifier et valider
+                </button>
+              </span>
+              <span v-else>
+                <button class="btn btn-default" @click="handlerDetail(vp)">
+                  <i class="icon-zoom-in-outline"></i>
+                  Voir le détail
                 </button>
               </span>
           </article>
