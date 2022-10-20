@@ -1432,7 +1432,35 @@ datetype:
                 route: /edit/:id
                 defaults:
                     action: edit
-
+################################################################################
+### TabDocument
+tabdocument:
+    type: segment
+    options:
+        route: /tab-document
+        defaults:
+            controller: TabDocument
+            action: index
+    may_terminate: true
+    child_routes:
+        new:
+            type: segment
+            options:
+                route: /new
+                defaults:
+                    action: new
+        delete:
+            type: segment
+            options:
+                route: /delete/:id
+                defaults:
+                    action: delete
+        edit:
+            type: segment
+            options:
+                route: /edit/:id
+                defaults:
+                    action: edit
 ################################################################################
 ### ActivityDate
 milestones:

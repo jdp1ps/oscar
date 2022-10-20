@@ -1496,19 +1496,21 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
     /**
      * Affiche les documents pour une activité de recherche, retour JSON.
+     * /activites-de-recherche/documents-json/id
      *
      * @return JsonModel
      * @throws OscarException
      */
     public function documentsJsonAction():JsonModel
     {
+        // Params (id activité)
         $id = $this->params()->fromRoute('id');
         $ui = $this->params()->fromQuery('ui');
 
         /** @var Activity $entity */
         $entity = $this->getActivityService()->getActivityById($id, true);
 
-        // Check access
+        // Check access génériques
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity);
         $deletable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
         $uploadable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
@@ -1516,26 +1518,37 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $out = $this->baseJsonResponse();
 
-        // ID des tabs (onglets pour les documents)
-        $tabsArray = [];
+        // ID des tabs (onglets pour ranger les documents)
+        $arrayTabs = [];
         $entitiesTabs = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
 
-        foreach ($entitiesTabs as $tab){
-            $tabsArray [$tab->getId()] = $tab->toJson();
-            $tabsArray [$tab->getId()] ["documents"] = [];
+        // Récupération des roles appli et des roles dans le contexte de l'activité et merge des roles
+        $roles = $this->getOscarUserContextService()->getRolesPersonInActivity($this->getCurrentPerson(), $entity);
+        $rolesAppli = $this->getOscarUserContextService()->getBaseRoleId();
+        $rolesMerged = array_merge($roles, $rolesAppli);
 
+        foreach ($entitiesTabs as $tabDocument){
+            // Traitement final attendu sur les rôles
+            /*
+            $tabsDocumentsRoles = $tabDocument->getTabsDocumentsRoles();
+            foreach ($tabsDocumentsRoles as $tabDocumentRole){
+                if (in_array($tabDocumentRole->getRole()->getRoleId(), $rolesMerged)){
+                    $arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
+                    $arrayTabs [$tabDocument->getId()] ["documents"] = [];
+                    break;
+                }
+            }
+            */
+
+            // TODO pour l'instant on hydrate par défault pour avoir des rendus côté front
+            $arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
+            $arrayTabs [$tabDocument->getId()] ["documents"] = [];
         }
-        // Onglet non classés constante
-        $tabPrivate = [];
-
-        /*$tabPrivate ["private"] =
-            ['id' => "null",
-            'label' => "Non classés",
-            'description' => "description test"
-            ];
-        $tabPrivate ["private"] ["documents"] = [];*/
-
-        $datas = [];
+        //Onglet non classé
+        $unclassifiedTab = [];
+        //Onglet privé
+        $privateTab = [];
+        //$datas = [];
 
         //Docs reliés à une activité
         /** @var ContractDocument $doc */
@@ -1548,19 +1561,24 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show', ['id' => $doc->getPerson()->getId()]) : false,
                 ]
             );
-
             if(!is_null($doc->getTabDocument())){
-                if (array_key_exists($doc->getTabDocument()->getId(), $tabsArray)){
-                    $tabsArray[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
+                if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)){
+                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
                 }
             }else{
-                $tabPrivate ["documents"] [] = $docDt;
+                if ($doc->isPrivate() === true){
+                    $privateTab ["documents"] [] = $docDt;
+                }else{
+                    $unclassifiedTab ["documents"] [] = $docDt;
+                }
             }
             $datas[] = $docDt;
         }
-        $out['datas'] = $datas;
-        $out['tabsWithDocuments'] =  $tabsArray;
-        $out['tabPrivate'] = $tabPrivate;
+
+        //$out['datas'] = $datas;
+        $out['tabsWithDocuments'] =  $arrayTabs;
+        $out['privateTab'] = $privateTab;
+        $out['unclassifiedTab'] = $unclassifiedTab;
         return new JsonModel($out);
     }
 

@@ -135,6 +135,22 @@
             <p>Permet de gérer les jalons disponibles dans les activités de recherche ainsi que leur comportement : système de validation, fréquence des rappels</p>
         </article>
 
+        <!-- Onglet des documents -->
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-cube"></i>
+                    Type d'onglet documents
+                </strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
+                    <a href="<?= $this->url('tabdocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Permet de gérer les onglets des documents au sein des activités de recherche avec leur accès en fonction des rôles</p>
+        </article>
+
         <article class="card">
             <h3 class="card-title">
                 <strong>

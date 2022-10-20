@@ -1,0 +1,61 @@
+<?php
+/**
+ * @author Hervé Marie<herve.marie@unicaen.fr>
+ * @date: 17/10/22 15:05
+ * @copyright Certic (c) 2022
+ */
+
+?>
+<div class="container">
+    <h1><i class="icon-calendar"></i>Onglet de document (activités)</h1>
+    <p class="info">
+        <?= count($entities) ?> Onglet(s)
+    </p>
+    <?php
+    foreach( $entities as $entity ):
+        ?>
+        <article class="card xs">
+            <h2 class="card-title">
+            <span>
+                <strong><?= $entity->getLabel() ?></strong>
+            </span>
+                <nav class="text-right">
+                    <small>
+                        <a href="<?= $this->url('tabdocument/delete', ['id' => $entity->getId()]) ?>" class="link">
+                            <i class="icon-trash"></i>
+                            Supprimer
+                        </a>
+                        <a href="<?= $this->url('tabdocument/edit', ['id' => $entity->getId()]) ?>" class="link">
+                            <i class="icon-pencil"></i>
+                            Modifier
+                        </a>
+                    </small>
+                </nav>
+            </h2>
+            <div class="card-content">
+                <?php if( $entity->getDescription()): ?>
+                    <span class="description"><?= $entity->getDescription() ?></span><br>
+                <?php endif; ?>
+                <span class="recursivity">
+                    <i class="icon-history"></i> Roles :
+                    <?php if( $entity->getTabsDocumentsRoles() && count($entity->getTabsDocumentsRoles()) > 0): ?>
+                        <?php foreach( $entity->getTabsDocumentsRoles() as $tabDocumentRole ): ?>
+                        <?php
+                            ?>
+                            <p>
+                                <span class="cartouche"><?= $tabDocumentRole->getRole()->getRoleId() ?> Role</span>
+                                <span class="icon-briefcase">Niveau d'accès : <?= $tabDocumentRole->getAccess() ?></span>
+                            </p>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <i>Pas de role associé</i>
+                    <?php endif; ?>
+            </span>
+            </div>
+        </article>
+    <?php endforeach; ?>
+
+    <footer>
+        <a href="<?= $this->url('tabdocument/new') ?>" class="btn btn-primary">créer</a>
+    </footer>
+</div>
