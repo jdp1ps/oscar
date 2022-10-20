@@ -12,7 +12,7 @@ class OscarVersion
 {
     const MAJOR = 2;
     const MINOR = 12;
-    const PATCH = 0;
+    const PATCH = 1;
     const NAME = "Spartan";
 
     public static function getBuild(){
