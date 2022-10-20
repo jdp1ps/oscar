@@ -224,7 +224,6 @@
         </span>
         <span v-on:click="handlerUploadNewDoc(tab.id)" class="stepHandler">
                  Téléverser un document
-          <!-- <i class="icon-book icon-clickable"></i> -->
         </span>
         <span v-if="isTabActive === tab.id">
               &nbsp;<i class="icon-flag"></i>
@@ -299,14 +298,14 @@
 
 
     <!-- TODO travail en cours sur la partie documents privés -->
-    <div :class="cssStepCurrentPrivate()" class="step" style="cursor: pointer; margin-top: 10px;" v-if="tabPrivate" @click="openTabPrivate = !openTabPrivate">
+    <div :class="cssStepCurrentPrivate()" class="step" style="cursor: pointer; margin-top: 10px;" v-if="privateTab" @click="openPrivateTab = !openPrivateTab">
       <i class="picto icon-lock"></i>Documents Privés
-      <span v-if="openTabPrivate === true">
+      <span v-if="openPrivateTab === true">
               &nbsp;<i class="icon-flag"></i>
         </span>
     </div>
-    <div class="step-content" v-if="openTabPrivate === true">
-      <article class="card xs" v-for="docP in tabPrivate.documents" :key="docP.id">
+    <div class="step-content" v-if="openPrivateTab === true">
+      <article class="card xs" v-for="docP in privateTab.documents" :key="docP.id">
         <div class="card-title">
           <i class="picto icon-doc" :class="'doc' + docP.extension"></i>
           <small class="text-light">{{ docP.categoryText }} ~ </small>
@@ -350,6 +349,53 @@
             </a>
           </nav>
 
+        </div>
+      </article>
+    </div>
+
+    <!-- Document non classifié dans un onglet (récupération historique avant fonctionnalité des onglets) -->
+    <div class="step" style="cursor: pointer; margin-top: 10px;" v-if="unclassifiedTab != null && unclassifiedTab.length != 0">
+      <i class="picto icon-lock"></i>Documents Non classés
+    </div>
+    <div v-if="unclassifiedTab != null && unclassifiedTab.length != 0" class="step-content">
+      <article class="card xs" v-for="docUnclassified in unclassifiedTab.documents" :key="docUnclassified.id">
+        <div class="card-title">
+          <i class="picto icon-doc" :class="'doc' + docUnclassified.extension"></i>
+          <small class="text-light">{{ docUnclassified.categoryText }} ~ </small>
+          <strong>{{docUnclassified.fileName}}</strong>
+          <small class="text-light" :title="docUnclassified.fileSize + ' octet(s)'">&nbsp;({{docUnclassified.fileSize | filesize}})</small>
+        </div>
+        <p>
+          {{ docUnclassified.information }}
+        </p>
+        <div class="card-content">
+          <p class="text-highlight">
+            Fichier <strong>{{ docUnclassified.extension}}</strong>
+            version {{ docUnclassified.version }},
+            téléversé le
+            <time>{{ docUnclassified.dateUpload | dateFull }}</time>
+            <span v-if="docUnclassified.uploader"> par <strong>{{ docUnclassified.uploader.displayname }}</strong></span>
+          </p>
+          <nav class="text-right show-over">
+            <a class="btn btn-default btn-xs" :href="docUnclassified.urlDownload" v-if="docUnclassified.urlDownload">
+              <i class="icon-upload-outline"></i>
+              Télécharger
+            </a>
+
+            <a class="btn btn-default btn-xs" :href="docUnclassified.urlReupload" v-if="docUnclassified.urlReupload">
+              <i class="icon-download-outline"></i>
+              Nouvelle version
+            </a>
+
+            <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(docUnclassified)">
+              <i class="icon-trash"></i>
+              Supprimer
+            </a>
+            <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(docUnclassified)">
+              <i class="icon-pencil"></i>
+              Modifier
+            </a>
+          </nav>
         </div>
       </article>
     </div>
@@ -487,8 +533,11 @@ export default {
         'init': false
       },
       // Documents privés
-      tabPrivate: null,
-      openTabPrivate: false,
+      privateTab: null,
+      //Documents non classés
+      unclassifiedTab: null,
+
+      openPrivateTab: false,
       // Message boite modal pour l'utilisateur (erreurs pour exemple)
       errorMessages: [],
       // Onglet sélectionné
@@ -531,7 +580,7 @@ export default {
     },
     // Pour afficher les documents selon IdOnglet (idTab)
     isTabActive() {
-      this.openTabPrivate = false;
+      this.openPrivateTab = false;
       return this.tabId;
     }
   },
@@ -541,11 +590,11 @@ export default {
       // Affectation valeur du tab dans lequel on se trouve
       this.tabId = tabId;
     },
-
+    // Suppression Doc
     deleteDocument(document) {
       this.deleteData = document;
     },
-
+  // TODO ordre des docs revoir avec Jack
     order: function (field) {
       if (this.sortField == field) {
         this.sortDirection *= -1;
@@ -555,15 +604,16 @@ export default {
     },
 
     cssStepCurrent(tabId) {
-      return tabId == this.tabId ? "current" : "";
+      return tabId === this.tabId ? "current" : "";
     },
 
     cssSort: function (compare) {
-      return compare == this.sortField ? "active" : "";
+      return compare === this.sortField ? "active" : "";
     },
 
+    // Affectation class dynamique sur la partie documents privés
     cssStepCurrentPrivate() {
-      return this.openTabPrivate === true ? "private" : "";
+      return this.openPrivateTab === true ? "private" : "";
     },
 
     // Modification d'un document
@@ -587,7 +637,8 @@ export default {
       };
     },
 
-    // Event Change sur composant "person-auto-completer" pour hydrater tableau de la liste des personnes pour document privé
+    // Event Change sur composant "person-auto-completer",
+    // pour hydrater tableau de la liste des personnes pour document privé
     handlerSelectPersons(person) {
       let personSelected = {
         "personName": person.displayname,
@@ -693,10 +744,10 @@ export default {
               });
     },
 
-    // Modification du type de document / changement onglet, privé ou pas personnes ou pas
+    // Modification du type de document / changement onglet, privé ou pas, personnes ou pas
     performEdit() {
-     /* console.log("Valeurs de l'édition : ", this.editData);
-      console.log("Valeurs des personnes éventuelles : ", this.persons);*/
+      // console.log("Valeurs de l'édition : ", this.editData);
+      //console.log("Valeurs des personnes éventuelles : ", this.persons);
 
       // Fenêtre messages d'erreurs avant soumission Form
       this.errorMessages = [];
@@ -704,7 +755,6 @@ export default {
       let persons = [];
       // Onglet pour le document
       let newTabDoc = "";
-
       /**
         Document privé ou non
         Conversion, envoie post 0 ou 1 ("true" ou "false" sont transmis en tant que chaine en http(s))
@@ -717,7 +767,6 @@ export default {
             persons.push(p.personId);
           });
         }
-
       }else {
         console.log("VALEUR this.editData.tabDocument_id : ",this.editData.tabDocument_id);
         privateBool = 0;
@@ -738,12 +787,11 @@ export default {
       let documentId = this.editData.document.id;
       // Category du document (type)
       let newType = this.editData.documentype_id;
-
-      /*console.log("Valeur privateBool : ", privateBool);
-      console.log("Valeur documentId : ", documentId);
-      console.log("Valeur newType : ", newType);
-      console.log("Valeur newTabDoc : ", newTabDoc);
-      console.log("Valeur persons : ", persons);*/
+      // console.log("Valeur privateBool : ", privateBool);
+      // console.log("Valeur documentId : ", documentId);
+      // console.log("Valeur newType : ", newType);
+      // console.log("Valeur newTabDoc : ", newTabDoc);
+      // console.log("Valeur persons : ", persons);*/
 
       // Initialisation des données de Vue
       this.editData = null;
@@ -766,9 +814,10 @@ export default {
 
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
-      this.tabPrivate = success.data.tabPrivate;
+      this.privateTab = success.data.privateTab;
+      this.unclassifiedTab = success.data.unclassifiedTab;
       this.tabsWithDocuments = success.data.tabsWithDocuments;
-
+      /*
       let data = success.data.datas;
       let documentsOrdered = [];
       let documents = {};
@@ -787,8 +836,10 @@ export default {
         }
       });
       this.documents = documentsOrdered;
+      */
     },
 
+    // Recup datas Docs
     fetch() {
       // Object JS Ajax
       oscarRemoteData
@@ -800,6 +851,7 @@ export default {
 
   mounted() {
     // Au chargement du module dans la page appel méthode initialisation -> fetch()
+    // Récupération des données documents par rapport à l'id de l'activité
     this.fetch();
   }
 }
@@ -845,6 +897,8 @@ export default {
   padding: 8px 12px;
   text-align: center;
   transition: all 0.3s ease-out;
+  display: inline-block;
+  margin-left: 100px;
 }
 
 .stepHandler:before{
@@ -856,6 +910,7 @@ export default {
 .stepHandler:hover,
 .stepHandler:focus {
   color: #333;
-  background-color: #fff;
+  background: #8E969F;
 }
+
 </style>
