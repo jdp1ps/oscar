@@ -369,6 +369,12 @@ return array(
                     'roles' => ['user']
                 ],
 
+                [
+                    'controller' => 'TabDocument',
+                    'action' => ['index', 'new', 'edit', 'delete'],
+                    'roles' => ['user']
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 // ORGANIZATION
                 ////////////////////////////////////////////////////////////////
@@ -971,6 +977,7 @@ return array(
             \Oscar\Controller\EnrollController::class => \Oscar\Controller\EnrollControllerFactory::class,
             \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentControllerFactory::class,
+            'TabDocument' => \Oscar\Controller\TabDocumentControllerFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
             'Organization' => \Oscar\Controller\OrganizationControllerFactory::class,
             'Project' => \Oscar\Controller\ProjectControllerFactory::class,

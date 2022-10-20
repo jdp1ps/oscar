@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use UnicaenAuth\Acl\NamedRole;
 
@@ -26,6 +27,12 @@ class Role implements HierarchicalRoleInterface
     const LEVEL_ORGANIZATION = 2;
     const LEVEL_APPLICATION = 4;
 
+
+    /**
+     * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="role")
+     */
+    private $tabsDocumentsRoles;
+
     /**
      * Role constructor.
      * @param int $id
@@ -33,8 +40,44 @@ class Role implements HierarchicalRoleInterface
     public function __construct()
     {
         $this->privileges = new ArrayCollection();
+        $this->tabsDocumentsRoles = new ArrayCollection();
     }
 
+
+    /**
+     * @return Collection|TabsDocumentsRoles[]
+     */
+    public function getTabsDocumentsRoles(): Collection
+    {
+        return $this->tabsDocumentsRoles;
+    }
+
+    public function addTabDocumentRole(TabsDocumentsRoles $tabDocumentRole): self
+    {
+        if (!$this->tabsDocumentsRoles->contains($tabDocumentRole)) {
+            $this->tabsDocumentsRoles[] = $tabDocumentRole;
+            $tabDocumentRole->setRole($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTabDocumentRole(TabsDocumentsRoles $tabDocumentRole): self
+    {
+        if ($this->tabsDocumentsRoles->contains($tabDocumentRole)) {
+            $this->tabsDocumentsRoles->removeElement($tabDocumentRole);
+            if ($tabDocumentRole->getRole() === $this) {
+                $tabDocumentRole->setRole(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Retourne l'instance rôle en conversion tableau clefs, valeurs
+     * @return array
+     */
     public function asArray()
     {
         return [
