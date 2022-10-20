@@ -26,18 +26,18 @@ class TabDocument
      * @var string
      * @ORM\Column(type="string", nullable=false)
      */
-    private string $label;
+    private $label;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    private string $description;
+    private $description;
 
     /**
      * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="tabDocument", cascade={"persist"})
      */
-    private ArrayCollection $tabsDocumentsRoles;
+    private Collection $tabsDocumentsRoles;
 
     public function __construct(){
         $this->tabsDocumentsRoles = new ArrayCollection();
@@ -52,9 +52,9 @@ class TabDocument
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getLabel()
+    public function getLabel():?string
     {
         return $this->label;
     }
