@@ -6242,6 +6242,7 @@ $onColor: saturate($baseColor, 25%);
   &.sickleave { background-color: #808000; }
   &.wp { background-color: #6a5999; }
   &.conflict { background: #AA0000; }
+  &.invalid { background: #AA0000; }
 }
 
 .loading-message {

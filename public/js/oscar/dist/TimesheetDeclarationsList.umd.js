@@ -91,1210 +91,238 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "fb15");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "8875":
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// addapted from the document.currentScript polyfill by Adam Miller
-// MIT license
-// source: https://github.com/amiller-gh/currentScript-polyfill
-
-// added support for Firefox https://bugzilla.mozilla.org/show_bug.cgi?id=1620505
-
-(function (root, factory) {
-  if (true) {
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-  } else {}
-}(typeof self !== 'undefined' ? self : this, function () {
-  function getCurrentScript () {
-    var descriptor = Object.getOwnPropertyDescriptor(document, 'currentScript')
-    // for chrome
-    if (!descriptor && 'currentScript' in document && document.currentScript) {
-      return document.currentScript
-    }
-
-    // for other browsers with native support for currentScript
-    if (descriptor && descriptor.get !== getCurrentScript && document.currentScript) {
-      return document.currentScript
-    }
-  
-    // IE 8-10 support script readyState
-    // IE 11+ & Firefox support stack trace
-    try {
-      throw new Error();
-    }
-    catch (err) {
-      // Find the second match for the "at" string to get file src url from stack.
-      var ieStackRegExp = /.*at [^(]*\((.*):(.+):(.+)\)$/ig,
-        ffStackRegExp = /@([^@]*):(\d+):(\d+)\s*$/ig,
-        stackDetails = ieStackRegExp.exec(err.stack) || ffStackRegExp.exec(err.stack),
-        scriptLocation = (stackDetails && stackDetails[1]) || false,
-        line = (stackDetails && stackDetails[2]) || false,
-        currentLocation = document.location.href.replace(document.location.hash, ''),
-        pageSource,
-        inlineScriptSourceRegExp,
-        inlineScriptSource,
-        scripts = document.getElementsByTagName('script'); // Live NodeList collection
-  
-      if (scriptLocation === currentLocation) {
-        pageSource = document.documentElement.outerHTML;
-        inlineScriptSourceRegExp = new RegExp('(?:[^\\n]+?\\n){0,' + (line - 2) + '}[^<]*<script>([\\d\\D]*?)<\\/script>[\\d\\D]*', 'i');
-        inlineScriptSource = pageSource.replace(inlineScriptSourceRegExp, '$1').trim();
-      }
-  
-      for (var i = 0; i < scripts.length; i++) {
-        // If ready state is interactive, return the script tag
-        if (scripts[i].readyState === 'interactive') {
-          return scripts[i];
-        }
-  
-        // If src matches, return the script tag
-        if (scripts[i].src === scriptLocation) {
-          return scripts[i];
-        }
-  
-        // If inline source matches, return the script tag
-        if (
-          scriptLocation === currentLocation &&
-          scripts[i].innerHTML &&
-          scripts[i].innerHTML.trim() === inlineScriptSource
-        ) {
-          return scripts[i];
-        }
-      }
-  
-      // If no match, return null
-      return null;
-    }
-  };
-
-  return getCurrentScript
-}));
-
-
-/***/ }),
-
-/***/ "fb15":
+/***/ "./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js ***!
+  \***********************************************************************/
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
-
-// CONCATENATED MODULE: ./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js
-// This file is imported into lib/wc client bundles.
-
-if (typeof window !== 'undefined') {
-  var currentScript = window.document.currentScript
-  if (true) {
-    var getCurrentScript = __webpack_require__("8875")
-    currentScript = getCurrentScript()
-
-    // for backward compatibility, because previously we directly included the polyfill
-    if (!('currentScript' in document)) {
-      Object.defineProperty(document, 'currentScript', { get: getCurrentScript })
-    }
-  }
-
-  var src = currentScript && currentScript.src.match(/(.+\/)[^/]+\.js(\?.*)?$/)
-  if (src) {
-    __webpack_require__.p = src[1] // eslint-disable-line
-  }
-}
-
-// Indicate to webpack that this file can be concatenated
-/* harmony default export */ var setPublicPath = (null);
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/TimesheetDeclarationsList.vue?vue&type=template&id=1288d79d&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticClass:"validations-admin"},[_c('transition',{attrs:{"name":"fade"}},[(_vm.loading)?_c('div',{staticClass:"pending overlay"},[_c('div',{staticClass:"overlay-content"},[_c('i',{staticClass:"icon-spinner animate-spin"}),_vm._v(" "+_vm._s(_vm.loading)+" ")])]):_vm._e()]),_c('transition',{attrs:{"name":"fade"}},[(_vm.error)?_c('div',{staticClass:"pending overlay"},[_c('div',{staticClass:"overlay-content"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "+_vm._s(_vm.error)+" ")])]):_vm._e()]),_c('transition',{attrs:{"name":"fade"}},[_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.create),expression:"create"}],staticClass:"overlay"},[_c('div',{staticClass:"overlay-content",staticStyle:{"overflow-y":"visible"}},[_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.create = null}}},[_vm._v("X")]),_vm._v(" Choisissez une personne à ajouter : "),_c('personautocompleter',{on:{"change":_vm.handlerAddPerson}}),_c('button',{staticClass:"btn btn-primary",class:{ 'disabled' : _vm.addedPerson == null },on:{"click":function($event){return _vm.handlerConfirmAdd(_vm.create, _vm.addedPerson.id)}}},[(_vm.addedPerson != null)?_c('span',[_vm._v("Ajouter "),_c('strong',[_vm._v(_vm._s(_vm.addedPerson.displayname))]),_vm._v(" comme validateur")]):_c('span',[_vm._v("Selectionner une personne")])])],1)])]),_c('transition',{attrs:{"name":"fade"}},[(_vm.addvalidatorperson)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content",staticStyle:{"overflow-y":"visible"}},[_c('span',{staticClass:"overlay-closer",on:{"click":function($event){_vm.addvalidatorperson = null}}},[_vm._v("X")]),_c('h3',[_vm._v("Assigner un validateur Hors-lot")]),_c('p',{staticClass:"alert alert-info"},[_vm._v("Selectionnez un validateur pour les "),_c('strong',[_vm._v("créneaux Hors-Lot")]),_vm._v(" de "),_c('strong',[_vm._v(_vm._s(_vm.filterPerson))]),_vm._v(". Cet opération affectera également le validateur pour les déclarations en cours non-validée. ")]),_c('personautocompleter',{on:{"change":_vm.handlerSelectValidateur}}),_c('form',{attrs:{"action":"","method":"post"}},[_c('input',{attrs:{"type":"hidden","name":"action","value":"addvalidator"}}),_c('input',{attrs:{"type":"hidden","name":"person"},domProps:{"value":_vm.selectedPerson.id}}),_c('input',{attrs:{"type":"hidden","name":"validatorId"},domProps:{"value":_vm.validatorId}}),_c('button',{staticClass:"btn btn-primary",class:{ 'disabled' : !_vm.validatorId },attrs:{"type":"submit"}},[_vm._v("Ajouter "),_c('strong',[_vm._v(_vm._s(_vm.validatorLabel))]),_vm._v(" comme validateur hors-lot")])]),_c('button',{on:{"click":function($event){_vm.addvalidatorperson = null}}},[_vm._v("Annuler")])],1)]):_vm._e()]),_c('transition',{attrs:{"name":"fade"}},[(_vm.schedule)?_c('div',{staticClass:"overlay"},[_c('div',{staticClass:"overlay-content",staticStyle:{"overflow-y":"visible"}},[_c('personschedule',{attrs:{"schedule":_vm.schedule.schedule,"editable":true},on:{"cancel":function($event){_vm.schedule = null},"changeschedule":_vm.handlerSaveSchedule}})],1)]):_vm._e()]),_c('h1',[_vm._v("Liste des déclarations")]),_c('div',{staticClass:"declarations-ui cols"},[_c('div',{staticClass:"persons-list col-1 onglets"},[_vm._m(0),_c('div',[_vm._m(1),_c('div',{staticClass:"tab-content"},[_c('div',{staticClass:"tab-pane active",attrs:{"role":"tabpanel","id":"declarants"}},_vm._l((_vm.declarers),function(p){return _c('article',{staticClass:"list-item",class:{'selected': p.displayname == _vm.filterPerson },on:{"click":function($event){$event.preventDefault();return _vm.handlerFilterPerson(p)}}},[_c('i',{staticClass:"icon-user"}),_vm._v(" "+_vm._s(p.displayname)+" "),(p.referents.length == 0)?_c('i',{staticClass:"icon-attention-1"}):_vm._e()])}),0),_c('div',{staticClass:"tab-pane",attrs:{"role":"tabpanel","id":"activities"}},_vm._l((_vm.activities),function(a){return _c('article',{staticClass:"list-item",class:{'selected': a == _vm.filterActivity },on:{"click":function($event){$event.preventDefault();return _vm.handlerFilterActivity(a)}}},[_c('i',{staticClass:"icon-cube"}),_vm._v(" "+_vm._s(a)+" ")])}),0)])])]),_c('div',{staticClass:"declarations-list col-4"},[_vm._m(2),_vm._l((_vm.filteredDeclarations),function(line,k){return _c('section',{staticClass:"card declaration reactive",on:{"click":function($event){line.open = !line.open}}},[_c('span',{staticClass:"opener"},[(line.open)?_c('i',{staticClass:"icon-angle-down"}):_c('i',{staticClass:"icon-angle-right"})]),_c('strong',[_vm._v(_vm._s(line.person))]),_vm._v(" "),_c('time',[_vm._v(_vm._s(_vm._f("period")(line.period)))]),_c('span',{staticClass:"validations-icon"},[(line.warnings.length > 0)?_c('i',{staticClass:"icon-attention-1 bg-danger rounded",staticStyle:{"border-radius":"8px"}}):_vm._e(),_vm._l((line.declarations),function(d){return _c('i',{staticClass:"icon",class:'icon-' +d.status,attrs:{"title":d.label}})})],2),_c('nav',[_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":'/feuille-de-temps/excel?action=export2&period=' + line.period +'&personid=' + line.person_id}},[_c('i',{staticClass:"icon-file-pdf"}),_vm._v("Voir")]),_c('a',{staticClass:"btn btn-default btn-xs",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerChangeSchedule(line)}}},[_c('i',{staticClass:"icon-clock"}),_vm._v("Horaires")]),_c('a',{staticClass:"btn btn-danger btn-xs",attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerCancelDeclaration(line)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v("Annuler")])]),_c('transition',{attrs:{"name":"slide"}},[(line.open)?_c('section',{staticClass:"validations text-small"},[(line.warnings.length > 0)?_c('ul',{staticClass:"alert-danger alert"},_vm._l((line.warnings),function(w){return _c('li',[_vm._v(_vm._s(w))])}),0):_vm._e(),_vm._l((line.declarations),function(validation){return _c('article',{staticClass:"validation",class:{ 'selected': _vm.selectedValidation == validation },on:{"click":function($event){$event.preventDefault();$event.stopPropagation();_vm.selectedValidation = validation}}},[_c('span',[_c('i',{class:validation.object == 'activity' ? 'icon-cube' : 'icon-' + validation.object}),_c('strong',[_vm._v(_vm._s(validation.label))])]),(validation.object == 'activity')?_c('span',[(validation.validation.validationactivity_by)?_c('span',{staticClass:"cartouche green",attrs:{"title":"Validation projet"}},[_c('i',{staticClass:"icon-cube"}),_vm._v(_vm._s(validation.validation.validationactivity_by)+" ")]):_c('span',{directives:[{name:"else",rawName:"v-else"}],staticClass:"validators"},[_c('i',{staticClass:"icon-cube"}),_vm._l((validation.validateursPrj),function(p){return _c('span',[_vm._v(_vm._s(p.person))])})],2)]):_c('span',[_vm._v("~")]),(validation.object == 'activity')?_c('span',[(validation.validation.validationsci_by)?_c('span',{staticClass:"cartouche green",attrs:{"title":"Validation scientifique"}},[_c('i',{staticClass:"icon-beaker"}),_vm._v(_vm._s(validation.validation.validationsci_by)+" ")]):_c('span',{staticClass:"validators"},[_c('i',{staticClass:"icon-beaker"}),_vm._l((validation.validateursSci),function(p){return _c('span',[_vm._v(_vm._s(p.person))])})],2)]):_c('span',[_vm._v("~")]),_c('span',[(validation.validation.validationadm_by)?_c('span',{staticClass:"cartouche green",attrs:{"title":"Validation administrative"}},[_c('i',{staticClass:"icon-book"}),_vm._v(_vm._s(validation.validation.validationadm_by)+" ")]):_c('span',{staticClass:"validators"},[_c('i',{staticClass:"icon-book"}),_vm._l((validation.validateursAdm),function(p){return _c('span',[_vm._v(_vm._s(p.person))])})],2)]),_c('em',[_c('i',{class:'icon-' +validation.status})])])})],2):_vm._e()])],1)})],2),_c('div',{staticClass:"declaration-details col-2"},[(_vm.filterPerson)?_c('div',[_c('h3',[_c('i',{staticClass:"icon-cog"}),_vm._v(" "+_vm._s(_vm.filterPerson))]),(_vm.selectedPerson.referents.length == 0)?_c('div',{staticClass:"alert alert-danger"},[_vm._v(" Aucun référent pour "),_c('strong',[_vm._v("valider les déclarations Hors-lot")])]):_c('div',[_c('h4',[_vm._v("Validateur :")]),_c('ul',_vm._l((_vm.selectedPerson.referents),function(r){return _c('li',{staticClass:"cartouche cartouche-default"},[_vm._v(_vm._s(r.displayname))])}),0)]),_c('button',{staticClass:"btn-primary btn",on:{"click":function($event){_vm.addvalidatorperson = true}}},[_vm._v(" Ajouter un validateur pour les créneaux "),_c('strong',[_vm._v("Hors-Lot")])]),_c('a',{staticClass:"btn-primary btn",attrs:{"href":'/person/show/' + _vm.selectedPerson.id}},[_vm._v(" Voir la fiche de "),_c('strong',[_vm._v(_vm._s(_vm.filterPerson))])])]):_vm._e(),_vm._m(3),(!_vm.selectedValidation)?_c('p',{staticClass:"alert alert-info"},[_vm._v(" Selectionnez une ligne d'une déclaration pour afficher les détails et "),_c('strong',[_vm._v("gérer les validateurs")])]):_vm._e(),_c('transition',{attrs:{"name":"fade"}},[(_vm.selectedValidation)?_c('div',{staticClass:"validation-details"},[_c('h3',[_c('small',[_vm._v("Validation pour les créneaux")]),_c('br'),(_vm.selectedValidation.object == 'activity')?_c('strong',[_c('i',{staticClass:"icon-cube"}),_vm._v(" "+_vm._s(_vm.selectedValidation.label)+" ")]):_c('strong',[_c('i',{class:'icon-' +_vm.selectedValidation.object}),_vm._v(" "+_vm._s(_vm.selectedValidation.label)+" ")]),_c('br'),_c('small',[_vm._v(" de "),_c('strong',[_vm._v(_vm._s(_vm.selectedValidation.person))]),_vm._v(" en "),_c('strong',[_vm._v(_vm._s(_vm._f("period")(_vm.selectedValidation.period)))])])]),(_vm.selectedValidation.object == 'activity')?_c('div',[(_vm.selectedValidation.validation.validationactivity_by)?_c('div',{staticClass:"card valid"},[_c('i',{staticClass:"icon-ok-circled"}),_vm._v(" Validation projet par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.validationactivity_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.validationactivity_at)))])]):(_vm.selectedValidation.validation.rejectactivity_by)?_c('div',{staticClass:"card reject"},[_c('i',{staticClass:"icon-attention-circled"}),_vm._v(" Rejet des créneaux par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.rejectactivity_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.rejectactivity_at)))]),_vm._v(" : "),_c('pre',[_vm._v(_vm._s(_vm.selectedValidation.validation.rejectactivity_message))])]):_c('div',{staticClass:"card waiting"},[_c('strong',[_vm._v("Validation projet en attente")]),_vm._v(" par l'un des validateurs suivant : "),_c('ul',_vm._l((_vm.selectedValidation.validatorsPrj),function(p){return _c('li',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(p.person)+" "),_c('a',{staticClass:"link",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerDelete('prj', p)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer")])])}),0),_c('a',{staticClass:"btn btn-xs btn-primary",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerAdd('prj')}}},[_vm._v("Ajouter un validateur")])]),(_vm.selectedValidation.validation.validationsci_by)?_c('div',{staticClass:"card valid"},[_vm._v(" Validation scientifique par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.validationsci_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.validationsci_at)))])]):(_vm.selectedValidation.validation.rejectsci_by)?_c('div',{staticClass:"card reject"},[_c('i',{staticClass:"icon-attention-circled"}),_vm._v(" Rejet scientifique des créneaux par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.rejectsci_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.rejectsci_at)))]),_c('pre',[_vm._v(_vm._s(_vm.selectedValidation.validation.rejectsci_message))])]):_c('div',{staticClass:"card waiting"},[_c('strong',[_vm._v("Validation scientifique en attente")]),_vm._v(" par l'un des validateurs suivant : "),_c('ul',_vm._l((_vm.selectedValidation.validatorsSci),function(p){return _c('li',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(p.person)+" "),_c('a',{staticClass:"link",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerDelete('sci', p)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer")])])}),0),_c('a',{staticClass:"btn btn-xs btn-primary",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerAdd('sci')}}},[_vm._v("Ajouter un validateur")])])]):_vm._e(),(_vm.selectedValidation.validation.validationadm_by)?_c('div',{staticClass:"card valid"},[_vm._v(" Validation administrative par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.validationadm_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.validationadm_at)))])]):(_vm.selectedValidation.validation.rejectadm_by)?_c('div',{staticClass:"card reject"},[_c('i',{staticClass:"icon-attention-circled"}),_vm._v(" Rejet administrative des créneaux par "),_c('strong',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(_vm.selectedValidation.validation.rejectadm_by))]),_vm._v(" le "),_c('time',[_vm._v(_vm._s(_vm._f("humandate")(_vm.selectedValidation.validation.rejectadm_at)))]),_c('pre',[_vm._v(_vm._s(_vm.selectedValidation.validation.validationadm_message))])]):_c('div',{staticClass:"card waiting"},[_c('strong',[_vm._v("Validation administrative en attente")]),_vm._v(" par l'un des validateurs suivant : "),_c('ul',_vm._l((_vm.selectedValidation.validatorsAdm),function(p){return _c('li',[_c('i',{staticClass:"icon-user"}),_vm._v(_vm._s(p.person)+" "),_c('a',{staticClass:"link",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerDelete('adm', p)}}},[_c('i',{staticClass:"icon-trash"}),_vm._v(" Supprimer")])])}),0),_c('a',{staticClass:"btn btn-xs btn-primary",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerAdd('adm')}}},[_vm._v("Ajouter un validateur")])])]):_vm._e()])],1)])],1)}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h3',[_c('i',{staticClass:"icon-sort"}),_vm._v(" Filtres")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"nav nav-tabs",attrs:{"role":"tablist"}},[_c('li',{staticClass:"active",attrs:{"role":"presentation"}},[_c('a',{attrs:{"href":"#declarants","aria-controls":"home","role":"tab","data-toggle":"tab"}},[_c('i',{staticClass:"icon-group"}),_vm._v(" Déclarants")])]),_c('li',{attrs:{"role":"presentation"}},[_c('a',{attrs:{"href":"#activities","aria-controls":"profile","role":"tab","data-toggle":"tab"}},[_c('i',{staticClass:"icon-cubes"}),_vm._v(" Activités")])])])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h2',[_c('i',{staticClass:"icon-calendar"}),_vm._v(" Déclaration")])},function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('h3',[_c('i',{staticClass:"icon-zoom-in-outline"}),_vm._v(" Détails")])}]
-
-
-// CONCATENATED MODULE: ./src/TimesheetDeclarationsList.vue?vue&type=template&id=1288d79d&
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=template&id=595e3162&
-var PersonAutoCompletervue_type_template_id_595e3162_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.expression),expression:"expression"}],attrs:{"type":"text"},domProps:{"value":(_vm.expression)},on:{"keyup":function($event){if(!$event.type.indexOf('key')&&_vm._k($event.keyCode,"enter",13,$event.key,"Enter")){ return null; }$event.preventDefault();return _vm.search.apply(null, arguments)},"input":function($event){if($event.target.composing){ return; }_vm.expression=$event.target.value}}}),_c('span',{directives:[{name:"show",rawName:"v-show",value:(_vm.loading),expression:"loading"}]},[_c('i',{staticClass:"icon-spinner animate-spin"})]),_c('div',{directives:[{name:"show",rawName:"v-show",value:(_vm.persons.length > 0 && _vm.showSelector),expression:"persons.length > 0 && showSelector"}],staticClass:"choose",staticStyle:{"position":"absolute","z-index":"3000","max-height":"400px","overflow":"hidden","overflow-y":"scroll"}},_vm._l((_vm.persons),function(c){return _c('div',{key:c.id,staticClass:"choice",on:{"click":function($event){$event.preventDefault();$event.stopPropagation();return _vm.handlerSelectPerson(c)}}},[_c('div',{staticStyle:{"display":"block","width":"50px","height":"50px"}},[_c('img',{staticStyle:{"width":"100%"},attrs:{"src":'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50',"alt":c.displayname}})]),_c('div',{staticClass:"infos"},[_c('strong',{staticStyle:{"font-weight":"700","font-size":"1.1em","padding-left":"0"}},[_vm._v(_vm._s(c.displayname))]),_c('br'),_c('span',{staticStyle:{"font-weight":"100","font-size":".8em","padding-left":"0"}},[_c('i',{staticClass:"icon-location"}),_vm._v(" "+_vm._s(c.affectation)+" "),(c.ucbnSiteLocalisation)?_c('span',[_vm._v(" ~ "+_vm._s(c.ucbnSiteLocalisation))]):_vm._e()]),_c('br'),_c('em',{staticStyle:{"font-weight":"100","font-size":".8em"}},[_c('i',{staticClass:"icon-mail"}),_vm._v(_vm._s(c.email))])])])}),0),(_vm.error)?_c('div',{staticClass:"alert alert-danger"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "+_vm._s(_vm.error)+" ")]):_vm._e()])}
-var PersonAutoCompletervue_type_template_id_595e3162_staticRenderFns = []
-
-
-// CONCATENATED MODULE: ./src/components/PersonAutoCompleter.vue?vue&type=template&id=595e3162&
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-let tempo;
-
-/* harmony default export */ var PersonAutoCompletervue_type_script_lang_js_ = ({
-  data() {
-    return {
-      url: "/person?l=m&q=",
-      persons: [],
-      expression: "",
-      loading: false,
-      selectedPerson: null,
-      showSelector: true,
-      request: null,
-      error: ""
-    }
-  },
-  watch: {
-    expression(n, o) {
-
-      if (n.length >= 2) {
-        if (tempo) {
-          clearTimeout(tempo);
-        }
-        tempo = setTimeout(() => {
-          this.search();
-        }, 500)
-
-      }
-    }
-  },
-  methods: {
-    search() {
-      this.loading = true;
-      this.$http.get(this.url + this.expression, {
-        before(r) {
-          if (this.request) {
-            this.request.abort();
-          }
-          this.request = r;
-        }
-      }).then(
-          ok => {
-            console.log(ok);
-            this.persons = ok.body.datas;
-            this.showSelector = true;
-          },
-          ko => {
-            console.log(ko);
-            if( ko.status == 403 ){
-              this.error = "403 Unauthorized";
-            }
-            else if( ko.body ){
-              this.error = ko.body;
-            }
-          }
-      ).then(foo => {
-        this.loading = false;
-        this.request = null;
-      });
-    },
-    handlerSelectPerson(data) {
-      this.selectedPerson = data;
-      this.showSelector = false;
-      this.expression = "";
-      this.$emit('change', data);
-    }
-  }
-});
-
-// CONCATENATED MODULE: ./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&
- /* harmony default export */ var components_PersonAutoCompletervue_type_script_lang_js_ = (PersonAutoCompletervue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () {
-        injectStyles.call(
-          this,
-          (options.functional ? this.parent : this).$root.$options.shadowRoot
-        )
-      }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functional component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
-
-// CONCATENATED MODULE: ./src/components/PersonAutoCompleter.vue
-
-
-
-
-
-/* normalize component */
-
-var component = normalizeComponent(
-  components_PersonAutoCompletervue_type_script_lang_js_,
-  PersonAutoCompletervue_type_template_id_595e3162_render,
-  PersonAutoCompletervue_type_template_id_595e3162_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* harmony default export */ var PersonAutoCompleter = (component.exports);
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55ddf09a-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonSchedule.vue?vue&type=template&id=9b4a1af6&
-var PersonSchedulevue_type_template_id_9b4a1af6_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('section',{staticClass:"schedule"},[_c('transition',{attrs:{"name":"fade"}},[(_vm.loading)?_c('div',{staticClass:"pending overlay"},[_c('div',{staticClass:"overlay-content"},[_c('i',{staticClass:"icon-spinner animate-spin"}),_vm._v(" "+_vm._s(_vm.loading)+" ")])]):_vm._e()]),_c('transition',{attrs:{"name":"fade"}},[(_vm.error)?_c('div',{staticClass:"pending overlay"},[_c('div',{staticClass:"overlay-content"},[_c('i',{staticClass:"icon-attention-1"}),_vm._v(" "+_vm._s(_vm.error)+" ")])]):_vm._e()]),_c('p',[_vm._v("La répartition horaire est issue de "+_vm._s(_vm.from)+" "),(_vm.from == 'application')?_c('strong',[_vm._v("la configuration Oscar par défaut")]):_vm._e(),(_vm.from == 'sync')?_c('strong',[_vm._v("la synchronisation (Connector)")]):_vm._e(),(_vm.from == 'custom')?_c('strong',[_vm._v("la configuration prédéfinie")]):_vm._e(),(_vm.from == 'free')?_c('strong',[_vm._v("la configuration manuelle")]):_vm._e()]),_vm._l((_vm.days),function(total,day){return _c('article',{staticClass:"card xs"},[_c('h3',{staticClass:"card-title"},[_c('strong',[_vm._v(_vm._s(_vm.daysLabels[day]))]),(_vm.editDay)?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.days[day]),expression:"days[day]"}],attrs:{"type":"text"},domProps:{"value":(_vm.days[day])},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.days, day, $event.target.value)}}}):_c('em',{staticClass:"big right",on:{"click":function($event){return _vm.handlerEditDays()}}},[_vm._v(_vm._s(_vm._f("heures")(total)))])])])}),_c('article',{staticClass:"card"},[_c('h3',{staticClass:"card-title"},[_c('strong',[_vm._v("Total / semaine")]),_c('em',{staticClass:"big right"},[_vm._v(_vm._s(_vm._f("heures")(_vm.totalWeek)))])])]),(_vm.editable)?_c('nav',[(!_vm.editDay)?_c('button',{staticClass:"btn btn-default",on:{"click":function($event){$event.preventDefault();return _vm.handlerEditDays()}}},[_c('i',{staticClass:"icon-pencil"}),_vm._v(" modifier")]):_vm._e(),(_vm.editDay)?_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){$event.preventDefault();return _vm.handlerSaveDays()}}},[_c('i',{staticClass:"icon-floppy"}),_vm._v(" enregistrer")]):_vm._e(),(_vm.models && _vm.editDay)?_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.model),expression:"model"}],staticClass:"form-inline",on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.model=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},function($event){return _vm.handlerSaveDays(_vm.model)}]}},[_c('option',{attrs:{"value":"default"}},[_vm._v("Aucun")]),_vm._l((_vm.models),function(m,key){return _c('option',{domProps:{"value":key,"selected":_vm.model == key}},[_vm._v(_vm._s(m.label))])})],2):_vm._e(),(_vm.editDay && _vm.from != 'default')?_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){$event.preventDefault();return _vm.handlerSaveDays('default')}}},[_c('i',{staticClass:"icon-floppy"}),_vm._v(" Horaires par défaut")]):_vm._e(),(_vm.editDay)?_c('button',{staticClass:"btn btn-primary",on:{"click":function($event){$event.preventDefault();return _vm.handlerCancel()}}},[_c('i',{staticClass:"icon-cancel-circled"}),_vm._v(" annuler")]):_vm._e()]):_vm._e()],2)}
-var PersonSchedulevue_type_template_id_9b4a1af6_staticRenderFns = []
-
-
-// CONCATENATED MODULE: ./src/components/PersonSchedule.vue?vue&type=template&id=9b4a1af6&
-
-// CONCATENATED MODULE: ./src/components/AjaxResolve.js
-/* harmony default export */ var AjaxResolve = ({
-    resolve( message, ajaxResponse ){
-        let serverMsg = "Erreur inconnue";
-        if( ajaxResponse ){
-            serverMsg = ajaxResponse.body;
-
-            if( ajaxResponse.status == 403 ){
-                serverMsg = "Vous avez été déconnectez de l'application";
-            }
-        }
-        return message + " (Réponse : " + serverMsg +")";
-    }
-});
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonSchedule.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// poi watch --format umd --moduleName  PersonSchedule --filename.css PersonSchedule.css --filename.js PersonSchedule.js --dist public/js/oscar/dist public/js/oscar/src/PersonSchedule.vue
-
-
-/* harmony default export */ var PersonSchedulevue_type_script_lang_js_ = ({
-    name: 'PersonSchedule',
-
-    props: {
-        urlapi: {default: ''},
-        editable: { default: false },
-        schedule: null
-    },
-
-    data() {
-        return {
-            daysLabels: {
-                '1': 'Lundi',
-                '2': 'Mardi',
-                '3': 'Mercredi',
-                '4': 'Jeudi',
-                '5': 'Vendredi',
-                '6': 'Samedi',
-                '7': 'Dimanche'
-            },
-            loading: null,
-            error: null,
-            dayLength: 0.0,
-            from: null,
-            days: {},
-            editDay: null,
-            newValue: 0,
-            models: [],
-            model: null
-        }
-    },
-
-    computed: {
-        totalWeek(){
-            let total = 0.0;
-            Object.keys(this.days).forEach(i => {
-                total += parseFloat(this.days[i]);
-            });
-            return total;
-        }
-    },
-
-    methods: {
-        day(index){
-            if( this.days.hasOwnProperty(index) ){
-                return this.days[index];
-            }
-            return this.dayLength;
-        },
-
-        handlerEditDays(){
-            this.editDay = true;
-        },
-
-        handlerCancel(){
-            if( !this.urlapi ){
-                this.$emit('cancel');
-            } else {
-                this.fetch();
-            }
-        },
-
-        handlerSaveDays( model = 'input'){
-            if( !this.urlapi ){
-                this.$emit('changeschedule', this.days);
-            }
-            else {
-                this.loading = "Enregistrement des horaires";
-                let datas = new FormData();
-                if( model == 'input' ){
-                    datas.append('days', JSON.stringify(this.days));
-                }
-                else {
-                    datas.append('model', model);
-                }
-
-
-                this.$http.post(this.urlapi, datas).then(
-                    ok => {
-                        this.fetch();
-                    },
-                    ko => {
-                        this.error = AjaxResolve.resolve('Impossible de modifier les horaires', ko);
-                    }
-                ).then(foo => {
-                    this.loading = false
-                });
-            }
-        },
-
-
-        fetch(clear = true) {
-            if( this.schedule == null ){
-
-                this.loading = "Chargement des données";
-
-                this.$http.get(this.urlapi).then(
-                    ok => {
-                        console.log(ok.body);
-                        this.days = ok.body.days;
-                        this.dayLength = ok.body.dayLength;
-                        this.from = ok.body.from;
-                        this.models = ok.body.models;
-                        this.model = ok.body.model;
-                    },
-                    ko => {
-                        this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
-                    }
-                ).then(foo => {
-                    this.loading = false;
-                    this.editDay = null;
-                });
-            } else {
-                console.log(this.schedule);
-                this.days = this.schedule.days;
-                this.dayLength = this.schedule.dayLength;
-                this.editDay = true;
-            }
-        }
-    },
-
-    mounted() {
-        this.fetch(true)
-    }
-});
-
-// CONCATENATED MODULE: ./src/components/PersonSchedule.vue?vue&type=script&lang=js&
- /* harmony default export */ var components_PersonSchedulevue_type_script_lang_js_ = (PersonSchedulevue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./src/components/PersonSchedule.vue
-
-
-
-
-
-/* normalize component */
-
-var PersonSchedule_component = normalizeComponent(
-  components_PersonSchedulevue_type_script_lang_js_,
-  PersonSchedulevue_type_template_id_9b4a1af6_render,
-  PersonSchedulevue_type_template_id_9b4a1af6_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* harmony default export */ var PersonSchedule = (PersonSchedule_component.exports);
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// nodejs node_modules/.bin/poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
-
-
-
-
-
-
-
-/* harmony default export */ var TimesheetDeclarationsListvue_type_script_lang_js_ = ({
-    name: 'TimesheetDeclarationsList',
-
-    props: {
-        moment: {required: true},
-        bootbox: {required: true},
-        urlapi: {default: null},
-        editable: { default: false }
-    },
-
-    components: {
-        'personautocompleter': PersonAutoCompleter,
-        'personschedule': PersonSchedule
-    },
-
-    data() {
-        return {
-            loading: null,
-            schedule: null,
-            declarations: {},
-            declarers: {},
-            error: null,
-            selectedValidation: null,
-            create: false,
-            addedPerson: null,
-            filterPerson: "",
-            filterActivity: "",
-            selectedPerson: null,
-            validatorId: null,
-            validatorLabel: null,
-            addvalidatorperson: null
-        }
-    },
-
-    computed: {
-        declarants(){
-            let declarants = {};
-            if( this.declarations ){
-                Object.keys(this.declarations).forEach( k => {
-                    let person = this.declarations[k].person;
-                    let person_id = this.declarations[k].person_id;
-
-                    if( !declarants.hasOwnProperty(person) ){
-                        declarants[person] = {
-                            person: person,
-                            person_id: person_id
-                        }
-                    }
-                })
-            }
-            return declarants;
-        },
-
-        activities(){
-            let activities = [];
-            if( this.declarations ){
-                Object.keys(this.declarations).forEach( k => {
-                    for( let i=0; i<this.declarations[k].declarations.length; i++ ){
-                        if( activities.indexOf(this.declarations[k].declarations[i].label) < 0 ){
-                            activities.push(this.declarations[k].declarations[i].label)
-                        }
-                    }
-                })
-            }
-            return activities;
-        },
-
-        filteredDeclarations(){
-            let declarations = [];
-
-            let keys = Object.keys(this.declarations);
-            for( let i=0; i<keys.length; i++ ){
-                let k = keys[i];
-                let period = this.declarations[k];
-
-                if( this.filterPerson != "" ){
-                    if( period.person != this.filterPerson ){
-                        continue;
-                    }
-                }
-
-                if( this.filterActivity != "" ){
-                    let keep = false;
-                    period.declarations.forEach(v => {
-                        if( v.label == this.filterActivity ){
-                            keep = true;
-                        }
-                    });
-                    if( keep == false ) continue;
-                }
-
-
-
-                declarations.push(period);
-            }
-
-            return declarations;
-        }
-    },
-
-    methods: {
-
-        /**
-         * Enregistrement de la modification de la répartition horaire.
-         * @param evt
-         */
-        handlerSaveSchedule(evt){
-            let datas = new FormData();
-            datas.append('person_id', this.schedule.person_id);
-            datas.append('period', this.schedule.period);
-            datas.append('action', 'changeschedule');
-            datas.append('days', JSON.stringify(evt));
-
-            this.$http.post('', datas).then(
-                ok => {
-                    this.fetch();
-                },
-                ko => {
-                    // this.error = AjaxResolve.resolve("Impossible de modifier les horaires", ko);
-
-                }
-            ).then(foo => {
-                this.addedPerson = null;
-                this.schedule = null;
-                this.create = null;
-                this.loading = false
-            });
-        },
-
-        handlerChangeSchedule(line){
-          console.log(line.settings);
-          this.schedule = {
-            schedule : JSON.parse(line.settings),
-            person_id: line.person_id,
-            period: line.period,
-          };
-        },
-
-        handlerSelectValidateur(validator){
-          this.validatorLabel = validator.displayname;
-          this.validatorId = validator.id;
-        },
-
-        handlerAdd(type){
-            this.create = type;
-        },
-
-        handlerAddPerson(data){
-          this.addedPerson = data;
-        },
-
-        handlerDelete( type, person ){
-            this.loading = "Suppression du validateur";
-
-            let datas = new FormData();
-            datas.append('person_id', person.id);
-            datas.append('declaration_id', this.selectedValidation.id);
-            datas.append('action', 'delete');
-            datas.append('type', type);
-
-            this.$http.post('', datas).then(
-                ok => {
-
-                    switch( type ){
-                        case "prj":
-                            this.selectedValidation.validatorsPrj.splice(this.selectedValidation.validatorsPrj.indexOf(person, 1));
-                            break;
-                        case "sci":
-                            this.selectedValidation.validatorsSci.splice(this.selectedValidation.validatorsSci.indexOf(person, 1));
-                            break;
-                        case "adm":
-                            this.selectedValidation.validatorsAdm.splice(this.selectedValidation.validatorsAdm.indexOf(person, 1));
-                            break;
-                    }
-                },
-                ko => {
-                    this.error = AjaxResolve.resolve("Impossible de supprimer ce validateur", ko);
-
-                }
-            ).then(foo => {
-                this.addedPerson = null;
-                this.create = null;
-                this.loading = false
-            });
-        },
-
-        handlerConfirmAdd(type, personId){
-
-            this.loading = "Ajout du validateur";
-
-            let datas = new FormData();
-            datas.append('person_id', personId);
-            datas.append('declaration_id', this.selectedValidation.id);
-            datas.append('type', type);
-
-            this.$http.post('', datas).then(
-                ok => {
-                    switch( type ){
-                        case "prj":
-                            this.selectedValidation.validatorsPrj.push(ok.body);
-                            break;
-                        case "sci":
-                            this.selectedValidation.validatorsSci.push(ok.body);
-                            break;
-                        case "adm":
-                            this.selectedValidation.validatorsAdm.push(ok.body);
-                            break;
-                    }
-                },
-                ko => {
-                    this.error = AjaxResolve.resolve("Impossible d'ajouter le validateur", ko);
-                }
-            ).then(foo => {
-                this.addedPerson = null;
-                this.create = null;
-                this.loading = false
-            });
-        },
-
-
-        fetch(clear = true) {
-            this.loading = "Chargement des données";
-
-            this.$http.get('').then(
-                ok => {
-                    for( let item in ok.body.periods ){
-                        ok.body.periods[item].open = false;
-                    }
-                    this.declarations = ok.body.periods;
-                    this.declarers = ok.body.declarants;
-                },
-                ko => {
-                    this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
-                }
-            ).then(foo => {
-                this.loading = false
-            });
-        },
-
-        handlerCancelDeclaration(declaration){
-            console.log(declaration);
-            this.bootbox.confirm("Supprimer la déclaration (le déclarant devra réenvoyer la déclaration) ?", ok => {
-                if( ok ){
-                    this.loading = "Suppression de la déclaration";
-
-                    this.$http.delete('?person_id=' + declaration.person_id +"&period=" +declaration.period).then(
-                        ok => {
-                            this.fetch();
-                        },
-                        ko => {
-                            this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
-                        }
-                    ).then(foo => {
-                        this.loading = false
-                    });
-                }
-            })
-
-        },
-        //////////////////////////////////////
-        // Application des filtres d'affichage
-
-        handlerFilterPerson( person ){
-            this.selectedValidation = null;
-            this.filterPerson = this.filterPerson == person.displayname ? "" : person.displayname;
-            this.selectedPerson = person;
-        },
-
-        handlerFilterActivity( activity ){
-            this.selectedValidation = null;
-            this.filterActivity = this.filterActivity == activity ? "" : activity;
-        }
-    },
-
-    mounted() {
-        this.fetch(true)
-    }
-});
-
-// CONCATENATED MODULE: ./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&
- /* harmony default export */ var src_TimesheetDeclarationsListvue_type_script_lang_js_ = (TimesheetDeclarationsListvue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./src/TimesheetDeclarationsList.vue
-
-
-
-
-
-/* normalize component */
-
-var TimesheetDeclarationsList_component = normalizeComponent(
-  src_TimesheetDeclarationsListvue_type_script_lang_js_,
-  render,
-  staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* harmony default export */ var TimesheetDeclarationsList = (TimesheetDeclarationsList_component.exports);
-// CONCATENATED MODULE: ./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js
-
-
-/* harmony default export */ var entry_lib = __webpack_exports__["default"] = (TimesheetDeclarationsList);
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _setPublicPath__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./setPublicPath */ \"./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js\");\n/* harmony import */ var _entry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ~entry */ \"./src/TimesheetDeclarationsList.vue\");\n/* empty/unused harmony star reexport */\n\n/* harmony default export */ __webpack_exports__[\"default\"] = (_entry__WEBPACK_IMPORTED_MODULE_1__[\"default\"]);\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js?");
 
+/***/ }),
 
+/***/ "./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n// This file is imported into lib/wc client bundles.\n\nif (typeof window !== 'undefined') {\n  var currentScript = window.document.currentScript\n  if (false) { var getCurrentScript; }\n\n  var src = currentScript && currentScript.src.match(/(.+\\/)[^/]+\\.js(\\?.*)?$/)\n  if (src) {\n    __webpack_require__.p = src[1] // eslint-disable-line\n  }\n}\n\n// Indicate to webpack that this file can be concatenated\n/* harmony default export */ __webpack_exports__[\"default\"] = (null);\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js?");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _components_PersonAutoCompleter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/PersonAutoCompleter */ \"./src/components/PersonAutoCompleter.vue\");\n/* harmony import */ var _components_PersonSchedule__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/PersonSchedule */ \"./src/components/PersonSchedule.vue\");\n/* harmony import */ var _components_AjaxResolve__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/AjaxResolve */ \"./src/components/AjaxResolve.js\");\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n\n// node node_modules/.bin/vue-cli-service build --name TimesheetDeclarationsList --dest ../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib src/TimesheetDeclarationsList.vue\n\n    \n    \n    \n\n\n\n    /* harmony default export */ __webpack_exports__[\"default\"] = ({\n        name: 'TimesheetDeclarationsList',\n\n        props: {\n            moment: {required: true},\n            bootbox: {required: true},\n            urlapi: {default: null},\n            editable: { default: false }\n        },\n\n        components: {\n            'personautocompleter': _components_PersonAutoCompleter__WEBPACK_IMPORTED_MODULE_0__[\"default\"],\n            'personschedule': _components_PersonSchedule__WEBPACK_IMPORTED_MODULE_1__[\"default\"]\n        },\n\n        data() {\n            return {\n                loading: null,\n                schedule: null,\n                declarations: {},\n                declarers: {},\n                error: null,\n                selectedValidation: null,\n                create: false,\n                addedPerson: null,\n                filterPerson: \"\",\n                filterActivity: \"\",\n                selectedPerson: null,\n                validatorId: null,\n                validatorLabel: null,\n                addvalidatorperson: null\n            }\n        },\n\n        computed: {\n            declarants(){\n                let declarants = {};\n                if( this.declarations ){\n                    Object.keys(this.declarations).forEach( k => {\n                        let person = this.declarations[k].person;\n                        let person_id = this.declarations[k].person_id;\n\n                        if( !declarants.hasOwnProperty(person) ){\n                            declarants[person] = {\n                                person: person,\n                                person_id: person_id\n                            }\n                        }\n                    })\n                }\n                return declarants;\n            },\n\n            activities(){\n                let activities = [];\n                if( this.declarations ){\n                    Object.keys(this.declarations).forEach( k => {\n                        for( let i=0; i<this.declarations[k].declarations.length; i++ ){\n                            if( activities.indexOf(this.declarations[k].declarations[i].label) < 0 ){\n                                activities.push(this.declarations[k].declarations[i].label)\n                            }\n                        }\n                    })\n                }\n                return activities;\n            },\n\n            filteredDeclarations(){\n                let declarations = [];\n\n                let keys = Object.keys(this.declarations);\n                for( let i=0; i<keys.length; i++ ){\n                    let k = keys[i];\n                    let period = this.declarations[k];\n\n                    if( this.filterPerson != \"\" ){\n                        if( period.person != this.filterPerson ){\n                            continue;\n                        }\n                    }\n\n                    if( this.filterActivity != \"\" ){\n                        let keep = false;\n                        period.declarations.forEach(v => {\n                            if( v.label == this.filterActivity ){\n                                keep = true;\n                            }\n                        });\n                        if( keep == false ) continue;\n                    }\n\n\n\n                    declarations.push(period);\n                }\n\n                return declarations;\n            }\n        },\n\n        methods: {\n\n            /**\n             * Enregistrement de la modification de la répartition horaire.\n             * @param evt\n             */\n            handlerSaveSchedule(evt){\n                let datas = new FormData();\n                datas.append('person_id', this.schedule.person_id);\n                datas.append('period', this.schedule.period);\n                datas.append('action', 'changeschedule');\n                datas.append('days', JSON.stringify(evt));\n\n                this.$http.post('', datas).then(\n                    ok => {\n                        this.fetch();\n                    },\n                    ko => {\n                        // this.error = AjaxResolve.resolve(\"Impossible de modifier les horaires\", ko);\n\n                    }\n                ).then(foo => {\n                    this.addedPerson = null;\n                    this.schedule = null;\n                    this.create = null;\n                    this.loading = false\n                });\n            },\n\n            handlerChangeSchedule(line){\n              console.log(line.settings);\n              this.schedule = {\n                schedule : JSON.parse(line.settings),\n                person_id: line.person_id,\n                period: line.period,\n              };\n            },\n\n            handlerSelectValidateur(validator){\n              this.validatorLabel = validator.displayname;\n              this.validatorId = validator.id;\n            },\n\n            handlerAdd(type){\n                this.create = type;\n            },\n\n            handlerAddPerson(data){\n              this.addedPerson = data;\n            },\n\n            handlerDelete( type, person ){\n                this.loading = \"Suppression du validateur\";\n\n                let datas = new FormData();\n                datas.append('person_id', person.id);\n                datas.append('declaration_id', this.selectedValidation.id);\n                datas.append('action', 'delete');\n                datas.append('type', type);\n\n                this.$http.post('', datas).then(\n                    ok => {\n\n                        switch( type ){\n                            case \"prj\":\n                                this.selectedValidation.validatorsPrj.splice(this.selectedValidation.validatorsPrj.indexOf(person, 1));\n                                break;\n                            case \"sci\":\n                                this.selectedValidation.validatorsSci.splice(this.selectedValidation.validatorsSci.indexOf(person, 1));\n                                break;\n                            case \"adm\":\n                                this.selectedValidation.validatorsAdm.splice(this.selectedValidation.validatorsAdm.indexOf(person, 1));\n                                break;\n                        }\n                    },\n                    ko => {\n                        this.error = _components_AjaxResolve__WEBPACK_IMPORTED_MODULE_2__[\"default\"].resolve(\"Impossible de supprimer ce validateur\", ko);\n\n                    }\n                ).then(foo => {\n                    this.addedPerson = null;\n                    this.create = null;\n                    this.loading = false\n                });\n            },\n\n            handlerConfirmAdd(type, personId){\n\n                this.loading = \"Ajout du validateur\";\n\n                let datas = new FormData();\n                datas.append('person_id', personId);\n                datas.append('declaration_id', this.selectedValidation.id);\n                datas.append('type', type);\n\n                this.$http.post('', datas).then(\n                    ok => {\n                        switch( type ){\n                            case \"prj\":\n                                this.selectedValidation.validatorsPrj.push(ok.body);\n                                break;\n                            case \"sci\":\n                                this.selectedValidation.validatorsSci.push(ok.body);\n                                break;\n                            case \"adm\":\n                                this.selectedValidation.validatorsAdm.push(ok.body);\n                                break;\n                        }\n                    },\n                    ko => {\n                        this.error = _components_AjaxResolve__WEBPACK_IMPORTED_MODULE_2__[\"default\"].resolve(\"Impossible d'ajouter le validateur\", ko);\n                    }\n                ).then(foo => {\n                    this.addedPerson = null;\n                    this.create = null;\n                    this.loading = false\n                });\n            },\n\n\n            fetch(clear = true) {\n                this.loading = \"Chargement des données\";\n\n                this.$http.get('').then(\n                    ok => {\n                        for( let item in ok.body.periods ){\n                            ok.body.periods[item].open = false;\n                        }\n                        this.declarations = ok.body.periods;\n                        this.declarers = ok.body.declarants;\n                    },\n                    ko => {\n                        this.error = _components_AjaxResolve__WEBPACK_IMPORTED_MODULE_2__[\"default\"].resolve('Impossible de charger les données', ko);\n                    }\n                ).then(foo => {\n                    this.loading = false\n                });\n            },\n\n            handlerCancelDeclaration(declaration){\n                console.log(declaration);\n                this.bootbox.confirm(\"Supprimer la déclaration (le déclarant devra réenvoyer la déclaration) ?\", ok => {\n                    if( ok ){\n                        this.loading = \"Suppression de la déclaration\";\n\n                        this.$http.delete('?person_id=' + declaration.person_id +\"&period=\" +declaration.period).then(\n                            ok => {\n                                this.fetch();\n                            },\n                            ko => {\n                                this.error = _components_AjaxResolve__WEBPACK_IMPORTED_MODULE_2__[\"default\"].resolve('Impossible de charger les données', ko);\n                            }\n                        ).then(foo => {\n                            this.loading = false\n                        });\n                    }\n                })\n\n            },\n            //////////////////////////////////////\n            // Application des filtres d'affichage\n\n            handlerFilterPerson( person ){\n                this.selectedValidation = null;\n                this.filterPerson = this.filterPerson == person.displayname ? \"\" : person.displayname;\n                this.selectedPerson = person;\n            },\n\n            handlerFilterActivity( activity ){\n                this.selectedValidation = null;\n                this.filterActivity = this.filterActivity == activity ? \"\" : activity;\n            }\n        },\n\n        mounted() {\n            this.fetch(true)\n        }\n    });\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/TimesheetDeclarationsList.vue?./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&":
+/*!*****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js& ***!
+  \*****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n\n\nlet tempo;\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n  data() {\n    return {\n      url: \"/person?l=m&q=\",\n      persons: [],\n      expression: \"\",\n      loading: false,\n      selectedPerson: null,\n      showSelector: true,\n      request: null,\n      error: \"\"\n    }\n  },\n  watch: {\n    expression(n, o) {\n\n      if (n.length >= 2) {\n        if (tempo) {\n          clearTimeout(tempo);\n        }\n        tempo = setTimeout(() => {\n          this.search();\n        }, 500)\n\n      }\n    }\n  },\n  methods: {\n    search() {\n      this.loading = true;\n      this.$http.get(this.url + this.expression, {\n        before(r) {\n          if (this.request) {\n            this.request.abort();\n          }\n          this.request = r;\n        }\n      }).then(\n          ok => {\n            console.log(ok);\n            this.persons = ok.body.datas;\n            this.showSelector = true;\n          },\n          ko => {\n            console.log(ko);\n            if( ko.status == 403 ){\n              this.error = \"403 Unauthorized\";\n            }\n            else if( ko.body ){\n              this.error = ko.body;\n            }\n          }\n      ).then(foo => {\n        this.loading = false;\n        this.request = null;\n      });\n    },\n    handlerSelectPerson(data) {\n      this.selectedPerson = data;\n      this.showSelector = false;\n      this.expression = \"\";\n      this.$emit('change', data);\n    }\n  }\n});\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonAutoCompleter.vue?./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonSchedule.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonSchedule.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _AjaxResolve__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./AjaxResolve */ \"./src/components/AjaxResolve.js\");\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n//\n\n// poi watch --format umd --moduleName  PersonSchedule --filename.css PersonSchedule.css --filename.js PersonSchedule.js --dist public/js/oscar/dist public/js/oscar/src/PersonSchedule.vue\n\n\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n    name: 'PersonSchedule',\n\n    props: {\n        urlapi: {default: ''},\n        editable: { default: false },\n        schedule: null\n    },\n\n    data() {\n        return {\n            daysLabels: {\n                '1': 'Lundi',\n                '2': 'Mardi',\n                '3': 'Mercredi',\n                '4': 'Jeudi',\n                '5': 'Vendredi',\n                '6': 'Samedi',\n                '7': 'Dimanche'\n            },\n            loading: null,\n            error: null,\n            dayLength: 0.0,\n            from: null,\n            days: {},\n            editDay: null,\n            newValue: 0,\n            models: [],\n            model: null\n        }\n    },\n\n    computed: {\n        totalWeek(){\n            let total = 0.0;\n            Object.keys(this.days).forEach(i => {\n                total += parseFloat(this.days[i]);\n            });\n            return total;\n        }\n    },\n\n    methods: {\n        day(index){\n            if( this.days.hasOwnProperty(index) ){\n                return this.days[index];\n            }\n            return this.dayLength;\n        },\n\n        handlerEditDays(){\n            this.editDay = true;\n        },\n\n        handlerCancel(){\n            if( !this.urlapi ){\n                this.$emit('cancel');\n            } else {\n                this.fetch();\n            }\n        },\n\n        handlerSaveDays( model = 'input'){\n            if( !this.urlapi ){\n                this.$emit('changeschedule', this.days);\n            }\n            else {\n                this.loading = \"Enregistrement des horaires\";\n                let datas = new FormData();\n                if( model == 'input' ){\n                    datas.append('days', JSON.stringify(this.days));\n                }\n                else {\n                    datas.append('model', model);\n                }\n\n\n                this.$http.post(this.urlapi, datas).then(\n                    ok => {\n                        this.fetch();\n                    },\n                    ko => {\n                        this.error = _AjaxResolve__WEBPACK_IMPORTED_MODULE_0__[\"default\"].resolve('Impossible de modifier les horaires', ko);\n                    }\n                ).then(foo => {\n                    this.loading = false\n                });\n            }\n        },\n\n\n        fetch(clear = true) {\n            if( this.schedule == null ){\n\n                this.loading = \"Chargement des données\";\n\n                this.$http.get(this.urlapi).then(\n                    ok => {\n                        console.log(ok.body);\n                        this.days = ok.body.days;\n                        this.dayLength = ok.body.dayLength;\n                        this.from = ok.body.from;\n                        this.models = ok.body.models;\n                        this.model = ok.body.model;\n                    },\n                    ko => {\n                        this.error = _AjaxResolve__WEBPACK_IMPORTED_MODULE_0__[\"default\"].resolve('Impossible de charger les données', ko);\n                    }\n                ).then(foo => {\n                    this.loading = false;\n                    this.editDay = null;\n                });\n            } else {\n                console.log(this.schedule);\n                this.days = this.schedule.days;\n                this.dayLength = this.schedule.dayLength;\n                this.editDay = true;\n            }\n        }\n    },\n\n    mounted() {\n        this.fetch(true)\n    }\n});\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonSchedule.vue?./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"21d02cb8-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return staticRenderFns; });\nvar render = function () {\n  var _vm = this\n  var _h = _vm.$createElement\n  var _c = _vm._self._c || _h\n  return _c(\n    \"section\",\n    { staticClass: \"validations-admin\" },\n    [\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.loading\n          ? _c(\"div\", { staticClass: \"pending overlay\" }, [\n              _c(\"div\", { staticClass: \"overlay-content\" }, [\n                _c(\"i\", { staticClass: \"icon-spinner animate-spin\" }),\n                _vm._v(\" \" + _vm._s(_vm.loading) + \" \"),\n              ]),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.error\n          ? _c(\"div\", { staticClass: \"pending overlay\" }, [\n              _c(\"div\", { staticClass: \"overlay-content\" }, [\n                _c(\"i\", { staticClass: \"icon-attention-1\" }),\n                _vm._v(\" \" + _vm._s(_vm.error) + \" \"),\n              ]),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _c(\n          \"div\",\n          {\n            directives: [\n              {\n                name: \"show\",\n                rawName: \"v-show\",\n                value: _vm.create,\n                expression: \"create\",\n              },\n            ],\n            staticClass: \"overlay\",\n          },\n          [\n            _c(\n              \"div\",\n              {\n                staticClass: \"overlay-content\",\n                staticStyle: { \"overflow-y\": \"visible\" },\n              },\n              [\n                _c(\n                  \"span\",\n                  {\n                    staticClass: \"overlay-closer\",\n                    on: {\n                      click: function ($event) {\n                        _vm.create = null\n                      },\n                    },\n                  },\n                  [_vm._v(\"X\")]\n                ),\n                _vm._v(\" Choisissez une personne à ajouter : \"),\n                _c(\"personautocompleter\", {\n                  on: { change: _vm.handlerAddPerson },\n                }),\n                _c(\n                  \"button\",\n                  {\n                    staticClass: \"btn btn-primary\",\n                    class: { disabled: _vm.addedPerson == null },\n                    on: {\n                      click: function ($event) {\n                        return _vm.handlerConfirmAdd(\n                          _vm.create,\n                          _vm.addedPerson.id\n                        )\n                      },\n                    },\n                  },\n                  [\n                    _vm.addedPerson != null\n                      ? _c(\"span\", [\n                          _vm._v(\"Ajouter \"),\n                          _c(\"strong\", [\n                            _vm._v(_vm._s(_vm.addedPerson.displayname)),\n                          ]),\n                          _vm._v(\" comme validateur\"),\n                        ])\n                      : _c(\"span\", [_vm._v(\"Selectionner une personne\")]),\n                  ]\n                ),\n              ],\n              1\n            ),\n          ]\n        ),\n      ]),\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.addvalidatorperson\n          ? _c(\"div\", { staticClass: \"overlay\" }, [\n              _c(\n                \"div\",\n                {\n                  staticClass: \"overlay-content\",\n                  staticStyle: { \"overflow-y\": \"visible\" },\n                },\n                [\n                  _c(\n                    \"span\",\n                    {\n                      staticClass: \"overlay-closer\",\n                      on: {\n                        click: function ($event) {\n                          _vm.addvalidatorperson = null\n                        },\n                      },\n                    },\n                    [_vm._v(\"X\")]\n                  ),\n                  _c(\"h3\", [_vm._v(\"Assigner un validateur Hors-lot\")]),\n                  _c(\"p\", { staticClass: \"alert alert-info\" }, [\n                    _vm._v(\"Selectionnez un validateur pour les \"),\n                    _c(\"strong\", [_vm._v(\"créneaux Hors-Lot\")]),\n                    _vm._v(\" de \"),\n                    _c(\"strong\", [_vm._v(_vm._s(_vm.filterPerson))]),\n                    _vm._v(\n                      \". Cet opération affectera également le validateur pour les déclarations en cours non-validée. \"\n                    ),\n                  ]),\n                  _c(\"personautocompleter\", {\n                    on: { change: _vm.handlerSelectValidateur },\n                  }),\n                  _c(\"form\", { attrs: { action: \"\", method: \"post\" } }, [\n                    _c(\"input\", {\n                      attrs: {\n                        type: \"hidden\",\n                        name: \"action\",\n                        value: \"addvalidator\",\n                      },\n                    }),\n                    _c(\"input\", {\n                      attrs: { type: \"hidden\", name: \"person\" },\n                      domProps: { value: _vm.selectedPerson.id },\n                    }),\n                    _c(\"input\", {\n                      attrs: { type: \"hidden\", name: \"validatorId\" },\n                      domProps: { value: _vm.validatorId },\n                    }),\n                    _c(\n                      \"button\",\n                      {\n                        staticClass: \"btn btn-primary\",\n                        class: { disabled: !_vm.validatorId },\n                        attrs: { type: \"submit\" },\n                      },\n                      [\n                        _vm._v(\"Ajouter \"),\n                        _c(\"strong\", [_vm._v(_vm._s(_vm.validatorLabel))]),\n                        _vm._v(\" comme validateur hors-lot\"),\n                      ]\n                    ),\n                  ]),\n                  _c(\n                    \"button\",\n                    {\n                      on: {\n                        click: function ($event) {\n                          _vm.addvalidatorperson = null\n                        },\n                      },\n                    },\n                    [_vm._v(\"Annuler\")]\n                  ),\n                ],\n                1\n              ),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.schedule\n          ? _c(\"div\", { staticClass: \"overlay\" }, [\n              _c(\n                \"div\",\n                {\n                  staticClass: \"overlay-content\",\n                  staticStyle: { \"overflow-y\": \"visible\" },\n                },\n                [\n                  _c(\"personschedule\", {\n                    attrs: { schedule: _vm.schedule.schedule, editable: true },\n                    on: {\n                      cancel: function ($event) {\n                        _vm.schedule = null\n                      },\n                      changeschedule: _vm.handlerSaveSchedule,\n                    },\n                  }),\n                ],\n                1\n              ),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"h1\", [_vm._v(\"Liste des déclarations\")]),\n      _c(\"div\", { staticClass: \"declarations-ui cols\" }, [\n        _c(\"div\", { staticClass: \"persons-list col-1 onglets\" }, [\n          _vm._m(0),\n          _c(\"div\", [\n            _vm._m(1),\n            _c(\"div\", { staticClass: \"tab-content\" }, [\n              _c(\n                \"div\",\n                {\n                  staticClass: \"tab-pane active\",\n                  attrs: { role: \"tabpanel\", id: \"declarants\" },\n                },\n                _vm._l(_vm.declarers, function (p) {\n                  return _c(\n                    \"article\",\n                    {\n                      staticClass: \"list-item\",\n                      class: { selected: p.displayname == _vm.filterPerson },\n                      on: {\n                        click: function ($event) {\n                          $event.preventDefault()\n                          return _vm.handlerFilterPerson(p)\n                        },\n                      },\n                    },\n                    [\n                      _c(\"i\", { staticClass: \"icon-user\" }),\n                      _vm._v(\" \" + _vm._s(p.displayname) + \" \"),\n                      p.referents.length == 0\n                        ? _c(\"i\", { staticClass: \"icon-attention-1\" })\n                        : _vm._e(),\n                    ]\n                  )\n                }),\n                0\n              ),\n              _c(\n                \"div\",\n                {\n                  staticClass: \"tab-pane\",\n                  attrs: { role: \"tabpanel\", id: \"activities\" },\n                },\n                _vm._l(_vm.activities, function (a) {\n                  return _c(\n                    \"article\",\n                    {\n                      staticClass: \"list-item\",\n                      class: { selected: a == _vm.filterActivity },\n                      on: {\n                        click: function ($event) {\n                          $event.preventDefault()\n                          return _vm.handlerFilterActivity(a)\n                        },\n                      },\n                    },\n                    [\n                      _c(\"i\", { staticClass: \"icon-cube\" }),\n                      _vm._v(\" \" + _vm._s(a) + \" \"),\n                    ]\n                  )\n                }),\n                0\n              ),\n            ]),\n          ]),\n        ]),\n        _c(\n          \"div\",\n          { staticClass: \"declarations-list col-4\" },\n          [\n            _vm._m(2),\n            _vm._l(_vm.filteredDeclarations, function (line, k) {\n              return _c(\n                \"section\",\n                {\n                  staticClass: \"card declaration reactive\",\n                  on: {\n                    click: function ($event) {\n                      line.open = !line.open\n                    },\n                  },\n                },\n                [\n                  _c(\"span\", { staticClass: \"opener\" }, [\n                    line.open\n                      ? _c(\"i\", { staticClass: \"icon-angle-down\" })\n                      : _c(\"i\", { staticClass: \"icon-angle-right\" }),\n                  ]),\n                  _c(\"strong\", [_vm._v(_vm._s(line.person))]),\n                  _vm._v(\" \"),\n                  _c(\"time\", [_vm._v(_vm._s(_vm._f(\"period\")(line.period)))]),\n                  _c(\n                    \"span\",\n                    { staticClass: \"validations-icon\" },\n                    [\n                      line.warnings.length > 0\n                        ? _c(\"i\", {\n                            staticClass: \"icon-attention-1 bg-danger rounded\",\n                            staticStyle: { \"border-radius\": \"8px\" },\n                          })\n                        : _vm._e(),\n                      _vm._l(line.declarations, function (d) {\n                        return _c(\"i\", {\n                          staticClass: \"icon\",\n                          class: \"icon-\" + d.status,\n                          attrs: { title: d.label },\n                        })\n                      }),\n                    ],\n                    2\n                  ),\n                  _c(\"nav\", [\n                    _c(\n                      \"a\",\n                      {\n                        staticClass: \"btn btn-default btn-xs\",\n                        attrs: {\n                          href:\n                            \"/feuille-de-temps/excel?action=export2&period=\" +\n                            line.period +\n                            \"&personid=\" +\n                            line.person_id,\n                        },\n                      },\n                      [\n                        _c(\"i\", { staticClass: \"icon-file-pdf\" }),\n                        _vm._v(\"Voir\"),\n                      ]\n                    ),\n                    _c(\n                      \"a\",\n                      {\n                        staticClass: \"btn btn-default btn-xs\",\n                        attrs: { href: \"#\" },\n                        on: {\n                          click: function ($event) {\n                            $event.preventDefault()\n                            $event.stopPropagation()\n                            return _vm.handlerChangeSchedule(line)\n                          },\n                        },\n                      },\n                      [\n                        _c(\"i\", { staticClass: \"icon-clock\" }),\n                        _vm._v(\"Horaires\"),\n                      ]\n                    ),\n                    _c(\n                      \"a\",\n                      {\n                        staticClass: \"btn btn-danger btn-xs\",\n                        attrs: { href: \"#\" },\n                        on: {\n                          click: function ($event) {\n                            $event.preventDefault()\n                            $event.stopPropagation()\n                            return _vm.handlerCancelDeclaration(line)\n                          },\n                        },\n                      },\n                      [\n                        _c(\"i\", { staticClass: \"icon-trash\" }),\n                        _vm._v(\"Annuler\"),\n                      ]\n                    ),\n                  ]),\n                  _c(\"transition\", { attrs: { name: \"slide\" } }, [\n                    line.open\n                      ? _c(\n                          \"section\",\n                          { staticClass: \"validations text-small\" },\n                          [\n                            line.warnings.length > 0\n                              ? _c(\n                                  \"ul\",\n                                  { staticClass: \"alert-danger alert\" },\n                                  _vm._l(line.warnings, function (w) {\n                                    return _c(\"li\", [_vm._v(_vm._s(w))])\n                                  }),\n                                  0\n                                )\n                              : _vm._e(),\n                            _vm._l(line.declarations, function (validation) {\n                              return _c(\n                                \"article\",\n                                {\n                                  staticClass: \"validation\",\n                                  class: {\n                                    selected:\n                                      _vm.selectedValidation == validation,\n                                  },\n                                  on: {\n                                    click: function ($event) {\n                                      $event.preventDefault()\n                                      $event.stopPropagation()\n                                      _vm.selectedValidation = validation\n                                    },\n                                  },\n                                },\n                                [\n                                  _c(\"span\", [\n                                    _c(\"i\", {\n                                      class:\n                                        validation.object == \"activity\"\n                                          ? \"icon-cube\"\n                                          : \"icon-\" + validation.object,\n                                    }),\n                                    _c(\"strong\", [\n                                      _vm._v(_vm._s(validation.label)),\n                                    ]),\n                                  ]),\n                                  validation.object == \"activity\"\n                                    ? _c(\"span\", [\n                                        validation.validation\n                                          .validationactivity_by\n                                          ? _c(\n                                              \"span\",\n                                              {\n                                                staticClass: \"cartouche green\",\n                                                attrs: {\n                                                  title: \"Validation projet\",\n                                                },\n                                              },\n                                              [\n                                                _c(\"i\", {\n                                                  staticClass: \"icon-cube\",\n                                                }),\n                                                _vm._v(\n                                                  _vm._s(\n                                                    validation.validation\n                                                      .validationactivity_by\n                                                  ) + \" \"\n                                                ),\n                                              ]\n                                            )\n                                          : _c(\n                                              \"span\",\n                                              {\n                                                directives: [\n                                                  {\n                                                    name: \"else\",\n                                                    rawName: \"v-else\",\n                                                  },\n                                                ],\n                                                staticClass: \"validators\",\n                                              },\n                                              [\n                                                _c(\"i\", {\n                                                  staticClass: \"icon-cube\",\n                                                }),\n                                                _vm._l(\n                                                  validation.validateursPrj,\n                                                  function (p) {\n                                                    return _c(\"span\", [\n                                                      _vm._v(_vm._s(p.person)),\n                                                    ])\n                                                  }\n                                                ),\n                                              ],\n                                              2\n                                            ),\n                                      ])\n                                    : _c(\"span\", [_vm._v(\"~\")]),\n                                  validation.object == \"activity\"\n                                    ? _c(\"span\", [\n                                        validation.validation.validationsci_by\n                                          ? _c(\n                                              \"span\",\n                                              {\n                                                staticClass: \"cartouche green\",\n                                                attrs: {\n                                                  title:\n                                                    \"Validation scientifique\",\n                                                },\n                                              },\n                                              [\n                                                _c(\"i\", {\n                                                  staticClass: \"icon-beaker\",\n                                                }),\n                                                _vm._v(\n                                                  _vm._s(\n                                                    validation.validation\n                                                      .validationsci_by\n                                                  ) + \" \"\n                                                ),\n                                              ]\n                                            )\n                                          : _c(\n                                              \"span\",\n                                              { staticClass: \"validators\" },\n                                              [\n                                                _c(\"i\", {\n                                                  staticClass: \"icon-beaker\",\n                                                }),\n                                                _vm._l(\n                                                  validation.validateursSci,\n                                                  function (p) {\n                                                    return _c(\"span\", [\n                                                      _vm._v(_vm._s(p.person)),\n                                                    ])\n                                                  }\n                                                ),\n                                              ],\n                                              2\n                                            ),\n                                      ])\n                                    : _c(\"span\", [_vm._v(\"~\")]),\n                                  _c(\"span\", [\n                                    validation.validation.validationadm_by\n                                      ? _c(\n                                          \"span\",\n                                          {\n                                            staticClass: \"cartouche green\",\n                                            attrs: {\n                                              title:\n                                                \"Validation administrative\",\n                                            },\n                                          },\n                                          [\n                                            _c(\"i\", {\n                                              staticClass: \"icon-book\",\n                                            }),\n                                            _vm._v(\n                                              _vm._s(\n                                                validation.validation\n                                                  .validationadm_by\n                                              ) + \" \"\n                                            ),\n                                          ]\n                                        )\n                                      : _c(\n                                          \"span\",\n                                          { staticClass: \"validators\" },\n                                          [\n                                            _c(\"i\", {\n                                              staticClass: \"icon-book\",\n                                            }),\n                                            _vm._l(\n                                              validation.validateursAdm,\n                                              function (p) {\n                                                return _c(\"span\", [\n                                                  _vm._v(_vm._s(p.person)),\n                                                ])\n                                              }\n                                            ),\n                                          ],\n                                          2\n                                        ),\n                                  ]),\n                                  _c(\"em\", [\n                                    _c(\"i\", {\n                                      class: \"icon-\" + validation.status,\n                                    }),\n                                  ]),\n                                ]\n                              )\n                            }),\n                          ],\n                          2\n                        )\n                      : _vm._e(),\n                  ]),\n                ],\n                1\n              )\n            }),\n          ],\n          2\n        ),\n        _c(\n          \"div\",\n          { staticClass: \"declaration-details col-2\" },\n          [\n            _vm.filterPerson\n              ? _c(\"div\", [\n                  _c(\"h3\", [\n                    _c(\"i\", { staticClass: \"icon-cog\" }),\n                    _vm._v(\" \" + _vm._s(_vm.filterPerson)),\n                  ]),\n                  _vm.selectedPerson.referents.length == 0\n                    ? _c(\"div\", { staticClass: \"alert alert-danger\" }, [\n                        _vm._v(\" Aucun référent pour \"),\n                        _c(\"strong\", [\n                          _vm._v(\"valider les déclarations Hors-lot\"),\n                        ]),\n                      ])\n                    : _c(\"div\", [\n                        _c(\"h4\", [_vm._v(\"Validateur :\")]),\n                        _c(\n                          \"ul\",\n                          _vm._l(_vm.selectedPerson.referents, function (r) {\n                            return _c(\n                              \"li\",\n                              { staticClass: \"cartouche cartouche-default\" },\n                              [_vm._v(_vm._s(r.displayname))]\n                            )\n                          }),\n                          0\n                        ),\n                      ]),\n                  _c(\n                    \"button\",\n                    {\n                      staticClass: \"btn-primary btn\",\n                      on: {\n                        click: function ($event) {\n                          _vm.addvalidatorperson = true\n                        },\n                      },\n                    },\n                    [\n                      _vm._v(\" Ajouter un validateur pour les créneaux \"),\n                      _c(\"strong\", [_vm._v(\"Hors-Lot\")]),\n                    ]\n                  ),\n                  _c(\n                    \"a\",\n                    {\n                      staticClass: \"btn-primary btn\",\n                      attrs: { href: \"/person/show/\" + _vm.selectedPerson.id },\n                    },\n                    [\n                      _vm._v(\" Voir la fiche de \"),\n                      _c(\"strong\", [_vm._v(_vm._s(_vm.filterPerson))]),\n                    ]\n                  ),\n                ])\n              : _vm._e(),\n            _vm._m(3),\n            !_vm.selectedValidation\n              ? _c(\"p\", { staticClass: \"alert alert-info\" }, [\n                  _vm._v(\n                    \" Selectionnez une ligne d'une déclaration pour afficher les détails et \"\n                  ),\n                  _c(\"strong\", [_vm._v(\"gérer les validateurs\")]),\n                ])\n              : _vm._e(),\n            _c(\"transition\", { attrs: { name: \"fade\" } }, [\n              _vm.selectedValidation\n                ? _c(\"div\", { staticClass: \"validation-details\" }, [\n                    _c(\"h3\", [\n                      _c(\"small\", [_vm._v(\"Validation pour les créneaux\")]),\n                      _c(\"br\"),\n                      _vm.selectedValidation.object == \"activity\"\n                        ? _c(\"strong\", [\n                            _c(\"i\", { staticClass: \"icon-cube\" }),\n                            _vm._v(\n                              \" \" + _vm._s(_vm.selectedValidation.label) + \" \"\n                            ),\n                          ])\n                        : _c(\"strong\", [\n                            _c(\"i\", {\n                              class: \"icon-\" + _vm.selectedValidation.object,\n                            }),\n                            _vm._v(\n                              \" \" + _vm._s(_vm.selectedValidation.label) + \" \"\n                            ),\n                          ]),\n                      _c(\"br\"),\n                      _c(\"small\", [\n                        _vm._v(\" de \"),\n                        _c(\"strong\", [\n                          _vm._v(_vm._s(_vm.selectedValidation.person)),\n                        ]),\n                        _vm._v(\" en \"),\n                        _c(\"strong\", [\n                          _vm._v(\n                            _vm._s(\n                              _vm._f(\"period\")(_vm.selectedValidation.period)\n                            )\n                          ),\n                        ]),\n                      ]),\n                    ]),\n                    _vm.selectedValidation.object == \"activity\"\n                      ? _c(\"div\", [\n                          _vm.selectedValidation.validation\n                            .validationactivity_by\n                            ? _c(\"div\", { staticClass: \"card valid\" }, [\n                                _c(\"i\", { staticClass: \"icon-ok-circled\" }),\n                                _vm._v(\" Validation projet par \"),\n                                _c(\"strong\", [\n                                  _c(\"i\", { staticClass: \"icon-user\" }),\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .validationactivity_by\n                                    )\n                                  ),\n                                ]),\n                                _vm._v(\" le \"),\n                                _c(\"time\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm._f(\"humandate\")(\n                                        _vm.selectedValidation.validation\n                                          .validationactivity_at\n                                      )\n                                    )\n                                  ),\n                                ]),\n                              ])\n                            : _vm.selectedValidation.validation\n                                .rejectactivity_by\n                            ? _c(\"div\", { staticClass: \"card reject\" }, [\n                                _c(\"i\", {\n                                  staticClass: \"icon-attention-circled\",\n                                }),\n                                _vm._v(\" Rejet des créneaux par \"),\n                                _c(\"strong\", [\n                                  _c(\"i\", { staticClass: \"icon-user\" }),\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .rejectactivity_by\n                                    )\n                                  ),\n                                ]),\n                                _vm._v(\" le \"),\n                                _c(\"time\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm._f(\"humandate\")(\n                                        _vm.selectedValidation.validation\n                                          .rejectactivity_at\n                                      )\n                                    )\n                                  ),\n                                ]),\n                                _vm._v(\" : \"),\n                                _c(\"pre\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .rejectactivity_message\n                                    )\n                                  ),\n                                ]),\n                              ])\n                            : _c(\"div\", { staticClass: \"card waiting\" }, [\n                                _c(\"strong\", [\n                                  _vm._v(\"Validation projet en attente\"),\n                                ]),\n                                _vm._v(\" par l'un des validateurs suivant : \"),\n                                _c(\n                                  \"ul\",\n                                  _vm._l(\n                                    _vm.selectedValidation.validatorsPrj,\n                                    function (p) {\n                                      return _c(\"li\", [\n                                        _c(\"i\", { staticClass: \"icon-user\" }),\n                                        _vm._v(_vm._s(p.person) + \" \"),\n                                        _c(\n                                          \"a\",\n                                          {\n                                            staticClass: \"link\",\n                                            on: {\n                                              click: function ($event) {\n                                                $event.preventDefault()\n                                                $event.stopPropagation()\n                                                return _vm.handlerDelete(\n                                                  \"prj\",\n                                                  p\n                                                )\n                                              },\n                                            },\n                                          },\n                                          [\n                                            _c(\"i\", {\n                                              staticClass: \"icon-trash\",\n                                            }),\n                                            _vm._v(\" Supprimer\"),\n                                          ]\n                                        ),\n                                      ])\n                                    }\n                                  ),\n                                  0\n                                ),\n                                _c(\n                                  \"a\",\n                                  {\n                                    staticClass: \"btn btn-xs btn-primary\",\n                                    on: {\n                                      click: function ($event) {\n                                        $event.preventDefault()\n                                        $event.stopPropagation()\n                                        return _vm.handlerAdd(\"prj\")\n                                      },\n                                    },\n                                  },\n                                  [_vm._v(\"Ajouter un validateur\")]\n                                ),\n                              ]),\n                          _vm.selectedValidation.validation.validationsci_by\n                            ? _c(\"div\", { staticClass: \"card valid\" }, [\n                                _vm._v(\" Validation scientifique par \"),\n                                _c(\"strong\", [\n                                  _c(\"i\", { staticClass: \"icon-user\" }),\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .validationsci_by\n                                    )\n                                  ),\n                                ]),\n                                _vm._v(\" le \"),\n                                _c(\"time\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm._f(\"humandate\")(\n                                        _vm.selectedValidation.validation\n                                          .validationsci_at\n                                      )\n                                    )\n                                  ),\n                                ]),\n                              ])\n                            : _vm.selectedValidation.validation.rejectsci_by\n                            ? _c(\"div\", { staticClass: \"card reject\" }, [\n                                _c(\"i\", {\n                                  staticClass: \"icon-attention-circled\",\n                                }),\n                                _vm._v(\" Rejet scientifique des créneaux par \"),\n                                _c(\"strong\", [\n                                  _c(\"i\", { staticClass: \"icon-user\" }),\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .rejectsci_by\n                                    )\n                                  ),\n                                ]),\n                                _vm._v(\" le \"),\n                                _c(\"time\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm._f(\"humandate\")(\n                                        _vm.selectedValidation.validation\n                                          .rejectsci_at\n                                      )\n                                    )\n                                  ),\n                                ]),\n                                _c(\"pre\", [\n                                  _vm._v(\n                                    _vm._s(\n                                      _vm.selectedValidation.validation\n                                        .rejectsci_message\n                                    )\n                                  ),\n                                ]),\n                              ])\n                            : _c(\"div\", { staticClass: \"card waiting\" }, [\n                                _c(\"strong\", [\n                                  _vm._v(\"Validation scientifique en attente\"),\n                                ]),\n                                _vm._v(\" par l'un des validateurs suivant : \"),\n                                _c(\n                                  \"ul\",\n                                  _vm._l(\n                                    _vm.selectedValidation.validatorsSci,\n                                    function (p) {\n                                      return _c(\"li\", [\n                                        _c(\"i\", { staticClass: \"icon-user\" }),\n                                        _vm._v(_vm._s(p.person) + \" \"),\n                                        _c(\n                                          \"a\",\n                                          {\n                                            staticClass: \"link\",\n                                            on: {\n                                              click: function ($event) {\n                                                $event.preventDefault()\n                                                $event.stopPropagation()\n                                                return _vm.handlerDelete(\n                                                  \"sci\",\n                                                  p\n                                                )\n                                              },\n                                            },\n                                          },\n                                          [\n                                            _c(\"i\", {\n                                              staticClass: \"icon-trash\",\n                                            }),\n                                            _vm._v(\" Supprimer\"),\n                                          ]\n                                        ),\n                                      ])\n                                    }\n                                  ),\n                                  0\n                                ),\n                                _c(\n                                  \"a\",\n                                  {\n                                    staticClass: \"btn btn-xs btn-primary\",\n                                    on: {\n                                      click: function ($event) {\n                                        $event.preventDefault()\n                                        $event.stopPropagation()\n                                        return _vm.handlerAdd(\"sci\")\n                                      },\n                                    },\n                                  },\n                                  [_vm._v(\"Ajouter un validateur\")]\n                                ),\n                              ]),\n                        ])\n                      : _vm._e(),\n                    _vm.selectedValidation.validation.validationadm_by\n                      ? _c(\"div\", { staticClass: \"card valid\" }, [\n                          _vm._v(\" Validation administrative par \"),\n                          _c(\"strong\", [\n                            _c(\"i\", { staticClass: \"icon-user\" }),\n                            _vm._v(\n                              _vm._s(\n                                _vm.selectedValidation.validation\n                                  .validationadm_by\n                              )\n                            ),\n                          ]),\n                          _vm._v(\" le \"),\n                          _c(\"time\", [\n                            _vm._v(\n                              _vm._s(\n                                _vm._f(\"humandate\")(\n                                  _vm.selectedValidation.validation\n                                    .validationadm_at\n                                )\n                              )\n                            ),\n                          ]),\n                        ])\n                      : _vm.selectedValidation.validation.rejectadm_by\n                      ? _c(\"div\", { staticClass: \"card reject\" }, [\n                          _c(\"i\", { staticClass: \"icon-attention-circled\" }),\n                          _vm._v(\" Rejet administrative des créneaux par \"),\n                          _c(\"strong\", [\n                            _c(\"i\", { staticClass: \"icon-user\" }),\n                            _vm._v(\n                              _vm._s(\n                                _vm.selectedValidation.validation.rejectadm_by\n                              )\n                            ),\n                          ]),\n                          _vm._v(\" le \"),\n                          _c(\"time\", [\n                            _vm._v(\n                              _vm._s(\n                                _vm._f(\"humandate\")(\n                                  _vm.selectedValidation.validation.rejectadm_at\n                                )\n                              )\n                            ),\n                          ]),\n                          _c(\"pre\", [\n                            _vm._v(\n                              _vm._s(\n                                _vm.selectedValidation.validation\n                                  .validationadm_message\n                              )\n                            ),\n                          ]),\n                        ])\n                      : _c(\"div\", { staticClass: \"card waiting\" }, [\n                          _c(\"strong\", [\n                            _vm._v(\"Validation administrative en attente\"),\n                          ]),\n                          _vm._v(\" par l'un des validateurs suivant : \"),\n                          _c(\n                            \"ul\",\n                            _vm._l(\n                              _vm.selectedValidation.validatorsAdm,\n                              function (p) {\n                                return _c(\"li\", [\n                                  _c(\"i\", { staticClass: \"icon-user\" }),\n                                  _vm._v(_vm._s(p.person) + \" \"),\n                                  _c(\n                                    \"a\",\n                                    {\n                                      staticClass: \"link\",\n                                      on: {\n                                        click: function ($event) {\n                                          $event.preventDefault()\n                                          $event.stopPropagation()\n                                          return _vm.handlerDelete(\"adm\", p)\n                                        },\n                                      },\n                                    },\n                                    [\n                                      _c(\"i\", { staticClass: \"icon-trash\" }),\n                                      _vm._v(\" Supprimer\"),\n                                    ]\n                                  ),\n                                ])\n                              }\n                            ),\n                            0\n                          ),\n                          _c(\n                            \"a\",\n                            {\n                              staticClass: \"btn btn-xs btn-primary\",\n                              on: {\n                                click: function ($event) {\n                                  $event.preventDefault()\n                                  $event.stopPropagation()\n                                  return _vm.handlerAdd(\"adm\")\n                                },\n                              },\n                            },\n                            [_vm._v(\"Ajouter un validateur\")]\n                          ),\n                        ]),\n                  ])\n                : _vm._e(),\n            ]),\n          ],\n          1\n        ),\n      ]),\n    ],\n    1\n  )\n}\nvar staticRenderFns = [\n  function () {\n    var _vm = this\n    var _h = _vm.$createElement\n    var _c = _vm._self._c || _h\n    return _c(\"h3\", [_c(\"i\", { staticClass: \"icon-sort\" }), _vm._v(\" Filtres\")])\n  },\n  function () {\n    var _vm = this\n    var _h = _vm.$createElement\n    var _c = _vm._self._c || _h\n    return _c(\n      \"ul\",\n      { staticClass: \"nav nav-tabs\", attrs: { role: \"tablist\" } },\n      [\n        _c(\"li\", { staticClass: \"active\", attrs: { role: \"presentation\" } }, [\n          _c(\n            \"a\",\n            {\n              attrs: {\n                href: \"#declarants\",\n                \"aria-controls\": \"home\",\n                role: \"tab\",\n                \"data-toggle\": \"tab\",\n              },\n            },\n            [_c(\"i\", { staticClass: \"icon-group\" }), _vm._v(\" Déclarants\")]\n          ),\n        ]),\n        _c(\"li\", { attrs: { role: \"presentation\" } }, [\n          _c(\n            \"a\",\n            {\n              attrs: {\n                href: \"#activities\",\n                \"aria-controls\": \"profile\",\n                role: \"tab\",\n                \"data-toggle\": \"tab\",\n              },\n            },\n            [_c(\"i\", { staticClass: \"icon-cubes\" }), _vm._v(\" Activités\")]\n          ),\n        ]),\n      ]\n    )\n  },\n  function () {\n    var _vm = this\n    var _h = _vm.$createElement\n    var _c = _vm._self._c || _h\n    return _c(\"h2\", [\n      _c(\"i\", { staticClass: \"icon-calendar\" }),\n      _vm._v(\" Déclaration\"),\n    ])\n  },\n  function () {\n    var _vm = this\n    var _h = _vm.$createElement\n    var _c = _vm._self._c || _h\n    return _c(\"h3\", [\n      _c(\"i\", { staticClass: \"icon-zoom-in-outline\" }),\n      _vm._v(\" Détails\"),\n    ])\n  },\n]\nrender._withStripped = true\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/TimesheetDeclarationsList.vue?./node_modules/cache-loader/dist/cjs.js?%7B%22cacheDirectory%22:%22node_modules/.cache/vue-loader%22,%22cacheIdentifier%22:%2221d02cb8-vue-loader-template%22%7D!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"21d02cb8-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return staticRenderFns; });\nvar render = function () {\n  var _vm = this\n  var _h = _vm.$createElement\n  var _c = _vm._self._c || _h\n  return _c(\"div\", [\n    _c(\"input\", {\n      directives: [\n        {\n          name: \"model\",\n          rawName: \"v-model\",\n          value: _vm.expression,\n          expression: \"expression\",\n        },\n      ],\n      attrs: { type: \"text\" },\n      domProps: { value: _vm.expression },\n      on: {\n        keyup: function ($event) {\n          if (\n            !$event.type.indexOf(\"key\") &&\n            _vm._k($event.keyCode, \"enter\", 13, $event.key, \"Enter\")\n          ) {\n            return null\n          }\n          $event.preventDefault()\n          return _vm.search.apply(null, arguments)\n        },\n        input: function ($event) {\n          if ($event.target.composing) {\n            return\n          }\n          _vm.expression = $event.target.value\n        },\n      },\n    }),\n    _c(\n      \"span\",\n      {\n        directives: [\n          {\n            name: \"show\",\n            rawName: \"v-show\",\n            value: _vm.loading,\n            expression: \"loading\",\n          },\n        ],\n      },\n      [_c(\"i\", { staticClass: \"icon-spinner animate-spin\" })]\n    ),\n    _c(\n      \"div\",\n      {\n        directives: [\n          {\n            name: \"show\",\n            rawName: \"v-show\",\n            value: _vm.persons.length > 0 && _vm.showSelector,\n            expression: \"persons.length > 0 && showSelector\",\n          },\n        ],\n        staticClass: \"choose\",\n        staticStyle: {\n          position: \"absolute\",\n          \"z-index\": \"3000\",\n          \"max-height\": \"400px\",\n          overflow: \"hidden\",\n          \"overflow-y\": \"scroll\",\n        },\n      },\n      _vm._l(_vm.persons, function (c) {\n        return _c(\n          \"div\",\n          {\n            key: c.id,\n            staticClass: \"choice\",\n            on: {\n              click: function ($event) {\n                $event.preventDefault()\n                $event.stopPropagation()\n                return _vm.handlerSelectPerson(c)\n              },\n            },\n          },\n          [\n            _c(\n              \"div\",\n              {\n                staticStyle: {\n                  display: \"block\",\n                  width: \"50px\",\n                  height: \"50px\",\n                },\n              },\n              [\n                _c(\"img\", {\n                  staticStyle: { width: \"100%\" },\n                  attrs: {\n                    src:\n                      \"https://www.gravatar.com/avatar/\" + c.mailMd5 + \"?s=50\",\n                    alt: c.displayname,\n                  },\n                }),\n              ]\n            ),\n            _c(\"div\", { staticClass: \"infos\" }, [\n              _c(\n                \"strong\",\n                {\n                  staticStyle: {\n                    \"font-weight\": \"700\",\n                    \"font-size\": \"1.1em\",\n                    \"padding-left\": \"0\",\n                  },\n                },\n                [_vm._v(_vm._s(c.displayname))]\n              ),\n              _c(\"br\"),\n              _c(\n                \"span\",\n                {\n                  staticStyle: {\n                    \"font-weight\": \"100\",\n                    \"font-size\": \".8em\",\n                    \"padding-left\": \"0\",\n                  },\n                },\n                [\n                  _c(\"i\", { staticClass: \"icon-location\" }),\n                  _vm._v(\" \" + _vm._s(c.affectation) + \" \"),\n                  c.ucbnSiteLocalisation\n                    ? _c(\"span\", [\n                        _vm._v(\" ~ \" + _vm._s(c.ucbnSiteLocalisation)),\n                      ])\n                    : _vm._e(),\n                ]\n              ),\n              _c(\"br\"),\n              _c(\n                \"em\",\n                { staticStyle: { \"font-weight\": \"100\", \"font-size\": \".8em\" } },\n                [_c(\"i\", { staticClass: \"icon-mail\" }), _vm._v(_vm._s(c.email))]\n              ),\n            ]),\n          ]\n        )\n      }),\n      0\n    ),\n    _vm.error\n      ? _c(\"div\", { staticClass: \"alert alert-danger\" }, [\n          _c(\"i\", { staticClass: \"icon-attention-1\" }),\n          _vm._v(\" \" + _vm._s(_vm.error) + \" \"),\n        ])\n      : _vm._e(),\n  ])\n}\nvar staticRenderFns = []\nrender._withStripped = true\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonAutoCompleter.vue?./node_modules/cache-loader/dist/cjs.js?%7B%22cacheDirectory%22:%22node_modules/.cache/vue-loader%22,%22cacheIdentifier%22:%2221d02cb8-vue-loader-template%22%7D!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"21d02cb8-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return render; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return staticRenderFns; });\nvar render = function () {\n  var _vm = this\n  var _h = _vm.$createElement\n  var _c = _vm._self._c || _h\n  return _c(\n    \"section\",\n    { staticClass: \"schedule\" },\n    [\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.loading\n          ? _c(\"div\", { staticClass: \"pending overlay\" }, [\n              _c(\"div\", { staticClass: \"overlay-content\" }, [\n                _c(\"i\", { staticClass: \"icon-spinner animate-spin\" }),\n                _vm._v(\" \" + _vm._s(_vm.loading) + \" \"),\n              ]),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"transition\", { attrs: { name: \"fade\" } }, [\n        _vm.error\n          ? _c(\"div\", { staticClass: \"pending overlay\" }, [\n              _c(\"div\", { staticClass: \"overlay-content\" }, [\n                _c(\"i\", { staticClass: \"icon-attention-1\" }),\n                _vm._v(\" \" + _vm._s(_vm.error) + \" \"),\n              ]),\n            ])\n          : _vm._e(),\n      ]),\n      _c(\"p\", [\n        _vm._v(\"La répartition horaire est issue de \" + _vm._s(_vm.from) + \" \"),\n        _vm.from == \"application\"\n          ? _c(\"strong\", [_vm._v(\"la configuration Oscar par défaut\")])\n          : _vm._e(),\n        _vm.from == \"sync\"\n          ? _c(\"strong\", [_vm._v(\"la synchronisation (Connector)\")])\n          : _vm._e(),\n        _vm.from == \"custom\"\n          ? _c(\"strong\", [_vm._v(\"la configuration prédéfinie\")])\n          : _vm._e(),\n        _vm.from == \"free\"\n          ? _c(\"strong\", [_vm._v(\"la configuration manuelle\")])\n          : _vm._e(),\n      ]),\n      _vm._l(_vm.days, function (total, day) {\n        return _c(\"article\", { staticClass: \"card xs\" }, [\n          _c(\"h3\", { staticClass: \"card-title\" }, [\n            _c(\"strong\", [_vm._v(_vm._s(_vm.daysLabels[day]))]),\n            _vm.editDay\n              ? _c(\"input\", {\n                  directives: [\n                    {\n                      name: \"model\",\n                      rawName: \"v-model\",\n                      value: _vm.days[day],\n                      expression: \"days[day]\",\n                    },\n                  ],\n                  attrs: { type: \"text\" },\n                  domProps: { value: _vm.days[day] },\n                  on: {\n                    input: function ($event) {\n                      if ($event.target.composing) {\n                        return\n                      }\n                      _vm.$set(_vm.days, day, $event.target.value)\n                    },\n                  },\n                })\n              : _c(\n                  \"em\",\n                  {\n                    staticClass: \"big right\",\n                    on: {\n                      click: function ($event) {\n                        return _vm.handlerEditDays()\n                      },\n                    },\n                  },\n                  [_vm._v(_vm._s(_vm._f(\"heures\")(total)))]\n                ),\n          ]),\n        ])\n      }),\n      _c(\"article\", { staticClass: \"card\" }, [\n        _c(\"h3\", { staticClass: \"card-title\" }, [\n          _c(\"strong\", [_vm._v(\"Total / semaine\")]),\n          _c(\"em\", { staticClass: \"big right\" }, [\n            _vm._v(_vm._s(_vm._f(\"heures\")(_vm.totalWeek))),\n          ]),\n        ]),\n      ]),\n      _vm.editable\n        ? _c(\"nav\", [\n            !_vm.editDay\n              ? _c(\n                  \"button\",\n                  {\n                    staticClass: \"btn btn-default\",\n                    on: {\n                      click: function ($event) {\n                        $event.preventDefault()\n                        return _vm.handlerEditDays()\n                      },\n                    },\n                  },\n                  [_c(\"i\", { staticClass: \"icon-pencil\" }), _vm._v(\" modifier\")]\n                )\n              : _vm._e(),\n            _vm.editDay\n              ? _c(\n                  \"button\",\n                  {\n                    staticClass: \"btn btn-primary\",\n                    on: {\n                      click: function ($event) {\n                        $event.preventDefault()\n                        return _vm.handlerSaveDays()\n                      },\n                    },\n                  },\n                  [\n                    _c(\"i\", { staticClass: \"icon-floppy\" }),\n                    _vm._v(\" enregistrer\"),\n                  ]\n                )\n              : _vm._e(),\n            _vm.models && _vm.editDay\n              ? _c(\n                  \"select\",\n                  {\n                    directives: [\n                      {\n                        name: \"model\",\n                        rawName: \"v-model\",\n                        value: _vm.model,\n                        expression: \"model\",\n                      },\n                    ],\n                    staticClass: \"form-inline\",\n                    on: {\n                      change: [\n                        function ($event) {\n                          var $$selectedVal = Array.prototype.filter\n                            .call($event.target.options, function (o) {\n                              return o.selected\n                            })\n                            .map(function (o) {\n                              var val = \"_value\" in o ? o._value : o.value\n                              return val\n                            })\n                          _vm.model = $event.target.multiple\n                            ? $$selectedVal\n                            : $$selectedVal[0]\n                        },\n                        function ($event) {\n                          return _vm.handlerSaveDays(_vm.model)\n                        },\n                      ],\n                    },\n                  },\n                  [\n                    _c(\"option\", { attrs: { value: \"default\" } }, [\n                      _vm._v(\"Aucun\"),\n                    ]),\n                    _vm._l(_vm.models, function (m, key) {\n                      return _c(\n                        \"option\",\n                        {\n                          domProps: { value: key, selected: _vm.model == key },\n                        },\n                        [_vm._v(_vm._s(m.label))]\n                      )\n                    }),\n                  ],\n                  2\n                )\n              : _vm._e(),\n            _vm.editDay && _vm.from != \"default\"\n              ? _c(\n                  \"button\",\n                  {\n                    staticClass: \"btn btn-primary\",\n                    on: {\n                      click: function ($event) {\n                        $event.preventDefault()\n                        return _vm.handlerSaveDays(\"default\")\n                      },\n                    },\n                  },\n                  [\n                    _c(\"i\", { staticClass: \"icon-floppy\" }),\n                    _vm._v(\" Horaires par défaut\"),\n                  ]\n                )\n              : _vm._e(),\n            _vm.editDay\n              ? _c(\n                  \"button\",\n                  {\n                    staticClass: \"btn btn-primary\",\n                    on: {\n                      click: function ($event) {\n                        $event.preventDefault()\n                        return _vm.handlerCancel()\n                      },\n                    },\n                  },\n                  [\n                    _c(\"i\", { staticClass: \"icon-cancel-circled\" }),\n                    _vm._v(\" annuler\"),\n                  ]\n                )\n              : _vm._e(),\n          ])\n        : _vm._e(),\n    ],\n    2\n  )\n}\nvar staticRenderFns = []\nrender._withStripped = true\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonSchedule.vue?./node_modules/cache-loader/dist/cjs.js?%7B%22cacheDirectory%22:%22node_modules/.cache/vue-loader%22,%22cacheIdentifier%22:%2221d02cb8-vue-loader-template%22%7D!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options");
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/runtime/componentNormalizer.js ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"default\", function() { return normalizeComponent; });\n/* globals __VUE_SSR_CONTEXT__ */\n\n// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).\n// This module is a runtime utility for cleaner component module output and will\n// be included in the final webpack user bundle.\n\nfunction normalizeComponent (\n  scriptExports,\n  render,\n  staticRenderFns,\n  functionalTemplate,\n  injectStyles,\n  scopeId,\n  moduleIdentifier, /* server only */\n  shadowMode /* vue-cli only */\n) {\n  // Vue.extend constructor export interop\n  var options = typeof scriptExports === 'function'\n    ? scriptExports.options\n    : scriptExports\n\n  // render functions\n  if (render) {\n    options.render = render\n    options.staticRenderFns = staticRenderFns\n    options._compiled = true\n  }\n\n  // functional template\n  if (functionalTemplate) {\n    options.functional = true\n  }\n\n  // scopedId\n  if (scopeId) {\n    options._scopeId = 'data-v-' + scopeId\n  }\n\n  var hook\n  if (moduleIdentifier) { // server build\n    hook = function (context) {\n      // 2.3 injection\n      context =\n        context || // cached call\n        (this.$vnode && this.$vnode.ssrContext) || // stateful\n        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional\n      // 2.2 with runInNewContext: true\n      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {\n        context = __VUE_SSR_CONTEXT__\n      }\n      // inject component styles\n      if (injectStyles) {\n        injectStyles.call(this, context)\n      }\n      // register component module identifier for async chunk inferrence\n      if (context && context._registeredComponents) {\n        context._registeredComponents.add(moduleIdentifier)\n      }\n    }\n    // used by ssr in case component is cached and beforeCreate\n    // never gets called\n    options._ssrRegister = hook\n  } else if (injectStyles) {\n    hook = shadowMode\n      ? function () {\n        injectStyles.call(\n          this,\n          (options.functional ? this.parent : this).$root.$options.shadowRoot\n        )\n      }\n      : injectStyles\n  }\n\n  if (hook) {\n    if (options.functional) {\n      // for template-only hot-reload because in that case the render fn doesn't\n      // go through the normalizer\n      options._injectStyles = hook\n      // register for functional component in vue file\n      var originalRender = options.render\n      options.render = function renderWithStyleInjection (h, context) {\n        hook.call(context)\n        return originalRender(h, context)\n      }\n    } else {\n      // inject component registration as beforeCreate hook\n      var existing = options.beforeCreate\n      options.beforeCreate = existing\n        ? [].concat(existing, hook)\n        : [hook]\n    }\n  }\n\n  return {\n    exports: scriptExports,\n    options: options\n  }\n}\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./node_modules/vue-loader/lib/runtime/componentNormalizer.js?");
+
+/***/ }),
+
+/***/ "./src/TimesheetDeclarationsList.vue":
+/*!*******************************************!*\
+  !*** ./src/TimesheetDeclarationsList.vue ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TimesheetDeclarationsList.vue?vue&type=template&id=213311c0& */ \"./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0&\");\n/* harmony import */ var _TimesheetDeclarationsList_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TimesheetDeclarationsList.vue?vue&type=script&lang=js& */ \"./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ \"./node_modules/vue-loader/lib/runtime/componentNormalizer.js\");\n\n\n\n\n\n/* normalize component */\n\nvar component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"])(\n  _TimesheetDeclarationsList_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[\"default\"],\n  _TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__[\"render\"],\n  _TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"],\n  false,\n  null,\n  null,\n  null\n  \n)\n\n/* hot reload */\nif (false) { var api; }\ncomponent.options.__file = \"src/TimesheetDeclarationsList.vue\"\n/* harmony default export */ __webpack_exports__[\"default\"] = (component.exports);\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/TimesheetDeclarationsList.vue?");
+
+/***/ }),
+
+/***/ "./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TimesheetDeclarationsList_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../node_modules/cache-loader/dist/cjs.js??ref--1-0!../node_modules/vue-loader/lib??vue-loader-options!./TimesheetDeclarationsList.vue?vue&type=script&lang=js& */ \"./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/TimesheetDeclarationsList.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__[\"default\"] = (_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TimesheetDeclarationsList_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[\"default\"]); \n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/TimesheetDeclarationsList.vue?");
+
+/***/ }),
+
+/***/ "./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0&":
+/*!**************************************************************************!*\
+  !*** ./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../node_modules/cache-loader/dist/cjs.js??ref--1-0!../node_modules/vue-loader/lib??vue-loader-options!./TimesheetDeclarationsList.vue?vue&type=template&id=213311c0& */ \"./node_modules/cache-loader/dist/cjs.js?{\\\"cacheDirectory\\\":\\\"node_modules/.cache/vue-loader\\\",\\\"cacheIdentifier\\\":\\\"21d02cb8-vue-loader-template\\\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/TimesheetDeclarationsList.vue?vue&type=template&id=213311c0&\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__[\"render\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TimesheetDeclarationsList_vue_vue_type_template_id_213311c0___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"]; });\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/TimesheetDeclarationsList.vue?");
+
+/***/ }),
+
+/***/ "./src/components/AjaxResolve.js":
+/*!***************************************!*\
+  !*** ./src/components/AjaxResolve.js ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = ({\n    resolve( message, ajaxResponse ){\n        let serverMsg = \"Erreur inconnue\";\n        if( ajaxResponse ){\n            serverMsg = ajaxResponse.body;\n\n            if( ajaxResponse.status == 403 ){\n                serverMsg = \"Vous avez été déconnectez de l'application\";\n            }\n        }\n        return message + \" (Réponse : \" + serverMsg +\")\";\n    }\n});\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/AjaxResolve.js?");
+
+/***/ }),
+
+/***/ "./src/components/PersonAutoCompleter.vue":
+/*!************************************************!*\
+  !*** ./src/components/PersonAutoCompleter.vue ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PersonAutoCompleter.vue?vue&type=template&id=512cd795& */ \"./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795&\");\n/* harmony import */ var _PersonAutoCompleter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PersonAutoCompleter.vue?vue&type=script&lang=js& */ \"./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ \"./node_modules/vue-loader/lib/runtime/componentNormalizer.js\");\n\n\n\n\n\n/* normalize component */\n\nvar component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"])(\n  _PersonAutoCompleter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[\"default\"],\n  _PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__[\"render\"],\n  _PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"],\n  false,\n  null,\n  null,\n  null\n  \n)\n\n/* hot reload */\nif (false) { var api; }\ncomponent.options.__file = \"src/components/PersonAutoCompleter.vue\"\n/* harmony default export */ __webpack_exports__[\"default\"] = (component.exports);\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonAutoCompleter.vue?");
+
+/***/ }),
+
+/***/ "./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&":
+/*!*************************************************************************!*\
+  !*** ./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonAutoCompleter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/cache-loader/dist/cjs.js??ref--1-0!../../node_modules/vue-loader/lib??vue-loader-options!./PersonAutoCompleter.vue?vue&type=script&lang=js& */ \"./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonAutoCompleter.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__[\"default\"] = (_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonAutoCompleter_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[\"default\"]); \n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonAutoCompleter.vue?");
+
+/***/ }),
+
+/***/ "./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795&":
+/*!*******************************************************************************!*\
+  !*** ./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795& ***!
+  \*******************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/cache-loader/dist/cjs.js??ref--1-0!../../node_modules/vue-loader/lib??vue-loader-options!./PersonAutoCompleter.vue?vue&type=template&id=512cd795& */ \"./node_modules/cache-loader/dist/cjs.js?{\\\"cacheDirectory\\\":\\\"node_modules/.cache/vue-loader\\\",\\\"cacheIdentifier\\\":\\\"21d02cb8-vue-loader-template\\\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonAutoCompleter.vue?vue&type=template&id=512cd795&\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__[\"render\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonAutoCompleter_vue_vue_type_template_id_512cd795___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"]; });\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonAutoCompleter.vue?");
+
+/***/ }),
+
+/***/ "./src/components/PersonSchedule.vue":
+/*!*******************************************!*\
+  !*** ./src/components/PersonSchedule.vue ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PersonSchedule.vue?vue&type=template&id=6e3ad588& */ \"./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588&\");\n/* harmony import */ var _PersonSchedule_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PersonSchedule.vue?vue&type=script&lang=js& */ \"./src/components/PersonSchedule.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ \"./node_modules/vue-loader/lib/runtime/componentNormalizer.js\");\n\n\n\n\n\n/* normalize component */\n\nvar component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"])(\n  _PersonSchedule_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[\"default\"],\n  _PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__[\"render\"],\n  _PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"],\n  false,\n  null,\n  null,\n  null\n  \n)\n\n/* hot reload */\nif (false) { var api; }\ncomponent.options.__file = \"src/components/PersonSchedule.vue\"\n/* harmony default export */ __webpack_exports__[\"default\"] = (component.exports);\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonSchedule.vue?");
+
+/***/ }),
+
+/***/ "./src/components/PersonSchedule.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./src/components/PersonSchedule.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonSchedule_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/cache-loader/dist/cjs.js??ref--1-0!../../node_modules/vue-loader/lib??vue-loader-options!./PersonSchedule.vue?vue&type=script&lang=js& */ \"./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonSchedule.vue?vue&type=script&lang=js&\");\n/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__[\"default\"] = (_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonSchedule_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[\"default\"]); \n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonSchedule.vue?");
+
+/***/ }),
+
+/***/ "./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588&":
+/*!**************************************************************************!*\
+  !*** ./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/cache-loader/dist/cjs.js?{\"cacheDirectory\":\"node_modules/.cache/vue-loader\",\"cacheIdentifier\":\"21d02cb8-vue-loader-template\"}!../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../node_modules/cache-loader/dist/cjs.js??ref--1-0!../../node_modules/vue-loader/lib??vue-loader-options!./PersonSchedule.vue?vue&type=template&id=6e3ad588& */ \"./node_modules/cache-loader/dist/cjs.js?{\\\"cacheDirectory\\\":\\\"node_modules/.cache/vue-loader\\\",\\\"cacheIdentifier\\\":\\\"21d02cb8-vue-loader-template\\\"}!./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/cache-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./src/components/PersonSchedule.vue?vue&type=template&id=6e3ad588&\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"render\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__[\"render\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"staticRenderFns\", function() { return _node_modules_cache_loader_dist_cjs_js_cacheDirectory_node_modules_cache_vue_loader_cacheIdentifier_21d02cb8_vue_loader_template_node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_cache_loader_dist_cjs_js_ref_1_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PersonSchedule_vue_vue_type_template_id_6e3ad588___WEBPACK_IMPORTED_MODULE_0__[\"staticRenderFns\"]; });\n\n\n\n//# sourceURL=webpack://TimesheetDeclarationsList/./src/components/PersonSchedule.vue?");
 
 /***/ })
 
 /******/ })["default"];
 });
-//# sourceMappingURL=TimesheetDeclarationsList.umd.js.map

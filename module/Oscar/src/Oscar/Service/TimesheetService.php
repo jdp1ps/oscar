@@ -4288,6 +4288,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         $timesheets = $this->getTimesheetsPersonPeriod($person, $from, $to);
+        $hasErrorWorkpackage = [];
+
+
         /** @var TimeSheet $t */
         foreach ($timesheets as $t) {
             $dayInt = (int)$t->getDateFrom()->format('d');
@@ -4296,8 +4299,37 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             if ($icsUid != null && !array_key_exists($icsUid, $icsUidList)) {
                 $icsUidList[$icsUid] = $t->getIcsFileName();
             }
+            //throw new OscarException("Problème ICI $dayInt $t");
 
-            if (!$t->getActivity() || !$t->getWorkpackage()) {
+            if( ($t->getActivity() && !$t->getWorkpackage()) || (!$t->getActivity() && $t->getWorkpackage()) ){
+                $hasErrorWorkpackage[] = "Un créneau le " . $t->getDateFrom()->format('d/M') . " n'a pas de lot de travail";
+                $otherInfo = $this->getOthersWPByCode($t->getLabel());
+                $label = $otherInfo['label'];
+                $code = $otherInfo['code'];
+                $group = $otherInfo['group'];
+
+                $datas = [
+                    'id' => $t->getId(),
+                    'int' => $dayInt,
+                    'label' => $label,
+                    'code' => $code,
+                    'group' => $group,
+                    'description' => $t->getComment(),
+                    'duration' => $t->getDuration(),
+                    'status_id' => $t->getValidationPeriod() ? $t->getValidationPeriod()->getStatus() : 'draft',
+                    'validations' => $t->getValidationPeriod() ? $t->getValidationPeriod()->json() : null
+                ];
+
+                $duree = (float)$t->getDuration();
+                $daysInfos[$dayInt]['othersWP'][] = $datas;
+                $daysInfos[$dayInt]['duration'] += $duree;
+                $daysInfos[$dayInt]['total'] += $duree;
+                $periodTotal += $duree;
+                $others[$code]['total'] += $duree;
+                continue;
+            }
+
+            elseif (!$t->getActivity() || !$t->getWorkpackage()) {
                 $otherInfo = $this->getOthersWPByCode($t->getLabel());
                 $label = $otherInfo['label'];
                 $code = $otherInfo['code'];
@@ -4368,6 +4400,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             ];
         }
 
+        $submitableClass = 'info';
+        if ( count($hasErrorWorkpackage) ){
+            $submitable = false;
+            $submitableClass = 'danger';
+            $submitableInfos = sprintf('Un ou plusieurs créneaux sont invalides : %s',
+                                       implode(', ', $hasErrorWorkpackage));
+        }
+
 
         $output = [
             'icsUidList' => $icsUidList,
@@ -4393,6 +4433,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'to' => $periodLastDay->format('Y-m-d'),
             'submitable' => $submitable,
             'submitableInfos' => $submitableInfos,
+            'submitableClass' => $submitableClass,
             'editable' => $editable,
             'editableInfos' => $editableInfos,
             'period_total_days' => $totalDays,

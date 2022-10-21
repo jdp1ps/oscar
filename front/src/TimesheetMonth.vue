@@ -692,7 +692,7 @@
                         <span v-else>Soumettre mes déclarations</span>
                     </button>
 
-                    <span v-else>
+                    <span v-else :class="'alert-' +ts.submitableClass" class="alert">
                         Vous ne pouvez pas soumettre cette période<br>
                         <small>{{ ts.submitableInfos }}</small>
                     </span>

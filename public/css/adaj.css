@@ -12372,6 +12372,9 @@ pre.alert-danger, pre.alert-info {
 .month .cartouche.conflict {
   background: #AA0000;
 }
+.month .cartouche.invalid {
+  background: #AA0000;
+}
 
 .loading-message {
   background: white;
