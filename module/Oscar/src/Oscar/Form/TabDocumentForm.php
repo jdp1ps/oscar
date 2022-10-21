@@ -7,25 +7,24 @@
 
 namespace Oscar\Form;
 
-
 use Doctrine\ORM\EntityManager;
-use Oscar\Entity\Role;
 use Oscar\Hydrator\TabDocumentFormHydrator;
-use Zend\Form\Element\Checkbox;
-use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Element\Select;
 use Zend\Form\Form;
+
 use Zend\InputFilter\InputFilterProviderInterface;
 
 class TabDocumentForm extends Form implements InputFilterProviderInterface
 {
+    const AUCUN  = 0;
+    const READ  = 1;
+    const WRITE  = 2;
 
     /**
      * @param array $roles
      * @param EntityManager $em
-     * @param array $idRolesChecked
      */
-    public function __construct(array $roles, EntityManager $em, array $idRolesChecked = [])
+    public function __construct(array $roles, EntityManager $em)
     {
         parent::__construct('tabdocument');
 
@@ -64,47 +63,28 @@ class TabDocumentForm extends Form implements InputFilterProviderInterface
             'type'=>'Textarea'
         ]);
 
-        // Roles
-       /*
-        * $label = 'Roles avec droits';
-        $this->add(
-            [
-                'type'=>MultiCheckbox::class,
-                'name'   => 'roles',
-                'attributes'    => [
-                    'class'       => 'form-control',
-                    'multiple' => 'multiple',
-                ],
-                'options' => [
-                    'label_attributes' => []
-                ]
-            ]
-        );
-       */
-
-        // / Roles avec droits
-        //foreach ($roles as $role){
+        // Gestion des rôles associés
+        foreach($roles as $role)
+        {
             $this->add(
                 [
-                    'type'=>MultiCheckbox::class,
-                    'name'   => 'roles',
-                    'attributes'    => [
-                        'class'       => 'form-control',
-                    ],
+                    'type' => Select::class,
+                    'name' => 'roleId_' . $role->getId(),
                     'options' => [
-                        'label_attributes' => []
+                        'value_options' => [
+                            self::AUCUN => 'Aucun',
+                            self::READ => 'Lecture uniquement',
+                            self::WRITE => 'Lecture et écriture',
+                        ],
                     ]
-                ]
-            );
-        //}
+                ]);
+        }
 
         $this->add(array(
             'name'  => 'secure',
             'type'  => 'Csrf',
         ));
-        $this->get('roles')->setValueOptions($this->checkedRoles($roles, $idRolesChecked));
     }
-
 
     /**
      * Filter obligatoire (champs obligatoires)
@@ -117,26 +97,5 @@ class TabDocumentForm extends Form implements InputFilterProviderInterface
             'label' => [ 'required' => true ],
             'description' => [ 'required' => false ]
         ];
-    }
-
-
-    /**
-     * Compare-les id roles déjà attribués (edit) et retour la config pour le champ MultiCheckbox au niveau valuesoptions
-     *
-     * @param $roles
-     * @param $idsRolesChecked
-     * @return array
-     */
-    private function checkedRoles($roles, $idsRolesChecked):array{
-        $checkboxRoles = [];
-        /**@var Role $entityRole */
-        foreach ($roles as $key => $entityRole) {
-            if (in_array($entityRole->getId(), $idsRolesChecked)){
-                $checkboxRoles [] = ['value'=>$entityRole->getId(), 'label' => $entityRole->getRoleId(), 'selected' => true];
-            }else{
-                $checkboxRoles [] = ['value'=>$entityRole->getId(), 'label' => $entityRole->getRoleId(), 'selected' => false];
-            }
-        }
-        return $checkboxRoles;
     }
 }

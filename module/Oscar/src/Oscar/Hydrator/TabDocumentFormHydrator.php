@@ -41,8 +41,13 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
             'id' => $object->getId(),
             'label' => $object->getLabel(),
             'description' => $object->getDescription(),
-            'roles' =>  $this->getRoles($object->getTabsDocumentsRoles()),
         ];
+
+        foreach ($object->getTabsDocumentsRoles() as $tabDocumentRole){
+            $data ['roleId_' . $tabDocumentRole->getRole()->getId()] = $tabDocumentRole->getAccess();
+        }
+
+
 
         return $data;
     }
@@ -66,12 +71,16 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
         // Reset Collection de relations
         $object->resetTabDocumentRole();
         // Ajoute-les objects en relation
-        foreach ($data['roles'] as $idsRoles){
-            $role = $this->em->getRepository(Role::class)->findOneBy(["id"=>$idsRoles]);
-            $entityTabDocumentRole = new TabsDocumentsRoles();
-            $entityTabDocumentRole->setRole($role);
-            $entityTabDocumentRole->setAccess(1);
-            $object->addTabDocumentRole($entityTabDocumentRole);
+        foreach ($data as $key => $value){
+            if(strstr($key, 'roleId_'))
+            {
+                $id = str_replace('roleId_', '', $key);
+                $role = $this->em->getRepository(Role::class)->findOneBy(["id"=>$id]);
+                $entityTabDocumentRole = new TabsDocumentsRoles();
+                $entityTabDocumentRole->setRole($role);
+                $entityTabDocumentRole->setAccess($value);
+                $object->addTabDocumentRole($entityTabDocumentRole);
+            }
         }
 
         $object->setDescription($data['description'])

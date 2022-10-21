@@ -41,7 +41,7 @@ class TabDocumentController extends AbstractOscarController
     public function newAction():ViewModel
     {
         $roles = $this->getEntityManager()->getRepository(Role::class)->findAll();
-        $form = new TabDocumentForm($roles, $this->getEntityManager(), []);
+        $form = new TabDocumentForm($roles, $this->getEntityManager());
         $request = $this->getRequest();
         $entity = new TabDocument();
         $form->setObject($entity);
@@ -60,6 +60,7 @@ class TabDocumentController extends AbstractOscarController
         $view = new ViewModel([
             'entity' => $entity,
             'form' => $form,
+            'roles' => $roles,
         ]);
 
         $view->setTemplate('oscar/tab-document/form.phtml');
@@ -76,6 +77,7 @@ class TabDocumentController extends AbstractOscarController
      */
     public function deleteAction():Response
     {
+        // TODO Check avant les docs qui sont raccrochés à ce tabsDocumentsRoles
         $id = $this->params()->fromRoute('id');
         $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($id);
         try {
@@ -104,13 +106,7 @@ class TabDocumentController extends AbstractOscarController
     {
         $entity = $this->getEntityManager()->getRepository(TabDocument::class)->find($this->params()->fromRoute('id'));
         $roles = $this->getEntityManager()->getRepository(Role::class)->findAll();
-        $tabsDocumentsRolesChecked = $entity->getTabsDocumentsRoles();
-        $arrayRolesChecked = [];
-        foreach ($tabsDocumentsRolesChecked as $tabDocumentRole) {
-            $arrayRolesChecked [] = $tabDocumentRole->getRole()->getId();
-        }
-
-        $form = new TabDocumentForm($roles, $this->getEntityManager(), $arrayRolesChecked);
+        $form = new TabDocumentForm($roles, $this->getEntityManager());
         $request = $this->getRequest();
         $form->setAttribute('action', $this->url()->fromRoute('tabdocument/edit', ['id' => $entity->getId()]));
         $form->bind($entity);
@@ -128,6 +124,7 @@ class TabDocumentController extends AbstractOscarController
         $view = new ViewModel([
             'entity' => $entity,
             'form' => $form,
+            'roles' => $roles,
         ]);
 
         $view->setTemplate('oscar/tab-document/form.phtml');
