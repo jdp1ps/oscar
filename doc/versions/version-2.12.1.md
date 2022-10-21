@@ -34,6 +34,10 @@ Ce nouvelle écran permet de :
 
 >* **validation en un clique** AVANT, si un validateur avait plusieurs "ligne" à valider, par exemple la validation pour un projet ET pour les créneaux Hors-lots, il devait valider pour chaque "ligne" une par une. Maintenant, tous est validé en même temps. 
 
+### Type d'activité requis
+
+![Type de jalon](../images/spartan-type-activity-miss.jpg)
+
 ### Mise à jour technique
 
 Procédure habituelle, mise à jour des sources : 
@@ -63,7 +67,6 @@ php bin/oscar.php check:privileges
 > Pour des raisons techniques, cette commande doit être exécutée plusieurs fois jusqu'à obtenir un message :
 >
 > **Les privilèges sont à jour**
-
 
 
 
