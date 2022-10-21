@@ -10,9 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Entity(repositoryClass="Oscar\Entity\TabsDocumentsRolesRepository")
  */
-class TabsDocumentsRoles implements ITrackable
+class TabsDocumentsRoles
+    //implements ITrackable
 {
-    use TraitTrackable;
+    //use TraitTrackable;
 
     /**
      * @ORM\Id

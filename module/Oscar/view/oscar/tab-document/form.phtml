@@ -25,6 +25,8 @@
 </style>
 
 <section class="container">
+
+
         <h1>
            <?= ($entity->getId()) ? "<small>Modification de</small><br><i class=\"icon-calendar\"></i> <strong>" . $entity . "</strong>" : "Nouvel onglet de document" ?>
         </h1>
@@ -37,10 +39,15 @@
                     <div class="col-md-12">
                         <label for="">Roles</label>
                         <p class="help">Affectation des roles aux onglets</p>
-                        <?= $this->formControlGroup($form->get('roles')); ?>
-                        <?php
-                            //dd($form->get('roles'));
-                        ?>
+                        <table class="table-condensed">
+                            <?php foreach($roles as $role): ?>
+                                <tr>
+                                    <td><?= $role->getRoleId(); ?></td>
+                                    <td><?= $this->formRow($form->get('roleId_' . $role->getId())); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+
                     </div>
                 </div>
             </div>
