@@ -77,7 +77,7 @@ class TabDocumentController extends AbstractOscarController
      */
     public function deleteAction():Response
     {
-        // TODO Check avant les docs qui sont raccrochés à ce tabsDocumentsRoles
+        // TODO Check avant les docs qui sont raccrochés à ce tabsDocumentsRoles avant de supprimer comme un bourrin
         $id = $this->params()->fromRoute('id');
         $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($id);
         try {

@@ -1529,7 +1529,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         foreach ($entitiesTabs as $tabDocument){
             // Traitement final attendu sur les rôles
-            /*
             $tabsDocumentsRoles = $tabDocument->getTabsDocumentsRoles();
             foreach ($tabsDocumentsRoles as $tabDocumentRole){
                 if (in_array($tabDocumentRole->getRole()->getRoleId(), $rolesMerged)){
@@ -1538,11 +1537,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     break;
                 }
             }
-            */
 
             // TODO pour l'instant on hydrate par défault pour avoir des rendus côté front
-            $arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
-            $arrayTabs [$tabDocument->getId()] ["documents"] = [];
+            //$arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
+            //$arrayTabs [$tabDocument->getId()] ["documents"] = [];
         }
         //Onglet non classé
         $unclassifiedTab = [];
