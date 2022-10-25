@@ -6963,7 +6963,7 @@ td.visible-print {
   cursor: pointer;
 }
 .tabs .tab.selected {
-  background: #eee;
+  background: #fff;
 }
 
 .privileges .tab-content {
@@ -11840,6 +11840,14 @@ pre.alert-danger, pre.alert-info {
 }
 .activity-timesheet-synthesis .person:nth-child(odd) {
   background: rgba(36, 88, 122, 0.1);
+}
+
+[class*=icon-access-2]:before {
+  content: "";
+}
+
+[class*=icon-access-1]:before {
+  content: "";
 }
 
 body {

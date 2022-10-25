@@ -20,6 +20,7 @@ use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
+use Oscar\Exception\OscarException;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;

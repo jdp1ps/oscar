@@ -381,7 +381,7 @@
     cursor: pointer;
 
     &.selected {
-      background: #eee;
+      background: #fff;
     }
   }
 }
@@ -5684,3 +5684,7 @@ pre.alert-danger, pre.alert-info {
 
 
 }
+
+[class*="icon-access-2"]:before { content: '\e821'; }
+[class*="icon-access-1"]:before { content: '\e8a9'; }
+

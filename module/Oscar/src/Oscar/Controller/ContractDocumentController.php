@@ -344,7 +344,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }catch (Exception $e){
             // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
             $this->getLoggerService()->error($e->getMessage());
-            die($e->getMessage());
+            return $this->getResponseInternalError($e->getMessage());
         }
     }
 

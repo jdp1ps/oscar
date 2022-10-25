@@ -104,7 +104,7 @@
           Téléverser un nouveau document
           <span class="overlay-closer" @click="uploadDoc = null">X</span>
         </h2>
-        <div>
+        <div style="width: 90%; margin-left: 5%">
           <div class="row">
             <div class="col-md-6">
               <!-- Fichier upload -->
@@ -162,12 +162,15 @@
                           cols="30" rows="10"></textarea>
               </div>
             </div>
-            <button class="btn btn-danger" @click="uploadDoc = null">
-              <i class="icon-cancel-alt"></i> Annuler
-            </button>
-            <a class="btn btn-success" href="#" @click.prevent="performUpload()">
-              <i class="icon-valid"></i> Enregistrer
-            </a>
+            <hr>
+            <nav class="buttons text-center">
+              <button class="btn btn-danger" @click="uploadDoc = null">
+                <i class="icon-cancel-alt"></i> Annuler
+              </button>
+              <button class="btn btn-success" href="#" @click.prevent="performUpload()">
+                <i class="icon-valid"></i> Enregistrer
+              </button>
+            </nav>
           </div>
         </div>
       </div>
@@ -185,13 +188,13 @@
           </li>
         </ul>
         <button class="btn btn-danger" @click="errorMessages = []">
-          <i class="icon-cancel-alt"></i> Annuler
+          <i class="icon-cancel-alt"></i> Retour
         </button>
       </div>
     </div>
 
 
-    <!-- Barre de tri des documents -->
+    <!-- Barre de tri des documents
     <div>
       <div class="oscar-sorter">
         <i class=" icon-sort"></i>
@@ -213,24 +216,26 @@
         </a>
       </div>
     </div>
+    ----------------------------------->
 
-
-    <!-- ############################### INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ################################### -->
-    <div v-for="tab in tabsWithDocuments" :key="tab.id">
-      <div style="cursor:pointer; margin-top: 10px;" :class="cssStepCurrent(tab.id)" v-on:click="activeTab(tab.id)" class="step">
-        <span>
-          <strong><i class="picto icon-doc"></i>{{ tab.label }}</strong><br/>
-          <i class="picto icon-comment"></i>{{ tab.description }}
-        </span>
-        <span v-on:click="handlerUploadNewDoc(tab.id)" class="stepHandler">
-                 Téléverser un document
-        </span>
-        <span v-if="isTabActive === tab.id">
-              &nbsp;<i class="icon-flag"></i>
-        </span>
+    <section class="documents-content">
+      <div class="tabs">
+        <div class="tab" :class="{'selected': selectedTab == tab }"
+             v-for="tab in tabsWithDocuments"
+             @click="handlerSelectTab(tab)">
+          {{ tab.label }}
+          <sup class="label label-default">{{ tab.documents.length }}</sup>
+        </div>
       </div>
-      <!--v-for="document in documentsPacked" :key="document.id">-->
-      <div v-if="isTabActive === tab.id" class="step-content">
+
+      <div class="tab-content" v-for="tab in tabsWithDocuments" v-show="selectedTab == tab">
+        <nav v-if="tab.manage" class="text-right">
+          <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
+            <i class="icon-download"></i>
+                 Téléverser un document
+          </button>
+        </nav>
+        <hr>
         <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
           <div class="card-title">
             <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
@@ -294,12 +299,96 @@
           </div>
         </article>
       </div>
+    </section>
+
+
+    <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ
+    <div v-for="tab in tabsWithDocuments" :key="tab.id">
+      <div style="cursor:pointer; margin-top: 10px;" :class="cssStepCurrent(tab.id)" v-on:click="activeTab(tab.id)" class="step">
+        <span>
+          <strong><i class="picto icon-doc"></i>{{ tab.label }}</strong><br/>
+          <i class="picto icon-comment"></i>{{ tab.description }}
+        </span>
+        <span v-on:click="handlerUploadNewDoc(tab.id)" class="stepHandler" v-if="tab.manage">
+                 Téléverser un document
+        </span>
+        <span v-if="isTabActive === tab.id">
+              &nbsp;<i class="icon-flag"></i>
+        </span>
+      </div>
+
+      <div v-if="isTabActive === tab.id" class="step-content">
+        <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
+          <div class="card-title">
+            <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
+            <small class="text-light">{{ doc.categoryText }} ~ </small>
+            <strong>{{doc.fileName}}</strong>
+            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
+          </div>
+          <p>
+            {{ doc.information }}
+          </p>
+          <div class="card-content">
+            <p class="text-highlight">
+              Fichier <strong>{{ doc.extension}}</strong>
+              version {{ doc.version }},
+              téléversé le
+              <time>{{ doc.dateUpload | dateFull }}</time>
+              <span v-if="doc.uploader"> par <strong>{{ doc.uploader.displayname }}</strong></span>
+            </p>
+            <!--
+            <div class="exploder" v-if="doc.previous.length" @click="doc.explode = !doc.explode">
+              Versions précédentes <i class="icon-angle-down" v-show="!doc.explode"></i>
+              <i class="icon-angle-up" v-show="doc.explode"></i>
+            </div>
+
+            <div v-if="doc.previous.length" v-show="doc.explode">
+              <article v-for="sub in doc.previous" class="subdoc text-highlight" :key="sub.id">
+                <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+                <strong>{{ sub.fileName }}</strong>
+                version <em>{{ sub.version }} </em>,
+                téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
+                <span v-if="sub.uploader">
+                        par <strong>{{ sub.uploader.displayname }}</strong>
+                        </span>
+                <a :href="sub.urlDownload">
+                  <i class="icon-download-outline"></i>
+                  Télécharger cette version
+                </a>
+              </article>
+            </div>
+
+            <nav class="text-right show-over">
+              <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
+                <i class="icon-upload-outline"></i>
+                Télécharger
+              </a>
+
+              <a class="btn btn-default btn-xs" :href="doc.urlReupload" v-if="doc.urlReupload">
+                <i class="icon-download-outline"></i>
+                Nouvelle version
+              </a>
+
+              <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)">
+                <i class="icon-trash"></i>
+                Supprimer
+              </a>
+              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)">
+                <i class="icon-pencil"></i>
+                Modifier
+              </a>
+            </nav>
+          </div>
+        </article>
+      </div>
     </div>
 
+    -->
 
-    <!-- TODO travail en cours sur la partie documents privés -->
-    <div :class="cssStepCurrentPrivate()" class="step" style="cursor: pointer; margin-top: 10px;" v-if="privateTab" @click="openPrivateTab = !openPrivateTab">
-      <i class="picto icon-lock"></i>Documents Privés
+
+    <!-- TODO travail en cours sur la partie documents privés
+    <div :class="cssStepCurrentPrivate()" class="step" style="cursor: pointer; margin-top: 10px;" v-if="privateTab && privateTab.documents && privateTab.documents.length" @click="openPrivateTab = !openPrivateTab">
+      <i class="picto icon-lock"></i>Documents privés
       <span v-if="openPrivateTab === true">
               &nbsp;<i class="icon-flag"></i>
         </span>
@@ -353,7 +442,7 @@
       </article>
     </div>
 
-    <!-- Document non classifié dans un onglet (récupération historique avant fonctionnalité des onglets) -->
+
     <div class="step" style="cursor: pointer; margin-top: 10px;" v-if="unclassifiedTab != null && unclassifiedTab.length != 0">
       <i class="picto icon-lock"></i>Documents Non classés
     </div>
@@ -400,7 +489,7 @@
       </article>
     </div>
 
-    <!-- Section boucle documents Originelle JACK -->
+    Section boucle documents Originelle JACK -->
     <!--
       <article class="card xs" v-for="document in documentsPacked" :key="document.id">
           <div class="card-title">
@@ -476,11 +565,8 @@ Depuis la racine OSCAR :
 cd front
 
 Pour compiler en temps réél :
-node node_modules/.bin/gulp activityDocumentWatch
 node node_modules/.bin/vue-cli-service build --name ActivityDocument --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib ./src/ActivityDocument.vue --watch
 
-Pour compiler :
-node node_modules/.bin/gulp activityDocument
  */
 
 import Datepicker from "./components/Datepicker";
@@ -555,7 +641,10 @@ export default {
       sortField: 'dateUpload',
       sortDirection: -1,
       editable: true,
-      remoterState: oscarRemoteData.state
+      remoterState: oscarRemoteData.state,
+
+      // Onglet active
+      selectedTab: null
     }
   },
 
@@ -817,6 +906,18 @@ export default {
       this.privateTab = success.data.privateTab;
       this.unclassifiedTab = success.data.unclassifiedTab;
       this.tabsWithDocuments = success.data.tabsWithDocuments;
+
+      if( this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length ){
+        this.selectedTab = this.tabsWithDocuments.unclassified;
+      }
+      else {
+        let keys = Object.keys(this.tabsWithDocuments)[0];
+        if( keys.length ){
+          this.selectedTab = this.tabsWithDocuments[keys[0]];
+        }
+      }
+
+      // this.selectedTab = this.tabsWithDocuments && this.tabsWithDocuments.length > 0 ? this.tabsWithDocuments[0] : null;
       /*
       let data = success.data.datas;
       let documentsOrdered = [];
@@ -837,6 +938,10 @@ export default {
       });
       this.documents = documentsOrdered;
       */
+    },
+
+    handlerSelectTab(tab){
+      this.selectedTab = tab;
     },
 
     // Recup datas Docs
