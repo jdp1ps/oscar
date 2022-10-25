@@ -86,6 +86,9 @@ class OscarRemoteData {
                 if (handlerResponse) {
                     handlerResponse(response);
                 }
+                }, ko => {
+                console.log('FAIL !!!');
+                console.debug(ko);
             })
             .catch(error => {
                 this.debug("[ERROR] " + error);

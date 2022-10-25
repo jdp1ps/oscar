@@ -37,14 +37,18 @@
                     <span class="description"><?= $entity->getDescription() ?></span><br>
                 <?php endif; ?>
                 <span class="recursivity">
-                    <i class="icon-history"></i> Roles :
+                    <i class="icon-lock"></i> Roles :
                     <?php if( $entity->getTabsDocumentsRoles() && count($entity->getTabsDocumentsRoles()) > 0): ?>
                         <?php foreach( $entity->getTabsDocumentsRoles() as $tabDocumentRole ): ?>
                             <?php if ($tabDocumentRole->getAccess() > 0): ?>
-                            <p>
-                                <span class="cartouche"><?= $tabDocumentRole->getRole()->getRoleId() ?> Role</span>
-                                <span class="icon-briefcase">Niveau d'accès : <?= $tabDocumentRole->getAccess() ?></span>
-                            </p>
+
+                                <span class="cartouche <?= $tabDocumentRole->getAccess() == 2 ? 'primary' : '' ?>">
+                                    <?= $tabDocumentRole->getRole()->getRoleId() ?>
+                                    <span class="addon">
+                                        <i class="icon-access-<?= $tabDocumentRole->getAccess() ?>"></i>
+                                    </span>
+                                </span>
+
                             <?php endif; ?>
                         <?php endforeach; ?>
                     <?php else: ?>

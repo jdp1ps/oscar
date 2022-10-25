@@ -35,6 +35,7 @@ use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\TabDocument;
+use Oscar\Entity\TabsDocumentsRoles;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\ValidationPeriodRepository;
 use Oscar\Exception\OscarException;
@@ -1527,56 +1528,90 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $rolesAppli = $this->getOscarUserContextService()->getBaseRoleId();
         $rolesMerged = array_merge($roles, $rolesAppli);
 
+        /** @var TabDocument $tabDocument */
         foreach ($entitiesTabs as $tabDocument){
             // Traitement final attendu sur les rôles
-            $tabsDocumentsRoles = $tabDocument->getTabsDocumentsRoles();
-            foreach ($tabsDocumentsRoles as $tabDocumentRole){
-                if (in_array($tabDocumentRole->getRole()->getRoleId(), $rolesMerged)){
-                    $arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
-                    $arrayTabs [$tabDocument->getId()] ["documents"] = [];
-                    break;
-                }
+            $tabId = $tabDocument->getId();
+            if( $tabDocument->hasAccess($rolesMerged) ){
+                $arrayTabs[$tabId] = $tabDocument->toJson();
+                $arrayTabs[$tabId]["documents"] = [];
+                $arrayTabs[$tabId]['manage'] = $tabDocument->isManage($rolesMerged);
             }
-
-            // TODO pour l'instant on hydrate par défault pour avoir des rendus côté front
-            //$arrayTabs [$tabDocument->getId()] = $tabDocument->toJson();
-            //$arrayTabs [$tabDocument->getId()] ["documents"] = [];
         }
+
         //Onglet non classé
-        $unclassifiedTab = [];
+        $unclassifiedTab = [
+            "id" => "unclassified",
+            "label" => "Non-classés",
+            "manage" => false,
+            "documents" => []
+        ];
+
+        $allowPrivate = true;
+
         //Onglet privé
-        $privateTab = [];
+        $privateTab = [
+            "id" => "private",
+            "label" => "Documents privés",
+            "documents" => [],
+            "manage" => $allowPrivate
+        ];
         //$datas = [];
 
         //Docs reliés à une activité
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
-            $docDt = $doc->toJson(
-                [
-                    'urlDelete' => $deletable ? $this->url()->fromRoute('contractdocument/delete', ['id' => $doc->getId()]) : false,
-                    'urlDownload' => $this->url()->fromRoute('contractdocument/download', ['id' => $doc->getId()]),
-                    'urlReupload' => $uploadable ? $this->url()->fromRoute('contractdocument/upload', ['idactivity' => $entity->getId()]) . "?id=" . $doc->getId() : false,
-                    'urlPerson' => $personShow && $doc->getPerson() ? $this->url()->fromRoute('person/show', ['id' => $doc->getPerson()->getId()]) : false,
-                ]
-            );
+
+            $this->getLoggerService()->info($doc->getFileName() . " - " . $doc->getTabDocument());
+
+            $manage = false;
+            $docAdded = $doc->toJson();
+
             if(!is_null($doc->getTabDocument())){
-                if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)){
-                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docDt;
+                if( !array_key_exists($doc->getTabDocument()->getId(), $arrayTabs )){
+                    continue;
+                }
+                if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
+                    if ($doc->getTabDocument()->isManage($rolesMerged)) {
+                        $docAdded['urlDelete'] = $this->url()->fromRoute(
+                            'contractdocument/delete',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlDownload'] = $this->url()->fromRoute(
+                            'contractdocument/download',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlReupload'] = $this->url()->fromRoute(
+                                'contractdocument/upload',
+                                ['idactivity' => $entity->getId()]
+                            ) . "?id=" . $doc->getId();
+                        $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
+                            'person/show',
+                            ['id' => $doc->getPerson()->getId()]
+                        ) : false;
+
+                    }
+                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
                 }
             }else{
                 if ($doc->isPrivate() === true){
-                    $privateTab ["documents"] [] = $docDt;
+                    $privateTab ["documents"] [] = $docAdded;
                 }else{
-                    $unclassifiedTab ["documents"] [] = $docDt;
+                    $unclassifiedTab ["documents"] [] = $docAdded;
                 }
             }
-            $datas[] = $docDt;
         }
 
         //$out['datas'] = $datas;
+        if( $privateTab ){
+            $arrayTabs['private'] = $privateTab;
+        }
+        if( $unclassifiedTab ){
+            $arrayTabs['unclassified'] = $unclassifiedTab;
+        }
         $out['tabsWithDocuments'] =  $arrayTabs;
-        $out['privateTab'] = $privateTab;
-        $out['unclassifiedTab'] = $unclassifiedTab;
+        //$out['privateTab'] = $privateTab;
+        //$out['unclassifiedTab'] = $unclassifiedTab;
         return new JsonModel($out);
     }
 

@@ -39,7 +39,8 @@ class TabDocument
      */
     private Collection $tabsDocumentsRoles;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->tabsDocumentsRoles = new ArrayCollection();
     }
 
@@ -54,7 +55,7 @@ class TabDocument
     /**
      * @return ?string
      */
-    public function getLabel():?string
+    public function getLabel(): ?string
     {
         return $this->label;
     }
@@ -92,20 +93,43 @@ class TabDocument
         return $this->getLabel();
     }
 
+    function hasAccess(array $roleIds)
+    {
+        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
+            if ($tabDocumentRole->getAccess() > 0 && in_array($tabDocumentRole->getRole()->getRoleId(), $roleIds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isManage(array $roleIds)
+    {
+        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
+            if( in_array( $tabDocumentRole->getRole()->getRoleId(), $roleIds) && $tabDocumentRole->getAccess() == 2 ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return array
      */
     public function toJson()
     {
         $roles = [];
-        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole){
-            $roles [] = $tabDocumentRole->getRole()->getRoleId();
+        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
+            if ($tabDocumentRole->getAccess() > 0) {
+                $roles [] = $tabDocumentRole->getRole()->getRoleId();
+            }
         }
         return
             [
                 'id' => $this->getId(),
                 'label' => $this->getLabel(),
                 'description' => $this->getDescription(),
+                'manage' => false,
                 'roles' => $roles
             ];
     }
@@ -146,9 +170,9 @@ class TabDocument
      *
      * @return $this
      */
-    public function resetTabDocumentRole():self
+    public function resetTabDocumentRole(): self
     {
-        $this->tabsDocumentsRoles=  new ArrayCollection();
+        $this->tabsDocumentsRoles = new ArrayCollection();
         return $this;
     }
 
@@ -158,7 +182,7 @@ class TabDocument
     public function toArray(): array
     {
         $roles = [];
-        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole){
+        foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
             $roles [] = $tabDocumentRole->getRole()->getRoleId();
         }
         return array(
