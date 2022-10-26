@@ -41,140 +41,140 @@
             <button type="submit" class="btn btn-primary">Rechercher</button>
         </span>
       </div>
+      <section v-if="showCriteria">
+        <h3>Critères de recherche</h3>
+        <div class="row">
+          <div class="col-md-4">
+            <h5>Filtres</h5>
+            <select class="form-control" @change="handlerSelectFilter" v-model="selecting_filter">
+              <option value="">Ajouter un filtre&hellip;</option>
+              <option :value="f" v-for="label,f in filters">{{ label }}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <h5>Status</h5>
+            <super-select :options="status"
+                          :name="'st'"
+                          @change="updateSelected"
+                          v-model="used_status"
+                          style="min-width: 250px"/>
+          </div>
+          <div class="col-md-2">
+            <h5>Trier par</h5>
+            <select v-model="sorter" name="t" class="form-control">
+              <option :value="s" v-for="text, s in sortters">{{ text }}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <h5>Ordre</h5>
+            <select v-model="direction" name="d" class="form-control">
+              <option :value="s" v-for="text, s in directions">{{s}} - {{ text }}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <h5>Ignorer si null</h5>
 
-      <h3>Critères de recherche</h3>
-      <div class="row">
-        <div class="col-md-4">
-          <h5>Filtres</h5>
-          <select class="form-control" @change="handlerSelectFilter" v-model="selecting_filter">
-            <option value="">Ajouter un filtre&hellip;</option>
-            <option :value="f" v-for="label,f in filters">{{ label }}</option>
-          </select>
+            <label for="ui_vuecompact" class="label-primary">
+              Mode compact
+              <input id="ui_vuecompact" name="ui_vuecompact" v-model="ui_vuecompact" type="checkbox">
+            </label>
+
+          </div>
         </div>
-        <div class="col-md-2">
-          <h5>Status</h5>
-          <super-select :options="status"
-                        :name="'st'"
-                        @change="updateSelected"
-                        v-model="used_status"
-                        style="min-width: 250px"/>
-        </div>
-        <div class="col-md-2">
-          <h5>Trier par</h5>
-          <select v-model="sorter" name="t" class="form-control">
-            <option :value="s" v-for="text, s in sortters">{{ text }}</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <h5>Ordre</h5>
-          <select v-model="direction" name="d" class="form-control">
-            <option :value="s" v-for="text, s in directions">{{s}} - {{ text }}</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <h5>Ignorer si null</h5>
 
-          <label for="ui_vuecompact" class="label-primary">
-            Mode compact
-            <input id="ui_vuecompact" name="ui_vuecompact" v-model="ui_vuecompact" type="checkbox">
-          </label>
+        <hr>
 
-        </div>
-      </div>
+        <section v-for="f in filters_obj">
+          <a-s-filter-person v-if="f.type == 'ap'" :type="'ap'"
+                             :value1="f.value1" :value2="f.value2"
+                             :roles_values="roles_person"
+                             :error="f.error"
+                             @delete="handlerDeleteFilter(f)"/>
 
-      <hr>
+          <a-s-filter-person v-else-if="f.type == 'pm'" :type="'pm'"
+                             :value1="f.value1" :value2="f.value2"
+                             :multiple="true"
+                             :roles_values="roles_person"
+                             :error="f.error"
+                             @delete="handlerDeleteFilter(f)"/>
 
-      <section v-for="f in filters_obj">
-        <a-s-filter-person v-if="f.type == 'ap'" :type="'ap'"
-                           :value1="f.value1" :value2="f.value2"
-                           :roles_values="roles_person"
-                           :error="f.error"
-                           @delete="handlerDeleteFilter(f)"/>
+          <a-s-filter-organization v-else-if="f.type == 'ao'" :type="'ao'"
+                             :value1="f.value1" :value2="f.value2"
+                             :roles_values="roles_organizations"
+                             :error="f.error"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <a-s-filter-person v-else-if="f.type == 'pm'" :type="'pm'"
-                           :value1="f.value1" :value2="f.value2"
-                           :multiple="true"
-                           :roles_values="roles_person"
-                           :error="f.error"
-                           @delete="handlerDeleteFilter(f)"/>
+          <a-s-filter-organization v-else-if="f.type == 'so'" :type="'so'"
+                                   :label="'N\'impliquant pas'"
+                                   :value1="f.value1" :value2="f.value2"
+                                   :roles_values="roles_organizations"
+                                   :error="f.error"
+                                   @delete="handlerDeleteFilter(f)"/>
 
-        <a-s-filter-organization v-else-if="f.type == 'ao'" :type="'ao'"
-                           :value1="f.value1" :value2="f.value2"
-                           :roles_values="roles_organizations"
-                           :error="f.error"
-                           @delete="handlerDeleteFilter(f)"/>
+          <a-s-filter-person v-else-if="f.type == 'sp'" :type="'sp'"
+                             :value1="f.value1" :value2="f.value2"
+                             :label="'N\'impliquant pas'"
+                             :roles_values="roles_person"
+                             :error="f.error"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <a-s-filter-organization v-else-if="f.type == 'so'" :type="'so'"
-                                 :label="'N\'impliquant pas'"
-                                 :value1="f.value1" :value2="f.value2"
-                                 :roles_values="roles_organizations"
-                                 :error="f.error"
-                                 @delete="handlerDeleteFilter(f)"/>
+          <a-s-filter-select v-else-if="f.type == 'cnt'" :type="'cnt'"
+                             :value1="f.value1"
+                             :label="'Pays (d\'une organisation)'"
+                             :icon="'icon-flag'"
+                             :error="f.error"
+                             :options="options_pays"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <a-s-filter-person v-else-if="f.type == 'sp'" :type="'sp'"
-                           :value1="f.value1" :value2="f.value2"
-                           :label="'N\'impliquant pas'"
-                           :roles_values="roles_person"
-                           :error="f.error"
-                           @delete="handlerDeleteFilter(f)"/>
+          <select-key-value v-else-if="f.type == 'tnt'" :type="'tnt'"
+                             :value1="f.value1"
+                             :label="'Type d\'organisation'"
+                             :icon="'icon-tag'"
+                             :error="f.error"
+                             :options="options_organization_types"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <a-s-filter-select v-else-if="f.type == 'cnt'" :type="'cnt'"
-                           :value1="f.value1"
-                           :label="'Pays (d\'une organisation)'"
-                           :icon="'icon-flag'"
-                           :error="f.error"
-                           :options="options_pays"
-                           @delete="handlerDeleteFilter(f)"/>
+          <single-date-field v-else-if="f.type == 'add'" :type="f.type"
+                             :moment="moment"
+                             :value1="f.value1"
+                             :value2="f.value2"
+                             :label="'Date de début'"
+                             :error="f.error"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <select-key-value v-else-if="f.type == 'tnt'" :type="'tnt'"
-                           :value1="f.value1"
-                           :label="'Type d\'organisation'"
-                           :icon="'icon-tag'"
-                           :error="f.error"
-                           :options="options_organization_types"
-                           @delete="handlerDeleteFilter(f)"/>
+          <single-date-field v-else-if="f.type == 'adf'" :type="f.type"
+                             :moment="moment" :error="f.error"
+                             :value1="f.value1" :value2="f.value2"
+                             :label="'Date de fin'"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <single-date-field v-else-if="f.type == 'add'" :type="f.type"
-                           :moment="moment"
-                           :value1="f.value1"
-                           :value2="f.value2"
-                           :label="'Date de début'"
-                           :error="f.error"
-                           @delete="handlerDeleteFilter(f)"/>
+          <single-date-field v-else-if="f.type == 'adc'" :type="f.type"
+                             :moment="moment" :error="f.error"
+                             :value1="f.value1" :value2="f.value2"
+                             :label="'Date de Création'"
+                             @delete="handlerDeleteFilter(f)"/>
 
-        <single-date-field v-else-if="f.type == 'adf'" :type="f.type"
-                           :moment="moment" :error="f.error"
-                           :value1="f.value1" :value2="f.value2"
-                           :label="'Date de fin'"
-                           @delete="handlerDeleteFilter(f)"/>
-
-        <single-date-field v-else-if="f.type == 'adc'" :type="f.type"
-                           :moment="moment" :error="f.error"
-                           :value1="f.value1" :value2="f.value2"
-                           :label="'Date de Création'"
-                           @delete="handlerDeleteFilter(f)"/>
-
-        <single-date-field v-else-if="f.type == 'adm'" :type="f.type"
-                           :moment="moment" :error="f.error"
-                           :value1="f.value1" :value2="f.value2"
-                           :label="'Date de Mise à jour'"
-                           @delete="handlerDeleteFilter(f)"/>
+          <single-date-field v-else-if="f.type == 'adm'" :type="f.type"
+                             :moment="moment" :error="f.error"
+                             :value1="f.value1" :value2="f.value2"
+                             :label="'Date de Mise à jour'"
+                             @delete="handlerDeleteFilter(f)"/>
 
 
-        <div v-else class="card critera">
-          non géré {{ f }}
-        </div>
+          <div v-else class="card critera">
+            non géré {{ f }}
+          </div>
+        </section>
+
+        <nav class="text-right">
+          <button type="reset" class="btn btn-default">
+            Réinitialiser le recherche
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Actualiser la recherche
+          </button>
+        </nav>
       </section>
-
-      <nav class="text-right">
-        <button type="reset" class="btn btn-default">
-          Réinitialiser le recherche
-        </button>
-        <button type="submit" class="btn btn-primary">
-          Actualiser la recherche
-        </button>
-      </nav>
-
     </form>
 
     <section v-if="search !== null">
@@ -230,13 +230,13 @@ export default {
     status: {required: true},
     roles_person: {required: true},
     roles_organizations: {required: true},
-    search: { require: false },
+    search: { require: false, default: "" },
     selected_status: { default: [] },
     options_pays: { default: [] },
     options_organization_types: { default: [] },
     used_filters: { require: false, default: []},
     used_status: { require: false, default: []},
-
+    showCriteria: { default: true },
     selectedOrganization: null
   },
 

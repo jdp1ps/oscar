@@ -2296,11 +2296,12 @@ class Activity implements ResourceInterface
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
                 $versementsEffectuesDate[] = $date;
             } else {
-                $date = $payment->getDatePredicted()->format('d/m/Y');
-
-                $versementsPrevus[] = $amount;
-                $versementsPrevusStr[] = $amount . ' le ' . $date;
-                $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+                if( $payment->getDatePredicted() ){
+                    $date = $payment->getDatePredicted()->format('d/m/Y');
+                    $versementsPrevus[] = $amount;
+                    $versementsPrevusStr[] = $amount . ' le ' . $date;
+                    $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+                }
             }
         }
         $datas['versements-prevus'] = implode(', ', $versementsPrevusStr);

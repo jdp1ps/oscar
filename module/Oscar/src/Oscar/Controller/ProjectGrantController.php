@@ -233,11 +233,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         // On test les droits de la personne / restrictions
         $person = $this->getCurrentPerson();
-        $idsPerson = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
-        if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX) ){
+        $fullaccess = false; // $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX);
+        if( $fullaccess ){
             $restricted_ids = false;
         } else {
-            // TRAITEMENT des RESTRICTIONS
+            $restricted_ids = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
         }
 
         ////////////////////////////////////////////////////////////////////////
