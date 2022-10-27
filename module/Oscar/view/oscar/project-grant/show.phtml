@@ -391,7 +391,7 @@
                                 var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
                                 return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
                             });
-
+                            //Vue.config.devtools = true;
                             new Vue({
                                 el: "#docv2",
                                 render(h) {

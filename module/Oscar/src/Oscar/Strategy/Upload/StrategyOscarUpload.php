@@ -128,9 +128,18 @@ class StrategyOscarUpload implements StrategyTypeInterface
                             // Traitement des datas personnes si personnes associées à la consultation du document contexte métier document privé
                             if (!is_null($this->datas[self::PERSONS]) && trim($this->datas[self::PERSONS]) !=""){
                                 $personsIds = explode("," , $this->datas[self::PERSONS]);
+                                $uploaderPerson = $this->getDocument()->getOscarUserContext()->getCurrentPerson();
+                                $uploaderPersonIsPresent = false;
                                 foreach ($personsIds as $id){
+                                    // TODO vérifier si personne qui upload est déja présent dans la liste sinon la rajouter obligatoirement
                                     $person = $this->getDocument()->getDocumentService()->getEntityManager()->getRepository(Person::class)->find($id);
                                     $document->addPerson($person);
+                                    if ($uploaderPerson === $person){
+                                        $uploaderPersonIsPresent = true;
+                                    }
+                                }
+                                if (false === $uploaderPersonIsPresent){
+                                    $document->addPerson($uploaderPerson);
                                 }
                             }
                     }

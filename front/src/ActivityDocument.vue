@@ -1,5 +1,5 @@
 <template>
-  <!-- MODAL DE SUPPRESSION DE DOCUMENT -->
+<!-- MODAL DE SUPPRESSION DE DOCUMENT -->
   <section style="position: relative; min-height: 100px">
     <!-- Composant affichage erreurs appels retour Ajax -->
     <ajax-oscar :oscar-remote-data="remoterState"/>
@@ -18,15 +18,14 @@
         <button class="btn btn-danger" @click="deleteData = null">
           <i class="icon-cancel-alt"></i> Annuler
         </button>
-
+        {{ deleteData }}
         <a class="btn btn-success" :href="deleteData.urlDelete">
           <i class="icon-valid"></i> Confirmer
         </a>
       </div>
     </div>
-    <!--###################################################-->
 
-    <!-- MODAL DE MODIFICATIONS DU TYPE DE DOCUMENT -->
+<!-- MODAL DE MODIFICATIONS DU TYPE DE DOCUMENT -->
     <div class="overlay" v-if="editData">
       <div class="overlay-content">
         <h2>
@@ -49,7 +48,7 @@
                 <label for="tabdocument">Onglet document</label>
                 <div>
                   <select name="tabdocument" id="tabdocument" v-model="editData.tabDocument_id">
-                    <option :selected="editData.tabDocument_id == id" :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                    <option v-if="tabDoc.manage === true && tabDoc.id !='private'" :selected="editData.tabDocument_id == id" :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
                   </select>
                 </div>
               </span>
@@ -71,18 +70,11 @@
                     <span v-if="p.affectation.trim() !==''" class="addon">
                       {{ p.affectation }}
                     </span>
-                    <i @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                    <i v-if="p.personId != idCurrentPerson" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
                   </span>
               </span>
           </div>
         </div>
-        <!--
-        <label for="filename">Nom du fichier</label>
-        <p class="help">
-        Il s'agit du nom du fichier par défaut lors du téléchargement. Le nom d'archivage ne sera pas modifié.
-        </p>
-        <input type="text" id="filename" class="form-control" v-model="editData.basename" />
-        -->
         <div class="row">
           <div class="col-md-12">
             <button class="btn btn-danger" @click="editData = null">
@@ -95,9 +87,8 @@
         </div>
       </div>
     </div>
-    <!-- ################################################### -->
 
-    <!-- MODAL DE TÉLÉVERSEMENT D'UN NOUVEAU DOCUMENT -->
+<!-- MODAL DE TÉLÉVERSEMENT D'UN NOUVEAU DOCUMENT -->
     <div class="overlay" v-if="uploadDoc">
       <div class="overlay-content">
         <h2>
@@ -129,7 +120,7 @@
                 </option>
               </select>
 
-              <!-- PRIVE, SI PRIVE AJOUT PERSONNES -->
+<!-- PRIVE, SI PRIVE AJOUT PERSONNES -->
               <div class="row" style="margin-top: 20px;">
                 <div class="col-md-6">
                   <label for="private">Document privé</label>
@@ -154,7 +145,7 @@
               </span>
             </div>
 
-            <!-- INFORMATIONS COMPLEMENTAIRES -->
+<!-- INFORMATIONS COMPLEMENTAIRES -->
             <div class="row">
               <div class="col-md-12">
                 <label for="informations">Note</label>
@@ -176,7 +167,7 @@
       </div>
     </div>
 
-    <!-- MODAL DE ERRORMESSAGES -->
+<!-- MODAL DE ERRORMESSAGES -->
     <div class="overlay" v-if="errorMessages.length !==0">
       <div class="overlay-content">
         <h2>
@@ -193,8 +184,8 @@
       </div>
     </div>
 
-
-    <!-- Barre de tri des documents
+    <!-- BARRE DE TRI DES DOCUMENTS ACTUELLEMENT ARRETEE -->
+    <!--
     <div>
       <div class="oscar-sorter">
         <i class=" icon-sort"></i>
@@ -216,66 +207,48 @@
         </a>
       </div>
     </div>
-    ----------------------------------->
+    -->
 
-    <section class="documents-content">
-      <div class="tabs">
-        <div class="tab" :class="{'selected': selectedTab == tab }"
-             v-for="tab in tabsWithDocuments"
-             @click="handlerSelectTab(tab)">
-          {{ tab.label }}
-          <sup class="label label-default">{{ tab.documents.length }}</sup>
-        </div>
-      </div>
-
-      <div class="tab-content" v-for="tab in tabsWithDocuments" v-show="selectedTab == tab">
-        <nav v-if="tab.manage" class="text-right">
-          <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
-            <i class="icon-download"></i>
-                 Téléverser un document
-          </button>
-        </nav>
-        <hr>
-        <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
-          <div class="card-title">
-            <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
-            <small class="text-light">{{ doc.categoryText }} ~ </small>
-            <strong>{{doc.fileName}}</strong>
-            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
-          </div>
-          <p>
-            {{ doc.information }}
-          </p>
-          <div class="card-content">
-            <p class="text-highlight">
-              Fichier <strong>{{ doc.extension}}</strong>
-              version {{ doc.version }},
-              téléversé le
-              <time>{{ doc.dateUpload | dateFull }}</time>
-              <span v-if="doc.uploader"> par <strong>{{ doc.uploader.displayname }}</strong></span>
-            </p>
-            <!--
-            <div class="exploder" v-if="doc.previous.length" @click="doc.explode = !doc.explode">
-              Versions précédentes <i class="icon-angle-down" v-show="!doc.explode"></i>
-              <i class="icon-angle-up" v-show="doc.explode"></i>
-            </div>
-
-            <div v-if="doc.previous.length" v-show="doc.explode">
-              <article v-for="sub in doc.previous" class="subdoc text-highlight" :key="sub.id">
-                <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
-                <strong>{{ sub.fileName }}</strong>
-                version <em>{{ sub.version }} </em>,
-                téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
-                <span v-if="sub.uploader">
-                        par <strong>{{ sub.uploader.displayname }}</strong>
-                        </span>
-                <a :href="sub.urlDownload">
-                  <i class="icon-download-outline"></i>
-                  Télécharger cette version
-                </a>
-              </article>
-            </div>
-            -->
+<!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
+   <section class="documents-content">
+     <div class="tabs">
+       <div class="tab" :class="{'selected': selectedTab === tab }"
+            v-for="tab in tabsWithDocuments"
+            @click="handlerSelectTab(tab)">
+         {{ tab.label }}
+         <sup class="label label-default">{{ tab.documents.length }}</sup>
+       </div>
+     </div>
+     <div class="tab-content" v-for="tab in tabsWithDocuments" v-show="selectedTab === tab">
+       <nav v-if="tab.manage" class="text-right">
+         <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
+           <i class="icon-download"></i>
+                Téléverser un document
+         </button>
+       </nav>
+       <hr>
+       <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
+         <div class="card-title">
+           <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
+           <small class="text-light">{{ doc.categoryText }} ~ </small>
+           <strong>{{doc.fileName}}</strong>
+           <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
+         </div>
+         <p>
+           {{ doc.information }}
+         </p>
+         <div class="card-content">
+           <p class="text-highlight">
+             Fichier <strong>{{ doc.extension}}</strong>
+             version {{ doc.version }},
+             téléversé le
+             <time>{{ doc.dateUpload | dateFull }}</time>
+             <span v-if="doc.uploader"> par <strong>{{ doc.uploader.displayname }}</strong></span>
+           </p>
+           <h5 v-if="doc.persons.length > 0">Personnes accédants à ces documents</h5>
+           <span class="cartouche" v-for="person in doc.persons" :key="person.personId">
+             {{ person.personName }}
+           </span>
             <nav class="text-right show-over">
               <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
                 <i class="icon-upload-outline"></i>
@@ -300,273 +273,35 @@
         </article>
       </div>
     </section>
-
-
-    <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ
-    <div v-for="tab in tabsWithDocuments" :key="tab.id">
-      <div style="cursor:pointer; margin-top: 10px;" :class="cssStepCurrent(tab.id)" v-on:click="activeTab(tab.id)" class="step">
-        <span>
-          <strong><i class="picto icon-doc"></i>{{ tab.label }}</strong><br/>
-          <i class="picto icon-comment"></i>{{ tab.description }}
-        </span>
-        <span v-on:click="handlerUploadNewDoc(tab.id)" class="stepHandler" v-if="tab.manage">
-                 Téléverser un document
-        </span>
-        <span v-if="isTabActive === tab.id">
-              &nbsp;<i class="icon-flag"></i>
-        </span>
-      </div>
-
-      <div v-if="isTabActive === tab.id" class="step-content">
-        <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
-          <div class="card-title">
-            <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
-            <small class="text-light">{{ doc.categoryText }} ~ </small>
-            <strong>{{doc.fileName}}</strong>
-            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
-          </div>
-          <p>
-            {{ doc.information }}
-          </p>
-          <div class="card-content">
-            <p class="text-highlight">
-              Fichier <strong>{{ doc.extension}}</strong>
-              version {{ doc.version }},
-              téléversé le
-              <time>{{ doc.dateUpload | dateFull }}</time>
-              <span v-if="doc.uploader"> par <strong>{{ doc.uploader.displayname }}</strong></span>
-            </p>
-            <!--
-            <div class="exploder" v-if="doc.previous.length" @click="doc.explode = !doc.explode">
-              Versions précédentes <i class="icon-angle-down" v-show="!doc.explode"></i>
-              <i class="icon-angle-up" v-show="doc.explode"></i>
-            </div>
-
-            <div v-if="doc.previous.length" v-show="doc.explode">
-              <article v-for="sub in doc.previous" class="subdoc text-highlight" :key="sub.id">
-                <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
-                <strong>{{ sub.fileName }}</strong>
-                version <em>{{ sub.version }} </em>,
-                téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
-                <span v-if="sub.uploader">
-                        par <strong>{{ sub.uploader.displayname }}</strong>
-                        </span>
-                <a :href="sub.urlDownload">
-                  <i class="icon-download-outline"></i>
-                  Télécharger cette version
-                </a>
-              </article>
-            </div>
-
-            <nav class="text-right show-over">
-              <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
-                <i class="icon-upload-outline"></i>
-                Télécharger
-              </a>
-
-              <a class="btn btn-default btn-xs" :href="doc.urlReupload" v-if="doc.urlReupload">
-                <i class="icon-download-outline"></i>
-                Nouvelle version
-              </a>
-
-              <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)">
-                <i class="icon-trash"></i>
-                Supprimer
-              </a>
-              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)">
-                <i class="icon-pencil"></i>
-                Modifier
-              </a>
-            </nav>
-          </div>
-        </article>
-      </div>
-    </div>
-
-    -->
-
-
-    <!-- TODO travail en cours sur la partie documents privés
-    <div :class="cssStepCurrentPrivate()" class="step" style="cursor: pointer; margin-top: 10px;" v-if="privateTab && privateTab.documents && privateTab.documents.length" @click="openPrivateTab = !openPrivateTab">
-      <i class="picto icon-lock"></i>Documents privés
-      <span v-if="openPrivateTab === true">
-              &nbsp;<i class="icon-flag"></i>
-        </span>
-    </div>
-    <div class="step-content" v-if="openPrivateTab === true">
-      <article class="card xs" v-for="docP in privateTab.documents" :key="docP.id">
-        <div class="card-title">
-          <i class="picto icon-doc" :class="'doc' + docP.extension"></i>
-          <small class="text-light">{{ docP.categoryText }} ~ </small>
-          <strong>{{docP.fileName}}</strong>
-          <small class="text-light" :title="docP.fileSize + ' octet(s)'">&nbsp;({{docP.fileSize | filesize}})</small>
-        </div>
-        <p>
-          {{ docP.information }}
-        </p>
-        <h5 v-if="docP.persons.length > 0">Personnes accédants à ces documents</h5>
-        <span class="cartouche" v-for="person in docP.persons" :key="person.personId">
-            {{ person.personName }}
-        </span>
-
-        <div class="card-content">
-          <p class="text-highlight">
-            Fichier <strong>{{ docP.extension}}</strong>
-            version {{ docP.version }},
-            téléversé le
-            <time>{{ docP.dateUpload | dateFull }}</time>
-            <span v-if="docP.uploader"> par <strong>{{ docP.uploader.displayname }}</strong></span>
-          </p>
-          <nav class="text-right show-over">
-            <a class="btn btn-default btn-xs" :href="docP.urlDownload" v-if="docP.urlDownload">
-              <i class="icon-upload-outline"></i>
-              Télécharger
-            </a>
-
-            <a class="btn btn-default btn-xs" :href="docP.urlReupload" v-if="docP.urlReupload">
-              <i class="icon-download-outline"></i>
-              Nouvelle version
-            </a>
-
-            <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(docP)">
-              <i class="icon-trash"></i>
-              Supprimer
-            </a>
-            <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(docP)">
-              <i class="icon-pencil"></i>
-              Modifier
-            </a>
-          </nav>
-
-        </div>
-      </article>
-    </div>
-
-
-    <div class="step" style="cursor: pointer; margin-top: 10px;" v-if="unclassifiedTab != null && unclassifiedTab.length != 0">
-      <i class="picto icon-lock"></i>Documents Non classés
-    </div>
-    <div v-if="unclassifiedTab != null && unclassifiedTab.length != 0" class="step-content">
-      <article class="card xs" v-for="docUnclassified in unclassifiedTab.documents" :key="docUnclassified.id">
-        <div class="card-title">
-          <i class="picto icon-doc" :class="'doc' + docUnclassified.extension"></i>
-          <small class="text-light">{{ docUnclassified.categoryText }} ~ </small>
-          <strong>{{docUnclassified.fileName}}</strong>
-          <small class="text-light" :title="docUnclassified.fileSize + ' octet(s)'">&nbsp;({{docUnclassified.fileSize | filesize}})</small>
-        </div>
-        <p>
-          {{ docUnclassified.information }}
-        </p>
-        <div class="card-content">
-          <p class="text-highlight">
-            Fichier <strong>{{ docUnclassified.extension}}</strong>
-            version {{ docUnclassified.version }},
-            téléversé le
-            <time>{{ docUnclassified.dateUpload | dateFull }}</time>
-            <span v-if="docUnclassified.uploader"> par <strong>{{ docUnclassified.uploader.displayname }}</strong></span>
-          </p>
-          <nav class="text-right show-over">
-            <a class="btn btn-default btn-xs" :href="docUnclassified.urlDownload" v-if="docUnclassified.urlDownload">
-              <i class="icon-upload-outline"></i>
-              Télécharger
-            </a>
-
-            <a class="btn btn-default btn-xs" :href="docUnclassified.urlReupload" v-if="docUnclassified.urlReupload">
-              <i class="icon-download-outline"></i>
-              Nouvelle version
-            </a>
-
-            <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(docUnclassified)">
-              <i class="icon-trash"></i>
-              Supprimer
-            </a>
-            <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(docUnclassified)">
-              <i class="icon-pencil"></i>
-              Modifier
-            </a>
-          </nav>
-        </div>
-      </article>
-    </div>
-
-    Section boucle documents Originelle JACK -->
+    <!-- Section boucle documents Originelle JACK DOCUMENTS VERSIONS -->
+    <!-- <article class="card xs" v-for="document in documentsPacked" :key="document.id">-->
     <!--
-      <article class="card xs" v-for="document in documentsPacked" :key="document.id">
-          <div class="card-title">
-              <i class="picto icon-doc" :class="'doc' + document.extension"></i>
-              <small class="text-light">{{ document.categoryText }} ~ </small>
-              <strong>{{document.fileName}}</strong>
-              <small class="text-light" :title="document.fileSize + ' octet(s)'">&nbsp;({{document.fileSize | filesize}})</small>
-          </div>
-          <p>
-              {{ document.information }}
-          </p>
-          <div class="card-content">
-              <p class="text-highlight">
-                  Fichier <strong>{{ document.extension}}</strong>
-                  version {{ document.version }},
-                  téléversé le <time>{{ document.dateUpload | dateFull }}</time>
-                  <span v-if="document.uploader">
-                      par <strong>{{ document.uploader.displayname }}</strong>
-                  </span>
-              </p>
-              <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
-                  Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
-                  <i class="icon-angle-up" v-show="document.explode"></i>
-              </div>
-              <div v-if="document.previous.length" v-show="document.explode">
-                  <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
-                      <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+    <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
+    Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
+    <i class="icon-angle-up" v-show="document.explode"></i>
+    </div>
 
-                      <strong>{{ sub.fileName }}</strong>
-                      version <em>{{ sub.version }} </em>,
-                      téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
-                      <span v-if="sub.uploader">
-                      par <strong>{{ sub.uploader.displayname }}</strong>
-                      </span>
-                      <a :href="sub.urlDownload">
-                          <i class="icon-download-outline"></i>
-                          Télécharger cette version
-                      </a>
-                  </article>
-              </div>
-              <nav class="text-right show-over">
-                  <a class="btn btn-default btn-xs" :href="document.urlDownload" v-if="document.urlDownload">
-                      <i class="icon-upload-outline"></i>
-                      Télécharger
-                  </a>
-
-                  <a class="btn btn-default btn-xs" :href="document.urlReupload" v-if="document.urlReupload">
-                      <i class="icon-download-outline"></i>
-                      Nouvelle version
-                  </a>
-
-                  <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(document)">
-                      <i class="icon-trash"></i>
-                      Supprimer
-                  </a>
-                  <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(document)">
-                      <i class="icon-pencil"></i>
-                      Modifier
-                  </a>
-              </nav>
-          </div>
-      </article>
-      -->
+    <div v-if="document.previous.length" v-show="document.explode">
+    <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
+    <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+    <strong>{{ sub.fileName }}</strong>
+    version <em>{{ sub.version }} </em>,
+    téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
+    <span v-if="sub.uploader">
+    par <strong>{{ sub.uploader.displayname }}</strong>
+    </span>
+    -->
   </section>
 </template>
 <script>
 
 /******************************************************************************************************************/
 /* ! DEVELOPPEURS
-
 Depuis la racine OSCAR :
-
 cd front
 
 Pour compiler en temps réél :
 node node_modules/.bin/vue-cli-service build --name ActivityDocument --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib ./src/ActivityDocument.vue --watch
-
  */
 
 import Datepicker from "./components/Datepicker";
@@ -597,6 +332,7 @@ export default {
 
   data() {
     return {
+      idCurrentPerson : null,
       // Formulaire Upload champs de formulaire
       persons: [],
       dateDeposit: '',
@@ -618,12 +354,6 @@ export default {
         'baseUrlUpload': this.urlUploadNewDoc,
         'init': false
       },
-      // Documents privés
-      privateTab: null,
-      //Documents non classés
-      unclassifiedTab: null,
-
-      openPrivateTab: false,
       // Message boite modal pour l'utilisateur (erreurs pour exemple)
       errorMessages: [],
       // Onglet sélectionné
@@ -650,7 +380,7 @@ export default {
 
   computed: {
     /**
-     * Retourne les documents triés.
+     * Retourne les documents triés A REVOIR ENTIEREMENT.
      * @returns {Array}
      */
     documentsPacked() {
@@ -666,11 +396,6 @@ export default {
         }.bind(this));
       };
       return out;
-    },
-    // Pour afficher les documents selon IdOnglet (idTab)
-    isTabActive() {
-      this.openPrivateTab = false;
-      return this.tabId;
     }
   },
 
@@ -698,11 +423,6 @@ export default {
 
     cssSort: function (compare) {
       return compare === this.sortField ? "active" : "";
-    },
-
-    // Affectation class dynamique sur la partie documents privés
-    cssStepCurrentPrivate() {
-      return this.openPrivateTab === true ? "private" : "";
     },
 
     // Modification d'un document
@@ -760,7 +480,11 @@ export default {
       this.uploadDoc = true;
       this.dateDeposit = '';
       this.dateSend = '';
-      this.privateDocument = false;
+      let privateTab = false;
+      if (tabId === PRIVATE){
+        privateTab = true;
+      }
+      this.privateDocument = privateTab;
       this.selectedIdTypeDocument = null;
       this.informationsDocument = '';
       this.persons = [];
@@ -903,8 +627,7 @@ export default {
 
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
-      this.privateTab = success.data.privateTab;
-      this.unclassifiedTab = success.data.unclassifiedTab;
+      this.idCurrentPerson = success.data.idCurrentPerson;
       this.tabsWithDocuments = success.data.tabsWithDocuments;
 
       if( this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length ){
