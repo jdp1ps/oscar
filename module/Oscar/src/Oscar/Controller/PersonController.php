@@ -294,7 +294,7 @@ class PersonController extends AbstractOscarController
             $justXHR = false;
         } else {
             $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
-                [Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]
+                [Privileges::ACTIVITY_INDEX, Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]
             );
         }
 
