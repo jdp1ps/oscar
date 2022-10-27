@@ -2239,20 +2239,36 @@ class Activity implements ResourceInterface
             }
             $persons[$roleStr][] = (string)$personActivity->getPerson();
         }
+
+        $organizations = [];
+
+        /** @var ActivityOrganization $organisationActivity */
+        foreach ($this->getOrganizationsDeep() as $organisationActivity) {
+            if( !$organisationActivity->getOrganization()->isClose() ){
+                $roleStr = (string)$organisationActivity->getRoleObj();
+                if (!array_key_exists($roleStr, $organizations)) {
+                    $organizations[$roleStr] = [];
+                }
+                $organizations[$roleStr][] = ((string)$organisationActivity->getOrganization());
+
+                // Personnes dans la structure
+                /** @var OrganizationPerson $personStructure */
+                foreach ($organisationActivity->getOrganization()->getPersons() as $personStructure){
+                    $roleInStructure = (string)$personStructure->getRoleObj();
+                    if( !$personStructure->isOutOfDate() ){
+                        if (!array_key_exists($roleInStructure, $persons)) {
+                            $persons['in-org-'.$roleInStructure] = [];
+                        }
+                        $persons['in-org-'.$roleInStructure][] = (string)$personStructure->getPerson();
+                    }
+                }
+            }
+        }
+
         foreach ($persons as $role => $ps) {
             $slug = $sluger->slugify($role);
             $datas[$slug] = implode(', ', $ps);
             $datas["$slug-list"] = $ps;
-        }
-
-        $organizations = [];
-
-        foreach ($this->getOrganizationsDeep() as $organisationActivity) {
-            $roleStr = (string)$organisationActivity->getRoleObj();
-            if (!array_key_exists($roleStr, $organizations)) {
-                $organizations[$roleStr] = [];
-            }
-            $organizations[$roleStr][] = utf8_encode((string)$organisationActivity->getOrganization());
         }
 
         foreach ($organizations as $role => $ps) {

@@ -2151,9 +2151,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $activity = $this->getActivityService()->getActivityById($activityId);
 
         $this->getOscarUserContextService()->check(
-            Privileges::ACTIVITY_PERSON_SHOW,
+            Privileges::ACTIVITY_ORGANIZATION_SHOW,
             $activity
         );
+
         $out = [];
 
         $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(
@@ -2233,6 +2234,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 //                'hash' => (string)$activityOrganization,
                 'enrolled' => $activityOrganization->getOrganization()->getId(),
                 'enrolledLabel' => $activityOrganization->getOrganization()->getFullName(),
+                'past' => !$activityOrganization->isActive(),
                 'start' => DateTimeUtils::toStr($activityOrganization->getDateStart(), 'Y-m-d'),
                 'end' => DateTimeUtils::toStr($activityOrganization->getDateEnd(), 'Y-m-d')
             ];

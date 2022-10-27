@@ -50,7 +50,7 @@ let intify = function( value ){
 
 export default {
   props: {
-    value: { default: null },
+    value: { default: '' },
     multiple: { default: false }
   },
 
@@ -86,6 +86,7 @@ export default {
 
   computed: {
     values(){
+      console.log('value:', this.value);
       if( !Array.isArray(this.value) ){
         return this.value ? intify(this.value) : [];
       } else {
@@ -95,7 +96,7 @@ export default {
     selectable(){
       if( this.multiple ) return true;
       else {
-        return this.value.length == 0;
+        return !this.value || this.value.length == 0;
       }
 
     }

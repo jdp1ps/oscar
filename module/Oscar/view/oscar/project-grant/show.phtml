@@ -217,7 +217,7 @@
                         new Vue({
                             el: "#membres",
                             render(h) {
-                                return h(EntityWithRole.default, {
+                                return h(EntityWithRole, {
                                     props: {
                                         url: "<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>",
                                         urlNew: "<?= $this->url(
@@ -310,7 +310,7 @@
                         new Vue({
                             el: "#organizations",
                             render(h) {
-                                return h(EntityWithRole.default, {
+                                return h(EntityWithRole, {
                                     props: {
                                         url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
                                         urlNew: "<?= $this->url(
