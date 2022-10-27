@@ -93,7 +93,15 @@ class TabDocument
         return $this->getLabel();
     }
 
-    function hasAccess(array $roleIds)
+    /**
+     * Accès au document
+     * Retourne un booléen en fonction de l'autorisation d'accès aux documents
+     * en comparant si autorisation d'accès supérieur à 0 (lecture au minima) et si présent dans le tableau fourni en paramètre
+     *
+     * @param array $roleIds
+     * @return bool
+     */
+    public function hasAccess(array $roleIds)
     {
         foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
             if ($tabDocumentRole->getAccess() > 0 && in_array($tabDocumentRole->getRole()->getRoleId(), $roleIds)) {
@@ -103,7 +111,15 @@ class TabDocument
         return false;
     }
 
-    function isManage(array $roleIds)
+    /**
+     * Management du doc
+     * Retourne un booléen en fonction de l'autorisation d'accès aux documents
+     * en comparant si autorisation d'accès == 2 (lecture + écriture) et si présent dans le tableau fourni en paramètre
+     *
+     * @param array $roleIds
+     * @return bool
+     */
+    public function isManage(array $roleIds)
     {
         foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
             if( in_array( $tabDocumentRole->getRole()->getRoleId(), $roleIds) && $tabDocumentRole->getAccess() == 2 ) {

@@ -1399,7 +1399,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
 
         $allowPrivate = true;
-
         //Onglet privé
         $privateTab = [
             "id" => "private",
@@ -1407,19 +1406,48 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             "documents" => [],
             "manage" => $allowPrivate
         ];
-        //$datas = [];
 
+        $currentPerson = $this->getCurrentPerson();
         //Docs reliés à une activité
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
-
             $this->getLoggerService()->info($doc->getFileName() . " - " . $doc->getTabDocument());
-
             $manage = false;
             $docAdded = $doc->toJson();
-
-            if(!is_null($doc->getTabDocument())){
-                if( !array_key_exists($doc->getTabDocument()->getId(), $arrayTabs )){
+            if(is_null($doc->getTabDocument())) {
+                if ($doc->isPrivate() === true) {
+                    // Droits sur les documents privés utilisateur courant associé ou non au document
+                    $personsDoc = $doc->getPersons();
+                    $isPresent = false;
+                    foreach ($personsDoc as $person) {
+                        if ($person === $currentPerson) {
+                            $isPresent = true;
+                        }
+                    }
+                    if (true === $isPresent) {
+                        $docAdded['urlDelete'] = $this->url()->fromRoute(
+                            'contractdocument/delete',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlDownload'] = $this->url()->fromRoute(
+                            'contractdocument/download',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlReupload'] = $this->url()->fromRoute(
+                                'contractdocument/upload',
+                                ['idactivity' => $entity->getId()]
+                            ) . "?id=" . $doc->getId();
+                        $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
+                            'person/show',
+                            ['id' => $doc->getPerson()->getId()]
+                        ) : false;
+                    }
+                    $privateTab ["documents"] [] = $docAdded;
+                }else{
+                    $unclassifiedTab ["documents"] [] = $docAdded;
+                }
+            }else{
+                if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
                     continue;
                 }
                 if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
@@ -1440,29 +1468,20 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]
                         ) : false;
-
                     }
                     $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
                 }
-            }else{
-                if ($doc->isPrivate() === true){
-                    $privateTab ["documents"] [] = $docAdded;
-                }else{
-                    $unclassifiedTab ["documents"] [] = $docAdded;
-                }
             }
-        }
+        } // End boucle
 
-        //$out['datas'] = $datas;
-        if( $privateTab ){
+        if($privateTab){
             $arrayTabs['private'] = $privateTab;
         }
-        if( $unclassifiedTab ){
+        if($unclassifiedTab){
             $arrayTabs['unclassified'] = $unclassifiedTab;
         }
         $out['tabsWithDocuments'] =  $arrayTabs;
-        //$out['privateTab'] = $privateTab;
-        //$out['unclassifiedTab'] = $unclassifiedTab;
+        $out['idCurrentPerson'] = $this->getCurrentPerson()->getId();
         return new JsonModel($out);
     }
 
@@ -1470,7 +1489,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      * @return array
      * @throws OscarException
      */
-    public function notificationsAction()
+    public function notificationsAction(): array
     {
         /** @var Activity $entity */
         $entity = $this->getActivityFromRoute();
@@ -1478,7 +1497,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Check access
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $entity);
 
-        /** @var NotificationService $notificationService */
         $notificationService = $this->getNotificationService();
 
         $notificationJson = [];
