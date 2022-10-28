@@ -896,9 +896,9 @@ $colorDefault: $colorMedium;
 }
 
 .metas {
-  font-size: .8em;
+  font-size: .9em;
   font-weight: 100;
-  color: lighten($brand-primary, 30%);
+  color: lighten($brand-primary, 10%);
   border-bottom-width: thin;
   border-bottom-style: solid;
   border-color: #f2f2f2;
@@ -1508,6 +1508,19 @@ $text-small: 12px;
   color: #fff;
 }
 
+.metas .person, .metas .organization,
+a.person.cartouche,
+a.organization.cartouche {
+  &.unclickable {
+    cursor: default;
+    text-decoration: none;
+    &:hover {
+      cursor: default;
+      text-decoration: none;
+    }
+  }
+}
+
 .versions {
   .opener {
     cursor: pointer;
@@ -2045,7 +2058,7 @@ $cardBorderSeparatorLnf: solid lighten($cardColorText, 50%) thin;
     font-size: 1.25em;
     display: flex;
     align-content: center;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     flex-flow: row;
 
@@ -2057,7 +2070,7 @@ $cardBorderSeparatorLnf: solid lighten($cardColorText, 50%) thin;
       flex: auto 0;
     }
     small {
-      flex: 15% 0;
+      flex: 10% 0;
     }
     abbr {
       flex: 5% 0;
@@ -4340,18 +4353,20 @@ time.date-missing {
   background: $colorGreyLight;
   border-radius: 2px;
   font-weight: 100;
-  text-shadow: -1px 1px 0 rgba(0, 0, 0, .2);
-  padding: 0 .3em;
+  padding: 0 .5em;
   margin-right: 1em;
   box-shadow: 0 0 .5em rgba(0, 0, 0, .1);
+  font-size: 1.2em;
   .key {
     color: white;
+    text-shadow: -1px 1px 1px rgba(0, 0, 0, .7);
     &:after {
       content: " / ";
     }
   }
   .value {
     color: $colorDark;
+    text-shadow: none;
     font-weight: 700;
   }
 }

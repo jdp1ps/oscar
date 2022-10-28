@@ -89,7 +89,7 @@
         <h1>
             <span> <i class="icon-cube"></i> <?= $entity->getLabel() ?></span>
             <?php
-            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW)): ?>
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PAYMENT_SHOW, $entity)): ?>
                 <div class="budget">
                     <em>Montant</em>
                     <strong><?= $this->currency($entity) ?></strong>
@@ -200,7 +200,7 @@
         <div class="col-md-8">
 
             <?php
-            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $entity)): ?>
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $entity)): ?>
                 <section class="has-btn">
                     <h2>
                         <i class="icon-group"></i>
@@ -217,7 +217,7 @@
                         new Vue({
                             el: "#membres",
                             render(h) {
-                                return h(EntityWithRole, {
+                                return h(EntityWithRole.default, {
                                     props: {
                                         url: "<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>",
                                         urlNew: "<?= $this->url(
@@ -310,7 +310,7 @@
                         new Vue({
                             el: "#organizations",
                             render(h) {
-                                return h(EntityWithRole, {
+                                return h(EntityWithRole.default, {
                                     props: {
                                         url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
                                         urlNew: "<?= $this->url(

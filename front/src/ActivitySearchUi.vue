@@ -261,7 +261,7 @@ export default {
       totalResultQuery: 0,
       previous: null,
       activities: [],
-      ui_vuecompact: true,
+      ui_vuecompact: false,
       filters_obj: [],
       selecting_filter: "",
       debug: ''

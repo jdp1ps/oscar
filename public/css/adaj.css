@@ -7406,9 +7406,9 @@ mark {
 }
 
 .metas {
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-weight: 100;
-  color: #65a7d2;
+  color: #3074a1;
   border-bottom-width: thin;
   border-bottom-style: solid;
   border-color: #f2f2f2;
@@ -7946,6 +7946,19 @@ body::-webkit-scrollbar-thumb {
   color: #fff;
 }
 
+.metas .person.unclickable, .metas .organization.unclickable,
+a.person.cartouche.unclickable,
+a.organization.cartouche.unclickable {
+  cursor: default;
+  text-decoration: none;
+}
+.metas .person.unclickable:hover, .metas .organization.unclickable:hover,
+a.person.cartouche.unclickable:hover,
+a.organization.cartouche.unclickable:hover {
+  cursor: default;
+  text-decoration: none;
+}
+
 .versions .opener {
   cursor: pointer;
   margin-bottom: 0;
@@ -8436,7 +8449,7 @@ h2 {
   font-size: 1.25em;
   display: flex;
   align-content: center;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   flex-flow: row;
 }
@@ -8451,7 +8464,7 @@ h2 {
   flex: auto 0;
 }
 .card .card-title small {
-  flex: 15% 0;
+  flex: 10% 0;
 }
 .card .card-title abbr {
   flex: 5% 0;
@@ -10624,19 +10637,21 @@ time.date-missing {
   background: #888;
   border-radius: 2px;
   font-weight: 100;
-  text-shadow: -1px 1px 0 rgba(0, 0, 0, 0.2);
-  padding: 0 0.3em;
+  padding: 0 0.5em;
   margin-right: 1em;
   box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.1);
+  font-size: 1.2em;
 }
 .number .key {
   color: white;
+  text-shadow: -1px 1px 1px rgba(0, 0, 0, 0.7);
 }
 .number .key:after {
   content: " / ";
 }
 .number .value {
   color: #1F180D;
+  text-shadow: none;
   font-weight: 700;
 }
 
