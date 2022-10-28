@@ -18,7 +18,6 @@
         <button class="btn btn-danger" @click="deleteData = null">
           <i class="icon-cancel-alt"></i> Annuler
         </button>
-        {{ deleteData }}
         <a class="btn btn-success" :href="deleteData.urlDelete">
           <i class="icon-valid"></i> Confirmer
         </a>
@@ -70,7 +69,7 @@
                     <span v-if="p.affectation.trim() !==''" class="addon">
                       {{ p.affectation }}
                     </span>
-                    <i v-if="p.personId != idCurrentPerson" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                    <i v-if="p.personId !== idCurrentPerson" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
                   </span>
               </span>
           </div>
@@ -559,9 +558,6 @@ export default {
 
     // Modification du type de document / changement onglet, privé ou pas, personnes ou pas
     performEdit() {
-      // console.log("Valeurs de l'édition : ", this.editData);
-      //console.log("Valeurs des personnes éventuelles : ", this.persons);
-
       // Fenêtre messages d'erreurs avant soumission Form
       this.errorMessages = [];
       // Personnes éventuellement associés
@@ -581,7 +577,7 @@ export default {
           });
         }
       }else {
-        console.log("VALEUR this.editData.tabDocument_id : ",this.editData.tabDocument_id);
+        //console.log("VALEUR this.editData.tabDocument_id : ",this.editData.tabDocument_id);
         privateBool = 0;
         // Mauvais statut Onglet (soit statut défaut soit aucune valeur)
         if (this.editData.tabDocument_id === PRIVATE || this.editData.tabDocument_id === ""){
@@ -590,22 +586,14 @@ export default {
           newTabDoc = this.editData.tabDocument_id;
         }
       }
-
       // Fenêtre de message d'erreur
       if (this.errorMessages.length !== 0){
         return;
       }
-
       // Id du doc
       let documentId = this.editData.document.id;
       // Category du document (type)
       let newType = this.editData.documentype_id;
-      // console.log("Valeur privateBool : ", privateBool);
-      // console.log("Valeur documentId : ", documentId);
-      // console.log("Valeur newType : ", newType);
-      // console.log("Valeur newTabDoc : ", newTabDoc);
-      // console.log("Valeur persons : ", persons);*/
-
       // Initialisation des données de Vue
       this.editData = null;
       this.persons = [];
@@ -639,8 +627,6 @@ export default {
           this.selectedTab = this.tabsWithDocuments[keys[0]];
         }
       }
-
-      // this.selectedTab = this.tabsWithDocuments && this.tabsWithDocuments.length > 0 ? this.tabsWithDocuments[0] : null;
       /*
       let data = success.data.datas;
       let documentsOrdered = [];

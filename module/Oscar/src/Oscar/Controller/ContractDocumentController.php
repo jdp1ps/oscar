@@ -190,27 +190,19 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
 
     /**
-     * Modification document (onglets, type, privé/oui/non ...)
+     * Modification document (onglets, TYPE, privé/oui/non ...)
      *
      * @return JsonModel
      * @throws ORMException
      * @throws OptimisticLockException
+     * @throws OscarException
      * @throws \HttpException
      */
-    public function changeTypeAction(){
-
+    public function changeTypeAction(): JsonModel
+    {
         /** @var Request $request */
         $request = $this->getRequest();
         if( $request->isPost() ){
-            dump($request->getPost());
-            /*array:5 [
-            "documentId" => "32"
-            "type" => "3"
-            "tabDocument" => ""
-            "private" => "1"
-            "persons" => "6"
-            ]*/
-
             // Récup document
             /** @var ContractDocument $document */
             $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($request->getPost('documentId'));
@@ -239,26 +231,27 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
             }else{
                 // Cas Document privé
-                // Récupérer persons dans la bd via id(s) post et ajouter s'ils ne sont pas associés au document
-                // Suppression éventuelle onglet associé au cas où le doc aurait été "public" avant
                 $document->setPrivate(true);
                 $document->setTabDocument(null);
                 if (trim($request->getPost('persons')) !== "") {
                     $idsPersons = explode(",", $request->getPost('persons'));
                     if (count($idsPersons) > 0) {
-                        $persons = [];
+                        foreach ($document->getPersons() as $person){
+                            $document->removePerson($person);
+                        }
                         foreach ($idsPersons as $idPerson) {
                             $person = $this->getEntityManager()->getRepository(Person::class)->find($idPerson);
                             $document->addPerson($person);
                         }
                     }
+                }else{
+                    $document->addPerson($this->getCurrentPerson());
                 }
             }
             $document->setTypeDocument($type);
             $this->getEntityManager()->flush();
-            $response = new JsonModel(['response' => 'ok']);
 
-            return $response;
+            return new JsonModel(['response' => 'ok']);
         }
         throw new \HttpException();
     }
@@ -278,7 +271,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             'error' => '',
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
-        $idTab = $this->params()->fromRoute('idtab');
+        $idTab = $this->params()->fromRoute('idtab') === "private"?null:$this->params()->fromRoute('idtab');
         $activity = $this->getActivityService()->getGrant($idActivity);
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
@@ -312,7 +305,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             );
             $processUpload = $serviceUpload->processUpload();
             // IF TRUE =-> POSTS
-            if(true == $processUpload)
+            if(true === $processUpload)
             {
                 // Le retour bool true indique que nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
                 switch ($serviceUpload->getStrategy()->getEtat()){
