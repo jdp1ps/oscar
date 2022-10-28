@@ -3193,14 +3193,27 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $personsId[] = $d->getId();
         }
 
-        $validations = $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriodBounds(
-            $personsId,
-            $activity->getDateStartStr('Y-m'),
-            $activity->getDateEndStr('Y-m')
-        );
 
-        foreach ($validations as $v) {
-            $this->getEntityManager()->remove($v);
+        if( count($personsId) > 0 ){
+            // TODO Ajouter des messages d'alerte ici
+            if( !$activity->getDateStart() || !$activity->getDateEnd() ){
+                // L'activité n'ayant pas de date, pas de validation
+
+            } else {
+                try {
+                    $validations = $this->getValidationPeriodRepository()->getValidationPeriodsForPersonsAtPeriodBounds(
+                        $personsId,
+                        $activity->getDateStartStr('Y-m'),
+                        $activity->getDateEndStr('Y-m')
+                    );
+
+                    foreach ($validations as $v) {
+                        $this->getEntityManager()->remove($v);
+                    }
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->error("Impossible de supprimer les périodes de validation");
+                }
+            }
         }
 
         $this->getEntityManager()->flush();

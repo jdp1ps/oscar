@@ -1032,7 +1032,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             // Récupération des informations annexes
 
             // On supprime les créneaux
-            $this->getTimesheetService()->removeTimesheetActivity($activity);
+            try {
+                $this->getTimesheetService()->removeTimesheetActivity($activity);
+            } catch (\Exception $e) {
+                throw new OscarException("Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage());
+            }
 
             // Suppression des documents
             $documents = $activity->getDocuments();
