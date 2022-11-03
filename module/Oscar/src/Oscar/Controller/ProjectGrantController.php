@@ -1435,8 +1435,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         );
                         $docAdded['urlReupload'] = $this->url()->fromRoute(
                                 'contractdocument/upload',
-                                ['idactivity' => $entity->getId()]
-                            ) . "?id=" . $doc->getId();
+                                [
+                                    'idactivity' => $entity->getId(),
+                                    'idtab' => 'private',
+                                    'id' => $doc->getId()
+                                ]
+                            );
                         $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]
@@ -1461,9 +1465,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             ['id' => $doc->getId()]
                         );
                         $docAdded['urlReupload'] = $this->url()->fromRoute(
-                                'contractdocument/upload',
-                                ['idactivity' => $entity->getId()]
-                            ) . "?id=" . $doc->getId();
+                            'contractdocument/upload',
+                            [
+                                'idactivity' => $entity->getId(),
+                                'idtab' => $doc->getTabDocument()->getId(),
+                                'id' => $doc->getId()
+                            ]
+                        );
                         $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]

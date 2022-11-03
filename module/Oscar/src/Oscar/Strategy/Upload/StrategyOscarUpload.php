@@ -117,7 +117,6 @@ class StrategyOscarUpload implements StrategyTypeInterface
                         ->setGrant($this->getDocument()->getActivity())
                         ->setDateDeposit($this->datas[self::DATE_DEPOSIT] ? new \DateTime($this->datas[self::DATE_DEPOSIT]):null)
                         ->setDateSend($this->datas[SELF::DATE_SEND] ? new \DateTime($this->datas[self::DATE_SEND]):null);
-                        //->setPrivate($this->datas[self::PRIVATE] ?? false);;
                     // Si le document téléversé n'est pas notifié comme privé alors ajout du tab (onglet) sélectionné
                     if (false === boolval($this->datas[self::PRIVATE])){
                             $document

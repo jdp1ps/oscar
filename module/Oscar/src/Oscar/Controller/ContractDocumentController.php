@@ -260,11 +260,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * Upload de document sur une activité
      *
      * /documents-des-contracts/televerser/idActivité/idDocument/idTab
-     *
+     * //http://localhost:8181/documents-des-contracts/televerser/2?id=61
      * @return array
      * @annotations Procédure générique pour l'envoi des fichiers.
      */
     public function uploadAction() {
+
         $datas = [
             'informations' => '',
             'type' => 0,
@@ -276,15 +277,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
         try {
-            //ATTENTION JACK SE SERT DES POSTS POUR SAVOIR SI LE CONTEXTE EST UPLOAD OU PAS
-            //Pour info, il faudra récup la section ici (évolution en cours), passer cette section au ServiceContextUpload pour faire traitement et choisir la stratégie adaptée d'upload
-            //Exemple récup possible
-            //$section = $this->params()->fromQuery('section,' null);
-            //Il faudra récupérer le type pour choisir stratégie dans le service serviceUpload pareil que section (évolution prévue sous peu)
-            //Exemple récup possible
-            //$typeDocument = this->params()->fromQuery('type', null);
             // Get ID pour remplacement ou ajout
-            $docId = $this->params()->fromQuery('id', null);
+            $docId = $this->params()->fromRoute('id', null);
             // Les injections de service nécessaires pour le service de traitement upload
             $documentService = $this->getVersionnedDocumentService();
             $oscarUserContext = $this->getOscarUserContext();
@@ -325,15 +319,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }else{
                 throw new Exception("Accès interdit en dehors de la soumission de données");
             }
-            // Affichage template par défaut upload new doc -> view/oscar/contract-document/upload.phtml
-            // Ancien code version formulaire Zend
-            /*return [
-                'activity' => $activity,
-                'data'  => $datas,
-                'types' => $this->getContractDocumentService()->getContractDocumentTypes(),
-                'tabs' => $this->getContractDocumentService()->getContractTabDocuments(),
-            ];*/
-
         }catch (Exception $e){
             // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
             $this->getLoggerService()->error($e->getMessage());

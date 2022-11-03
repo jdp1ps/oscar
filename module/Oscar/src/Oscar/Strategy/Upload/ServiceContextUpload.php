@@ -114,9 +114,6 @@ class ServiceContextUpload
      */
     private function upload(StrategyTypeInterface $strategy):void
     {
-        //Nous ne savons pas quelle stratégie est utilisée (design pattern stratégie plus ou moins) mais c'est l'objectif
-        //$this->strategy = $strategy;
-        //$this->strategy->uploadDocument();
         $strategy->uploadDocument();
     }
 
