@@ -1221,7 +1221,7 @@ contractdocument:
         upload:
             type: segment
             options:
-                route: /televerser/:idactivity[/:idtab]
+                route: /televerser/:idactivity[/:idtab][/:id]
                 defaults:
                     action: upload
         download:

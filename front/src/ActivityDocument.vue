@@ -166,6 +166,86 @@
       </div>
     </div>
 
+    <!-- MODAL DE TÉLÉVERSEMENT D'UNE NOUVELLE VERSION DE DOCUMENT -->
+    <div class="overlay" v-if="uploadNewVersionDoc">
+      <div class="overlay-content">
+        <h2>
+          Téléverser une nouvelle version du document
+          <span class="overlay-closer" @click="uploadNewVersionDoc = null">X</span>
+        </h2>
+        <div style="width: 90%; margin-left: 5%">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Fichier upload -->
+              <label for="file">Fichier</label>
+              <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
+              <!-- Date de dépot -->
+              <label>Date de dépôt</label>
+              <p class="help">Date à laquelle le fichier a été reçu</p>
+              <date-picker v-model="dateDeposit" :moment="moment"></date-picker>
+              <!-- Date d'envoi' -->
+              <label>Date d'envoi</label>
+              <p class="help">Date à laquelle le fichier a été envoyé</p>
+              <date-picker v-model="dateSend" :moment="moment"></date-picker>
+            </div>
+
+            <!-- TYPE DE DOCUMENT -->
+            <div class="col-md-6">
+              <label for="type">Type de document</label>
+              <select v-model="selectedIdTypeDocument" name="type" id="type" class="form-control">
+                <option v-for="(label, id) in documentTypes" :value="id" :key="id">
+                  {{ label }}
+                </option>
+              </select>
+
+              <!-- PRIVE, SI PRIVE AJOUT PERSONNES -->
+              <div class="row" style="margin-top: 20px;">
+                <div class="col-md-6">
+                  <label for="private">Document privé</label>
+                </div>
+                <div class="col-md-6">
+                  <input type="checkbox" name="private" id="private" class="form-control" v-model="privateDocument">
+                </div>
+              </div>
+              <span v-if="privateDocument === true">
+                <h4>Ce document sera classé automatiquement dans l'onglet privé</h4>
+                 <label>Choix des personnes ayant accès à ce document</label>
+                  <person-auto-completer @change="handlerSelectPersons"></person-auto-completer>
+                  <span v-if="persons.length !== 0" v-for="p in persons" :key="p.personId" class="cartouche">
+                    <i class="icon-cube"></i>
+                    <span>{{ p.personName }}</span>
+                    <span v-if="p.affectation.trim() !=''" class="addon">
+                      {{ p.affectation }}
+                    </span>
+                    <i v-if="p.affectation.trim() ===''" @click="handlerDeletePerson(p)"
+                       class="icon-trash icon-clickable"></i>
+                  </span>
+              </span>
+            </div>
+
+            <!-- INFORMATIONS COMPLEMENTAIRES -->
+            <div class="row">
+              <div class="col-md-12">
+                <label for="informations">Note</label>
+                <textarea v-model="informationsDocument" name="informations" id="informations" class="form-control"
+                          cols="30" rows="10"></textarea>
+              </div>
+            </div>
+            <hr>
+            <nav class="buttons text-center">
+              <button class="btn btn-danger" @click="uploadNewVersionDoc = null">
+                <i class="icon-cancel-alt"></i> Annuler
+              </button>
+              <button class="btn btn-success" href="#" @click.prevent="performUpload()">
+                <i class="icon-valid"></i> Enregistrer
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 <!-- MODAL DE ERRORMESSAGES -->
     <div class="overlay" v-if="errorMessages.length !==0">
       <div class="overlay-content">
@@ -253,12 +333,10 @@
                 <i class="icon-upload-outline"></i>
                 Télécharger
               </a>
-
-              <a class="btn btn-default btn-xs" :href="doc.urlReupload" v-if="doc.urlReupload">
+              <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload)" class="btn btn-default btn-xs"  v-if="tab.manage">
                 <i class="icon-download-outline"></i>
-                Nouvelle version
-              </a>
-
+                  Nouvelle Version
+              </button>
               <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)">
                 <i class="icon-trash"></i>
                 Supprimer
@@ -365,6 +443,7 @@ export default {
       deleteData: null,
       editData: null,
       uploadDoc: null,
+      uploadNewVersionDoc: null,
       documents: [],
       loading: true,
       sortField: 'dateUpload',
@@ -477,6 +556,28 @@ export default {
      */
     handlerUploadNewDoc(tabId) {
       this.uploadDoc = true;
+      //Hydratation de l'url de soumission complétée (propre à cet objet)
+      this.uploadNewDocData.baseUrlUpload = this.urlUploadNewDoc + '/' + tabId;
+      //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
+      this.initUploadDatas(tabId);
+    },
+
+    /**
+     Déclenche ouverture Modal Upload nouvelle version document initialise datas/reset et affectation de base
+     *
+     * @param tabId
+     * @param urlReupload
+     */
+    handlerUploadNewVersionDoc(tabId, urlReupload) {
+      this.uploadNewVersionDoc = true;
+      //Hydratation de l'url de soumission complétée (propre à cet objet)
+      this.uploadNewDocData.baseUrlUpload =  urlReupload
+      //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
+      this.initUploadDatas(tabId);
+    },
+
+    // FAIT OFFICE DE METHODE PSEUDO PRIVEE TRAITEMENT SIMILAIRE (nouveau doc, nouvelle version de doc)
+    initUploadDatas(tabId){
       this.dateDeposit = '';
       this.dateSend = '';
       let privateTab = false;
@@ -493,8 +594,6 @@ export default {
       this.fileToDownload = null;
       // Tab choisis pour upload document (TabId est égal id onglet)
       this.uploadNewDocData.tab = tabId;
-      // Hydratation de l'url de soumission complétée (propre à cet objet)
-      this.uploadNewDocData.baseUrlUpload = this.urlUploadNewDoc + '/' + tabId;
     },
 
     // Event onChange sur le champ INPUT FILE
@@ -542,6 +641,7 @@ export default {
         return;
       }
       this.uploadDoc = null;
+      this.uploadNewVersionDoc = null;
       this.persons = [];
       // Objet JS Appel Ajax
       oscarRemoteData
