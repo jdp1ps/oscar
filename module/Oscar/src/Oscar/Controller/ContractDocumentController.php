@@ -244,6 +244,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                             $document->addPerson($person);
                         }
                     }
+                    $document->addPerson($this->getCurrentPerson());
                 }else{
                     $document->addPerson($this->getCurrentPerson());
                 }
