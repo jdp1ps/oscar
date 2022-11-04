@@ -208,6 +208,25 @@
     </div>
     -->
 
+    <!-- Section boucle documents Originelle JACK DOCUMENTS VERSIONS -->
+    <!-- <article class="card xs" v-for="document in documentsPacked" :key="document.id">-->
+    <!--
+    <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
+    Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
+    <i class="icon-angle-up" v-show="document.explode"></i>
+    </div>
+
+    <div v-if="document.previous.length" v-show="document.explode">
+    <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
+    <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+    <strong>{{ sub.fileName }}</strong>
+    version <em>{{ sub.version }} </em>,
+    téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
+    <span v-if="sub.uploader">
+    par <strong>{{ sub.uploader.displayname }}</strong>
+    </span>
+    -->
+
 <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
    <section class="documents-content">
      <div class="tabs">
@@ -270,24 +289,6 @@
         </article>
       </div>
     </section>
-    <!-- Section boucle documents Originelle JACK DOCUMENTS VERSIONS -->
-    <!-- <article class="card xs" v-for="document in documentsPacked" :key="document.id">-->
-    <!--
-    <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
-    Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
-    <i class="icon-angle-up" v-show="document.explode"></i>
-    </div>
-
-    <div v-if="document.previous.length" v-show="document.explode">
-    <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
-    <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
-    <strong>{{ sub.fileName }}</strong>
-    version <em>{{ sub.version }} </em>,
-    téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
-    <span v-if="sub.uploader">
-    par <strong>{{ sub.uploader.displayname }}</strong>
-    </span>
-    -->
   </section>
 </template>
 <script>
@@ -647,6 +648,7 @@ export default {
           this.selectedTab = this.tabsWithDocuments[keys[0]];
         }
       }
+      // Voir avec Jack est-ce que l'on remet l'ordre des documents ? Et si oui comment ?
       /*
       let data = success.data.datas;
       let documentsOrdered = [];
