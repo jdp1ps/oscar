@@ -9,6 +9,8 @@ interface StrategyTypeInterface
 
     public function uploadDocument(): void;
 
+    public function setDocument(TypeDocumentInterface $document): void;
+
     public function getDocument(): TypeDocumentInterface;
 
     public function getDatas(): array;

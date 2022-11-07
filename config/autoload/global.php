@@ -9,6 +9,13 @@ return array(
     /// Vous pouvez surcharger ces paramètres en les redéclarants dans le
     /// fichier local.php
     'oscar' => [
+        // Strategy upload de documents (Param default -> Gestion des documents Oscar système de fichiers internes)
+        'strategyUpload' => [
+            "class" =>\Oscar\Strategy\Upload\StrategyOscarUpload::class,
+            "gedName" => \Oscar\Constantes\Constantes::GED_OSCAR,
+            "typeStockage" => \Oscar\Strategy\Upload\TypeOscar::class
+        ],
+
         // Par défaut, pas de socket
         'socket' => false,
 

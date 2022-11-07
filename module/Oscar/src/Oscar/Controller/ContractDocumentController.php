@@ -164,17 +164,39 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
-        // Récupération
-        $documents = $em->createQueryBuilder('d')
-            ->select('d')
-            ->where('d.fileName = :fileName AND d.grant = :grant')
-            ->setParameters([
-                'fileName' => $document->getFileName(),
-                'grant' => $document->getGrant()
-            ])
-            ->getQuery()->getResult();
-
-        foreach( $documents as $doc ){
+        // Récupération (Attention Cas spécifique documents privés)
+        $documents = $em->createQueryBuilder('d')->select('d');
+        $paramsQuery = [
+            'fileName' => $document->getFileName(),
+            'grant' => $document->getGrant(),
+        ];
+        // Documents Non privé
+        if ($document->isPrivate() === true ){
+            $paramsQuery ['private'] = true;
+            $documents ->where(
+                'd.fileName = :fileName 
+                AND d.grant = :grant
+                AND d.private = :private'
+            );
+        }else{
+            if(!is_null($document->getTabDocument())){
+                $paramsQuery ['tabDocument'] = $document->getTabDocument();
+                $documents ->where(
+                    'd.fileName = :fileName 
+                    AND d.grant = :grant 
+                    AND d.tabDocument = :tabDocument'
+                );
+            }else{
+                $paramsQuery ['private'] = false;
+                $documents ->where(
+                    'd.fileName = :fileName 
+                    AND d.grant = :grant
+                    AND d.private = :private'
+                );
+            }
+        }
+        $results = $documents->setParameters($paramsQuery)->getQuery()->getResult();
+        foreach( $results as $doc ){
             $this->getEntityManager()->remove($doc);
         }
         $this->getEntityManager()->flush();
@@ -259,9 +281,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     /**
      * Upload de document sur une activité
+     * /documents-des-contracts/televerser/:idactivity[/:idtab][/:id]
      *
-     * /documents-des-contracts/televerser/idActivité/idDocument/idTab
-     * //http://localhost:8181/documents-des-contracts/televerser/2?id=61
      * @return array
      * @annotations Procédure générique pour l'envoi des fichiers.
      */
@@ -278,13 +299,14 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
 
         try {
-            // Get ID pour remplacement ou ajout
+            // Get ID doc pour remplacement ou ajout
             $docId = $this->params()->fromRoute('id', null);
             // Les injections de service nécessaires pour le service de traitement upload
             $documentService = $this->getVersionnedDocumentService();
             $oscarUserContext = $this->getOscarUserContext();
             $notificationService = $this->getNotificationService();
             $activityLogService = $this->getActivityLogService();
+            $oscarConfigurationService = $this->getOscarConfigurationService();
             /** $serviceUpload instanciation */
             $serviceUpload = new ServiceContextUpload
             (
@@ -296,13 +318,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $activity,
                 $oscarUserContext,
                 $notificationService,
-                $activityLogService
+                $activityLogService,
+                $oscarConfigurationService
             );
             $processUpload = $serviceUpload->processUpload();
             // IF TRUE =-> POSTS
             if(true === $processUpload)
             {
-                // Le retour bool true indique que nous avons des posts donc nous allons traiter et nous devons aller chercher les infos dont nous avons besoin pour retour
                 switch ($serviceUpload->getStrategy()->getEtat()){
                     case true:
                         // Infos juste pour xdebug

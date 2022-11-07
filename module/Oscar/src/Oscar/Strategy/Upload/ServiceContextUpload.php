@@ -6,14 +6,12 @@ namespace Oscar\Strategy\Upload;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use DoctrineORMModule\Options\EntityManager;
-use DoctrineORMModule\Service\EntityManagerAliasCompatFactory;
 use Oscar\Constantes\Constantes;
-use Oscar\Controller\ContractDocumentController;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\VersionnedDocumentService;
 use Oscar\Traits\UseActivityLogServiceTrait;
@@ -22,7 +20,6 @@ use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Zend\Http\Request;
-use Zend\Mvc\Controller\Plugin\Redirect;
 
 class ServiceContextUpload
 {
@@ -39,6 +36,7 @@ class ServiceContextUpload
     private $oscarUserContext;
     private $notificationService;
     private $activityLogService;
+    private $oscarConfigurationService;
 
     public function __construct
     (
@@ -50,8 +48,8 @@ class ServiceContextUpload
         Activity $activity,
         OscarUserContext $oscarUserContext,
         NotificationService $notificationService,
-        ActivityLogService $activityLogService
-
+        ActivityLogService $activityLogService,
+        OscarConfigurationService $oscarConfigurationService
     )
     {
         $this->request = $request;
@@ -63,35 +61,38 @@ class ServiceContextUpload
         $this->oscarUserContext = $oscarUserContext;
         $this->notificationService = $notificationService;
         $this->activityLogService = $activityLogService;
+        $this->oscarConfigurationService = $oscarConfigurationService;
     }
 
     /**
+     * Méthode d'instanciation et traitement de téléversement via la stratégie choisis via fichier de configuration
+     *
      * @return bool
      * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws NonUniqueResultException|\Oscar\Exception\OscarException
      */
     public function processUpload():bool
     {
-        // Choix stratégie et hydrater l'objet Type choisi avec la stratégie
-        // GED ou OSCAR (POST OU PAS POST)
+        // GED X ou Y ou OSCAR (POST OU PAS POST)
         $isPost = false;
-        // Mise à jour document si id doc est fournis (mise à jour nouvelle version doc)
+        // Mise à jour du document si id doc est fournis (mise à jour nouvelle version doc)
         if ($this->docId) {
             $doc = new ContractDocument();
             if ($doc = $this->documentService->getDocument($this->docId)->getQuery()->getSingleResult()) {
                 $this->docReplaced = $doc->getFileName();
             }
         }
-        // Exemple ci-dessous avec constantes pour faire des traitements de tests nous partons sur GED OSCAR FILE INTERNE AVEC TEST SUR LES POSTS
         if( $this->request->isPost() ) {
             $isPost = true;
-            // Ci-dessous juste pour tester avec Ged Oscar Actuellement
-            // $typeDocumentStrategyConfig = Constantes::GED_UP;
-            $typeDocumentStrategyConfig = Constantes::GED_OSCAR;
-            // Fin bla bla
-            $typeDocumentGedOscar = new TypeOscar
+            // Récup config pour init
+            $gedConfig = $this->oscarConfigurationService->getConfiguration("strategyUpload");
+            $typeDocumentConfig = $gedConfig["gedName"];
+            $nameClassStrategy = $gedConfig["class"];
+            $typeDocument = $gedConfig["typeStockage"];
+            $typeDocumentGed = new $typeDocument;
+            $typeDocumentGed->init
             (
-                $typeDocumentStrategyConfig,
+                $typeDocumentConfig,
                 $this->activity,
                 $this->request,
                 $this->documentService,
@@ -100,8 +101,10 @@ class ServiceContextUpload
                 $this->notificationService,
                 $this->activityLogService
             );
-            // Ici il serait bon de récup la stratégie choisis via un fichier de config
-            $this->strategy = new StrategyOscarUpload($typeDocumentGedOscar);
+
+            // Utilisations Params des fichiers de config oscar
+            $this->strategy = new $nameClassStrategy;
+            $this->strategy->setDocument($typeDocumentGed);
             $this->strategy->setEtat(1);
             $this->upload($this->strategy);
         }

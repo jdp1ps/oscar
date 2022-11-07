@@ -1230,7 +1230,6 @@ contractdocument:
                 route: /telecharger/:id
                 defaults:
                     action: download
-
         delete:
             type: segment
             options:

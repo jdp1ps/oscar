@@ -13,6 +13,17 @@ use Zend\Http\Request;
 
 interface TypeDocumentInterface
 {
+    public function init
+    (
+        $typeStockage,
+        Activity $activity,
+        Request $request,
+        VersionnedDocumentService $documentService,
+        ?String $docReplaced,
+        OscarUserContext $oscarUserContext,
+        NotificationService $notificationService,
+        ActivityLogService $activityLogService
+    ):void;
     public function returnStatut(): bool;
     public function getTypeStockage(): string;
     public function setTypeStockage($typeStockage): void;

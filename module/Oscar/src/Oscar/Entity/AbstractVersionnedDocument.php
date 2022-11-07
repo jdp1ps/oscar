@@ -280,6 +280,8 @@ abstract class AbstractVersionnedDocument
         return sprintf("oscar-%s-%s", $this->getVersion(), $slugify->slugify($this->getFileName()));
     }
 
+
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // METHODS
