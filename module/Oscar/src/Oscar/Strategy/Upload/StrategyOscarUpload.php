@@ -8,7 +8,6 @@ use Exception;
 use Oscar\Entity\AbstractVersionnedDocument;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
-use Oscar\Exception\OscarException;
 
 
 class StrategyOscarUpload implements StrategyTypeInterface
@@ -30,10 +29,10 @@ class StrategyOscarUpload implements StrategyTypeInterface
     private $document;
     private $datas;
 
-    public function __construct(TypeDocumentInterface $document)
+    public function __construct()
     {
-        $this->document= $document;
         $this->etat = false;
+        return $this;
     }
 
     /**
@@ -63,7 +62,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
         }
 
         if( $file[self::ERROR_FILE] != 0 ){
-            //dump($datas); // Errors dans le fichier uploadé genre taille trop grande etc...
+            // Erreurs dans le fichier téléversé exemple : taille trop grande etc...
             $errors = [
                 UPLOAD_ERR_INI_SIZE => 'Le fichier dépasse la taille autorisée par le serveur ('.ini_get('upload_max_filesize').')',
                 UPLOAD_ERR_FORM_SIZE => 'Le fichier dépasse la taille autorisée par le formulaire',
@@ -139,7 +138,8 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     }
                     $this->etat = true;
                     $this->datas ["activityId" ] = $this->getDocument()->getActivity()->getId();
-                    if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){
+                    //if ( $this->getDocument()->getDocumentService()->createDocument($file['tmp_name'], $document) ){
+                    if ( $this->getDocument()->getDocumentService()->createDocumentInTab($file['tmp_name'], $document) ){
                             $this->getDocument()->getNotificationService()->generateActivityDocumentUploaded($document);
                             $this->getDocument()->getActivityLogService()->addUserInfo(
                                 sprintf("a déposé le document '%s' dans l'activité %s", $document->getFileName(), $this->getDocument()->getActivity()->log()),
@@ -155,6 +155,15 @@ class StrategyOscarUpload implements StrategyTypeInterface
             }
         }
     }
+
+    /**
+     * @param TypeDocumentInterface $document
+     */
+    public function setDocument(TypeDocumentInterface $document): void
+    {
+        $this->document = $document;
+    }
+
 
     public function getDocument(): TypeDocumentInterface
     {

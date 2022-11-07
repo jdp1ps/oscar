@@ -22,7 +22,10 @@ class TypeOscar implements TypeDocumentInterface
     private $notificationService;
     private $activityLogService;
 
-    public function __construct
+    public function __construct(){}
+
+
+    public function init
     (
         $typeStockage,
         Activity $activity,
@@ -32,7 +35,7 @@ class TypeOscar implements TypeDocumentInterface
         OscarUserContext $oscarUserContext,
         NotificationService $notificationService,
         ActivityLogService $activityLogService
-    )
+    ): void
     {
         $this->typeStockage                     = $typeStockage;
         $this->activity                         = $activity;

@@ -351,6 +351,19 @@ class ContractDocument extends AbstractVersionnedDocument
         return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));
     }
 
+    /**
+     * Génère le nom du fichier et non son emplacement
+     *
+     * @return string
+     */
+    public function generateName()
+    {
+        $slugify = new Slugify();
+        return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));
+    }
+
+
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // METHODS

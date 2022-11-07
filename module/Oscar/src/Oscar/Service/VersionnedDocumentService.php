@@ -34,13 +34,16 @@ use Zend\Http\Request;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
+use function PHPUnit\Framework\directoryExists;
+use function PHPUnit\Framework\throwException;
+
 
 class VersionnedDocumentService {
 
     /** @var EntityManager EntityManager */
     private $entityManager;
 
-    /** @var  Emplaement où sont stoqués les fichiers */
+    /** @var  Emplacement où sont stoqués les fichiers */
     private $documentHome;
 
     /** @var  string className */
@@ -259,6 +262,8 @@ class VersionnedDocumentService {
      * @throws OptimisticLockException
      * @throws \Exception
      */
+
+    // TODO A supprimer après validation de sa non utilisation au sein d'Oscar à un autre endroit que dans la gestion des documents dans les activités
     public function createDocument( $source, AbstractVersionnedDocument $doc ): bool
     {
         // Récupération de la version
@@ -284,8 +289,78 @@ class VersionnedDocumentService {
         }
     }
 
+    /**
+     * @param $source
+     * @param AbstractVersionnedDocument $doc
+     * @return bool
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws \Exception
+     */
+    public function createDocumentInTab( $source, AbstractVersionnedDocument $doc ): bool
+    {
+        // Récupération de la version
+        $exists = $this->getEntityManager()->getRepository($this->effectiveClass)->findBy(
+            [
+                'fileName' => $doc->getFileName()
+            ]);
+        $version = 0;
+        /** @var AbstractVersionnedDocument $exist */
+        foreach( $exists as $exist ){
+            $version = max($version, $exist->getVersion());
+        }
+        $doc->setVersion($version+1);
+
+        // Init nom de base
+        $realName = $doc->generateName();
+        $directoryLocation = $this->documentHome;
+        if($doc->isPrivate() === true){
+           $folder = $this->createFolder($directoryLocation, "private");
+        }else{
+            $folder = $this->createFolder($directoryLocation, $doc->getTabDocument()->getId());
+        }
+        $doc->setPath($realName);
+        if(@move_uploaded_file($source, $folder.'/'.$realName)){
+            $this->getEntityManager()->persist($doc);
+            $this->getEntityManager()->flush($doc);
+            return true;
+        } else {
+            throw new \Exception("Document non déplaçable -> NOT MOVABLE");
+            //return false;
+        }
+    }
+
 
     /**
+     * Génère le chemin complet pour le dépôt de document
+     * Si le répertoire n'existe il est créé
+     *
+     * @return string
+     * @throws \Exception
+     */
+    private function createFolder(string $directoryLocation, ?string $tab){
+        // Répertoire private
+        if ($tab === "private"){
+            $folder = $directoryLocation.$tab;
+        }elseif (is_null($tab) || trim($tab) === ""){
+            // Anciens documents
+            $folder = $directoryLocation;
+        }else{
+            // Nouvelle gestion des répertoires
+            $folder = $directoryLocation."tab_".$tab;
+        }
+
+        if (!is_dir($folder)){
+            if (!mkdir($folder, 0777, true)) {
+                throw new \Exception("Impossible de créer le répertoire pour réceptionner le document !" );
+            }
+        }
+        return $folder;
+    }
+
+    /**
+     * Retourne la liste des types de documents
+     *
      * @return TypeDocument[]
      */
     public function getContractDocumentTypes(): array
@@ -294,10 +369,12 @@ class VersionnedDocumentService {
     }
 
     /**
+     * Retourne une entité Type document via son id
+     *
      * @param $idDocumentType
-     * @return TypeDocument
+     * @return object
      */
-    public function getContractDocumentType( $idDocumentType ): TypeDocument
+    public function getContractDocumentType( $idDocumentType ): object
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->find($idDocumentType);
     }
