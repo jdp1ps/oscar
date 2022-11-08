@@ -232,10 +232,9 @@ class RoleRepository extends EntityRepository
     public function getDistinctRolesPersonInActivities( Person $person )
     {
 
-        $sql = "SELECT DISTINCT ur.id FROM user_role ur "
-            ."LEFT JOIN activityperson ap ON ur.id = ap.roleobj_id "
-            ."LEFT JOIN projectmember pm ON ur.id = pm.roleobj_id "
-            ."WHERE ap.person_id = :idPerson OR pm.person_id = :idPerson";
+        $sql = "select distinct roleobj_id from activityperson a where person_id = :idPerson
+                    union 
+                select distinct roleobj_id from projectmember p where person_id = :idPerson";
 
         $query = $this->getEntityManager()->getConnection()->prepare($sql);
         $idPerson = $person->getId();
