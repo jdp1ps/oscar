@@ -170,7 +170,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
         } else {
             $split = explode(" ", $search);
             if( count($split) == 1 ){
-                $search = sprintf('%s OR %s*', $split[0], $split[0]);
+                $search = sprintf('%s OR %s', $split[0], $split[0].'*');
             } else {
                 $assembly = [];
                 foreach ($split as $term) {
