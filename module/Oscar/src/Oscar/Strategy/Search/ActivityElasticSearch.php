@@ -164,6 +164,7 @@ class ActivityElasticSearch implements ActivitySearchStrategy
 
     public function search($search)
     {
+        $search = trim($search);
         // TRAITEMENT de la recherche
         if( strpos($search, 'AND') || strpos($search, 'OR') || strpos($search, '"') ){
 
