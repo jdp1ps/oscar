@@ -35,9 +35,15 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const pfi_strict = 'pfi_strict';
     const pfi_strict_format = 'pfi_strict_format';
     const allow_node_selection = 'allow_node_selection';
+    const empty_project_require_validation = 'empty_project_require_validation';
 
 
     const theme = 'theme';
+
+    public function emptyProjectRequireValidation() :bool
+    {
+        return $this->getConfiguration(self::empty_project_require_validation);
+    }
 
     /**
      * @return bool

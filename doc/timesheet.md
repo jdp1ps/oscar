@@ -511,8 +511,26 @@ Par exemple, pour faire une rappel une fois par semaine, le CRON devra être pla
 php bin/oscar.php timesheets:high-delay --send
 ```
 
+#### Validations des lignes vides
+
+Il est possible de configurer OSCAR pour permettre l'envoi de ligne vide à valider si un déclarant envoi une déclaration dont le contenu pour un/ou plusieurs projets est vide. Cette option (globale) enverra une validation aux validateurs du/des projets, même si aucune heure n'a été renseignée pour leur projet. 
 
 
-
-
+```php
+<?php
+// config/autoload/local/php
+return array(
+    // ..
+    'oscar' => [
+        // ...
+        // empty_project_require_validation => BOOL
+        // default : false
+        // La validation implique automatiquement 
+        // tous les validateurs, même si le déclarant 
+        // n'a rien déclaré pour leur projet
+        'empty_project_require_validation' => true,
+        //...
+    ]
+);
+```
 

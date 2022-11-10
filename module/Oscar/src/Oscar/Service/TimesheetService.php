@@ -5830,6 +5830,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
     }
 
+    public function getActivitiesDeclarer(  int $senderId, $period = null )
+    {
+        return $this->getActivityService()->getActivitiesByIds(
+            $this->getTimesheetRepository()->getActivitiesIdsForDeclarer($senderId, $period)
+        );
+    }
+
     public function sendPeriod($from, $to, $sender, $comments = null)
     {
         $fromMonth = $from->format('Y-m');
@@ -5890,6 +5897,57 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         // Liste des déclarations pour lesquelles des
         // mails doivent être envoyés
         $validationPeriodsMailed = [];
+
+        if(  $this->getOscarConfigurationService()->emptyProjectRequireValidation() ){
+            // Récupération des activités pour cette période
+            $activities = $this->getActivitiesDeclarer($sender->getId(), sprintf('%s-%s', $annee, $mois));
+
+            /** @var Activity $activity */
+            foreach ($activities as $activity) {
+
+                $object = ValidationPeriod::OBJECT_ACTIVITY;
+                $objectGroup = ValidationPeriod::GROUP_WORKPACKAGE;
+                $objectId = $activity->getId();
+
+                $key = sprintf("%s_%s", $object, $objectId);
+                if (!array_key_exists($key, $declarations)) {
+
+                    $comment = "";
+                    $objectCommentKey = $objectId;
+                    if ($objectCommentKey == -1) {
+                        $objectCommentKey = $object;
+                    }
+
+
+                    if ($comments && array_key_exists($objectCommentKey, $comments)) {
+                        $this->getLoggerService()->debug('Comment KEY : ' . $objectCommentKey);
+                        $comment = array_key_exists($objectCommentKey, $comments) ? $comments[$objectCommentKey] : '';
+                    }
+                    $declarations[$key] = [
+                        'objectId' => $objectId,
+                        'object' => $object,
+                        'objectGroup' => $objectGroup,
+                        'log' => "Déclaration envoyée",
+                        'comment' => $comment
+                    ];
+                    // saveComment( Person $person, $objectKey, $year, $month, $content )
+                    $this->saveComment($sender, $key, $annee, $mois, $comment);
+
+                    $declaration = $this->createDeclaration(
+                        $sender,
+                        $annee,
+                        $mois,
+                        $object,
+                        $objectId,
+                        $objectGroup,
+                        $comment
+                    );
+
+                    $declarations[$key]['declaration'] = $declaration;
+                    $validationPeriodsMailed[] = $declaration;
+                }
+            }
+        }
 
         /** @var TimeSheet $timesheet */
         foreach ($timesheets as $timesheet) {

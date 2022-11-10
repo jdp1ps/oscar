@@ -14,6 +14,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\QueryBuilder;
+use Oscar\Utils\PeriodInfos;
 
 class TimesheetRepository extends EntityRepository
 {
@@ -24,6 +25,37 @@ class TimesheetRepository extends EntityRepository
             ->orderBy('t.activity, t.dateFrom');
     }
 
+    public function getActivitiesIdsForDeclarer( int $declarerId, ?string $period = "" )
+    {
+        try {
+            $rsm = new ResultSetMapping();
+            $rsm->addScalarResult('activity_id', 'activity_id');
+
+            $params = [
+                'declarerId' => $declarerId
+            ];
+
+            $sql = 'select distinct activity_id from workpackage wp 
+                        inner join workpackageperson wpp on wpp.workpackage_id = wp.id 
+                        inner join activity a on wp.activity_id = a.id 
+                        where wpp.person_id = :declarerId';
+
+            if( $period ){
+                $sql .= ' and a.dateStart <= :period_end and a.dateEnd >= :period_start';
+                $p = PeriodInfos::getPeriodInfosObj($period);
+                $params['period_start'] = $p->getStart()->format('Y-m-d');
+                $params['period_end'] = $p->getEnd()->format('Y-m-d');
+            }
+
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $results = $query->setParameters($params)->getResult();
+
+            return array_map('current', $results);
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
 
     /**
      * Retourne la liste des créneaux de la personne (ID).

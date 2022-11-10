@@ -180,6 +180,10 @@ return array(
         // TRUE => en heure
         'declarationsHours' => false,
 
+        // Force une ligne de déclaration pour les périodes où un projet
+        // est identifié, mais n'a aucun créneau renseigné par le déclarant
+        'empty_project_require_validation' => false,
+
         'declarationsWeekend' => false,
         'declarationsWeekendOverwrite' => false,
 
