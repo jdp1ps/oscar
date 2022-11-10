@@ -249,18 +249,22 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function getDatasDeclarations()
+    public function getDatasDeclarations( array $filterpersonsIds = [], $filterYear = null )
     {
         $output = [
             "periods" => [],
             "declarants" => []
         ];
 
-        // --- Récupération des déclarations
-        $declarations = $this->getEntityManager()->getRepository(ValidationPeriod::class)->findAll();
+        if( $filterpersonsIds ){
+            $declarations = $this->getValidationPeriodRepository()->getValidationPeriodsPersons($filterpersonsIds, $filterYear);
+        } else {
+            $declarations = $this->getValidationPeriodRepository()->getValidationPeriods($filterYear);
+        }
 
         /** @var ValidationPeriod $declaration */
         foreach ($declarations as $declaration) {
+
             $period = sprintf('%s-%s', $declaration->getYear(), $declaration->getMonth());
             $personId = $declaration->getDeclarer()->getId();
             $dataKey = sprintf('%s_%s', $period, $personId);

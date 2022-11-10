@@ -52,6 +52,45 @@ class ValidationPeriodRepository extends EntityRepository
         return $this->getValidationPeriodsPersonQuery($personId)->getQuery()->getResult();
     }
 
+    /**
+     * Retourne la liste des toutes les ValidationPeriod pour les personnes données.
+     *
+     * @param array $personsIds
+     * @return int|mixed|string
+     */
+    public function getValidationPeriodsPersons( array $personsIds, ?int $filterYear = null ){
+
+        $query = $this->createQueryBuilder('vp')
+            ->where('vp.declarer IN (:ids)')
+            ->setParameters(['ids' => $personsIds])
+            ->orderBy('vp.year, vp.month');
+
+        if( $filterYear !== null ){
+            $query->andWhere('vp.year = :year')
+                ->setParameter('year', $filterYear)
+            ;
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne la liste des toutes les ValidationPeriod.
+     *
+     * @return int|mixed|string
+     */
+    public function getValidationPeriods( ?int $filterYear = null ){
+
+        $query = $this->createQueryBuilder('vp')
+            ->orderBy('vp.year, vp.month');
+
+        if( $filterYear !== null ){
+            $query->andWhere('vp.year = :year')
+                ->setParameter('year', $filterYear)
+            ;
+        }
+        return $query->getQuery()->getResult();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// GET ENTITIES
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

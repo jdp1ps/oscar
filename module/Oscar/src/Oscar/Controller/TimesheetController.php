@@ -35,6 +35,7 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
+use Oscar\Utils\StringUtils;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Console\View\Renderer;
@@ -2718,10 +2719,16 @@ class TimesheetController extends AbstractOscarController
             }
         }
 
-        if ($this->isAjax()) {
+        if ($this->isAjax() || $this->params()->fromQuery('format') == 'json' ) {
             switch ($method) {
                 case 'GET' :
-                    $return = $this->getTimesheetService()->getDatasDeclarations();
+                    $person_ids = $this->params()->fromQuery('person_ids', '');
+                    if( $person_ids ){
+                        $filterPersons = StringUtils::intArray($person_ids);
+                    } else {
+                        $filterPersons = [];
+                    }
+                    $return = $this->getTimesheetService()->getDatasDeclarations($filterPersons);
                     // $return['validatorsEdit'] = true;
                     return $this->ajaxResponse($return);
 
