@@ -332,11 +332,22 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $types;
     }
 
+    public function getOrganizationTypesObject()
+    {
+        $options = [];
+
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
+        foreach ($types as $type) {
+            $options[$type->getId()] = $type;
+        }
+        return $options;
+    }
+
     public function getOrganizationTypesSelect()
     {
         $options = [];
 
-        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
         foreach ($types as $type) {
             $options[$type->getId()] = (string) $type;
         }
