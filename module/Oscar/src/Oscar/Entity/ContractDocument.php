@@ -121,6 +121,17 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
     /**
+     * Methode similaire à getGrant juste pour avoir un nom sémantique parlant
+     * Historique Grant lié à l'origine d'Oscar
+     *
+     * @return Activity
+     */
+    public function getActivity(): Activity
+    {
+        return $this->getGrant();
+    }
+
+    /**
      * @param Activity $grant
      */
     public function setGrant($grant)
