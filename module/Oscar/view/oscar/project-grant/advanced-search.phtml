@@ -175,6 +175,11 @@
                         value="<?= $id ?>"><?= $label ?></option>
                 <?php endforeach; ?>
             </select>
+            <select class="val2 changer">
+                <option value="0">Et ces sous-types</option>
+                <option value="1">Type seul</option>
+            </select>
+
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
@@ -699,7 +704,6 @@
                     };
 
                 var addcriterie = function (datas) {
-                    console.log("ADD", datas);
                     datas.typeLabel = (labelsType[datas.type]);
                     datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
 
@@ -859,6 +863,10 @@
 
                     if( datas.val2 ){
                         dom.find('.role').val(datas.val2);
+                    }
+
+                    if(datas.type == 'at'){
+                        dom.find('.val2').val(datas.val2);
                     }
 
                     if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {

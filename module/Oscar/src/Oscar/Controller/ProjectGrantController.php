@@ -221,8 +221,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'used_status' => $this->params()->fromQuery('st', []),
             'search' => $this->params()->fromQuery('q')
         ];
-
-
     }
 
     /**
@@ -1387,6 +1385,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Request $request */
         $request = $this->getRequest();
         if ($request->isPost()) {
+
             $validOrganizationForm = true;
 
             if ($withOrganization) {
@@ -1409,6 +1408,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $validOrganizationForm = true;
                     }
                 }
+
                 if (!$validOrganizationForm) {
                     $errorRoles = "Vous devez selectionner un rôle d'organisation";
                 }
@@ -1443,7 +1443,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
 
                 // Mise à jour de l'index de recherche
-                $this->getActivityService()->jobSearchUpdate($projectGrant);
+                try {
+                    $this->getActivityService()->jobSearchUpdate($projectGrant);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->error($e->getMessage());
+                }
 
                 $this->redirect()->toRoute(
                     'contract/show',
@@ -2830,14 +2834,23 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
 
                     case 'at' :
+
                         if (!isset($parameters['withtype'])) {
                             $parameters['withtype'] = [];
                             $qb->andWhere('c.activityType IN (:withtype)');
                         }
+
+                        if( $value2 == 1 ){
+                            $types = [$value1];
+                        } else {
+                            $types = $this->getActivityTypeService()->getTypeIdsInside($value1);
+                        }
+
                         $parameters['withtype'] = array_merge(
                             $parameters['withtype'],
-                            $this->getActivityTypeService()->getTypeIdsInside($value1)
+                            $types
                         );
+                        $result = $qb->setParameters($parameters)->getQuery()->getResult();
                         break;
                     case 'st' :
                         if (!isset($parameters['withouttype'])) {

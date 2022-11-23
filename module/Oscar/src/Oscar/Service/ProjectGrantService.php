@@ -2537,9 +2537,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $this->getEntityManager()->flush($organizationActivity);
 
 
-            $this->jobSearchUpdate($activity);
-            $this->getOrganizationService()->updateIndex($organization);
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            try {
+                $this->jobSearchUpdate($activity);
+                $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+                $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error("Soucis d'appel avec Gearman");
+            }
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(" a ajouté l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
