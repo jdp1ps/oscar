@@ -677,6 +677,16 @@ class Activity implements ResourceInterface
         }
         return $this->numbers;
     }
+    public function getNumbersValues()
+    {
+        $out = [];
+        if( $this->numbers ){
+            foreach ($this->numbers as $key=>$value) {
+                $out[] = $value;
+            }
+        }
+        return $out;
+    }
 
     /**
      * @param string $numbers

@@ -143,14 +143,14 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             $partners[] = (string)$organizationRolead->getOrganization();
         }
 
-        return [
+        $out = [
             'label' => $activity->getLabel(),
             'description' => $activity->getDescription(),
             'saic' => $activity->getCentaureId(),
             'numerotation' => $activity->getNumbers(),
             'oscar' => $activity->getOscarNum(),
             'activitytype' => $activity->getActivityType() ? (string)$activity->getActivityType() : '',
-            'numbers' => $activity->getNumbers(),
+            'numbers' => implode(" ", $activity->getNumbersValues()),
             'eotp' => $activity->getCodeEOTP(),
             'acronym' => $activity->getAcronym(),
             'activity_id' => $activity->getId(),
@@ -160,6 +160,8 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'project_id' => $project_id,
             'project' => $project_body,
         ];
+
+        return $out;
     }
 
     public function search($search)
