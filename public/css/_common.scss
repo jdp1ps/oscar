@@ -6602,4 +6602,29 @@ $weekHightlightColor: #80b7ec;
 ;
 }
 
+.val2-options {
+  opacity: 1;
+  position: relative;
+}
+
+.val2-options:hover .choose {
+  display: block;
+}
+
+.val2-options .choose {
+  display: none;
+}
+
+.val2-options .choose {
+  padding: 1em;
+  position: absolute;
+  z-index: 1000;
+}
+
+.hideval2-on {
+  .val2-options {
+    display: none;
+  }
+}
+@import "modules/oscar-autocompleter.scss";
 @import "vue-select.css";

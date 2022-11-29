@@ -402,13 +402,19 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
 
-    public function getActivityIdsByJalon($jalonTypeId)
+    public function getActivityIdsByJalon($jalonTypeId, $progression = null )
     {
         $q = $this->getActivityRepository()->createQueryBuilder('c')
             ->select('c.id')
             ->innerJoin('c.milestones', 'm')
-            ->where('m.type = :jalonId')
-            ->setParameter('jalonId', $jalonTypeId);
+            ->where('m.type = :jalonId');
+
+        if( is_array($progression) ){
+            $q->andWhere('m.finished IN(:progression)')
+                ->setParameter('progression', $progression);
+        }
+
+        $q->setParameter('jalonId', $jalonTypeId);
 
         $activities = $q->getQuery()->getResult();
         return array_map('current', $activities);

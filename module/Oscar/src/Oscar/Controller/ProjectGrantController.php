@@ -2452,6 +2452,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ];
             }
 
+            // Liste des états d'avancements
+
+
             // Trie
             $sortDirections = [
                 'desc' => 'Décroissant',
@@ -2899,7 +2902,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         break;
                     case 'aj':
-                        $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1']);
+                        $progressStr = $params[2];
+                        $progressArray = null;
+
+                        if( $progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined' ){
+                            $progressArray = explode(',', $progressStr);
+                            $crit['val1'] = $value1;
+                            $crit['val2'] = implode(',', $progressArray);
+                        } else {
+                            $crit['val2'] = '';
+                        }
+                        $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1'], $progressArray);
                         break;
                     case 'ds' :
                         $qb->andWhere('dis.id = :discipline');

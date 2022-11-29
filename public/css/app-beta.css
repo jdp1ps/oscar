@@ -12707,4 +12707,61 @@ article.wp h3 {
   font-size: 0.8em;
 }
 
+.val2-options {
+  opacity: 1;
+  position: relative;
+}
+
+.val2-options:hover .choose {
+  display: block;
+}
+
+.val2-options .choose {
+  display: none;
+}
+
+.val2-options .choose {
+  padding: 1em;
+  position: absolute;
+  z-index: 1000;
+}
+
+.hideval2-on .val2-options {
+  display: none;
+}
+
+.result-item {
+  border-bottom: thin solid #999999;
+}
+.result-item code, .result-item span, .result-item strong, .result-item em {
+  margin: 0 0.25em;
+}
+.result-item code {
+  background: #ceedff;
+  padding: 2px;
+  font-size: 0.8em;
+  line-height: inherit;
+  border-radius: 4px;
+}
+.result-item .location, .result-item .infos {
+  font-size: 0.7em;
+  font-weight: 200;
+}
+.result-item h4 {
+  color: #111 !important;
+}
+.result-item:hover code {
+  color: black;
+}
+.result-item.organization-closed {
+  border-left: solid 4px red;
+}
+.result-item.organization-closed div {
+  opacity: 0.5;
+}
+.result-item.organization-closed h4 {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
 /*# sourceMappingURL=app-beta.css.map */
