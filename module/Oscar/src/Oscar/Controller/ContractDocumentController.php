@@ -215,8 +215,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * Modification document (onglets, TYPE, privé/oui/non ...)
      *
      * @return JsonModel
-     * @throws ORMException
-     * @throws OptimisticLockException
      * @throws OscarException|\HttpException
      */
     public function changeTypeAction(): JsonModel
@@ -235,7 +233,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             if( !$type ){
                 $this->getResponseBadRequest("Type de document invalide");
             }
-            // Privé ou non traitements métiers
+            // Privé ou non traitements métiers souhaité
             $privateDocument = $request->getPost('private');
             // Si Document non privée
             // Suppression persons éventuelles et affectation à un onglet (vérifier si cet onglet existe comme type).
@@ -246,12 +244,17 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 }
                 $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($request->getPost('tabDocument'));
                 if( !$tabDocument ){
+                     // TODO attention pas spécialement accroché si branchement SPARTAN par exemple nouvelle feature
                     $this->getResponseBadRequest("Onglet de document invalide");
                 }
                 $document->setTabDocument($tabDocument);
 
             }else{
                 // Cas Document privé
+                // Récup état initial du tabDocument du document
+                $initTabDocument = $document->getTabDocument();
+                $initPrivate = $document->isPrivate();
+
                 $document->setPrivate(true);
                 $document->setTabDocument(null);
                 if (trim($request->getPost('persons')) !== "") {
@@ -270,13 +273,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     $document->addPerson($this->getCurrentPerson());
                 }
                 // TODO Manage documents associés et déplacement physiquement dans les répertoire des documents
-                $succesManageDocuments = $this->manageDocsInTab(true, $document);
+                $succesManageDocuments = $this->manageDocsInTab(true, $document, $initTabDocument, $initPrivate);
                 if (false === $succesManageDocuments){
                     $this->getResponseBadRequest("La gestion des documents associés a échouée !");
                 }
             }
             $document->setTypeDocument($type);
-            $this->getEntityManager()->flush();
+            //$this->getEntityManager()->flush();
 
             return new JsonModel(['response' => 'ok']);
         }
@@ -290,19 +293,22 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      *
      * @param bool $docToPrivate
      * @param ContractDocument $document
+     * @param mixed $initTabDocument
+     * @param bool $initPrivate
      * @return bool
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws OscarException
      */
-    private function manageDocsInTab(bool $docToPrivate, ContractDocument $document):bool{
+    private function manageDocsInTab(bool $docToPrivate, ContractDocument $document,  $initTabDocument, bool $initPrivate):bool{
         $isSuccess = false;
         $activity = $document->getActivity();
 
-        // 1 : Récupérer le statut du doc (tabId du document s'il était dans un contexte d'un onglet ou déjà tagué isPrivate true)
-        $docStatusIsPrivate = $document->isPrivate();
+        // 1 : Statut du doc (tabId du document s'il était dans un contexte d'un onglet ou déjà tagué isPrivate true)
+        $docStatusIsPrivate = $initPrivate;
+        $valueInitTabDocument = (!is_null($initTabDocument)?$initTabDocument:null);
 
         $em = $this->getEntityManager()->getRepository(ContractDocument::class);
         $documents = $em->createQueryBuilder('d')->select('d');
+        // Params de requete de base
         $paramsQuery = [
             'fileName' => $document->getFileName(),
             'grant' => $activity,
@@ -317,7 +323,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 AND d.private = :private'
                 );
         }else{
-            if(!is_null($document->getTabDocument())){
+            if(!is_null($valueInitTabDocument)){
                 $paramsQuery ['tabDocument'] = $document->getTabDocument();
                 $documents ->where(
                     'd.fileName = :fileName 
@@ -325,6 +331,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     AND d.tabDocument = :tabDocument'
                 );
             }else{
+                // Document version antérieur feature onglets de documents (non classés)
                 $paramsQuery ['private'] = false;
                 $documents ->where(
                     'd.fileName = :fileName 
@@ -333,19 +340,26 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 );
             }
         }
-        // 3 : Document récupérer selon le statut et le nom
+        // 3 : Documents récupérés selon le statut et le nom, contexte
         $results = $documents->setParameters($paramsQuery)->getQuery()->getResult();
 
         // 4 : Mettre à jour les datas des documents et les changer de répertoire
         // TODO mettre a jour les datas et bouger les documents dans le répertoire dédié
+        // Config répertoire des documents
+        $pathsConfig = $this->getOscarConfigurationService()->getConfiguration("paths");
+        $pathDocumentsConfig = $pathsConfig["document_oscar"];
         /** @var ContractDocument $doc */
         foreach( $results as $doc ){
             // Souhait de passer ce doc en mode privé
             // Attention ne pas oublier d'affecter personnes et la personne en cours qui fait la modif
             if (true === $docToPrivate){
-                $tabId = $document->getTabDocument()->getId();
-                if(!is_null($tabId)){
-                    // TODO
+                $tabDocument = $doc->getTabDocument();
+                if(!is_null($tabDocument)){
+                    $pathSource = $pathDocumentsConfig.'tab_'.$tabDocument->getId().'/'.$doc->getPath();
+                    $pathDestination = $pathDocumentsConfig.'private/'.$doc->getPath();
+                    dump($pathSource);
+                    dd($pathDestination);
+                    //rename( realpath(__DIR__) . '/../../data/documents/activity/tab_'.$tabDocument->getId().'/'.$doc->getPath(), realpath(__DIR__) . '/../../data/documents/activity/private/'.$doc->getPath());
                     // Déplacer document de l'endroit tab actuel vers rep "private"
                 }else{
                     // TODO
@@ -355,10 +369,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $doc->setPrivate(true);
                 $doc->setTabDocument(null);
 
+            }else{
+                // TODO passage en non privé donc passage sur un tabDocument
             }
         }
 
-        $this->getEntityManager()->flush();
+        //$this->getEntityManager()->flush();
         $this->getActivityLogService()->addUserInfo(
             sprintf("a modifié le document '%s' dans l'activité %s.", $document, $document->getGrant()->log()),
             'Activity',
