@@ -225,7 +225,7 @@ class ContractDocument extends AbstractVersionnedDocument
      * @param ?TabDocument $tabDocument
      * @return $this
      */
-    public function setTabDocument(?TabDocument $tabDocument):self
+    public function setTabDocument(?TabDocument $tabDocument): self
     {
         $this->tabDocument = $tabDocument;
         return $this;
@@ -236,14 +236,14 @@ class ContractDocument extends AbstractVersionnedDocument
      */
     public function isPrivate(): bool
     {
-        return ($this->private === null)?false:$this->private;
+        return (is_null($this->private)) ? false : $this->private;
     }
 
     /**
      * @param bool|null $private
      * @return $this
      */
-    public function setPrivate(?bool $private):self
+    public function setPrivate(?bool $private): self
     {
         $this->private = $private;
         return $this;
@@ -288,57 +288,58 @@ class ContractDocument extends AbstractVersionnedDocument
      * @param $options
      * @return array
      */
-    public function toJson( $options=false ){
+    public function toJson($options = false)
+    {
         $defaultOptions = [
-            'urlDelete' => false,
+            'urlDelete'   => false,
             'urlDownload' => false,
             'urlReupload' => false,
-            'urlPerson' => false,
+            'urlPerson'   => false,
         ];
-        if( !$options ){
+        if (!$options) {
             $options = $defaultOptions;
-        }
-        else {
-            foreach( $defaultOptions as $key=>$value ){
-                if( !key_exists($key, $options) ){
+        } else {
+            foreach ($defaultOptions as $key => $value) {
+                if (!key_exists($key, $options)) {
                     $options[$key] = $defaultOptions[$key];
                 }
             }
         }
 
         return [
-            'id' => $this->getId(),
-            'version' => $this->getVersion(),
+            'id'          => $this->getId(),
+            'version'     => $this->getVersion(),
             'information' => $this->getInformation(),
-            'fileName' => $this->getFileName(),
-            'basename' => preg_replace('/(.*)(\.[\w]*)/','$1', $this->getFileName()),
-            'fileSize' => $this->getFileSize(),
-            'typeMime' => $this->getFileTypeMime(),
-            'dateUpload' => $this->getDateUpdoad()->format('Y-m-d H:i:s'),
+            'fileName'    => $this->getFileName(),
+            'basename'    => preg_replace('/(.*)(\.[\w]*)/', '$1', $this->getFileName()),
+            'fileSize'    => $this->getFileSize(),
+            'typeMime'    => $this->getFileTypeMime(),
+            'dateUpload'  => $this->getDateUpdoad()->format('Y-m-d H:i:s'),
             'dateDeposit' => $this->getDateDeposit() ? $this->getDateDeposit()->format('Y-m-d') : null,
-            'dateSend' => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
-            'extension' => $this->getExtension(),
-            'category' => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
+            'dateSend'    => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
+            'extension'   => $this->getExtension(),
+            'category'    => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
             'tabDocument' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
-            'private' => $this->isPrivate(),
-            'persons' => $this->personsToJson(),
-            'urlDelete' => $options['urlDelete'],
+            'private'     => $this->isPrivate(),
+            'persons'     => $this->personsToJson(),
+            'urlDelete'   => $options['urlDelete'],
             'urlDownload' => $options['urlDownload'],
             'urlReupload' => $options['urlReupload'],
-            'uploader' => $this->getPerson() ? $this->getPerson()->toJson(['urlPerson' => $options['urlPerson']]) : null,
+            'uploader'    => $this->getPerson() ? $this->getPerson()->toJson(['urlPerson' => $options['urlPerson']]) : null,
         ];
     }
 
     /**
      * @return array
      */
-    private function personsToJson(){
+    private function personsToJson()
+    {
         $personsJson = [];
         /* @var Person $person */
-        foreach ($this->getPersons() as $key => $person){
+        foreach ($this->getPersons() as $key => $person) {
             $entityPerson = [];
-            $entityPerson ["personId"]  = $person->getId();
-            $entityPerson ["personName"]  = $person->getFullname();
+            $entityPerson ["personId"] = $person->getId();
+            $entityPerson ["personName"] = $person->getFullname();
             $entityPerson ["affectation"] = $person->getLdapAffectation() ? $person->getLdapAffectation() : "";
             $personsJson [] = $entityPerson;
         }
@@ -382,6 +383,6 @@ class ContractDocument extends AbstractVersionnedDocument
     ////////////////////////////////////////////////////////////////////////////
     function __toString()
     {
-        return "" . ($this->getFileName()?:"sans-nom");
+        return "" . ($this->getFileName() ?: "sans-nom");
     }
 }
