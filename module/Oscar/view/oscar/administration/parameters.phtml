@@ -132,6 +132,27 @@
             </article>
 
             <article class="card">
+                <h3><i class="icon-eye"></i>Type d'activités sélectionnable</h3>
+                <p class="help-message">
+                    <i class="icon-help-circled"></i>
+                    Cette permet de limiter ou pas la selection des types d'activités
+                </p>
+
+                <form action="" method="post" class="form">
+                    <label for="<?= \Oscar\Service\OscarConfigurationService::allow_node_selection ?>">Selection de tous les types</label>
+
+                    <div>
+                        <input name="parameter_name" type="hidden" id="<?= \Oscar\Service\OscarConfigurationService::allow_node_selection ?>"
+                               value="<?= \Oscar\Service\OscarConfigurationService::allow_node_selection ?>"/>
+                        <input name="parameter_value"
+                               type="checkbox" <?= $allow_node_selection ? ' checked' : "" ?> />
+                    </div>
+
+                    <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+                </form>
+            </article>
+
+            <article class="card">
                 <h3><i class="icon-"></i>Format du PFI</h3>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>

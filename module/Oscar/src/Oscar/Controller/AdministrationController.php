@@ -266,7 +266,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'roleOrganizationPrincipal' => $rolesOrganisationPrincipal
         ];
 
-        if( $this->isAjax() && $this->params()->fromQuery('a') == 'verifypfi' ){
+        if ($this->isAjax() && $this->params()->fromQuery('a') == 'verifypfi') {
             $regex = $this->params()->fromQuery('reg');
             $pfis = $this->getProjectGrantService()->checkPFIRegex($regex);
             return $this->ajaxResponse(['pfi' => $pfis]);
@@ -275,6 +275,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if ($this->getHttpXMethod() == "POST") {
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
+                case OscarConfigurationService::allow_node_selection:
+                    $value = $this->params()->fromPost('parameter_value') == "on";
+                    $this->getOscarConfigurationService()->setAllowNodeSelection($value);
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 case OscarConfigurationService::allow_numerotation_custom:
                     $value = $this->params()->fromPost('parameter_value') == "on";
                     $this->getOscarConfigurationService()->setNumerotationEditable($value);
@@ -324,15 +329,18 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                 case OscarConfigurationService::pfi_strict:
                     $strict = $this->params()->fromPost(OscarConfigurationService::pfi_strict) == "on";
-                    var_dump($strict);
-                    die();
                     $regex = $this->params()->fromPost(OscarConfigurationService::pfi_strict_format);
-                    if( $strict == true && !$regex ){
-                        throw new OscarException("Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide");
+                    if ($strict == true && !$regex) {
+                        throw new OscarException(
+                            "Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide"
+                        );
                     } else {
                         // Contrôler la regex
                         $this->getOscarConfigurationService()->setStrict($strict);
-                        $this->getOscarConfigurationService()->saveEditableConfKey(OscarConfigurationService::pfi_strict_format, $regex);
+                        $this->getOscarConfigurationService()->saveEditableConfKey(
+                            OscarConfigurationService::pfi_strict_format,
+                            $regex
+                        );
                     }
                     return $this->redirect()->toRoute('administration/parameters');
 
@@ -360,10 +368,12 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
             ],
             'organization_leader_role' => $organization_leader_role,
-            OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService()->getDocumentUseVersionInName(),
+            OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService(
+            )->getDocumentUseVersionInName(),
             OscarConfigurationService::pfi_strict => $this->getOscarConfigurationService()->isPfiStrict(),
             OscarConfigurationService::pfi_strict_format => $pfiFixed,
-           "pfi_default_format" => $this->getOscarConfigurationService()->getConfiguration('validation.pfi'),
+            "pfi_default_format" => $this->getOscarConfigurationService()->getConfiguration('validation.pfi'),
+            "allow_node_selection" => $this->getOscarConfigurationService()->isAllowNodeSelection(),
         ];
     }
 
@@ -1278,25 +1288,22 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
 
             if ($this->getHttpXMethod() == 'PUT') {
-
-
-
                 try {
                     // Données du rôle à modifier
-                    $id = (int) $request->getPost('id');
+                    $id = (int)$request->getPost('id');
                     $label = trim($request->getPost('label'));
                     $description = trim($request->getPost('description'));
                     $principal = $request->getPost('principal') == "true";
                     $this->getLoggerService()->info("Modification du rôle d'organization $label");
 
-                    if( $label == "" ){
+                    if ($label == "") {
                         throw new OscarException("Vous devez renseigner un intitulé");
                     }
 
                     $roleObjEdited = $this->getOscarUserContextService()->getOrganizationRoleById($id, true);
                     $exist = $this->getOscarUserContextService()->getOrganizationRoleByRoleId($label);
 
-                    if( $exist && $exist->getId() != $roleObjEdited->getId() ){
+                    if ($exist && $exist->getId() != $roleObjEdited->getId()) {
                         throw new OscarException("Un autre rôle d'organisation porte déjà cet intitulé : '$label'");
                     }
 
@@ -1307,7 +1314,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $this->getEntityManager()->flush();
 
                     return $this->ajaxResponse($roleObjEdited->toArray());
-
                 } catch (\Exception $e) {
                     return $this->getResponseInternalError("Impossible de modifier le rôle : " . $e->getMessage());
                 }
@@ -1416,6 +1422,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'validatorsRelanceJour1' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour1(),
             'validatorsRelance2' => $this->getOscarConfigurationService()->getValidatorsRelance2(),
             'validatorsRelanceJour2' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
+            'highdelayRelance' => $this->getOscarConfigurationService()->getHighDelayRelance(),
+            'highdelayRelanceJour' => $this->getOscarConfigurationService()->getHighDelayRelanceJour(),
         ];
 
         switch ($method) {
@@ -1433,6 +1441,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $validatorsRelanceJour2 = (int)$this->params()->fromPost('validatorsRelanceJour2');
                 $declarersRelanceConflitMessage = $this->params()->fromPost('declarersRelanceConflitMessage');
                 $declarersRelanceConflitJour = (int)$this->params()->fromPost('declarersRelanceConflitJour');
+                $highdelayRelance = $this->params()->fromPost('highdelayRelance');
+                $highdelayRelanceJour = intval($this->params()->fromPost('highdelayRelanceJour'));
 
                 $this->getOscarConfigurationService()->setDeclarersRelance1($declarersRelance1);
                 $this->getOscarConfigurationService()->setDeclarersRelanceJour1($declarersRelanceJour1);
@@ -1446,6 +1456,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $declarersRelanceConflitMessage
                 );
                 $this->getOscarConfigurationService()->setDeclarersRelanceConflitJour($declarersRelanceConflitJour);
+                $this->getOscarConfigurationService()->setHighDelayRelance($highdelayRelance);
+                $this->getOscarConfigurationService()->setHighDelayRelanceJour($highdelayRelanceJour);
 
                 return $this->redirect()->toRoute('administration/messages');
         }
@@ -1512,7 +1524,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_PARAMETERS_MANAGE);
 
         if ($this->isAjax()) {
-
             $partnerRoles = $this->getProjectGrantService()->getOrganizationService()
                 ->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_FLAT);
 
@@ -1580,16 +1591,15 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $data['pcru_incharge_role'] = $inchargeRolePosted;
                 $data['pcru_contract_type'] = $contractType;
 
-                $this->getLoggerService()->info("Enregistrement de la configuration PCRU" );
+                $this->getLoggerService()->info("Enregistrement de la configuration PCRU");
 
                 foreach ($data as $key => $value) {
+                    // $this->getLoggerService()->debug(" - $key : $value" );
                     $this->getOscarConfigurationService()->saveEditableConfKey($key, $value);
                 }
                 $this->getResponseOk("Informations PCRU modifiées");
             }
         }
-
-
         return [];
     }
 
@@ -1625,6 +1635,4 @@ class AdministrationController extends AbstractOscarController implements UsePro
             'datas' => $this->getProjectGrantService()->getPcruSourceFinancement()
         ];
     }
-
-
 }

@@ -49,6 +49,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Zend\Mvc\Controller\Plugin\Url;
 
 /**
  * Gestion des Personnes :
@@ -144,10 +145,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $what
      * @return Person[]
      */
-    public function search($what)
+    public function search($what) :array
     {
-        $ids = $this->getSearchEngineStrategy()->search($what);
-        return $this->getPersonRepository()->getPersonsByIds($ids);
+        return $this->getPersonRepository()->getPersonsByIds($this->searchIds($what));
+    }
+
+    const SEARCH_ID_PATTERN = '/id:(([0-9]+,?)*)/';
+
+    public function searchIds($what) :array {
+        if( preg_match_all(self::SEARCH_ID_PATTERN, $what, $matches, PREG_SET_ORDER, 0) ){
+            $idsStr = $matches[0][1];
+            if($idsStr){
+                return explode(',', $idsStr);
+            }
+        }
+        return $this->getSearchEngineStrategy()->search($what);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -578,7 +590,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         $output['referents'] = [];
         $output['subordinates'] = [];
-        
+
         foreach ($referents as $referent) {
             if ($replacer && $referent->getReferent()->getId() == $replacer->getId()) {
                 continue;
@@ -903,7 +915,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function removeReferentOnPerson(Person $referent, Person $on)
     {
-       $this->removeAddReferent($on->getId(), null, $referent->getId());
+        $this->removeAddReferent($on->getId(), null, $referent->getId());
     }
 
 
@@ -1080,7 +1092,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * activité. (Beaucoup de requêtes, attention ux perfs)
      *
      * @param $privilegeFullCode
-     * @param $activity
+     * @param Activity $activity
+     * @param bool $includeApp
+     * @return array
+     * @throws OscarException
      */
     public function getAllPersonsWithPrivilegeInActivity($privilegeFullCode, Activity $activity, $includeApp = false)
     {
@@ -1174,6 +1189,297 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         } catch (\Exception $e) {
             throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
         }
+    }
+
+
+    /**
+     * Charge en profondeur la liste des personnes sur une
+     * activité (structure, projet). (Beaucoup de requêtes, attention aux perfs)
+     * Retourne un tableau de tableaux id activité -> array ids roles -> arrayIdsPersons
+     *
+     * @param Activity $activity
+     * @return array
+     * @throws OscarException
+     */
+    public function getAllPersonsWithRolesInActivity(Activity $activity): array
+    {
+        //Résultat
+        $persons = [];
+        try {
+            // Selection des personnes associées via le Projet/Activité
+            /** @var ActivityPerson $p */
+            foreach ($activity->getPersonsDeep() as $p) {
+                $persons[$p->getRoleObj()->getId()] [] = $p->getPerson()->getId();
+            }
+            // Selection des personnes via l'organisation associée au Projet/Activité
+            /** @var ActivityOrganization $organization */
+            foreach ($activity->getOrganizationsDeep() as $organization) {
+                if ($organization->isPrincipal()) {
+                    /** @var OrganizationPerson $personOrganization */
+                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
+                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
+                        )->getId();
+                    }
+                }
+            }
+            return $persons;
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de trouver les personnes : " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Retourne la liste des validateurs EFFECTIFS impliqués dans la validation des heures du déclarant pour la
+     * période.
+     *
+     * @param int $delcarerId
+     * @param string $periodCod
+     * @return array
+     */
+    public function getValidatorsIdsPersonPeriod(int $declarerId, string $periodCode): array
+    {
+        $output = [];
+        $validations = $this->getTimesheetService()->getValidationsPeriodPersonAt($declarerId, $periodCode);
+        /** @var ValidationPeriod $validation */
+        foreach ($validations as $validation) {
+            /** @var Person $validator */
+            foreach ($validation->getCurrentValidators() as $validator) {
+                $output[$validator->getId()] = [
+                    'id' => $validator->getId(),
+                    'fullname' => $validator->getFullname(),
+                    'email' => $validator->getEmail(),
+                    'current' =>"foo"
+                ];
+            }
+        }
+        return $output;
+    }
+
+    /**
+     * Retourne la liste des déclarants impliqués dans des retards pour une période (périodes précédentes inclues).
+     * Les données tiennent compte des retards de validation et propose des données de synthèse sur les retards.
+     *
+     * @param string $period (YYYY-MM)
+     * @param Url $urlHelper Plugin pour générer les URL (optionnel)
+     * @param bool $includeNonActive Inclus les données des activités autres que le status ACTIVE(101)
+     *
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getPersonsHighDelay(string $period, ?Url $urlHelper = null, bool $includeNonActive = false)
+    {
+        // Liste des déclarants
+        $declarers = $this->getDeclarersIdsBeforePeriod($period, $includeNonActive);
+
+        $output = [];
+
+        foreach ($declarers as $personId => $infos) {
+            /** @var Person $person */
+            $person = $infos['person'];
+
+            $personName = (string)$person;
+            $personId = $person->getId();
+            $personEmail = $person->getEmail();
+            $personPeriods = $this->getTimesheetService()->getPeriodsPerson($person, true, $includeNonActive);
+            $repport = $this->getHighDelayForPerson($personId, $includeNonActive);
+            $validatorsPerson = [];
+            $validatorsOthers = [];
+            $personActivities = [];
+
+            $validatorsOthersPerson = $this->getReferentsPerson($personId);
+
+            /** @var Referent $v */
+            foreach ($validatorsOthersPerson as $v) {
+                $validatorsOthers[$v->getReferent()->getId()] = [
+                    'fullname' => $v->getReferent()->getFullname(),
+                    'email' => $v->getReferent()->getEmail()
+                ];
+            }
+
+            $periods = [];
+
+            $urlShow = false;
+            if ($urlHelper) {
+                $urlShow = $urlHelper->fromRoute('person/show', ['id' => $personId]);
+            }
+
+            $output[$personId] = [
+                'person_id' => $personId,
+                'fullname' => $personName,
+                'emailmd5' => $person->getMd5Email(),
+                'url_show' => $urlShow,
+                'email' => $personEmail,
+                'np1' => $validatorsOthers,
+                'total_periods' => count($personPeriods),
+                'total_declarations' => count($repport),
+                'valid' => false,
+                'send' => true,
+                'notif' => true,
+                'require_alert_declarer' => count($repport) < count($personPeriods),
+                'require_alert_validator' => false,
+                'periods' => [],
+                'infos' => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
+            ];
+
+            foreach ($personPeriods as $pp => $periodDetails) {
+
+                if ($pp >= $period) {
+                    continue;
+                }
+
+                $send = (array_key_exists($pp, $repport) && $repport[$pp]['send']);
+                $valid = array_key_exists($pp, $repport) && $repport[$pp]['valid'] ? true : false;
+                $step = array_key_exists($pp, $repport) ? $repport[$pp]['step'] : 0;
+                $validators = [];
+
+                foreach ($periodDetails['activities'] as $activityInfos) {
+                    $activityId = $activityInfos['id'];
+
+                    if (!array_key_exists('url_timesheet', $activityInfos) && $urlHelper) {
+                        $activityInfos['url_timesheet'] = $urlHelper->fromRoute(
+                            'contract/timesheet',
+                            ['id' => $activityId]
+                        );
+                    }
+
+                    if (!array_key_exists($activityId, $personActivities)) {
+                        $personActivities[$activityId] = $activityInfos;
+                        $activityValidators = [
+                            'prj' => [],
+                            'sci' => [],
+                            'adm' => [],
+                        ];
+
+                        $activity = $this->getProjectGrantService()->getActivityById($activityId);
+
+                        foreach ($activity->getValidatorsPrj() as $val) {
+                            $activityValidators['prj'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
+                        }
+                        foreach ($activity->getValidatorsSci() as $val) {
+                            $activityValidators['sci'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
+                        }
+                        foreach ($activity->getValidatorsAdm() as $val) {
+                            $activityValidators['adm'][$val->getId()] = [
+                                'fullname' => (string)$val,
+                                'email' => $val->getEmail()
+                            ];
+                        }
+                        $personActivities[$activityId]['validators'] = $activityValidators;
+                    }
+                }
+
+                if ($send === false) {
+                    $output[$personId]['send'] = false;
+                } else {
+                    $validators = $this->getValidatorsIdsPersonPeriod($personId, $pp);
+                    foreach ($validators as $idValidator => $validatorFullName) {
+                        $validatorsPerson[$idValidator] = $validatorFullName;
+                    }
+                }
+
+                if ($send === false) {
+                    $output[$personId]['send'] = false;
+                }
+
+                if ($send === true && $valid === false) {
+                    $output[$personId]['require_alert_validator'] = true;
+                }
+
+                // état de la période
+                $value = null;
+                $periodInfos = [
+                    'valid' => false,
+                    'valid_prj' => false,
+                    'valid_sci' => false,
+                    'valid_adm' => false,
+                    'send' => false,
+                    'conflict' => false,
+                    'step' => $step,
+                    'validators' => $validators,
+                    'activities' => $periodDetails['activities']
+                ];
+                if (array_key_exists($pp, $repport)) {
+                    $periodInfos['valid'] = $repport[$pp]['valid'];
+                    $periodInfos['valid_prj'] = $repport[$pp]['valid_prj'];
+                    $periodInfos['valid_sci'] = $repport[$pp]['valid_sci'];
+                    $periodInfos['valid_adm'] = $repport[$pp]['valid_adm'];
+                    $periodInfos['send'] = $repport[$pp]['send'];
+                    $periodInfos['conflict'] = $repport[$pp]['reject'];
+                }
+
+                if ($valid == false) {
+                    $output[$personId]['infos'] = "Il y'a des déclarations non-terminée";
+                    $output[$personId]['valid'] = false;
+                }
+                $periods[$pp] = $periodInfos;
+
+                $output[$personId]['periods'] = $periods;
+                $output[$personId]['activities'] = $personActivities;
+            }
+
+            $output[$personId]['periods'] = $periods;
+            $output[$personId]['validators'] = $validatorsPerson;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Retourne le détails des informations sur les retards importants de déclaration pour une personne.
+     *
+     * @param int $personId
+     * @param bool $includeNonActive (Inclus des activités inactives)
+     * @return array
+     */
+    public function getHighDelayForPerson(int $personId, bool $includeNonActive = false)
+    {
+        $highdelays = $this->getPersonRepository()->getRepportDeclarationPerson($personId, $includeNonActive);
+        $output = [];
+        foreach ($highdelays as $highdelay) {
+            $period = $highdelay['period'];
+            $nbr = $highdelay['nbr'];
+            $prj = $highdelay['prj'];
+            $sci = $highdelay['sci'];
+            $adm = $highdelay['adm'];
+
+            $step = 0;
+            if ($prj == $nbr) {
+                $step = 1;
+            }
+            if ($sci == $nbr) {
+                $step = 2;
+            }
+            if ($adm == $nbr) {
+                $step = 3;
+            }
+
+            $valid = ($prj + $sci + $adm) == ($nbr * 3);
+            $send = $nbr > 0;
+            $rejprj = $highdelay['rejprj'];
+            $rejsci = $highdelay['rejsci'];
+            $rejadm = $highdelay['rejadm'];
+            $reject = ($rejprj + $rejsci + $rejadm) > 0;
+
+            // TODO Ajouter la détection des conflits
+            $output[$highdelay['period']] = [
+                'period' => $period,
+                'valid' => $valid,
+                'send' => $send,
+                'reject' => $reject,
+                'valid_prj' => $prj == $nbr,
+                'valid_sci' => $sci == $nbr,
+                'valid_adm' => $adm == $nbr,
+                'step' => $step
+            ];
+        }
+        return $output;
     }
 
 
@@ -1522,6 +1828,26 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         return $this->getPersonRepository()->getIdsDeclarers($periodStr, $periodStr);
     }
 
+
+    /**
+     * Liste des déclarants pour la période.
+     *
+     * @param string $periodStr
+     * @return int[]
+     */
+    public function getDeclarersIdsBeforePeriod(string $periodStr, bool $includeNonActive = false): array
+    {
+        $ids = $this->getPersonRepository()->getIdsDeclarersBeforePeriod($periodStr, $includeNonActive);
+        $output = [];
+        foreach ($ids as $id) {
+            $output[$id] = [
+                'person' => $this->getPersonById($id),
+                'periods' => []
+            ];
+        }
+        return $output;
+    }
+
     /**
      * Retourne la liste des identifiants des personnes référentes (N+1 - Ils assurent la validation administrative d'une
      * ou plusieurs personnes).
@@ -1589,45 +1915,57 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $query->addOrderBy('p.' . $filters['order_by'], 'ASC');
         }
 
+//        if( preg_match('/id:([0-9]*)/m', $search, $matches) ){
+//            $id = $matches[1];
+//            $ids = [
+//                $this->getPerson($id)->getId()
+//            ];
+//            if (array_key_exists('ids', $filters)) {
+//                $filters['ids'] = array_intersect($filters['ids'], $ids);
+//            } else {
+//                $filters['ids'] = $ids;
+//            }
+//        }
+
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
-        if (preg_match('/(([a-z]*):(.*))/', $search, $matches)) {
-            $connector = $matches[2];
-            $connectorValue = $matches[3];
-            try {
-                $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery(
-                    $connector,
-                    $connectorValue
-                );
-            } catch (\Exception $e) {
-                $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
-                throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
+        if( $search != "" ){
+            // Recherche via les IDS
+            if( preg_match_all(self::SEARCH_ID_PATTERN, $search, $matches, PREG_SET_ORDER, 0) ){
+                //
             }
-        } // RECHERCHE sur le nom/prenom/email
-        else {
-            if ($search != "") {
+            // Recherche via le connecteur
+            elseif (preg_match('/(([a-z]*):(\w*))/', $search, $matches) ){
+                $connector = $matches[2];
+                $connectorValue = $matches[3];
                 try {
-                    $ids = $this->getSearchEngineStrategy()->search($search);
-
-                    if (array_key_exists('ids', $filters)) {
-                        $filters['ids'] = array_intersect($filters['ids'], $ids);
-                    } else {
-                        $filters['ids'] = $ids;
-                    }
-                } catch (\Exception $e) {
-                    die("what ??? " . $e->getMessage());
-                    $this->getLoggerService()->error(
-                        sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
+                    $query = $this->getEntityManager()->getRepository(Person::class)->getPersonByConnectorQuery(
+                        $connector,
+                        $connectorValue
                     );
-                    // Ancienne méthode
-                    $searchR = str_replace('*', '%', $search);
-                    $query->where(
-                        'lower(p.firstname) LIKE :search OR lower(p.lastname) LIKE :search OR lower(p.email) LIKE :search OR LOWER(CONCAT(CONCAT(p.firstname, \' \'), p.lastname)) LIKE :search OR LOWER(CONCAT(CONCAT(p.lastname, \' \'), p.firstname)) LIKE :search'
-                    )
-                        ->setParameter('search', '%' . strtolower($searchR) . '%');
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->error("Requête sur le connecteur : " . $e->getMessage());
+                    throw new OscarException("Impossible d'obtenir les personnes via l'UI de connector");
                 }
             }
+
+            try {
+                $ids = $this->searchIds($search);
+
+
+                if (array_key_exists('ids', $filters)) {
+                    $filters['ids'] = array_intersect($filters['ids'], $ids);
+                } else {
+                    $filters['ids'] = $ids;
+                }
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error(
+                    sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
+                );
+                throw new OscarException("Méthode de recherche des personnes non-disponible : %s", $e->getMessage());
+            }
         }
+
 
         // FILTRE : Application des filtres sur les rôles
         if (isset($filters['filter_roles']) && count($filters['filter_roles']) > 0) {
@@ -1829,7 +2167,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param string $format
      * @return array
      */
-    public function getAvailableRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT) :array
+    public function getAvailableRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT): array
     {
         return $this->getEntityManager()->getRepository(Role::class)->getRolesAtActivityArray($format);
     }

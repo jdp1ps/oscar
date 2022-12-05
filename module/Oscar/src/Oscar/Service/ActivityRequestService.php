@@ -127,6 +127,18 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
         throw new OscarException("L'enregistrement des demandes d'activité n'est pas encore implanté.");
     }
 
+    /**
+     * Validation d'une demande d'activité.
+     *
+     * @param ActivityRequest $activityRequest
+     * @param Person $validator
+     * @param null $personsDatas
+     * @param null $organisationDatas
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function valid( ActivityRequest $activityRequest, Person $validator, $personsDatas = null, $organisationDatas = null ){
 
         // Test du status
@@ -151,6 +163,8 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
             ->setAmount($activityRequest->getAmount())
             ->setDateStart($activityRequest->getDateStart())
             ->setDateEnd($activityRequest->getDateEnd())
+            ->setPcruPoleCompetitivite(null)
+            ->setPcruValidPoleCompetitivite(false)
             ->setCurrency($currency);
 
         $person = $this->getPersonService()->getPersonById($activityRequest->getCreatedBy()->getId(), true);
@@ -208,7 +222,7 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
         $this->getEntityManager()->flush();
 
         // Mise à jour de l'index de recherche
-        $activityService->searchUpdate($activity);
+        $activityService->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
 
         // Ajout du Follow
         $follow = new ActivityRequestFollow();

@@ -39,7 +39,7 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
         // Fix CURL error curl: (18) transfer closed with 141 bytes remaining to read
-        curl_setopt($curl, CURLOPT_IGNORE_CONTENT_LENGTH, true);
+        //curl_setopt($curl, CURLOPT_IGNORE_CONTENT_LENGTH, true);
 
         $return = curl_exec($curl);
 

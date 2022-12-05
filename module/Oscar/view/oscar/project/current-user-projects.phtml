@@ -27,10 +27,12 @@
 
             new Vue({
                 render: function (h) {
-                    return h(ActivitySearchUi.default, {
+                    return h(ActivitySearchUi, {
                         props: {
                             url: '<?= $this->url('contract/api') ?>',
                             first: true,
+                            search: <?= json_encode($q) ?>,
+                            showCriteria: false,
                             title: '<?= $this->translate("Mes activités de recherche") ?>'
                         }
                     })

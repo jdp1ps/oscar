@@ -13,15 +13,33 @@
         });
 
         Vue.filter('fullDate', function(text){
-            var d = moment(text);
-            return d.format("dddd, D MMMM YYYY") + " (" + d.fromNow() + ")";
+            if( text ) {
+                var d = moment(text);
+                return d.format("dddd, D MMMM YYYY") + " (" + d.fromNow() + ")";
+            } else {
+                return "Pas de date";
+            }
         });
 
         new Vue({
             render: function (h) {
-                return h(ActivitySearchUi.default, {
+                return h(ActivitySearchUi, {
                     props: {
-                        url: '<?= $this->url('contract/api') ?>'
+                        url: '<?= $this->url('contract/api') ?>',
+                        moment: moment,
+                        sortters: <?= json_encode($sorts) ?>,
+                        filters: <?= json_encode($filters) ?>,
+                        directions: <?= json_encode($directions) ?>,
+                        direction: <?= json_encode($direction) ?>,
+                        sorter: <?= json_encode($sorter) ?>,
+                        status: <?= json_encode($status) ?>,
+                        roles_person: <?= json_encode($roles_person) ?>,
+                        roles_organizations: <?= json_encode($roles_organizations) ?>,
+                        options_pays: <?= json_encode($options_pays) ?>,
+                        used_filters: <?= json_encode($used_filters) ?>,
+                        options_organization_types: <?= json_encode($options_organization_types) ?>,
+                        used_status: <?= json_encode($used_status) ?>,
+                        search: <?= json_encode($search) ?>
                     }
                 })
             }

@@ -12,21 +12,26 @@ use Doctrine\ORM\EntityRepository;
 class RecallDeclarationRepository extends EntityRepository
 {
     /**
-     * Liste des procédures de rappel pour les validateurs.
+     * Liste des procédures de rappel générique.
      *
      * @param int $personId
      * @param int|null $year
      * @param int|null $month
-     * @return RecallDeclaration[]
+     * @param string|null $context
+     * @return int|mixed|string
      */
-    public function getRecallValidationPerson(int $personId, ?int $year = null, ?int $month = null)
-    {
+    protected function getRecallDeclarationPersonCore(
+        int $personId,
+        ?int $year = null,
+        ?int $month = null,
+        ?string $context
+    ) {
         $qb = $this->createQueryBuilder('r')
             ->where('r.person = :person AND r.context = :context ')
             ->setParameters(
                 [
                     'person' => $personId,
-                    'context' => RecallDeclaration::CONTEXT_VALIDATOR,
+                    'context' => $context,
                 ]
             );
 
@@ -44,6 +49,19 @@ class RecallDeclarationRepository extends EntityRepository
     }
 
     /**
+     * Liste des procédures de rappel pour les validateurs.
+     *
+     * @param int $personId
+     * @param int|null $year
+     * @param int|null $month
+     * @return RecallDeclaration[]
+     */
+    public function getRecallValidationPerson(int $personId, ?int $year = null, ?int $month = null)
+    {
+        return $this->getRecallDeclarationPersonCore($personId, $year, $month, RecallDeclaration::CONTEXT_VALIDATOR);
+    }
+
+    /**
      * Retourne la procédure de rappel pour un déclarant pour la période.
      *
      * @param int $personId
@@ -54,19 +72,11 @@ class RecallDeclarationRepository extends EntityRepository
      */
     public function getRecallDeclarationsPersonPeriod(int $personId, int $periodYear, int $periodMonth)
     {
-        return $this->createQueryBuilder('r')
-            ->where(
-                'r.person = :person AND r.periodYear = :periodYear AND r.periodMonth = :periodMonth AND r.context = :context'
-            )
-            ->setParameters(
-                [
-                    'person' => $personId,
-                    'periodYear' => $periodYear,
-                    'periodMonth' => $periodMonth,
-                    'context' => RecallDeclaration::CONTEXT_DECLARER,
-                ]
-            )
-            ->getQuery()
-            ->getResult();
+        return $this->getRecallDeclarationPersonCore(
+            $personId,
+            $periodYear,
+            $periodMonth,
+            RecallDeclaration::CONTEXT_DECLARER
+        );
     }
 }

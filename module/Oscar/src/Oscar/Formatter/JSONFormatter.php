@@ -73,6 +73,10 @@ class JSONFormatter
     public function formatActivity( Activity $activity, $compact=true ){
         $datas = $activity->toArray();
 
+        // Date de création
+        $datas['dateCreated'] =
+            $activity->getDateCreated() ? $activity->getDateCreated()->format('Y-m-d') : '';
+
         $datas['amount'] = null;
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity) ) {
@@ -86,12 +90,21 @@ class JSONFormatter
         $datas['project_id'] = $activity->getProject()?$activity->getProject()->getId():null;
         $datas['statutId'] = $activity->getStatus();
 
+        $datas['person_url'] = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW);
+        $datas['organizations_url'] = $this->getOscarUserContext()->hasPrivileges(Privileges::ORGANIZATION_SHOW);
         $datas['persons'] = null;
         $datas['persons_primary'] = null;
         $datas['has_workpackages'] = count($activity->getWorkPackages()) > 0;
 
+        $datas['numbers'] = [];
+        foreach($activity->getNumbers() as $key=>$value){
+            $datas['numbers'][$key] = $value;
+
+        }
+
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity) ) {
 
+            $person_url = $this->getOscarUserContext()->hasPrivileges(Privileges::PERSON_SHOW);
             $datas['persons'] = [];
             $datas['persons_primary'] = [];
 
@@ -107,6 +120,7 @@ class JSONFormatter
                     'affectation' => $activityPerson->getPerson()->getLdapAffectation(),
                     'location' => $activityPerson->getPerson()->getLdapSiteLocation(),
                     'end' => $this->formatDateISO($activityPerson->getDateEnd()),
+                    'url' => $person_url ? '/person/show/'.$activityPerson->getPerson()->getId() : false,
                     'spot' => get_class($activityPerson) == ActivityPerson::class ? 'activity' : 'project'
                 ];
 
@@ -132,6 +146,7 @@ class JSONFormatter
 
         if( $this->getOscarUserContext()->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity) ) {
 
+            $organization_url = $this->getOscarUserContext()->hasPrivileges(Privileges::ORGANIZATION_SHOW);
             $datas['organizations'] = [];
             $datas['organizations_primary'] = [];
 
@@ -145,6 +160,7 @@ class JSONFormatter
 //                'email' => $activityOrganization->getOrganization()->getEmail(),
                     'start' => $this->formatDateISO($activityOrganization->getDateStart()),
                     'end' => $this->formatDateISO($activityOrganization->getDateEnd()),
+                    'url' => $organization_url ? '/organization/show/'.$activityOrganization->getOrganization()->getId() : false,
                     'spot' => get_class($activityOrganization) == ActivityOrganization::class ? 'activity' : 'project'
                 ];
 

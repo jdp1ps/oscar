@@ -65,8 +65,27 @@
             </div>
             <div class="col-md-3">
                 <?php echo $this->formLabel($form->get('activityType'));?>
-                <?php echo $this->formSelect($form->get('activityType'));?>
-                <?php echo $this->formElementErrors($form->get('activityType')); ?>
+                <?php /* echo $this->formSelect($form->get('activityType')); */?>
+                <div id="activityType"></div>
+                <script>
+                    require(["vue", "vue-resource", "activitytypeselector", "activitytypeitem"], function(Vue, VueResource, ActivityTypeSelector, ActivityTypeItem){
+                        Vue.use(VueResource);
+                        Vue.component('activity-type-item', ActivityTypeItem);
+
+                        new Vue({
+                            el: "#activityType",
+                            render: function(e) {
+                                return e(ActivityTypeSelector, { props: {
+                                        initialSelected: "<?= $activity && $activity->getActivityType() ? $activity->getActivityType()->getId() : '' ?>",
+                                        allowNodeSelection: <?= $allowNodeSelection ? 'true' : 'false' ?>,
+                                        inputName: "activityType",
+                                        typesAvailable: <?= json_encode($tree) ?>
+                                    } });
+                            }
+                        });
+                    })
+                </script>
+                <?php echo $this->formElementErrors($form->get('activityType'), ["class" => "alert alert-danger"]); ?>
             </div>
             <div class="col-md-3">
                 <?php if( !in_array('disciplines', $hidden)): ?>
@@ -169,7 +188,7 @@
 <script>
     Initer.ready(function(){
         require(['select2'], function(){
-            $('[name="activityType"], .select2').select2();
+            $('.select2').select2();
         });
 
         require(['Keyvalue'], function(KeyValue){

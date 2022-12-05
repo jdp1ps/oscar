@@ -10,8 +10,11 @@ RUN if [ "$proxy_environnement" != "" ]; \
     then echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
     fi
 
-RUN apt-get update && apt-get upgrade -y
+# Note : Supprimé car provoque une erreur de locale
+## nitdb: error: invalid locale settings; check LANG and LC_* environment variables
+#RUN apt-get update && apt-get upgrade -y
 #RUN apt-get install -y nano
 
 # Install bdd fichier SQL
-COPY oscar-install.sql /docker-entrypoint-initdb.d/
+COPY oscar-install.sql /opt/
+COPY init-db.sh /docker-entrypoint-initdb.d/

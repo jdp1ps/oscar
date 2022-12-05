@@ -175,6 +175,11 @@
                         value="<?= $id ?>"><?= $label ?></option>
                 <?php endforeach; ?>
             </select>
+            <select class="val2 changer">
+                <option value="0">Et ces sous-types</option>
+                <option value="1">Type seul</option>
+            </select>
+
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
@@ -182,6 +187,7 @@
             </nav>
         </article>
     </script>
+
     <script type="text/x-handlebars" id="discipline-criteria-tpl">
         <article class="criteria criteria-type card">
             <div class="icon-beaker"></div>
@@ -222,16 +228,48 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="typeorga-tpl">
+        <article class="criteria criteria-typeorga card">
+            <div class="icon-tag"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
+                <?php foreach( $typeorgas as $typeorga ): ?>
+                <option value="<?= $typeorga ?>"><?= $typeorga ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
     <script type="text/x-handlebars" id="milestones-criteria-tpl">
         <article class="criteria criteria-{{type}} card">
             <div class="icon-calendar"></div>
             <small>{{typeLabel}}</small>
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
-            <select class="select2 form-control val1 changer types" id="filter_jalon">
+            <select class="select2 form-control val1 changer types hideval2" id="filter_jalon">
                 <?php foreach( $filterJalons as $jalon ): ?>
-                    <option value="<?= $jalon['id'] ?>"><?= $jalon['label'] ?></option>
+                    <option value="<?= $jalon['id'] ?>" data-progress="<?= $jalon['finishable'] ? 'on' : 'off' ?>"><?= $jalon['label'] ?></option>
                 <?php endforeach; ?>
             </select>
+
+            <div class="progression val2-options">
+                <i class="icon-cog"></i> Options
+                <div class="choose">
+                <?php foreach( \Oscar\Entity\ActivityDate::progressInfos() as $value=>$label ): $uniq = uniqid('cb'); ?>
+                    <div>
+                        <label for="<?= $uniq ?>">
+                            <input id="<?= $uniq ?>" type="checkbox" value="<?= $value ?>" class="val2 changer" /> <?= $label ?>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
+                </div>
+            </div>
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <nav>
                 <a href="#" class="delete">
@@ -516,6 +554,14 @@
                     Export JSON
                 </button>
             </form>
+
+            <form action="<?= $this->url('contract/gant') ?>" class=" export-selection-area" method="get">
+                <input type="hidden" name="ids" value="<?= $exportIds ?>">
+                <button type="submit" href="#" class="btn btn-primary btn-xs">
+                    <i class="icon-cube"></i>
+                    Vue GANTT (beta)
+                </button>
+            </form>
             <hr />
             <div class="form-checker">
                 <div class="form-checker-handler">
@@ -671,7 +717,7 @@
                     };
 
                 var addcriterie = function (datas) {
-                    console.log("ADD", datas);
+                    console.log("DATAS:", datas);
                     datas.typeLabel = (labelsType[datas.type]);
                     datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
 
@@ -692,6 +738,10 @@
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
                     }
+                    else if(datas.type == 'tnt' ) {
+                        datas.label = "Type d'organisation";
+                        dom = $(tplTypeOrga(datas));
+                    }
                     else if(datas.type == 'at' || datas.type == 'st' ) {
                         datas.label = datas.type == 'as' ? 'Ayant le status'
                             : "N'a pas le status";
@@ -703,6 +753,9 @@
                         dom = $(tplFinance(datas));
                     }
                     else if(datas.type == 'pp' ) {
+                        dom = $(tplStatic(datas));
+                    }
+                    else if(datas.type == 'fdt' ) {
                         dom = $(tplStatic(datas));
                     }
                     else if(datas.type == 'mp' ) {
@@ -728,9 +781,42 @@
                     applyChange = function(){
                         console.log('applyChange');
                         var filter = dom;
+                        var val2 = "";
+
+                        // Afficher/montrer les options
+                        var select = dom.find('.val1.hideval2');
+                        if( select.length ){
+                            var opt = select.find('option[value="' + select.val() +'"]');
+                            if( opt[0].dataset.progress && opt[0].dataset.progress == 'off' ){
+                                dom.addClass('hideval2-on')
+                            } else {
+                                dom.removeClass('hideval2-on')
+                            }
+                        }
+
+                        // Checkbox ?
+                        var checkboxs = filter.find('.val2[type="checkbox"]');
+
+                        if( checkboxs.length > 1 ){
+                            var values = [];
+                            checkboxs.each(i => {
+                                var checkbox = checkboxs[i];
+                                if( checkbox.checked ){
+                                    values.push(checkbox.value);
+                                }
+                            });
+                            val2 = values.join(',');
+                        } else {
+                            var val2Elem = filter.find('.val2');
+                            if( val2Elem ){
+                                val2 = val2Elem.val();
+                            }
+
+                        }
+
                         filter.find('.criteria').val(datas.type
                             + ';' + filter.find('.val1').val()
-                            + ';' + filter.find('.val2').val());
+                            + ';' + val2);
                     };
 
 
@@ -773,7 +859,6 @@
                                     };
                                 },
                                 processResults: function (data, page) {
-                                    console.log(data);
                                     return {results: data.datas};
                                 },
                                 cache: true
@@ -826,6 +911,41 @@
                         dom.find('.role').val(datas.val2);
                     }
 
+                    if(datas.type == 'at'){
+                        dom.find('.val2').val(datas.val2);
+                    }
+
+                    if(datas.type == 'aj' && datas.val2 != null ){
+
+                        var option = dom.find('option[value="'+ datas.val1 +'"]');
+                        // On affiche ou pas les options
+                        if( option ){
+                            try{
+                                if(option[0].dataset.progress && option[0].dataset.progress == 'off'){
+                                    dom.addClass('hideval2-on');
+                                }
+                            } catch (error){
+                              console.log(error);
+                            }
+                        }
+
+                        console.log("AJ", datas);
+                        var val2 = "" +datas.val2;
+                        if( val2.indexOf(',') > 0 ){
+                            checked = val2.split(',');
+                        } else {
+                            checked = [val2];
+                        }
+                        console.log("checked", checked);
+
+                        var checkboxs = dom.find('input[type="checkbox"]');
+                        checkboxs.each(i => {
+                            if( checked.indexOf(checkboxs[i].value) >= 0 ){
+                                checkboxs[i].checked = true;
+                            }
+                        })
+                    }
+
                     if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
                         $('.datepicker').datepicker({
                             format: "yyyy-mm-dd",
@@ -873,6 +993,7 @@
                     tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),
+                    tplTypeOrga = Handlebars.compile($('#typeorga-tpl').html()),
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),

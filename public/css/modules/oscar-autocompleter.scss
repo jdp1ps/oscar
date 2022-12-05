@@ -1,0 +1,35 @@
+.result-item {
+  code, span, strong, em {
+    margin: 0 .25em;
+  }
+  code {
+    background: #ceedff;
+    padding: 2px;
+    font-size: .8em;
+    line-height: inherit;
+    border-radius: 4px;
+  }
+  .location, .infos {
+    font-size: .7em;
+    font-weight: 200;
+  }
+  h4 {
+    color: #111 !important;
+  }
+  border-bottom: thin solid #999999;
+
+  &:hover code {
+    color: black;
+  }
+
+  &.organization-closed {
+    border-left: solid 4px red;
+    div {
+      opacity: .5;
+    }
+    h4 {
+      opacity: .7;
+      text-decoration: line-through;
+    }
+  }
+}

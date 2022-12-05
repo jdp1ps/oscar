@@ -38,12 +38,12 @@ Installation des paquets PHP
 ```bash
 apt install php7.4 \
  php7.4-bcmath  \
- php-bz2 \
+ php7.4-bz2 \
  php7.4-cli \
  php7.4-curl \
  php7.4-dom \
  php7.4-gd \
- gearman-php \
+ php7.4-gearman \
  php7.4-intl \
  php7.4-ldap \
  php7.4-mbstring \
@@ -156,7 +156,7 @@ Configuration de l'authentification
 
 ```php
 <?php
-// config/autoload/local.php
+// config/autoload/unicaen-auth.local.php
 $settings = array(
     // Authentification via LDAP/BDD
     'local' => [

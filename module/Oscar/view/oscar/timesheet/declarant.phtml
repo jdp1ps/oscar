@@ -52,7 +52,7 @@
 
         new Vue({
             render: function(h){
-                return h(TimesheetMonth.default, {
+                return h(TimesheetMonth, {
                     props: {
                         declarationInHours: <?= $declarationInHours ? 'true' : 'false' ?>,
                         defaultYear: <?= $year ?>,

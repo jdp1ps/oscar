@@ -25,6 +25,7 @@ use Oscar\Entity\ContractType;
 use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\PcruPoleCompetitivite;
 use Oscar\Entity\PcruPoleCompetitiviteRepository;
@@ -44,6 +45,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\AsArrayFormatter;
 use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\OscarFormatterFactory;
+use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\ActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
@@ -71,6 +73,7 @@ use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\StringUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
 
@@ -170,7 +173,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
-    public function checkPFIRegex( $regex ) :array
+    public function checkPFIRegex($regex): array
     {
         $out = [
             'warnings' => [],
@@ -184,8 +187,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         $pfi = $this->getActivityRepository()->getDistinctPFI();
         foreach ($pfi as $pfiTested) {
-            if( $pfiTested == "" ) continue;
-            if( preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)){
+            if ($pfiTested == "") {
+                continue;
+            }
+            if (preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)) {
                 $out['valids'][] = $pfiTested;
             } else {
                 $badPfi = "Un ou plusieurs PFI ne correspondent pas au format attendu";
@@ -193,10 +198,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
             $out['count']++;
         }
-        if($badPfi){
+        if ($badPfi) {
             $out['error'][] = $badPfi;
         }
-        if(!$regex){
+        if (!$regex) {
             $out['error'][] = "Aucune regex renseignée";
         }
 
@@ -258,19 +263,19 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param Person $to
      * @param Activity $activity
      */
-    public function replacePerson(Person $from, Person $to, Activity $activity) :void
+    public function replacePerson(Person $from, Person $to, Activity $activity): void
     {
-       $date = new \DateTime();
+        $date = new \DateTime();
 
-       /** @var ActivityPerson $activityPerson */
+        /** @var ActivityPerson $activityPerson */
         foreach ($activity->getPersons() as $activityPerson) {
-           if( $activityPerson->getPerson()->getId() == $from->getId() ){
-               $roleObj = $activityPerson->getRoleObj();
-               $this->getPersonService()->personActivityAdd($activity, $to, $roleObj, $date);
-               $activityPerson->setDateEnd($date);
-               $this->getEntityManager()->flush($activityPerson);
-           }
-       }
+            if ($activityPerson->getPerson()->getId() == $from->getId()) {
+                $roleObj = $activityPerson->getRoleObj();
+                $this->getPersonService()->personActivityAdd($activity, $to, $roleObj, $date);
+                $activityPerson->setDateEnd($date);
+                $this->getEntityManager()->flush($activityPerson);
+            }
+        }
     }
 
 
@@ -294,13 +299,32 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
+     * @param string $importedUid
+     * @param bool $throw
+     * @return Activity|null
+     * @throws OscarException
+     */
+    public function getActivityByImportedUid(string $importedUid, $throw = true): ?Activity
+    {
+        $activity = $this->getActivityRepository()->findOneBy(['centaureId' => $importedUid]);
+        if (!$activity) {
+            if ($throw === true) {
+                throw new OscarException("Impossible de charger l'activité (UID = $importedUid)");
+            } else {
+                return null;
+            }
+        }
+        return $activity;
+    }
+
+    /**
      * @param int $id
      * @param bool $throw
      * @return Project|null
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getProjectById( int $id, bool $throw = true ) :?Project
+    public function getProjectById(int $id, bool $throw = true): ?Project
     {
         return $this->getProjectService()->getProject($id, $throw);
     }
@@ -378,13 +402,19 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
 
-    public function getActivityIdsByJalon($jalonTypeId)
+    public function getActivityIdsByJalon($jalonTypeId, $progression = null )
     {
         $q = $this->getActivityRepository()->createQueryBuilder('c')
             ->select('c.id')
             ->innerJoin('c.milestones', 'm')
-            ->where('m.type = :jalonId')
-            ->setParameter('jalonId', $jalonTypeId);
+            ->where('m.type = :jalonId');
+
+        if( is_array($progression) ){
+            $q->andWhere('m.finished IN(:progression)')
+                ->setParameter('progression', $progression);
+        }
+
+        $q->setParameter('jalonId', $jalonTypeId);
 
         $activities = $q->getQuery()->getResult();
         return array_map('current', $activities);
@@ -413,6 +443,396 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
 
         return $query->getQuery()->getResult();
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    ///
+    /// RECHERCHE AVANCES
+    ///
+    //////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Système de recherche avancées V2.
+     *
+     * @param string $search
+     * @param array $options
+     */
+    public function searchActivities(string $search, array $options): array
+    {
+        //
+        $sort = 'hit';
+        $direction = 'desc';
+        $page = 1;
+        $resultByPage = 50;
+        $ids_search = null;
+        $restricted_ids = null;
+
+        if (array_key_exists('restricted_ids', $options)) {
+            $restricted_ids = $options['restricted_ids'];
+        }
+
+        // Critère de trie
+        if (array_key_exists('sort', $options)) {
+            $sort = $options['sort'];
+        }
+
+        // Ordre de trie
+        if (array_key_exists('direction', $options)) {
+            $direction = $options['direction'];
+        }
+
+        $output = [
+            'version' => OscarVersion::getBuild(),
+            'date' => (new \DateTime())->format('Y-m-d H:i:s'),
+            'total' => 0,
+            'total_page' => 0,
+            'total_time' => 0,
+            'total_page_time' => 0,
+            'page' => $page,
+            'result_by_page' => $resultByPage,
+            'options' => json_encode($options),
+            'search_text' => '',
+            'search_text_total' => 0,
+            'search_text_error' => '',
+            'search_text_time' => 0,
+            'filters_infos' => [],
+            'activities' => [],
+        ];
+
+        $step = $begin = microtime(true);
+
+        if ($restricted_ids === false && count($options['filters']) == 0) {
+            $restricted_ids = $this->getActivityRepository()->getActivitiesIdsAll();
+        }
+
+        // Recherche textuel via Elastic
+        if ($search) {
+            try {
+                $output['search_text'] = $search;
+                $ids_search = $this->search($search);
+                $output['search_text_total'] = count($ids_search);
+            } catch (\Exception $e) {
+                $output['search_text_error'] = $e->getMessage();
+            }
+            $output['search_text_time'] = microtime(true) - $step;
+            $step = microtime(true);
+        }
+
+        if ($restricted_ids) {
+            if ($ids_search === null) {
+                $ids_search = $restricted_ids;
+            } else {
+                $ids_search = array_intersect($ids_search, $restricted_ids);
+            }
+        }
+
+        // Critères des filtres
+        if (array_key_exists('filters', $options)) {
+            $criteriaDef = $this->getActivitiesSearchCriteria();
+            foreach ($options['filters'] as $filterStr) {
+                $filter_info = [
+                    'input' => $filterStr,
+                    'error' => '',
+                    'time' => 0,
+                    'type' => '',
+                    'label' => '',
+                    'total' => 0
+                ];
+                $params = explode(';', $filterStr);
+                $type = $params[0];
+
+                if (!array_key_exists($type, $criteriaDef) && $type != 's') {
+                    $this->getLoggerService()->error("Mauvais filtre '$type'");
+                    $filter_info['error'] = "Filtre '$type' inconnu";
+                    $output['filters_infos'][] = $filter_info;
+                    continue;
+                }
+
+                $filter_info['type'] = $type;
+                $filter_info['label'] = $criteriaDef[$type];
+
+                // Extraction des paramètres du filtre
+                $value1 = count($params) >= 2 ? intval($params[1]) : -1;
+                $value2 = count($params) == 3 ? intval($params[2]) : -1;
+
+                $ids_exclude = null;
+
+                try {
+                    switch ($type) {
+                        case 'ao' :
+                            if (!$value1) {
+                                throw new OscarException("Vous devez préciser une structure");
+                            }
+                            $ids = $this->getActivityRepository()->getIdsForOrganizationWithRole($value1, $value2);
+                            break;
+
+                        case 'so' :
+                            if (!$value1) {
+                                throw new OscarException("Vous devez préciser une structure");
+                            }
+                            $ids = $this->getActivityRepository()->getIdsWithoutOrganizationWithRole($value1, $value2);
+                            break;
+
+                        case 'sp' :
+                            if (!$value1) {
+                                throw new OscarException("Vous devez préciser une personne");
+                            }
+                            $ids = $this->getActivityRepository()->getIdsWithoutPersonWithRole($value1, $value2);
+                            break;
+
+                        case 'ap' :
+                            if (!$value1) {
+                                throw new OscarException("Vous devez préciser une personne");
+                            }
+                            $ids = $this->getActivityRepository()->getIdsForPersonWithRole($value1, $value2);
+                            break;
+
+                        case 'pm' :
+                            $idPerson = explode(',', $params[1]);
+                            try {
+                                $idsPerson = StringUtils::intArray($params[1]);
+                            } catch (\Exception $e) {
+                                throw new \Exception("Mauvais format : " . $e->getMessage());
+                            }
+                            $ids = $this->getActivityRepository()->getIdsForPersons($idsPerson);
+                            break;
+
+                        case 'cnt' :
+                            $pays = explode(',', $params[1]);
+
+                            // IDS des organizations
+                            /** @var OrganizationRepository $organizationRepository */
+                            $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+                            $organizationIds = $organizationRepository->getIdWithCountries($pays);
+
+                            $ids = $this->getActivityRepository()
+                                ->getActivitiesIdsForOrganizations($organizationIds, false);
+                            break;
+
+                        case 'tnt' :
+                            // Activités impliquant certains types d'organisation
+                            $types = explode(',', $params[1]);
+
+                            // IDS des organizations
+                            /** @var OrganizationRepository $organizationRepository */
+                            $organizationRepository = $this->getEntityManager()->getRepository(Organization::class);
+                            $organizationIds = $organizationRepository->getIdWithTypes($types);
+                            $ids = $this->getActivityRepository()
+                                ->getActivitiesIdsForOrganizations($organizationIds, false);
+                            break;
+
+                        case 's' :
+                            $statusarray = explode(',', $params[1]);
+                            $filter_info['param'] = $value1;
+                            $filter_info['debug'] = $statusarray;
+                            $ids = $this->getActivityRepository()->getIdsWithStatus($statusarray);
+                            break;
+
+                        // Critère liè aux DATES
+                        case 'add' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates($dateDebut, $dateFin, 'dateStart');
+                            break;
+
+                        case 'adf' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates($dateDebut, $dateFin, 'dateEnd');
+                            break;
+
+                        case 'adc' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates(
+                                $dateDebut,
+                                $dateFin,
+                                'dateCreated'
+                            );
+                            break;
+                        case 'adm' :
+                            $dateDebut = $params[1];
+                            $dateFin = $params[2];
+                            $ids = $this->getActivityRepository()->getBeetween2Dates(
+                                $dateDebut,
+                                $dateFin,
+                                'dateUpdated'
+                            );
+                            break;
+
+
+                        default :
+                            $filter_info['error'] = "Filtre non-implémenté '$type'";
+                            throw new OscarException("Critère '$type' non-implémenté");
+                    }
+
+                    $filter_info['total'] = count($ids);
+                    $filter_info['time'] = microtime(true) - $step;
+
+                    $this->getLoggerService()->info(
+                        sprintf(
+                            "Filter result '%' take %s ms with %s result(s)",
+                            $filterStr,
+                            $filter_info['time'],
+                            $filter_info['total']
+                        )
+                    );
+
+                    $step = microtime(true);
+
+                    if ($ids_search === null) {
+                        $ids_search = $ids;
+                    } else {
+                        $ids_search = array_intersect($ids_search, $ids);
+                    }
+                } catch (\Exception $e) {
+                    $filter_info['error'] = $e->getMessage();
+                }
+
+                $output['filters_infos'][] = $filter_info;
+            }
+        }
+
+        $start = ($page - 1) * $resultByPage;
+        $output['total'] = count($ids_search);
+        $idsKeep = array_slice($ids_search, $start, $resultByPage);
+
+        if (count($idsKeep) > 0) {
+            $queryBuilder = $this->getActivityRepository()->getBaseQueryBuilderByIdsPaged(
+                $idsKeep,
+                $page,
+                $resultByPage
+            );
+
+            if ($sort == "hit") {
+                $resultRaw = $queryBuilder->getQuery()->getResult();
+                $pertinenceFunction = function ($a1, $a2) use ($idsKeep) {
+                    $a1ID = array_search($a1->getId(), $idsKeep);
+                    $a2ID = array_search($a2->getId(), $idsKeep);
+                    return $a1ID > $a2ID;
+                };
+                usort($resultRaw, $pertinenceFunction);
+            } else {
+                $queryBuilder->orderBy('c.' . $sort, $direction);
+                $resultRaw = $queryBuilder->getQuery()->getResult();
+            }
+
+            $output['activities'] = $resultRaw;
+            $output['total_page'] = count($resultRaw);
+            $output['total_page_time'] = microtime(true) - $step;
+        }
+
+        $output['total_time'] = microtime(true) - $begin;
+        $this->getLoggerService()->info(
+            sprintf(
+                "Recherche '%s' (took %s ms)",
+                $output['search_text'],
+                $output['total_time']
+            )
+        );
+
+        return $output;
+    }
+
+    protected function debug__displayIds(array $ids)
+    {
+        echo " = ";
+        $sep = "";
+        foreach ($ids as $id) {
+            echo "$sep$id";
+            $sep = ',';
+        }
+        echo "\n---\n";
+    }
+
+
+    /**
+     * Retourne la liste des critères de trie disponibles pour la recherche avancées.
+     *
+     * @return string[]
+     */
+    public function getActivitiesSearchSort(): array
+    {
+        static $_activitiesSearchSort;
+        if ($_activitiesSearchSort === null) {
+            $_activitiesSearchSort = [
+                'hit' => 'Pertinence',
+                'dateUpdated' => 'Date de mise à jour',
+                'dateCreated' => 'Date de création',
+                'dateStart' => 'Date de début',
+                'dateEnd' => 'Date de fin',
+                'dateSigned' => 'Date de signature',
+                'acronym' => 'Acronyme de projet',
+                'label' => 'Intitulé',
+                'status' => 'Status',
+                'oscarNum' => 'N°Oscar',
+                'codeEOTP' => 'PFI',
+                'amount' => 'Montant'
+            ];
+        }
+        return $_activitiesSearchSort;
+    }
+
+    public function getActivitiesSearchStatus(): array
+    {
+        return Activity::getStatusSelect();
+    }
+
+    /**
+     * Retourne la liste des critères de trie disponibles pour la recherche avancées.
+     *
+     * @return string[]
+     */
+    public function getActivitiesSearchDirection(): array
+    {
+        static $_activitiesSearchDirection;
+        if ($_activitiesSearchDirection === null) {
+            $_activitiesSearchDirection = [
+                'asc' => 'Croissant',
+                'desc' => 'Décroissant',
+            ];
+        }
+        return $_activitiesSearchDirection;
+    }
+
+    /**
+     * Retourne la liste des critères de filtrage pour la recherche avancées.
+     *
+     * @return string[]
+     */
+    public function getActivitiesSearchCriteria(): array
+    {
+        static $activitiesSearchCriteria;
+        if ($activitiesSearchCriteria === null) {
+            $activitiesSearchCriteria = [
+                'ap' => "Impliquant la personne",
+                'sp' => "N'impliquant pas la personne",
+                'pm' => "Impliquant une de ces personnes",
+                'ao' => "Impliquant l'organisation",
+                'so' => "N'impliquant pas l'organisation",
+                'om' => "Impliquant une des organisations",
+                'as' => 'Ayant le statut',
+                'ss' => 'N\'ayant pas le statut',
+                'cnt' => "Pays (d'une organisation)",
+                'tnt' => "Type d'organisation",
+                'af' => 'Ayant comme incidence financière',
+                'sf' => 'N\'ayant pas comme incidence financière',
+                'mp' => 'Montant prévu',
+                'at' => 'est de type',
+                'st' => 'n\'est pas de type',
+                'add' => 'Date de début',
+                'adf' => 'Date de fin',
+                'adc' => 'Date de création',
+                'adm' => 'Date de dernière mise à jour',
+                'ads' => 'Date de signature',
+                'adp' => 'Date d\'ouverture du PFI dans SIFAC',
+                'pp' => 'Activités sans projet',
+                'fdt' => 'Activités soumise à feuille de temps',
+                'ds' => 'Ayant pour discipline',
+                'aj' => 'Ayant le jalon'
+            ];
+        }
+        return $activitiesSearchCriteria;
     }
 
     public function exportJsonPerson(Person $person)
@@ -473,7 +893,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ];
         }
 
-
         return $datas;
     }
 
@@ -492,7 +911,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 if ($r['numbers']) {
                     foreach ($r['numbers'] as $key => $value) {
                         if (!$value) {
-                            echo "$key\n";
+                            //echo "$key\n";
                         }
                         if (!in_array($key, $customNum)) {
                             $customNum[] = $key;
@@ -622,7 +1041,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $datas;
     }
 
-    public function getMilestoneTypesArray() :array
+    public function getMilestoneTypesArray(): array
     {
         $milestones = [];
         /** @var DateType $milestoneType */
@@ -632,12 +1051,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $milestones;
     }
 
-    protected function getRoleRepository() : RoleRepository
+    protected function getRoleRepository(): RoleRepository
     {
         return $this->getEntityManager()->getRepository(Role::class);
     }
 
-    public function getRolesPersonActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT) :array
+    public function getRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
     {
         return $this->getRoleRepository()->getRolesAtActivityArray($format);
     }
@@ -1145,7 +1564,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $out;
     }
 
-    public function getAvailableDocumentTypes( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT ) :array
+    public function getAvailableDocumentTypes(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT): array
     {
         return OscarFormatterFactory::getFormatter($format)->format($this->getDocumentTypes());
     }
@@ -1577,7 +1996,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return null|object
      * @throws \Exception
      */
-    public function getActivityDate(int $id, $throw = true) :ActivityDate
+    public function getActivityDate(int $id, $throw = true): ActivityDate
     {
         $activityDate = $this->getActivityDateRepository()->find($id);
         if ($throw === true && !$activityDate) {
@@ -1594,7 +2013,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @return bool
      * @throws \Exception
      */
-    public function deleteActivityDate(ActivityDate $activityDate, $throw = true) :void
+    public function deleteActivityDate(ActivityDate $activityDate, $throw = true): void
     {
         try {
             $this->getEntityManager()->remove($activityDate);
@@ -1973,7 +2392,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->getSingleResult();
     }
 
-    public function getBaseDataTemplate() :array
+    public function getBaseDataTemplate(): array
     {
         //
         $datas = [
@@ -2124,9 +2543,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $this->getEntityManager()->flush($organizationActivity);
 
 
-            $this->jobSearchUpdate($activity);
-            $this->getOrganizationService()->updateIndex($organization);
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            try {
+                $this->jobSearchUpdate($activity);
+                $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
+                $this->getNotificationService()->jobUpdateNotificationsActivity($activity);
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error("Soucis d'appel avec Gearman");
+            }
 
             $this->getActivityLogService()->addUserInfo(
                 sprintf(" a ajouté l'organisation %s de l'activité %s", $organization->log(), $activity->log()),
@@ -2337,7 +2760,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /**
      * @return array
      */
-    public function getDocumentTypes() :array
+    public function getDocumentTypes(): array
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
     }
@@ -2434,7 +2857,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /// REPOSITORY ACCESS
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function getActivityDateRepository() :ActivityDateRepository
+    public function getActivityDateRepository(): ActivityDateRepository
     {
         return $this->getEntityManager()->getRepository(ActivityDate::class);
     }

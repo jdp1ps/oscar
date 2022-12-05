@@ -5,11 +5,12 @@
     "projectlabel": "Théorie de la relativité",
     "description": "Description le d'activité 1",
     "label": "Exemple d'activité 1",
-    "datestart": "",
-    "dateend": "",
+    "datestart": "2014-01-01",
+    "dateend": "2023-03-31",
     "datesigned": "2017-06-01",
     "pfi": "99PFI1234",
-    "datePFI":"2018-01-01",
+    "status": 101,
+    "datePFI": "2018-01-01",
     "type": "ANR",
     "amount": "0.0",
     "financialImpact": "Recette",
@@ -23,7 +24,6 @@
         "date": "2018-01-31"
       }
     ],
-
     "organizations": {
       "Référent extérieur": [],
       "Laboratoire": [
@@ -36,7 +36,8 @@
         "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe", "Sarah Déclarant"
+        "John Doe",
+        "Sarah Déclarant"
       ]
     }
   },
@@ -46,18 +47,17 @@
     "projectlabel": "Théorie de la relativité",
     "description": "Description le d'activité 2",
     "label": "Exemple d'activité 2",
-    "datestart": "2015-01-01",
-    "dateend": "2017-12-31",
-    "datesigned": "2015-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-01-05",
     "pfi": "",
+    "status": 101,
     "type": "Colloques",
     "amount": 15000,
-    "financialImpact": "Aucune",
+    "financialImpact": "Recettes",
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [
@@ -78,25 +78,53 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Etude et analyse",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Albert Einstein",
+          "Maurice Solovine",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Albert Einstein",
+          "Marcel Grossmann"
+        ]
+      }
+    ]
   },
   {
     "uid": "A0003",
     "acronym": "MECAQUAN",
     "projectlabel": "Mécanique quantique",
     "label": "Étude des quanta",
-    "datestart": "2012-01-01",
-    "dateend": "2020-12-31",
-    "datesigned": "2014-02-01",
+    "datestart": "2021-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2021-02-01",
     "financialImpact": "Dépense",
     "pfi": "",
+    "status": 101,
     "type": "ANR",
     "amount": 9990,
     "milestones": [
-
     ],
     "payments": [
-
     ],
     "organizations": {
       "Laboratoire": [
@@ -117,6 +145,70 @@
         "Marcel Grossmann",
         "Sarah Déclarant"
       ]
-    }
+    },
+    "workpackages": [
+      {
+        "code": "WP1",
+        "label": "Travaux préparatoires",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      },
+      {
+        "code": "WP2",
+        "label": "Rédaction d'article",
+        "declarers": [
+          "Max Plank",
+          "Erwin Schrödinger",
+          "Marcel Grossmann"
+        ]
+      },
+      {
+        "code": "WP3",
+        "label": "Expériences",
+        "declarers": [
+          "Marcel Grossmann",
+          "Sarah Déclarant"
+        ]
+      }
+    ]
+  },
+  {
+    "uid": "A0004",
+    "acronym": "TESTPCRU",
+    "projectlabel": "Projet PCRUifié",
+    "label": "Contrat vers PCRU",
+    "datestart": "2022-01-01",
+    "dateend": "2022-12-31",
+    "datesigned": "2022-01-05",
+    "financialImpact": "Dépense",
+    "pfi": "2022PFI04079",
+    "status": 101,
+    "type": "ANR",
+    "amount": 15250,
+    "milestones": [
+    ],
+    "payments": [
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "Groupe Olympia"
+      ]
+    },
+    "persons": {
+      "Responsable scientifique": [
+        "Max Plank"
+      ],
+      "Chercheur": [
+        "Erwin Schrödinger"
+      ],
+      "Ingénieur": [
+        "Sarah Déclarant"
+      ]
+    },
+    "workpackages": []
   }
 ]

@@ -8,9 +8,11 @@
 namespace Oscar\Hydrator;
 
 
+use Doctrine\ORM\EntityManager;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OscarFacet;
+use Oscar\Entity\Role;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\Hydrator\HydratorInterface;
@@ -19,11 +21,19 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
 {
     use ServiceLocatorAwareTrait;
 
+    private EntityManager $em;
+
+    public function __construct(EntityManager $em)
+    {
+        $this->em = $em;
+    }
+
+
     /**
      * @param DateType $object
      * @return array
      */
-    public function extract($object)
+    public function extract($object): array
     {
         $data = [
             'id' => $object->getId(),
@@ -42,13 +52,21 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
     /**
      * @param array $data
      * @param DateType $object
+     * @return DateType
      */
-    public function hydrate(array $data, $object)
+    public function hydrate(array $data, $object): DateType
     {
-        return $object->setDescription($data['description'])
+        $object->resetRoles();
+        foreach ($data['roles'] as $idRole){
+            $entityRole = $this->em->getRepository(Role::class)->findOneBy(["id"=>$idRole]);
+            $object->addRole($entityRole);
+        }
+
+        $object->setDescription($data['description'])
             ->setFacet(OscarFacet::getFacets()[$data['facet']])
             ->setRecursivity($data['recursivity'])
             ->setFinishable(array_key_exists('finishable', $data) ? true : false)
             ->setLabel($data['label']);
+        return $object;
     }
 }

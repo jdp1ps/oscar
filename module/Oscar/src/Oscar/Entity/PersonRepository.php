@@ -24,6 +24,13 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
 
+    public function removeOrganizationPersons( array $organizationsRoles ):void
+    {
+        foreach ($organizationsRoles as $organizationsRole) {
+            $this->getEntityManager()->remove($organizationsRole);
+        }
+    }
+
 
     public function getReferentsIdsPerson(int $person): array
     {
@@ -493,6 +500,78 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         $ids = array_unique(array_merge($sci, $adm, $prj));
 
         return $ids;
+    }
+
+    /**
+     * Retourne la synthèse d'état des déclarations en cours de validation pour la personne.
+     * (ATTENTION : Si aucune déclaration n'a été envoyée, il n'y a pas de résultats)
+     * @param int $personId
+     */
+    public function getRepportDeclarationPerson( int $personId, bool $includenonActive = false )
+    {
+        $sql = "SELECT
+            declarer_id AS declarer_id,
+            vp.year || '-' || LPAD(vp.month::text, 2, '0') AS period,
+            count(*) as Nbr,
+
+            SUM(CASE WHEN  vp.validationactivityat IS NULL THEN 0 ELSE 1 END) AS prj,
+            SUM(CASE WHEN  vp.validationsciat IS NULL THEN 0 ELSE 1 END) AS sci,
+            SUM(CASE WHEN  vp.validationadmat IS NULL THEN 0 ELSE 1 END) AS adm,
+        
+            SUM(CASE WHEN  vp.rejectactivityat IS NULL THEN 0 ELSE 1 END) AS rejprj,
+            SUM(CASE WHEN  vp.rejectsciat IS NULL THEN 0 ELSE 1 END) AS rejsci,
+            SUM(CASE WHEN  vp.rejectadmat IS NULL THEN 0 ELSE 1 END) AS rejadm
+        
+            FROM validationperiod vp WHERE vp.declarer_id = :person_id 
+
+            GROUP BY declarer_id, period
+            ORDER BY period";
+
+        $query = $this->getEntityManager()->getConnection()->prepare($sql);
+
+        $result = $query->executeQuery([
+            "person_id" => $personId
+]       );
+
+        $datas = $result->fetchAllAssociative();
+
+        return $datas;
+    }
+
+    /**
+     * Retourne les ID des déclarants avant la période donnée.
+     *
+     * @param string $period
+     * @return array
+     */
+    public function getIdsDeclarersBeforePeriod( string $period, bool $includeNonActive = false ): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT(p.id) id')
+            ->from(Person::class, 'p')
+            ->innerJoin('p.workPackages', 'wpp')
+            ->groupBy('p.id');
+
+        $extract = DateTimeUtils::periodBounds($period);
+        $end = $extract['end'];
+
+        $qb->innerJoin('wpp.workPackage', 'wp')
+            ->innerJoin('wp.activity', 'a')
+            ->where('a.dateStart < :periodEnd');
+
+        $parametersQuery = [
+            'periodEnd' => $end
+        ];
+
+        if( $includeNonActive == false ){
+            $qb->andWhere('a.status = :status');
+            $parametersQuery['status'] = Activity::STATUS_ACTIVE;
+        }
+
+        $qb->setParameters($parametersQuery);
+
+        $results = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
+        return array_map('current', $results);
     }
 
     /**

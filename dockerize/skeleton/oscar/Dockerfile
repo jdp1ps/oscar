@@ -15,13 +15,15 @@ ARG CONFIG_TEST="../config"
 LABEL authors="Herve Marie <herve.marie@unicaen.fr> Stéphane Bouvry <stephane.bouvry@unicaen.fr>"
 LABEL description="OSCAR"
 
-RUN if [ "$proxy_environnement" != "" ]; \
-    then echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
-    fi
-
+# AVEC CETTE SOLUTION CI-DESSOUS (HM)) J'AI EU DES SOUCIS, FAUT'IL FAIRE AUTRE CHOSE QUE COPIER PAS TROUVE DE SOLUTION VIABLE STEPH AVEC COPIE DE FICHIERS.
 # PROXY (environment/apt)
-# COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
-COPY etc/environment /etc/environment
+#COPY etc/apt/apt.conf.d/proxy /etc/apt/apt.conf.d/proxy
+#COPY etc/environment /etc/environment
+# REMPLACE PAR SOLUTION CI-DESSOUS FONCTIONNE A TOUS LES COUPS
+RUN if [ "$proxy_environnement" != "" ]; \
+    then \
+      echo "Acquire::http::proxy \"$proxy_environnement\";" > /etc/apt/apt.conf.d/proxy; \
+    fi
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y\
@@ -84,9 +86,16 @@ RUN apt-get install -y \
 # Enable xdebug -> Need to install later xdebug
 #RUN pecl install xdebug
 
-# Install OCI (penser à forcer le proxy)
-#RUN pear config-set http_proxy "${http_proxy}"
-RUN pear config-set http_proxy "£PROXY"
+# SOUCIS DERRIERE PROXY UNICAEN (HM) METHODE COPIE DE FICHIERS, PASSAGE PAR UN TEST IF ET CELA FONCTIONNE DANS TOUS LES CAS DE FIGURE
+# PROXY (wget)
+#COPY etc/apt/wgetrc /etc/apt/wgetrc
+# INSTALL OCI ET UTILISATION DE WGET (ATTENTION PROXY) -> LE HOOK VIA UN if CI-DESSOUS FONCTIONNE BIEN DERRIERE OU PAS UN PROXY (HM)
+RUN if [ "$proxy_environnement" != "" ]; \
+    then \
+      pear config-set http_proxy "$proxy_environnement"; \
+      echo "http_proxy = $proxy_environnement"  >> /etc/wgetrc && echo "https_proxy = $proxy_environnement" >> /etc/wgetrc; \
+    fi
+
 COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
 COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
@@ -98,16 +107,12 @@ RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/l
 RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
     ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
 
-
-RUN if [ "$proxy_environnement" != "" ]; \
-    then pear config-set http_proxy "£PROXY"; \
-    fi
-
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
 RUN echo "extension=oci8.so" > /etc/php/7.4/apache2/conf.d/30-php-oci8.ini && \
     echo "extension=oci8.so" > /etc/php/7.4/cli/conf.d/30-php-oci8.ini && \
     echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
+#RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 RUN echo "XDEBUG"
 COPY etc/php/7.4/mods-available/xdebug.ini /etc/php/7.4/mods-available/xdebug.ini
 RUN phpenmod -v ALL -s ALL xdebug
@@ -121,7 +126,6 @@ RUN apt-get autoremove -y && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 #CONFIG APACHE2
 #RUN rm /etc/apache2/site-available/000-default.conf /etc/apache2/site-available/default-ssl.conf
-COPY etc/php/7.4/99-oscar.ini /etc/php/7.4/99-oscar.ini
 COPY etc/apache2/sites-available/oscar.conf /etc/apache2/sites-available/oscar.conf
 RUN a2dissite 000-default && a2dissite default-ssl && a2ensite oscar
 
@@ -130,7 +134,7 @@ COPY run /usr/local/bin/run
 RUN chmod +x /usr/local/bin/run
 RUN a2enmod rewrite && a2enmod ssl
 
-#Composer
+#Composer (Attention proxy important pour du wget)
 RUN wget https://getcomposer.org/download/latest-stable/composer.phar
 RUN mv composer.phar /usr/local/bin/composer
 RUN chmod +x /usr/local/bin/composer
@@ -140,6 +144,12 @@ RUN echo "UPDATE"
 #SCRIPT INIT
 COPY startup.sh /opt/startup.sh
 RUN chmod +x /opt/startup.sh
+
+# OSCAR CONFIG (default)
+RUN mkdir /etc/oscar_config/
+COPY oscar/config/autoload/local.php /opt/oscar_config/local.php
+COPY oscar/config/autoload/unicaen-app.local.php /opt/oscar_config/unicaen-app.local.php
+COPY oscar/config/autoload/unicaen-auth.local.php /opt/oscar_config/unicaen-auth.local.php
 
 #SUPERVISOR FICHIERS DE CONFIG POUR MULTIPLES SERVICES IN CONTAINER DOCKER
 COPY supervisor /etc/supervisor/conf.d/oscar.conf

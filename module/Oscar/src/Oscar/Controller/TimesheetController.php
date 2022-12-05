@@ -9,6 +9,7 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
+use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Organization;
@@ -20,9 +21,11 @@ use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
+use Oscar\Formatter\TimesheetPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\OscarVersion;
@@ -31,6 +34,8 @@ use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\PeriodInfos;
+use Oscar\Utils\StringUtils;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Console\View\Renderer;
@@ -93,14 +98,16 @@ class TimesheetController extends AbstractOscarController
     /**
      * @return TimesheetService
      */
-    public function getTimesheetService() :TimesheetService {
+    public function getTimesheetService(): TimesheetService
+    {
         return $this->timesheetService;
     }
 
     /**
      * @param TimesheetService $s
      */
-    public function setTimesheetService( TimesheetService $s ){
+    public function setTimesheetService(TimesheetService $s)
+    {
         $this->timesheetService = $s;
     }
 
@@ -126,13 +133,15 @@ class TimesheetController extends AbstractOscarController
     /**
      * @return PersonService
      */
-    protected function getPersonFromRoute(){
+    protected function getPersonFromRoute()
+    {
         $idPerson = $this->params()->fromRoute('idperson');
         $person = $this->getEntityManager()->getRepository(Person::class)->find($idPerson);
         return $person;
     }
 
-    public function validatePersonPeriodAction(){
+    public function validatePersonPeriodAction()
+    {
         $person = $this->getPersonFromRoute();
         // TODO
         return [
@@ -140,16 +149,17 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function validationActivityAction(){
-
+    public function validationActivityAction()
+    {
         // Récupération de l'activité
         $activityId = $this->params()->fromRoute('idactivity');
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
         // Mode de déclaration
 
-        if( !$activity )
+        if (!$activity) {
             return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
+        }
 
         $method = $this->getHttpXMethod();
         $currentPerson = $this->getCurrentPerson();
@@ -157,131 +167,163 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
 
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             switch ($method) {
                 case 'POST':
-                    $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
-                    $action             = $this->params()->fromPost('action');
+                    $validationPeriodId = (int)$this->params()->fromPost('validationperiod_id');
+                    $action = $this->params()->fromPost('action');
 
                     // Récupération de la période
-                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($validationPeriodId);
-                    if( !$validationPeriod ){
-                        return $this->getResponseInternalError('Aucune procédure de validation en cours disponible pour cette période');
+                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find(
+                        $validationPeriodId
+                    );
+                    if (!$validationPeriod) {
+                        return $this->getResponseInternalError(
+                            'Aucune procédure de validation en cours disponible pour cette période'
+                        );
                     }
 
-                    if( $action == "valid-prj" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                    if ($action == "valid-prj") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
-
-                            if( $timesheetService->validationProject($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationProject($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée au niveau projet");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "valid-sci" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
+                    if ($action == "valid-sci") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider scientifiquement la déclaration"
+                            );
                         }
 
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
-
-                            if( $timesheetService->validationSci($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationSci($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée scientifiquement");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "valid-adm" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
+                    if ($action == "valid-adm") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider administrativement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
 
                         try {
-
-                            if( $timesheetService->validationAdm($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationAdm($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée administrativement");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-prj" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                    if ($action == "reject-prj") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectPrj($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectPrj($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de rejet pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-sci" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
+                    if ($action == "reject-sci") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectSci($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectSci($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
-                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage();
+                        } catch (\Exception $e) {
+                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage(
+                                );
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-adm" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
+                    if ($action == "reject-adm") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour rejeter administrativement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectAdm($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectAdm($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
-                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage();
+                        } catch (\Exception $e) {
+                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage(
+                                );
                         }
 
                         return $this->getResponseInternalError($error);
                     }
-
 
 
                     return $this->getResponseNotImplemented("Cette fonctionnalité n'est pas encore disponible");
@@ -289,8 +331,6 @@ class TimesheetController extends AbstractOscarController
                     return $this->getResponseBadRequest("Méthode non disponible");
             }
         }
-
-
 
 
         //
@@ -302,20 +342,34 @@ class TimesheetController extends AbstractOscarController
         foreach ($validationPeriods as $validationPeriod) {
             $periodInfos = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
             $activity = null;
-            if( $validationPeriod->isActivityValidation() ){
-                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
+            if ($validationPeriod->isActivityValidation()) {
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find(
+                    $validationPeriod->getObjectId()
+                );
             }
 
-            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
-            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+            $validablePrj = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                    $activity
+                );
+            $validableSci = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                    $activity
+                );
+            $validableAdm = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                    $activity
+                );
 
             $periodInfos['validable_prj'] = $validablePrj;
             $periodInfos['validable_sci'] = $validableSci;
             $periodInfos['validable_adm'] = $validableAdm;
 
             $periodKey = sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth());
-            if( !array_key_exists($periodKey, $periods) ){
+            if (!array_key_exists($periodKey, $periods)) {
                 $periods[$periodKey] = [];
             }
 
@@ -328,14 +382,15 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function validationActivity2Action(){
-
+    public function validationActivity2Action()
+    {
         // Récupération de l'activité
         $activityId = $this->params()->fromRoute('idactivity');
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
-        if( !$activity )
+        if (!$activity) {
             return $this->getResponseInternalError(sprintf("L'activités '%s' n'existe pas", $activityId));
+        }
 
         $method = $this->getHttpXMethod();
         $currentPerson = $this->getCurrentPerson();
@@ -343,135 +398,167 @@ class TimesheetController extends AbstractOscarController
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
 
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             switch ($method) {
                 case 'POST':
-                    $validationPeriodId = (int) $this->params()->fromPost('validationperiod_id');
-                    $action             = $this->params()->fromPost('action');
+                    $validationPeriodId = (int)$this->params()->fromPost('validationperiod_id');
+                    $action = $this->params()->fromPost('action');
 
                     // Récupération de la période
-                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find($validationPeriodId);
-                    if( !$validationPeriod ){
-                        return $this->getResponseInternalError('Aucune procédure de validation en cours disponible pour cette période');
+                    $validationPeriod = $this->getEntityManager()->getRepository(ValidationPeriod::class)->find(
+                        $validationPeriodId
+                    );
+                    if (!$validationPeriod) {
+                        return $this->getResponseInternalError(
+                            'Aucune procédure de validation en cours disponible pour cette période'
+                        );
                     }
 
-                    if( $action == "valid-prj" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                    if ($action == "valid-prj") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
-
-                            if( $timesheetService->validationProject($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationProject($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée au niveau projet");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "valid-sci" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider scientifiquement la déclaration");
+                    if ($action == "valid-sci") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider scientifiquement la déclaration"
+                            );
                         }
 
                         return $this->getResponseDeprecated("En cours de modification SCI");
 
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
-
-                            if( $timesheetService->validationSci($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationSci($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée scientifiquement");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "valid-adm" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider administrativement la déclaration");
+                    if ($action == "valid-adm") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider administrativement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
 
                         return $this->getResponseDeprecated("En cours de modification ADMIN");
 
                         try {
-
-                            if( $timesheetService->validationAdm($validationPeriod, $currentPerson) ){
+                            if ($timesheetService->validationAdm($validationPeriod, $currentPerson)) {
                                 return $this->getResponseOk("La période a bien été validée administrativement");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de validation pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-prj" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour valider la déclaration");
+                    if ($action == "reject-prj") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour valider la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectPrj($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectPrj($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $error = "Erreur de rejet pour la période $validationPeriodId : " . $e->getMessage();
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-sci" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration");
+                    if ($action == "reject-sci") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour rejeter scientifiquement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectSci($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectSci($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
-                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage();
+                        } catch (\Exception $e) {
+                            $error = "Erreur de rejet scientifique pour la période $validationPeriodId : " . $e->getMessage(
+                                );
                         }
 
                         return $this->getResponseInternalError($error);
                     }
 
-                    if( $action == "reject-adm" ){
-                        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity) ){
-                            $this->getResponseUnauthorized("Vous ne disposez pas des droits pour rejeter administrativement la déclaration");
+                    if ($action == "reject-adm") {
+                        if (!$this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                            $activity
+                        )) {
+                            $this->getResponseUnauthorized(
+                                "Vous ne disposez pas des droits pour rejeter administrativement la déclaration"
+                            );
                         }
                         $error = 'Procédure de validation obsolète (VID: ' . $validationPeriodId . ')';
                         try {
                             $message = $this->params()->fromPost('message');
-                            if( !$message ){
+                            if (!$message) {
                                 throw new \Exception('Vous devez renseigner une raison au rejet.');
                             }
-                            if( $timesheetService->rejectAdm($validationPeriod, $currentPerson, $message) ){
+                            if ($timesheetService->rejectAdm($validationPeriod, $currentPerson, $message)) {
                                 return $this->getResponseOk("La période a bien été rejetée");
                             }
-                        } catch ( \Exception $e ){
-                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage();
+                        } catch (\Exception $e) {
+                            $error = "Erreur de rejet administratif pour la période $validationPeriodId : " . $e->getMessage(
+                                );
                         }
 
                         return $this->getResponseInternalError($error);
                     }
-
 
 
                     return $this->getResponseNotImplemented("Cette fonctionnalité n'est pas encore disponible");
@@ -479,8 +566,6 @@ class TimesheetController extends AbstractOscarController
                     return $this->getResponseBadRequest("Méthode non disponible");
             }
         }
-
-
 
 
         //
@@ -492,20 +577,34 @@ class TimesheetController extends AbstractOscarController
         foreach ($validationPeriods as $validationPeriod) {
             $periodInfos = $timesheetService->getTimesheetsForValidationPeriod($validationPeriod);
             $activity = null;
-            if( $validationPeriod->isActivityValidation() ){
-                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($validationPeriod->getObjectId());
+            if ($validationPeriod->isActivityValidation()) {
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find(
+                    $validationPeriod->getObjectId()
+                );
             }
 
-            $validablePrj = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY, $activity);
-            $validableSci = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity);
-            $validableAdm = $validationPeriod->getStatus() == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity);
+            $validablePrj = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP1 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
+                    $activity
+                );
+            $validableSci = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP2 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                    $activity
+                );
+            $validableAdm = $validationPeriod->getStatus(
+                ) == ValidationPeriod::STATUS_STEP3 && $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM,
+                    $activity
+                );
 
             $periodInfos['validable_prj'] = $validablePrj;
             $periodInfos['validable_sci'] = $validableSci;
             $periodInfos['validable_adm'] = $validableAdm;
 
             $periodKey = sprintf('%s-%s', $validationPeriod->getYear(), $validationPeriod->getMonth());
-            if( !array_key_exists($periodKey, $periods) ){
+            if (!array_key_exists($periodKey, $periods)) {
                 $periods[$periodKey] = [];
             }
 
@@ -519,14 +618,14 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function validationHWPPersonAction(){
-
+    public function validationHWPPersonAction()
+    {
         $person = $this->getEntityManager()->getRepository(Person::class)->find($this->params()->fromRoute('idperson'));
-        if( !$person ){
+        if (!$person) {
             return $this->getResponseBadRequest("Personne introuvable");
         }
 
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             $serviceTimesheet = $this->getTimesheetService();
 
@@ -537,22 +636,22 @@ class TimesheetController extends AbstractOscarController
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action');
-                    if( !in_array($action, ['valid', 'reject']) ){
+                    if (!in_array($action, ['valid', 'reject'])) {
                         return $this->getResponseBadRequest("Mauvaise requête !");
                     }
                     $periodId = $this->params()->fromPost('period_id');
                     $message = $this->params()->fromPost('message', '');
                     try {
                         $period = $this->getTimesheetService()->getValidationPeriod($periodId);
-                        if( !$period ){
+                        if (!$period) {
                             throw new OscarException("Impossible de charger la période.");
                         }
-                        if( $action == 'valid' )
+                        if ($action == 'valid') {
                             $this->getTimesheetService()->validationAdm($period, $this->getCurrentPerson(), $message);
-                        else
+                        } else {
                             $this->getTimesheetService()->rejectAdm($period, $this->getCurrentPerson(), $message);
-
-                    } catch (\Exception $e ){
+                        }
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     break;
@@ -565,6 +664,113 @@ class TimesheetController extends AbstractOscarController
         return [
             'person' => $person
         ];
+    }
+
+    /**
+     * url(/feuille-de-temps/highdelay)
+     * @return array|JsonModel
+     * @throws OscarException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function highDelayAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
+
+        $format = $this->params()->fromQuery('f', OscarFormatterConst::FORMAT_IO_HTML);
+        $includeNonActive = $this->params()->fromQuery('a', 'off');
+
+        if ($this->isAjax() || $format == OscarFormatterConst::FORMAT_IO_JSON) {
+            // Critères
+            $period = $this->params()->fromQuery('period', date('Y-m'));
+            $period = PeriodInfos::getPeriodInfosObj($period)->prevMonth();
+            $datas = $this->baseJsonResponse();
+
+            // Liste des personnes avec des retards anciens (Personne => Période)
+            $datas['include_nonactive'] = $includeNonActive == 'on';
+            $datas['highdelays'] = $this->getPersonService()->getPersonsHighDelay(
+                $period->getPeriodCode(),
+                $this->url(),
+                $includeNonActive == 'on'
+            );
+            return $this->jsonOutput($datas);
+        }
+        return [];
+    }
+
+    public function synthesisActivityPeriodsBoundsAction()
+    {
+        $datas = [];
+        $activity_id = $this->params()->fromRoute('id', null);
+
+        // Analyse des critères
+        $year = $this->params()->fromQuery('year', null);
+        $from = $this->params()->fromQuery('from', null);
+        $to = $this->params()->fromQuery('to', null);
+        $facet = $this->params()->fromQuery('facet', 'person');
+        $format = $this->params()->fromQuery('format', OscarFormatterConst::FORMAT_IO_JSON);
+
+        //
+        $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+        $start = $activity->getDateStartStr('Y-m');
+        $end = $activity->getDateEndStr('Y-m');
+
+        if ($year) {
+            $start = sprintf('%s-01', $year);
+            $end = sprintf('%s-12', $year);
+        }
+
+        if ($from) {
+            $start = $from;
+        }
+
+        if ($to) {
+            $end = $to;
+        }
+
+        try {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+            $datas = $this->getTimesheetService()->getSynthesisActivityPeriods($start, $end, $activity->getId());
+            $datas['facet'] = $facet;
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
+
+
+        switch ($format) {
+            case OscarFormatterConst::FORMAT_IO_JSON :
+                return $this->jsonOutput($datas);
+
+            case OscarFormatterConst::FORMAT_IO_HTML :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                die($html);
+
+            case OscarFormatterConst::FORMAT_IO_PDF :
+                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
+                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
+
+                $formatter = new TimesheetPeriodHtmlFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $this->getViewRenderer()
+                );
+                $formatter->render($datas);
+                $html = $formatter->render($datas);
+                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
+                $pdfRendrer->convert($html, $datas['filename']);
+                die("terminé");
+
+            default:
+                return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
+        }
     }
 
     /**
@@ -583,21 +789,19 @@ class TimesheetController extends AbstractOscarController
         $error = null;
 
         try {
-
             // Contrôle d'accès
             $activity = $this->getProjectGrantService()->getActivityById($activity_id, true);
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
             // On détermine la 'plage'
-            if( $year ){
-
-                if( $format == 'excel') {
+            if ($year) {
+                if ($format == 'excel') {
                     $datas = $this->getTimesheetService()->getSynthesisActivityYear($year, $activity_id);
                     $formatter = new TimesheetActivityPeriodFormatter();
                     $formatter->output($datas);
                     die();
                 }
-                if( $format == 'pdf') {
+                if ($format == 'pdf') {
                     $datas = $this->getTimesheetService()->getHtmlTimesheetYear($year, $activity_id);
                 }
                 throw new OscarException("Format demandé inconnu");
@@ -606,17 +810,15 @@ class TimesheetController extends AbstractOscarController
 
             $output = $this->getTimesheetService()->getSynthesisActivityPeriod($activity_id, $period);
 
-            if( $format == 'json' ){
+            if ($format == 'json') {
                 return $this->jsonOutput($output);
-            }
-            elseif ($format == "excel") {
+            } elseif ($format == "excel") {
                 // TODO à revoir/supprimer
                 // Sur le plan métier, les fonctionnels de Tours ne trouve pas utilse de disposer d'un excel
                 // modifiable. A Caen, il est utilisé pour réaliser des synthèses/bilan
                 $formatter = new TimesheetActivityPeriodFormatter();
                 $formatter->output($output, 'excel');
-            }
-            elseif ($format == "pdf") {
+            } elseif ($format == "pdf") {
                 $output['format'] = 'pdf';
 
                 $formatter = new TimesheetActivityPeriodPdfFormatter(
@@ -626,25 +828,21 @@ class TimesheetController extends AbstractOscarController
 
                 $formatter->render($output, $this->getOscarConfigurationService()->getHtmlToPdfMethod());
                 die();
-            }
-            elseif ($format == "json") {
+            } elseif ($format == "json") {
                 $output['format'] = 'json';
                 return $this->jsonOutput($output);
-
-                die();
-            }
-            else {
+            } else {
                 $output['format'] = 'html';
-                $formatter =  new TimesheetActivityPeriodHtmlFormatter(
+                $formatter = new TimesheetActivityPeriodHtmlFormatter(
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
                     $this->getViewRenderer()
                 );
                 $html = $formatter->render($output);
                 die($html);
             }
-
         } catch (\Exception $e) {
-            die("AÏE");
+            echo $e->getTraceAsString();
+            die("AÏE : " . $e->getMessage());
         }
     }
 
@@ -661,28 +859,27 @@ class TimesheetController extends AbstractOscarController
      * @throws \PHPExcel_Reader_Exception
      * @throws \PHPExcel_Writer_Exception
      */
-    public function synthesisAllAction(){
-
+    public function synthesisAllAction()
+    {
         // Données reçues
-        $activity_id    = $this->params()->fromQuery('activity_id', null);
-        $person_id      = $this->params()->fromQuery('person_id', null);
-        $format         = $this->params()->fromQuery('format', '');
-        $period         = $this->params()->fromQuery('period', null);
-        $version        = $this->params()->fromQuery('v', 1);
-        $error          = null;
-        $validations    = null;
+        $activity_id = $this->params()->fromQuery('activity_id', null);
+        $person_id = $this->params()->fromQuery('person_id', null);
+        $format = $this->params()->fromQuery('format', '');
+        $period = $this->params()->fromQuery('period', null);
+        $version = $this->params()->fromQuery('v', 1);
+        $error = null;
+        $validations = null;
 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités
-        if( $activity_id != null ){
-
+        if ($activity_id != null) {
             $personsIds = [];
 
             /** @var Activity $activity */
             $activity = $this->getEntityManager()->find(Activity::class, $activity_id);
 
-            if( !$activity ){
+            if (!$activity) {
                 return $this->getResponseInternalError(sprintf(_("Activité introuvable")));
             }
 
@@ -694,65 +891,72 @@ class TimesheetController extends AbstractOscarController
                 $personsIds[] = $person->getId();
             }
 
-            if( !$activity->getDateStart() || !$activity->getDateEnd() ){
+            if (!$activity->getDateStart() || !$activity->getDateEnd()) {
                 throw new OscarException("Vous devez renseigner les dates de début et de fin de l'activité.");
             }
 
-            if( count($personsIds) == 0 ){
+            if (count($personsIds) == 0) {
                 return $this->getResponseInternalError(sprintf(_("Il n'y a pas de déclarants dans cette activité")));
             }
 
             // Période
-            $start  = $activity->getDateStart()->format('Y');
-            $end    = $activity->getDateEnd()->format('Y');
+            $start = $activity->getDateStart()->format('Y');
+            $end = $activity->getDateEnd()->format('Y');
 
             $periodStart = $activity->getDateStart()->format('Y-m');
             $periodEnd = $activity->getDateEnd()->format('Y-m');
 
             // $datas = $this->getTimesheetService()->getDatasActivity($activity, $periodStart, $periodEnd);
 
-            $validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod($personsIds, $periodStart, $periodEnd);
+            $validations = $this->getTimesheetService()->getDatasValidationPersonsPeriod(
+                $personsIds,
+                $periodStart,
+                $periodEnd
+            );
             $datas = $this->getTimesheetService()->getDatasDeclarersSynthesis($personsIds, $periodStart, $periodEnd);
             $horslots = $this->getTimesheetService()->getOthersWP();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour la personne
-        elseif ( $person_id != null ){
-
+        elseif ($person_id != null) {
             $person = $this->getPersonService()->getPerson($person_id);
 
-            if( !$person ){
+            if (!$person) {
                 return $this->getResponseInternalError(_("La personne est introuvable"));
             }
 
             // Contrôle des droits d'accès
             $global = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW);
-            if( !$global ){
+            if (!$global) {
                 $allow = in_array($this->getCurrentPerson(), $this->getPersonService()->getManagers($person));
-                if( !$allow ){
+                if (!$allow) {
                     // Patch :
                     // On va récupérer la liste des activités impliquant la personne pour la période, et tester si l'utilisateur
                     // est autorisé à voir les feuilles de temps pour l'une d'elles.
-                    $activitiesDeclarer = $this->getProjectGrantService()->getActivitiesPersonPeriod($person->getId(), $period);
+                    $activitiesDeclarer = $this->getProjectGrantService()->getActivitiesPersonPeriod(
+                        $person->getId(),
+                        $period
+                    );
                     foreach ($activitiesDeclarer as $activity) {
-                        if( $allow == false ) {
-                            $allow = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
+                        if ($allow == false) {
+                            $allow = $this->getOscarUserContextService()->hasPrivileges(
+                                Privileges::ACTIVITY_TIMESHEET_VIEW,
+                                $activity
+                            );
                         }
                     }
                 }
             }
 
-            if( !$period ){
+            if (!$period) {
                 return $this->getResponseBadRequest(_("Vous devez spécifier la période"));
             }
 
             $split = explode('-', $period);
             $periodOk = DateTimeUtils::getCodePeriod($split[0], $split[1]);
             $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
-        }
-
-        else {
+        } else {
             return $this->getResponseBadRequest("Paramètres de l'API insuffisants");
         }
 
@@ -764,11 +968,42 @@ class TimesheetController extends AbstractOscarController
             'validations' => $validations
         ];
 
-        if( $format == "excel" ){
-
+        if ($format == "excel") {
             $modele = $this->getConfiguration('oscar.paths.timesheet_synthesis_modele');
 
-            $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
+            $cellDays = [
+                'C',
+                'D',
+                'E',
+                'F',
+                'G',
+                'H',
+                'I',
+                'J',
+                'K',
+                'L',
+                'M',
+                'N',
+                'O',
+                'P',
+                'Q',
+                'R',
+                'S',
+                'T',
+                'U',
+                'V',
+                'W',
+                'X',
+                'Y',
+                'Z',
+                'AA',
+                'AB',
+                'AC',
+                'AD',
+                'AE',
+                'AF',
+                'AG'
+            ];
             $lineWpFormula = '=SUM(C%s:AG%s)';
             $rowWpFormula = '=SUM(%s10:%s%s)';
 
@@ -785,8 +1020,14 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
             $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 
-            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue(
+                'U3',
+                $datas['debut']
+            ); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue(
+                'U4',
+                $datas['fin']
+            ); // $fmt->format($activity->getDateEnd()));
             $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
             $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
 
@@ -798,7 +1039,7 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->insertNewColumnBefore('D');
 
             $name = "TEST_EXPORT.xls";
-            $filepath = '/tmp/'. $name;
+            $filepath = '/tmp/' . $name;
 
             $edited->save($filepath);
 
@@ -811,12 +1052,10 @@ class TimesheetController extends AbstractOscarController
             unlink($filepath);
 
             die($contentfile);
-
-
         }
 
-        if( $format == "json" || $this->isAjax() ){
-            if( $version == "2" ){
+        if ($format == "json" || $this->isAjax()) {
+            if ($version == "2") {
                 $json = [
                     'date' => date("Y-m-d H:i:s"),
                     'version' => OscarVersion::getBuild(),
@@ -841,8 +1080,8 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function syntheseActivityAction(){
-
+    public function syntheseActivityAction()
+    {
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
 
@@ -862,7 +1101,6 @@ class TimesheetController extends AbstractOscarController
         $totalPersons = [];
 
 
-
         $lots = []; // Données des lots
         $others = []; // Données des hors-lots
         $projects = []; // Données des autres projets
@@ -872,7 +1110,7 @@ class TimesheetController extends AbstractOscarController
         $period = DateTimeUtils::getCodePeriod($year, $month);
 
         /** @var WorkPackage $wp */
-        foreach ($activity->getWorkPackages() as $wp ){
+        foreach ($activity->getWorkPackages() as $wp) {
             $wpId = $wp->getId();
             $enteteLots[$wpId] = sprintf("%s - %s", $wp->getActivity()->getAcronym(), $wp->getCode());
             $totalLots[$wpId] = 0.0;
@@ -885,47 +1123,44 @@ class TimesheetController extends AbstractOscarController
         }
 
 
-        foreach ($activity->getDeclarers() as $person ){
+        foreach ($activity->getDeclarers() as $person) {
             $personId = $person->getId();
             $totalPersons[$personId] = 0.0;
             $lots[$personId] = [];
             $entetePerson[$personId] = (string)$person;
 
-            foreach ($enteteLots as $wpId=>$wpLabel){
+            foreach ($enteteLots as $wpId => $wpLabel) {
                 $lots[$personId][$wpId] = 0.0;
             }
 
             $others[$personId] = [];
-            foreach ($enteteOthers as $otherCode=>$otherLabel){
+            foreach ($enteteOthers as $otherCode => $otherLabel) {
                 $others[$personId][$otherCode] = 0.0;
             }
             $projects[$personId] = [];
         }
 
 
-
-        foreach ($activity->getDeclarers() as $person ){
-            
+        foreach ($activity->getDeclarers() as $person) {
             $timePerson = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
             $personId = $person->getId();
 
-            foreach ($timePerson['workpackages'] as $idActivityPerson=>$activityDetails){
+            foreach ($timePerson['workpackages'] as $idActivityPerson => $activityDetails) {
                 $acronym = $activityDetails['acronym'];
                 $activity_id = $activityDetails['activity_id'];
                 $workpackage_id = $activityDetails['id'];
                 $total = $activityDetails['total'];
 
-                if( $activity_id != $currentActivityId ){
-                    if( !array_key_exists($activity_id, $enteteProjets) ){
+                if ($activity_id != $currentActivityId) {
+                    if (!array_key_exists($activity_id, $enteteProjets)) {
                         $enteteProjets[$activity_id] = $acronym;
                         $totalProjets[$activity_id] = 0.0;
-                        foreach ($projects as $p=>$d){
+                        foreach ($projects as $p => $d) {
                             $projects[$p][$activity_id] = 0.0;
                         }
                     }
                     $totalProjets[$activity_id] += $total;
                     $projects[$personId][$activity_id] += $total;
-
                 } else {
                     $lots[$personId][$workpackage_id] += $total;
                     $totalPersons[$personId] += $total;
@@ -933,7 +1168,7 @@ class TimesheetController extends AbstractOscarController
                 }
             }
 
-            foreach ($timePerson['otherWP'] as $codeOther=>$dataOther) {
+            foreach ($timePerson['otherWP'] as $codeOther => $dataOther) {
                 $total = $dataOther['total'];
                 $totalOthers[$codeOther] += $total;
                 $others[$personId][$codeOther] += $total;
@@ -949,13 +1184,13 @@ class TimesheetController extends AbstractOscarController
         $enteteOthers = [];
          */
         echo "<thead><tr><th>Personne</th>";
-        foreach ($enteteLots as $id=>$label){
+        foreach ($enteteLots as $id => $label) {
             echo "<th class='lot heading active'>$label</th>";
         }
-        foreach ($enteteProjets as $id=>$label){
+        foreach ($enteteProjets as $id => $label) {
             echo "<th class='lot heading off'>$label</th>";
         }
-        foreach ($enteteOthers as $id=>$label){
+        foreach ($enteteOthers as $id => $label) {
             echo "<th class='hors-lot heading off'>$label</th>";
         }
         echo "<th>Total</th>";
@@ -965,16 +1200,16 @@ class TimesheetController extends AbstractOscarController
 
         $totalMonth = 0.0;
 
-        foreach ($entetePerson as $idPerson=>$labelPerson) {
+        foreach ($entetePerson as $idPerson => $labelPerson) {
             echo "<tr><th>$labelPerson</th>";
 
-            foreach ($lots[$idPerson] as $id=>$label){
+            foreach ($lots[$idPerson] as $id => $label) {
                 echo "<th class='lot heading active'>$label</th>";
             }
-            foreach ($projects[$idPerson] as $id=>$label){
+            foreach ($projects[$idPerson] as $id => $label) {
                 echo "<th class='lot heading off'>$label</th>";
             }
-            foreach ($others[$idPerson] as $id=>$label){
+            foreach ($others[$idPerson] as $id => $label) {
                 echo "<th class='hors-lot heading off'>$label</th>";
             }
 
@@ -986,15 +1221,15 @@ class TimesheetController extends AbstractOscarController
         }
 
         echo "<tr><th>Total</th>";
-        foreach ($totalLots as $id=>$total){
+        foreach ($totalLots as $id => $total) {
             echo "<th class='lot total active'>$total</th>";
         }
 
-        foreach ($totalProjets as $id=>$total){
+        foreach ($totalProjets as $id => $total) {
             echo "<th class='lot total'>$total</th>";
         }
 
-        foreach ($totalOthers as $id=>$total){
+        foreach ($totalOthers as $id => $total) {
             echo "<th class='hors-lot total'>$total</th>";
         }
         echo "<th class='hors-lot total'>$totalMonth</th>";
@@ -1010,14 +1245,14 @@ class TimesheetController extends AbstractOscarController
     /**
      * Permet d'exporter les informations de déclaration pour une activité entre 2 dates
      */
-    public function exportActivityDatesAction(){
-
+    public function exportActivityDatesAction()
+    {
         // Récupération des infos demandées
-        $activityId     = $this->params()->fromQuery('activity_id');
-        $periodDebut    = $this->params()->fromQuery('from', null);
-        $periodFin      = $this->params()->fromQuery('to', null);
+        $activityId = $this->params()->fromQuery('activity_id');
+        $periodDebut = $this->params()->fromQuery('from', null);
+        $periodFin = $this->params()->fromQuery('to', null);
 
-        if( !$activityId ){
+        if (!$activityId) {
             throw new OscarException(_("Données insuffisantes"));
         }
 
@@ -1025,12 +1260,14 @@ class TimesheetController extends AbstractOscarController
 
         // TODO Ajouter un test sur l'existance des dates (normalement, on ne peut pas avoir de feuilles de temps sur une activité non datée
         // période de début/fin
-        if( !$periodDebut )
+        if (!$periodDebut) {
             $periodDebut = $activity->getDateStart()->format('m-Y');
+        }
 
         // période de début/fin
-        if( !$periodFin )
+        if (!$periodFin) {
             $periodFin = $activity->getDateEnd()->format('m-Y');
+        }
 
 
         // TODO Tester que la période demandée est cohérente
@@ -1046,38 +1283,41 @@ class TimesheetController extends AbstractOscarController
      * @return array
      * @throws OscarException
      */
-    public function excelAction(){
-
-        $activityId     = $this->params()->fromQuery('activityid');
+    public function excelAction()
+    {
+        $activityId = $this->params()->fromQuery('activityid');
 
         /** @var Activity $activity */
-        $activity           = null;
-        $action             = $this->params()->fromQuery('action');
-        $period             = $this->params()->fromQuery('period', null);
-        $personIdQuery      = $this->params()->fromQuery('personid', null );
+        $activity = null;
+        $action = $this->params()->fromQuery('action');
+        $period = $this->params()->fromQuery('period', null);
+        $personIdQuery = $this->params()->fromQuery('personid', null);
 
         //
-        $currentPersonId    = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : -1;
+        $currentPersonId = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : -1;
 
-        if( $activityId ){
+        if ($activityId) {
             $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
         }
 
-        if( $personIdQuery != null && $currentPersonId != $personIdQuery ){
-
-            if( $activity == null ){
+        if ($personIdQuery != null && $currentPersonId != $personIdQuery) {
+            if ($activity == null) {
                 //  TODO Si l'activité n'est pas fournis, il faut récupérer la liste des activités du déclarant
                 $activities = $this->getProjectGrantService()->getActivitiesPersonPeriod($personIdQuery, $period);
                 $allow = false;
 
-                foreach ($activities  as $activity) {
-
-                    if($allow === false && $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity)){
+                foreach ($activities as $activity) {
+                    if ($allow === false && $this->getOscarUserContextService()->hasPrivileges(
+                            Privileges::ACTIVITY_TIMESHEET_VIEW,
+                            $activity
+                        )) {
                         $allow = true;
                     }
                 }
-                if( $allow == false ){
-                    return $this->getResponseUnauthorized("Vous ne pouvez pas voir cette feuille de temps pour cette période");
+                if ($allow == false) {
+                    return $this->getResponseUnauthorized(
+                        "Vous ne pouvez pas voir cette feuille de temps pour cette période"
+                    );
                 }
             }
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
@@ -1089,7 +1329,7 @@ class TimesheetController extends AbstractOscarController
         /** @var Person $person */
         $person = $this->getEntityManager()->getRepository(Person::class)->find($personId);
 
-        if( !$person ){
+        if (!$person) {
             throw new OscarException("Impossible de trouver la personne.");
         }
 
@@ -1097,33 +1337,34 @@ class TimesheetController extends AbstractOscarController
         $timesheetService = $this->getTimesheetService();
 
 
-        if( $action == "csv" ){
+        if ($action == "csv") {
             die("Cette fonctionnalité est provisoirement indisponible.");
-            if( !$activity ){
+            if (!$activity) {
                 $this->getResponseBadRequest("Impossible de trouver l'activité");
             }
             $datas = $timesheetService->getPersonTimesheetsCSV($person, $activity, false);
-            $filename = $activity->getAcronym() . '-' . $activity->getOscarNum().'-'.$person->getLadapLogin().'.csv';
+            $filename = $activity->getAcronym() . '-' . $activity->getOscarNum() . '-' . $person->getLadapLogin(
+                ) . '.csv';
             $handler = fopen('/tmp/' . $filename, 'w');
 
-             /** @var ActivityPayment $payment */
+            /** @var ActivityPayment $payment */
             foreach ($datas as $line) {
                 fputcsv($handler, $line);
             }
 
             fclose($handler);
-            header('Content-Disposition: attachment; filename='.$filename);
+            header('Content-Disposition: attachment; filename=' . $filename);
             header('Content-Length: ' . filesize('/tmp/' . $filename));
             header('Content-type: plain/text');
             die(file_get_contents('/tmp/' . $filename));
         }
 
-        if( $action == "export2" ){
+        if ($action == "export2") {
             $out = $this->params()->fromQuery('out', 'pdf');
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
             $datas['format'] = $out;
 
-            if( $out == 'pdf' ){
+            if ($out == 'pdf') {
                 /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
                 $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
 
@@ -1143,8 +1384,7 @@ class TimesheetController extends AbstractOscarController
 //                );
 //                $formatter->render($datas);
 //                die();
-            }
-            elseif ($out == 'html') {
+            } elseif ($out == 'html') {
                 $formatter = new TimesheetPersonPeriodHtmlFormatter(
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
                     $this->getViewRenderer()
@@ -1152,17 +1392,16 @@ class TimesheetController extends AbstractOscarController
                 $formatter->render($datas);
                 $html = $formatter->render($datas);
                 die($html);
-            }
-            else {
+            } else {
                 return $this->getResponseBadRequest("Format non-géré");
             }
         }
 
-        if( $action == "export" ){
+        if ($action == "export") {
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
 
             $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
-            if( !$modele ){
+            if (!$modele) {
                 throw new OscarException("Impossible de charger le modèle de feuille de temps");
             }
 
@@ -1172,12 +1411,45 @@ class TimesheetController extends AbstractOscarController
                 \IntlDateFormatter::FULL,
                 'Europe/Paris',
                 \IntlDateFormatter::GREGORIAN,
-                'd MMMM Y');
+                'd MMMM Y'
+            );
 
 //            /** @var Activity $activity */
 //            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
-            $cellDays = ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V', 'W','X','Y','Z','AA', 'AB', 'AC', 'AD', 'AE','AF','AG'];
+            $cellDays = [
+                'C',
+                'D',
+                'E',
+                'F',
+                'G',
+                'H',
+                'I',
+                'J',
+                'K',
+                'L',
+                'M',
+                'N',
+                'O',
+                'P',
+                'Q',
+                'R',
+                'S',
+                'T',
+                'U',
+                'V',
+                'W',
+                'X',
+                'Y',
+                'Z',
+                'AA',
+                'AB',
+                'AC',
+                'AD',
+                'AE',
+                'AF',
+                'AG'
+            ];
             $lineWpFormula = '=SUM(C%s:AG%s)';
             $rowWpFormula = '=SUM(%s10:%s%s)';
 
@@ -1187,8 +1459,8 @@ class TimesheetController extends AbstractOscarController
             /** @var \PHPExcel $spreadsheet */
             $spreadsheet = \PHPExcel_IOFactory::load($modele);
 
-            $dateStart  = new \DateTime($period.'-01');
-            $dateEnd    = new \DateTime($period.'-01');
+            $dateStart = new \DateTime($period . '-01');
+            $dateEnd = new \DateTime($period . '-01');
 
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
@@ -1196,8 +1468,14 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
             $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 
-            $spreadsheet->getActiveSheet()->setCellValue('U3', $datas['debut']); //$fmt->format($activity->getDateStart()));
-            $spreadsheet->getActiveSheet()->setCellValue('U4', $datas['fin']); // $fmt->format($activity->getDateEnd()));
+            $spreadsheet->getActiveSheet()->setCellValue(
+                'U3',
+                $datas['debut']
+            ); //$fmt->format($activity->getDateStart()));
+            $spreadsheet->getActiveSheet()->setCellValue(
+                'U4',
+                $datas['fin']
+            ); // $fmt->format($activity->getDateEnd()));
             $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
             $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
 
@@ -1210,24 +1488,25 @@ class TimesheetController extends AbstractOscarController
                 $labelG = $groupData['label'];
 
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
-                $spreadsheet->getActiveSheet()->setCellValue('A'.$line, $labelG);
-                $spreadsheet->getActiveSheet()->mergeCells('A'.$line.':'.'AG'.$line);
-                $spreadsheet->getActiveSheet()->getCell('A'.$line)->getStyle()->applyFromArray([]);
-                $spreadsheet->getActiveSheet()->setCellValue('B'.$line, "");
+                $spreadsheet->getActiveSheet()->setCellValue('A' . $line, $labelG);
+                $spreadsheet->getActiveSheet()->mergeCells('A' . $line . ':' . 'AG' . $line);
+                $spreadsheet->getActiveSheet()->getCell('A' . $line)->getStyle()->applyFromArray([]);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . $line, "");
 
                 $line++;
 
                 foreach ($groupData['subgroup'] as $subGroupData) {
                     $labelSG = $subGroupData['label'];
                     $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
-                    $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $labelSG);
-                    for( $i=0; $i<count($cellDays); $i++ ){
-
+                    $spreadsheet->getActiveSheet()->setCellValue('B' . $line, $labelSG);
+                    for ($i = 0; $i < count($cellDays); $i++) {
                         // Mise en forme du jour pour obtenir les clefs
-                        $day = $i+1;
-                        if( $day < 10 ) $day = '0'.$day;
+                        $day = $i + 1;
+                        if ($day < 10) {
+                            $day = '0' . $day;
+                        }
 
-                        $cellIndex = $cellDays[$i].$line;
+                        $cellIndex = $cellDays[$i] . $line;
                         $value = 0.0;
                         $style = [
                             'fill' => [
@@ -1236,49 +1515,50 @@ class TimesheetController extends AbstractOscarController
                             ]
                         ];
 
-                        if( array_key_exists($day, $subGroupData['days']) ){
+                        if (array_key_exists($day, $subGroupData['days'])) {
                             $value = $subGroupData['days'][$day];
                             $style['fill']['color']['rgb'] = 'bbf776';
                         }
 
-                        if( $datas['daysInfos'][$day]['close'] ){
+                        if ($datas['daysInfos'][$day]['close']) {
                             $style['fill']['color']['rgb'] = 'cccccc';
                         }
 
                         $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
                         $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
                     }
-                    $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+                    $spreadsheet->getActiveSheet()->setCellValue('AH' . $line, sprintf($lineWpFormula, $line, $line));
                     $line++;
                 }
             }
 
             $lineTotalWP = $line;
 
-            for( $i=0; $i<count($cellDays); $i++ ){
+            for ($i = 0; $i < count($cellDays); $i++) {
                 $cell = $cellDays[$i];
                 $sum = sprintf($rowWpFormula, $cell, $cell, $line);
-                $spreadsheet->getActiveSheet()->setCellValue($cell.($line+1), $sum);
+                $spreadsheet->getActiveSheet()->setCellValue($cell . ($line + 1), $sum);
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue('AH'.($line+1), sprintf($rowWpFormula, 'AH', 'AH', $line));
+            $spreadsheet->getActiveSheet()->setCellValue('AH' . ($line + 1), sprintf($rowWpFormula, 'AH', 'AH', $line));
 
             $line += 2;
-            $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
+            $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
             $line++;
 
-            foreach( $this->getOthersWP() as $other ){
-                $spreadsheet->getActiveSheet()->insertNewRowBefore(($line +1));
-                $spreadsheet->getActiveSheet()->setCellValue('B'.$line, $other['label']);
+            foreach ($this->getOthersWP() as $other) {
+                $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
+                $spreadsheet->getActiveSheet()->setCellValue('B' . $line, $other['label']);
                 $daysDatas = $datas['declarations']['others']['Hors-lot']['subgroup'][$other['label']]['days'];
 
-                for( $i=0; $i<count($cellDays); $i++ ){
-
+                for ($i = 0; $i < count($cellDays); $i++) {
                     // Mise en forme du jour pour obtenir les clefs
-                    $day = $i+1;
-                    if( $day < 10 ) $day = '0'.$day;
+                    $day = $i + 1;
+                    if ($day < 10) {
+                        $day = '0' . $day;
+                    }
 
-                    $cellIndex = $cellDays[$i].$line;
+                    $cellIndex = $cellDays[$i] . $line;
                     $value = 0.0;
                     $style = [
                         'fill' => [
@@ -1287,37 +1567,37 @@ class TimesheetController extends AbstractOscarController
                         ]
                     ];
 
-                    if( array_key_exists($day, $daysDatas) ){
+                    if (array_key_exists($day, $daysDatas)) {
                         $value = $daysDatas[$day];
                         $style['fill']['color']['rgb'] = 'bbf776';
                     }
 
-                    if( $datas['daysInfos'][$day]['close'] ){
+                    if ($datas['daysInfos'][$day]['close']) {
                         $style['fill']['color']['rgb'] = 'cccccc';
                     }
 
                     $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
                     $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
                 }
-                $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+                $spreadsheet->getActiveSheet()->setCellValue('AH' . $line, sprintf($lineWpFormula, $line, $line));
                 $line++;
             }
 
             $line += 1;
 
 
-
             $startTotal = $lineTotalWP;
-            $end = $line-1;
+            $end = $line - 1;
 
-            for( $i=0; $i<count($cellDays); $i++ ){
-
+            for ($i = 0; $i < count($cellDays); $i++) {
                 // Mise en forme du jour pour obtenir les clefs
-                $day = $i+1;
-                if( $day < 10 ) $day = '0'.$day;
+                $day = $i + 1;
+                if ($day < 10) {
+                    $day = '0' . $day;
+                }
 
                 $col = $cellDays[$i];
-                $cellIndex = $cellDays[$i].$line;
+                $cellIndex = $cellDays[$i] . $line;
 
                 $value = sprintf("=SUM(%s%s:%s%s)", $col, $startTotal, $col, $end); //$lineTotalWP';
                 $style = [
@@ -1327,7 +1607,7 @@ class TimesheetController extends AbstractOscarController
                     ]
                 ];
 
-                if( $datas['daysInfos'][$day]['close'] ){
+                if ($datas['daysInfos'][$day]['close']) {
                     $style['fill']['color']['rgb'] = 'cccccc';
                 }
 
@@ -1335,23 +1615,22 @@ class TimesheetController extends AbstractOscarController
                 $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue('AH'.$line, sprintf($lineWpFormula, $line, $line));
+            $spreadsheet->getActiveSheet()->setCellValue('AH' . $line, sprintf($lineWpFormula, $line, $line));
 
             // TOTAL
 
 
             $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
 
-            $name = ($person->getLadapLogin())."-" . $period . ".xls";
-            $filepath = '/tmp/'. $name;
+            $name = ($person->getLadapLogin()) . "-" . $period . ".xls";
+            $filepath = '/tmp/' . $name;
 
             $edited->save($filepath);
 
-                header('Content-Type: application/octet-stream');
-                header("Content-Transfer-Encoding: Binary");
-                header("Content-disposition: attachment; filename=\"" . $name . "\"");
-                die(readfile($filepath));
-
+            header('Content-Type: application/octet-stream');
+            header("Content-Transfer-Encoding: Binary");
+            header("Content-disposition: attachment; filename=\"" . $name . "\"");
+            die(readfile($filepath));
         }
 
 
@@ -1365,23 +1644,26 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function importIcalAction(){
-
+    public function importIcalAction()
+    {
         // -------------------------------------------------------------------------------------------------------------
         // Période URL
         $period = $this->params()->fromQuery('period', null);
-        if( !$this->getOscarConfigurationService()->getConfiguration('importEnable') ){
+        if (!$this->getOscarConfigurationService()->getConfiguration('importEnable')) {
             throw new OscarException("Cette option n'est activée");
         }
 
-        if( !$period )
+        if (!$period) {
             return $this->getResponseBadRequest("La période est non définit");
+        }
 
         $personId = $this->params()->fromQuery('person', null);
 
-        if( $personId && $personId != $this->getCurrentPerson()->getId() ) {
+        if ($personId && $personId != $this->getCurrentPerson()->getId()) {
             $person = $this->getPersonService()->getPersonById($personId, true);
-            if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $person->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
+            if (!($this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::PERSON_FEED_TIMESHEET
+                ) || $person->getTimesheetsBy()->contains($this->getCurrentPerson()))) {
                 throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $person");
             }
         } else {
@@ -1392,21 +1674,20 @@ class TimesheetController extends AbstractOscarController
         $resume = $this->getTimesheetService()->getPersonPeriods($person, $period);
 
         // par défaut, mois qui précède
-        if( $period == null ){
+        if ($period == null) {
             $now = new \DateTime();
-            $now->sub( new \DateInterval('P1M'));
+            $now->sub(new \DateInterval('P1M'));
             $period = $now->format('Y-m');
         }
 
-        if( $this->getHttpXMethod() == "POST" ){
-
+        if ($this->getHttpXMethod() == "POST") {
             $request = $this->getRequest();
             $events = json_decode($request->getPost('timesheets', '[]'), true);
             $removePrevious = $request->getPost('previousicsuidremove', null) == 'remove';
 
-            if( $removePrevious === true ){
+            if ($removePrevious === true) {
                 $uid = $request->getPost('previousicsuid', null);
-                if( $uid ){
+                if ($uid) {
                     $periodInfos = DateTimeUtils::periodBounds($period);
 
                     $qb = $this->getEntityManager()->createQueryBuilder();
@@ -1416,12 +1697,14 @@ class TimesheetController extends AbstractOscarController
                     $qb->andWhere('t.dateFrom >= :dateFrom');
                     $qb->andWhere('t.dateTo <= :dateTo');
 
-                    $qb->setParameters([
-                        'icsuid' => $uid,
-                        'person' => $person,
-                        'dateFrom' => $periodInfos['start'],
-                        'dateTo' => $periodInfos['end'],
-                    ]);
+                    $qb->setParameters(
+                        [
+                            'icsuid' => $uid,
+                            'person' => $person,
+                            'dateFrom' => $periodInfos['start'],
+                            'dateTo' => $periodInfos['end'],
+                        ]
+                    );
 
                     $qb->getQuery()->execute();
                 }
@@ -1434,8 +1717,10 @@ class TimesheetController extends AbstractOscarController
                         $to = DateTimeUtils::toDatetime($event['end']);
                         $from = DateTimeUtils::toDatetime($event['start']);
 
-                        if( !$from || !$to ){
-                            throw new OscarException("Problème de format des dates : " . $event['form'] . " / " . $event['end']);
+                        if (!$from || !$to) {
+                            throw new OscarException(
+                                "Problème de format des dates : " . $event['form'] . " / " . $event['end']
+                            );
                         }
 
                         /** @var TimeSheet $timesheet */
@@ -1451,7 +1736,9 @@ class TimesheetController extends AbstractOscarController
                             ->setDateTo($to);
 
                         if ($event['destinationId']) {
-                            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->findOneBy(['id' => $event['destinationId'] ]);
+                            $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->findOneBy(
+                                ['id' => $event['destinationId']]
+                            );
                             if (!$wp) {
                                 return $this->getResponseInternalError("Lot de travail inconnue");
                             }
@@ -1468,14 +1755,22 @@ class TimesheetController extends AbstractOscarController
                         $this->getEntityManager()->flush($timesheet);
                     }
 
-                    $dayRef = new \DateTime($period.'-01');
-                    return $this->redirect()->toRoute('timesheet/declarant', [], ['query' => ['month' => $dayRef->format('m'), 'year' => $dayRef->format('Y')]]);
+                    $dayRef = new \DateTime($period . '-01');
+                    return $this->redirect()->toRoute(
+                        'timesheet/declarant',
+                        [],
+                        [
+                            'query' => [
+                                'month' => $dayRef->format('m'),
+                                'year' => $dayRef->format('Y')
+                            ]
+                        ]
+                    );
                     die();
                 } catch (\Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
             }
-
         }
 
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($person, $period);
@@ -1496,16 +1791,21 @@ class TimesheetController extends AbstractOscarController
      */
     public function declarersAction()
     {
-        if( $this->isAjax() ){
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
-            switch( $method ){
+            switch ($method) {
                 case 'GET' :
                     $action = $this->params()->fromQuery('a');
                     try {
-                        if( $action == "declarers")
-                            return $this->ajaxResponse(['declarers' => $this->getTimesheetService()->getDeclarersList() ]);
+                        if ($action == "declarers") {
+                            return $this->ajaxResponse(
+                                ['declarers' => $this->getTimesheetService()->getDeclarersList()]
+                            );
+                        }
                     } catch (\Exception $e) {
-                        return $this->getResponseInternalError("Impossible de charger les déclarants : " . $e->getMessage());
+                        return $this->getResponseInternalError(
+                            "Impossible de charger les déclarants : " . $e->getMessage()
+                        );
                     }
             }
             return $this->getResponseBadRequest();
@@ -1519,7 +1819,7 @@ class TimesheetController extends AbstractOscarController
     public function recallDeclarerAction()
     {
         $declarerId = $this->params()->fromQuery('personid', null);
-        $periodStr  = $this->params()->fromQuery('period', null);
+        $periodStr = $this->params()->fromQuery('period', null);
 
         return $this->getResponseInternalError("Système de relance de $declarerId pour la période $periodStr a venir");
     }
@@ -1527,8 +1827,8 @@ class TimesheetController extends AbstractOscarController
     /**
      * Affiche les déclarations par structure
      */
-    public function organizationLeaderAction(){
-
+    public function organizationLeaderAction()
+    {
         /** @var TimesheetService $timesheetsService */
         $timesheetsService = $this->getTimesheetService();
 
@@ -1536,33 +1836,34 @@ class TimesheetController extends AbstractOscarController
 
         $organizationsTimesheets = [];
 
-        if( $organizationId != null ){
-            if( !( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
+        if ($organizationId != null) {
+            if (!($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
                 || $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI)
-                )) {
+            )) {
                 throw new UnAuthorizedException("Droits insuffisants");
             }
             $organisation = $this->getEntityManager()->getRepository(Organization::class)->find($organizationId);
-            $label = (string) $organisation;
+            $label = (string)$organisation;
             $roleOk = null;
 
-            foreach ($this->getOscarUserContextService()->getDbUser()->getRoles() as $role){
-                if( $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) || $role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM) ){
-                  $roleOk = $role;
+            foreach ($this->getOscarUserContextService()->getDbUser()->getRoles() as $role) {
+                if ($role->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) || $role->hasPrivilege(
+                        Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM
+                    )) {
+                    $roleOk = $role;
                 }
             }
             $organizationsTimesheets[] = [
-              'organization' => $organisation,
-              'role' => $roleOk
+                'organization' => $organisation,
+                'role' => $roleOk
             ];
         } else {
             /** @var OrganizationPerson $organizationPerson */
-            foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $organizationPerson ){
-
-                if(
+            foreach ($this->getCurrentPerson()->getLeadedOrganizations() as $organizationPerson) {
+                if (
                     $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI) ||
                     $organizationPerson->getRoleObj()->hasPrivilege(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM)
-                ){
+                ) {
                     $organizationsTimesheets[] = [
                         'organization' => $organizationPerson->getOrganization(),
                         'role' => $organizationPerson->getRoleObj()
@@ -1573,42 +1874,56 @@ class TimesheetController extends AbstractOscarController
 
         $method = $this->getHttpXMethod();
 
-        switch( $method ){
+        switch ($method) {
             case 'GET':
-                if( $this->isAjax() ){
+                if ($this->isAjax()) {
                     $result = [];
 
                     $urlActivity = [];
                     $urlProject = [];
 
                     /** @var OrganizationPerson $organizationPerson */
-                    foreach ($organizationsTimesheets as $data ){
-
+                    foreach ($organizationsTimesheets as $data) {
                         $organisationDatas = [
-                          'label' => (string)$data['organization'],
-                          'role'  => (string)$data['role'],
-                          'timesheets' => []
+                            'label' => (string)$data['organization'],
+                            'role' => (string)$data['role'],
+                            'timesheets' => []
                         ];
 
                         /** @var TimeSheet $timesheet */
-                        foreach ($timesheetsService->getTimesheetToValidateByOrganization( $data['organization']) as $timesheet ){
-
+                        foreach (
+                            $timesheetsService->getTimesheetToValidateByOrganization(
+                                $data['organization']
+                            ) as $timesheet
+                        ) {
                             $activity = $timesheet->getActivity();
                             $project = $activity->getProject();
                             $activityId = $activity->getId();
                             $projectId = $project->getId();
 
-                            if( !array_key_exists($activityId, $urlActivity) ){
-                                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
-                                    $urlActivity[$activityId] = $this->url()->fromRoute('contract/show', ['id' => $activityId]);
+                            if (!array_key_exists($activityId, $urlActivity)) {
+                                if ($this->getOscarUserContextService()->hasPrivileges(
+                                    Privileges::ACTIVITY_SHOW,
+                                    $activity
+                                )) {
+                                    $urlActivity[$activityId] = $this->url()->fromRoute(
+                                        'contract/show',
+                                        ['id' => $activityId]
+                                    );
                                 } else {
                                     $urlActivity[$activityId] = null;
                                 }
                             }
 
-                            if( !array_key_exists($projectId, $urlProject) ){
-                                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_SHOW, $activity->get) ){
-                                    $urlProject[$projectId] = $this->url()->fromRoute('project/show', ['id' => $projectId]);
+                            if (!array_key_exists($projectId, $urlProject)) {
+                                if ($this->getOscarUserContextService()->hasPrivileges(
+                                    Privileges::PROJECT_SHOW,
+                                    $activity->get
+                                )) {
+                                    $urlProject[$projectId] = $this->url()->fromRoute(
+                                        'project/show',
+                                        ['id' => $projectId]
+                                    );
                                 } else {
                                     $urlProject[$projectId] = null;
                                 }
@@ -1630,18 +1945,21 @@ class TimesheetController extends AbstractOscarController
             case "POST":
                 $action = $this->params()->fromPost('action', null);
                 $timesheetId = $this->params()->fromPost('timesheet_id', null);
-                if( !$timesheetId ){
+                if (!$timesheetId) {
                     return $this->getResponseInternalError("Erreur, impossible d'identifier le créneau à modifier");
                 } else {
                     try {
                         $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
-                    } catch( \Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseNotFound('Impossible de trouver ce créneau.');
                     }
                 }
-                switch ( $action ){
+                switch ($action) {
                     case 'validateadm':
-                        $timesheet = $timesheetsService->validateAdmin([$timesheet->toJson()], $this->getCurrentPerson());
+                        $timesheet = $timesheetsService->validateAdmin(
+                            [$timesheet->toJson()],
+                            $this->getCurrentPerson()
+                        );
                         return $this->ajaxResponse($timesheet);
 
                     case 'validatesci':
@@ -1670,16 +1988,16 @@ class TimesheetController extends AbstractOscarController
     }
 
     /**
-     * @deprecated
      * @return Response
+     * @deprecated
      */
     public function usurpationAction()
     {
         return $this->getResponseDeprecated("Cette fonctionnalité n'est plus disponible");
     }
 
-    public function resumeActivityAction(){
-
+    public function resumeActivityAction()
+    {
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('id'));
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
@@ -1688,13 +2006,12 @@ class TimesheetController extends AbstractOscarController
         $format = $this->params()->fromQuery('format', null);
         $method = $this->getHttpXMethod();
 
-        if( $this->isAjax() || $format == 'json' ){
+        if ($this->isAjax() || $format == 'json') {
             switch ($method) {
                 case 'GET' :
                     $datas = $this->getTimesheetService()->getResumeActivity($activity);
-                    if( $format == 'json' ){
+                    if ($format == 'json') {
                         return $this->jsonOutput($datas);
-
                     }
                     return $this->ajaxResponse($datas);
             }
@@ -1702,10 +2019,10 @@ class TimesheetController extends AbstractOscarController
         return [];
     }
 
-    public function resumeAction(){
-
+    public function resumeAction()
+    {
         $personId = $this->params()->fromQuery('person_id', null);
-        if( $personId ){
+        if ($personId) {
             $person = $this->getPersonService()->getPerson($personId);
         } else {
             $person = $this->getCurrentPerson();
@@ -1717,10 +2034,72 @@ class TimesheetController extends AbstractOscarController
         ];
     }
 
-    public function validationsAction() {
+    public function validations2Action()
+    {
+        if( $this->getHttpXMethod() == 'POST' ){
+            try {
+                $action = $this->params()->fromPost('action');
+                switch($action){
+                    case 'validate':
+                        $declarer_id = $this->params()->fromPost('declarer');
+                        $period = $this->params()->fromPost('period');
+                        $validator = $this->getCurrentPerson();
 
+                        $this->getTimesheetService()->validationProcess(
+                            $validator,
+                            $declarer_id,
+                            $period
+                        );
+                        break;
 
-        if( $this->isAjax() ){
+                    case 'reject':
+                        $declarer_id = $this->params()->fromPost('declarer');
+                        $period = $this->params()->fromPost('period');
+                        $message = $this->params()->fromPost('message');
+                        $validator = $this->getCurrentPerson();
+
+                        $this->getTimesheetService()->rejectProcess(
+                            $validator,
+                            $declarer_id,
+                            $period,
+                            $message
+                        );
+                        break;
+                }
+            } catch (\Exception $e) {
+                throw new OscarException($e->getMessage());
+            }
+            $this->redirect()->toRoute('timesheet/validations2');
+        }
+
+        // Lecture des informations
+        if( $this->isAjax() || $this->params()->fromQuery('f', null) == 'json' ){
+            $json = $this->baseJsonResponse();
+            $action = $this->params()->fromQuery('action', '');
+            if($action == 'details'){
+                $period = $this->params()->fromQuery('period', null);
+                $declarer_id = $this->params()->fromQuery('declarer_id', null);
+                $json['declarer'] = $declarer_id;
+                $json['period'] = $period;
+                $json['validation'] = $this->getTimesheetService()->getDatasValidationDeclarerPeriod(
+                    $this->getCurrentPerson()->getId(),
+                    $declarer_id,
+                    $period);
+            } else {
+                $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator($this->getCurrentPerson());
+            }
+            return $this->jsonOutput($json);
+        }
+
+        return [
+
+        ];
+    }
+
+    public function validationsAction()
+    {
+
+        if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             $serviceTimesheet = $this->getTimesheetService();
 
@@ -1732,22 +2111,22 @@ class TimesheetController extends AbstractOscarController
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action');
-                    if( !in_array($action, ['valid', 'reject']) ){
+                    if (!in_array($action, ['valid', 'reject'])) {
                         return $this->getResponseBadRequest("Mauvaise requête !");
                     }
                     $periodId = $this->params()->fromPost('period_id');
                     $message = $this->params()->fromPost('message', '');
                     try {
                         $period = $this->getTimesheetService()->getValidationPeriod($periodId);
-                        if( !$period ){
+                        if (!$period) {
                             throw new OscarException("Impossible de charger la période.");
                         }
-                        if( $action == 'valid' )
+                        if ($action == 'valid') {
                             $this->getTimesheetService()->validation($period, $this->getCurrentPerson(), $message);
-                        else
+                        } else {
                             $this->getTimesheetService()->reject($period, $this->getCurrentPerson(), $message);
-
-                    } catch (\Exception $e ){
+                        }
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     return $this->getResponseOk();
@@ -1760,8 +2139,8 @@ class TimesheetController extends AbstractOscarController
         return [];
     }
 
-    public function resolveInvalidLabelsAction(){
-
+    public function resolveInvalidLabelsAction()
+    {
         // TODO
         // $this->$this->getOscarUserContextService()->check(Privileges::)
 
@@ -1769,19 +2148,24 @@ class TimesheetController extends AbstractOscarController
         $destinations = $this->getTimesheetService()->getOthersWP();
         $message = "";
 
-        if( $this->getHttpXMethod() == 'POST' ){
-
+        if ($this->getHttpXMethod() == 'POST') {
             $correspondances = $this->params()->fromPost('labels');
             $resolve = [];
 
-            foreach( $correspondances as $correspondance=>$destination ){
-                if( $destination == "" ) continue;
-
-                if( !in_array($correspondance, $invalidLabels) ){
-                    throw new OscarException(sprintf("Opération interrompue : L'intitulé %s n'existe pas", $correspondance));
+            foreach ($correspondances as $correspondance => $destination) {
+                if ($destination == "") {
+                    continue;
                 }
-                if( !array_key_exists($destination, $destinations) ){
-                    throw new OscarException(sprintf("Opération interrompue : La destination %s n'existe pas", $correspondance));
+
+                if (!in_array($correspondance, $invalidLabels)) {
+                    throw new OscarException(
+                        sprintf("Opération interrompue : L'intitulé %s n'existe pas", $correspondance)
+                    );
+                }
+                if (!array_key_exists($destination, $destinations)) {
+                    throw new OscarException(
+                        sprintf("Opération interrompue : La destination %s n'existe pas", $correspondance)
+                    );
                 }
 
                 $resolve[$correspondance] = $destination;
@@ -1793,7 +2177,7 @@ class TimesheetController extends AbstractOscarController
         return [
             'message' => $message,
             'datas' => $invalidLabels,
-            'othersWP'=> $destinations
+            'othersWP' => $destinations
         ];
     }
 
@@ -1809,7 +2193,9 @@ class TimesheetController extends AbstractOscarController
         ];
 
         if ($datas['timesheetId']) {
-            $datas['timesheet'] = $this->getEntityManager()->getRepository(TimeSheet::class)->find($datas['timesheetId']);
+            $datas['timesheet'] = $this->getEntityManager()->getRepository(TimeSheet::class)->find(
+                $datas['timesheetId']
+            );
         }
     }
 
@@ -1822,16 +2208,25 @@ class TimesheetController extends AbstractOscarController
         $method = $this->getHttpXMethod();
 
         /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find(
+            $this->params()->fromRoute('idactivity')
+        );
 
         if (!$activity) {
-            return $this->getResponseNotFound(sprintf("L'activité %s n'existe pas",
-                $activity));
+            return $this->getResponseNotFound(
+                sprintf(
+                    "L'activité %s n'existe pas",
+                    $activity
+                )
+            );
         }
 
-        if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)
+        if (!($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_ADM, $activity)
             ||
-            $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI, $activity)) ){
+            $this->getOscarUserContextService()->hasPrivileges(
+                Privileges::ACTIVITY_TIMESHEET_VALIDATE_SCI,
+                $activity
+            ))) {
             throw new UnAuthorizedException();
         }
 
@@ -1839,11 +2234,10 @@ class TimesheetController extends AbstractOscarController
 
         if ($this->getRequest()->isXmlHttpRequest()) {
             if ($method == 'GET') {
-
                 // Récupération des déclarations pour cette activité
                 $timesheets = [];
 
-                foreach( $timeSheetService->allByActivity($activity) as $timesheet ){
+                foreach ($timeSheetService->allByActivity($activity) as $timesheet) {
                     // On désactive les fonctionnalités de déclaration
                     $timesheet['credentials']['deletable'] = false;
                     $timesheet['credentials']['editable'] = false;
@@ -1851,14 +2245,15 @@ class TimesheetController extends AbstractOscarController
                     $timesheets[] = $timesheet;
                 }
 
-                $response = new JsonModel([
-                    'timesheets' => $timesheets
-                ]);
+                $response = new JsonModel(
+                    [
+                        'timesheets' => $timesheets
+                    ]
+                );
 
                 $response->setTerminal(true);
 
                 return $response;
-
             } else {
                 /** @var Request $request */
                 $request = $this->getRequest();
@@ -1866,14 +2261,22 @@ class TimesheetController extends AbstractOscarController
                 if ($method == 'POST') {
                     $events = json_decode($request->getPost('events', '[]'), true);
                     if (count($events) == 1 && $events[0]['id'] == 'null') {
-                            throw new OscarException('A refactorer !');
+                        throw new OscarException('A refactorer !');
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
                         $events = json_decode($this->getRequest()->getPost()['events'], true);
-                        $timesheets = $this->processAction($action, $events, $timeSheetService, $activity, $this->getOscarUserContextService()->getCurrentPerson());
-                        $response = new JsonModel([
-                            'timesheets' => $timesheets
-                        ]);
+                        $timesheets = $this->processAction(
+                            $action,
+                            $events,
+                            $timeSheetService,
+                            $activity,
+                            $this->getOscarUserContextService()->getCurrentPerson()
+                        );
+                        $response = new JsonModel(
+                            [
+                                'timesheets' => $timesheets
+                            ]
+                        );
                         $response->setTerminal(true);
                         return $response;
                     }
@@ -1887,7 +2290,7 @@ class TimesheetController extends AbstractOscarController
         foreach ($activity->getWorkPackages() as $workpackage) {
             /** @var WorkPackagePerson $workpackageperson */
             foreach ($workpackage->getPersons() as $workpackageperson) {
-                if( !array_key_exists($workpackageperson->getPerson()->getId(), $declarants) ){
+                if (!array_key_exists($workpackageperson->getPerson()->getId(), $declarants)) {
                     $declarants[$workpackageperson->getPerson()->getId()] = $workpackageperson;
                 }
             }
@@ -1904,65 +2307,66 @@ class TimesheetController extends AbstractOscarController
      *
      * @return Response
      */
-    public function validatorAPIAction(){
+    public function validatorAPIAction()
+    {
         return $this->getResponseNotImplemented();
     }
 
-    protected function getOthersWP(){
+    protected function getOthersWP()
+    {
         return $this->getTimesheetService()->getOthersWP();
     }
 
 
     public function sendTimesheet(Person $person)
     {
-
         // JOUR
         $datas = json_decode($this->params()->fromPost('timesheets'));
         $action = $this->params()->fromPost('action');
 
         // Réenvois d'une déclaration
-        if( $action == "fix-reject" ){
+        if ($action == "fix-reject") {
             return $this->getResponseNotImplemented("Le FIX des rejets n'est pas encore implanté.");
         }
 
         $timesheets = [];
 
         //
-        if( count($datas) == 0 ){
+        if (count($datas) == 0) {
             return $this->getResponseBadRequest("Aucun créneau à traiter");
         }
 
         $now = new \DateTime();
 
-        foreach ($datas as $data){
+        foreach ($datas as $data) {
             $day = new \DateTime($data->day);
-            $dayBase = $day->format('Y-m-d'). ' %s:%s:00';
+            $dayBase = $day->format('Y-m-d') . ' %s:%s:00';
             $wpId = $data->wpId;
             $code = $data->code;
             $duration = (int)$data->duration;
-            $heures = floor($duration/60);
-            $minutes = $duration - ($heures*60);
+            $heures = floor($duration / 60);
+            $minutes = $duration - ($heures * 60);
             $status = TimeSheet::STATUS_DRAFT;
             $comment = $data->comment;
             $timesheetId = $data->id;
             $start = new \DateTime(sprintf($dayBase, 8, 0));
-            $end = new \DateTime(sprintf($dayBase, 8+$heures, $minutes));
+            $end = new \DateTime(sprintf($dayBase, 8 + $heures, $minutes));
             $month = (integer)$start->format('m');
             $year = (integer)$start->format('Y');
             $dayKey = $start->format('Y-n-j');
 
-            if( $duration <= 0 ){
+            if ($duration <= 0) {
                 throw new OscarException("Vous ne pouvez pas ajouter de créneau avec une durée nulle");
             }
 
             // Récupération des jours bloqués
             $locked = $this->getTimesheetService()->getLockedDays($year, $month);
 
-            if( array_key_exists($dayKey, $locked) ){
+            if (array_key_exists($dayKey, $locked)) {
                 return $this->getResponseBadRequest("Vous ne pouvez pas déclarer ce jour : " . $locked[$dayKey]);
             }
 
-            if( $start > $now ){
+            if ($start > $now) {
                 return $this->getResponseBadRequest('Vous ne pouvez pas anticiper une déclaration');
             }
 
@@ -1974,48 +2378,55 @@ class TimesheetController extends AbstractOscarController
             $validationPeriods = $this->getTimesheetService()->getValidationPeriods($year, $month, $person);
 
             // Créneau "Hors-lot"
-            if( !$data->wpId ){
-
+            if (!$data->wpId) {
                 $other = $this->getOthersWP()[$data->code];
 
                 // Récupération de la procédure de validation en cours
-                $validationPeriod = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt($person, $year, $month, $label);
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriosOutOfWorkpackageAt(
+                    $person,
+                    $year,
+                    $month,
+                    $label
+                );
 
                 $status = TimeSheet::STATUS_INFO;
                 $label = $code;
 
                 // On contrôle le code
-                if( !$other ){
+                if (!$other) {
                     $msg = sprintf("Ce type de créneau '%s' n'est pas pris en charge dans cette version", $code);
                     $this->getLoggerService()->error($msg);
                     return $this->getResponseBadRequest($msg);
                 }
-            }
-            // Créneau sur un lot
+            } // Créneau sur un lot
             else {
                 /** @var WorkPackage $wp */
                 $wp = $this->getEntityManager()->getRepository(WorkPackage::class)->find($wpId);
 
                 try {
                     $this->getTimesheetService()->checkAllowedAddedTimesheetInWorkPackage($person, $start, $end, $wp);
-                } catch ( OscarException $e ){
+                } catch (OscarException $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
 
 
-                if( !$wp ){
+                if (!$wp) {
                     $msg = sprintf("Le lot de travail 'N°%s' n'existe plus", $wpId);
                     $this->getLoggerService()->error($msg);
                     return $this->getResponseInternalError($msg);
                 }
 
-                $validationPeriod = $this->getTimesheetService()->getValidationPeriodActivityAt($wp->getActivity(), $person, $year, $month);
+                $validationPeriod = $this->getTimesheetService()->getValidationPeriodActivityAt(
+                    $wp->getActivity(),
+                    $person,
+                    $year,
+                    $month
+                );
                 $label = (string)$wp;
             }
 
             // Il y'a une/plusieurs procédures de validation sur cette période ?
-            if( count($validationPeriods) > 0 ){
-
+            if (count($validationPeriods) > 0) {
                 $hasConflict = false;
                 $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation.";
 
@@ -2023,35 +2434,32 @@ class TimesheetController extends AbstractOscarController
                 /** @var ValidationPeriod $vp */
                 foreach ($validationPeriods as $vp) {
                     $this->getLoggerService()->debug("$vp");
-                    if( $vp->getStatus() == ValidationPeriod::STATUS_CONFLICT ){
+                    if ($vp->getStatus() == ValidationPeriod::STATUS_CONFLICT) {
                         $unauthorizedError = "Vous ne pouvez pas modifier une déclaration en cours de validation. Seul les créneaux marqués en erreur peuvent être modifiés";
                         $hasConflict = true;
                     }
                 }
 
                 // Aucune procédure de validation spécifique pour ce type de créneau
-                if( $validationPeriod ){
-                    if( !$validationPeriod->hasConflict() ){
+                if ($validationPeriod) {
+                    if (!$validationPeriod->hasConflict()) {
                         return $this->getResponseBadRequest($unauthorizedError);
                     }
                 }
             }
 
-            if( $timesheetId ){
+            if ($timesheetId) {
                 $timesheet = $this->getEntityManager()->getRepository(TimeSheet::class)->find($timesheetId);
 
-                if( !$timesheet ){
+                if (!$timesheet) {
                     continue;
                 }
 
                 $credentials = $this->getTimesheetService()->resolveTimeSheetCredentials($timesheet, $person);
 
-                if( !$credentials['editable'] ){
+                if (!$credentials['editable']) {
                     return $this->getResponseInternalError("Vous n'avez pas le droit de modififier le créneau");
                 }
-
-
-
             } else {
                 $timesheet = new TimeSheet();
                 $this->getEntityManager()->persist($timesheet);
@@ -2071,10 +2479,10 @@ class TimesheetController extends AbstractOscarController
         $this->getEntityManager()->flush($timesheets);
 
         return $this->getResponseOk();
-
     }
 
-    public function checkperiodAction(){
+    public function checkperiodAction()
+    {
         $today = new \DateTime();
         $year = (int)$this->params()->fromQuery('year', $today->format('Y'));
         $month = (int)$this->params()->fromQuery('month', $today->format('m'));
@@ -2087,7 +2495,7 @@ class TimesheetController extends AbstractOscarController
         try {
             $this->getTimesheetService()->verificationPeriod($currentPerson, $year, $month);
             return $this->getResponseOk("Déclaration valide");
-        } catch (\Exception $e ){
+        } catch (\Exception $e) {
             return $this->getResponseInternalError("Déclaration invalide : " . $e->getMessage());
         }
 
@@ -2100,9 +2508,9 @@ class TimesheetController extends AbstractOscarController
      * @return array|Response
      * @throws \Exception
      */
-    public function declarantAction(){
-
-        if( !$this->getOscarUserContextService()->getCurrentPerson() ){
+    public function declarantAction()
+    {
+        if (!$this->getOscarUserContextService()->getCurrentPerson()) {
             return $this->getResponseInternalError("Vous avez été déconnecté de Oscar");
         }
 
@@ -2119,11 +2527,11 @@ class TimesheetController extends AbstractOscarController
         $usurpation = false;
 
         // Vérification de declarerId
-        if( $declarerId && !preg_match('/[0-9]*/', $declarerId )){
+        if ($declarerId && !preg_match('/[0-9]*/', $declarerId)) {
             return $this->getResponseBadRequest("Identifiant de déclarant incorrect");
         }
 
-        if( $declarerId ){
+        if ($declarerId) {
             $usurpation = $declarerId;
         } else {
             $declarerId = $this->getCurrentPerson()->getId();
@@ -2133,9 +2541,13 @@ class TimesheetController extends AbstractOscarController
         $currentPerson = $this->getPersonService()->getPersonById($declarerId); //$this->getCurrentPerson();
 
         // On test l'authorisation à l'usurpation si besoin
-        if( $declarerId != $this->getCurrentPerson()->getId() ){
-            if( !($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_FEED_TIMESHEET) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson())) ){
-                throw new UnAuthorizedException("Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson");
+        if ($declarerId != $this->getCurrentPerson()->getId()) {
+            if (!($this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::PERSON_FEED_TIMESHEET
+                ) || $currentPerson->getTimesheetsBy()->contains($this->getCurrentPerson()))) {
+                throw new UnAuthorizedException(
+                    "Vous n'êtes pas authorisé à compléter la feuille de temps de $currentPerson"
+                );
             }
         }
 
@@ -2143,15 +2555,15 @@ class TimesheetController extends AbstractOscarController
         $timesheetService = $this->getTimesheetService();
 
 
-        if( $this->isAjax() || $format == 'json' ) {
+        if ($this->isAjax() || $format == 'json') {
             switch ($method) {
-
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // Récupération des créneaux de la période
                 case 'GET' :
                     $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
-                    if( $usurpation )
+                    if ($usurpation) {
                         $datas['usurpation'] = $usurpation;
+                    }
 
                     return $this->ajaxResponse($datas);
                     break;
@@ -2162,24 +2574,24 @@ class TimesheetController extends AbstractOscarController
                     $action = $this->params()->fromPost('action', 'send');
                     $comments = $this->params()->fromPost('comments', null);
 
-                    if( $comments ){
+                    if ($comments) {
                         $comments = json_decode($comments, JSON_OBJECT_AS_ARRAY);
                     }
 
                     // Ajout des créneaux
-                    if( $action == 'add' ){
+                    if ($action == 'add') {
                         try {
                             return $this->sendTimesheet($currentPerson);
-                        } catch (\Exception $e){
+                        } catch (\Exception $e) {
                             return $this->getResponseInternalError($e->getMessage());
                         }
                     }
 
-                    if( $action == 'comment' ){
+                    if ($action == 'comment') {
                         try {
                             $timesheetService->saveCommentFromPost($currentPerson, $_POST);
                             return $this->getResponseOk();
-                        }catch (OscarException $e){
+                        } catch (OscarException $e) {
                             return $this->getResponseInternalError($e->getMessage());
                         }
 
@@ -2188,18 +2600,22 @@ class TimesheetController extends AbstractOscarController
 
                     $datas = json_decode($this->params()->fromPost('datas'));
 
-                    if( !$datas ){
+                    if (!$datas) {
                         return $this->getResponseBadRequest('Problème de transmission des données');
                     }
 
-                    if( !$datas->from || !$datas->to ){
+                    if (!$datas->from || !$datas->to) {
                         return $this->getResponseInternalError("La période soumise est incomplète");
                     }
 
                     try {
                         $firstDay = new \DateTime($datas->from);
-                        $this->getTimesheetService()->verificationPeriod($currentPerson, $firstDay->format('Y'), $firstDay->format('m'));
-                    } catch (\Exception $e ){
+                        $this->getTimesheetService()->verificationPeriod(
+                            $currentPerson,
+                            $firstDay->format('Y'),
+                            $firstDay->format('m')
+                        );
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError("Déclaration invalide : " . $e->getMessage());
                     }
 
@@ -2208,8 +2624,10 @@ class TimesheetController extends AbstractOscarController
                         $to = new \DateTime($datas->to);
                         $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
                         return $this->getResponseOk();
-                    } catch (\Exception $e ){
-                        return $this->getResponseInternalError('Erreur de soumission de la période : ' . $e->getMessage());
+                    } catch (\Exception $e) {
+                        return $this->getResponseInternalError(
+                            'Erreur de soumission de la période : ' . $e->getMessage()
+                        );
                     }
                     return $this->getResponseNotImplemented("Erreur inconnue");
                     break;
@@ -2221,15 +2639,16 @@ class TimesheetController extends AbstractOscarController
                         $idsCreneaux = explode(',', $this->params()->fromQuery('id'));
                         $timesheetService->delete($idsCreneaux, $currentPerson);
                         return $this->getResponseOk();
-                    } catch (\Exception $e ){
+                    } catch (\Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     break;
             }
         }
         $datas = $this->getTimesheetService()->getTimesheetDatasPersonPeriod($currentPerson, $period);
-        if( $usurpation )
+        if ($usurpation) {
             $datas['usurpation'] = $usurpation;
+        }
         return $datas;
     }
 
@@ -2243,7 +2662,8 @@ class TimesheetController extends AbstractOscarController
      * @return Response
      * @throws OscarException
      */
-    protected function processAction( $action, $events, $timeSheetService, $activity, $person ){
+    protected function processAction($action, $events, $timeSheetService, $activity, $person)
+    {
         return $this->getResponseDeprecated("Cette fonctionnalité a été désactivée");
     }
 
@@ -2260,27 +2680,38 @@ class TimesheetController extends AbstractOscarController
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_VALIDATION_MANAGE);
         $method = $this->getHttpXMethod();
 
-        if( $method == 'POST' && !$this->isAjax() ){
+        if ($method == 'POST' && !$this->isAjax()) {
             $action = $this->params()->fromPost('action');
-            switch( $action ){
+            switch ($action) {
                 case 'addvalidator':
                     $declarer = $this->getPersonService()->getPersonById($this->params()->fromPost('person'), true);
-                    $validator = $this->getPersonService()->getPersonById($this->params()->fromPost('validatorId'), true);
+                    $validator = $this->getPersonService()->getPersonById(
+                        $this->params()->fromPost('validatorId'),
+                        true
+                    );
                     try {
-                        $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getLoggerService()->notice(
+                            "Ajout de $validator comme validateur Hors-Lot pour $declarer"
+                        );
                         $this->getPersonService()->addReferentToDeclarationHorsLot($declarer, $validator, true);
-                    } catch (\Exception $e){
+                    } catch (\Exception $e) {
                         $this->getLoggerService()->error($e->getMessage());
-                        $this->flashMessenger()->addErrorMessage("$validator n'a pas été ajouté aux déclarations : " . $e->getMessage());
+                        $this->flashMessenger()->addErrorMessage(
+                            "$validator n'a pas été ajouté aux déclarations : " . $e->getMessage()
+                        );
                     }
 
                     try {
-                        $this->getLoggerService()->notice("Ajout de $validator comme validateur Hors-Lot pour $declarer");
+                        $this->getLoggerService()->notice(
+                            "Ajout de $validator comme validateur Hors-Lot pour $declarer"
+                        );
                         $this->getPersonService()->addReferent($validator->getId(), $declarer->getId());
-                    } catch ( \Exception $e ){
+                    } catch (\Exception $e) {
                         $this->getLoggerService()->error($e->getMessage());
-                        $this->flashMessenger()->addErrorMessage("$validator n'a pas été assigné comme validateur Hors-Lot pour $declarer : " . $e->getMessage());
-
+                        $this->flashMessenger()->addErrorMessage(
+                            "$validator n'a pas été assigné comme validateur Hors-Lot pour $declarer : " . $e->getMessage(
+                            )
+                        );
                     }
                     return $this->redirect()->toRoute('timesheet/declarations');
                 default:
@@ -2288,12 +2719,18 @@ class TimesheetController extends AbstractOscarController
             }
         }
 
-        if( $this->isAjax() ){
+        if ($this->isAjax() || $this->params()->fromQuery('format') == 'json' ) {
             switch ($method) {
                 case 'GET' :
-                $return = $this->getTimesheetService()->getDatasDeclarations();
-               // $return['validatorsEdit'] = true;
-                return $this->ajaxResponse($return);
+                    $person_ids = $this->params()->fromQuery('person_ids', '');
+                    if( $person_ids ){
+                        $filterPersons = StringUtils::intArray($person_ids);
+                    } else {
+                        $filterPersons = [];
+                    }
+                    $return = $this->getTimesheetService()->getDatasDeclarations($filterPersons);
+                    // $return['validatorsEdit'] = true;
+                    return $this->ajaxResponse($return);
 
                 case 'POST' :
                     $action = $this->params()->fromPost('action', 'add');
@@ -2302,37 +2739,34 @@ class TimesheetController extends AbstractOscarController
                     $person = $this->getPersonService()->getPerson($person_id);
 
                     // Modification des heures pour la périodes
-                    if( $action == 'changeschedule') {
+                    if ($action == 'changeschedule') {
                         $days = json_decode($this->params()->fromPost('days'));
                         $period = $this->params()->fromPost('period');
 
                         try {
                             $this->getTimesheetService()->changePersonSchedulePeriod($person, $days, $period);
                             return $this->getResponseOk();
-                        } catch (OscarException $e){
+                        } catch (OscarException $e) {
                             return $this->getResponseInternalError($e->getMessage());
                         }
-                    }
-
-                    //
+                    } //
                     else {
-
                         $type = $this->params()->fromPost('type');
                         $declaration_id = $this->params()->fromPost('declaration_id');
                         $validation = $this->getTimesheetService()->getValidationPeriod($declaration_id);
 
 
-                        if( !in_array($type, ['adm', 'sci', 'prj']) ){
+                        if (!in_array($type, ['adm', 'sci', 'prj'])) {
                             return $this->getResponseInternalError('Type de validation inconnu');
                         }
 
-                        if( $action == 'delete' ){
+                        if ($action == 'delete') {
                             $this->getTimesheetService()->removeValidatorToValidation($type, $person, $validation);
                             return $this->getResponseOk();
                         } else {
                             $this->getTimesheetService()->addValidatorToValidation($type, $person, $validation);
                             $return = [
-                                'person' => (string) $person,
+                                'person' => (string)$person,
                                 'id' => $person->getId()
                             ];
                             return $this->ajaxResponse($return);
@@ -2345,7 +2779,7 @@ class TimesheetController extends AbstractOscarController
                     $person_id = $this->params()->fromQuery('person_id');
                     $period = $this->params()->fromQuery('period');
                     try {
-                        if( $person_id ){
+                        if ($person_id) {
                             $person = $this->getPersonService()->getPerson($person_id);
                         }
                         $this->getTimesheetService()->deleteValidationPeriodPerson($person, $period);

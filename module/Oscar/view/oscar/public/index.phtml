@@ -95,13 +95,14 @@
 
                             <?php if( $this->grant()->getCurrentPerson()
                                 && $this->grant()->isDeclarer()): ?>
+
                                 <a class="btn btn-primary" href="<?= $this->url('timesheet/declarant') ?>">
                                     <i class="icon-pencil"></i>
                                     <?= $this->translate('Déclarer des heures') ?>
                                 </a>
-                                <a class="btn btn-primary" href="<?= $this->url('timesheet/resume') ?>">
+                                <a class="btn btn-default" href="<?= $this->url('timesheet/resume') ?>">
                                     <i class="icon-calendar"></i>
-                                    <?= $this->translate('Voir mes feuilles de temps') ?>
+                                    <?= $this->translate('Historique de mes feuilles de temps') ?>
                                 </a>
                             <?php endif; ?>
 
@@ -125,10 +126,22 @@
                             <?php endif; ?>
 
                             <?php if( $isValidator ): ?>
-                                    <a href="<?= $this->url('timesheet/validations') ?>" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
-                                        <i class="icon-pencil"></i>
-                                        Validation des feuilles de temps
-                                    </a>
+
+                                <div class="btn-group">
+                                    <a type="button" href="<?= $this->url('timesheet/validations2') ?>"
+                                       class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?>">
+                                        <i class="icon-edit"></i>
+                                    Validation des feuilles de temps</a>
+                                    <button type="button" class="btn <?= count($validations) > 0 ? 'btn-primary' : 'btn-default' ?> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="caret"></span>
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<?= $this->url('timesheet/validations2') ?>">Validations v2</a></li>
+                                        <li><a href="<?= $this->url('timesheet/validations') ?>">Validations (ancienne version)</a></li>
+                                    </ul>
+                                </div>
+
                             <?php endif; ?>
 
                             <?php if( $isRequestValidator ): ?>

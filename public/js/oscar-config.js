@@ -3,6 +3,9 @@
  *
  * Created by jacksay on 17/09/15.
  */
+
+let devext = window.MODE_DEV ? '' : '.min';
+
 requirejs.config({
     baseUrl: "/js/",
     paths: {
@@ -67,11 +70,10 @@ requirejs.config({
         "Datepicker2" : "oscar/dist/Datepicker",
         "activityclone" : "oscar/dist/Activityclone",
         "polyfill" : "oscar/dist/Polyfill",
-        "ActivitySearchUi" : "oscar/dist/ActivitySearchUi",
+        "ActivitySearchUi" : "oscar/dist/ActivitySearchUi.umd",
         "VueFilters" : "oscar/dist/VueFilters",
         "OrganizationType" : "oscar/dist/OrganizationType",
         "DisciplineUI" : "oscar/dist/DisciplineUI",
-        "TimesheetMonth" : "oscar/dist/TimesheetMonth",
         "ValidationActivityVue" : "oscar/dist/ValidationActivityVue",
         "ValidationPeriod" : "oscar/dist/ValidationPeriod",
         "DeclarersList" : "oscar/dist/DeclarersList",
@@ -84,11 +86,10 @@ requirejs.config({
         "PersonsList" : "oscar/dist/PersonsList",
         "Tva": "oscar/dist/Tva",
         "ActivityRequest": "oscar/dist/ActivityRequest",
-        "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin",
-        "ConfigStringList": "oscar/dist/ConfigStringList",
+        "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin.umd",
         "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
-        "ActivityGant": "oscar/dist/ActivityGant",
+        "ActivityGant": "oscar/dist/ActivityGant.umd",
         "Keyvalue": "oscar/dist/Keyvalue",
         "DocumentSectionAdmin": "oscar/dist/DocumentSectionAdmin",
         "SpentGroupAdmin": "oscar/dist/SpentGroupAdmin",
@@ -116,6 +117,12 @@ requirejs.config({
         "activityvalidator": "oscar/dist/ActivityValidator.umd.min",
         "workpackageui": "oscar/dist/WorkpackageUI.umd.min",
         "replacestrengthenperson": "oscar/dist/ReplaceStrengthenPerson.umd.min",
+        "timesheetactivitysynthesis": "oscar/dist/TimesheetActivitySynthesis.umd"+devext,
+        "timesheethighdelay": "oscar/dist/TimesheetHighDelay.umd"+devext,
+        "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
+        "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min",
+        "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
+        "ValidationUI": "oscar/dist/ValidationUI.umd.min"
     },
     shim: {
         "bootstrap": {

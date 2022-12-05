@@ -12,7 +12,10 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Procédure d'installation](install-prod.md)
  - [Procédure de mise à jour](update.md)
 
+## Installation via *Docker*
+
 ### Configuration de base
+ - [Authentification](configuration/config-auth.md)
  - [Gestion des documents](config-documents.md) : Configuration de la gestion des documents.
  - [Configuration des documents](config-documents.md)
  - [Configuration du moteur de recherche](config-elasticsearch.md)

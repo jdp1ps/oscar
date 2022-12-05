@@ -356,6 +356,23 @@
         <article class="card xs">
             <h3 class="card-title">
                 <strong>
+                    <i class="icon-calendar"></i>
+                    Retard de déclaration</strong>
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
+                    <a href="<?= $this->url('timesheet/highdelay') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php endif; ?>
+            </h3>
+            <p>Cette interface permet de visualiser les retards de déclaration.</p>
+        </article>
+
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
                     <i class="icon-docs"></i>
                     Gestion des documents téléversés</strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE) ):?>

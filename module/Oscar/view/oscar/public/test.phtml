@@ -1,23 +1,72 @@
+<?php
+///////////////////////////////////////////////////
+///
+function renderNode( $entry, $route = [] ) {
+    echo '<div class="item">';
+    if( count($entry['children']) > 0 ) {
+        echo '<i class="icon-archive"></i>';
+    } else {
+        echo '<i class="icon-tag"></i>';
+    }
+
+    echo  '<span class="item-label">'. $entry ['label'].'</span>';
+    if( count($route) > 0 ){
+        echo '<small> ~ '
+            . implode(' / ', $route)
+            . '</small>';
+    }
+
+    if( count($entry['children']) ){
+        echo '<div class="children">';
+        foreach ($entry['children'] as $item){
+            renderNode($item, array_merge($route, [$entry['label']]));
+        }
+        echo '</div>';
+    }
+
+    echo '</div>';
+}
+?>
+<style>
+
+</style>
 <div class="container">
-    <div id="synthesis-timesheet">ICI</div>
+    <div class="col-md-6">
+        <input type="text" name="selected" id="render">
+    </div>
+    <div class="col-md-6">
+        <div id="activitytype"></div>
+        <script>
+
+            require(["vue", "vue-resource", "activitytypeselector", "activitytypeitem"], function(Vue, VueResource, ActivityTypeSelector, ActivityTypeItem){
+                console.log("OK");
+                Vue.use(VueResource);
+                Vue.component('activity-type-item', ActivityTypeItem);
+
+                new Vue({
+                   el: "#activitytype",
+                   render: function(e) {
+                       return e(ActivityTypeSelector, { props: {
+                           initialSelected: 439,
+                           allowNodeSelection: true,
+                           typesAvailable: <?= json_encode($tree) ?>
+                       } });
+                   }
+                }).$on('select', function(){
+                    console.log('select')
+                });
+            })
+        </script>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id="test">ICI</div>
+        </div>
+    </div>
+
+
+
+    <pre><?php var_dump($tree[0]) ?></pre>
 </div>
 
-    <script>
-        require(['vue', 'vue-resource', 'timesheetsynthesismenu'], function (Vue, VueResource, ActivityTimesheetSynthesisMenu) {
-
-        Vue.use(VueResource);
-        Vue.http.options.emulateJSON = true;
-        Vue.http.options.emulateHTTP = true;
-
-        new Vue({
-            render: function (h) {
-        return h(ActivityTimesheetSynthesisMenu, {
-        props: {
-        url: '<?= $this->url('timesheet/synthesis') ?>?activity_id=9310&v=2'
-    }
-    })
-    },
-        el: '#synthesis-timesheet'
-    }).$mount()
-    });
-</script>

@@ -59,6 +59,28 @@ class DateTimeUtils
         return datefmt_format($fmt, $date->getTimestamp());
     }
 
+    public static function normalizePeriodStr( string $period ) :string
+    {
+        $re = '/([0-9]{1,2})-([0-9]{4})/m';
+        $format = '%s-%s';
+        $error = sprintf("La période '%s' est invalide", $period);
+
+        if( preg_match_all($re, $period, $matches, PREG_SET_ORDER, 0) ){
+            $month = intval($matches[0][1]);
+            if( $month > 12 || $month < 1 ){
+                throw new \Exception($error);
+            }
+            if( $month < 10 ){
+                $month = '0'.$month;
+            }
+            return sprintf($format, $month, $matches[0][2]);
+        }
+
+        else {
+            throw new OscarException($error);
+        }
+    }
+
     public static function periodBounds($period, $daysDetails = false)
     {
         $dateRef = new \DateTime(sprintf('%s-01', $period));

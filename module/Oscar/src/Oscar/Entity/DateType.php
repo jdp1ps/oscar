@@ -8,6 +8,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -61,18 +62,27 @@ class DateType implements ITrackable
     private $finishable = false;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var Collection
      * @ORM\OneToMany(targetEntity="ActivityDate", mappedBy="type")
      */
     private $milestones;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="datesType", fetch="EAGER")
+     * @ORM\JoinTable(name="role_datetype")
+     *      joinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="date_type_id", referencedColumnName="id")})
+     */
+    protected $roles;
+
+
+    /**
      * DateType constructor.
-     * @param \Doctrine\Common\Collections\Collection $milestones
      */
     public function __construct()
     {
         $this->milestones = new ArrayCollection();
+        $this->roles = new ArrayCollection();
     }
 
 
@@ -180,6 +190,48 @@ class DateType implements ITrackable
             'recursivity' => $this->getRecursivityArray()
         ];
     }
+
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param Role $role
+     * @return $this
+     */
+    public function addRole(Role $role): self
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles[] = $role;
+            $role->addDateType($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Role $role
+     * @return $this
+     */
+    public function removeRole(Role $role): self
+    {
+        if ($this->roles->contains($role)) {
+            $this->roles->removeElement($role);
+            $role->removeDateType($this);
+        }
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function resetRoles() :self
+    {
+        $this->roles = new ArrayCollection();
+        return $this;
+    }
+
 
     function __toString()
     {

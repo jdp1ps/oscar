@@ -10,13 +10,13 @@ $brand-primary: #455790 !default;
 $brand-complementary: #27556C !default;
 $bg-image: 'bg.jpg' !default;
 
-//rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary));
 $brand-secondary1: #6a5999;
 $brand-secondary2: #ff6600;
 $brand-success: #5cb85c !default;
 $brand-info: #5bc0de !default;
 $brand-warning: #f0ad4e !default;
 $brand-danger: #d9534f !default;
+$brand-error: #cb0b05 !default;
 
 $colorGreyUltraLight: #CCC;
 $colorGreyLight: #AAA;
@@ -35,5 +35,6 @@ $grid-float-breakpoint: 1024px;
 $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
+
 
 @import "_common.scss";

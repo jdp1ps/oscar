@@ -152,7 +152,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
 
 
-        if ($this->getRequest()->isXmlHttpRequest()) {
+        if ($this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') === 'json') {
             $result = [ 'datas' => []];
             foreach ($organizations as $data) {
                 $result['datas'][] = $data->toArray();
@@ -432,7 +432,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     public function newAction()
     {
-        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesObject());
         $entity = new Organization();
         $form->init();
         $form->bind($entity);
@@ -800,7 +800,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $entity = $result->getQuery()->getSingleResult();
         }
 
-        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesSelect());
+        $form = new OrganizationIdentificationForm($this->getOrganizationService(), $this->getOrganizationService()->getOrganizationTypesObject());
         $form->init();
         $form->bind($entity);
 

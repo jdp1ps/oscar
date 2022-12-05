@@ -39,7 +39,7 @@
                                 <div class="col-md-4">
                                     <select v-model="confirmProccess.personRole" class="form-control" id="roleDeclarer">
                                         <option value="0">Ne pas affecter à l'activité</option>
-                                        <option v-for="r, id in rolesPerson" :value="id">{{ r }}</option>
+                                        <option v-for="(r, id) in rolesPerson" :value="id">{{ r }}</option>
                                     </select>
                                 </div>
                             </section>
@@ -47,7 +47,7 @@
                                 <label for="roleOrg" class="col-md-8">Rôle de {{ confirmProccess.organization }}</label>
                                 <div class="col-md-4">
                                     <select v-model="confirmProccess.organisationRole" class="form-control" id="roleOrg">
-                                        <option v-for="r in rolesOrganisation" :value="r.id">{{ r.label }}</option>
+                                        <option v-for="(r, id) in rolesOrganisation" :value="id">{{ r }}</option>
                                     </select>
                                 </div>
                             </section>
@@ -148,7 +148,9 @@
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  ActivityRequestAdmin --filename.css ActivityRequestAdmin.css --filename.js ActivityRequestAdmin.js --dist public/js/oscar/dist public/js/oscar/src/ActivityRequestAdmin.vue
+// node node_modules/.bin/vue-cli-service build --name ActivityRequestAdmin --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/ActivityRequestAdmin.vue
+
+    import JCKSelector from "./components/JCKSelector";
 
     export default {
         data(){
@@ -177,7 +179,7 @@
         },
 
         components: {
-            'jckselector': require('./JCKSelector.vue').default,
+            'jckselector': JCKSelector,
         },
 
         props: {

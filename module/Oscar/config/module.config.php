@@ -164,6 +164,7 @@ return array(
                         'pcru',
                         'pcruInfos',
                         "pcruList",
+                        "apiUi",
                         "timesheet"
                     ],
 
@@ -171,7 +172,7 @@ return array(
                 ],
                 [
                     'controller' => 'Activity',
-                    'action' => ['advancedSearch', 'exportJSON', 'almostDone', 'almostStart'],
+                    'action' => ['advancedSearch','exportJSON', 'almostDone', 'almostStart'],
                     'privileges' => \Oscar\Provider\Privileges::ACTIVITY_INDEX
                 ],
                 [
@@ -262,10 +263,12 @@ return array(
                 [
                     'controller' => 'Timesheet',
                     'action' => [
+
+                        'highDelay',
                         'indexPersonActivity',
+
                         'sauvegarde',
                         'declaration',
-                        'validations',
                         'resume',
                         "declaration2",
                         "indexActivity",
@@ -285,8 +288,11 @@ return array(
                         'syntheseActivity',
                         'synthesisAll',
                         'synthesisActivityPeriod',
+                        'synthesisActivityPeriodsBounds',
                         'exportActivityDates',
-                        'checkperiod'
+                        'checkperiod',
+                        'validations',
+                        'validations2',
                     ],
                     'roles' => ['user']
                 ],

@@ -6,8 +6,86 @@
  * Time: 11:43
  */
 ?>
+<style>
+    .bordered-area {
+        border: solid #AAA 1px;
+        background: white;
+        padding: 1em;
+        overflow: scroll;
+        box-shadow: inset -.5em .5em 1em rgba(0,0,0,.1);
+    }
+    .activity {
+        min-height: 50px;
+        background: rgba(124, 181, 198, .5);
+        border: thin solid rgb(20, 34, 45);
+        border-left-width: 4px;
+        border-right-width: 4px;
+        margin: .25em 0;
+        position: absolute;
+    }
 
-<div class="container">
+    .activity:hover {
+        background: rgba(124, 181, 198, .8);
+    }
+    .activity:hover .milestone {
+        opacity: 1;
+    }
+
+    .date-start-end {
+        position: relative;
+        border-top: dotted rgba(255,255,255,.75) thin;
+        overflow: hidden;
+        height: 1.2em;
+        font-size: .8em;
+    }
+    .date-start-end .date-end {
+        position: absolute;
+        right: 0;
+    }
+    .date-start-end .date-start {
+        position: absolute;
+        left: 0;
+    }
+
+    .activity-label {
+        white-space: nowrap;
+    }
+    .milestone {
+        opacity: .5;
+        position: absolute;
+        border-left: 2px dotted rgba(20, 34, 45, .7);
+        min-height: 70px;
+        font-size: .9em;
+        padding-left: .3em;
+        white-space: nowrap;
+    }
+
+    .header-year {
+        position: absolute;
+        bottom: 0;
+    }
+    .header-year-div {
+        position: absolute;
+        border-left: dashed #777777 thin;
+        top: 0;
+        bottom: 0;
+        padding: 0 .3em;
+        font-weight: bold;
+        color: #BBB;
+    }
+    .months {
+        display: flex;
+        flex: 0 1;
+        flex-flow: nowrap;
+        justify-items: center;
+    }
+    .months span {
+        border-left: dashed #777777 thin;
+        font-weight: 100;
+        color: #BBB;
+    }
+</style>
+<div class="container-fluid">
     <div id="app"></div>
     <script>
         require(["vue", "vue-resource", "ActivityGant"], function(Vue, VueResource, ActivityGant){
@@ -17,9 +95,9 @@
             new Vue({
                 el: "#app",
                 render(h){
-                    return h(ActivityGant.default, {
+                    return h(ActivityGant, {
                         props: {
-                            url: 'http://localhost:8080/activites-de-recherche/api'/*,
+                            url: ''/*,
                             activities: []
                             /****/
                         }

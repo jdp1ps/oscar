@@ -79,6 +79,22 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $this->personService = $personService;
     }
 
+    public function getTypesIdsByLabel(?array $labels) :array {
+        $types = [];
+        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(
+            ['root' => null],
+            ['label' => 'DESC']
+        );
+
+        /** @var OrganizationType $type */
+        foreach ($result as $type) {
+            if( in_array($type->getLabel(), $labels) ){
+                $types[] = $type->getId();
+            }
+        }
+        return $types;
+    }
+
 
     private $cacheCountries = null;
     private $cacheConnectors = null;
@@ -222,6 +238,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 ->select('o.country')
                 ->from(Organization::class, 'o')
                 ->distinct('o.country')
+                ->where('o.country IS NOT NULL AND o.country != \'\'')
                 ->getQuery()
                 ->getScalarResult();
             foreach ($countries as $r) {
@@ -315,13 +332,24 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $types;
     }
 
+    public function getOrganizationTypesObject()
+    {
+        $options = [];
+
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
+        foreach ($types as $type) {
+            $options[$type->getId()] = $type;
+        }
+        return $options;
+    }
+
     public function getOrganizationTypesSelect()
     {
         $options = [];
 
-        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'DESC']);
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
         foreach ($types as $type) {
-            $options[$type->getId()] = $type;
+            $options[$type->getId()] = (string) $type;
         }
         return $options;
     }

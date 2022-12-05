@@ -36,6 +36,14 @@ $this->headScript();
             'type' => 'image/vnd.microsoft.icon',
             'href' => '//www.unicaen.fr/images/favicon.ico')) */?>
 
+        <?php if( getenv('APPLICATION_ENV') != 'production' ): ?>
+            <style>/*#navbar{background-color: #330000 !important; }body {background-color: #eedddd;}*/</style>
+            <script>
+                window.MODE_DEV = true;
+                console.log("OSCAR (Mode développement activé)")
+            </script>
+        <?php endif; ?>
+
         <!-- Scripts -->
         <script src="<?= $this->basePath() . '/js/initer.js' ?>"></script>
         <script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>"></script>
@@ -48,10 +56,6 @@ $this->headScript();
           <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
           <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
-
-        <?php if( getenv('APPLICATION_ENV') != 'production' ): ?>
-            <style>/*#navbar{background-color: #330000 !important; }body {background-color: #eedddd;}*/</style>
-        <?php endif; ?>
     </head>
 
     <body class="<?php echo getenv('APPLICATION_ENV') ?: 'development' ?>">
@@ -258,47 +262,6 @@ $this->headScript();
                         })
                     }
                 }).$mount('#notifications-area');
-
-		<?php /*if( $this->grant()->hasSocket() ): ?>
-
-            requirejs.config({ paths: {
-                "io":  "/js/socket.io"
-            }});
-            require(['io', 'vue'], (io, Vue) => {
-                socket = io('<?= $this->grant()->getSocketUrl() ?>', {
-                    query: {
-                        token: '<?= $this->grant()->dbUser()->getSecret() ?>'
-                    }
-                });
-                socket.on('connect', function(){
-                    console.log('Connect');
-                });
-                socket.on('notification', function(datas){
-                    notifications.fetch();
-                });
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
-                var connected = new Vue({
-                    el: "#connected",
-                    data: {
-                        users: []
-                    },
-                    template: `<section class="connected">
-                        Personnes connectées :
-                        <span class="cartouche xs" v-for="u in users">
-                            {{ u }}
-                        </span>
-                    </section>`
-                })
-                socket.on('users', function(datas){
-                    console.log('USERS', datas);
-                    connected.users = datas;
-                });
-                <?php endif; ?>
-                socket.on('disconnect', function(){
-                    console.log('disconnect');
-                });
-            });
-            <?php endif;*/ ?>
             });
         </script>
         <?php endif; ?>

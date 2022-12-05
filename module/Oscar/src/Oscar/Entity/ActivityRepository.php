@@ -9,6 +9,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
 
@@ -169,6 +170,244 @@ class ActivityRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function getBaseQueryBuilder() :QueryBuilder
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.project', 'p')
+
+            ;
+//            ->leftJoin('c.persons', 'm1')
+//            ->leftJoin('m1.person', 'pers1')
+//            ->leftJoin('c.disciplines', 'dis')
+//            ->leftJoin('c.activityType', 't1')
+//            ->leftJoin('c.organizations', 'p1')
+//            ->leftJoin('p1.organization', 'orga1')
+//            ->leftJoin('c.documents', 'd1')
+//            ->leftJoin('c.project', 'pr')
+//            ->leftJoin('pr.members', 'm2')
+//            ->leftJoin('pr.partners', 'p2')
+//            ->leftJoin('m2.person', 'pers2')
+//            ->leftJoin('p2.organization', 'orga2');
+    }
+
+    public function getBaseQueryBuilderByIdsPaged( array $ids, int $page = 1, int $resultByPage = 50 ):QueryBuilder
+    {
+        $offsetSQL = ($page - 1) * $resultByPage;
+        $limitSQL = $resultByPage;
+
+        return $this->getBaseQueryBuilder()
+            ->select('c')
+            ->where('c.id in(:ids)')
+            ->setFirstResult($offsetSQL)
+            ->setMaxResults($limitSQL)
+            ->setParameters([
+                'ids' => $ids
+                            ]);
+    }
+
+    /**
+     * @param int $idPerson
+     * @param int $idRole
+     * @return array
+     */
+    public function getIdsWithoutPersonWithRole( int $idPerson, int $idRole ) :array {
+        $idsWith = $this->getIdsForPersonWithRole($idPerson, $idRole);
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.id NOT IN(:ids)')
+            ->setParameter('ids', $idsWith);
+        return array_map(
+            'current',
+            $qb->getQuery()->getResult()
+        );
+    }
+
+    public function getIdsForPersons( array $idsPersons ) :array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.persons', 'act_per')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.members', 'prj_pers');
+
+        $parameters = [
+            'persons' => $idsPersons
+        ];
+
+        $qb->where('act_per.person IN(:persons) OR prj_pers.person IN(:persons)');
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
+    /**
+     * Retourne la liste des IDS des activités où la personne est impliquée (avec le role).
+     *
+     * @param int $idPerson ID de la personne (Person)
+     * @param int $idRole Si -1, ignoré
+     *
+     * @return array
+     */
+    public function getIdsForPersonWithRole( int $idPerson, int $idRole ) :array {
+            $qb = $this->createQueryBuilder('a')
+                ->select('a.id')
+                ->leftJoin('a.persons', 'act_per')
+                ->leftJoin('a.project', 'prj')
+                ->leftJoin('prj.members', 'prj_pers');
+
+            $parameters = [
+                'person' => $idPerson
+            ];
+
+            if( $idRole > 0 ){
+                $qb->where('(act_per.person = :person AND act_per.roleObj = :role) '
+                           .'OR (prj_pers.person = :person AND prj_pers.roleObj = :role)');
+                $parameters['role'] = $idRole;
+            } else {
+                $qb->where('act_per.person = :person OR prj_pers.person = :person');
+            }
+
+            return array_map(
+                'current',
+                $qb
+                    ->getQuery()
+                    ->setParameters($parameters)
+                    ->getResult()
+            );
+    }
+
+    /**
+     * Retourne la liste des IDs des activités ayant un des status donné.
+     *
+     * @param array $status
+     * @return array
+     */
+    public function getIdsWithStatus( array $status ) :array {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.status IN(:status)');
+
+        $parameters = [
+            'status' => $status
+        ];
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
+    public function getBeetween2Dates( string $from, string $to, string $field ) :array {
+
+        if( !$from && !$to ){
+            throw new OscarException("Le filtrage par date implique des dates");
+        }
+
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id');
+
+        $parameters = [
+
+        ];
+
+        if( $from ){
+            $qb->andWhere('a.'.$field . ' >= :from');
+            $parameters['from'] = $from;
+        }
+
+        if( $to ){
+            $qb->andWhere('a.'.$field . ' <= :to');
+            $parameters['to'] = $to;
+        }
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
+    public function getActivitiesIdsAll() :array {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id');
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * Retourne la liste des ids des activités n'impliquant pas l'organisation (avec le rôle).
+     *
+     * @param int $idOrganization
+     * @param int $idRole
+     * @return array
+     */
+    public function getIdsWithoutOrganizationWithRole( int $idOrganization, int $idRole ) :array {
+        $idsExclude = $this->getIdsForOrganizationWithRole($idOrganization, $idRole);
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.id NOT IN(:not)')
+            ->setParameter('not', $idsExclude);
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * @param int $idOrganization
+     * @param int $idRole
+     * @return array
+     */
+    public function getIdsForOrganizationWithRole( int $idOrganization, int $idRole ) :array {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.organizations', 'act_org')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.partners', 'prj_org')
+            ->where(
+                'act_org.organization = :organization OR prj_org.organization = :organization'
+            )
+        ;
+
+
+        $parameters = [
+            'organization' => $idOrganization
+        ];
+
+        if( $idRole > 0 ){
+            $qb->where('(act_org.organization = :organization AND act_org.roleObj = :role) '
+                       .'OR (prj_org.organization = :organization AND prj_org.roleObj = :role)');
+            $parameters['role'] = $idRole;
+        } else {
+            $qb->where('act_org.organization = :organization OR prj_org.organization = :organization');
+        }
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
     /**
      * Retourne les activités où les dates de début/fin sont inversées.
      *
@@ -179,5 +418,25 @@ class ActivityRepository extends EntityRepository
         $qb = $this->createQueryBuilder('a')
             ->where('a.dateStart > a.dateEnd');
         return $qb->getQuery()->getResult();
+    }
+
+
+    public function getActivityIdsWithWorkpackage() :array
+    {
+        return array_map(
+            'current',
+           $this->getQueryActivityIdsWithWorkpackage()
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    public function getQueryActivityIdsWithWorkpackage() :QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->innerJoin('a.workPackages', 'wp');
+
+        return $qb;
     }
 }

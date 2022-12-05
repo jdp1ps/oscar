@@ -9,6 +9,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
@@ -18,12 +19,14 @@ use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\NotificationRepository;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Entity\Role;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
@@ -227,6 +230,28 @@ class NotificationService implements UseServiceContainer
         return $this->_object_privilege_persons[$activityId][$privilege];
     }
 
+    /**
+     * @var array
+     */
+    private $_object_roles_persons = [];
+
+    /**
+     * Retourne un tableau de la liste des personnes et leurs rôles en relation avec l'activité $activité.
+     *
+     * @param Activity $activity
+     * @return mixed
+     * @throws OscarException
+     */
+    public function getRolesIdsWithPersonsIds(Activity $activity)
+    {
+        $activityId = $activity->getId();
+        $personsService = $this->getPersonService();
+        /** @var Person[] $persons Liste des personnes impliquées dans une activité avec leurs rôles cherche en profondeur */
+        $persons = $personsService->getAllPersonsWithRolesInActivity($activity);
+        $this->_object_roles_persons[$activityId] = $persons;
+        return $this->_object_roles_persons[$activityId];
+    }
+
 
     /**
      * Déclenche l'envoi d'un document lors de l'upload.
@@ -273,7 +298,7 @@ class NotificationService implements UseServiceContainer
      * Suppression des notifications liées à un jalon.
      *
      * @param ActivityDate $milestone
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function purgeNotificationMilestone(ActivityDate $milestone)
@@ -451,10 +476,14 @@ class NotificationService implements UseServiceContainer
     public function updateNotificationCoreMilestone(Activity $activity): void
     {
         $hashs = [];
+        Moment::setLocale('fr_FR');
+
+        $this->getLoggerService()->debug("MAJ notification pour $activity");
 
         /** @var ActivityDate $milestone */
         foreach ($activity->getMilestones() as $milestone) {
             $context = "milestone:" . $milestone->getId();
+            $this->getLoggerService()->debug(" - Traitement de $milestone");
 
             // Si le jalon peut être complété
             if ($milestone->isFinishable()) {
@@ -494,8 +523,11 @@ class NotificationService implements UseServiceContainer
 
             // Les rappels configurés dans le le type de jalon
             foreach ($milestone->getRecursivityDate() as $dateRappel) {
+                $moment = new Moment($milestone->getDateStartStr('Y-m-d'));
+                $dateDiff = $moment->from($dateRappel->format('Y-m-d'));
+                $delayStr = $dateDiff->getRelative();
                 $hashs[] = $this->buildNotificationCore(
-                    $message,
+                    $message . ' (' . $delayStr . ')',
                     Notification::OBJECT_ACTIVITY,
                     $activity->getId(),
                     $context,
@@ -569,52 +601,117 @@ class NotificationService implements UseServiceContainer
         }
     }
 
+    /**
+     * @param Activity $activity
+     * @param $ignorePast
+     * @return void
+     * @throws ORMException
+     * @throws OscarException
+     */
     public function updateNotificationsMilestonePersonActivity(Activity $activity, $ignorePast = true)
     {
+        $this->getLoggerService()->debug("updateNotificationsMilestonePersonActivity $activity");
         // Liste des notifications Programmées
         $notificationsActivity = $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
 
-        // Personnes devant être inscrite
-        $expectedSubscribers = $this->getPersonsIdFor(Privileges::ACTIVITY_MILESTONE_SHOW, $activity, true);
+        // Personnes devant être inscrites
+        $idsPersonsRoles = $this->getRolesIdsWithPersonsIds($activity);
 
-        $expectedSubscribersById = [];
-        $idsExpectedSubscribers = [];
-
-        /** @var Person $p */
-        foreach ($expectedSubscribers as $p) {
-            $expectedSubscribersById[$p->getId()] = $p;
-            $idsExpectedSubscribers[] = $p->getId();
+        $this->getLoggerService()->debug("Rôles concernées : ");
+        foreach ($idsPersonsRoles as $roleId => $personsIds) {
+            $this->getLoggerService()->debug(" - rôle '$roleId' : : " . count($personsIds) . " personne(s)");
         }
+
 
         $now = (new \DateTime('now'))->modify('-1 month');
 
+        //$na = notification
         foreach ($notificationsActivity as $na) {
-            $isPasted = $ignorePast && ($na->getDateEffective() < $now);
-            $idsPersonInPlace = [];
-            if ($isPasted) {
+            $contextNotification = explode(":", $na->getContext());
+
+            if( count($contextNotification) < 2 ){
                 continue;
             }
+            //ActivityDate = Jalon donc Milestone (ancienne nomenclature, terminologie métier)
+            $idActivityDate = $contextNotification[1];
+            try {
+                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
+            } catch (\Exception $e) {
+                die("idActivityDate : $idActivityDate --- " . $na->getContext());
+            }
+
+            if( !$activityDate ){
+                continue;
+            }
+
+            //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
+            $rolesActivityDate  = $activityDate->getType()->getRoles();
+
+            // Si pas de rôles on passe directement, pas de calcul de notifications
+            if (count($rolesActivityDate) == 0){
+                $this->getLoggerService()->debug(" > Skip (pas de rôles)");
+                continue;
+            }
+            // Si finishable et pas fait
+            // TODO
+//            if (!$activityDate->isLate()){
+//                $this->getLoggerService()->debug(" > Finishable / pas en retard");
+//                continue;
+//            }
+
+            // Mais la personne ne l'a pas qualifié c'est un cas particulier à prendre en compte dans la feature (ajouter à la condition)
+            $isPasted = $ignorePast && ($na->getDateEffective() < $now);
+            if ($isPasted) {
+                $this->getLoggerService()->debug(" > Passé");
+                continue;
+            }
+
+            // IDS des roles pour ce type de jalon
+            $idsRolesActivityDate = [];
+
+            /** @var  Role $roleActivityDate */
+            foreach ($rolesActivityDate as $roleActivityDate){
+                //idRole associé au type de jalon/milestone (ActivityDate)
+                $idsRolesActivityDate [] = $roleActivityDate->getId();
+            }
+
+            // Comparaison rôles du jalon et rôles des personnes et génération du tableau des personnes concernées
+            $idsExpectedSubscribersById = [];
+
+            $rolesAndExpectedSubscribers = $idsPersonsRoles;
+            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons){
+                if (in_array($idRole, $idsRolesActivityDate)){
+                    foreach ($arrayIdspersons as $key => $idPerson){
+                        if (!in_array($idPerson, $idsExpectedSubscribersById)){
+                            $idsExpectedSubscribersById [] = $idPerson;
+                        }
+                    }
+                }
+            }
+
+            $idsPersonInPlace = [];
+            // On récupère déjà les personnes inscrites
             /** @var NotificationPerson $inscrit */
             foreach ($na->getPersons() as $inscrit) {
                 $idPersonInscrit = $inscrit->getPerson()->getId();
-
                 // Ne devrait pas avoir la notif
-                if (!array_key_exists($idPersonInscrit, $expectedSubscribersById)) {
+                if (!array_key_exists($idPersonInscrit, $idsExpectedSubscribersById)) {
                     $this->getEntityManager()->remove($inscrit);
                 } // OK
                 else {
                     $idsPersonInPlace[] = $idPersonInscrit;
                 }
             }
-            $diff = array_diff($idsExpectedSubscribers, $idsPersonInPlace);
+
+            $diff = array_diff($idsExpectedSubscribersById, $idsPersonInPlace);
             if (count($diff) > 0) {
+                $this->getLoggerService()->debug("Mise à jour des inscrits");
                 /** @var int $idPersonToAdd */
                 foreach ($diff as $idPersonToAdd) {
-                    $personToAdd = $expectedSubscribersById[$idPersonToAdd];
+                    $personToAdd = $this->getEntityManager()->getRepository(Person::class)->find($idPersonToAdd);
                     $subscribe = new NotificationPerson();
                     $this->getEntityManager()->persist($subscribe);
-                    $subscribe->setNotification($na)
-                        ->setPerson($personToAdd);
+                    $subscribe->setNotification($na)->setPerson($personToAdd);
                 }
             }
         }

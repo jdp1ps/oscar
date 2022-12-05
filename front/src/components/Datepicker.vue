@@ -239,7 +239,6 @@
                     }
                 }
             }
-
         },
 
         ////////////////////////////////////////////////////////////////////: METHODES
@@ -288,7 +287,7 @@
             changeDate(date) {
                 console.log("Modification de la date", date);
                 this.picker = false;
-                this.realValue = date;
+                this.realValue = date ? this.moment(date).format(this.valueFormat) : '';
                 this.$emit('input', this.realValue);
                 this.$emit('change', this.realValue);
                 this.handlerHide();

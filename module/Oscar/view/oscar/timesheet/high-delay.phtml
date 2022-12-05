@@ -1,0 +1,22 @@
+<?php
+?>
+<div class="container">
+    <h1>
+        <i class="icon-clock"></i>
+        Retards importants
+    </h1>
+    <div id="timesheethighdelay"></div>
+</div>
+
+<script>
+    require(['vue', 'vue-resource', 'timesheethighdelay'], function(Vue, VueResource, TimesheetHighDelay){
+        console.log(TimesheetHighDelay);
+        Vue.use(VueResource);
+        new Vue({
+            el: "#timesheethighdelay",
+            render: function(h){
+                return h(TimesheetHighDelay);
+            }
+        })
+    })
+</script>

@@ -29,8 +29,9 @@ class Activity implements ResourceInterface
     ///////////////////////////////////////////////////////////////////// STATUS
     // 100 Statuts actifs
     const STATUS_ACTIVE = 101;
-
     const STATUS_PROGRESS = 102;
+    const STATUS_ACCEPTED = 106;
+
     /** Activité en cours de réalisation (dossier) */
     const STATUS_DEPOSIT = 103;
     const STATUS_MONTAGE = 104;
@@ -83,6 +84,7 @@ class Activity implements ResourceInterface
                 self::STATUS_ABORDED => 'Dossier abandonné',
                 self::STATUS_DISPUTE => 'Litige',
                 self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_ACCEPTED => 'Accepté',
                 self::STATUS_TERMINATED => 'Résilié',
                 self::STATUS_CLOSED => 'Terminé',
                 self::STATUS_MONTAGE => 'Montage',
@@ -674,6 +676,16 @@ class Activity implements ResourceInterface
             $this->numbers = [];
         }
         return $this->numbers;
+    }
+    public function getNumbersValues()
+    {
+        $out = [];
+        if( $this->numbers ){
+            foreach ($this->numbers as $key=>$value) {
+                $out[] = $value;
+            }
+        }
+        return $out;
     }
 
     /**
@@ -1588,7 +1600,8 @@ class Activity implements ResourceInterface
 
     /**
      * Retourne la liste des personnes ayant le rôle.
-     * @param string $role
+     * @param array $roles
+     * @return array
      */
     public function getPersonsRoledDeep(array $roles)
     {
@@ -1788,6 +1801,7 @@ class Activity implements ResourceInterface
     }
 
     private $_cacheOrganizationsByRole;
+    private $_cacheOrganizationsByRoles;
 
     public function getOrganizationsWithOneRole(array $roleIds): array
     {
@@ -1804,6 +1818,42 @@ class Activity implements ResourceInterface
         return $structures;
     }
 
+    public function getOrganizationsWithOneRoleIn(array $roles, $deep = true) {
+        if ($this->_cacheOrganizationsByRoles === null) {
+            $this->_cacheOrganizationsByRoles = [];
+            /** @var ActivityOrganization $relation */
+            foreach ($this->getOrganizations() as $relation) {
+                $role = $relation->getRole();
+                $organization = $relation->getOrganization();
+                $organizationId = $organization->getId();
+
+                if (!array_key_exists($role, $this->_cacheOrganizationsByRoles)) {
+                    $this->_cacheOrganizationsByRoles[$role] = [];
+                }
+
+                $this->_cacheOrganizationsByRoles[$role][$organizationId] = $organization;
+            }
+            if ($this->getProject()) {
+                foreach ($this->getProject()->getOrganizations() as $relation) {
+                    $role = $relation->getRole();
+                    $organization = $relation->getOrganization();
+                    $organizationId = $organization->getId();
+                    if (!array_key_exists($role, $this->_cacheOrganizationsByRoles)) {
+                        $this->_cacheOrganizationsByRoles[$role] = [];
+                    }
+                    $this->_cacheOrganizationsByRoles[$role][$organizationId] = $organization;
+                }
+            }
+        }
+        $output = [];
+        foreach ($roles as $role) {
+            if (isset($this->_cacheOrganizationsByRoles[$role])) {
+                $output = array_merge($output, $this->_cacheOrganizationsByRoles[$role]);
+            }
+        }
+        return $output;
+    }
+
     public function getOrganizationsWithRole($role, $deep = true)
     {
         if ($this->_cacheOrganizationsByRole === null) {
@@ -1817,6 +1867,9 @@ class Activity implements ResourceInterface
             }
             if ($this->getProject()) {
                 foreach ($this->getProject()->getOrganizations() as $partner) {
+                    if (!isset($this->_cacheOrganizationsByRole[$partner->getRole()])) {
+                        $this->_cacheOrganizationsByRole[$partner->getRole()] = [];
+                    }
                     $this->_cacheOrganizationsByRole[$partner->getRole()][] = $partner;
                 }
             }
@@ -2173,6 +2226,10 @@ class Activity implements ResourceInterface
         $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
         $datas['note-financiere'] = $this->getNoteFinanciere();
 
+        // Info Projet
+        $datas['project-label'] = $this->getProject() ? $this->getProject()->getLabel() : '';
+        $datas['project-acronym'] = $this->getProject() ? $this->getProject()->getAcronym() : '';
+
         $datas['type'] = (string)$this->getActivityType();
 
         $sluger = Slugify::create();
@@ -2192,20 +2249,36 @@ class Activity implements ResourceInterface
             }
             $persons[$roleStr][] = (string)$personActivity->getPerson();
         }
+
+        $organizations = [];
+
+        /** @var ActivityOrganization $organisationActivity */
+        foreach ($this->getOrganizationsDeep() as $organisationActivity) {
+            if( !$organisationActivity->getOrganization()->isClose() ){
+                $roleStr = (string)$organisationActivity->getRoleObj();
+                if (!array_key_exists($roleStr, $organizations)) {
+                    $organizations[$roleStr] = [];
+                }
+                $organizations[$roleStr][] = ((string)$organisationActivity->getOrganization());
+
+                // Personnes dans la structure
+                /** @var OrganizationPerson $personStructure */
+                foreach ($organisationActivity->getOrganization()->getPersons() as $personStructure){
+                    $roleInStructure = (string)$personStructure->getRoleObj();
+                    if( !$personStructure->isOutOfDate() ){
+                        if (!array_key_exists($roleInStructure, $persons)) {
+                            $persons['in-org-'.$roleInStructure] = [];
+                        }
+                        $persons['in-org-'.$roleInStructure][] = (string)$personStructure->getPerson();
+                    }
+                }
+            }
+        }
+
         foreach ($persons as $role => $ps) {
             $slug = $sluger->slugify($role);
             $datas[$slug] = implode(', ', $ps);
             $datas["$slug-list"] = $ps;
-        }
-
-        $organizations = [];
-
-        foreach ($this->getOrganizationsDeep() as $organisationActivity) {
-            $roleStr = (string)$organisationActivity->getRoleObj();
-            if (!array_key_exists($roleStr, $organizations)) {
-                $organizations[$roleStr] = [];
-            }
-            $organizations[$roleStr][] = (string)$organisationActivity->getOrganization();
         }
 
         foreach ($organizations as $role => $ps) {
@@ -2249,11 +2322,12 @@ class Activity implements ResourceInterface
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
                 $versementsEffectuesDate[] = $date;
             } else {
-                $date = $payment->getDatePredicted()->format('d/m/Y');
-
-                $versementsPrevus[] = $amount;
-                $versementsPrevusStr[] = $amount . ' le ' . $date;
-                $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+                if( $payment->getDatePredicted() ){
+                    $date = $payment->getDatePredicted()->format('d/m/Y');
+                    $versementsPrevus[] = $amount;
+                    $versementsPrevusStr[] = $amount . ' le ' . $date;
+                    $versementsPrevusDate[] = $payment->getDatePredicted()->format('d/m/Y');
+                }
             }
         }
         $datas['versements-prevus'] = implode(', ', $versementsPrevusStr);
@@ -2300,6 +2374,16 @@ class Activity implements ResourceInterface
             'Note' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
+    }
+
+    public function getWorkpackageByCode( string $code )
+    {
+        foreach ($this->getWorkPackages() as $workPackage) {
+            if ($workPackage->getCode() == $code){
+                return $workPackage;
+            }
+        }
+        return null;
     }
 
     public static function csvHeaders()

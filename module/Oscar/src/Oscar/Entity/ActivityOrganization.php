@@ -123,4 +123,9 @@ class ActivityOrganization implements ILoggable
             ->setRoleObj($this->getRoleObj());
         return $new;
     }
+
+    function isActive() :bool
+    {
+        return !$this->isOutOfDate() && !$this->getOrganization()->isClose();
+    }
 }

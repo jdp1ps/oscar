@@ -143,14 +143,14 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             $partners[] = (string)$organizationRolead->getOrganization();
         }
 
-        return [
+        $out = [
             'label' => $activity->getLabel(),
             'description' => $activity->getDescription(),
             'saic' => $activity->getCentaureId(),
             'numerotation' => $activity->getNumbers(),
             'oscar' => $activity->getOscarNum(),
             'activitytype' => $activity->getActivityType() ? (string)$activity->getActivityType() : '',
-            'numbers' => $activity->getNumbers(),
+            'numbers' => implode(" ", $activity->getNumbersValues()),
             'eotp' => $activity->getCodeEOTP(),
             'acronym' => $activity->getAcronym(),
             'activity_id' => $activity->getId(),
@@ -160,10 +160,29 @@ class ActivityElasticSearch implements ActivitySearchStrategy
             'project_id' => $project_id,
             'project' => $project_body,
         ];
+
+        return $out;
     }
 
     public function search($search)
     {
+        $search = trim($search);
+        // TRAITEMENT de la recherche
+        if( strpos($search, 'AND') || strpos($search, 'OR') || strpos($search, '"') ){
+
+        } else {
+            $split = explode(" ", $search);
+            if( count($split) == 1 ){
+                $search = sprintf('%s OR %s', $split[0], $split[0].'*');
+            } else {
+                $assembly = [];
+                foreach ($split as $term) {
+                    $assembly[] = trim($term);
+                }
+                $search = implode(' AND ', $assembly);
+            }
+        }
+
         $params = [
             'index' => $this->getIndex(),
             'type' => $this->getType(),
@@ -171,7 +190,20 @@ class ActivityElasticSearch implements ActivitySearchStrategy
                 'size' => 10000,
                 'query' => [
                     'query_string' => [
-                        'query' => sprintf('%s OR  %s*', $search, $search)
+                        'query' => $search,
+                        'fields' => [
+                            'acronym^10',
+                            'numerotation^9',
+                            'eotp^9',
+                            'numbers^9',
+                            'oscar^9',
+                            'label^7',
+                            'description^7',
+                            'project^5',
+                            'disciplines^5',
+                            'activitytype^2',
+                            'partners^5',
+                            'members^5']
                     ]
                 ]
             ]

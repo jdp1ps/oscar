@@ -440,7 +440,8 @@ class ProjectController extends AbstractOscarController
     public function currentUserProjectsAction()
     {
         return [
-            'person' => $this->getCurrentPerson()
+            'person' => $this->getCurrentPerson(),
+            'q' => $this->params()->fromQuery('q', '')
         ];
     }
 

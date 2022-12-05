@@ -153,4 +153,9 @@ class ProjectPartner implements ILoggable
         return $new;
     }
 
+    function isActive() :bool
+    {
+        return !$this->isOutOfDate() && !$this->getOrganization()->isClose();
+    }
+
 }

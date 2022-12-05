@@ -13,15 +13,16 @@ class ProjectToArrayFormatter implements IProjectFormater
     private array $rolesPerson = [];
     private array $rolesOrganization = [];
     private array $milestoneTypes = [];
+    private array $numerotations = [];
     private Slugify $slugger;
 
     const PREFIX_PERSON_ROLE = 'person';
     const PREFIX_ORGANIZATION_ROLE = 'organization';
     const PREFIX_MILESTONE = 'milestone';
+    const PREFIX_NUMEROTATION = 'numerotation';
 
 
-
-    protected function getNormalizedKey( string $label, string $prefix = '', string $suffix = '' ) :string
+    protected function getNormalizedKey(string $label, string $prefix = '', string $suffix = ''): string
     {
         return
             ($prefix ? $prefix . '-' : '') .
@@ -29,33 +30,43 @@ class ProjectToArrayFormatter implements IProjectFormater
             ($suffix ? '-' . $suffix : '');
     }
 
-    protected function getPersonRoleKey( string $role ) :string
+    protected function getPersonRoleKey(string $role): string
     {
         return $this->getNormalizedKey($role, self::PREFIX_PERSON_ROLE);
     }
 
-    protected function getOrganizationRoleKey( string $role ) :string
+    protected function getOrganizationRoleKey(string $role): string
     {
         return $this->getNormalizedKey($role, self::PREFIX_ORGANIZATION_ROLE);
     }
 
-    protected function getMilestoneTypeKey( string $role ) :string
+    protected function getMilestoneTypeKey(string $role): string
     {
         return $this->getNormalizedKey($role, self::PREFIX_MILESTONE);
     }
 
-    public function configure(array $rolesPerson, array $rolesOrganization, array $milestoneTypes): void
+    protected function getNumerotationKey(string $num): string
     {
+        return $this->getNormalizedKey($num, self::PREFIX_NUMEROTATION);
+    }
+
+    public function configure(
+        array $rolesPerson,
+        array $rolesOrganization,
+        array $milestoneTypes,
+        array $numerotations
+    ): void {
         $this->rolesPerson = $rolesPerson;
         $this->rolesOrganization = $rolesOrganization;
         $this->milestoneTypes = $milestoneTypes;
+        $this->numerotations = $numerotations;
         $this->slugger = new Slugify();
     }
 
     public function format(Project $project): array
     {
         $output = [];
-        foreach ($this->headers() as $key=>$label) {
+        foreach ($this->headers() as $key => $label) {
             $output[$key] = '';
         }
 
@@ -77,11 +88,16 @@ class ProjectToArrayFormatter implements IProjectFormater
         $financialImpacts = [];
         $disciplines = [];
 
+        $numerotations = [];
+        foreach ($this->numerotations as $num) {
+            $numerotations[$this->getNumerotationKey($num)] = [];
+        }
+
         // Données aggrégées
         $amount = 0.0;
         $pfi = [];
         $oscarNum = [];
-        $type = [];
+        $types = [];
         $status = [];
         $start = [];
         $end = [];
@@ -128,7 +144,7 @@ class ProjectToArrayFormatter implements IProjectFormater
             }
 
             if ($activity->getType()) {
-                $type[] = $activity->getType();
+                $types[] = $activity->getType();
             }
 
             $status[] = $activity->getStatusLabel();
@@ -192,12 +208,20 @@ class ProjectToArrayFormatter implements IProjectFormater
                     $milestones[$type][] = $d;
                 }
             }
+
+            foreach ($this->numerotations as $num) {
+                $keyNum = $this->getNumerotationKey($num);
+                $value = $activity->getNumber($num);
+                if ($value) {
+                    $numerotations[$keyNum][] = $value;
+                }
+            }
         }
 
         $output['amount'] = $amount;
         $output['pfi'] = implode(', ', $pfi);
         $output['oscarNum'] = implode(', ', $oscarNum);
-        $output['type'] = implode(', ', $type);
+        $output['type'] = implode(', ', $types);
         $output['status'] = implode(', ', $status);
         $output['start'] = implode(', ', $start);
         $output['end'] = implode(', ', $end);
@@ -222,6 +246,10 @@ class ProjectToArrayFormatter implements IProjectFormater
             $output[$this->getMilestoneTypeKey($type)] = implode(', ', $p);
         }
 
+        foreach ($numerotations as $key => $numbers) {
+            $output[$key] = implode(', ', $numbers);
+        }
+
         return $output;
     }
 
@@ -235,7 +263,6 @@ class ProjectToArrayFormatter implements IProjectFormater
         static $headers;
 
         if ($headers === null) {
-
             $headers = [
                 "id" => "Id Project",
                 "acronym" => "Acronyme",
@@ -270,6 +297,10 @@ class ProjectToArrayFormatter implements IProjectFormater
 
             foreach ($this->milestoneTypes as $t) {
                 $headers[$this->getMilestoneTypeKey($t)] = $t;
+            }
+
+            foreach ($this->numerotations as $n) {
+                $headers[$this->getNumerotationKey($n)] = $n;
             }
         }
 

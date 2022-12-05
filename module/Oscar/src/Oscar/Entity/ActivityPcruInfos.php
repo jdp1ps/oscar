@@ -534,7 +534,7 @@ class ActivityPcruInfos
      */
     public function setObjet(string $objet): self
     {
-        $this->objet = $objet;
+        $this->objet = mb_substr($objet, 0, 1000);
         return $this;
     }
 
@@ -551,7 +551,7 @@ class ActivityPcruInfos
      */
     public function setCodeUniteLabintel(string $codeUniteLabintel): self
     {
-        $this->codeUniteLabintel = $codeUniteLabintel;
+        $this->codeUniteLabintel = mb_substr($codeUniteLabintel, 0, 10);
         return $this;
     }
 
@@ -568,7 +568,7 @@ class ActivityPcruInfos
      */
     public function setSigleUnite(string $sigleUnite): self
     {
-        $this->sigleUnite = $sigleUnite;
+        $this->sigleUnite = mb_substr($sigleUnite, 0, 20);;
         return $this;
     }
 
@@ -607,7 +607,7 @@ class ActivityPcruInfos
      */
     public function setEquipe(string $equipe): self
     {
-        $this->equipe = $equipe;
+        $this->equipe = mb_substr($equipe, 0, 150);
         return $this;
     }
 
@@ -641,7 +641,7 @@ class ActivityPcruInfos
      */
     public function setAcronyme(string $acronyme): self
     {
-        $this->acronyme = $acronyme;
+        $this->acronyme = mb_substr($acronyme, 0, 10);
         return $this;
     }
 
@@ -675,7 +675,7 @@ class ActivityPcruInfos
      */
     public function setResponsableScientifique(string $responsableScientifique): self
     {
-        $this->responsableScientifique = $responsableScientifique;
+        $this->responsableScientifique = mb_substr($responsableScientifique, 0, 50);
         return $this;
     }
 
@@ -692,7 +692,7 @@ class ActivityPcruInfos
      */
     public function setEmployeurResponsableScientifique(string $employeurResponsableScientifique): self
     {
-        $this->employeurResponsableScientifique = $employeurResponsableScientifique;
+        $this->employeurResponsableScientifique = mb_substr($employeurResponsableScientifique, 0, 50);
         return $this;
     }
 
@@ -733,7 +733,7 @@ class ActivityPcruInfos
     /**
      * @return bool
      */
-    public function isPartenairePrincipal(): bool
+    public function getPartenairePrincipal(): string
     {
         return $this->partenairePrincipal;
     }
@@ -741,9 +741,9 @@ class ActivityPcruInfos
     /**
      * @param bool $partenairePrincipal
      */
-    public function setPartenairePrincipal(bool $partenairePrincipal): self
+    public function setPartenairePrincipal(string $partenairePrincipal): self
     {
-        $this->partenairePrincipal = $partenairePrincipal;
+        $this->partenairePrincipal = mb_substr($partenairePrincipal, 0, 50);
         return $this;
     }
 
@@ -760,7 +760,7 @@ class ActivityPcruInfos
      */
     public function setIdPartenairePrincipal(string $idPartenairePrincipal): self
     {
-        $this->idPartenairePrincipal = $idPartenairePrincipal;
+        $this->idPartenairePrincipal = mb_substr($idPartenairePrincipal, 0, 50);
         return $this;
     }
 
@@ -794,7 +794,7 @@ class ActivityPcruInfos
      */
     public function setLieuExecution(string $lieuExecution): self
     {
-        $this->lieuExecution = $lieuExecution;
+        $this->lieuExecution = mb_substr($lieuExecution, 0, 50);
         return $this;
     }
 
@@ -1013,7 +1013,7 @@ class ActivityPcruInfos
      */
     public function setReference(string $reference): self
     {
-        $this->reference = $reference;
+        $this->reference = mb_substr($reference, 0, 100);
         return $this;
     }
 
@@ -1047,7 +1047,7 @@ class ActivityPcruInfos
      */
     public function setCifre(string $cifre): self
     {
-        $this->cifre = $cifre;
+        $this->cifre = mb_substr($cifre, 0, 100);
         return $this;
     }
 
@@ -1064,7 +1064,7 @@ class ActivityPcruInfos
      */
     public function setChaireIndustrielle(string $chaireIndustrielle): self
     {
-        $this->chaireIndustrielle = $chaireIndustrielle;
+        $this->chaireIndustrielle = mb_substr($chaireIndustrielle, 0, 8);
         return $this;
     }
 

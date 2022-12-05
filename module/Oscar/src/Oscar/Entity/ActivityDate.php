@@ -33,6 +33,15 @@ class ActivityDate implements ITrackable
     const VALUE_CANCELED    = 200;
     const VALUE_REFUSED     = 400;
 
+    static public function progressInfos() {
+        return [
+            self::VALUE_TODO => "A faire",
+            self::VALUE_INPROGRESS => "En cours",
+            self::VALUE_VALIDED => "Validé",
+            self::VALUE_CANCELED => "Annulé",
+            self::VALUE_REFUSED => "Refusé"
+        ];
+    }
 
     /**
      * Données (la date)
@@ -85,8 +94,6 @@ class ActivityDate implements ITrackable
      * @ORM\Column(type="date", nullable=true)
      */
     private $dateFinish;
-
-
 
 
     public function finish( $value = 100, $date = null ){

@@ -9,6 +9,7 @@ if(
     $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_USURPATION) ||
     $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ||
     $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ||
+    $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ||
     $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE)
 ):
 ?>
@@ -34,13 +35,10 @@ if(
         <?php endif; ?>
 
         <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW)): ?>
-            <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Déclarants</li>
+            <li role="presentation" class="dropdown-header"><i class="icon-group"></i> Feuille de temps</li>
             <li><a href="<?= $this->url('person/declarers') ?>">Liste des déclarants</a></li>
+            <li><a href="<?= $this->url('timesheet/highdelay') ?>">Retards importants</a></li>
         <?php endif; ?>
-
-
-
-
 
         <li role="presentation" class="dropdown-header"><i class="icon-stethoscope"></i> Maintenance des données</li>
 

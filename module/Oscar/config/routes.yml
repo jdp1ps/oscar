@@ -163,13 +163,25 @@ timesheet:
     may_terminate: false
 
     child_routes:
+        highdelay:
+            type: segment
+            options:
+                route: /highdelay
+                defaults:
+                    action: highDelay
+
         synthesisactivity:
             type: segment
             options:
                 route: /synthesisactivity
                 defaults:
                     action: synthesisActivityPeriod
-
+        synthesisactivitybounds:
+            type: segment
+            options:
+                route: /synthese-activite-periode/:id
+                defaults:
+                    action: synthesisActivityPeriodsBounds
 
         synthesis:
             type: segment
@@ -312,6 +324,13 @@ timesheet:
                 route: /validations
                 defaults:
                     action: validations
+
+        validations2:
+            type: segment
+            options:
+                route: /validations2
+                defaults:
+                    action: validations2
 
         validationhwpperson:
             type: segment
@@ -886,6 +905,13 @@ contract:
                 route: /feuille-de-temps/:id
                 defaults:
                     action: timesheet
+
+        sdfjkhsdfjk:
+            type: segment
+            options:
+                route: /foo
+                defaults:
+                    action: searchActivity
 
         advancedsearch:
             type: segment

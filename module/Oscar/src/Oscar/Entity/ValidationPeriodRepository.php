@@ -52,6 +52,45 @@ class ValidationPeriodRepository extends EntityRepository
         return $this->getValidationPeriodsPersonQuery($personId)->getQuery()->getResult();
     }
 
+    /**
+     * Retourne la liste des toutes les ValidationPeriod pour les personnes données.
+     *
+     * @param array $personsIds
+     * @return int|mixed|string
+     */
+    public function getValidationPeriodsPersons( array $personsIds, ?int $filterYear = null ){
+
+        $query = $this->createQueryBuilder('vp')
+            ->where('vp.declarer IN (:ids)')
+            ->setParameters(['ids' => $personsIds])
+            ->orderBy('vp.year, vp.month');
+
+        if( $filterYear !== null ){
+            $query->andWhere('vp.year = :year')
+                ->setParameter('year', $filterYear)
+            ;
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne la liste des toutes les ValidationPeriod.
+     *
+     * @return int|mixed|string
+     */
+    public function getValidationPeriods( ?int $filterYear = null ){
+
+        $query = $this->createQueryBuilder('vp')
+            ->orderBy('vp.year, vp.month');
+
+        if( $filterYear !== null ){
+            $query->andWhere('vp.year = :year')
+                ->setParameter('year', $filterYear)
+            ;
+        }
+        return $query->getQuery()->getResult();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// GET ENTITIES
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +209,30 @@ class ValidationPeriodRepository extends EntityRepository
         return $out;
     }
 
+    /**
+     * @param int $declarer_id
+     * @param int $year
+     * @param int $month
+     * @return \Doctrine\ORM\Query
+     */
+    public function getValidationsDeclarerPeriod( int $declarer_id, int $year, int $month )
+    {
+        return $this->createQueryBuilder('vp')
+            ->select('vp')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where("vp.declarer = :declarer_id 
+                AND vp.month = :month 
+                AND vp.year = :year"
+            )
+            /* //->setParameter('person', $validator_id) */
+            ->setParameter('declarer_id', $declarer_id)
+            ->setParameter('month', $month)
+            ->setParameter('year', $year)
+            ->getQuery();
+    }
+
     public function getValidationsPeriodPerson( $personId ){
        return $this->createQueryBuilder('vp')
             ->where('vp.declarer = :person')
@@ -178,6 +241,98 @@ class ValidationPeriodRepository extends EntityRepository
            ->getResult();
     }
 
+    /**
+     * @param $status
+     * @return string
+     */
+    public static function getStatusText( $status ) :string
+    {
+        return self::getStatusTexts()[$status];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatusTexts() :array
+    {
+        static $STATUS_TEXTS;
+        if( $STATUS_TEXTS === null ){
+            $STATUS_TEXTS = [
+                'send-prj' => 'Validation projet',
+                'send-sci' => 'Validation scientifique',
+                'send-adm' => 'Validation administrative',
+                'conflict' => 'Conflit à résoudre',
+                'valid' => 'Validé',
+            ];
+        }
+        return $STATUS_TEXTS;
+    }
+
+    /**
+     * @param int $validatorId Identifiant Person
+     * @return array
+     */
+    public function getValidationPeriodForValidator( int $validatorId ):array
+    {
+        $query = $this->createQueryBuilder('vp')
+            ->select('vp')
+            ->innerJoin('vp.declarer', 'declarer')
+            ->leftJoin('vp.validatorsPrj', 'vprj')
+            ->leftJoin('vp.validatorsSci', 'vsci')
+            ->leftJoin('vp.validatorsAdm', 'vadm')
+            ->where("vprj = :person OR vsci = :person OR vadm = :person")
+            ->setParameter('person', $validatorId)
+            ->getQuery();
+
+        $out = [];
+        /** @var ValidationPeriod $validationPeriod */
+        foreach ($query->getResult() as $validationPeriod) {
+            $validable = false;
+
+            // Activity
+            $activity_id = null;
+            $activity_acronym = "";
+            if( $validationPeriod->isActivityValidation() ){
+                $activity_id = $validationPeriod->getObjectId();
+                $activity_acronym = "MISSING ACRONYM";
+                try {
+                    $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+                    $activity_acronym = $activity->getAcronym();
+                } catch (\Exception $e) {
+
+                }
+            }
+
+            $validators = [];
+
+            /** @var Person $validator */
+            foreach ($validationPeriod->getCurrentValidators() as $validator){
+                $validator_fullname = $validator->getFullName();
+                if( !in_array($validator_fullname, $validators) ){
+                    array_push($validators, $validator_fullname);
+                }
+                if( $validator->getId() == $validatorId ){
+                    $validable = true;
+                }
+            }
+
+            $out[] = [
+                'id' => $validationPeriod->getId(),
+                'declarer_id' => $validationPeriod->getDeclarer()->getId(),
+                'declarer_fullname' => (string) $validationPeriod->getDeclarer(),
+                'declarer_affectation' => $validationPeriod->getDeclarer()->getLdapAffectation(),
+                'validators' => $validators,
+                'period' => $validationPeriod->getPeriod(),
+                'statut' => $validationPeriod->getStatus(),
+                'statut_test' => self::getStatusText($validationPeriod->getStatus()),
+                'validable' => $validable,
+                'activity_id' => $activity_id,
+                'activity_acronym' => $activity_acronym
+            ];
+        }
+
+        return $out;
+    }
 
 
     /**
@@ -221,6 +376,33 @@ class ValidationPeriodRepository extends EntityRepository
                     'month' => $periodInfos->getMonth(),
                 ]
             )->getQuery()->getResult();
+    }
+    /**
+     * @param array $personIds
+     * @param string $periodStr
+     * @return \Doctrine\ORM\QueryBuilder
+     * @throws OscarException
+     */
+    public function getValidationPeriodsForPersonsAtPeriodBounds( array $personIds, string $from, string $to)
+    {
+        $start = PeriodInfos::getPeriodInfosObj($from);
+        $end = PeriodInfos::getPeriodInfosObj($to);
+
+        $query = $this->createQueryBuilder('v')
+            ->select('v')
+            ->where("v.declarer IN(:personIds) 
+                AND CONCAT(v.year, '-', v.month) >= :speriod 
+                AND CONCAT(v.year, '-', v.month) <= :fperiod 
+                " )
+            ->setParameters(
+                [
+                    'personIds' => $personIds,
+                    'speriod' => $start->getPeriodSimple(),
+                    'fperiod' => $end->getPeriodSimple()
+                ]
+            )->getQuery();
+
+        return $query->getResult();
     }
 
     /**

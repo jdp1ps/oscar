@@ -33,8 +33,9 @@ class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFil
 
         $typesSelect = [];
         $typesSelect[] = "";
-        foreach ($this->types as $t ){
-            $typesSelect[$t->getId()] = (string)$t;
+
+        foreach ($this->types as $id=>$t ){
+            $typesSelect[$id] = (string)$t;
         }
 
         $this->add(array(

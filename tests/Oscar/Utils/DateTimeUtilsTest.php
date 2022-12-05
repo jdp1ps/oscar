@@ -14,6 +14,46 @@ use Zend\Db\Sql\Ddl\Column\Datetime;
 
 class DateTimeUtilsTest extends TestCase
 {
+    public function testNormalize(){
+        $datas = [
+            '1-2021' => '01-2021',
+            '2-2021' => '02-2021',
+            '3-2021' => '03-2021',
+            '4-2021' => '04-2021',
+            '5-2021' => '05-2021',
+            '6-2021' => '06-2021',
+            '7-2021' => '07-2021',
+            '8-2021' => '08-2021',
+            '9-2021' => '09-2021',
+            '10-2021' => '10-2021',
+            '11-2021' => '11-2021',
+            '12-2021' => '12-2021',
+        ];
+        foreach ($datas as $entry=>$expected) {
+            try {
+                $out = DateTimeUtils::normalizePeriodStr($entry);
+            } catch (\Exception $e) {
+                $out = $e->getMessage();
+            }
+            $this->assertEquals($out, $expected);
+        }
+    }
+
+    public function testNormalizeError(){
+        $datas = [
+            '0-2021' => "La période '0-2021' est invalide",
+            '13-2021' => "La période '13-2021' est invalide",
+        ];
+        foreach ($datas as $entry=>$expected) {
+            try {
+                $out = DateTimeUtils::normalizePeriodStr($entry);
+            } catch (\Exception $e) {
+                $out = $e->getMessage();
+            }
+            $this->assertEquals($out, $expected);
+        }
+    }
+
     public function testSDateOK(){
         $valid = [
             ['date' => '2018-01', 'month' => 1, 'year' => 2018, 'period' => '2018-1', 'periodCode' => '2018-01', 'periodLabel' => 'janvier 2018' ],

@@ -77,6 +77,12 @@ class ConnectorPersonREST extends AbstractConnector
         return $this->personHydrator;
     }
 
+    protected function log( string $text ) :void {
+        if( true ){
+            echo "$text";
+        }
+    }
+
     /**
      * @param PersonRepository $personRepository
      * @param bool $force
@@ -85,15 +91,16 @@ class ConnectorPersonREST extends AbstractConnector
      */
     function syncPersons(PersonRepository $personRepository, $force)
     {
-        $exist = [];
         $exist = $personRepository->getUidsConnector($this->getName());
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
         $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
         $access = $this->getAccessStrategy();
+        $this->log("Pending access : " . count($exist));
 
         try {
             $json = $access->getDataAll();
+            $this->log("data gain : " . count($json));
             $personsDatas = null;
 
             if( is_object($json) && property_exists($json, 'persons') ){
@@ -176,16 +183,31 @@ class ConnectorPersonREST extends AbstractConnector
                         if( count($personOscarToDelete->getActivities()) > 0 ){
                             $activeIn[] = "activité";
                         }
+
                         if( count($personOscarToDelete->getProjectAffectations()) > 0 ){
                             $activeIn[] = "projet";
                         }
+
+                        // Récupération des affectations issues de la synchro
+                        $synchronizedAffectationsOrganizations = $personOscarToDelete->getOrganizationsSync();
+                        if( count($synchronizedAffectationsOrganizations) > 0 ){
+                            $personRepository->removeOrganizationPersons($synchronizedAffectationsOrganizations);
+                            $personRepository->flush($synchronizedAffectationsOrganizations);
+                        }
+
                         if( count($personOscarToDelete->getOrganizations()) > 0 ){
                             $activeIn[] = "organisation";
                         }
 
+
                         if( count($activeIn) == 0 ){
                             $idsToDelete[] = $personOscarToDelete->getId();
                         } else {
+
+                            // Tentative de suppression des rôles synchronisés
+
+
+
                             $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(', ', $activeIn));
                         }
 
@@ -204,10 +226,13 @@ class ConnectorPersonREST extends AbstractConnector
                 }
             }
         } catch (\Exception $e ){
+            $this->log("ERROR : " . $e->getMessage());
             throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
         }
 
+        $this->log("FLUSH...");
         $personRepository->flush(null);
+        $this->log("FLUSH DONE...");
 
         return $repport;
     }

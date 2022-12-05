@@ -63,6 +63,11 @@ class OrganizationPerson  implements ILoggable
         return $this;
     }
 
+    public function isSync()
+    {
+        return !($this->getOrigin() == null || $this->getOrigin() == '');
+    }
+
     /**
      * @return Role
      */

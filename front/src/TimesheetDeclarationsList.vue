@@ -292,7 +292,7 @@
     </section>
 </template>
 <script>
-    // nodejs node_modules/.bin/poi watch --format umd --moduleName  TimesheetDeclarationsList --filename.css TimesheetDeclarationsList.css --filename.js TimesheetDeclarationsList.js --dist public/js/oscar/dist public/js/oscar/src/TimesheetDeclarationsList.vue
+// node node_modules/.bin/vue-cli-service build --name TimesheetDeclarationsList --dest ../public/js/oscar/dist/ --no-clean --formats umd,umd-min --target lib src/TimesheetDeclarationsList.vue
 
     import PersonAutoCompleter from "./components/PersonAutoCompleter";
     import PersonSchedule from "./components/PersonSchedule";

@@ -218,7 +218,7 @@ h2.tv-serie-label { border-bottom: none; }
                     new Vue({
                         el: "#organizations",
                         render(h){
-                            return h(EntityWithRole.default, { props: {
+                            return h(EntityWithRole, { props: {
                                     url: "<?= $this->url('project/persons', ['idproject' => $project->getId()]) ?>",
                                     urlNew: "<?= $this->url('personproject/new', ['idenroller' => $project->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project) ? "true" : 'false' ?>,
@@ -250,7 +250,7 @@ h2.tv-serie-label { border-bottom: none; }
                     new Vue({
                         el: "#organizations",
                         render(h){
-                            return h(EntityWithRole.default, { props: {
+                            return h(EntityWithRole, { props: {
                                     url: "<?= $this->url('project/organizations', ['idproject' => $project->getId()]) ?>",
                                     urlNew: "<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project) ? "true" : 'false' ?>,

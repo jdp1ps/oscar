@@ -7,20 +7,21 @@
 
 namespace Oscar\Form;
 
-
+use Doctrine\ORM\EntityManager;
 use Oscar\Entity\OscarFacet;
 use Oscar\Hydrator\DateTypeFormHydrator;
 use Zend\Form\Element\Checkbox;
+use Zend\Form\Element\MultiCheckbox;
 use Zend\Form\Form;
 use Zend\InputFilter\InputFilterProviderInterface;
 
 class DateTypeForm extends Form implements InputFilterProviderInterface
 {
-    public function __construct()
+    public function __construct(array $roles, EntityManager $em, array $idsRolesCheck = [])
     {
         parent::__construct('datetype');
 
-        $this->setHydrator(new DateTypeFormHydrator());
+        $this->setHydrator(new DateTypeFormHydrator($em));
 
         $this->add(array(
             'name'  => 'id',
@@ -104,22 +105,62 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'type'=>'Textarea'
         ]);
 
+        // ROLES
+        $label = 'Roles';
+        $this->add(
+            [
+                'type'=>MultiCheckbox::class,
+                'name'   => 'roles',
+                'attributes'    => [
+                    'class'       => 'form-control',
+                    'multiple' => 'multiple',
+                ],
+                'options' => [
+                    'label_attributes' => []
+                ]
+            ]
+        );
+
         $this->add(array(
             'name'  => 'secure',
             'type'  => 'Csrf',
         ));
+
+        $this->get('roles')->setValueOptions($this->checkedRoles($roles, $idsRolesCheck));
+
     }
 
 
-
-    public function getInputFilterSpecification()
+    /**
+     * @return array
+     */
+    public function getInputFilterSpecification(): array
     {
         return [
             'label' => [ 'required' => true ],
             'description' => [ 'required' => false ],
             'recursivity' => [ 'required' => false ],
             'finishable' => [ 'required' => false ],
-
+            'roles' => ['required' => false],
         ];
     }
+
+    /**
+     * Compare-les id roles déjà attribués (edit) et retour la config pour le champ MultiCheckbox au niveau valuesoptions
+     * @param $roles
+     * @param $idsRolesCheck
+     * @return array
+     */
+    private function checkedRoles($roles, $idsRolesCheck):array{
+        $checkboxRoles = [];
+        foreach ($roles as $key => $entityRole) {
+            if (in_array($entityRole->getId(), $idsRolesCheck)){
+                $checkboxRoles [] = ['value'=>$entityRole->getId(), 'label' => $key, 'selected' => true];
+            }else{
+                $checkboxRoles [] = ['value'=>$entityRole->getId(), 'label' => $key, 'selected' => false];
+            }
+        }
+        return $checkboxRoles;
+    }
+
 }

@@ -34,9 +34,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const auth_person_normalize = 'authPersonNormalize';
     const pfi_strict = 'pfi_strict';
     const pfi_strict_format = 'pfi_strict_format';
+    const allow_node_selection = 'allow_node_selection';
+    const empty_project_require_validation = 'empty_project_require_validation';
 
 
     const theme = 'theme';
+
+    public function emptyProjectRequireValidation() :bool
+    {
+        return $this->getConfiguration(self::empty_project_require_validation);
+    }
 
     /**
      * @return bool
@@ -66,6 +73,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPfiRegex() :string
     {
         return $this->getEditableConfKey(self::pfi_strict_format, "");
+    }
+
+    public function isAllowNodeSelection() :bool
+    {
+        return $this->getEditableConfKey(self::allow_node_selection, "1") == "1";
+    }
+
+    public function setAllowNodeSelection( bool $allow ) :void
+    {
+        $this->saveEditableConfKey(self::allow_node_selection, $allow === true ? "1" : "0");
     }
 
 
@@ -403,6 +420,26 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->saveEditableConfKey('validatorsRelanceJour2', $value);
     }
 
+    public function getHighDelayRelance()
+    {
+        return $this->getEditableConfKey('highdelayRelance', "");
+    }
+
+    public function setHighDelayRelance($value)
+    {
+        return $this->saveEditableConfKey('highdelayRelance', $value);
+    }
+
+    public function getHighDelayRelanceJour() :int
+    {
+        return $this->getEditableConfKey('highdelayRelanceJour', 3);
+    }
+
+    public function setHighDelayRelanceJour( int $value)
+    {
+        return $this->saveEditableConfKey('highdelayRelanceJour', $value);
+    }
+
 
     public function setTheme($theme)
     {
@@ -431,6 +468,28 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function setTimesheetPreview($bool)
     {
         $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// MAILS D'envoi/rejet
+    public function getEmailRejectBody() :string
+    {
+        return $this->getOptionalConfiguration('email_reject_body', "Bonjour {PERSON},\r\nVotre déclaration pour la période {PERIOD} a été rejetée.\r\nMerci de corriger votre déclaration");
+    }
+
+    public function getEmailRejectSubject() :string
+    {
+        return $this->getOptionalConfiguration('email_reject_subject', "Déclaration rejetée");
+    }
+
+    public function getEmailToValidatetBody() :string
+    {
+        return $this->getOptionalConfiguration('email_tovalidate_body', "Bonjour,\r\nUne déclaration de {PERSON} pour la période {PERIOD} attend votre validation.\r\nMerci");
+    }
+
+    public function getEmailToValidateSubject() :string
+    {
+        return $this->getOptionalConfiguration('email_tovalidate_subject', "Déclaration à valider");
     }
 
     /**
@@ -569,7 +628,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getPcruContractType(): string
     {
         //->getOptionalConfiguration('pcru_contrat_type', "Contrat Version Définitive Signée");
-        return $roleRSToFind = $this->getEditableConfKey('pcru_contrat_type', "Contrat Version Définitive Signée");
+        return $roleRSToFind = $this->getEditableConfKey('pcru_contract_type', "Contrat Version Définitive Signée");
     }
 
     /**
