@@ -97,8 +97,6 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
 
         $method = $this->getHttpXMethod();
 
-        $this->getLogger()->debug("SPENTTYPE - $method");
-
         switch ($method) {
             case Request::METHOD_PUT:
                 try {
@@ -132,15 +130,32 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                     }
 
                     elseif ($this->params()->fromPost("action") == 'annexe') {
-                        /** @var SpentTypeGroup $spent */
-                        $spent = $this->getSpentService()->getSpentTypeById($this->params()->fromPost('id'));
-                        $annexe = $spent->getAnnexe();
-                        $newAnnexe = $this->params()->fromPost('annexe');
+                        try {
+                            $id = $this->params()->fromPost('id');
 
-                        // @todo Contrôler la validitée de l'annexe
-                        $spent->setAnnexe( $annexe == $newAnnexe ? '' : $newAnnexe);
-                        $this->getEntityManager()->flush($spent);
-                        return $this->getResponseOk();
+                            /** @var SpentTypeGroup $spent */
+                            $spent = $this->getSpentService()->getSpentTypeById($id);
+                            if( !$spent ){
+                                throw new OscarException("Impossible de charger le compte $id");
+                            }
+                            $annexe = $spent->getAnnexe();
+                            $newAnnexe = $this->params()->fromPost('annexe');
+
+                            $savedAnnexe = $annexe == $newAnnexe ? '' : $newAnnexe;
+
+                            $this->getLogger()->info("Modification du compte $id vers $newAnnexe");
+                            // @todo Contrôler la validitée de l'annexe
+                            if( $savedAnnexe == '0' ){
+                                $spent->setBlind(true);
+                            } else {
+                                $spent->setBlind(false);
+                            }
+                            $spent->setAnnexe($savedAnnexe);
+                            $this->getEntityManager()->flush($spent);
+                            return $this->getResponseOk();
+                        } catch (\Exception $e){
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
                     }
 
                     else {

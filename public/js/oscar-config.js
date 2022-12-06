@@ -122,7 +122,8 @@ requirejs.config({
         "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
         "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min",
         "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
-        "ValidationUI": "oscar/dist/ValidationUI.umd.min"
+        "ValidationUI": "oscar/dist/ValidationUI.umd.min",
+        "AccountList": "oscar/dist/AccountList.umd.min"
     },
     shim: {
         "bootstrap": {

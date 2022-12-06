@@ -6626,5 +6626,57 @@ $weekHightlightColor: #80b7ec;
     display: none;
   }
 }
+
+.account-infos {
+  border-left: solid 4px $colorBlue;
+  /*
+'missing': a.annexe == null,
+'ignored': a.annexe == 0,
+'input': a.annexe == 1
+*/
+  &.ignored {
+    border-left: solid 4px $colorGreyBlack;
+    opacity: .8;
+  }
+  &.input {
+    border-left: solid 4px $colorGreen;
+  }
+  &.missing {
+    border-left: solid 4px $colorRed;
+    background-color: #f7665f;
+  }
+  h3 {
+    display: flex;
+    strong {
+      flex: 1;
+      padding-left: 1em;
+    }
+    code {
+      padding: 0 1em;
+      line-height: 2em;
+      background: #999999;
+      font-size: .5em;
+    }
+    code, em {
+      flex: 0 0;
+    }
+    em {
+      padding: 0 1em;
+      white-space: nowrap;
+      color: white;
+      font-weight: 700;
+      font-size: .7em;
+      line-height: 2em;
+      border-radius: 4px;
+      text-shadow: -1px 1px 1px rgba(0,0,0,.5);
+      &.off { background: $colorGreyMedium; }
+      &.plus { background: $colorGreen; }
+      &.minus { background: $colorBlue; }
+      &.value-missing { background: $colorRed; }
+    }
+  }
+}
+
+
 @import "modules/oscar-autocompleter.scss";
 @import "vue-select.css";

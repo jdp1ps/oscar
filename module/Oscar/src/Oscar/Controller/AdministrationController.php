@@ -34,6 +34,8 @@ use Oscar\Traits\UsePCRUService;
 use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseSpentService;
+use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Traits\UseTypeDocumentService;
 use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
@@ -48,9 +50,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
                                                                           UseTypeDocumentService,
                                                                           UseAdministrativeDocumentService,
                                                                           UseOrganizationService,
+                                                                          UseSpentService,
                                                                           UseOscarConfigurationService, UsePCRUService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait, UseSpentServiceTrait;
 
     private $serviceLocator;
 
@@ -248,6 +251,19 @@ class AdministrationController extends AbstractOscarController implements UsePro
         ];
     }
 
+    public function accountsAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+        if( $this->isAjax() || $this->params()->fromQuery('f') == 'json' ){
+            $datas = [
+                'accounts' => $this->getSpentService()->getUsedAccount(),
+                'masses' => $this->getOscarConfigurationService()->getMasses()
+                ];
+            return $this->jsonOutput($datas);
+        }
+        return [];
+    }
+
     public function parametersAction()
     {
         // Récupération des rôles en fonction d'un privilège :
@@ -390,6 +406,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function numerotationAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
+
 
         $invalidActivityNumbers = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
 

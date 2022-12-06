@@ -1843,6 +1843,14 @@ administration:
                 defaults:
                     action: tva
 
+        accounts:
+            type: segment
+            may_terminate: true
+            options:
+                route: /comptes
+                defaults:
+                    action: accounts
+
         privileges:
             type: segment
             may_terminate: true

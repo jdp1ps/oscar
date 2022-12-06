@@ -78,4 +78,18 @@ class SpentTypeGroupRepository extends EntityRepository{
             ->getQuery()
             ->getSingleResult();
     }
+
+    /**
+     * Retourne la liste des comptes référencés dans les dépenses (SpentLine).
+     *
+     * @return array
+     */
+    public function getUsedAccount()
+    {
+        $qb = $this->getEntityManager()->getRepository(SpentLine::class)
+            ->createQueryBuilder('s')
+            ->select('DISTINCT s.compteGeneral');
+
+        return array_map('current', $qb->getQuery()->getArrayResult());
+    }
 }

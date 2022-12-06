@@ -223,6 +223,12 @@
                 <?php endif; ?>
             </h3>
             <p>Gestion des types de dépense.</p>
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+                <a href="<?= $this->url('administration/accounts') ?>" class="btn btn-primary"><i class="icon-cog"></i>
+                    <?= _("Gérer les masses des comptes utilisés") ?>
+                </a>
+            <?php endif; ?>
+
         </article>
 
         <article class="card">

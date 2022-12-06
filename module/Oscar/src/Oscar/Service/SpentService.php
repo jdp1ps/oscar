@@ -665,6 +665,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
                     $parent = $this->getParentWithAnnexe($plan, $plan[$reduce]->getCode());
                     $dump($plan[$reduce]);
+                    $out['id'] = $plan[$reduce]->getId();
                     $out['label'] = $plan[$reduce]->getLabel();
                     $out['code'] = $plan[$reduce]->getCode();
                     $out['codeFull'] = $code;
@@ -760,6 +761,22 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $this->getEntityManager()->flush($spentType);
         }
         return true;
+    }
+
+    /**
+     * Liste des comptes utilisés.
+     *
+     * @return array
+     */
+    public function getUsedAccount()
+    {
+        $usedAccounts = $this->getSpentTypeRepository()->getUsedAccount();
+        $accountInfos = [];
+        foreach ($usedAccounts as $compte) {
+            $infos = $this->getCompte($compte);
+            $accountInfos[] = $infos;
+        }
+        return $accountInfos;
     }
 
     /**
