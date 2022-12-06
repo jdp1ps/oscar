@@ -17,7 +17,6 @@
 
           <p>
             Choisissez une annexe budgétaire :
-            {{ editedAccount }}
             <select name="" id="" class="form-control" v-model="editedAccount.annexe">
               <option value="0">Ignorer</option>
               <option value="1">Traiter comme une recette</option>
