@@ -92,4 +92,17 @@ class SpentTypeGroupRepository extends EntityRepository{
 
         return array_map('current', $qb->getQuery()->getArrayResult());
     }
+
+    public function getPfiForCodesAccounts( $codes )
+    {
+
+        $qb = $this->getEntityManager()->getRepository(SpentLine::class)
+            ->createQueryBuilder('g')
+            ->select('DISTINCT g.pfi')
+            ->where('g.compteGeneral IN(:codes)')
+            ->setParameter('codes', $codes)
+        ;
+
+        return array_map('current', $qb->getQuery()->getArrayResult());
+    }
 }

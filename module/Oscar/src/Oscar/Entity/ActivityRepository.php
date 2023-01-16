@@ -28,6 +28,16 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
+    public function getActivitiesIdsByPfis( array $pfis ) :array
+    {
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.codeEOTP IN(:pfis)')
+            ->setParameter('pfis', $pfis)
+        ;
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
     /**
      * @param null $limitEnd
      * @param bool $statusActive

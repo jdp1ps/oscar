@@ -71,6 +71,7 @@
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
+                    <i class="icon-cancel-outline"></i>
                 </a>
             </nav>
         </article>
@@ -218,6 +219,25 @@
             <select class="select2 form-control val1 changer types" id="filter_country" multiple>
                 <?php foreach( $countries as $country ): ?>
                 <option value="<?= $country ?>"><?= $country ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="accounts-tpl">
+        <article class="criteria criteria-account card">
+            <div class="icon-bank"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_account" multiple>
+                <?php foreach( $accounts as $account ): ?>
+                <option value="<?= $account["codeFull"] ?>"><?= $account["codeFull"] ?> - <?= $account["label"] ?></option>
                 <?php endforeach; ?>
             </select>
             <nav>
@@ -734,6 +754,10 @@
                             : "N'a pas le status";
                         dom = $(tplStatus(datas));
                     }
+                    else if(datas.type == 'cb' ) {
+                        datas.label = "Dépenses sur le compte";
+                        dom = $(tplAccount(datas));
+                    }
                     else if(datas.type == 'cnt' ) {
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
@@ -990,6 +1014,7 @@
 
                 // Gabarits pour les critères
                 var tpl = Handlebars.compile($('#criteria-tpl').html()),
+                    tplAccount = Handlebars.compile($('#accounts-tpl').html()),
                     tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),

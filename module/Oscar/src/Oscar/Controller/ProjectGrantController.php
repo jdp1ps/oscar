@@ -202,7 +202,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $typesOrganization = $this->getOrganizationService()
             ->getOrganizationTypesSelect();
 
-
         return [
             'filters' => $this->getProjectGrantService()->getActivitiesSearchCriteria(),
             'sorts' => $this->getProjectGrantService()->getActivitiesSearchSort(),
@@ -2413,7 +2412,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'ds' => 'Ayant pour discipline',
 
                 // Ajout d'un filtre sur les jalons
-                'aj' => 'Ayant le jalon'
+                'aj' => 'Ayant le jalon',
+
+                'cb' => 'Impliquant le compte'
             ];
 
             // Correspondance des champs de type date
@@ -2757,6 +2758,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;
+                    case 'cb':
+                        // Récupération de l'organisation
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        try {
+                            $codeAccounts = $value1;
+                            $ids = $this->getSpentService()->getIdsActivitiesForAccounts($codeAccounts);
+                        } catch (\Exception $e) {
+                            die("SOUCIS");
+                        }
+                        break;
 
                     case 'ao' :
                     case 'so' :
@@ -2951,7 +2962,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
                 }
                 $criterias[] = $crit;
-                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'fdt') {
+                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'fdt' || $type == 'cb') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
                     } else {
@@ -3064,6 +3075,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'typeorgas' => $this->getOrganizationService()->getOrganizationTypesSelect(),
                     'countries' => $this->getOrganizationService()->getCountriesList(),
                     'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),
+                    'accounts' => $this->getSpentService()->getUsedAccount(),
                     'persons' => $persons,
                     'filterJalons' => $jalonsFilters,
                     'activities' => $activities,

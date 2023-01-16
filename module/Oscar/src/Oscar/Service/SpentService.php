@@ -16,6 +16,7 @@ use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\EstimatedSpentLine;
 use Oscar\Entity\Notification;
@@ -625,6 +626,18 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getParentWithAnnexe($plan, $codeParent);
     }
 
+    public function getIdsActivitiesForAccounts( array $codesAccounts ) :array
+    {
+        //$codesAccounts = array_map(function($c){ return '00'.$c; }, $codesAccounts);
+
+        $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($codesAccounts);
+
+        /** @var ActivityRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+        $idsActivities = $activityRepository->getActivitiesIdsByPfis($pfis);
+        return $idsActivities;
+    }
+
     /**
      * Retourne les informations pour un compte à partir de son code : 00XXXXXXXXXX
      * Pour déterminer l'annexe budgétaire, le code cherche dans le compte, puis
@@ -635,36 +648,21 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      */
     public function getCompte($code)
     {
-        $dump = function($foo){};
-        $echo = function($foo){};
-        $end = function(){};
-
-        if( false ){
-            $dump = function($foo){ var_dump($foo); };
-            $echo = function($foo){ echo "$foo"; };
-            $end = function(){ die('FIN'); };
-        }
-
         static $cacheCompte;
 
         if ($cacheCompte == null) {
             $cacheCompte = [];
         }
 
-
         if (!array_key_exists($code, $cacheCompte)) {
-            $echo("Construction du compte $code");
             $plan = $this->getPlanComptable();
             $find = null;
             $reduce = strval($code);
             $out = [];
             for ($i = strlen($reduce) - 1; $find == null && $i > 0; $i--) {
                 if( $reduce[$i] == '0' ) continue;
-
                 if (array_key_exists($reduce, $plan)) {
-
                     $parent = $this->getParentWithAnnexe($plan, $plan[$reduce]->getCode());
-                    $dump($plan[$reduce]);
                     $out['id'] = $plan[$reduce]->getId();
                     $out['label'] = $plan[$reduce]->getLabel();
                     $out['code'] = $plan[$reduce]->getCode();
@@ -778,6 +776,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
         return $accountInfos;
     }
+
+
 
     /**
      * Retourne les données de synthèse des dépenses pour un PFI donné sous la forme d'un tableau :
