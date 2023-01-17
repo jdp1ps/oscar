@@ -237,9 +237,24 @@
             <small>{{typeLabel}}</small>
             <select class="select2 form-control val1 changer types" id="filter_account" multiple>
                 <?php foreach( $accounts as $account ): ?>
-                <option value="<?= $account["codeFull"] ?>"><?= $account["codeFull"] ?> - <?= $account["label"] ?></option>
+                <option value="<?= $account["id"] ?>"><?= $account["code"] ?> - <?= $account["label"] ?></option>
                 <?php endforeach; ?>
             </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="accountscode-tpl">
+        <article class="criteria criteria-account card">
+            <div class="icon-bank"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <input type="text" class="form-control val1 changer" value="{{val1}}" />
+            <small>{{typeLabel}}</small>
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
@@ -758,6 +773,12 @@
                         datas.label = "Dépenses sur le compte";
                         dom = $(tplAccount(datas));
                     }
+                    // accountscode
+                    else if(datas.type == 'cb2' ) {
+                        datas.label = "Code de compte général";
+                        dom = $(tplAccountCode(datas));
+                    }
+
                     else if(datas.type == 'cnt' ) {
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
@@ -1015,6 +1036,7 @@
                 // Gabarits pour les critères
                 var tpl = Handlebars.compile($('#criteria-tpl').html()),
                     tplAccount = Handlebars.compile($('#accounts-tpl').html()),
+                    tplAccountCode = Handlebars.compile($('#accountscode-tpl').html()),
                     tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),

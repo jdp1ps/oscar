@@ -36,6 +36,7 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Utils\AccountInfoUtil;
 use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -533,7 +534,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     /**
      * @return SpentTypeGroupRepository
      */
-    protected function getSpentTypeRepository()
+    public function getSpentTypeRepository()
     {
         return $this->getEntityManager()->getRepository(SpentTypeGroup::class);
     }
@@ -626,10 +627,17 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getParentWithAnnexe($plan, $codeParent);
     }
 
+    public function getIdsActivitiesForCompteGeneral( array $compteGeneral ) :array
+    {
+        $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($compteGeneral);
+        /** @var ActivityRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+        $idsActivities = $activityRepository->getActivitiesIdsByPfis($pfis);
+        return $idsActivities;
+    }
+
     public function getIdsActivitiesForAccounts( array $codesAccounts ) :array
     {
-        //$codesAccounts = array_map(function($c){ return '00'.$c; }, $codesAccounts);
-
         $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($codesAccounts);
 
         /** @var ActivityRepository $activityRepository */
@@ -775,6 +783,11 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $accountInfos[] = $infos;
         }
         return $accountInfos;
+    }
+
+    public function getAccountsInfosUsed() :AccountInfoUtil
+    {
+        return AccountInfoUtil::getInstance($this);
     }
 
 

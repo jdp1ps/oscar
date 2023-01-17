@@ -67,7 +67,11 @@
                 'input': a.annexe == 1
               }">
       <h3>
-        <code title="Code utilisé dans SIFAC">{{ a.codeFull }}</code>
+        <code title="Code utilisé dans SIFAC">
+          <a :href="'/activites-de-recherche/advancedsearch?q=&criteria[]=cb2%3B'+a.codeFull" style="color: white">
+            {{ a.codeFull }}
+          </a>
+        </code>
         <strong>
           {{ a.label }}
           <small title="Numéro dans OSCAR">({{ a.code }})</small>
