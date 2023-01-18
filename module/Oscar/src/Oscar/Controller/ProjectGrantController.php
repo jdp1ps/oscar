@@ -1897,6 +1897,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
 
+        if(!$entity){
+            throw new OscarException("Cette activité n'existe plus/pas");
+        }
+
         // Check access
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
 

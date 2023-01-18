@@ -238,11 +238,16 @@ class ProjectController extends AbstractOscarController
                 return $this->htmlProjectDetail($entity);
             }
 
+            $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
+            $rolesPersons = $this->getOscarUserContextService()->getAllRoleIdPersonInActivity();
+
 
             return array(
                 // 'access' => $this->getAccessResolverService()->getProjectAccess($entity),
                 'project' => $entity,
                 'documents' => $documents,
+                'rolesOrganizations' => $rolesOrganizations,
+                'rolesPersons' => $rolesPersons,
                 'logs' => $this->getActivityLogService()->projectActivities($entity->getId())->getQuery()->getResult()
             );
         } catch (UnAuthorizedException $e) {

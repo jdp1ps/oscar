@@ -244,6 +244,7 @@ h2.tv-serie-label { border-bottom: none; }
             </section>
             <script>
                 require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
+                    console.log("ORGANIZATIONS")
                     Vue.use(VueResource);
                     Vue.http.options.emulateJSON = true;
                     Vue.http.options.emulateHTTP = true;
@@ -255,12 +256,12 @@ h2.tv-serie-label { border-bottom: none; }
                                     urlNew: "<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project) ? "true" : 'false' ?>,
                                     title: "Organisation",
-                                    roles: <?= json_encode($rolesPersons) ?>,
+                                    roles: <?= json_encode($rolesOrganizations) ?>,
                                     moment: moment
                                 }});
                         }
 
-                    })
+                    }).$mount()
                 });
             </script>
         <?php endif; ?>

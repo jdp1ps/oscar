@@ -125,8 +125,9 @@
                         </span>
             <div class="form-group" v-else>
               <label class=" control-label" for="enroled">{{ title }}</label>
-              <personselector @change="handlerEnrolledSelected($event)" v-if="title == 'Personne'" v-model="selectedPerson"/>
-              <organizationselector @change="handlerEnrolledSelected($event)" v-else/>
+              <pre>{{ selected }} / {{ selectedPerson }}</pre>
+              <personselector @change="handlerEnrolledSelectedPerson($event)" v-if="title == 'Personne'" v-model="selected"/>
+              <organizationselector @change="handlerEnrolledSelected($event)" v-else v-model="selected" />
             </div>
 
             <div class="form-group">
@@ -196,6 +197,8 @@ import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter";
 import PersonAutoCompleter from "./components/PersonAutoCompleter";
 import Datepicker from "./components/Datepicker";
 
+console.log("FOO");
+
 export default {
   components: {
     organizationselector: OrganizationAutoCompleter,
@@ -215,6 +218,7 @@ export default {
   data() {
     return {
       selectedPerson: null,
+      selected: null,
       entities: [],
       entityEdited: null,
       entityDelete: null,
@@ -245,7 +249,12 @@ export default {
     },
 
     handlerEnrolledSelected(data) {
-      console.log(data);
+      this.entityNew.enroled = data.id;
+      this.entityNew.enroledLabel = data.label;
+    },
+
+    handlerEnrolledSelectedPerson(data) {
+      this.selected = data.id;
       this.entityNew.enroled = data.id;
       this.entityNew.enroledLabel = data.label;
     },
@@ -298,7 +307,8 @@ export default {
     performNew() {
       let data = new FormData();
       this.loading = "Création...";
-      var enroled = this.entityNew.enroled;
+      console.log("ENTITYNEW:", JSON.stringify(this.entityNew));
+      var enroled = this.selected;
       data.append('dateStart', this.entityNew.start);
       data.append('dateEnd', this.entityNew.end);
       data.append('role', this.entityNew.role);
@@ -338,6 +348,7 @@ export default {
   },
 
   mounted() {
+    console.log("MOUNTED");
     this.fetch();
   }
 }
