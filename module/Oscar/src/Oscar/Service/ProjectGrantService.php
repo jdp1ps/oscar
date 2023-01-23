@@ -1173,13 +1173,16 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         // On isole les activités ayant des clefs de numérotation "Hors configuration"
         $activities = [];
+        $keys = [];
 
         /** @var Activity $activity */
         foreach ($query->getQuery()->getResult() as $activity) {
             $hasUnknow = false;
             foreach (array_keys($activity->getNumbers()) as $key) {
                 if (!in_array($key, $authorisedKeys)) {
-                    $this->getLoggerService()->debug("$key n'est pas référencé");
+                    if( !in_array($key, $keys) ){
+                        $keys[] = $key;
+                    }
                     $hasUnknow = true;
                 }
             }
@@ -1188,7 +1191,31 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
         }
 
-        return $activities;
+        return [
+            'activities' => $activities,
+            'keys' => $keys
+        ];
+    }
+
+    /**
+     * Renomage des clefs pour les numérotations personnalisées;
+     *
+     * @param $from
+     * @param $to
+     */
+    public function administrationMoveKey($from, $to) :int
+    {
+       $activities = $this->getActivityRepository()->getActivitiesWithNumber($from);
+       $out = [];
+       /** @var Activity $activity */
+        foreach ($activities as $activity) {
+           $value = $activity->getNumber($from);
+           $activity->removeNumber($from);
+           $activity->addNumber($to, $value);
+           $out[] = $activity->getId();
+           $this->getEntityManager()->flush($activity);
+       }
+        return count($out);
     }
 
     public function getPaymentsByActivityId(array $idsActivity, $organizations = null)

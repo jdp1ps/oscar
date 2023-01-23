@@ -20,6 +20,13 @@ use Oscar\Utils\DateTimeUtils;
 class ActivityRepository extends EntityRepository
 {
 
+    public function getActivitiesWithNumber( string $key ) :array {
+        $len = strlen($key);
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->where("a.numbers LIKE '%s:$len:\"".$key."\"%'");
+        return $queryBuilder->getQuery()->getResult();
+    }
+
     public function getDistinctPFI() :array
     {
         $queryBuilder = $this->createQueryBuilder('a')

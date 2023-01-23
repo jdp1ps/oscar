@@ -197,8 +197,6 @@ import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter";
 import PersonAutoCompleter from "./components/PersonAutoCompleter";
 import Datepicker from "./components/Datepicker";
 
-console.log("FOO");
-
 export default {
   components: {
     organizationselector: OrganizationAutoCompleter,
