@@ -1824,64 +1824,80 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
 
-        /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        // Multiple ids
+        $ids = explode(",", $id);
 
-        // Check access
-        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+        try {
+            $masses = $this->getOscarConfigurationService()->getMasses();
+            $pfis = [];
 
-        //
-        $masses = $this->getOscarConfigurationService()->getMasses();
+            $lastUpdate = null;
 
-        // Method
-        $method = $this->getHttpXMethod();
-
-        if ($method == 'POST') {
-            // Vérifiaction des droits d'accès
-            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
-
-            // Récupération des affectations
-            $postedAffectations = $this->params()->fromPost('affectation');
-
-            try {
-                $this->getSpentService()->updateAffectation($postedAffectations);
-            } catch (\Exception $e) {
-                return $this->getResponseInternalError($e->getMessage());
-            }
-            return $this->getResponseOk("Affectation des comptes terminée");
-        }
-
-        $pfi = $entity->getCodeEOTP();
-
-        if (!$pfi) {
-            return $this->getResponseInternalError("Cette activité n'a pas de PFI");
-        }
-
-        $out = $this->baseJsonResponse();
-        $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
-        $out['warning'] = null; // Affiche les avertissements
-
-        if ($this->getOscarConfigurationService()->getAutoUpdateSpent()) {
-            if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity)) {
-                $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
-            } else {
-                try {
-                    $this->spentService->syncSpentsByEOTP($pfi);
-                } catch (\Exception $e) {
-                    $out['error'] = $e->getMessage();
+            foreach ($ids as $id) {
+                /** @var Activity $entity */
+                $entity = $this->getActivityService()->getActivityById($id, true);
+                $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+                $pfis[] = $entity->getCodeEOTP();
+                if( $lastUpdate == null || $entity->getDateTotalSpent() > $lastUpdate ){
+                    $lastUpdate = $entity->getDateTotalSpent();
                 }
             }
+
+            // Check access
+            $pfis = array_unique($pfis);
+
+            // Method
+            $method = $this->getHttpXMethod();
+
+            if ($method == 'POST') {
+                // Vérifiaction des droits d'accès
+                $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+
+                // Récupération des affectations
+                $postedAffectations = $this->params()->fromPost('affectation');
+
+                try {
+                    $this->getSpentService()->updateAffectation($postedAffectations);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+                return $this->getResponseOk("Affectation des comptes terminée");
+            }
+
+            if (count($pfis) == 0) {
+                return $this->getResponseInternalError("Pas de PFI");
+            }
+
+            $out = $this->baseJsonResponse();
+            $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
+            $out['warning'] = null; // Affiche les avertissements
+
+//            if ($this->getOscarConfigurationService()->getAutoUpdateSpent()) {
+//                if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity)) {
+//                    $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
+//                } else {
+//                    try {
+//                        $this->spentService->syncSpentsByEOTP($pfi);
+//                    } catch (\Exception $e) {
+//                        $out['error'] = $e->getMessage();
+//                    }
+//                }
+//            }
+
+            // Construction des données de dépense
+            $out['masses'] = $masses;
+            $out['dateUpdated'] = $entity->getDateTotalSpent();
+            $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI(
+                $pfis,
+                $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
+                )
+            );
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
         }
 
-        // Construction des données de dépense
-        $out['masses'] = $masses;
-        $out['dateUpdated'] = $entity->getDateTotalSpent();
-        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI(
-            $pfi,
-            $this->getOscarUserContextService()->hasPrivileges(
-                Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
-            )
-        );
+
 
         return $this->jsonOutput($out);
     }

@@ -241,9 +241,24 @@ class ProjectController extends AbstractOscarController
             $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
             $rolesPersons = $this->getOscarUserContextService()->getAllRoleIdPersonInActivity();
 
+            // Calcule de l'accès aux dépense
+            $nbrSpent = 0;
+            $nbrSpentAllow = 0;
+            $spentActivitiesIds = [];
+            foreach ($entity->getActivities() as $activity) {
+                if( $activity->getCodeEOTP() ){
+                    $nbrSpent++;
+                    if( $this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SHOW, $activity) ){
+                        $nbrSpentAllow++;
+                        $spentActivitiesIds[] = $activity->getId();
+                    }
+                }
+            }
 
             return array(
                 // 'access' => $this->getAccessResolverService()->getProjectAccess($entity),
+                'spentActivitiesIds' => $spentActivitiesIds,
+                'spentMissingAcces' => $nbrSpentAllow < $nbrSpent,
                 'project' => $entity,
                 'documents' => $documents,
                 'rolesOrganizations' => $rolesOrganizations,

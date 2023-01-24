@@ -697,6 +697,16 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         return $cacheCompte[$code];
     }
+    public function getSpentsByPFIs($pfis){
+        $out = [];
+        foreach ($pfis as $pfi) {
+            $spents = $this->getSpentsByPFI($pfi);
+            foreach ($spents as $s) {
+                $out[] = $s;
+            }
+        }
+        return $out;
+    }
 
     public function getSpentsByPFI($pfi)
     {
@@ -808,7 +818,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     {
 
         // Récupération des dépenses
-        $spents = $this->getSpentsByPFI($pfi);
+        $spents = $this->getSpentsByPFIs($pfi);
 
         // Récupération des Masses comptable configurées dans config
         $masses = $this->getOscarConfigurationService()->getMasses();

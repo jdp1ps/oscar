@@ -4,13 +4,15 @@ $showDelete = isset($showDelete) && $showDelete === true ? true : false;
 /** @var \Oscar\Entity\ContractDocument $document */ ?>
 <article class="card xs" data-openable>
     <div class="card-title">
-        <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>
-        <small class="text-light"><?= $document->getTypeDocument() ?> ~ </small>
-        <strong><?= $document->getFileName() ?></strong>
+        <div>
+            <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>
+            <small class="text-light"><?= $document->getTypeDocument() ?> ~ </small> <br>
+            <strong><?= $document->getFileName() ?></strong>
+        </div>
         <small class="text-light">&nbsp;(<?= $this->fileSize($document->getFileSize()) ?>)</small>
     </div>
     <div class="card-content">
-        <p class="text-highlight">
+        <p class="text-highlight" style="display: none">
             Fichier <strong><?= $document->getExtension() ?></strong> version <?= $document->getVersion()?>, téléversé le <time><?= $this->moment($document->getDateUpdoad())->full() ?></time>
             par <?= $this->link()->person($document->getPerson()) ?>
         </p>
