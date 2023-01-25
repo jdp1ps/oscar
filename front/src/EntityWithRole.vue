@@ -125,7 +125,6 @@
                         </span>
             <div class="form-group" v-else>
               <label class=" control-label" for="enroled">{{ title }}</label>
-              <pre>{{ selected }} / {{ selectedPerson }}</pre>
               <personselector @change="handlerEnrolledSelectedPerson($event)" v-if="title == 'Personne'" v-model="selected"/>
               <organizationselector @change="handlerEnrolledSelected($event)" v-else v-model="selected" />
             </div>
