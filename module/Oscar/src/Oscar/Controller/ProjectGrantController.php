@@ -2421,6 +2421,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'mp' => 'Montant prévu',
                 'at' => 'est de type',
                 'st' => 'n\'est pas de type',
+                'td' => 'Ayant ce type de document',
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
                 'adc' => 'Date de création',
@@ -2801,6 +2802,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         break;
 
+                    case 'td':
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        try {
+                            $ids = $this->getActivityService()->getActivitiesIdsWithTypeDocument($value1);
+                        } catch (\Exception $e) {
+                            throw new OscarException($e->getMessage());
+                        }
+                        break;
+
                     case 'ao' :
                     case 'so' :
                         $organizationId[] = $value1;
@@ -2984,7 +2994,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
                 $criterias[] = $crit;
                 if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om'
-                    || $type == 'fdt' || $type == 'cb' || $type == 'cb2') {
+                    || $type == 'fdt' || $type == 'cb' || $type == 'cb2' || $type == 'td') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
                     } else {
@@ -3085,6 +3095,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 return $this->ajaxResponse($json);
             }
 
+            // Données de la vue
+            $documentsTypes = $this->getActivityService()->getTypesDocuments(true);
+
             $view = new ViewModel(
                 [
                     'projectview' => $projectview,
@@ -3109,6 +3122,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortDirection' => $sortDirection,
                     'sortIgnoreNull' => $sortIgnoreNull,
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
+                    'documentsTypes' => $documentsTypes,
                     'disciplines' => $this->getActivityService()->getDisciplines(),
                     'projectsIds' => $projectsIds,
                 ]

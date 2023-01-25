@@ -19,15 +19,27 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ActivityRepository extends EntityRepository
 {
+    public function getActivitiesIdsWithTypeDocument(array $idsTypeDocument): array
+    {
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->select('DISTINCT a.id')
+            ->innerJoin('a.documents', 'd')
+            ->where('d.typeDocument IN(:typesDocument)')
+            ->setParameter('typesDocument', $idsTypeDocument)
+        ;
 
-    public function getActivitiesWithNumber( string $key ) :array {
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
+    public function getActivitiesWithNumber(string $key): array
+    {
         $len = strlen($key);
         $queryBuilder = $this->createQueryBuilder('a')
-            ->where("a.numbers LIKE '%s:$len:\"".$key."\"%'");
+            ->where("a.numbers LIKE '%s:$len:\"" . $key . "\"%'");
         return $queryBuilder->getQuery()->getResult();
     }
 
-    public function getDistinctPFI() :array
+    public function getDistinctPFI(): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->select('DISTINCT a.codeEOTP');
@@ -35,13 +47,12 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
-    public function getActivitiesIdsByPfis( array $pfis ) :array
+    public function getActivitiesIdsByPfis(array $pfis): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->select('a.id')
             ->where('a.codeEOTP IN(:pfis)')
-            ->setParameter('pfis', $pfis)
-        ;
+            ->setParameter('pfis', $pfis);
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
@@ -96,7 +107,9 @@ class ActivityRepository extends EntityRepository
             ->innerJoin('a.persons', 'ap')
             ->leftJoin('a.project', 'p')
             ->leftJoin('p.members', 'pp')
-            ->where('(ap.person = :personId  OR pp.person = :personId) AND (a.dateStart < :date AND a.dateEnd >= :date)')
+            ->where(
+                '(ap.person = :personId  OR pp.person = :personId) AND (a.dateStart < :date AND a.dateEnd >= :date)'
+            )
             ->setParameters(
                 [
                     'personId' => "$personId",
@@ -187,12 +200,10 @@ class ActivityRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getBaseQueryBuilder() :QueryBuilder
+    public function getBaseQueryBuilder(): QueryBuilder
     {
         return $this->createQueryBuilder('c')
-            ->leftJoin('c.project', 'p')
-
-            ;
+            ->leftJoin('c.project', 'p');
 //            ->leftJoin('c.persons', 'm1')
 //            ->leftJoin('m1.person', 'pers1')
 //            ->leftJoin('c.disciplines', 'dis')
@@ -207,7 +218,7 @@ class ActivityRepository extends EntityRepository
 //            ->leftJoin('p2.organization', 'orga2');
     }
 
-    public function getBaseQueryBuilderByIdsPaged( array $ids, int $page = 1, int $resultByPage = 50 ):QueryBuilder
+    public function getBaseQueryBuilderByIdsPaged(array $ids, int $page = 1, int $resultByPage = 50): QueryBuilder
     {
         $offsetSQL = ($page - 1) * $resultByPage;
         $limitSQL = $resultByPage;
@@ -217,9 +228,11 @@ class ActivityRepository extends EntityRepository
             ->where('c.id in(:ids)')
             ->setFirstResult($offsetSQL)
             ->setMaxResults($limitSQL)
-            ->setParameters([
-                'ids' => $ids
-                            ]);
+            ->setParameters(
+                [
+                    'ids' => $ids
+                ]
+            );
     }
 
     /**
@@ -227,7 +240,8 @@ class ActivityRepository extends EntityRepository
      * @param int $idRole
      * @return array
      */
-    public function getIdsWithoutPersonWithRole( int $idPerson, int $idRole ) :array {
+    public function getIdsWithoutPersonWithRole(int $idPerson, int $idRole): array
+    {
         $idsWith = $this->getIdsForPersonWithRole($idPerson, $idRole);
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
@@ -239,7 +253,7 @@ class ActivityRepository extends EntityRepository
         );
     }
 
-    public function getIdsForPersons( array $idsPersons ) :array
+    public function getIdsForPersons(array $idsPersons): array
     {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
@@ -270,32 +284,35 @@ class ActivityRepository extends EntityRepository
      *
      * @return array
      */
-    public function getIdsForPersonWithRole( int $idPerson, int $idRole ) :array {
-            $qb = $this->createQueryBuilder('a')
-                ->select('a.id')
-                ->leftJoin('a.persons', 'act_per')
-                ->leftJoin('a.project', 'prj')
-                ->leftJoin('prj.members', 'prj_pers');
+    public function getIdsForPersonWithRole(int $idPerson, int $idRole): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.persons', 'act_per')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.members', 'prj_pers');
 
-            $parameters = [
-                'person' => $idPerson
-            ];
+        $parameters = [
+            'person' => $idPerson
+        ];
 
-            if( $idRole > 0 ){
-                $qb->where('(act_per.person = :person AND act_per.roleObj = :role) '
-                           .'OR (prj_pers.person = :person AND prj_pers.roleObj = :role)');
-                $parameters['role'] = $idRole;
-            } else {
-                $qb->where('act_per.person = :person OR prj_pers.person = :person');
-            }
-
-            return array_map(
-                'current',
-                $qb
-                    ->getQuery()
-                    ->setParameters($parameters)
-                    ->getResult()
+        if ($idRole > 0) {
+            $qb->where(
+                '(act_per.person = :person AND act_per.roleObj = :role) '
+                . 'OR (prj_pers.person = :person AND prj_pers.roleObj = :role)'
             );
+            $parameters['role'] = $idRole;
+        } else {
+            $qb->where('act_per.person = :person OR prj_pers.person = :person');
+        }
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
     }
 
     /**
@@ -304,7 +321,8 @@ class ActivityRepository extends EntityRepository
      * @param array $status
      * @return array
      */
-    public function getIdsWithStatus( array $status ) :array {
+    public function getIdsWithStatus(array $status): array
+    {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
             ->where('a.status IN(:status)');
@@ -322,9 +340,9 @@ class ActivityRepository extends EntityRepository
         );
     }
 
-    public function getBeetween2Dates( string $from, string $to, string $field ) :array {
-
-        if( !$from && !$to ){
+    public function getBeetween2Dates(string $from, string $to, string $field): array
+    {
+        if (!$from && !$to) {
             throw new OscarException("Le filtrage par date implique des dates");
         }
 
@@ -335,13 +353,13 @@ class ActivityRepository extends EntityRepository
 
         ];
 
-        if( $from ){
-            $qb->andWhere('a.'.$field . ' >= :from');
+        if ($from) {
+            $qb->andWhere('a.' . $field . ' >= :from');
             $parameters['from'] = $from;
         }
 
-        if( $to ){
-            $qb->andWhere('a.'.$field . ' <= :to');
+        if ($to) {
+            $qb->andWhere('a.' . $field . ' <= :to');
             $parameters['to'] = $to;
         }
 
@@ -354,7 +372,8 @@ class ActivityRepository extends EntityRepository
         );
     }
 
-    public function getActivitiesIdsAll() :array {
+    public function getActivitiesIdsAll(): array
+    {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id');
 
@@ -373,7 +392,8 @@ class ActivityRepository extends EntityRepository
      * @param int $idRole
      * @return array
      */
-    public function getIdsWithoutOrganizationWithRole( int $idOrganization, int $idRole ) :array {
+    public function getIdsWithoutOrganizationWithRole(int $idOrganization, int $idRole): array
+    {
         $idsExclude = $this->getIdsForOrganizationWithRole($idOrganization, $idRole);
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
@@ -392,7 +412,8 @@ class ActivityRepository extends EntityRepository
      * @param int $idRole
      * @return array
      */
-    public function getIdsForOrganizationWithRole( int $idOrganization, int $idRole ) :array {
+    public function getIdsForOrganizationWithRole(int $idOrganization, int $idRole): array
+    {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
             ->leftJoin('a.organizations', 'act_org')
@@ -400,17 +421,18 @@ class ActivityRepository extends EntityRepository
             ->leftJoin('prj.partners', 'prj_org')
             ->where(
                 'act_org.organization = :organization OR prj_org.organization = :organization'
-            )
-        ;
+            );
 
 
         $parameters = [
             'organization' => $idOrganization
         ];
 
-        if( $idRole > 0 ){
-            $qb->where('(act_org.organization = :organization AND act_org.roleObj = :role) '
-                       .'OR (prj_org.organization = :organization AND prj_org.roleObj = :role)');
+        if ($idRole > 0) {
+            $qb->where(
+                '(act_org.organization = :organization AND act_org.roleObj = :role) '
+                . 'OR (prj_org.organization = :organization AND prj_org.roleObj = :role)'
+            );
             $parameters['role'] = $idRole;
         } else {
             $qb->where('act_org.organization = :organization OR prj_org.organization = :organization');
@@ -438,17 +460,17 @@ class ActivityRepository extends EntityRepository
     }
 
 
-    public function getActivityIdsWithWorkpackage() :array
+    public function getActivityIdsWithWorkpackage(): array
     {
         return array_map(
             'current',
-           $this->getQueryActivityIdsWithWorkpackage()
+            $this->getQueryActivityIdsWithWorkpackage()
                 ->getQuery()
                 ->getResult()
         );
     }
 
-    public function getQueryActivityIdsWithWorkpackage() :QueryBuilder
+    public function getQueryActivityIdsWithWorkpackage(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')

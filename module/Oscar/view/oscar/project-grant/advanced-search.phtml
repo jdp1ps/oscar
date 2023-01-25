@@ -282,6 +282,25 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="typedocument-tpl">
+        <article class="criteria criteria-typedocument card">
+            <div class="icon-docs"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
+                <?php foreach( $documentsTypes as $typeDocId=>$typeDoc ): ?>
+                <option value="<?= $typeDocId ?>"><?= $typeDoc ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
     <script type="text/x-handlebars" id="milestones-criteria-tpl">
         <article class="criteria criteria-{{type}} card">
             <div class="icon-calendar"></div>
@@ -758,6 +777,8 @@
 
                     var dom, applyChange;
 
+
+
                     if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
                         dom = $(tpl(datas));
                     }
@@ -782,6 +803,11 @@
                     else if(datas.type == 'cnt' ) {
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
+                    }
+                    else if(datas.type == 'td' ){
+                        //$documentsTypes
+                        datas.label = "Type de document";
+                        dom = $(tplTypeDocument(datas));
                     }
                     else if(datas.type == 'tnt' ) {
                         datas.label = "Type d'organisation";
@@ -1041,6 +1067,7 @@
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),
                     tplTypeOrga = Handlebars.compile($('#typeorga-tpl').html()),
+                    tplTypeDocument = Handlebars.compile($('#typedocument-tpl').html()),
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),

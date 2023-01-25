@@ -167,7 +167,7 @@ class JSONFormatter
                 $principal = $activityOrganization->getRoleObj() && $activityOrganization->getRoleObj()->isPrincipal();
 
                 if ($principal) {
-                    if (!array_key_exists($role, $datas['organizations'])) {
+                    if (!array_key_exists($role, $datas['organizations_primary'])) {
                         $datas['organizations_primary'][$role] = [];
                     }
                     $datas['organizations_primary'][$role][] = $organization;
