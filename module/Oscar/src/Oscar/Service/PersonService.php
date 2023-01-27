@@ -145,17 +145,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * @param $what
      * @return Person[]
      */
-    public function search($what) :array
+    public function search($what): array
     {
         return $this->getPersonRepository()->getPersonsByIds($this->searchIds($what));
     }
 
     const SEARCH_ID_PATTERN = '/id:(([0-9]+,?)*)/';
 
-    public function searchIds($what) :array {
-        if( preg_match_all(self::SEARCH_ID_PATTERN, $what, $matches, PREG_SET_ORDER, 0) ){
+    public function searchIds($what): array
+    {
+        if (preg_match_all(self::SEARCH_ID_PATTERN, $what, $matches, PREG_SET_ORDER, 0)) {
             $idsStr = $matches[0][1];
-            if($idsStr){
+            if ($idsStr) {
                 return explode(',', $idsStr);
             }
         }
@@ -1011,11 +1012,18 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     )
                 );
 
+                $text = sprintf(
+                    '%s %s (%s)',
+                    strtoupper($person->getLastname()),
+                    $person->getFirstname(),
+                    $person->getEmail()
+                );
+
                 if (in_array($cron, $settings['frequency'])) {
-                    $log(sprintf('Envoi de mail pour %s', $person));
+                    $log(sprintf(" + >>> Envoi de mail pour %s", $text));
                     $this->mailNotificationsPerson($person);
                 } else {
-                    $log(sprintf('%s n\'est pas inscrite à ce crénaux', $person));
+                    $log(sprintf(' - %s n\'est pas inscrite à ce crénaux', $text));
                 }
             } catch (\Exception $e) {
                 $this->getLoggerService()->error("Impossible de récupérer l'authentification d'un personne.");
@@ -1248,7 +1256,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     'id' => $validator->getId(),
                     'fullname' => $validator->getFullname(),
                     'email' => $validator->getEmail(),
-                    'current' =>"foo"
+                    'current' => "foo"
                 ];
             }
         }
@@ -1323,7 +1331,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ];
 
             foreach ($personPeriods as $pp => $periodDetails) {
-
                 if ($pp >= $period) {
                     continue;
                 }
@@ -1929,13 +1936,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
         // RECHERCHE sur le connector
         // Ex: rest:p00000001
-        if( $search != "" ){
+        if ($search != "") {
             // Recherche via les IDS
-            if( preg_match_all(self::SEARCH_ID_PATTERN, $search, $matches, PREG_SET_ORDER, 0) ){
+            if (preg_match_all(self::SEARCH_ID_PATTERN, $search, $matches, PREG_SET_ORDER, 0)) {
                 //
-            }
-            // Recherche via le connecteur
-            elseif (preg_match('/(([a-z]*):(\w*))/', $search, $matches) ){
+            } // Recherche via le connecteur
+            elseif (preg_match('/(([a-z]*):(\w*))/', $search, $matches)) {
                 $connector = $matches[2];
                 $connectorValue = $matches[3];
                 try {

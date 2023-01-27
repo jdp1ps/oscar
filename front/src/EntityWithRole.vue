@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <template>
       <div class="oscar-ajax" v-show="loading || error">
         <div class="oscar-ajax-content">
@@ -15,7 +14,7 @@
         </div>
       </div>
     </template>
-    <code>{{ entityEdited }}</code>
+
     <div class="overlay" v-if="entityDelete">
       <div class="overlay-content">
         <i class="icon-cancel-outline overlay-closer" @click="entityDelete = null"></i>
@@ -57,11 +56,12 @@
 
         <form :action="entityEdited.urlEdit" method="post" @submit.prevent.stop="performEdit">
           <h2>
-                        <span v-if="entityEdited.enrolledLabel">
-                            Modifier <strong>{{ entityEdited.enrolledLabel }}</strong>
-                            en tant que <em>{{ entityEdited.role }}</em>
-                        </span>
+            <span v-if="entityEdited.enrolledLabel">
+                Modifier <strong>{{ entityEdited.enrolledLabel }}</strong>
+                en tant que <em>{{ entityEdited.role }}</em>
+            </span>
           </h2>
+
           <input type="hidden" name="enroled" class="form-control select2" v-model="entityEdited.enrolled"/>
 
           <div class="row">
@@ -172,7 +172,56 @@
         <i class="icon-doc-add"></i>
         Nouveau
       </a>
+      <a class="oscar-link" @click="handlerEditEnable()">
+        <i class="icon-edit"></i>
+        Modifier
+      </a>
     </nav>
+
+    <section v-if="editMode">
+      <div class="alert alert-info">
+        Détails des affectations. Une personne peut apparaître plusieurs fois selon le contexte et le rôle
+      </div>
+      <article class="row card" v-for="e in sortedFull">
+        <div class="col-md-6">
+          <i class="icon-cube" v-if="e.context == 'activity'"></i>
+          <i class="icon-cubes" v-else></i>
+          <strong>{{ e.enrolledLabel }}</strong>
+          <small>
+            (<span v-if="e.context == 'activity'">
+                <i class="icon-cube"></i>
+                {{ e.contextKey }}</span>
+              <span v-else>
+                <i class="icon-cubes"></i>
+                {{ e.contextKey }}</span>)
+          </small>
+        </div>
+        <div class="col-md-3">
+          <em :class="{'bold': e.rolePrincipal }">{{ e.roleLabel }}</em>
+        </div>
+        <div class="col-md-3 text-right">
+          <a  @click="handlerEdit(e)" style="white-space: nowrap">
+            <i class="icon-pencil-1 icon-clickable" v-if="manage"></i>&nbsp;Modifier
+          </a>
+
+          <a  @click="handlerDelete(e)" style="white-space: nowrap">
+            <i class="icon-trash icon-clickable" v-if="manage"></i>&nbsp;Supprimer
+          </a>
+        </div>
+      </article>
+    </section>
+    <section v-else>
+      <span class="cartouche" v-for="e in stacked" :class="e.hasPrimary ? 'primary' : 'default' ">
+        {{ e.enrolledLabel }}
+        <span class="addon principal" >
+          <span v-for="r in e.roles" class="addon-module" :class="{'primary': r.rolePrincipal}">
+            {{ r.role }}
+          </span>
+        </span>
+      </span>
+    </section>
+
+<!--
     <span class="cartouche" v-for="e in entities" :class="{'primary': e.rolePrincipal, 'outofdate past': e.past }">
       <i v-if="e.context == 'activity'" class="icon-cube"></i>
       <i v-else class="icon-cubes"></i>
@@ -184,6 +233,7 @@
         <i class="icon-trash icon-clickable" v-if="manage" @click="handlerDelete(e)"></i>
       </span>
     </span>
+-->
   </div>
 </template>
 <script>
@@ -221,10 +271,42 @@ export default {
       entityDelete: null,
       entityNew: null,
       error: null,
-      loading: false
+      loading: false,
+      editMode: false
     };
   },
 
+  computed: {
+    sortedFull(){
+      console.log("sort");
+      return this.entities.sort( (a, b) => a.enrolled - b.enrolled )
+    },
+    stacked(){
+      let stacks = {};
+      this.entities.forEach(i => {
+        let id = i.enrolled;
+        if( !stacks.hasOwnProperty(id) ){
+          stacks[id] = {
+            enrolled: i.enrolled,
+            enrolledLabel: i.enrolledLabel,
+            hasPrimary: false
+          }
+          stacks[id]['roles'] = {};
+        }
+        stacks[id]['roles'][i.roleId] = {
+          role: i.roleLabel,
+          roleId: i.roleId,
+          rolePrincipal: i.rolePrincipal,
+          context: i.context,
+        };
+        if( i.rolePrincipal ){
+          stacks[id].hasPrimary = true;
+        }
+
+      })
+      return stacks;
+    }
+  },
 
   methods: {
     handlerEdit(item) {
@@ -266,9 +348,12 @@ export default {
       document.location = url;
     },
 
+    handlerEditEnable() {
+      this.editMode = !this.editMode;
+    },
+
     performDelete() {
       this.loading = "Suppression...";
-      console.log(url, this.entityDelete);
       var url = this.entityDelete.urlDelete;
       this.entityDelete = null;
 

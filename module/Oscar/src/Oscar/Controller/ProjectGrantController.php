@@ -2124,6 +2124,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $contextKey = $activityPerson->getActivity()->getOscarNum();
                 $idEnroller = $activityPerson->getActivity()->getId();
             } else {
                 $urlDelete = $deletableA ? $this->url()->fromRoute(
@@ -2137,6 +2138,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $contextKey = $activityPerson->getProject()->getAcronym();
                 $idEnroller = $activityPerson->getProject()->getId();
             }
             $urlShow = false;
@@ -2155,6 +2157,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'rolePrincipal' => $activityPerson->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
+                'contextKey' => $contextKey,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
                 'past' => $activityPerson->isPast(),
@@ -2223,10 +2226,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $contextKey = $activityOrganization->getActivity()->getOscarNum();
             } else {
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $contextKey = $activityOrganization->getProject()->getAcronym();
             }
 
             $urlDelete = $deletableA ? $this->url()->fromRoute(
@@ -2252,6 +2257,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'rolePrincipal' => $activityOrganization->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
+                'contextKey' => $contextKey,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
                 'enroller' => $activity->getId(),

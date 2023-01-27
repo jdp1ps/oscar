@@ -57,6 +57,13 @@ class EnrollToArrayFormatter
         $output['rolePrincipal'] = $affectation->getRoleObj()->isPrincipal();
         $output['roleId'] = $affectation->getRoleObj()->getId();
         $output['context'] = $context;
+        $output['contextKey'] = '';
+        if( $context == 'activity' ){
+            $output['contextKey'] = $affectation->getEnroller()->getOscarNum();
+        }
+        if( $context == 'project' ){
+            $output['contextKey'] = $affectation->getEnroller()->getAcronym();
+        }
 
         $manage = false;
         $show = false;

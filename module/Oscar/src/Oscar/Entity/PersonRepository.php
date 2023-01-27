@@ -243,7 +243,10 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
                 )
             )
             ->innerJoin(NotificationPerson::class, 'n', Join::WITH, $qb->expr()->eq('p.id', 'n.person'))
-            ->where('n.read IS NULL')
+            ->innerJoin('n.notification', 'nt')
+            ->where('n.read IS NULL AND nt.dateEffective <= :now')
+            ->orderBy('p.lastname', 'ASC')
+            ->setParameter('now', date('Y-m-d'))
             ->getQuery()
             ->getResult();
 

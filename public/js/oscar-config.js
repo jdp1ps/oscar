@@ -100,7 +100,7 @@ requirejs.config({
         "Declarers": "oscar/dist/Declarers",
         "ReferentUI": "oscar/dist/ReferentUI",
         "APIAccess": "oscar/dist/APIAccess",
-        "EntityWithRole": "oscar/dist/EntityWithRole.umd.min",
+        "EntityWithRole": "oscar/dist/EntityWithRole.umd",
         "SpentLinePFI": "oscar/dist/SpentLinePFI",
         "gestionprivileges": "oscar/dist/GestionPrivileges",
         "documentsactivity": "oscar/dist/DocumentsActivity",
