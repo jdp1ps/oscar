@@ -409,8 +409,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->innerJoin('c.milestones', 'm')
             ->where('m.type = :jalonId');
 
-        if( is_array($progression) ){
-            $q->andWhere('m.finished IN(:progression)')
+        if( is_array($progression) && count($progression) > 0 ){
+            $clause = 'm.finished IN(:progression)';
+
+            if( in_array('0', $progression) ){
+                $clause .= ' OR m.finished IS NULL';
+            }
+            $q->andWhere($clause)
                 ->setParameter('progression', $progression);
         }
 

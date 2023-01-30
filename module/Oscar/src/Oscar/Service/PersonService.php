@@ -965,6 +965,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         }
 
         $date = new \DateTime($dateRef);
+        $this->getNotificationService()->generateActivityMilestonesUncompleted($date);
 
         $rel = [
             'Mon' => 'Lun',
