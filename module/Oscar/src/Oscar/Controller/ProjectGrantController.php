@@ -2222,7 +2222,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
             $class = get_class($activityOrganization);
 
-            if ($class == ActivityOrganization::class || get_class($activityOrganization) == $class) {
+            if ( $class == ActivityOrganization::class ) {
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
