@@ -2224,6 +2224,7 @@ class Activity implements ResourceInterface
         $datas['label'] = htmlspecialchars($this->getLabel());
         $datas['tva'] = $this->getTva() ? (string)$this->getTva() : '';
         $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
+        $datas['financial-impact'] = (string)$this->getFinancialImpact();
         $datas['note-financiere'] = $this->getNoteFinanciere();
 
         // Info Projet
