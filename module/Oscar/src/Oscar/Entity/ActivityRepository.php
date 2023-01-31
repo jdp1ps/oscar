@@ -19,14 +19,43 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ActivityRepository extends EntityRepository
 {
+    /**
+     * Retourne l'ID des activités qui impliquent une des numérotations données.
+     *
+     * @param array $numerotations
+     * @return array
+     */
+    public function getActivitiesIdsWithNumerotations(array $numerotations): array
+    {
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->select('DISTINCT a.id');
+
+        if (count($numerotations) == 0 || (in_array('null', $numerotations) && count($numerotations) == 1)) {
+            $queryBuilder->where('a.numbers = \'a:0:{}\' OR a.numbers = \'N;\' OR a.numbers IS NULL');
+        } else {
+            $where = [];
+            foreach ($numerotations as $num) {
+                $where[] = 'a.numbers LIKE \'%s:' . strlen($num) . ':"' . $num . '"%\'';
+            }
+
+            $queryBuilder->where(implode(' OR ', $where));
+        }
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
+    /**
+     * Retourne les IDS des activités qui impliquent un des types de documents donnés.
+     *
+     * @param array $idsTypeDocument
+     * @return array
+     */
     public function getActivitiesIdsWithTypeDocument(array $idsTypeDocument): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->select('DISTINCT a.id')
             ->innerJoin('a.documents', 'd')
             ->where('d.typeDocument IN(:typesDocument)')
-            ->setParameter('typesDocument', $idsTypeDocument)
-        ;
+            ->setParameter('typesDocument', $idsTypeDocument);
 
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
@@ -39,6 +68,11 @@ class ActivityRepository extends EntityRepository
         return $queryBuilder->getQuery()->getResult();
     }
 
+    /**
+     * Retourne la liste des différents PFIs.
+     *
+     * @return array
+     */
     public function getDistinctPFI(): array
     {
         $queryBuilder = $this->createQueryBuilder('a')

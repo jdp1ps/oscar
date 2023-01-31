@@ -1206,6 +1206,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityRepository()->getActivitiesIdsWithTypeDocument($idsTypeDocument);
     }
 
+    public function getActivitiesWithNumerotation( array $numerotations ) :array
+    {
+        $ids = $this->getActivityRepository()->getActivitiesIdsWithNumerotations($numerotations);
+        return $ids;
+    }
+
     /**
      * Renomage des clefs pour les numérotations personnalisées;
      *

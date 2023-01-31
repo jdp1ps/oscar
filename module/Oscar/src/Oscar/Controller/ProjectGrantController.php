@@ -763,6 +763,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
         $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
+        $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
         $activity = $this->getProjectGrantService()->getGrant($id);
         $documentDatas = $activity->documentDatas($baseDatas);
         $documentDatas["type-full"] = $this->getActivityTypeService()->getActivityTypeChainFormatted(
@@ -2445,7 +2446,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 // Ajout d'un filtre sur les jalons
                 'aj' => 'Ayant le jalon',
 
-                'cb' => 'Impliquant le compte'
+                'cb' => 'Impliquant le compte',
+                'num' => 'Ayant une numérotation',
             ];
 
             // Correspondance des champs de type date
@@ -2822,6 +2824,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         break;
 
+                    case 'num' :
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        try {
+                            $ids = $this->getActivityService()->getActivitiesWithNumerotation($value1);
+                        } catch (\Exception $e) {
+                            throw new OscarException($e->getMessage());
+                        }
+                        break;
+
                     case 'ao' :
                     case 'so' :
                         $organizationId[] = $value1;
@@ -3003,7 +3014,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
                 }
                 $criterias[] = $crit;
-                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om'
+                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'num'
                     || $type == 'fdt' || $type == 'cb' || $type == 'cb2' || $type == 'td') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
@@ -3131,6 +3142,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortCriteria' => $sortCriteria,
                     'sortDirection' => $sortDirection,
                     'sortIgnoreNull' => $sortIgnoreNull,
+                    'numerotations' => $this->getOscarConfigurationService()->getNumerotationKeys(),
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
                     'documentsTypes' => $documentsTypes,
                     'disciplines' => $this->getActivityService()->getDisciplines(),

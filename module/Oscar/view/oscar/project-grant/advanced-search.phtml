@@ -301,6 +301,25 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="numerotation-tpl">
+        <article class="criteria criteria-numerotation card">
+            <div class="icon-cal"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_numerotation" multiple>
+                <?php foreach( $numerotations as $num ): ?>
+                <option value="<?= $num ?>"><?= $num ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
     <script type="text/x-handlebars" id="milestones-criteria-tpl">
         <article class="criteria criteria-{{type}} card">
             <div class="icon-calendar"></div>
@@ -794,6 +813,10 @@
                         datas.label = "Dépenses sur le compte";
                         dom = $(tplAccount(datas));
                     }
+                    else if(datas.type == 'num' ) {
+                        datas.label = "Numérotation";
+                        dom = $(tplNumerotation(datas));
+                    }
                     // accountscode
                     else if(datas.type == 'cb2' ) {
                         datas.label = "Code de compte général";
@@ -1076,6 +1099,7 @@
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
                     tplOrganizations= Handlebars.compile($('#organizations-criteria-tpl').html()),
                     tplMilestone = Handlebars.compile($('#milestones-criteria-tpl').html()),
+                    tplNumerotation = Handlebars.compile($('#numerotation-tpl').html()),
                     id = 1;
 
                 //
