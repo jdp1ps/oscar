@@ -99,21 +99,42 @@ class ActivityTypeService implements UseEntityManager
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getActivityTypeChain($activity)
+    public function getActivityTypeChain($activityType)
     {
-        if ($activity === null) {
+        if ($activityType === null) {
             return [];
         }
         $chain = $this->getBaseQuery()
             ->where('t.lft <= :lft AND t.rgt >= :rgt')
             ->setParameters([
-                'lft' => $activity->getLft(),
-                'rgt' => $activity->getRgt(),
+                'lft' => $activityType->getLft(),
+                'rgt' => $activityType->getRgt(),
             ])
             ->getQuery()
             ->getResult();
 
         return $chain;
+    }
+
+    public function getActivityTypeChainFormatted($activityType) :string
+    {
+        $output = [];
+        if ( $activityType ){
+            $chain = $this->getActivityTypeChain($activityType);
+            /** @var ActivityType $node */
+            foreach ($chain as $node) {
+                if( $node->getLabel() == 'ROOT' ){
+                    continue;
+                }
+                $output[] = $node->getLabel();
+            }
+        }
+
+        if( count($output) == 0 ){
+            return "Pas de type";
+        } else {
+            return implode(" > ", $output);
+        }
     }
 
     public function getActivityTypesPcru()
