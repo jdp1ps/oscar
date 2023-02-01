@@ -143,16 +143,8 @@
 <script>
     /******************************************************************************************************************/
     /* ! DEVELOPPEUR
-    Depuis la racine OSCAR :
-
     cd front
-
-    Pour compiler en temps réél :
-    node node_module/.bin/gulp activityDocumentWatch
-
-    Pour compiler :
-    node node_module/.bin/gulp activityDocument
-
+    node node_modules/.bin/vue-cli-service build --name ActivityDocument --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/ActivityDocument.vue
      */
 
     import AjaxOscar from "./remote/AjaxOscar";
@@ -231,9 +223,8 @@
             },
 
             handlerEdit(document){
-                console.log(document);
                 this.editData = {
-                    'documentype_id': document.category.id,
+                    'documentype_id': document.category ? document.category.id : "",
                     'basename': document.basename,
                     'document': document
                 };

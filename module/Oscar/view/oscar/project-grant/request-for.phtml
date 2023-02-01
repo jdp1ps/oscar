@@ -30,10 +30,9 @@
             return d.toFixed(2);
         });
         new Vue({
-            el: '#app',
             render: function(h){
-                return h(ActivityRequest.default, { props: { moment: moment, title: "<?= $this->translate("Demande d'activité") ?>" }})
+                return h(ActivityRequest, { props: { moment: moment, title: "<?= $this->translate("Demande d'activité") ?>" }})
             }
-        })
+        }).$mount('#app')
     })
 </script>
