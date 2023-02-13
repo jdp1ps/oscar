@@ -1034,6 +1034,7 @@ return array(
         'factories' => [
             'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelperFactory::class,
             'Grant' => \Oscar\View\Helpers\GrantFactory::class,
+            'Vite' => \Oscar\View\Helpers\ViteFactory::class,
             'hasRole' => \Oscar\View\Helpers\HasRoleFactory::class,
             'link' => \Oscar\View\Helpers\LinksFactory::class,
             'options' => \Oscar\View\Helpers\OptionsFactory::class,
