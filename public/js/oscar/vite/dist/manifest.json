@@ -1,0 +1,20 @@
+{
+  "_vendor.js": {
+    "file": "vendor.js"
+  },
+  "src/example.css": {
+    "file": "assets/example-aabfddd4.css",
+    "src": "src/example.css"
+  },
+  "src/example.js": {
+    "css": [
+      "assets/example-aabfddd4.css"
+    ],
+    "file": "assets/example-41465e59.js",
+    "imports": [
+      "_vendor.js"
+    ],
+    "isEntry": true,
+    "src": "src/example.js"
+  }
+}
