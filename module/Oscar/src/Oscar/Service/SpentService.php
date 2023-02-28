@@ -68,10 +68,14 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     {
         $out = [];
 
-        $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral::varchar ';
+        // On test si il y'a des comptes
+
+        $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral';
         $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
         $stmt->execute();
         $used = $stmt->fetchAll();
+
+
 
         $masses = $this->getMasses();
         $i = 0;
