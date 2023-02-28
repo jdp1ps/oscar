@@ -460,17 +460,18 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         // Récupération des données
         $pcruInfos = $this->getPcruInfosActivity($activity);
         $preview = false;
+        $factory = new ActivityPcruInfoFromActivityFactory(
+            $this->getOscarConfigurationService(),
+            $this->getEntityManager()
+        );
 
         if (!$pcruInfos) {
             $preview = true;
-            $factory = new ActivityPcruInfoFromActivityFactory(
-                $this->getOscarConfigurationService(),
-                $this->getEntityManager()
-            );
+
             $pcruInfos = $factory->createNew($activity);
         }
 
-        $headers = ActivityPcruInfoFromActivityFactory::getHeaders();
+        $headers = $factory->getHeaders();
         $datas = $pcruInfos->toArray($this->getEntityManager());
 
         $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
@@ -578,10 +579,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
      */
     public function getResponsableScientifiques(Activity $activity): array
     {
-        $roleStr = $this->getOscarConfigurationService()->getOptionalConfiguration(
-            'pcru_responsablescientifique',
-            'Responsable scientifique'
-        );
+        $roleStr = $this->getOscarConfigurationService()->getPcruInChargeRole();
         $out = [];
         /** @var ActivityPerson $per */
         foreach ($activity->getPersonsDeep() as $per) {
@@ -606,6 +604,10 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             );
         }
         return $factory;
+    }
+
+    public function getHeaders(){
+        return $this->getDataFactory()->getHeaders();
     }
 
     protected function getPCRUDepotStrategy()

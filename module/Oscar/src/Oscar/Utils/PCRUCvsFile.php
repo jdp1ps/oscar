@@ -20,6 +20,7 @@ class PCRUCvsFile
     private $datas;
     private $pcruService;
     private $logs;
+    private $headers;
 
     /**
      * PCRUCvsFile constructor.
@@ -31,6 +32,7 @@ class PCRUCvsFile
         $this->path = $directory == null ? $pcruService->getOscarConfigurationService()->getPcruDirectoryForUpload() : $directory;
         $this->datas = [];
         $this->logs = [];
+        $this->headers = $pcruService->getHeaders();
     }
 
     /**
@@ -353,7 +355,7 @@ class PCRUCvsFile
      */
     public function getHeaders(): array
     {
-        return array_keys(ActivityPcruInfoFromActivityFactory::getHeaders());
+        return $this->headers;
     }
 
     public function printInSymfonyConsole(SymfonyStyle $symfonyStyle): void

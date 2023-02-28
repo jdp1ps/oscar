@@ -174,7 +174,7 @@ class ActivityPcruInfoFromActivityFactory
         return $activityPcruInfos;
     }
 
-    public static function getHeaders()
+    public function getHeaders()
     {
         return [
             'Objet' => "Intitulé de l'activité",
@@ -185,7 +185,7 @@ class ActivityPcruInfoFromActivityFactory
             'TypeContrat' => '',
             'Acronyme' => "Acronyme du projet de l'activité",
             'ContratsAssocies' => 'off',
-            'ResponsableScientifique' => 'Nom de la personne ayant le rôle "Responsable scientifique"',
+            'ResponsableScientifique' => 'Nom de la personne ayant le rôle "'. $this->oscarConfigurationService->getPcruInChargeRole() . '"',
             'EmployeurResponsableScientifique' => 'off',
             'CoordinateurConsortium' => 'off',
             'Partenaires' => 'off',
