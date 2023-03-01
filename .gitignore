@@ -74,6 +74,10 @@ data/documents/public/**
 !data/documents/public/.gitkeep
 data/documents/request/**
 !data/documents/request/.gitkeep
+data/generated-documents/activity/**
+!data/generated-documents/activity/bordereau.docx
+!data/generated-documents/activity/fiche.docx
+!data/generated-documents/activity/sample.docx
 
 # Gabarits
 data/templates/timesheet_activity_synthesis.html.php
