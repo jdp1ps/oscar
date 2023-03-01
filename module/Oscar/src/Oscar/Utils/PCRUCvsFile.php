@@ -184,11 +184,12 @@ class PCRUCvsFile
      */
     public function writeContratsCsv($dest = null)
     {
+        $headers = $this->getHeaders();
         if ($dest == null) {
             $dest = $this->pcruService->getOscarConfigurationService()->getPcruContratFile();
         }
         $handler = fopen($dest, 'w');
-        fputcsv($handler, $this->getHeaders(), ';');
+        fputcsv($handler, array_keys($this->getHeaders()), ';');
         foreach ($this->getData() as $data) {
             fputcsv($handler, $data, ';');
         }
