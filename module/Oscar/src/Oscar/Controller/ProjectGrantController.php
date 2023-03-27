@@ -2941,24 +2941,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                     case 'cnt' :
                         if ($params[1]) {
-                            if (!isset($parameters['countries'])) {
-                                $parameters['countries'] = [];
-                            }
                             $value1 = $crit['val1'] = explode(',', $params[1]);
-                            $qb->andWhere('orga1.country IN (:countries) OR orga2.country IN (:countries)');
-                            $parameters['countries'] = $value1;
+                            $ids = $this->getActivityService()->getActivityRepository()
+                                ->getIdsWithOrganizationOfCountry($value1);
                         }
                         break;
 
                     case 'tnt' :
                         if ($params[1]) {
-                            if (!isset($parameters['typeorga'])) {
-                                $parameters['typeorga'] = [];
-                            }
                             $value1 = $crit['val1'] = explode(',', $params[1]);
                             $typeIds = $this->getOrganizationService()->getTypesIdsByLabel($value1);
-                            $qb->andWhere('orga1.typeObj IN (:typeorga) OR orga2.typeObj IN (:typeorga)');
-                            $parameters['typeorga'] = $typeIds;
+                            $ids = $this->getActivityService()->getActivityRepository()
+                                ->getIdsWithOrganizationOfType($typeIds);
                         }
                         break;
 
@@ -3015,7 +3009,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
                 $criterias[] = $crit;
                 if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'num'
-                    || $type == 'fdt' || $type == 'cb' || $type == 'cb2' || $type == 'td') {
+                    || $type == 'fdt' || $type == 'cb' || $type == 'cb2' || $type == 'td' || $type == 'tnt'
+                    || $type == 'cnt') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
                     } else {

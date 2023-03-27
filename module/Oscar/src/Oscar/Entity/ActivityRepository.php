@@ -43,6 +43,55 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
+
+    protected function baseQueryWithOrganizationOf() :QueryBuilder
+    {
+        return $this->createQueryBuilder('c')
+            ->select('DISTINCT c.id')
+            ->leftJoin('c.project', 'pr')
+            ->leftJoin('c.organizations', 'p1')
+            ->leftJoin('p1.organization', 'orga1')
+            ->leftJoin('pr.partners', 'p2')
+            ->leftJoin('p2.organization', 'orga2');
+    }
+
+    /**
+     * Retourne les IDS des activités impliquant une organisation d'un des types spécifiés.
+     *
+     * @param array $organizationTypeIds ID des types d'organisation
+     * @return array
+     */
+    public function getIdsWithOrganizationOfType(array $organizationTypeIds): array
+    {
+        $queryBuilder = $this->baseQueryWithOrganizationOf()
+            ->where('orga1.typeObj IN (:typeorga) OR orga2.typeObj IN (:typeorga)');
+
+        $queryBuilder->setParameters(
+            [
+                'typeorga' => $organizationTypeIds
+            ]
+        );
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
+    /**
+     * Retourne les IDS des activités impliquant une organisation ayant un des pays spécifiés.
+     *
+     * @param array $organizationTypeIds ID des types d'organisation
+     * @return array
+     */
+    public function getIdsWithOrganizationOfCountry( array $countries ): array {
+        $queryBuilder = $this->baseQueryWithOrganizationOf()
+            ->where('orga1.country IN (:countries) OR orga2.country IN (:countries)');
+
+        $queryBuilder->setParameters(
+            [
+                'countries' => $countries
+            ]
+        );
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
     /**
      * Retourne les IDS des activités qui impliquent un des types de documents donnés.
      *
