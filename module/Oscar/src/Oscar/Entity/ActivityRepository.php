@@ -55,6 +55,19 @@ class ActivityRepository extends EntityRepository
             ->leftJoin('p2.organization', 'orga2');
     }
 
+    public function getIdsWithOrganizations( array $organisationsIds ): array
+    {
+        $queryBuilder = $this->baseQueryWithOrganizationOf()
+            ->where('orga1.id IN (:organizations_ids) OR orga2.id IN (:organizations_ids)');
+
+        $queryBuilder->setParameters(
+            [
+                'organizations_ids' => $organisationsIds
+            ]
+        );
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
     /**
      * Retourne les IDS des activités impliquant une organisation d'un des types spécifiés.
      *

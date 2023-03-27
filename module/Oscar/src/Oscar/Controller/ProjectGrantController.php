@@ -2400,11 +2400,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $startEmpty = false;
             }
 
+            $organizationsIdsPerimeter = null;
+
             if ($this->getOrganizationPerimeter()) {
                 $include = $this->params()->fromQuery('include', null);
                 if ($include) {
                     foreach ($include as $index => $value) {
-                        $include[$index] = intval($value);
+                        $include[] = intval($value);
                     }
                     $include = array_intersect(
                         $include,
@@ -2413,6 +2415,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 } else {
                     $include = $this->getOrganizationPerimeter();
                 }
+
+                // IDS concernés
+                $organizationsIdsPerimeter = $this->getActivityService()
+                    ->getActivityRepository()
+                    ->getIdsWithOrganizations($include);
             }
 
             // Type de recherche supportée
@@ -2615,14 +2622,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 if ($include) {
-                    $organizationsPerimeterIds = implode(',', $include);
-                    $qb->andWhere(
-                        'p1.organization IN('
-                        . $organizationsPerimeterIds
-                        . ') OR p2.organization IN('
-                        . $organizationsPerimeterIds
-                        . ')'
-                    );
+                    $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
                 }
             } else {
                 if ($search) {
@@ -3048,15 +3048,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // FILTRE STATIC SUR LES ORGA
             if ($this->getOrganizationPerimeter()) {
-                $organizationsPerimeterIds = implode(',', $include);
-
-                $qb->andWhere(
-                    'p1.organization IN('
-                    . $organizationsPerimeterIds
-                    . ') OR p2.organization IN('
-                    . $organizationsPerimeterIds
-                    . ')'
-                );
+                $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
             }
 
             $activities = null;
