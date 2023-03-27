@@ -31,7 +31,7 @@ class OscarNotificationsMailsPersonsCommand extends OscarCommandAbstract
         $io = new SymfonyStyle($input, $output);
 
         $date = $input->getOption('date');
-        $dateRef = null;
+        $dateRef = new \DateTime();
         if( $date ){
             $dateRef = new \DateTime(date('Y-m-d ') . $date);
         }
