@@ -2220,12 +2220,14 @@ class Activity implements ResourceInterface
         $datas['annee-fin'] = $this->getDateEndStr('Y');
         $datas['debut'] = $this->getDateStartStr('d/m/Y');
         $datas['fin'] = $this->getDateEndStr('d/m/Y');
+        $datas['signature'] = $this->getDateSignedStr('d/m/Y');
         $datas['intitule'] = htmlspecialchars($this->getLabel());
         $datas['label'] = htmlspecialchars($this->getLabel());
         $datas['tva'] = $this->getTva() ? (string)$this->getTva() : '';
         $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
         $datas['financial-impact'] = (string)$this->getFinancialImpact();
         $datas['note-financiere'] = $this->getNoteFinanciere();
+        $datas['frais-gestion'] = $this->getFraisDeGestion();
 
         // Info Projet
         $datas['project-label'] = $this->getProject() ? $this->getProject()->getLabel() : '';
