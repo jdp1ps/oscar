@@ -78,7 +78,7 @@ class Activity implements ResourceInterface
     const STATUS_REFUSED = 210; // Refusé
     const STATUS_REFUSED_2 = 211; // Refusé en phase 2
     const STATUS_TRANSFERED = 220; // Transféré
-    const STATUS_STATUS_REORIENTED = 221; // Réorienté
+    const STATUS_REORIENTED = 230; // Réorienté
     const STATUS_ABORDED = 250; // Abandonnée
     const STATUS_FENCED = 275; // Clôturé
 
