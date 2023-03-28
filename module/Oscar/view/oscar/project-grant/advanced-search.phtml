@@ -909,7 +909,7 @@
                                 }
                             });
                             val2 = values.join(',');
-                        } else {
+                        } else if (checkboxs.length == 1){
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].checked ? "1" : "0";
