@@ -39,9 +39,8 @@ class Activity implements ResourceInterface
                 self::STATUS_FENCED => 'Clôturé',
                 self::STATUS_DEPOSIT => 'Déposée',
                 self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_TERMINATED => 'En clôture',
+                self::STATUS_TERMINATED => 'En cours de clôture',
                 self::STATUS_PENDING_ACCEPTED => 'En cours de conventionnement',
-                self::STATUS_PENDING_FENCED => 'En cours de clôture',
                 self::STATUS_IDENTIFY => 'Identifiée',
                 self::STATUS_JUSTIFY => 'Justifiée',
                 self::STATUS_DISPUTE => 'Litige',
@@ -70,19 +69,18 @@ class Activity implements ResourceInterface
     const STATUS_ACCEPTED = 106;    // Accepté
     const STATUS_IDENTIFY = 107;    // Identifié
     const STATUS_PENDING_ACCEPTED = 108;    // En cours de conventionnement
-    const STATUS_ACCEPTED_2 = 109;    // Acceptée en phase 2
+    const STATUS_ACCEPTED_2 = 109;    // Accepté en phase 2
 
 
     // 200 : Terminées / Abandonnées
-    const STATUS_CLOSED = 200;     // Activité fermée
-    const STATUS_TERMINATED = 201; // Activité terminée
-    const STATUS_REFUSED = 210; // Activité refusée
-    const STATUS_REFUSED_2 = 211; // Activité refusée en phase 2
-    const STATUS_TRANSFERED = 220; // Transférée
+    const STATUS_CLOSED = 200;     // Fermé
+    const STATUS_TERMINATED = 201; // Terminé
+    const STATUS_REFUSED = 210; // Refusé
+    const STATUS_REFUSED_2 = 211; // Refusé en phase 2
+    const STATUS_TRANSFERED = 220; // Transféré
     const STATUS_STATUS_REORIENTED = 221; // Réorienté
-    const STATUS_ABORDED = 250; // Activité abandonnée
-    const STATUS_PENDING_FENCED = 270; // Activité abandonnée
-    const STATUS_FENCED = 275; // Activité abandonnée
+    const STATUS_ABORDED = 250; // Abandonnée
+    const STATUS_FENCED = 275; // Clôturé
 
     // 400 : Conflits
     const STATUS_DISPUTE = 400; // Litige
