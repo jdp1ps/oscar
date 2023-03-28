@@ -287,12 +287,21 @@
             <div class="icon-docs"></div>
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
-            <small>{{typeLabel}}</small>
+            <small>
+                <strong></p>Ayant au moins un des types de document</strong>
+                (Laisser vide pour n'importe quel type de document)
+            </small>
             <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
                 <?php foreach( $documentsTypes as $typeDocId=>$typeDoc ): ?>
                 <option value="<?= $typeDocId ?>"><?= $typeDoc ?></option>
                 <?php endforeach; ?>
             </select>
+            <div class="progression val2-options">
+                <label for="<?php $uniq = uniqid('doc'); echo $uniq ?>">
+                    <input id="<?= $uniq ?>" type="checkbox" value="1" class="val2 changer" />
+                    N'ayant pas
+                </label>
+            </div>
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
@@ -903,7 +912,7 @@
                         } else {
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
-                                val2 = val2Elem.val();
+                                val2 = val2Elem[0].checked ? "1" : "0";
                             }
 
                         }
@@ -1008,6 +1017,15 @@
                     if(datas.type == 'at'){
                         dom.find('.val2').val(datas.val2);
                     }
+
+                    if(datas.type == 'td' && datas.val2 != null ){
+                        if( datas.val2 == "1" ){
+                            console.log('VAL2', datas.val2);
+                            console.log('>>>>', dom.find('.val2'), dom.find('.val2').checked);
+                            dom.find('.val2')[0].checked = true;
+                        }
+                    }
+
 
                     if(datas.type == 'aj' && datas.val2 != null ){
 

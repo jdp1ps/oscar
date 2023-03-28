@@ -2816,9 +2816,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
 
                     case 'td':
-                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        if( $crit['val1'] == "null" || !$crit['val1'] ){
+                            $value1 = [];
+                        } else {
+                            $value1 = $crit['val1'] = explode(',', $params[1]);
+                        }
+
                         try {
-                            $ids = $this->getActivityService()->getActivitiesIdsWithTypeDocument($value1);
+                            $reverse = $value2 == "1";
+
+                            $ids = $this->getActivityService()
+                                ->getActivitiesIdsWithTypeDocument($value1, $reverse);
                         } catch (\Exception $e) {
                             throw new OscarException($e->getMessage());
                         }

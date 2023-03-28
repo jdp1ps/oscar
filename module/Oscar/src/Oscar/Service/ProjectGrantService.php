@@ -1202,8 +1202,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ];
     }
 
-    public function getActivitiesIdsWithTypeDocument( array $idsTypeDocument ):array {
-        return $this->getActivityRepository()->getActivitiesIdsWithTypeDocument($idsTypeDocument);
+    public function getActivitiesIdsWithTypeDocument( array $idsTypeDocument, bool $reverse = false ):array {
+        return $this->getActivityRepository()->getActivitiesIdsWithTypeDocument($idsTypeDocument, $reverse);
     }
 
     public function getActivitiesWithNumerotation( array $numerotations ) :array

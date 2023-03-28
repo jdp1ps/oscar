@@ -44,7 +44,7 @@ class ActivityRepository extends EntityRepository
     }
 
 
-    protected function baseQueryWithOrganizationOf() :QueryBuilder
+    protected function baseQueryWithOrganizationOf(): QueryBuilder
     {
         return $this->createQueryBuilder('c')
             ->select('DISTINCT c.id')
@@ -55,7 +55,7 @@ class ActivityRepository extends EntityRepository
             ->leftJoin('p2.organization', 'orga2');
     }
 
-    public function getIdsWithOrganizations( array $organisationsIds ): array
+    public function getIdsWithOrganizations(array $organisationsIds): array
     {
         $queryBuilder = $this->baseQueryWithOrganizationOf()
             ->where('orga1.id IN (:organizations_ids) OR orga2.id IN (:organizations_ids)');
@@ -93,7 +93,8 @@ class ActivityRepository extends EntityRepository
      * @param array $organizationTypeIds ID des types d'organisation
      * @return array
      */
-    public function getIdsWithOrganizationOfCountry( array $countries ): array {
+    public function getIdsWithOrganizationOfCountry(array $countries): array
+    {
         $queryBuilder = $this->baseQueryWithOrganizationOf()
             ->where('orga1.country IN (:countries) OR orga2.country IN (:countries)');
 
@@ -111,15 +112,34 @@ class ActivityRepository extends EntityRepository
      * @param array $idsTypeDocument
      * @return array
      */
-    public function getActivitiesIdsWithTypeDocument(array $idsTypeDocument): array
+    public function getActivitiesIdsWithTypeDocument(array $typeDocumentIds, bool $reverse = false): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->select('DISTINCT a.id')
-            ->innerJoin('a.documents', 'd')
-            ->where('d.typeDocument IN(:typesDocument)')
-            ->setParameter('typesDocument', $idsTypeDocument);
+            ->innerJoin('a.documents', 'd');
 
-        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+        $parameters = [];
+
+        if (count($typeDocumentIds) > 0) {
+            $queryBuilder->where('d.typeDocument IN(:typesDocument)');
+            $parameters['typesDocument'] = $typeDocumentIds;
+            $queryBuilder->setParameter('typesDocument', $typeDocumentIds);
+        }
+
+        $ids = array_map('current', $queryBuilder->getQuery()->getArrayResult());
+
+        if ($reverse) {
+            $queryBuilder = $this->createQueryBuilder('a')
+                ->select('DISTINCT a.id');
+            if (count($ids) > 0) {
+                $queryBuilder->where('a.id NOT IN(:ids)')
+                    ->setParameter('ids', $ids);
+            }
+
+            $ids = array_map('current', $queryBuilder->getQuery()->getArrayResult());
+        }
+
+        return $ids;
     }
 
     public function getActivitiesWithNumber(string $key): array
