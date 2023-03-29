@@ -85,7 +85,7 @@ requirejs.config({
         "ResumeActivity" : "oscar/dist/ResumeActivity",
         "PersonsList" : "oscar/dist/PersonsList",
         "Tva": "oscar/dist/Tva",
-        "ActivityRequest": "oscar/dist/ActivityRequest",
+        "ActivityRequest": "oscar/dist/ActivityRequest.umd",
         "ActivityRequestAdmin": "oscar/dist/ActivityRequestAdmin.umd",
         "ConfigStringList": "oscar/dist/ConfigStringList",
         "ActivityPersons": "oscar/dist/ActivityPersons",
@@ -99,15 +99,15 @@ requirejs.config({
         "Referent": "oscar/dist/Referent",
         "Declarers": "oscar/dist/Declarers",
         "ReferentUI": "oscar/dist/ReferentUI",
-        "EntityWithRole": "oscar/dist/EntityWithRole",
         "APIAccess": "oscar/dist/APIAccess",
+        "EntityWithRole": "oscar/dist/EntityWithRole.umd",
         "SpentLinePFI": "oscar/dist/SpentLinePFI",
         "gestionprivileges": "oscar/dist/GestionPrivileges",
         "documentsactivity": "oscar/dist/DocumentsActivity",
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
         "rolesadminui": "oscar/dist/RolesAdminUI",
         "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
-        "activitydocument": "oscar/dist/ActivityDocument.umd.min",
+        "activitydocument": "oscar/dist/ActivityDocument.umd",
         "administrationpcru": "oscar/dist/AdministrationPcru.umd",
         "administrationpcrupc": "oscar/dist/AdministrationPcruPoleCompetitivite.umd.min",
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
@@ -122,7 +122,9 @@ requirejs.config({
         "activitytypeselector": "oscar/dist/ActivityTypeSelector.umd.min",
         "activitytypeitem": "oscar/dist/ActivityTypeItem.umd.min",
         "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
-        "ValidationUI": "oscar/dist/ValidationUI.umd.min"
+        "ValidationUI": "oscar/dist/ValidationUI.umd.min",
+        "AccountList": "oscar/dist/AccountList.umd.min",
+        "NumberMigrate": "oscar/dist/NumberMigrate.umd.min"
     },
     shim: {
         "bootstrap": {

@@ -48,6 +48,7 @@ return array(
                     'action' => [
                         'access',
                         "accessAPI",
+                        'accounts',
                         'accueil', // OK
                         'activityIndexBuild', // OK
                         'connectorsConfig',

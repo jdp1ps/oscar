@@ -16,6 +16,7 @@ use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\EstimatedSpentLine;
 use Oscar\Entity\Notification;
@@ -35,6 +36,7 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Utils\AccountInfoUtil;
 use Oscar\Utils\StringUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
@@ -66,10 +68,14 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     {
         $out = [];
 
-        $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral::varchar ';
+        // On test si il y'a des comptes
+
+        $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral';
         $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
         $stmt->execute();
         $used = $stmt->fetchAll();
+
+
 
         $masses = $this->getMasses();
         $i = 0;
@@ -532,7 +538,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     /**
      * @return SpentTypeGroupRepository
      */
-    protected function getSpentTypeRepository()
+    public function getSpentTypeRepository()
     {
         return $this->getEntityManager()->getRepository(SpentTypeGroup::class);
     }
@@ -625,6 +631,25 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getParentWithAnnexe($plan, $codeParent);
     }
 
+    public function getIdsActivitiesForCompteGeneral( array $compteGeneral ) :array
+    {
+        $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($compteGeneral);
+        /** @var ActivityRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+        $idsActivities = $activityRepository->getActivitiesIdsByPfis($pfis);
+        return $idsActivities;
+    }
+
+    public function getIdsActivitiesForAccounts( array $codesAccounts ) :array
+    {
+        $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($codesAccounts);
+
+        /** @var ActivityRepository $activityRepository */
+        $activityRepository = $this->getEntityManager()->getRepository(Activity::class);
+        $idsActivities = $activityRepository->getActivitiesIdsByPfis($pfis);
+        return $idsActivities;
+    }
+
     /**
      * Retourne les informations pour un compte à partir de son code : 00XXXXXXXXXX
      * Pour déterminer l'annexe budgétaire, le code cherche dans le compte, puis
@@ -635,36 +660,22 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      */
     public function getCompte($code)
     {
-        $dump = function($foo){};
-        $echo = function($foo){};
-        $end = function(){};
-
-        if( false ){
-            $dump = function($foo){ var_dump($foo); };
-            $echo = function($foo){ echo "$foo"; };
-            $end = function(){ die('FIN'); };
-        }
-
         static $cacheCompte;
 
         if ($cacheCompte == null) {
             $cacheCompte = [];
         }
 
-
         if (!array_key_exists($code, $cacheCompte)) {
-            $echo("Construction du compte $code");
             $plan = $this->getPlanComptable();
             $find = null;
             $reduce = strval($code);
             $out = [];
             for ($i = strlen($reduce) - 1; $find == null && $i > 0; $i--) {
                 if( $reduce[$i] == '0' ) continue;
-
                 if (array_key_exists($reduce, $plan)) {
-
                     $parent = $this->getParentWithAnnexe($plan, $plan[$reduce]->getCode());
-                    $dump($plan[$reduce]);
+                    $out['id'] = $plan[$reduce]->getId();
                     $out['label'] = $plan[$reduce]->getLabel();
                     $out['code'] = $plan[$reduce]->getCode();
                     $out['codeFull'] = $code;
@@ -689,6 +700,16 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
 
         return $cacheCompte[$code];
+    }
+    public function getSpentsByPFIs($pfis){
+        $out = [];
+        foreach ($pfis as $pfi) {
+            $spents = $this->getSpentsByPFI($pfi);
+            foreach ($spents as $s) {
+                $out[] = $s;
+            }
+        }
+        return $out;
     }
 
     public function getSpentsByPFI($pfi)
@@ -763,6 +784,29 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     }
 
     /**
+     * Liste des comptes utilisés.
+     *
+     * @return array
+     */
+    public function getUsedAccount()
+    {
+        $usedAccounts = $this->getSpentTypeRepository()->getUsedAccount();
+        $accountInfos = [];
+        foreach ($usedAccounts as $compte) {
+            $infos = $this->getCompte($compte);
+            $accountInfos[] = $infos;
+        }
+        return $accountInfos;
+    }
+
+    public function getAccountsInfosUsed() :AccountInfoUtil
+    {
+        return AccountInfoUtil::getInstance($this);
+    }
+
+
+
+    /**
      * Retourne les données de synthèse des dépenses pour un PFI donné sous la forme d'un tableau :
      * [
      *  'masse1'    => float,
@@ -778,7 +822,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     {
 
         // Récupération des dépenses
-        $spents = $this->getSpentsByPFI($pfi);
+        $spents = $this->getSpentsByPFIs($pfi);
 
         // Récupération des Masses comptable configurées dans config
         $masses = $this->getOscarConfigurationService()->getMasses();

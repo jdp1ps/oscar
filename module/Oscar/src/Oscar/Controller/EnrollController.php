@@ -116,10 +116,18 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     public function organizationProjectDeleteAction()
     {
         try {
+            $idenroll = $this->params()->fromRoute('idenroll');
+            if( !$idenroll ){
+                throw new OscarException("Identifiant non-trouvé " . $idenroll);
+            }
+
             /** @var ProjectPartner $enroll */
-            $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find(
-                $this->params()->fromRoute('idenroll')
-            );
+            $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($idenroll);
+            if( !$enroll ){
+                throw new OscarException("L'association Organization/Projet est manquante");
+            }
+
+
             $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_MANAGE, $enroll->getProject());
 
             $this->getProjectService()->removeProjectOrganization($enroll);

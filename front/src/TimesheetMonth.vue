@@ -930,7 +930,7 @@
                             hl[code].days[d] = 0.0;
 
                         hl[code].days[d] += dec.duration;
-                        hl[code].total += dec.duration;
+                        //hl[code].total += dec.duration;
                     });
                 });
 
@@ -1066,12 +1066,9 @@
 
         methods: {
             handledEditComment(type, data){
-                console.log("MODIFICATION COMMENTAIRE ", type, data);
-
                 this.commentEditedLabel = data.label;
                 this.commentEdited = data;
                 this.commentEditedContent = data.comment;
-
             },
 
             handlerSendComment(){
@@ -1093,8 +1090,6 @@
                     formData.append('id', id);
                     formData.append('code', code);
                     formData.append('content', this.commentEditedContent);
-
-                    console.log("Envoi du commentaire");
 
                     this.$http.post('', formData).then(
                         ok => {
@@ -1222,11 +1217,9 @@
                 this.loading = true;
                 this.$http.get(this.urlValidation +'?year=' + this.ts.year + '&month=' + this.ts.month).then(
                     ok => {
-                        console.log("OK");
                         this.sendMonth(action);
                     },
                     ko => {
-                        console.log(ko);
                         this.error = ko.body;
                     }
                 ).then(foo => {

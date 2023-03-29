@@ -332,6 +332,7 @@ export default {
   },
 
   mounted() {
+    console.log("MOUNT");
     this.fetch();
   }
 }

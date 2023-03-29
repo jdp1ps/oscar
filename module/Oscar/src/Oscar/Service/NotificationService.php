@@ -13,6 +13,7 @@ use Doctrine\ORM\ORMException;
 use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
+use Oscar\Entity\ActivityDateRepository;
 use Oscar\Entity\ActivityNotification;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
@@ -856,5 +857,22 @@ class NotificationService implements UseServiceContainer
         }
 
         $this->getEntityManager()->flush();
+    }
+
+
+    /**
+     * Récupère la liste des jalons "terminable" où le status n'est pas modifié afin de notifier les personnes
+     * idoines.
+     * @param \DateTime $reference
+     */
+    public function generateActivityMilestonesUncompleted( \DateTime $reference ) :void
+    {
+        // TODO
+//        /** @var ActivityDateRepository $milestoneRepository */
+//        $milestoneRepository = $this->getEntityManager()->getRepository(ActivityDate::class);
+//
+//        $milestones = $milestoneRepository->getMilestonesFinishable();
+//
+//        die("Calcule");
     }
 }

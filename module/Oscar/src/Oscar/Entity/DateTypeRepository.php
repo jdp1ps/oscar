@@ -26,7 +26,7 @@ class DateTypeRepository extends EntityRepository
             $rsm->addScalarResult('used', 'used');
             $sql = 'select d.id, d.label, d.description, 
                         d.finishable , d.recursivity, d.facet, 
-                        count(a.id) as used, array_agg(distinct ur.role_id) as roles from datetype d
+                        count(a.id) as used, json_agg(distinct ur.role_id) as roles from datetype d
                     left join activitydate a ON a.type_id = d.id
                     left join role_datetype rd on rd.datetype_id = d.id 
                     left join user_role ur on ur.id = rd.role_id 
@@ -36,10 +36,10 @@ class DateTypeRepository extends EntityRepository
             $results = $query->getResult();
 
             foreach ($results as &$row) {
-                if ($row['roles'] == '{NULL}') {
+                if ($row['roles'] == '[null]') {
                     $row['roles'] = [];
                 } else {
-                    $rolesStr = '[' . substr($row['roles'], 1, strlen($row['roles']) - 2) . ']';
+                    $rolesStr = $row['roles'];
                     $row['roles'] = json_decode($rolesStr, false);
                 }
             }

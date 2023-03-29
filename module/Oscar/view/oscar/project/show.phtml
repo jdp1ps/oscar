@@ -91,114 +91,183 @@ h2.tv-serie-label { border-bottom: none; }
         </div>
     </section>
 
-    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-    <!--                 ACTIVITÉS de RECHERCHE                              -->
-    <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-    <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project)): ?>
-    <section id="activities" class="has-btn">
 
-        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_ADD, $project) && $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::ACTIVITY_CREATE)): ?>
-        <div class="btn-area">
-            <a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>" class="smoke">
-                <i class="icon-cube"></i>
-                Ajouter une activité</a>
+    <section class="row">
+        <div class="col-md-8">
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+            <!--                 ACTIVITÉS de RECHERCHE                              -->
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+            <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_SHOW, $project)): ?>
+            <section id="activities" class="has-btn">
+
+                <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ACTIVITY_ADD, $project) && $this->grant()->privilegeDeep(\Oscar\Provider\Privileges::ACTIVITY_CREATE)): ?>
+                    <div class="btn-area">
+                        <a href="<?= $this->url('contract/new', ['projectid' => $project->getId()]) ?>" class="smoke">
+                            <i class="icon-cube"></i>
+                            Ajouter une activité</a>
+                    </div>
+                <?php endif; ?>
+
+                <h2><i class="icon-cube"></i> Activités de recherche</h2>
+                <?php
+                $year = null; $totalYear = 0.0; $totalProject = 0.0; $nbrContratYear = 0;
+                /** @var \Oscar\Entity\Activity $contract */
+                foreach ($project->getGrants() as $contract):
+
+                    // En-tête de regroupement
+                    $projectYear = $contract->getDateCreated()->format('Y');
+                    if($year != $projectYear ){
+                        echo '<div class="list-separator"><h3 class="list-separator-label">'.$projectYear.'</h3></div>';
+                        $year = $projectYear;
+                        $totalYear = 0.0;
+                        $nbrContratYear = 0.0;
+                    } // En-tête de regroupement [fin]
+
+                    $rate = $contract->getCurrency() ? $contract->getCurrency()->getRate() : 1;
+                    $totalYear += $contract->getAmount() * $rate;
+                    $totalProject += $contract->getAmount()  * $rate;
+                    $nbrContratYear++;
+
+                    echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $contract, 'hideProject'=> true, 'deepMembers' => false])
+                    ?>
+                <?php endforeach; ?>
+
+                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT) ): ?>
+                    <form action="<?= $this->url('project/add-activities', ['id' => $project->getId() ]) ?>" method="post">
+                        Ajouter des activités existantes dans ce projet :
+                        <div class="row">
+                            <div class="col-md-10">
+                                <select name="activities_ids[]" id="activities-choose" data-url="<?= $this->url('contract/advancedsearch') ?>" multiple></select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary" style="display: block">
+                                    Envoyer
+                                </button>
+                            </div>
+                        </div>
+                        <div id="activities-toadd">
+
+                        </div>
+                    </form>
+                    <script>
+                        require(['jquery','select2'], function($) {
+                            var formatRepo, formatRepoSelection;
+
+                            formatRepo = function (repo) {
+                                console.log('Format');
+                                if (repo.loading) return repo.text;
+
+                                var markup = '<div class="clearfix">';
+                                markup += ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                                markup += '</div>';
+
+                                return markup;
+                            };
+
+                            formatRepoSelection = function (repo) {
+                                return ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                            };
+
+                            $('#activities-choose').select2({
+                                placeholder: 'Rechercher une activité...',
+                                width: '100%',
+                                allowClear: true,
+                                ajax: {
+                                    url: $('#activities-choose').data('url'),
+                                    dataType: 'json',
+                                    delay: 250,
+                                    data: function (params) {
+                                        console.log(params);
+                                        return {
+                                            q: params.term, // search term
+                                            page: params.page
+                                        };
+                                    },
+                                    processResults: function (data, page) {
+                                        console.log('Données', data);
+                                        return {results: data.datas};
+                                    },
+                                    cache: true
+                                },
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                },
+                                minimumInputLength: 4,
+                                templateResult: formatRepo, // omitted for brevity, see the source of this page
+                                templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
+                            });
+                        });
+                    </script>
+                <?php endif; ?>
+
+                <?php endif; ?>
+            </section>
         </div>
-        <?php endif; ?>
+        <div class="col-md-4">
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%% DEPENSES %%%%%%%%%%%%%%%%%%%%%%%% -->
+            <?php
+            /*
+            'spentActivitiesIds' => $spentActivitiesIds,
+                'spentMissingAcces' => $nbrSpentAllow < $nbrSpent,
+             */
+            // ------------------------------------------------------------------------------------------------ DÉPENSES
+            if (count($spentActivitiesIds) > 0) : ?>
+                <section>
+                    <h2><i class="icon-book"></i> Dépenses</h2>
 
-        <h2><i class="icon-cube"></i> Activités de recherche</h2>
-        <?php
-        $year = null; $totalYear = 0.0; $totalProject = 0.0; $nbrContratYear = 0;
-        /** @var \Oscar\Entity\Activity $contract */
-        foreach ($project->getGrants() as $contract):
+                    <div id="depenses">DÉPENSES</div>
+                    <script>
+                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function (Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment) {
+                            Vue.use(VueResource);
+                            Vue.filter('money', VueFilters.default.money);
+                            Vue.filter('dateFull', function (date) {
+                                var m = moment(date);
+                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                            });
+                            new Vue({
+                                el: "#depenses",
+                                render: function (h) {
+                                    return h(ActivitySpendSynthesis.default, {
+                                        "props":
+                                            {
+                                                "manageDepense": '<?= $this->grant(
+                                                    \Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
+                                                ) ? $this->url('depense/manage') : "null" ?>',
+                                                "url": "<?= $this->url(
+                                                    'contract/spent-synthesis',
+                                                    ['id' => implode(',', $spentActivitiesIds)]
+                                                ) ?>"
+                                            }
+                                    });
+                                }
+                            })
+                        })
+                    </script>
+                </section>
+            <?php endif; ?>
 
-            // En-tête de regroupement
-            $projectYear = $contract->getDateCreated()->format('Y');
-            if($year != $projectYear ){
-                echo '<div class="list-separator"><h3 class="list-separator-label">'.$projectYear.'</h3></div>';
-                $year = $projectYear;
-                $totalYear = 0.0;
-                $nbrContratYear = 0.0;
-            } // En-tête de regroupement [fin]
 
-            $rate = $contract->getCurrency() ? $contract->getCurrency()->getRate() : 1;
-            $totalYear += $contract->getAmount() * $rate;
-            $totalProject += $contract->getAmount()  * $rate;
-            $nbrContratYear++;
+            <!-- %%%%%%%%%%%%%%%%%%%%%%%% DOCUMENTS %%%%%%%%%%%%%%%%%%%%%%%% -->
+            <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_DOCUMENT_SHOW, $project)): ?>
+                <section id="documents" class="">
+                    <h2><i class="icon-book"></i>Documents</h2>
 
-            echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $contract, 'hideProject'=> true, 'deepMembers' => false])
-            ?>
-        <?php endforeach; ?>
-
-        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT) ): ?>
-            <form action="<?= $this->url('project/add-activities', ['id' => $project->getId() ]) ?>" method="post">
-                Ajouter des activités existantes dans ce projet :
-                <div class="row">
-                    <div class="col-md-10">
-                        <select name="activities_ids[]" id="activities-choose" data-url="<?= $this->url('contract/advancedsearch') ?>" multiple></select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary" style="display: block">
-                            Envoyer
-                        </button>
-                    </div>
-                </div>
-                <div id="activities-toadd">
-
-                </div>
-            </form>
-            <script>
-                require(['jquery','select2'], function($) {
-                    var formatRepo, formatRepoSelection;
-
-                    formatRepo = function (repo) {
-                        console.log('Format');
-                        if (repo.loading) return repo.text;
-
-                        var markup = '<div class="clearfix">';
-                        markup += ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
-                        markup += '</div>';
-
-                        return markup;
-                    };
-
-                    formatRepoSelection = function (repo) {
-                        return ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
-                    };
-
-                    $('#activities-choose').select2({
-                        placeholder: 'Rechercher une activité...',
-                        width: '100%',
-                        allowClear: true,
-                        ajax: {
-                            url: $('#activities-choose').data('url'),
-                            dataType: 'json',
-                            delay: 250,
-                            data: function (params) {
-                                console.log(params);
-                                return {
-                                    q: params.term, // search term
-                                    page: params.page
-                                };
-                            },
-                            processResults: function (data, page) {
-                                console.log('Données', data);
-                                return {results: data.datas};
-                            },
-                            cache: true
-                        },
-                        escapeMarkup: function (markup) {
-                            return markup;
-                        },
-                        minimumInputLength: 4,
-                        templateResult: formatRepo, // omitted for brevity, see the source of this page
-                        templateSelection: formatRepoSelection // omitted for brevity, see the source of this page
-                    });
-                });
-            </script>
-        <?php endif; ?>
-
-        <?php endif; ?>
+                    <p class="help-block">Les documents ci-dessous sont issus des activités de recherche</p>
+                    <?php if( count($documents) ): ?>
+                        <?php
+                        /** @var \Oscar\Entity\ContractDocument $document */
+                        foreach( $documents as $document ): ?>
+                            <?= $this->partial('oscar/contract-document/list-item.phtml', ['document' => $document, 'showActivity'=>true]) ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="no-data">Aucun document pour les activités de recherche de ce projet</p>
+                    <?php endif; ?>
+                </section>
+            <?php endif; ?>
+        </div>
     </section>
+
+
 
     <section>
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)): ?>
@@ -244,6 +313,7 @@ h2.tv-serie-label { border-bottom: none; }
             </section>
             <script>
                 require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
+                    console.log("ORGANIZATIONS")
                     Vue.use(VueResource);
                     Vue.http.options.emulateJSON = true;
                     Vue.http.options.emulateHTTP = true;
@@ -255,12 +325,12 @@ h2.tv-serie-label { border-bottom: none; }
                                     urlNew: "<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>",
                                     manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project) ? "true" : 'false' ?>,
                                     title: "Organisation",
-                                    roles: <?= json_encode($rolesPersons) ?>,
+                                    roles: <?= json_encode($rolesOrganizations) ?>,
                                     moment: moment
                                 }});
                         }
 
-                    })
+                    }).$mount()
                 });
             </script>
         <?php endif; ?>
@@ -297,23 +367,6 @@ h2.tv-serie-label { border-bottom: none; }
                 partenaires de ce projet</p>
         <?php endif; ?>
     </section>
-
-    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_DOCUMENT_SHOW, $project)): ?>
-    <section id="documents" class="">
-        <h2><i class="icon-book"></i>Documents</h2>
-
-        <p class="help-block">Les documents ci-dessous sont issus des activités de recherche</p>
-        <?php if( count($documents) ): ?>
-            <?php
-            /** @var \Oscar\Entity\ContractDocument $document */
-            foreach( $documents as $document ): ?>
-                <?= $this->partial('oscar/contract-document/list-item.phtml', ['document' => $document, 'showActivity'=>true]) ?>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="no-data">Aucun document pour les activités de recherche de ce projet</p>
-        <?php endif; ?>
-    </section>
-    <?php endif; ?>
 
     <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ): ?>
     <section id="documents" class="">

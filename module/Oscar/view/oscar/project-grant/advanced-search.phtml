@@ -71,6 +71,7 @@
             <nav>
                 <a href="#" class="delete">
                     <i class="icon-cancel-outline"></i>
+                    <i class="icon-cancel-outline"></i>
                 </a>
             </nav>
         </article>
@@ -228,6 +229,40 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="accounts-tpl">
+        <article class="criteria criteria-account card">
+            <div class="icon-bank"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_account" multiple>
+                <?php foreach( $accounts as $account ): ?>
+                <option value="<?= $account["id"] ?>"><?= $account["code"] ?> - <?= $account["label"] ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="accountscode-tpl">
+        <article class="criteria criteria-account card">
+            <div class="icon-bank"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <input type="text" class="form-control val1 changer" value="{{val1}}" />
+            <small>{{typeLabel}}</small>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
     <script type="text/x-handlebars" id="typeorga-tpl">
         <article class="criteria criteria-typeorga card">
             <div class="icon-tag"></div>
@@ -237,6 +272,53 @@
             <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
                 <?php foreach( $typeorgas as $typeorga ): ?>
                 <option value="<?= $typeorga ?>"><?= $typeorga ?></option>
+                <?php endforeach; ?>
+            </select>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="typedocument-tpl">
+        <article class="criteria criteria-typedocument card">
+            <div class="icon-docs"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>
+                <strong></p>Ayant au moins un des types de document</strong>
+                (Laisser vide pour n'importe quel type de document)
+            </small>
+            <select class="select2 form-control val1 changer types" id="filter_typeorga" multiple>
+                <?php foreach( $documentsTypes as $typeDocId=>$typeDoc ): ?>
+                <option value="<?= $typeDocId ?>"><?= $typeDoc ?></option>
+                <?php endforeach; ?>
+            </select>
+            <div class="progression val2-options">
+                <label for="<?php $uniq = uniqid('doc'); echo $uniq ?>">
+                    <input id="<?= $uniq ?>" type="checkbox" value="1" class="val2 changer" />
+                    N'ayant pas
+                </label>
+            </div>
+            <nav>
+                <a href="#" class="delete">
+                    <i class="icon-cancel-outline"></i>
+                </a>
+            </nav>
+        </article>
+    </script>
+
+    <script type="text/x-handlebars" id="numerotation-tpl">
+        <article class="criteria criteria-numerotation card">
+            <div class="icon-cal"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_numerotation" multiple>
+                <?php foreach( $numerotations as $num ): ?>
+                <option value="<?= $num ?>"><?= $num ?></option>
                 <?php endforeach; ?>
             </select>
             <nav>
@@ -723,6 +805,8 @@
 
                     var dom, applyChange;
 
+
+
                     if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
                         dom = $(tpl(datas));
                     }
@@ -734,9 +818,28 @@
                             : "N'a pas le status";
                         dom = $(tplStatus(datas));
                     }
+                    else if(datas.type == 'cb' ) {
+                        datas.label = "Dépenses sur le compte";
+                        dom = $(tplAccount(datas));
+                    }
+                    else if(datas.type == 'num' ) {
+                        datas.label = "Numérotation";
+                        dom = $(tplNumerotation(datas));
+                    }
+                    // accountscode
+                    else if(datas.type == 'cb2' ) {
+                        datas.label = "Code de compte général";
+                        dom = $(tplAccountCode(datas));
+                    }
+
                     else if(datas.type == 'cnt' ) {
                         datas.label = "Pays d'une des organisations";
                         dom = $(tplCountry(datas));
+                    }
+                    else if(datas.type == 'td' ){
+                        //$documentsTypes
+                        datas.label = "Type de document";
+                        dom = $(tplTypeDocument(datas));
                     }
                     else if(datas.type == 'tnt' ) {
                         datas.label = "Type d'organisation";
@@ -806,10 +909,10 @@
                                 }
                             });
                             val2 = values.join(',');
-                        } else {
+                        } else if (checkboxs.length == 1){
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
-                                val2 = val2Elem.val();
+                                val2 = val2Elem[0].checked ? "1" : "0";
                             }
 
                         }
@@ -915,6 +1018,15 @@
                         dom.find('.val2').val(datas.val2);
                     }
 
+                    if(datas.type == 'td' && datas.val2 != null ){
+                        if( datas.val2 == "1" ){
+                            console.log('VAL2', datas.val2);
+                            console.log('>>>>', dom.find('.val2'), dom.find('.val2').checked);
+                            dom.find('.val2')[0].checked = true;
+                        }
+                    }
+
+
                     if(datas.type == 'aj' && datas.val2 != null ){
 
                         var option = dom.find('option[value="'+ datas.val1 +'"]');
@@ -990,10 +1102,13 @@
 
                 // Gabarits pour les critères
                 var tpl = Handlebars.compile($('#criteria-tpl').html()),
+                    tplAccount = Handlebars.compile($('#accounts-tpl').html()),
+                    tplAccountCode = Handlebars.compile($('#accountscode-tpl').html()),
                     tplDate = Handlebars.compile($('#date-criteria-tpl').html()),
                     tplStatus = Handlebars.compile($('#status-criteria-tpl').html()),
                     tplCountry = Handlebars.compile($('#country-tpl').html()),
                     tplTypeOrga = Handlebars.compile($('#typeorga-tpl').html()),
+                    tplTypeDocument = Handlebars.compile($('#typedocument-tpl').html()),
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),
@@ -1002,6 +1117,7 @@
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
                     tplOrganizations= Handlebars.compile($('#organizations-criteria-tpl').html()),
                     tplMilestone = Handlebars.compile($('#milestones-criteria-tpl').html()),
+                    tplNumerotation = Handlebars.compile($('#numerotation-tpl').html()),
                     id = 1;
 
                 //

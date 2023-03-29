@@ -26,22 +26,61 @@ class Activity implements ResourceInterface
 {
     use TraitTrackable;
 
+    public static function getStatusSelect()
+    {
+        static $statusSelect;
+        if ($statusSelect === null) {
+            $statusSelect = [
+                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
+                self::STATUS_ACCEPTED => 'Accepté',
+                self::STATUS_ACCEPTED_2 => 'Accepté en phase 2',
+                self::STATUS_ACTIVE => 'Actif',
+                self::STATUS_PROGRESS => 'Brouillon',
+                self::STATUS_FENCED => 'Clôturé',
+                self::STATUS_DEPOSIT => 'Déposée',
+                self::STATUS_ABORDED => 'Dossier abandonné',
+                self::STATUS_TERMINATED => 'En cours de clôture',
+                self::STATUS_PENDING_ACCEPTED => 'En cours de conventionnement',
+                self::STATUS_IDENTIFY => 'Identifiée',
+                self::STATUS_JUSTIFY => 'Justifiée',
+                self::STATUS_DISPUTE => 'Litige',
+                self::STATUS_REFUSED => 'Refusé',
+                self::STATUS_REFUSED_2 => 'Refusé en phase 2',
+                self::STATUS_REORIENTED => 'Réorienté',
+                self::STATUS_TERMINATED => 'Résilié',
+                self::STATUS_CLOSED => 'Terminé',
+                self::STATUS_TRANSFERED => 'Transféré',
+                self::STATUS_MONTAGE => 'Montage',
+            ];
+        }
+        return $statusSelect;
+    }
+
     ///////////////////////////////////////////////////////////////////// STATUS
     // 100 Statuts actifs
-    const STATUS_ACTIVE = 101;
-    const STATUS_PROGRESS = 102;
-    const STATUS_ACCEPTED = 106;
+    const STATUS_ACTIVE = 101;      // Actif
+    const STATUS_PROGRESS = 102;    // Brouillon
 
     /** Activité en cours de réalisation (dossier) */
     const STATUS_DEPOSIT = 103;
     const STATUS_MONTAGE = 104;
     const STATUS_JUSTIFY = 105;
 
+    const STATUS_ACCEPTED = 106;    // Accepté
+    const STATUS_IDENTIFY = 107;    // Identifié
+    const STATUS_PENDING_ACCEPTED = 108;    // En cours de conventionnement
+    const STATUS_ACCEPTED_2 = 109;    // Accepté en phase 2
+
+
     // 200 : Terminées / Abandonnées
-    const STATUS_CLOSED = 200;     // Activité fermée
-    const STATUS_TERMINATED = 201; // Activité terminée
-    const STATUS_ABORDED = 250; // Activité abandonnée
-    const STATUS_REFUSED = 210; // Activité refusée
+    const STATUS_CLOSED = 200;     // Fermé
+    const STATUS_TERMINATED = 201; // Terminé
+    const STATUS_REFUSED = 210; // Refusé
+    const STATUS_REFUSED_2 = 211; // Refusé en phase 2
+    const STATUS_TRANSFERED = 220; // Transféré
+    const STATUS_REORIENTED = 230; // Réorienté
+    const STATUS_ABORDED = 250; // Abandonnée
+    const STATUS_FENCED = 275; // Clôturé
 
     // 400 : Conflits
     const STATUS_DISPUTE = 400; // Litige
@@ -70,29 +109,6 @@ class Activity implements ResourceInterface
         }
 
         return $finacialImpctValues;
-    }
-
-    public static function getStatusSelect()
-    {
-        static $statusSelect;
-        if ($statusSelect === null) {
-            $statusSelect = [
-                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
-                self::STATUS_ACTIVE => 'Actif',
-                self::STATUS_PROGRESS => 'Brouillon',
-                self::STATUS_DEPOSIT => 'Déposé',
-                self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_DISPUTE => 'Litige',
-                self::STATUS_REFUSED => 'Refusé',
-                self::STATUS_ACCEPTED => 'Accepté',
-                self::STATUS_TERMINATED => 'Résilié',
-                self::STATUS_CLOSED => 'Terminé',
-                self::STATUS_MONTAGE => 'Montage',
-                self::STATUS_JUSTIFY => 'Justifié',
-            ];
-        }
-
-        return $statusSelect;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -677,11 +693,12 @@ class Activity implements ResourceInterface
         }
         return $this->numbers;
     }
+
     public function getNumbersValues()
     {
         $out = [];
-        if( $this->numbers ){
-            foreach ($this->numbers as $key=>$value) {
+        if ($this->numbers) {
+            foreach ($this->numbers as $key => $value) {
                 $out[] = $value;
             }
         }
@@ -1079,7 +1096,7 @@ class Activity implements ResourceInterface
      * @param string $format
      * @return string
      */
-    public function getDateOpenedStr( $format = 'Y-m-d') :string
+    public function getDateOpenedStr($format = 'Y-m-d'): string
     {
         if ($this->getDateOpened()) {
             return $this->getDateOpened()->format($format);
@@ -1818,7 +1835,8 @@ class Activity implements ResourceInterface
         return $structures;
     }
 
-    public function getOrganizationsWithOneRoleIn(array $roles, $deep = true) {
+    public function getOrganizationsWithOneRoleIn(array $roles, $deep = true)
+    {
         if ($this->_cacheOrganizationsByRoles === null) {
             $this->_cacheOrganizationsByRoles = [];
             /** @var ActivityOrganization $relation */
@@ -2195,7 +2213,7 @@ class Activity implements ResourceInterface
      * @param string $format
      * @return string
      */
-    public function getDateSignedStr( $format = 'Y-m-d') :string
+    public function getDateSignedStr($format = 'Y-m-d'): string
     {
         if ($this->getDateSigned()) {
             return $this->getDateSigned()->format($format);
@@ -2215,16 +2233,19 @@ class Activity implements ResourceInterface
         $datas['amount'] = $this->getAmount();
         $datas['pfi'] = $this->getCodeEOTP();
         $datas['oscar'] = $this->getOscarNum();
-        $datas['montant'] = number_format((double)$this->getAmount(),2,',',' ') . $this->getCurrency()->getSymbol();
+        $datas['montant'] = number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol();
         $datas['annee-debut'] = $this->getDateStartStr('Y');
         $datas['annee-fin'] = $this->getDateEndStr('Y');
         $datas['debut'] = $this->getDateStartStr('d/m/Y');
         $datas['fin'] = $this->getDateEndStr('d/m/Y');
+        $datas['signature'] = $this->getDateSignedStr('d/m/Y');
         $datas['intitule'] = htmlspecialchars($this->getLabel());
         $datas['label'] = htmlspecialchars($this->getLabel());
         $datas['tva'] = $this->getTva() ? (string)$this->getTva() : '';
         $datas['assiette-subventionnable'] = (string)$this->getAssietteSubventionnable();
+        $datas['financial-impact'] = (string)$this->getFinancialImpact();
         $datas['note-financiere'] = $this->getNoteFinanciere();
+        $datas['frais-gestion'] = $this->getFraisDeGestion();
 
         // Info Projet
         $datas['project-label'] = $this->getProject() ? $this->getProject()->getLabel() : '';
@@ -2254,7 +2275,7 @@ class Activity implements ResourceInterface
 
         /** @var ActivityOrganization $organisationActivity */
         foreach ($this->getOrganizationsDeep() as $organisationActivity) {
-            if( !$organisationActivity->getOrganization()->isClose() ){
+            if (!$organisationActivity->getOrganization()->isClose()) {
                 $roleStr = (string)$organisationActivity->getRoleObj();
                 if (!array_key_exists($roleStr, $organizations)) {
                     $organizations[$roleStr] = [];
@@ -2263,13 +2284,13 @@ class Activity implements ResourceInterface
 
                 // Personnes dans la structure
                 /** @var OrganizationPerson $personStructure */
-                foreach ($organisationActivity->getOrganization()->getPersons() as $personStructure){
+                foreach ($organisationActivity->getOrganization()->getPersons() as $personStructure) {
                     $roleInStructure = (string)$personStructure->getRoleObj();
-                    if( !$personStructure->isOutOfDate() ){
+                    if (!$personStructure->isOutOfDate()) {
                         if (!array_key_exists($roleInStructure, $persons)) {
-                            $persons['in-org-'.$roleInStructure] = [];
+                            $persons['in-org-' . $roleInStructure] = [];
                         }
-                        $persons['in-org-'.$roleInStructure][] = (string)$personStructure->getPerson();
+                        $persons['in-org-' . $roleInStructure][] = (string)$personStructure->getPerson();
                     }
                 }
             }
@@ -2322,7 +2343,7 @@ class Activity implements ResourceInterface
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
                 $versementsEffectuesDate[] = $date;
             } else {
-                if( $payment->getDatePredicted() ){
+                if ($payment->getDatePredicted()) {
                     $date = $payment->getDatePredicted()->format('d/m/Y');
                     $versementsPrevus[] = $amount;
                     $versementsPrevusStr[] = $amount . ' le ' . $date;
@@ -2340,7 +2361,7 @@ class Activity implements ResourceInterface
         $datas['versement-effectue-date'] = $versementsEffectuesDate;
 
         foreach ($this->getNumbers() as $key => $value) {
-            $datas['num-'.$sluger->slugify($key)] = $value;
+            $datas['num-' . $sluger->slugify($key)] = $value;
         }
 
         return $datas;
@@ -2371,15 +2392,16 @@ class Activity implements ResourceInterface
             'Frais de gestion' => $this->getFraisDeGestion(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
             'incidence financière' => $this->getIncidenceFinanciere(),
+            'Assiette subventionnable' => $this->getAssietteSubventionnable(),
             'Note' => $this->getNoteFinanciere(),
             'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
         );
     }
 
-    public function getWorkpackageByCode( string $code )
+    public function getWorkpackageByCode(string $code)
     {
         foreach ($this->getWorkPackages() as $workPackage) {
-            if ($workPackage->getCode() == $code){
+            if ($workPackage->getCode() == $code) {
                 return $workPackage;
             }
         }
@@ -2411,6 +2433,7 @@ class Activity implements ResourceInterface
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'incidence financière',
+            'Assiette subventionnable',
             'Note',
             'Disciplines'
         );
@@ -2457,7 +2480,7 @@ class Activity implements ResourceInterface
 
     private $ecartPaiementExplain = null;
 
-    public function getEcartPaimentExplain() :string
+    public function getEcartPaimentExplain(): string
     {
         if ($this->ecartPaiementExplain === null) {
             $this->ecartPaiementExplain = [];

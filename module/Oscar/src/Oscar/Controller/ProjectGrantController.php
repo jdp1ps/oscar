@@ -196,6 +196,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     {
         $this->activityRequestService = $activityRequestService;
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function apiUiAction()
     {
@@ -205,7 +206,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $typesOrganization = $this->getOrganizationService()
             ->getOrganizationTypesSelect();
-
 
         return [
             'filters' => $this->getProjectGrantService()->getActivitiesSearchCriteria(),
@@ -236,7 +236,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // On test les droits de la personne / restrictions
         $person = $this->getCurrentPerson();
         $fullaccess = false; // $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX);
-        if( $fullaccess ){
+        if ($fullaccess) {
             $restricted_ids = false;
         } else {
             $restricted_ids = array_unique($this->getActivityService()->getActivitiesIdsPerson($person));
@@ -252,18 +252,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $status = $this->params()->fromQuery('st', '');
         $filters = $this->params()->fromQuery('f', []);
 
-        if( !array_key_exists($sort, $this->getProjectGrantService()->getActivitiesSearchSort()) ){
+        if (!array_key_exists($sort, $this->getProjectGrantService()->getActivitiesSearchSort())) {
             $sort = 'hit';
         }
 
-        if( !array_key_exists($direction, $this->getProjectGrantService()->getActivitiesSearchDirection()) ){
+        if (!array_key_exists($direction, $this->getProjectGrantService()->getActivitiesSearchDirection())) {
             $direction = 'desc';
         }
 
         // Contrôle des filtres
 
-        if( $status ){
-            $filters[] = 's;'.$status.';-1';
+        if ($status) {
+            $filters[] = 's;' . $status . ';-1';
         }
 
         // Options des recheches
@@ -496,8 +496,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return [
             'asAdmin' => $asAdmin,
-            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
-            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE)
+            'rolesPerson' => $this->getPersonService()->getAvailableRolesPersonActivity(
+                OscarFormatterConst::FORMAT_ARRAY_ID_VALUE
+            ),
+            'rolesOrganisation' => $this->getOrganizationService()->getAvailableRolesOrganisationActivity(
+                OscarFormatterConst::FORMAT_ARRAY_ID_VALUE
+            )
         ];
     }
 
@@ -763,12 +767,15 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
         $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
-
+        $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
+        $activity = $this->getProjectGrantService()->getGrant($id);
+        $documentDatas = $activity->documentDatas($baseDatas);
+        $documentDatas["type-full"] = $this->getActivityTypeService()->getActivityTypeChainFormatted(
+            $activity->getActivityType()
+        );
         if ($doc == "dump") {
-
             echo "<table border='1'>";
-            $activity = $this->getProjectGrantService()->getGrant($id);
-            foreach ($activity->documentDatas($baseDatas) as $key => $value) {
+            foreach ($documentDatas as $key => $value) {
                 echo "<tr>";
                 if (is_array($value)) {
                     echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
@@ -786,13 +793,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
         $config = $configDocuments[$doc];
 
-        $activity = $this->getProjectGrantService()->getGrant($id);
-
         Settings::setOutputEscapingEnabled(true);
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
-
-
-        $documentDatas = $activity->documentDatas($baseDatas);
 
         foreach ($documentDatas as $key => $value) {
             if (is_array($value)) {
@@ -1037,19 +1039,20 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             try {
                 $this->getTimesheetService()->removeTimesheetActivity($activity);
             } catch (\Exception $e) {
-                throw new OscarException("Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage());
+                throw new OscarException(
+                    "Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage()
+                );
             }
 
             // Suppression des documents
             $documents = $activity->getDocuments();
-            if( count($documents) ){
-
+            if (count($documents)) {
                 $documentPathRoot = $this->getOscarConfigurationService()->getDocumentDropLocation();
 
                 /** @var ContractDocument $d */
                 foreach ($documents as $d) {
-                    $path = $documentPathRoot.'/'.$d->getPath();
-                    if( file_exists($path) ){
+                    $path = $documentPathRoot . '/' . $d->getPath();
+                    if (file_exists($path)) {
                         unlink($path);
                     }
                     $this->getLoggerService()->info("Suppression du document '$d'");
@@ -1173,7 +1176,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Récupération des IDS
         if ($request->isPost()) {
             $paramID = $this->params()->fromPost('ids', '');
-            if( !$paramID ){
+            if (!$paramID) {
                 return $this->getResponseBadRequest();
             }
         } else {
@@ -1213,7 +1216,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 case 'GET' :
                     $out = $this->baseJsonResponse();
                     $out['activities'] = [];
-                    $activities = $this->getActivityService()->getActivitiesByIds(explode(',',$ids));
+                    $activities = $this->getActivityService()->getActivitiesByIds(explode(',', $ids));
                     $format = new ActivityGantJson();
                     $out['activities'] = $format->formatAll($activities);
                     return $this->jsonOutput($out);
@@ -1342,7 +1345,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CREATE)) {
             if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(
-                Privileges::ACTIVITY_CREATE)) {
+                Privileges::ACTIVITY_CREATE
+            )) {
                 throw new UnAuthorizedException(_("Vous n'avez pas les droits pour créer une nouvelle activité"));
             }
             $organisationsUser = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(
@@ -1389,7 +1393,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Request $request */
         $request = $this->getRequest();
         if ($request->isPost()) {
-
             $validOrganizationForm = true;
 
             if ($withOrganization) {
@@ -1931,64 +1934,79 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
 
-        /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        // Multiple ids
+        $ids = explode(",", $id);
 
-        // Check access
-        $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+        try {
+            $masses = $this->getOscarConfigurationService()->getMasses();
+            $pfis = [];
 
-        //
-        $masses = $this->getOscarConfigurationService()->getMasses();
+            $lastUpdate = null;
 
-        // Method
-        $method = $this->getHttpXMethod();
-
-        if ($method == 'POST') {
-            // Vérifiaction des droits d'accès
-            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
-
-            // Récupération des affectations
-            $postedAffectations = $this->params()->fromPost('affectation');
-
-            try {
-                $this->getSpentService()->updateAffectation($postedAffectations);
-            } catch (\Exception $e) {
-                return $this->getResponseInternalError($e->getMessage());
-            }
-            return $this->getResponseOk("Affectation des comptes terminée");
-        }
-
-        $pfi = $entity->getCodeEOTP();
-
-        if (!$pfi) {
-            return $this->getResponseInternalError("Cette activité n'a pas de PFI");
-        }
-
-        $out = $this->baseJsonResponse();
-        $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
-        $out['warning'] = null; // Affiche les avertissements
-
-        if ($this->getOscarConfigurationService()->getAutoUpdateSpent()) {
-            if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity)) {
-                $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
-            } else {
-                try {
-                    $this->spentService->syncSpentsByEOTP($pfi);
-                } catch (\Exception $e) {
-                    $out['error'] = $e->getMessage();
+            foreach ($ids as $id) {
+                /** @var Activity $entity */
+                $entity = $this->getActivityService()->getActivityById($id, true);
+                $this->getOscarUserContextService()->check(Privileges::DEPENSE_SHOW, $entity);
+                $pfis[] = $entity->getCodeEOTP();
+                if ($lastUpdate == null || $entity->getDateTotalSpent() > $lastUpdate) {
+                    $lastUpdate = $entity->getDateTotalSpent();
                 }
             }
+
+            // Check access
+            $pfis = array_unique($pfis);
+
+            // Method
+            $method = $this->getHttpXMethod();
+
+            if ($method == 'POST') {
+                // Vérifiaction des droits d'accès
+                $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+
+                // Récupération des affectations
+                $postedAffectations = $this->params()->fromPost('affectation');
+
+                try {
+                    $this->getSpentService()->updateAffectation($postedAffectations);
+                } catch (\Exception $e) {
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+                return $this->getResponseOk("Affectation des comptes terminée");
+            }
+
+            if (count($pfis) == 0) {
+                return $this->getResponseInternalError("Pas de PFI");
+            }
+
+            $out = $this->baseJsonResponse();
+            $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
+            $out['warning'] = null; // Affiche les avertissements
+
+//            if ($this->getOscarConfigurationService()->getAutoUpdateSpent()) {
+//                if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity)) {
+//                    $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
+//                } else {
+//                    try {
+//                        $this->spentService->syncSpentsByEOTP($pfi);
+//                    } catch (\Exception $e) {
+//                        $out['error'] = $e->getMessage();
+//                    }
+//                }
+//            }
+
+            // Construction des données de dépense
+            $out['masses'] = $masses;
+            $out['dateUpdated'] = $entity->getDateTotalSpent();
+            $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI(
+                $pfis,
+                $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
+                )
+            );
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
         }
 
-        // Construction des données de dépense
-        $out['masses'] = $masses;
-        $out['dateUpdated'] = $entity->getDateTotalSpent();
-        $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI(
-            $pfi,
-            $this->getOscarUserContextService()->hasPrivileges(
-                Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
-            )
-        );
 
         return $this->jsonOutput($out);
     }
@@ -2008,6 +2026,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         /** @var Activity $entity */
         $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+
+        if (!$entity) {
+            throw new OscarException("Cette activité n'existe plus/pas");
+        }
 
         // Check access
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
@@ -2216,6 +2238,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $contextKey = $activityPerson->getActivity()->getOscarNum();
                 $idEnroller = $activityPerson->getActivity()->getId();
             } else {
                 $urlDelete = $deletableA ? $this->url()->fromRoute(
@@ -2229,6 +2252,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $contextKey = $activityPerson->getProject()->getAcronym();
                 $idEnroller = $activityPerson->getProject()->getId();
             }
             $urlShow = false;
@@ -2247,6 +2271,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'rolePrincipal' => $activityPerson->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
+                'contextKey' => $contextKey,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
                 'past' => $activityPerson->isPast(),
@@ -2299,7 +2324,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
          */
         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
             // FIX (non idéale)
-            if( !$activityOrganization->getRoleObj() ){
+            if (!$activityOrganization->getRoleObj()) {
                 $this->getLoggerService()->warning(
                     sprintf(
                         "L'organisation '%s' n'a pas d'objet rôle sur '%s'",
@@ -2311,14 +2336,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
             $class = get_class($activityOrganization);
 
-            if ($class == ActivityOrganization::class || get_class($activityOrganization) == $class) {
+            if ($class == ActivityOrganization::class) {
                 $editable = $editableA;
                 $deletable = $deletableA;
                 $context = "activity";
+                $contextKey = $activityOrganization->getActivity()->getOscarNum();
             } else {
                 $editable = $editableP;
                 $deletable = $deletableP;
                 $context = "project";
+                $contextKey = $activityOrganization->getProject()->getAcronym();
             }
 
             $urlDelete = $deletableA ? $this->url()->fromRoute(
@@ -2344,6 +2371,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'rolePrincipal' => $activityOrganization->isPrincipal(),
                 'urlDelete' => $urlDelete,
                 'context' => $context,
+                'contextKey' => $contextKey,
                 'urlEdit' => $urlEdit,
                 'urlShow' => $urlShow,
                 'enroller' => $activity->getId(),
@@ -2454,10 +2482,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $this->getResponseBadRequest($e->getMessage());
         }
 
-        $view = new ViewModel([
-            'search' => $search,
-            'activities' => $activities,
-        ]);
+        $view = new ViewModel(
+            [
+                'search' => $search,
+                'activities' => $activities,
+            ]
+        );
         $view->setTemplate('oscar/activity/search.phtml');
         return $view;
     }
@@ -2481,11 +2511,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $startEmpty = false;
             }
 
+            $organizationsIdsPerimeter = null;
+
             if ($this->getOrganizationPerimeter()) {
                 $include = $this->params()->fromQuery('include', null);
                 if ($include) {
                     foreach ($include as $index => $value) {
-                        $include[$index] = intval($value);
+                        $include[] = intval($value);
                     }
                     $include = array_intersect(
                         $include,
@@ -2494,6 +2526,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 } else {
                     $include = $this->getOrganizationPerimeter();
                 }
+
+                // IDS concernés
+                $organizationsIdsPerimeter = $this->getActivityService()
+                    ->getActivityRepository()
+                    ->getIdsWithOrganizations($include);
             }
 
             // Type de recherche supportée
@@ -2513,6 +2550,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'mp' => 'Montant prévu',
                 'at' => 'est de type',
                 'st' => 'n\'est pas de type',
+                'td' => 'Ayant ce type de document',
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
                 'adc' => 'Date de création',
@@ -2524,7 +2562,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'ds' => 'Ayant pour discipline',
 
                 // Ajout d'un filtre sur les jalons
-                'aj' => 'Ayant le jalon'
+                'aj' => 'Ayant le jalon',
+
+                'cb' => 'Impliquant le compte',
+                'num' => 'Ayant une numérotation',
             ];
 
             // Correspondance des champs de type date
@@ -2539,7 +2580,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // Critères de trie
             $sortCriteria = [
-            //    'hit' => 'Pertinence (Recherche textuelle)',
+                //    'hit' => 'Pertinence (Recherche textuelle)',
                 'dateCreated' => 'Date de création',
                 'dateStart' => 'Date début',
                 'dateEnd' => 'Date fin',
@@ -2603,6 +2644,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $organizations = [];
             $persons = [];
 
+            $accountsInfos = $this->getSpentService()->getAccountsInfosUsed();
 
             $queryPersons = $this->getEntityManager()->createQueryBuilder()
                 ->select('a.id')
@@ -2691,21 +2733,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 if ($include) {
-                    $organizationsPerimeterIds = implode(',', $include);
-                    $qb->andWhere(
-                        'p1.organization IN('
-                        . $organizationsPerimeterIds
-                        . ') OR p2.organization IN('
-                        . $organizationsPerimeterIds
-                        . ')'
-                    );
+                    $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
                 }
             } else {
                 if ($search) {
                     $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
 
                     // La saisie est un PFI
-                    if ( $this->getOscarConfigurationService()->isPfiStrict()
+                    if ($this->getOscarConfigurationService()->isPfiStrict()
                         && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
                         $qb->andWhere('c.codeEOTP = :search');
@@ -2798,7 +2833,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                     // Filtre sur les activités ayant des feuilles de temps (Lot de travail)
                     case 'fdt' :
-                        $ids = $this->getProjectGrantService()->getActivityRepository()->getActivityIdsWithWorkpackage();
+                        $ids = $this->getProjectGrantService()->getActivityRepository()->getActivityIdsWithWorkpackage(
+                        );
                         break;
 
                     // Personne (plusieurs)
@@ -2868,6 +2904,53 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;
+                    case 'cb':
+                        // Récupération de l'organisation
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        try {
+                            $compteGeneralList = $accountsInfos->getCompteGeneralListByAccountIds($value1);
+                            $ids = $this->getSpentService()->getIdsActivitiesForAccounts($compteGeneralList);
+                        } catch (\Exception $e) {
+                            die("SOUCIS");
+                        }
+                        break;
+
+                    case 'cb2':
+                        // Récupération de l'organisation
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+
+                        try {
+                            $ids = $this->getSpentService()->getIdsActivitiesForCompteGeneral($value1);
+                        } catch (\Exception $e) {
+                            throw new OscarException($e->getMessage());
+                        }
+                        break;
+
+                    case 'td':
+                        if( $crit['val1'] == "null" || !$crit['val1'] ){
+                            $value1 = [];
+                        } else {
+                            $value1 = $crit['val1'] = explode(',', $params[1]);
+                        }
+
+                        try {
+                            $reverse = $value2 == "1";
+
+                            $ids = $this->getActivityService()
+                                ->getActivitiesIdsWithTypeDocument($value1, $reverse);
+                        } catch (\Exception $e) {
+                            throw new OscarException($e->getMessage());
+                        }
+                        break;
+
+                    case 'num' :
+                        $value1 = $crit['val1'] = explode(',', $params[1]);
+                        try {
+                            $ids = $this->getActivityService()->getActivitiesWithNumerotation($value1);
+                        } catch (\Exception $e) {
+                            throw new OscarException($e->getMessage());
+                        }
+                        break;
 
                     case 'ao' :
                     case 'so' :
@@ -2882,7 +2965,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $organizations[$organization->getId()] = $organization;
                             $crit['val1Label'] = (string)$organization;
                         } catch (\Exception $e) {
-
                         }
 
                         if ($value2 > 0) {
@@ -2891,7 +2973,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             )->find($value2);
 
 
-                            if( !$organization ){
+                            if (!$organization) {
                                 $query = $queryOrganisationRoleNorOrg;
                                 $queryParam = [
                                     'roleObj' => $roleOrganisation
@@ -2901,7 +2983,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 $queryParam['roleObj'] = $roleOrganisation;
                             }
                         } else {
-                            if($organization == null) {
+                            if ($organization == null) {
                                 $crit['error'] = "Impossible de filtrer Organisation et/ou rôle requis.";
                             }
                             $query = $queryOrganisationNoRole;
@@ -2909,25 +2991,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                         $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
 
-//                        try {
-//                            $organization = $this->getOrganizationService()->getOrganization($value1);
-//                            $organizations[$organization->getId()] = $organization;
-//                            $crit['val1Label'] = (string)$organization;
-//                            $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService(
-//                            )->getRolesOrganizationInActivity()[$value2] : '';
-//                            if ($value2 > 0) {
-//                                $roleOrganisation = $this->getEntityManager()->getRepository(
-//                                    OrganizationRole::class
-//                                )->find($value2);
-//                                $queryParam['roleObj'] = $roleOrganisation;
-//                                $query = $queryOrganisationRole;
-//                            } else {
-//                                $query = $queryOrganisationNoRole;
-//                            }
-//                            $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
-//                        } catch (\Exception $e) {
-//                            $crit['error'] = "Impossible de filtrer sur l'organisation (" . $e->getMessage() . ")";
-//                        }
                         break;
 
                     // Filtre sur le statut de l'activité
@@ -2938,6 +3001,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $parameters['withstatus'][] = $value1;
                         $qb->andWhere('c.status IN (:withstatus)');
                         break;
+
                     case 'ss' :
                         if (!isset($parameters['withoutstatus'])) {
                             $parameters['withoutstatus'] = [];
@@ -2946,7 +3010,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $qb->andWhere('c.status NOT IN (:withoutstatus)');
                         break;
 
-
                     case 'at' :
 
                         if (!isset($parameters['withtype'])) {
@@ -2954,7 +3017,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $qb->andWhere('c.activityType IN (:withtype)');
                         }
 
-                        if( $value2 == 1 ){
+                        if ($value2 == 1) {
                             $types = [$value1];
                         } else {
                             $types = $this->getActivityTypeService()->getTypeIdsInside($value1);
@@ -2966,6 +3029,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         );
                         $result = $qb->setParameters($parameters)->getQuery()->getResult();
                         break;
+
                     case 'st' :
                         if (!isset($parameters['withouttype'])) {
                             $parameters['withouttype'] = [];
@@ -2976,6 +3040,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $this->getActivityTypeService()->getTypeIdsInside($value1)
                         );
                         break;
+
                     // Filtre sur la/les incidences financière
                     case 'af' :
                         if (!isset($parameters['withfinancial'])) {
@@ -2984,6 +3049,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         $parameters['withfinancial'][] = Activity::getFinancialImpactValues()[$value1];
                         break;
+
                     case 'sf' :
                         if (!isset($parameters['withoutfinancial'])) {
                             $parameters['withoutfinancial'] = [];
@@ -2991,32 +3057,29 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         $parameters['withoutfinancial'][] = Activity::getFinancialImpactValues()[$value1];
                         break;
+
                     case 'cnt' :
                         if ($params[1]) {
-                            if (!isset($parameters['countries'])) {
-                                $parameters['countries'] = [];
-                            }
                             $value1 = $crit['val1'] = explode(',', $params[1]);
-                            $qb->andWhere('orga1.country IN (:countries) OR orga2.country IN (:countries)');
-                            $parameters['countries'] = $value1;
+                            $ids = $this->getActivityService()->getActivityRepository()
+                                ->getIdsWithOrganizationOfCountry($value1);
                         }
                         break;
+
                     case 'tnt' :
                         if ($params[1]) {
-                            if (!isset($parameters['typeorga'])) {
-                                $parameters['typeorga'] = [];
-                            }
                             $value1 = $crit['val1'] = explode(',', $params[1]);
                             $typeIds = $this->getOrganizationService()->getTypesIdsByLabel($value1);
-                            $qb->andWhere('orga1.typeObj IN (:typeorga) OR orga2.typeObj IN (:typeorga)');
-                            $parameters['typeorga'] = $typeIds;
+                            $ids = $this->getActivityService()->getActivityRepository()
+                                ->getIdsWithOrganizationOfType($typeIds);
                         }
                         break;
+
                     case 'aj':
                         $progressStr = $params[2];
                         $progressArray = null;
 
-                        if( $progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined' ){
+                        if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
                             $progressArray = explode(',', $progressStr);
                             $crit['val1'] = $value1;
                             $crit['val2'] = implode(',', $progressArray);
@@ -3025,10 +3088,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
                         $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1'], $progressArray);
                         break;
+
                     case 'ds' :
                         $qb->andWhere('dis.id = :discipline');
                         $parameters['discipline'] = $value1;
                         break;
+
                     case 'add' :
                     case 'adf' :
                     case 'adm' :
@@ -3062,7 +3127,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
                 }
                 $criterias[] = $crit;
-                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'fdt') {
+                if ($type == 'ap' || $type == 'ao' || $type == 'pm' || $type == 'om' || $type == 'num'
+                    || $type == 'fdt' || $type == 'cb' || $type == 'cb2' || $type == 'td' || $type == 'tnt'
+                    || $type == 'cnt') {
                     if ($filterIds === null) {
                         $filterIds = $ids;
                     } else {
@@ -3100,20 +3167,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // FILTRE STATIC SUR LES ORGA
             if ($this->getOrganizationPerimeter()) {
-                $organizationsPerimeterIds = implode(',', $include);
-
-                $qb->andWhere(
-                    'p1.organization IN('
-                    . $organizationsPerimeterIds
-                    . ') OR p2.organization IN('
-                    . $organizationsPerimeterIds
-                    . ')'
-                );
+                $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
             }
 
-
             $activities = null;
-
 
             if ($startEmpty === false) {
                 if ($projectview == 'on') {
@@ -3130,12 +3187,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 if ($projectview == 'on') {
                     $qb->select('pr');
-                    if( $sort != 'hit' ){
+                    if ($sort != 'hit') {
                         $qb->orderBy('c.' . $sort, $sortDirection);
                     }
                 } else {
                     $qb->select('c, pr, m1, p1, m2, p2, d1, t1, orga1, orga2, pers1, pers2, dis');
-                    if( $sort != 'hit' ){
+                    if ($sort != 'hit') {
                         $qb->orderBy('c.' . $sort, $sortDirection);
                         if ($sortIgnoreNull) {
                             $qb->andWhere('c.' . $sort . ' IS NOT NULL');
@@ -3146,9 +3203,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
 
             $projectsIds = [];
-            if( $projectview == 'on' ){
+            if ($projectview == 'on') {
                 foreach ($activities as $p) {
-                   $projectsIds[] = $p->getId();
+                    $projectsIds[] = $p->getId();
                 }
             }
 
@@ -3165,6 +3222,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 return $this->ajaxResponse($json);
             }
 
+            // Données de la vue
+            $documentsTypes = $this->getActivityService()->getTypesDocuments(true);
+
             $view = new ViewModel(
                 [
                     'projectview' => $projectview,
@@ -3175,6 +3235,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'typeorgas' => $this->getOrganizationService()->getOrganizationTypesSelect(),
                     'countries' => $this->getOrganizationService()->getCountriesList(),
                     'fieldsCSV' => $this->getActivityService()->getFieldsCSV(),
+                    'accounts' => $accountsInfos->getAccounts(),
                     'persons' => $persons,
                     'filterJalons' => $jalonsFilters,
                     'activities' => $activities,
@@ -3187,7 +3248,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'sortCriteria' => $sortCriteria,
                     'sortDirection' => $sortDirection,
                     'sortIgnoreNull' => $sortIgnoreNull,
+                    'numerotations' => $this->getOscarConfigurationService()->getNumerotationKeys(),
                     'types' => $this->getActivityTypeService()->getActivityTypes(true),
+                    'documentsTypes' => $documentsTypes,
                     'disciplines' => $this->getActivityService()->getDisciplines(),
                     'projectsIds' => $projectsIds,
                 ]
@@ -3364,11 +3427,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity);
 
-        if( $this->isAjax() ){
-
+        if ($this->isAjax()) {
             $action = $this->getRequest()->getQuery()->get('a', null);
 
-            if( $this->getRequest()->isDelete() || $action == 'd' ){
+            if ($this->getRequest()->isDelete() || $action == 'd') {
                 $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
                 $person_id = $this->getRequest()->getQuery()->get('p');
                 $where = $this->getRequest()->getQuery()->get('w');
@@ -3379,7 +3441,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
             }
 
-            if( $this->getRequest()->isPost() && $action != 'd' ){
+            if ($this->getRequest()->isPost() && $action != 'd') {
                 //
                 $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
                 $person_id = $this->getRequest()->getPost()->get('person_id');
@@ -3400,13 +3462,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $this->url()
             );
             $response['validations'] = $this->getTimesheetService()->getDatasActivityValidations($activity);
-            $response['validators_editable'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
+            $response['validators_editable'] = $this->getOscarUserContextService()->hasPrivileges(
+                Privileges::ACTIVITY_EDIT,
+                $activity
+            );
 
             return $this->jsonOutput($response);
         }
 
         $timesheetRepport = null;
-        if( $activity->isTimesheetAllowed() ){
+        if ($activity->isTimesheetAllowed()) {
             $timesheetRepport = $this->getTimesheetService()->getSynthesisActivityPeriods(
                 $activity->getDateStartStr('Y-m'),
                 $activity->getDateEndStr('Y-m'),

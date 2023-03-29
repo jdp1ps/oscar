@@ -6,6 +6,8 @@
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
+// v.202303
+
 $brand-primary: #455790 !default;
 $brand-complementary: #27556C !default;
 $bg-image: 'bg.jpg' !default;
@@ -39,3 +41,26 @@ $colorGreyBlack: #222;
 
 // Update 2020-11-04
 @import "_common.scss";
+
+.cartouche .addon .addon-module {
+  border-right: none;
+}
+
+.cartouche .addon .addon-module:after {
+  font-weight: 100;
+  content: ', ';
+}
+.cartouche .addon .addon-module:last-child:after {
+  content: '';
+}
+
+.cartouche .addon .addon-module.primary {
+  font-weight: bold;
+  text-shadow: 1px -1x 0 rgba(255,255,255,1);
+}
+
+.bold {
+  font-weight: bold;
+}
+body {
+}

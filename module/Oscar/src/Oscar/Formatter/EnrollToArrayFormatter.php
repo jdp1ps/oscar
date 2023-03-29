@@ -57,6 +57,13 @@ class EnrollToArrayFormatter
         $output['rolePrincipal'] = $affectation->getRoleObj()->isPrincipal();
         $output['roleId'] = $affectation->getRoleObj()->getId();
         $output['context'] = $context;
+        $output['contextKey'] = '';
+        if( $context == 'activity' ){
+            $output['contextKey'] = $affectation->getEnroller()->getOscarNum();
+        }
+        if( $context == 'project' ){
+            $output['contextKey'] = $affectation->getEnroller()->getAcronym();
+        }
 
         $manage = false;
         $show = false;
@@ -78,47 +85,46 @@ class EnrollToArrayFormatter
 
     private $_conf;
     private function getConf($affectation){
-        if( $this->_conf === null ){
-            $this->_conf = new \stdClass();
-            switch (get_class($affectation) ){
-                case ProjectPartner::class:
-                    $this->_conf->context = self::CONTEXT_PROJECT;
-                    $this->_conf->manage = Privileges::PROJECT_ORGANIZATION_MANAGE;
-                    $this->_conf->show = Privileges::PROJECT_ORGANIZATION_SHOW;
-                    $this->_conf->edit = 'organizationproject/edit';
-                    $this->_conf->delete = 'organizationproject/delete';
-                    break;
-                case ProjectMember::class :
-                    $this->_conf->context = self::CONTEXT_PROJECT;
-                    $this->_conf->manage = Privileges::PROJECT_PERSON_MANAGE;
-                    $this->_conf->show = Privileges::PROJECT_PERSON_SHOW;
-                    $this->_conf->edit = 'personproject/edit';
-                    $this->_conf->delete = 'personproject/delete';
-                    break;
-                case ActivityOrganization::class:
-                    $this->_conf->context = self::CONTEXT_ACTIVITY;
-                    $this->_conf->manage = Privileges::ACTIVITY_ORGANIZATION_MANAGE;
-                    $this->_conf->show = Privileges::ACTIVITY_ORGANIZATION_SHOW;
-                    $this->_conf->edit = 'organizationactivity/edit';
-                    $this->_conf->delete = 'organizationactivity/delete';
-                    break;
-                case ActivityPerson::class :
-                    $this->_conf->context = self::CONTEXT_ACTIVITY;
-                    $this->_conf->manage = Privileges::ACTIVITY_PERSON_MANAGE;
-                    $this->_conf->show = Privileges::ACTIVITY_PAYMENT_SHOW;
-                    $this->_conf->edit = 'personactivity/edit';
-                    $this->_conf->delete = 'personactivity/delete';
-                    break;
-                case OrganizationPerson::class:
-                    $this->_conf->context = self::CONTEXT_ORGANIZATION;
-                    $this->_conf->manage = Privileges::ORGANIZATION_EDIT;
-                    $this->_conf->show = Privileges::ORGANIZATION_SHOW;
-                    break;
-                default:
-                    throw new OscarException("Objet non-pris en charge");
-            }
+        $_conf = new \stdClass();
+        switch (get_class($affectation) ){
+            case ProjectPartner::class:
+                $_conf->context = self::CONTEXT_PROJECT;
+                $_conf->manage = Privileges::PROJECT_ORGANIZATION_MANAGE;
+                $_conf->show = Privileges::PROJECT_ORGANIZATION_SHOW;
+                $_conf->edit = 'organizationproject/edit';
+                $_conf->delete = 'organizationproject/delete';
+                break;
+            case ProjectMember::class :
+                $_conf->context = self::CONTEXT_PROJECT;
+                $_conf->manage = Privileges::PROJECT_PERSON_MANAGE;
+                $_conf->show = Privileges::PROJECT_PERSON_SHOW;
+                $_conf->edit = 'personproject/edit';
+                $_conf->delete = 'personproject/delete';
+                break;
+            case ActivityOrganization::class:
+                $_conf->context = self::CONTEXT_ACTIVITY;
+                $_conf->manage = Privileges::ACTIVITY_ORGANIZATION_MANAGE;
+                $_conf->show = Privileges::ACTIVITY_ORGANIZATION_SHOW;
+                $_conf->edit = 'organizationactivity/edit';
+                $_conf->delete = 'organizationactivity/delete';
+                break;
+            case ActivityPerson::class :
+                $_conf->context = self::CONTEXT_ACTIVITY;
+                $_conf->manage = Privileges::ACTIVITY_PERSON_MANAGE;
+                $_conf->show = Privileges::ACTIVITY_PAYMENT_SHOW;
+                $_conf->edit = 'personactivity/edit';
+                $_conf->delete = 'personactivity/delete';
+                break;
+            case OrganizationPerson::class:
+                $_conf->context = self::CONTEXT_ORGANIZATION;
+                $_conf->manage = Privileges::ORGANIZATION_EDIT;
+                $_conf->show = Privileges::ORGANIZATION_SHOW;
+                break;
+            default:
+                throw new OscarException("Objet non-pris en charge");
         }
-        return $this->_conf;
+
+        return $_conf;
     }
 
     protected function getManagePrivilege($affectation) {

@@ -34,6 +34,8 @@ use Oscar\Traits\UsePCRUService;
 use Oscar\Traits\UsePCRUServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
+use Oscar\Traits\UseSpentService;
+use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Traits\UseTypeDocumentService;
 use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
@@ -48,9 +50,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
                                                                           UseTypeDocumentService,
                                                                           UseAdministrativeDocumentService,
                                                                           UseOrganizationService,
+                                                                          UseSpentService,
                                                                           UseOscarConfigurationService, UsePCRUService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait;
+    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait, UseSpentServiceTrait;
 
     private $serviceLocator;
 
@@ -248,6 +251,19 @@ class AdministrationController extends AbstractOscarController implements UsePro
         ];
     }
 
+    public function accountsAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
+        if( $this->isAjax() || $this->params()->fromQuery('f') == 'json' ){
+            $datas = [
+                'accounts' => $this->getSpentService()->getUsedAccount(),
+                'masses' => $this->getOscarConfigurationService()->getMasses()
+                ];
+            return $this->jsonOutput($datas);
+        }
+        return [];
+    }
+
     public function parametersAction()
     {
         // Récupération des rôles en fonction d'un privilège :
@@ -391,67 +407,99 @@ class AdministrationController extends AbstractOscarController implements UsePro
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_NUMEROTATION_MANAGE);
 
-        $invalidActivityNumbers = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
+        $infosUnreferenced = $this->getProjectGrantService()->getActivitiesWithUnreferencedNumbers();
+        $invalidActivityNumbers = $infosUnreferenced['activities'];
+        $usedKey = $this->getOscarConfigurationService()->getNumerotationKeys();
+        $unreferenced = $infosUnreferenced['keys'];
 
         if ($this->isAjax()) {
+            $action = $this->params()->fromQuery('action');
             $method = $this->getHttpXMethod();
-            switch ($method) {
-                case 'GET':
-                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
-                    return $this->jsonOutput($numerotation);
-                    break;
 
-                case 'DELETE':
-                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
-                    $deleted = $this->params()->fromQuery('str');
-                    if (!in_array($deleted, $numerotation)) {
-                        return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
-                    }
+            if( $action == 'migrate' ){
+                switch ($method) {
+                    case 'GET':
+                        return $this->jsonOutput([
+                             "referenced" => $usedKey,
+                             "unreferenced" => $unreferenced
+                            ]);
+                        break;
 
-                    $index = array_search($deleted, $numerotation);
+                    case 'POST':
+                        try {
+                            $from = $this->params()->fromPost('from');
+                            $to = $this->params()->fromPost('to');
+                            $totalChanged = $this->getActivityService()->administrationMoveKey($from, $to);
+                            return $this->getResponseOk("$totalChanged activité(s) mise à jour");
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError($e->getMessage());
+                        }
+                        break;
 
-                    array_splice($numerotation, $index, 1);
+                    default:
+                        return $this->getResponseInternalError();
+                }
+            } else {
+                switch ($method) {
+                    case 'GET':
+                        $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                        return $this->jsonOutput($numerotation);
+                        break;
 
-                    try {
-                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
-                        $this->getResponseOk();
-                    } catch (\Exception $e) {
-                        return $this->getResponseInternalError(
-                            "Impossible de supprimer le type '$deleted' : " . $e->getMessage()
-                        );
-                    }
+                    case 'DELETE':
+                        $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                        $deleted = $this->params()->fromQuery('str');
+                        if (!in_array($deleted, $numerotation)) {
+                            return $this->getResponseBadRequest("Impossible de supprimer '$deleted'.'");
+                        }
 
-                    break;
+                        $index = array_search($deleted, $numerotation);
 
-                case 'POST':
-                    $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
-                    $added = trim($this->params()->fromPost('str'));
+                        array_splice($numerotation, $index, 1);
 
-                    if ($added == "") {
-                        return $this->getResponseInternalError("Impossible d'ajouter une valeur vide.");
-                    }
+                        try {
+                            $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
+                            $this->getResponseOk();
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError(
+                                "Impossible de supprimer le type '$deleted' : " . $e->getMessage()
+                            );
+                        }
 
-                    if (in_array($added, $numerotation)) {
-                        return $this->getResponseInternalError("Le type '$added' existe déjà.");
-                    }
-                    $numerotation[] = $added;
+                        break;
 
-                    try {
-                        $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
-                        $this->getResponseOk();
-                    } catch (\Exception $e) {
-                        return $this->getResponseInternalError(
-                            "Impossible d'ajouter le type '$added' : " . $e->getMessage()
-                        );
-                    }
-                    break;
+                    case 'POST':
+                        $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
+                        $added = trim($this->params()->fromPost('str'));
 
-                default:
-                    return $this->getResponseInternalError();
+                        if ($added == "") {
+                            return $this->getResponseInternalError("Impossible d'ajouter une valeur vide.");
+                        }
+
+                        if (in_array($added, $numerotation)) {
+                            return $this->getResponseInternalError("Le type '$added' existe déjà.");
+                        }
+                        $numerotation[] = $added;
+
+                        try {
+                            $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
+                            $this->getResponseOk();
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError(
+                                "Impossible d'ajouter le type '$added' : " . $e->getMessage()
+                            );
+                        }
+                        break;
+
+                    default:
+                        return $this->getResponseInternalError();
+                }
             }
         }
         return [
-            "invalidActivityNumbers" => $invalidActivityNumbers
+            "invalidActivityNumbers" => $invalidActivityNumbers,
+            "referenced" => $usedKey,
+            "unreferenced" => $unreferenced
         ];
     }
 

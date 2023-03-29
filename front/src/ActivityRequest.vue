@@ -64,7 +64,7 @@
                     <div>
                         <label for="form_files">Fichiers à ajouter</label>
                         <p class="help">Vous pouvez sélectionner plusieurs fichiers en maintenant la touche CTRL enfoncé lors de la sélection d'un fichier</p>
-                        <input type="file" name="files[]" id="form_files">
+                        <input type="file" name="files[]" id="form_files" multiple>
                     </div>
 
                     <div class="alert alert-info">
@@ -265,7 +265,9 @@
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  ActivityRequest --filename.css ActivityRequest.css --filename.js ActivityRequest.js --dist public/js/oscar/dist public/js/oscar/src/ActivityRequest.vue
+    // node node_modules/.bin/vue-cli-service build --name ActivityRequest --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/ActivityRequest.vue
+
+    import JCKSelector from "./components/JCKSelector";
 
     export default {
         data(){
@@ -316,7 +318,7 @@
         },
 
         components: {
-            'jckselector': require('./JCKSelector.vue').default,
+            'jckselector': JCKSelector
         },
 
         methods:{

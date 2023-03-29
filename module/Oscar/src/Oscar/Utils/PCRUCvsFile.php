@@ -20,6 +20,7 @@ class PCRUCvsFile
     private $datas;
     private $pcruService;
     private $logs;
+    private $headers;
 
     /**
      * PCRUCvsFile constructor.
@@ -31,6 +32,7 @@ class PCRUCvsFile
         $this->path = $directory == null ? $pcruService->getOscarConfigurationService()->getPcruDirectoryForUpload() : $directory;
         $this->datas = [];
         $this->logs = [];
+        $this->headers = $pcruService->getHeaders();
     }
 
     /**
@@ -182,11 +184,12 @@ class PCRUCvsFile
      */
     public function writeContratsCsv($dest = null)
     {
+        $headers = $this->getHeaders();
         if ($dest == null) {
             $dest = $this->pcruService->getOscarConfigurationService()->getPcruContratFile();
         }
         $handler = fopen($dest, 'w');
-        fputcsv($handler, $this->getHeaders(), ';');
+        fputcsv($handler, array_keys($this->getHeaders()), ';');
         foreach ($this->getData() as $data) {
             fputcsv($handler, $data, ';');
         }
@@ -353,7 +356,7 @@ class PCRUCvsFile
      */
     public function getHeaders(): array
     {
-        return array_keys(ActivityPcruInfoFromActivityFactory::getHeaders());
+        return $this->headers;
     }
 
     public function printInSymfonyConsole(SymfonyStyle $symfonyStyle): void

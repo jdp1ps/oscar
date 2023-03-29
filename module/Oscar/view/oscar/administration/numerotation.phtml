@@ -32,6 +32,22 @@ $hasOthers = count($invalidActivityNumbers) > 0;
         </div>
         <?php if( $hasOthers ): ?>
         <div class="col-md-4">
+            <div>
+                Outils d'uniformisation des clefs
+                <div id="number-migrate"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'NumberMigrate'], function(Vue, VueResource, NumberMigrate){
+                        Vue.use(VueResource);
+                        new Vue({
+                            render(h){
+                                return h(NumberMigrate)
+                            }
+                        }).$mount('#number-migrate').$on('migrate', function(){
+                            console.log("MIGRATE ICI")
+                        })
+                    })
+                </script>
+            </div>
             <h3>Autres numérotation détéctées</h3>
             <p class="alert alert-warning">
                 Les activités ci-dessous utilisent encore la numérotation libre avec des intitulés non référencés :
