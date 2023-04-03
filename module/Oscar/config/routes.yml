@@ -1170,6 +1170,14 @@ user_parameters:
             controller: Public
             action: parameters
 
+vitejs_example:
+    type: segment
+    options:
+        route: /dev-vitejs
+        defaults:
+            controller: Public
+            action: devVitejs
+
 ################################################################################
 # GESTION des DOCUMENTS (administratifs)
 administrativedocument:

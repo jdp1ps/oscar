@@ -11,5 +11,5 @@
 
 ```bash
 cd ui
-yarn
+yarn run dev
 ```

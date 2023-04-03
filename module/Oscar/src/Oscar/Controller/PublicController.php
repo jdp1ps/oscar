@@ -42,6 +42,11 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         return $this->activityRequestService;
     }
 
+    public function devVitejsAction()
+    {
+        return [];
+    }
+
     /**
      * @param mixed $activityRequestService
      */
