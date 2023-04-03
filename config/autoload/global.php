@@ -19,6 +19,14 @@ return array(
         // Par défaut, pas de socket
         'socket' => false,
 
+        'vite' => [
+            'mode' => 'prod',
+            'src' => __DIR__ . '/../../ui',
+            'dest' => __DIR__ . '/../../public/js/oscar/vite/dist',
+            'base_url_dev' => 'http://127.0.0.1:5173',
+            'base_url_prod' => '/js/oscar/vite/dist',
+        ],
+
         // Rapports de synchronisation
         'repport_directory' => __DIR__ .'/../../data/repports/',
 
