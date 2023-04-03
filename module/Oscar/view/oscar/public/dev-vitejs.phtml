@@ -1,0 +1,18 @@
+<section class="container">
+    <h1>Exemple d'intégration VITEJS</h1>
+
+    <ul>
+        <li>Intégration Oscar dans <code>./module/Oscar/view/public/dev-vitejs.phtml</code></li>
+        <li>Source JS à compiler dans <code>./ui/</code></li>
+    </ul>
+
+    <h2>Compilation des sources Javascript</h2>
+    <pre>
+cd ui
+yarn run dev
+    </pre>
+    <div id="example"></div>
+    <pre><?php
+        $this->Vite()->addJs('src/example.js');
+        ?></pre>
+</section>

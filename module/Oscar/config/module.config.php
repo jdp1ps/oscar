@@ -21,7 +21,7 @@ return array(
                 // PUBLIC
                 [
                     'controller' => 'Public',
-                    'action' => ['index',],
+                    'action' => ['index','devVitejs'],
                     'roles' => [],
                 ],
 
