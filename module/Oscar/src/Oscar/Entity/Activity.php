@@ -597,16 +597,29 @@ class Activity implements ResourceInterface
         return $this->fraisDeGestion;
     }
 
-    public function getFraisDeGestionDisplay()
+    public function getFraisDeGestionDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
     {
+        $percent = '';
+        $currency = '';
+        $data = '';
+
+        if( $diplayCurrency ){
+            $currency = ''.$this->getCurrency()->getSymbol();
+        }
+
         if (($partH = $this->getFraisDeGestion())) {
             if (strpos($partH, '%')) {
-                return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol() . " ($partH)";
+                if( $displayPercentInfo ){
+                    $percent = sprintf(' (%s)', $partH);
+                }
+                $data = $this->getAmount() / 100 * floatval($partH);
             } else {
-                return $partH . $this->getCurrency()->getSymbol();
+                $data = $partH;
             }
+
+            return number_format($data, 2, ',', '').$currency.$percent;
         }
-        return $this->fraisDeGestionPartHebergeur;
+        return $this->fraisDeGestion;
     }
 
     /**
@@ -626,14 +639,27 @@ class Activity implements ResourceInterface
         return $this->fraisDeGestionPartHebergeur;
     }
 
-    public function getFraisDeGestionPartHebergeurDisplay()
+    public function getFraisDeGestionPartHebergeurDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
     {
+        $percent = '';
+        $currency = '';
+        $data = '';
+
+        if( $diplayCurrency ){
+            $currency = ''.$this->getCurrency()->getSymbol();
+        }
+
         if (($partH = $this->getFraisDeGestionPartHebergeur())) {
             if (strpos($partH, '%')) {
-                return $this->getAmount() / 100 * floatval($partH) . $this->getCurrency()->getSymbol();
+                if( $displayPercentInfo ){
+                    $percent = sprintf(' (%s)', $partH);
+                }
+                $data = $this->getAmount() / 100 * floatval($partH);
             } else {
-                return $partH . $this->getCurrency()->getSymbol();
+                $data = $partH;
             }
+
+            return number_format($data, 2, ',', '').$currency.$percent;
         }
         return $this->fraisDeGestionPartHebergeur;
     }
@@ -2389,8 +2415,8 @@ class Activity implements ResourceInterface
             'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
             'écart de paiement' => number_format($this->getEcartPaiement(), 2, ',', ''),
             'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
-            'Frais de gestion' => $this->getFraisDeGestion(),
-            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeur(),
+            'Frais de gestion' => $this->getFraisDeGestionDisplay(),
+            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeurDisplay(true, false),
             'incidence financière' => $this->getIncidenceFinanciere(),
             'Assiette subventionnable' => $this->getAssietteSubventionnable(),
             'Note' => $this->getNoteFinanciere(),
