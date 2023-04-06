@@ -76,6 +76,7 @@ use Oscar\Utils\UnicaenDoctrinePaginator;
 use PhpOffice\PhpWord\Settings;
 use Zend\Http\PhpEnvironment\Request;
 use Zend\Mvc\Console\View\Renderer;
+use Zend\Stdlib\ArrayUtils;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 use Zend\View\Renderer\PhpRenderer;
@@ -213,7 +214,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'directions' => $this->getProjectGrantService()->getActivitiesSearchDirection(),
             'direction' => $this->params()->fromQuery('d', 'desc'),
             'sorter' => $this->params()->fromQuery('t', 'hit'),
-            'status' => $this->getProjectGrantService()->getActivitiesSearchStatus(),
+            'status' => $this->getProjectGrantService()->getActivitactivitiesOrganizationsiesSearchStatus(),
             'options_pays' => $this->getOrganizationService()->getCountriesList(),
             'roles_person' => $this->getPersonService()
                 ->getAvailableRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_ID_VALUE),
@@ -1502,7 +1503,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      * @return JsonModel
      * @throws OscarException
      */
-    public function documentsJsonAction():JsonModel
+    public function documentsJsonAction(): JsonModel
     {
         // Params (id activité)
         $id = $this->params()->fromRoute('id');
@@ -1529,10 +1530,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $rolesMerged = array_merge($roles, $rolesAppli);
 
         /** @var TabDocument $tabDocument */
-        foreach ($entitiesTabs as $tabDocument){
+        foreach ($entitiesTabs as $tabDocument) {
             // Traitement final attendu sur les rôles
             $tabId = $tabDocument->getId();
-            if( $tabDocument->hasAccess($rolesMerged) ){
+            if ($tabDocument->hasAccess($rolesMerged)) {
                 $arrayTabs[$tabId] = $tabDocument->toJson();
                 $arrayTabs[$tabId]["documents"] = [];
                 $arrayTabs[$tabId]['manage'] = $tabDocument->isManage($rolesMerged);
@@ -1563,7 +1564,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $this->getLoggerService()->info($doc->getFileName() . " - " . $doc->getTabDocument());
             $manage = false;
             $docAdded = $doc->toJson();
-            if(is_null($doc->getTabDocument())) {
+            if (is_null($doc->getTabDocument())) {
                 if ($doc->isPrivate() === true) {
                     // Droits sur les documents privés utilisateur courant associé ou non au document
                     $personsDoc = $doc->getPersons();
@@ -1583,23 +1584,23 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             ['id' => $doc->getId()]
                         );
                         $docAdded['urlReupload'] = $this->url()->fromRoute(
-                                'contractdocument/upload',
-                                [
-                                    'idactivity' => $entity->getId(),
-                                    'idtab' => 'private',
-                                    'id' => $doc->getId()
-                                ]
-                            );
+                            'contractdocument/upload',
+                            [
+                                'idactivity' => $entity->getId(),
+                                'idtab' => 'private',
+                                'id' => $doc->getId()
+                            ]
+                        );
                         $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]
                         ) : false;
                     }
                     $privateTab ["documents"] [] = $docAdded;
-                }else{
+                } else {
                     $unclassifiedTab ["documents"] [] = $docAdded;
                 }
-            }else{
+            } else {
                 if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
                     continue;
                 }
@@ -1631,13 +1632,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
         } // End boucle
 
-        if($privateTab){
+        if ($privateTab) {
             $arrayTabs['private'] = $privateTab;
         }
-        if($unclassifiedTab){
+        if ($unclassifiedTab) {
             $arrayTabs['unclassified'] = $unclassifiedTab;
         }
-        $out['tabsWithDocuments'] =  $arrayTabs;
+        $out['tabsWithDocuments'] = $arrayTabs;
         $out['idCurrentPerson'] = $this->getCurrentPerson()->getId();
         return new JsonModel($out);
     }
@@ -2030,7 +2031,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function showAction():array
+    public function showAction(): array
     {
         // Identifiant de l'activité
         $id = $this->params()->fromRoute('id');
@@ -2704,7 +2705,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 if ($include) {
-                    $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
+                    $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) . ')');
                 }
             } else {
                 if ($search) {
@@ -2810,28 +2811,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                     // Personne (plusieurs)
                     case 'pm' :
-                        $value1 = explode(',', $params[1]);
+                        $value1 = \Oscar\Utils\ArrayUtils::explodeIntegerFromString($params[1]);
                         $crit['val1'] = $value1;
-                        $personsQuery = $this->getEntityManager()->createQueryBuilder()
-                            ->select('pr')
-                            ->from(Person::class, 'pr')
-                            ->where('pr.id IN(:idsPersons)');
-
-                        foreach (
-                            $personsQuery->getQuery()->setParameter(
-                                'idsPersons',
-                                $value1
-                            )->getResult() as $person
-                        ) {
-                            $filterPersons[$person->getId()] = (string)$person;
-                        }
-
-                        $ids = array_keys(
-                            $queryPersons->setParameter(
-                                'ids',
-                                $value1
-                            )->getQuery()->getArrayResult()
+                        $filterPersons = $this->getPersonService()->getPersonRepository()->getPersonsByIds_idValue(
+                            $value1
                         );
+                        $ids = $this->getProjectGrantService()->getActivityRepository()
+                            ->getIdsForPersons(array_keys($filterPersons));
                         break;
 
                     case 'om' :
@@ -2887,7 +2873,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         break;
 
                     case 'td':
-                        if( $crit['val1'] == "null" || !$crit['val1'] ){
+                        if ($crit['val1'] == "null" || !$crit['val1']) {
                             $value1 = [];
                         } else {
                             $value1 = $crit['val1'] = explode(',', $params[1]);
@@ -3112,7 +3098,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // FILTRE STATIC SUR LES ORGA
             if ($this->getOrganizationPerimeter()) {
-                $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) .')');
+                $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) . ')');
             }
 
             $activities = null;

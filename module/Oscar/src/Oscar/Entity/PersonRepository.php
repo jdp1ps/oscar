@@ -106,6 +106,15 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function getPersonsByIds_idValue(array $ids) :array
+    {
+        $out = [];
+        foreach ($this->getPersonsByIds($ids) as $person) {
+            $out[$person->getId()] = (string)$person;
+        }
+        return $out;
+    }
+
 
     /**
      * Retourne la liste des UIDS des personnes issues d'une synchronisation dans
