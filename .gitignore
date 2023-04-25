@@ -19,6 +19,7 @@ debug
 DEV.md
 composer.phar
 composer-stable.phar
+config/autoload/local.docker.php
 
 # Prototype
 prototype/timesheet/*
