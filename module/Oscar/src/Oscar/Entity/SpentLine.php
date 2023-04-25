@@ -38,6 +38,11 @@ class SpentLine
     private $pfi;
 
     /**
+     * @ORM\Column(type="string", nullable=true, options={"default":"9A"})
+     */
+    private $rldnr = '9A';
+
+    /**
      * @ORM\Column(type="string", nullable=true)
      */
     private $numSifac;
@@ -164,6 +169,23 @@ class SpentLine
     public function setSyncId($syncId)
     {
         $this->syncId = $syncId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRldnr(): string
+    {
+        return $this->rldnr;
+    }
+
+    /**
+     * @param string $rldnr
+     */
+    public function setRldnr(string $rldnr): self
+    {
+        $this->rldnr = $rldnr;
+        return $this;
     }
 
     /**
@@ -524,36 +546,39 @@ class SpentLine
     }
 
 
-    public function getDetailsHeaders(){
+    public function getDetailsHeaders()
+    {
         return [
-                "ID(oscar)",
-                "PFI",
-                "Centre de profit",
-                "N° SIFAC",
-                "N° PIECE",
-                "CODE Ste",
-                "CODE Domaine Fonc.",
-                "CODE Service Fait",
-                "Date Comptable",
-                "Année Exercice",
-                "Date paiment",
-                "Date pièce",
-                "Date service fait",
+            "ID(oscar)",
+            "PFI",
+            "Centre de profit",
+            "N° SIFAC",
+            "N° PIECE",
+            "CODE Ste",
+            "CODE Domaine Fonc.",
+            "CODE Service Fait",
+            "Date Comptable",
+            "Année Exercice",
+            "Date paiment",
+            "Date pièce",
+            "Date service fait",
 
-                "COMPT. Général",
-                "Compt. Budg",
-                "Centre profit",
-                "Centre financier",
+            "COMPT. Général",
+            "Compt. Budg",
+            "Centre profit",
+            "Centre financier",
 
-                "Designation",
-                "Texte",
-                "MONTANT",
+            "Designation",
+            "Texte",
+            "MONTANT",
 
-                "N° Commande Aff",
-                "N° Fournisseur",
-            ];
+            "N° Commande Aff",
+            "N° Fournisseur",
+        ];
     }
-    public function getDetailsDatas(){
+
+    public function getDetailsDatas()
+    {
         return [
             $this->getId(),
             $this->getPfi(),

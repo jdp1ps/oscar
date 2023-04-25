@@ -1298,6 +1298,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $spentLine->setSyncId($data['IDSYNC']);
         $spentLine->setPfi($data['PFI']);
         $spentLine->setNumSifac($data['NUMSIFAC']);
+        $spentLine->setRldnr($data['AB9']);
         $spentLine->setNumCommandeAff($data['NUMCOMMANDEAFF']);
         $spentLine->setNumPiece($data['NUMPIECE']);
         $spentLine->setNumFournisseur($data['NUMFOURNISSEUR']);
