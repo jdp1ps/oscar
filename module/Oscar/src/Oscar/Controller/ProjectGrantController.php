@@ -2775,20 +2775,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'ap' :
                     case 'sp' :
                         try {
+//                            var_dump($value2); die();
                             $personsId[] = $value1;
                             $person = $this->getPersonService()->getPerson($value1);
                             $persons[$person->getId()] = $person;
                             $crit['val1Label'] = $person->getDisplayName();
-                            $crit['val2Label'] = $value2 >= 0 ? $this->getOscarUserContextService()->getAllRoleIdPerson(
+                            $crit['val2Label'] = $value2 > 0 ? $this->getOscarUserContextService()->getAllRoleIdPerson(
                             )[$value2] : '';
-                            $query = $queryPersonNoRole;
-                            if ($value2 >= 0) {
-                                $queryParam['roleObj'] = $this->getEntityManager()->getRepository(Role::class)->find(
-                                    $value2
-                                );
-                                $query = $queryPersonRole;
-                            }
-                            $ids = array_keys($query->setParameters($queryParam)->getQuery()->getArrayResult());
+                            $ids = $this->getActivityService()->getActivityRepository()->getIdsForPersonWithRole($person->getId(), $value2 ? $value2 : 0);
                         } catch (\Exception $e) {
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }

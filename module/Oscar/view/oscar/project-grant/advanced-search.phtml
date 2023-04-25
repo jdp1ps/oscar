@@ -386,7 +386,7 @@
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <div class="icon-building-filled"></div>
 
-            <input type="hidden" name="criteria[]" class="criteria"
+            <input type="text" name="criteria[]" class="criteria"
                    value="{{criteria}}"/>
             <small>{{typeLabel}}</small>
             <select class="select2 changer val1">
@@ -913,6 +913,17 @@
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].checked ? "1" : "0";
+                            }
+
+                        }
+
+                        // Select
+                        var select = filter.find('select.val2');
+
+                        if( select.length > 0 ){
+                            var val2Elem = filter.find('.val2');
+                            if( val2Elem ){
+                                val2 = val2Elem[0].value ? val2Elem[0].value : "0";
                             }
 
                         }
