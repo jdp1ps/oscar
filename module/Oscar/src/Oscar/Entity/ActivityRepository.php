@@ -106,6 +106,41 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
+    public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0) :array
+    {
+        if( $organizationId <= 0 && $roleObjId <= 0 ){
+            throw new OscarException("Vous devez préciser une organisation et/ou un rôle");
+        }
+
+        $clauseA = [];
+        $clauseB = [];
+
+        if( $roleObjId > 0) {
+            $clauseA[] = 'p1.roleObj = :roleId';
+            $clauseB[] = 'p2.roleObj = :roleId';
+            $params['roleId'] = $roleObjId;
+        }
+
+        if( $organizationId > 0 ) {
+            $clauseA[] = 'orga1.id = :orgId';
+            $clauseB[] = 'orga2.id = :orgId';
+            $params['orgId'] = $organizationId;
+        }
+
+        $queryBuilder = $this->baseQueryWithOrganizationOf();
+        $clause = '('
+            .implode($clauseA, ' AND ')
+            .') OR ('
+            .implode($clauseB, 'AND ')
+            . ')';
+
+        $queryBuilder->where($clause);
+
+        $queryBuilder->setParameters($params);
+
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
     /**
      * Retourne les IDS des activités qui impliquent un des types de documents donnés.
      *

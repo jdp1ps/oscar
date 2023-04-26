@@ -928,6 +928,17 @@
 
                         }
 
+                        // Select
+                        var input = filter.find('input.val2');
+
+                        if( input.length > 0 ){
+                            var val2Elem = filter.find('.val2');
+                            if( val2Elem ){
+                                val2 = val2Elem[0].value ? val2Elem[0].value : "";
+                            }
+
+                        }
+
                         filter.find('.criteria').val(datas.type
                             + ';' + filter.find('.val1').val()
                             + ';' + val2);
@@ -1052,7 +1063,6 @@
                             }
                         }
 
-                        console.log("AJ", datas);
                         var val2 = "" +datas.val2;
                         if( val2.indexOf(',') > 0 ){
                             checked = val2.split(',');
