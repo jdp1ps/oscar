@@ -4589,10 +4589,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function getPersonTimesheetsDatas(Person $person, $period, $validatedOnly = false)
+    public function getPersonTimesheetsDatas(Person $person, $period, $validatedOnly = false, int $restrictedActivityId = 0)
     {
         $periodBounds = DateTimeUtils::periodBounds($period);
         $periodInfosObj = PeriodInfos::getPeriodInfosObj($period);
+        $restrictedActivityAggregate = $this->getOthersWPByCode('research');
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
@@ -4627,7 +4628,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $validationsDone = [];
 
-
         $declarations = [
             'activities' => [],
             'others' => [],
@@ -4650,17 +4650,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
 
             if ($timesheet->getActivity()) {
-                if (!in_array($timesheet->getActivity()->getCodeEOTP(), $pfi)) {
-                    $pfi[] = $timesheet->getActivity()->getCodeEOTP();
-                }
-                if (!in_array($timesheet->getActivity()->getAcronym(), $acronyms)) {
-                    $acronyms[] = $timesheet->getActivity()->getAcronym();
-                }
-                if (!in_array($timesheet->getActivity()->getOscarNum(), $num)) {
-                    $num[] = $timesheet->getActivity()->getOscarNum();
-                }
-                if (!in_array($timesheet->getActivity(), $activities)) {
-                    $activities[] = $timesheet->getActivity();
+                if( $restrictedActivityId == 0 || $timesheet->getActivity()->getId() == $restrictedActivityId ){
+                    if (!in_array($timesheet->getActivity()->getCodeEOTP(), $pfi)) {
+                        $pfi[] = $timesheet->getActivity()->getCodeEOTP();
+                    }
+                    if (!in_array($timesheet->getActivity()->getAcronym(), $acronyms)) {
+                        $acronyms[] = $timesheet->getActivity()->getAcronym();
+                    }
+                    if (!in_array($timesheet->getActivity()->getOscarNum(), $num)) {
+                        $num[] = $timesheet->getActivity()->getOscarNum();
+                    }
+                    if (!in_array($timesheet->getActivity(), $activities)) {
+                        $activities[] = $timesheet->getActivity();
+                    }
                 }
             }
 
@@ -4674,20 +4676,33 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $day = $timesheet->getDateFrom()->format('d');
 
             if ($timesheet->getActivity() && $timesheet->getWorkpackage()) {
-                $path = 'activities';
-                $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
-                $groupType = 'activity';
-                $groupFamily = 'research';
-                $groupId = $timesheet->getActivity()->getId();
-                $subGroup = sprintf(
-                    '%s - %s',
-                    $timesheet->getWorkpackage()->getCode(),
-                    $timesheet->getWorkpackage()->getLabel()
-                );
-                $subGroupId = $timesheet->getWorkpackage()->getId();
-                $subGroupType = "wp";
-                $label = $subGroup;
-                $acronym = $timesheet->getActivity()->getAcronym();
+                if( $restrictedActivityId == 0 || $timesheet->getActivity()->getId() == $restrictedActivityId ){
+                    $path = 'activities';
+                    $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
+                    $groupType = 'activity';
+                    $groupFamily = 'research';
+                    $groupId = $timesheet->getActivity()->getId();
+                    $subGroup = sprintf(
+                        '%s - %s',
+                        $timesheet->getWorkpackage()->getCode(),
+                        $timesheet->getWorkpackage()->getLabel()
+                    );
+                    $subGroupId = $timesheet->getWorkpackage()->getId();
+                    $subGroupType = "wp";
+                    $label = $subGroup;
+                    $acronym = $timesheet->getActivity()->getAcronym();
+                } else {
+                    $path = 'others';
+                    $group = $restrictedActivityAggregate['label'];
+                    $groupId = -1;
+                    $groupType = 'others';
+                    $groupFamily = $restrictedActivityAggregate['group'];
+                    $subGroupId = $restrictedActivityAggregate['label'];
+                    $subGroupType = $restrictedActivityAggregate['label'];
+                    $label = $restrictedActivityAggregate['label'];
+                    $subGroup = $restrictedActivityAggregate['group'];
+                    $acronym = "ACRONYM";
+                }
             }
 
             if (array_key_exists($timesheet->getLabel(), $others)) {

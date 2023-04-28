@@ -106,9 +106,14 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
-    public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0) :array
+    /**
+     * Retourne les IDs des activités impliquant une des organizations donnée avec le rôle spécifié
+     * @param array $organizationsIds IDS des organisations
+     * @param int $roleObjId ID rôle
+     */
+    public function getIdsWithOneOfOrganizationsRoled( array $organizationsIds, int $roleObjId = 0 ) :array
     {
-        if( $organizationId <= 0 && $roleObjId <= 0 ){
+        if( count($organizationsIds) == 0 && $roleObjId <= 0 ){
             throw new OscarException("Vous devez préciser une organisation et/ou un rôle");
         }
 
@@ -121,17 +126,17 @@ class ActivityRepository extends EntityRepository
             $params['roleId'] = $roleObjId;
         }
 
-        if( $organizationId > 0 ) {
-            $clauseA[] = 'orga1.id = :orgId';
-            $clauseB[] = 'orga2.id = :orgId';
-            $params['orgId'] = $organizationId;
+        if( count($organizationsIds) > 0 ) {
+            $clauseA[] = 'orga1.id IN(:orgIds)';
+            $clauseB[] = 'orga2.id IN(:orgIds)';
+            $params['orgIds'] = $organizationsIds;
         }
 
         $queryBuilder = $this->baseQueryWithOrganizationOf();
         $clause = '('
             .implode($clauseA, ' AND ')
             .') OR ('
-            .implode($clauseB, 'AND ')
+            .implode($clauseB, ' AND ')
             . ')';
 
         $queryBuilder->where($clause);
@@ -139,6 +144,11 @@ class ActivityRepository extends EntityRepository
         $queryBuilder->setParameters($params);
 
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
+    public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0) :array
+    {
+        return $this->getIdsWithOneOfOrganizationsRoled([$organizationId], $roleObjId);
     }
 
     /**
