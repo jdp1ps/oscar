@@ -3419,7 +3419,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         // Déclarant / infos déclarées
         $declarer = $this->getPersonService()->getPersonById($declarerId, true);
-        $datas = $this->getPersonTimesheetsDatas($declarer, $period);
+        $datas = $this->getPersonTimesheetsDatas($declarer, $period, false, 0);
 
         foreach ($datas['daysInfos'] as $day) {
             $needed += $day['dayLength'];
