@@ -4608,7 +4608,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             );
 
         // état de la validation pour cette période
-        $validationsStates = $this->getValidationStatePersonPeriod($person, $period);
+        $validationsStates = $this->getValidationStatePersonPeriod($person, $period, $restrictedActivityId);
 
         $commentaires = "";
         $acronyms = [];
@@ -4864,7 +4864,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return mixed
      * @throws OscarException
      */
-    public function getValidationStatePersonPeriod(Person $person, $periodKey)
+    public function getValidationStatePersonPeriod(Person $person, $periodKey, $restrictedActivityId = 0)
     {
         $periodData = DateTimeUtils::extractPeriodDatasFromString($periodKey);
         $year = $periodData['year'];
@@ -4900,29 +4900,31 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $datas['validations'][] = (string)$vp;
                 $globalState = max($globalState, array_search($vp->getStatus(), $states));
 
-                // Récupération des validateurs
-                if ($vp->getValidationActivityById() > 0) {
-                    $validators['prj'][$vp->getValidationActivityById()] = [
-                        'person' => $vp->getValidationActivityBy(),
-                        'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationActivityAt())
-                    ];
-                }
+                if ( $restrictedActivityId == 0 || $vp->getObjectId() <= 0 || $vp->getObjectId() == $restrictedActivityId ){
+                    // Récupération des validateurs
+                    if ($vp->getValidationActivityById() > 0) {
+                        $validators['prj'][$vp->getValidationActivityById()] = [
+                            'person' => $vp->getValidationActivityBy(),
+                            'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationActivityAt())
+                        ];
+                    }
 
-                if ($vp->getValidationSciById() > 0) {
-                    $validators['sci'][$vp->getValidationSciById()] = [
-                        'person' => $vp->getValidationSciBy(),
-                        'date' => $vp->getValidationSciAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationSciAt())
-                    ];
-                }
+                    if ($vp->getValidationSciById() > 0) {
+                        $validators['sci'][$vp->getValidationSciById()] = [
+                            'person' => $vp->getValidationSciBy(),
+                            'date' => $vp->getValidationSciAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationSciAt())
+                        ];
+                    }
 
-                if ($vp->getValidationAdmById() > 0) {
-                    $validators['adm'][$vp->getValidationAdmById()] = [
-                        'person' => $vp->getValidationAdmBy(),
-                        'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationAdmAt())
-                    ];
+                    if ($vp->getValidationAdmById() > 0) {
+                        $validators['adm'][$vp->getValidationAdmById()] = [
+                            'person' => $vp->getValidationAdmBy(),
+                            'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationAdmAt())
+                        ];
+                    }
                 }
             }
 
