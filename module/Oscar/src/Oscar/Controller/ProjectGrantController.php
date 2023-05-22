@@ -1030,6 +1030,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Récupération des informations annexes
+            foreach ($activity->getPersons() as $activityPerson){
+                $this->getPersonService()->personActivityRemove($activityPerson);
+            }
+
+            foreach ($activity->getOrganizations() as $activityOrganization){
+                $this->getActivityService()->activityOrganizationRemove($activityOrganization);
+            }
 
             // On supprime les créneaux
             try {
@@ -1039,6 +1046,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     "Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage()
                 );
             }
+
+            // Suppression des notifications
+            $this->getNotificationService()->deleteNotificationActivityById($activity->getId());
 
             // Suppression des documents
             $documents = $activity->getDocuments();

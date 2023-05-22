@@ -630,26 +630,28 @@ class NotificationService implements UseServiceContainer
         foreach ($notificationsActivity as $na) {
             $contextNotification = explode(":", $na->getContext());
 
-            if( count($contextNotification) < 2 ){
+            if (count($contextNotification) < 2) {
                 continue;
             }
             //ActivityDate = Jalon donc Milestone (ancienne nomenclature, terminologie métier)
             $idActivityDate = $contextNotification[1];
             try {
-                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
+                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(
+                    ["id" => $idActivityDate]
+                );
             } catch (\Exception $e) {
                 die("idActivityDate : $idActivityDate --- " . $na->getContext());
             }
 
-            if( !$activityDate ){
+            if (!$activityDate) {
                 continue;
             }
 
             //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
-            $rolesActivityDate  = $activityDate->getType()->getRoles();
+            $rolesActivityDate = $activityDate->getType()->getRoles();
 
             // Si pas de rôles on passe directement, pas de calcul de notifications
-            if (count($rolesActivityDate) == 0){
+            if (count($rolesActivityDate) == 0) {
                 $this->getLoggerService()->debug(" > Skip (pas de rôles)");
                 continue;
             }
@@ -671,7 +673,7 @@ class NotificationService implements UseServiceContainer
             $idsRolesActivityDate = [];
 
             /** @var  Role $roleActivityDate */
-            foreach ($rolesActivityDate as $roleActivityDate){
+            foreach ($rolesActivityDate as $roleActivityDate) {
                 //idRole associé au type de jalon/milestone (ActivityDate)
                 $idsRolesActivityDate [] = $roleActivityDate->getId();
             }
@@ -680,10 +682,10 @@ class NotificationService implements UseServiceContainer
             $idsExpectedSubscribersById = [];
 
             $rolesAndExpectedSubscribers = $idsPersonsRoles;
-            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons){
-                if (in_array($idRole, $idsRolesActivityDate)){
-                    foreach ($arrayIdspersons as $key => $idPerson){
-                        if (!in_array($idPerson, $idsExpectedSubscribersById)){
+            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons) {
+                if (in_array($idRole, $idsRolesActivityDate)) {
+                    foreach ($arrayIdspersons as $key => $idPerson) {
+                        if (!in_array($idPerson, $idsExpectedSubscribersById)) {
                             $idsExpectedSubscribersById [] = $idPerson;
                         }
                     }
@@ -715,6 +717,25 @@ class NotificationService implements UseServiceContainer
                     $subscribe->setNotification($na)->setPerson($personToAdd);
                 }
             }
+        }
+        $this->getEntityManager()->flush();
+    }
+
+    public function deleteNotificationActivityById(int $idActivity): void
+    {
+        try {
+            $activity = $this->getPersonService()->getProjectGrantService()->getActivityById($idActivity);
+        } catch (\Exception $exception) {
+            throw new OscarException($exception->getMessage());
+        }
+        $this->deleteNotificationActivity($activity);
+    }
+
+    public function deleteNotificationActivity(Activity $activity): void
+    {
+        $notifications = $this->getNotificationRepository()->getNotificationsActivity($activity->getId());
+        foreach ($notifications as $notification) {
+            $this->getEntityManager()->remove($notification);
         }
         $this->getEntityManager()->flush();
     }
@@ -865,7 +886,7 @@ class NotificationService implements UseServiceContainer
      * idoines.
      * @param \DateTime $reference
      */
-    public function generateActivityMilestonesUncompleted( \DateTime $reference ) :void
+    public function generateActivityMilestonesUncompleted(\DateTime $reference): void
     {
         // TODO
 //        /** @var ActivityDateRepository $milestoneRepository */

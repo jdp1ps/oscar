@@ -50,8 +50,12 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
      */
     protected function sendBackgroundTask(string $task, array $params, string $key): void
     {
-        $this->getLoggerService()->debug(" > gearman : $task($key) " . json_encode($params));
-        $this->getGearmanClient()->doBackground($task, json_encode($params), $key);
+        try {
+            $this->getLoggerService()->debug(" > gearman : $task($key) " . json_encode($params));
+            $this->getGearmanClient()->doBackground($task, json_encode($params), $key);
+        } catch (\Exception $e){
+            throw new \Exception(sprintf("Impossible de programmer une task gearman (%s)", $e->getMessage()));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
