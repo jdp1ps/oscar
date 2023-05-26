@@ -1361,7 +1361,8 @@ class TimesheetController extends AbstractOscarController
 
         if ($action == "export2") {
             $out = $this->params()->fromQuery('out', 'pdf');
-            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+            $restrictedActivity = $this->params()->fromQuery('activityid', 0);
+            $datas = $timesheetService->getPersonTimesheetsDatas($person, $period, false, $restrictedActivity);
             $datas['format'] = $out;
 
             if ($out == 'pdf') {

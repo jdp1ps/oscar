@@ -2515,13 +2515,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Affectation ORGANISATION <> ACTIVITÉ
-
-    public function deleteActivityPerson(ActivityPerson $activityPerson)
-    {
-    }
-
     public function organizationActivityEdit(
         ActivityOrganization $activityorganization,
         OrganizationRole $roleOrganization,
