@@ -36,6 +36,7 @@ use Oscar\Strategy\Upload\TypeGed;
 use Oscar\Strategy\Upload\TypeOscar;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
+use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
 use Zend\Http\Request;
@@ -105,17 +106,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     protected function getDropLocation(ContractDocument $document = null)
     {
         if (!is_null($document)){
-            $pathsConfig = $this->getOscarConfigurationService()->getConfiguration("paths");
-            $pathDocumentsConfig = $pathsConfig["document_oscar"];
-            $sourceDocumentPath = "";
-            if ($document->isPrivate()){
-                $sourceDocumentPath = "private/".$document->getPath();
-            }elseif(!is_null($document->getTabDocument())){
-                $sourceDocumentPath = "tab_".$document->getTabDocument()->getId()."/".$document->getPath();
-            }else{
-                $sourceDocumentPath = $document->getPath();
-            }
-            return $pathDocumentsConfig.$sourceDocumentPath;
+            return $this->getOscarConfigurationService()->getDocumentRealpath($document);
         }else{
             return $this->getContractDocumentService()->getDropLocation();
         }
@@ -171,6 +162,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function deleteAction()
     {
+
+        $document = $this->getContractDocumentService()->getDocument(
+            $this->params()->fromQuery('id'), true
+        );
+
         // Path document pour déplacement
         $pathsConfig = $this->getOscarConfigurationService()->getConfiguration("paths");
         $pathDocumentsConfig = $pathsConfig["document_oscar"];
@@ -368,9 +364,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         $idDoc = $this->params()->fromRoute('id');
         /** @var ContractDocument $doc */
-        $doc = $this->getContractDocumentService()->getDocument($idDoc)->getQuery()->getSingleResult();
+        $doc = $this->getContractDocumentService()->getDocument($idDoc);
 
         $activity = $doc->getGrant();
+        // Modifier les tests d'accès aux documents
         $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $activity);
 
         $sourceDoc = $this->getDropLocation($doc);
@@ -384,11 +381,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $filename = preg_replace('/(.*)(\.\w*)/', '$1-version-' . $version . '$2', $filename);
         }
 
+        $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Content-type: ' . $doc->getFileTypeMime());
-        //readfile($fileDir . '/' . $doc->getPath());
-        readfile($sourceDoc);
-        die();
+        die($content);
     }
 
     /**
@@ -405,8 +401,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         $isSuccess = false;
         $activity = $document->getActivity();
-        $pathsConfig = $this->getOscarConfigurationService()->getConfiguration("paths");
-        $pathDocumentsConfig = $pathsConfig["document_oscar"];
+        $pathDocumentsConfig = $this->getOscarConfigurationService()->getDocumentDropLocation();
 
         // 1 : On va chercher toutes les versions d'un même document
         $em = $this->getEntityManager()->getRepository(ContractDocument::class);

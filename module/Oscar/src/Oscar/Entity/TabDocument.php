@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class TabDocument
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\TabsDocumentsRepository")
  */
 class TabDocument
 {
@@ -156,6 +157,23 @@ class TabDocument
     public function getTabsDocumentsRoles(): Collection
     {
         return $this->tabsDocumentsRoles;
+    }
+
+    public function getRolesAccess() :array
+    {
+        $rolesIds = [
+            'read' => [],
+            'write' => []
+        ];
+        foreach ($this->getTabsDocumentsRoles() as $tabsDocumentsRole) {
+            if( $tabsDocumentsRole->getAccess() > 0 ){
+                $rolesIds['read'][] = $tabsDocumentsRole->getRole()->getRoleId();
+            }
+            if( $tabsDocumentsRole->getAccess() > 1 ){
+                $rolesIds['write'][] = $tabsDocumentsRole->getRole()->getRoleId();
+            }
+        }
+        return $rolesIds;
     }
 
     public function addTabDocumentRole(TabsDocumentsRoles $tabDocumentRole): self

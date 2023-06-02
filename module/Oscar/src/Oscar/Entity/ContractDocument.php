@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ContractDocumentRepository")
  */
 class ContractDocument extends AbstractVersionnedDocument
 {
@@ -221,6 +221,12 @@ class ContractDocument extends AbstractVersionnedDocument
         return $this->tabDocument;
     }
 
+    public function hasTabDocument(): bool
+    {
+        return $this->getTabDocument() != null;
+    }
+
+
     /**
      * @param ?TabDocument $tabDocument
      * @return $this
@@ -357,10 +363,9 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
 
-    public function generatePath()
+    public function generatePath() :string
     {
-        $slugify = new Slugify();
-        return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));
+        return $this->generateName();
     }
 
     /**
@@ -368,7 +373,7 @@ class ContractDocument extends AbstractVersionnedDocument
      *
      * @return string
      */
-    public function generateName()
+    public function generateName() :string
     {
         $slugify = new Slugify();
         return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));

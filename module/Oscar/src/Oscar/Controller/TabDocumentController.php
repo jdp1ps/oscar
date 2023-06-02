@@ -11,10 +11,15 @@ namespace Oscar\Controller;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Tools\Export\ExportException;
+use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Role;
 use Oscar\Entity\TabDocument;
+use Oscar\Entity\TabsDocumentsRolesRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\TabDocumentForm;
+use Oscar\Provider\Privileges;
+use Oscar\Utils\FileSystemUtils;
 use Zend\Http\Response;
 use Zend\View\Model\ViewModel;
 
@@ -53,6 +58,7 @@ class TabDocumentController extends AbstractOscarController
             if ($form->isValid()) {
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
+                $path = $this->getOscarConfigurationService()->getDocumentTabLocation($entity);
                 $this->redirect()->toRoute('tabdocument');
             }
         }
@@ -77,20 +83,44 @@ class TabDocumentController extends AbstractOscarController
      */
     public function deleteAction():Response
     {
+        $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
+
         // TODO Check avant les docs qui sont raccrochés à ce tabsDocumentsRoles avant de supprimer comme un bourrin
         $id = $this->params()->fromRoute('id');
-        $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($id);
+
+        /** @var TabsDocumentsRolesRepository $tabDocumentRepository */
+        $tabDocumentRepository = $this->getEntityManager()->getRepository(TabDocument::class);
+
+        /** @var TabDocument $tabDocument */
+        $tabDocument = $tabDocumentRepository->find($id);
+
+        /** @var ContractDocument[] $documents */
+        $documents = $tabDocumentRepository->getDocumentsForTabId($tabDocument->getId());
+
         try {
             // Supprime les relations entre le tabDocument et les TabsDocumentsRoles
+            foreach ($documents as $document) {
+                $fileFrom = $this->getOscarConfigurationService()->getDocumentRealpath($document);
+                $fileTo = $this->getOscarConfigurationService()->getDocumentDropLocation()
+                    . DIRECTORY_SEPARATOR . $document->getFileName();
+                try {
+                    FileSystemUtils::getInstance()->rename($fileFrom, $fileTo);
+                } catch (\Exception $exception){
+                    throw new \Exception("Oscar n'est pas parvenu à déplacer un des documents");
+                }
+                $document->setTabDocument(null);
+                $this->getEntityManager()->flush($document);
+            }
+
             $tabsDocumentsRoles = $tabDocument->getTabsDocumentsRoles();
             foreach ($tabsDocumentsRoles as $tabDocumentRole){
                 $this->getEntityManager()->remove($tabDocumentRole);
-                $this->getEntityManager()->flush();
             }
+
             $this->getEntityManager()->remove($tabDocument);
             $this->getEntityManager()->flush();
             return $this->redirect()->toRoute('tabdocument');
-        } catch ( ForeignKeyConstraintViolationException $e ){
+        } catch ( \Exception $e ){
             throw new OscarException("Oscar n'a pas pu supprimer le type d'onglet' : " . $e->getMessage());
         }
     }
