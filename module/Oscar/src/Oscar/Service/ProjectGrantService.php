@@ -37,6 +37,8 @@ use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
+use Oscar\Entity\TabDocument;
+use Oscar\Entity\TabsDocumentsRolesRepository;
 use Oscar\Entity\TVA;
 use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
@@ -73,6 +75,7 @@ use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\DateTimeUtils;
+use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\StringUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
@@ -2512,6 +2515,46 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         } catch (\Exception  $e) {
             throw new OscarException("Le rôle d'organisation '$idRole' est introuvable.");
         }
+    }
+
+    public function getDocumentTabInfos() :array
+    {
+        /** @var TabsDocumentsRolesRepository $documentTabRepository */
+        $documentTabRepository = $this->getEntityManager()->getRepository(TabDocument::class);
+
+        $infos = [
+
+        ];
+
+        // Onglet "par défaut"
+        $defaultTab = [
+            'label' => "Onglet 'Par défaut'"
+        ];
+        try {
+            $path = $this->getOscarConfigurationService()->getDocumentDropLocation();
+            $defaultTab['path'] = $path;
+            FileSystemUtils::getInstance()->checkDirWritable($path);
+        } catch (\Exception $e) {
+            $defaultTab['error'] = $e->getMessage();
+        }
+
+        // Onglet privé
+        $privateTab = [
+            'label' => "Onglet 'Privé'"
+        ];
+
+        try {
+            $path = $this->getOscarConfigurationService()->getDocumentPrivateLocation();
+            $privateTab['path'] = $path;
+            FileSystemUtils::getInstance()->checkDirWritable($path);
+        } catch (\Exception $e) {
+            $privateTab['error'] = $e->getMessage();
+        }
+
+        $infos[] = $defaultTab;
+        $infos[] = $privateTab;
+
+        return $infos;
     }
 
 

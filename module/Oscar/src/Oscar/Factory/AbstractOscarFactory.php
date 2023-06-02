@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\AdministrativeDocumentService;
+use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
@@ -28,6 +29,7 @@ use Oscar\Service\UserParametersService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityTypeService;
 use Oscar\Traits\UseAdministrativeDocumentService;
+use Oscar\Traits\UseContractDocumentService;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseOrganizationService;
@@ -109,6 +111,10 @@ abstract class AbstractOscarFactory
 
         if( is_subclass_of($service, UsePCRUService::class) ){
             $service->setPCRUService($container->get(PCRUService::class));
+        }
+
+        if( is_subclass_of($service, UseContractDocumentService::class) ){
+            $service->setContractDocumentService($container->get(ContractDocumentService::class));
         }
 
         // NOTIFICATION

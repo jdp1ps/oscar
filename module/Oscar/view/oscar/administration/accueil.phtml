@@ -144,6 +144,18 @@
                 </strong>
                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
                     <a href="<?= $this->url('tabdocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <h5>Emplacements</h5>
+                    <ul>
+                        <?php foreach ($docLocations as $infos): ?>
+                            <li>
+                                <strong><?= $infos['label'] ?></strong> :
+                                <code><?= $infos['path'] ?></code>
+                                <?php if( $infos['error'] ): ?>
+                                <em class="text-danger"><?= $infos['error'] ?></em>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 <?php else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
                 <?php endif; ?>

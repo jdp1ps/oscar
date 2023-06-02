@@ -589,7 +589,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 //return $this->getResponseBadRequest();
         }
 
-        return [];
+        $docLocationsinfos = $this->getActivityService()->getDocumentTabInfos();
+
+        return [
+            'docLocations' => $docLocationsinfos
+        ];
     }
 
     /**

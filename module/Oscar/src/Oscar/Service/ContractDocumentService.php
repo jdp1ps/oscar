@@ -16,19 +16,24 @@ use Jacksay\PhpFileExtension\Exception\NotFoundExtension;
 use Jacksay\PhpFileExtension\PhpFileExtension;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
+use Oscar\Traits\UseEntityManager;
+use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseOscarConfigurationService;
+use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ContractDocumentService implements ServiceLocatorAwareInterface, EntityManagerAwareInterface
+class ContractDocumentService implements UseOscarConfigurationService, UseEntityManager
 {
-    use ServiceLocatorAwareTrait, EntityManagerAwareTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait;
 
     /**
      * @param Activity $grant
@@ -39,14 +44,6 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
      */
     public function newDocument(Activity $grant, Person $person, $FileName, $information, $centaureId=null ){
         throw new \RuntimeException('Not implemented');
-    }
-
-    /**
-     *
-     */
-    public function getDocuments()
-    {
-        return $this->baseQuery()->addOrderBy('d.dateUpdoad', 'DESC');
     }
 
     /**
@@ -102,15 +99,7 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
      * @return mixed
      */
     public function getDropLocation(){
-        static $doclocation;
-        if( $doclocation == null ){
-            $conf = realpath($this->getServiceLocator()->get('Config')['oscar']['paths']['document_oscar']);
-            if( !file_exists($conf) || !is_writable($conf) ){
-                throw new OscarException("L'emplacement des documents n'est pas un dossier accessible en écriture");
-            }
-            $doclocation = $conf.'/';
-        }
-        return $doclocation;
+        return $this->getOscarConfigurationService()->getDocumentDropLocation();
     }
 
     public function createDocument( $source, ContractDocument $doc )
@@ -134,7 +123,6 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
         }
     }
 
-
     /**
      * @return TypeDocument[]
      */
@@ -151,7 +139,6 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
         return $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
     }
 
-
     /**
      * @return TypeDocument
      */
@@ -161,22 +148,21 @@ class ContractDocumentService implements ServiceLocatorAwareInterface, EntityMan
     }
 
     /**
-     *
+     * @return ContractDocumentRepository
      */
-    public function getDocument( $id )
+    protected function getContractDocumentRepository()
     {
-        return $this->baseQuery()
-            ->where('d.id = :id')
-            ->setParameter('id', $id);
+        return $this->getEntityManager()->getRepository(ContractDocument::class);
     }
 
-    protected function baseQuery()
+    /**
+     * @param int $id
+     * @param bool $throw
+     * @return ContractDocument|null
+     * @throws OscarException
+     */
+    public function getDocument( int $id, bool $throw = false )
     {
-        return $this->getEntityManager()->createQueryBuilder()
-            ->select('d, p, g')
-            ->from(ContractDocument::class, 'd')
-            ->leftJoin('d.person', 'p')
-            ->leftJoin('d.grant', 'g');
+        return $this->getContractDocumentRepository()->getDocument($id, $throw);
     }
-
 }

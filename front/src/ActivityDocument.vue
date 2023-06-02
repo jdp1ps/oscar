@@ -276,11 +276,11 @@
                 <i class="icon-download-outline"></i>
                   Nouvelle Version
               </button>
-              <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)">
+              <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)" v-if="tab.manage">
                 <i class="icon-trash"></i>
                 Supprimer
               </a>
-              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)">
+              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)" v-if="tab.manage">
                 <i class="icon-pencil"></i>
                 Modifier
               </a>

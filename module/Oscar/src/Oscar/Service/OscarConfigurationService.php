@@ -10,10 +10,13 @@ namespace Oscar\Service;
 
 
 use Monolog\Logger;
+use Oscar\Entity\ContractDocument;
+use Oscar\Entity\TabDocument;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Import\Data\DataStringArray;
 use Oscar\OscarVersion;
+use Oscar\Utils\FileSystemUtils;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
@@ -40,7 +43,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     const theme = 'theme';
 
-    public function emptyProjectRequireValidation() :bool
+    public function emptyProjectRequireValidation(): bool
     {
         return $this->getConfiguration(self::empty_project_require_validation);
     }
@@ -48,11 +51,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     /**
      * @return bool
      */
-    public function isPfiStrict() :bool
+    public function isPfiStrict(): bool
     {
         $new = $this->getEditableConfKey(self::pfi_strict, null);
 
-        if( $new === null ){
+        if ($new === null) {
             return true;
         }
         return $new;
@@ -62,7 +65,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @param bool $strict
      * @throws OscarException
      */
-    public function setStrict( bool $strict ) :void
+    public function setStrict(bool $strict): void
     {
         $this->saveEditableConfKey(self::pfi_strict, $strict);
     }
@@ -70,17 +73,17 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     /**
      * @return string
      */
-    public function getPfiRegex() :string
+    public function getPfiRegex(): string
     {
         return $this->getEditableConfKey(self::pfi_strict_format, "");
     }
 
-    public function isAllowNodeSelection() :bool
+    public function isAllowNodeSelection(): bool
     {
         return $this->getEditableConfKey(self::allow_node_selection, "1") == "1";
     }
 
-    public function setAllowNodeSelection( bool $allow ) :void
+    public function setAllowNodeSelection(bool $allow): void
     {
         $this->saveEditableConfKey(self::allow_node_selection, $allow === true ? "1" : "0");
     }
@@ -300,7 +303,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     {
         $reg = $this->getEditableConfKey(self::pfi_strict_format);
         // On test si la nouvelle configuration est utilisée
-        if( $reg == null ){
+        if ($reg == null) {
             return $this->getConfiguration('validation.pfi');
         }
         return $reg;
@@ -430,12 +433,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $this->saveEditableConfKey('highdelayRelance', $value);
     }
 
-    public function getHighDelayRelanceJour() :int
+    public function getHighDelayRelanceJour(): int
     {
         return $this->getEditableConfKey('highdelayRelanceJour', 3);
     }
 
-    public function setHighDelayRelanceJour( int $value)
+    public function setHighDelayRelanceJour(int $value)
     {
         return $this->saveEditableConfKey('highdelayRelanceJour', $value);
     }
@@ -472,22 +475,28 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// MAILS D'envoi/rejet
-    public function getEmailRejectBody() :string
+    public function getEmailRejectBody(): string
     {
-        return $this->getOptionalConfiguration('email_reject_body', "Bonjour {PERSON},\r\nVotre déclaration pour la période {PERIOD} a été rejetée.\r\nMerci de corriger votre déclaration");
+        return $this->getOptionalConfiguration(
+            'email_reject_body',
+            "Bonjour {PERSON},\r\nVotre déclaration pour la période {PERIOD} a été rejetée.\r\nMerci de corriger votre déclaration"
+        );
     }
 
-    public function getEmailRejectSubject() :string
+    public function getEmailRejectSubject(): string
     {
         return $this->getOptionalConfiguration('email_reject_subject', "Déclaration rejetée");
     }
 
-    public function getEmailToValidatetBody() :string
+    public function getEmailToValidatetBody(): string
     {
-        return $this->getOptionalConfiguration('email_tovalidate_body', "Bonjour,\r\nUne déclaration de {PERSON} pour la période {PERIOD} attend votre validation.\r\nMerci");
+        return $this->getOptionalConfiguration(
+            'email_tovalidate_body',
+            "Bonjour,\r\nUne déclaration de {PERSON} pour la période {PERIOD} attend votre validation.\r\nMerci"
+        );
     }
 
-    public function getEmailToValidateSubject() :string
+    public function getEmailToValidateSubject(): string
     {
         return $this->getOptionalConfiguration('email_tovalidate_subject', "Déclaration à valider");
     }
@@ -781,23 +790,87 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     /**
-     * @return array|object
+     * Retourne le chemin absolue du stockage des documents sans catégorie/non-privé (Activités de recherche).
+     *
+     * @return string
      * @throws OscarException
      */
-    public function getDocumentDropLocation()
+    public function getDocumentDropLocation(): string
     {
         static $documentDropLocation;
         if ($documentDropLocation == null) {
             $path = realpath($this->getConfiguration('paths.document_oscar'));
-            if (!file_exists($path)) {
-                throw new OscarException(_("L'emplacement de stockage des documents est manquant."));
-            }
-            if (!is_readable($path)) {
-                throw new OscarException(_("L'emplacement de stockage des documents est mal configuré."));
+            try {
+                FileSystemUtils::getInstance()->checkDirWritable($path);
+            } catch (\Exception $e) {
+                throw new OscarException(_("L'emplacement de stockage des documents est manquant/inaccessible."));
             }
             $documentDropLocation = $path;
         }
         return $documentDropLocation;
+    }
+
+    /**
+     * Retourne le chemin absolue du stockage des documents privés (Activités de recherche)
+     *
+     * @return string
+     * @throws OscarException
+     */
+    public function getDocumentPrivateLocation(): string
+    {
+        static $documentPrivateLocation;
+        if ($documentPrivateLocation == null) {
+            $name = 'private';
+            $path = $this->getDocumentDropLocation() . DIRECTORY_SEPARATOR . $name;
+            try {
+                FileSystemUtils::getInstance()->mkdir($path);
+            } catch (\Exception $e) {
+                throw new OscarException(_("L'emplacement de stockage des documents privé est inaccessible."));
+            }
+            $documentPrivateLocation = $path;
+        }
+        return $documentPrivateLocation;
+    }
+
+
+    public function getDocumentTabLocation(TabDocument $tab): string
+    {
+        static $documentTabLocation;
+        if ($documentTabLocation == null) {
+            $documentTabLocation = [];
+        }
+
+        $name = sprintf('tab_%s', $tab->getId());
+        if (!array_key_exists($name, $documentTabLocation)) {
+            $path = $this->getDocumentDropLocation() . DIRECTORY_SEPARATOR . $name;
+            try {
+                FileSystemUtils::getInstance()->mkdir($path);
+            } catch (\Exception $e) {
+                throw new OscarException(
+                    _(
+                        sprintf(
+                            "L'emplacement de stockage des documents de l'onglet '%s' est inaccessible.",
+                            $tab->getLabel()
+                        )
+                    )
+                );
+            }
+            $documentTabLocation[$name] = $path;
+        }
+        return $documentTabLocation[$name];
+    }
+
+    public function getDocumentRealpath(ContractDocument $document): string
+    {
+        $basePath = $this->getDocumentDropLocation();
+
+        if ($document->isPrivate()) {
+            $basePath = $this->getDocumentPrivateLocation();
+        } elseif (!is_null($document->getTabDocument())) {
+            $basePath = $this->getDocumentTabLocation($document->getTabDocument());
+        }
+
+        return $basePath . DIRECTORY_SEPARATOR . $document->generatePath();
     }
 
 

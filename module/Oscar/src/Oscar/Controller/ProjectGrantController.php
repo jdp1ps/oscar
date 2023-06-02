@@ -54,11 +54,14 @@ use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
+use Oscar\Traits\UseContractDocumentService;
+use Oscar\Traits\UseContractDocumentServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePCRUService;
@@ -90,10 +93,11 @@ use Zend\View\Renderer\PhpRenderer;
  */
 class ProjectGrantController extends AbstractOscarController implements UseNotificationService, UsePersonService,
                                                                         UseServiceContainer, UseProjectService,
-                                                                        UseSpentService, UsePCRUService
+                                                                        UseSpentService, UsePCRUService,
+                                                                        UseContractDocumentService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait, UseContractDocumentServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -1035,11 +1039,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Récupération des informations annexes
-            foreach ($activity->getPersons() as $activityPerson){
+            foreach ($activity->getPersons() as $activityPerson) {
                 $this->getPersonService()->personActivityRemove($activityPerson);
             }
 
-            foreach ($activity->getOrganizations() as $activityOrganization){
+            foreach ($activity->getOrganizations() as $activityOrganization) {
                 $this->getActivityService()->activityOrganizationRemove($activityOrganization);
             }
 
@@ -1511,31 +1515,36 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var Activity $entity */
         $entity = $this->getActivityService()->getActivityById($id, true);
 
-        // Check access génériques
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity);
-        $deletable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
-        $uploadable = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE);
-        $personShow = $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW);
-
         $out = $this->baseJsonResponse();
 
         // ID des tabs (onglets pour ranger les documents)
         $arrayTabs = [];
-        $entitiesTabs = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+        $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
 
         // Récupération des roles appli et des roles dans le contexte de l'activité et merge des roles
+//        echo "<pre>";
         $roles = $this->getOscarUserContextService()->getRolesPersonInActivity($this->getCurrentPerson(), $entity);
+//        echo "READ : ";
+//        var_dump($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity));
+//        echo "\nWRITE : ";
+//        var_dump($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity));
+//        echo "\nrôles : ";
+//        var_dump($roles);
         $rolesAppli = $this->getOscarUserContextService()->getBaseRoleId();
         $rolesMerged = array_merge($roles, $rolesAppli);
+        if( $this->getOscarUserContextService()->getAccessActivityDocument($entity)['read'] != true ){
+            return $this->getResponseUnauthorized();
+        }
 
         /** @var TabDocument $tabDocument */
         foreach ($entitiesTabs as $tabDocument) {
             // Traitement final attendu sur les rôles
-            $tabId = $tabDocument->getId();
-            if ($tabDocument->hasAccess($rolesMerged)) {
+            $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
+            if( $access['read'] ){
+                $tabId = $tabDocument->getId();
                 $arrayTabs[$tabId] = $tabDocument->toJson();
                 $arrayTabs[$tabId]["documents"] = [];
-                $arrayTabs[$tabId]['manage'] = $tabDocument->isManage($rolesMerged);
+                $arrayTabs[$tabId]['manage'] = $access['write'] === true;
             }
         }
 
@@ -1561,7 +1570,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             $this->getLoggerService()->info($doc->getFileName() . " - " . $doc->getTabDocument());
-            $manage = false;
+
+            if( !$this->getOscarUserContextService()->contractDocumentRead($doc) ){
+                continue;
+            }
+
+            $manage = $this->getOscarUserContextService()->contractDocumentWrite($doc);
+
             $docAdded = $doc->toJson();
             if (is_null($doc->getTabDocument())) {
                 if ($doc->isPrivate() === true) {
@@ -1590,10 +1605,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 'id' => $doc->getId()
                             ]
                         );
-                        $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
+                        $docAdded['urlPerson'] = false;/*$personShow && $doc->getPerson() ? $this->url()->fromRoute(
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]
-                        ) : false;
+                        ) : false;*/
                     }
                     $privateTab ["documents"] [] = $docAdded;
                 } else {
@@ -1604,7 +1619,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     continue;
                 }
                 if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
-                    if ($doc->getTabDocument()->isManage($rolesMerged)) {
+                    if( $arrayTabs[$doc->getTabDocument()->getId()]['manage'] ){
+//                    if ($doc->getTabDocument()->isManage($rolesMerged)) {
                         $docAdded['urlDelete'] = $this->url()->fromRoute(
                             'contractdocument/delete',
                             ['id' => $doc->getId()]
@@ -1621,22 +1637,22 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 'id' => $doc->getId()
                             ]
                         );
-                        $docAdded['urlPerson'] = $personShow && $doc->getPerson() ? $this->url()->fromRoute(
+                        $docAdded['urlPerson'] = false; /*$personShow && $doc->getPerson() ? $this->url()->fromRoute(
                             'person/show',
                             ['id' => $doc->getPerson()->getId()]
-                        ) : false;
+                        ) : false;*/
                     }
                     $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
                 }
             }
         } // End boucle
 
-        if ($privateTab) {
+        if ($privateTab && $privateTab['documents']) {
             $arrayTabs['private'] = $privateTab;
         }
-        if ($unclassifiedTab) {
-            $arrayTabs['unclassified'] = $unclassifiedTab;
-        }
+//        if ($unclassifiedTab) {
+//            $arrayTabs['unclassified'] = $unclassifiedTab;
+//        }
         $out['tabsWithDocuments'] = $arrayTabs;
         $out['idCurrentPerson'] = $this->getCurrentPerson()->getId();
         return new JsonModel($out);
@@ -2813,7 +2829,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $filterOrganizations[$organisation->getId()] = (string)$organisation;
                         }
 
-                        $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOneOfOrganizationsRoled($value1);
+                        $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOneOfOrganizationsRoled(
+                            $value1
+                        );
 
                         break;
 
@@ -2888,8 +2906,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $crit['val1Label'] = "Non déterminé";
                         $organization = null;
 
-                        $organizationId = (int) $value1;
-                        $roleId = (int) $value2;
+                        $organizationId = (int)$value1;
+                        $roleId = (int)$value2;
 
                         // Récupération de l'organisation
                         try {
@@ -2900,7 +2918,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
 
                         try {
-                            $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOrganizationAndRole($organizationId, $roleId);
+                            $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOrganizationAndRole(
+                                $organizationId,
+                                $roleId
+                            );
                         } catch (\Exception $e) {
                             $crit['error'] = $e->getMessage();
                         }

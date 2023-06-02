@@ -14,6 +14,7 @@ use Interop\Container\ContainerInterface;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
+use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
@@ -48,6 +49,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setActivityService($container->get(ProjectGrantService::class));
         $c->setProjectService($container->get(ProjectService::class));
         $c->setSpentService($container->get(SpentService::class));
+        $c->setContractDocumentService($container->get(ContractDocumentService::class));
         $c->setServiceContainer($container);
         return $c;
     }
