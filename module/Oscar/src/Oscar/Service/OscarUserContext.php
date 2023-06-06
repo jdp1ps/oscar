@@ -1218,25 +1218,27 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 }
                 $tmpActivities[$key] = $roles;
             } catch (\Exception $e) {
-                $this->getServiceLocator()->get('logger')->error($e->getMessage());
+                $this->getLoggerService()->error(
+                    "Un erreur est survenue lors du calcule des rôles pour '$person' dans '$activity' : " . $e->getMessage(
+                    )
+                );
             }
         }
 
         return $tmpActivities[$key];
     }
 
-    public function getPrivilegesOrganization(Organization $organization)
+    public function getPrivilegesOrganization(Organization $organization) :array
     {
         if (!$this->getCurrentPerson()) {
             return [];
         } else {
             $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
-            $privileges = $this->getPrivilegesRoles($roles);
-            return $privileges;
+            return $this->getPrivilegesRoles($roles);;
         }
     }
 
-    public function getPrivilegesActivity(Activity $entity)
+    public function getPrivilegesActivity(Activity $entity) :array
     {
         if (!$this->getCurrentPerson()) {
             return [];
@@ -1314,11 +1316,22 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /////////////////////////////////////////////////// ACCES DOCUMENTS
+
+    /**
+     * Calcule l'accès à un onglet de document.
+     * Un cache est créé pour la liste des rôles fournis en créant une clef globale indiquant
+     * si la lecture est autorisée de façon générale. Puis une clef par onglet avent le détails
+     * de l'accès (read / write).
+     *
+     * @param TabDocument|null $tabDocument
+     * @param array|null $roles
+     * @return false[]
+     */
     public function getAccessTabDocument(?TabDocument $tabDocument = null, ?array $roles = null): array
     {
         static $tmpAccessTabDocuments, $tmpAccessByRoles;
 
-        if( $roles === null ){
+        if ($roles === null) {
             $roles = $this->getBaseRoleId();
         }
         if ($tmpAccessByRoles === null) {
@@ -1337,18 +1350,19 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         $key = implode("---", $rolesSimplified);
 
         if (!array_key_exists($key, $tmpAccessByRoles)) {
+            $this->getLoggerService()->debug("# Calcule de l'accès à l'onglet '$key' > '$tabDocument'");
             $accessRole = [
                 'global' => ['read' => false]
             ];
             foreach ($tmpAccessTabDocuments as $id => $rolesAccess) {
                 $read = false;
                 $write = false;
-                if( array_intersect($rolesAccess['read'], $roles) ){
+                if (array_intersect($rolesAccess['read'], $roles)) {
                     $accessRole['global']['read'] = true;
                     $read = true;
                 }
-                if( array_intersect($rolesAccess['read'], $roles) ){
-                    $read = true;
+                if (array_intersect($rolesAccess['write'], $roles)) {
+                    $write = true;
                 }
                 $accessRole[$id] = [
                     'read' => $read,
@@ -1356,13 +1370,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 ];
             }
             $tmpAccessByRoles[$key] = $accessRole;
+            $this->getLoggerService()->debug(json_encode($accessRole));
         }
 
-        if( $tabDocument === null ){
+        if ($tabDocument === null) {
             return $tmpAccessByRoles[$key]['global'];
-        }
-        else {
-            if( array_key_exists($tabDocument->getId(), $tmpAccessByRoles[$key]) ){
+        } else {
+            if (array_key_exists($tabDocument->getId(), $tmpAccessByRoles[$key])) {
                 return $tmpAccessByRoles[$key][$tabDocument->getId()];
             }
             return [
@@ -1370,6 +1384,17 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 'write' => false
             ];
         }
+    }
+
+    /**
+     * Retourne les droits d'accès à un document.
+     *
+     * @param ContractDocument $contractDocument
+     * @return bool[]|false[]
+     */
+    public function getAccessDocument(ContractDocument $contractDocument): array
+    {
+        return $this->contractDocumentComputeAccess($contractDocument);
     }
 
 
@@ -1385,6 +1410,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
 
         if (!array_key_exists($contractDocument->getId())) {
+            $this->getLoggerService()->debug("ACCES DOC : " . $contractDocument->getFileName());
             // Document privé
             if ($contractDocument->isPrivate() && $contractDocument->getPersons()->contains(
                     $this->getCurrentPerson()
@@ -1392,10 +1418,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 $read = true;
                 $write = true;
             } elseif (!$contractDocument->hasTabDocument()) {
-                $read = $this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $contractDocument->getActivity());
-                $write = $this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $contractDocument->getActivity());
+                // TODO On test le privilège global, à retirer
+                $read = false; //$this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $contractDocument->getActivity());
+                $write = false; // $this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $contractDocument->getActivity());
             } else {
-                $rolesInActivity = $this->getRolesInActivity($this->getCurrentPerson(), $contractDocument->getActivity());
+                $rolesInActivity = $this->getRolesInActivity(
+                    $this->getCurrentPerson(),
+                    $contractDocument->getActivity()
+                );
                 $rolesInApp = $this->getBaseRoleId();
                 $roles = array_merge($rolesInApp, $rolesInActivity);
                 $access = $this->getAccessTabDocument($contractDocument->getTabDocument(), $roles);
@@ -1409,20 +1439,29 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $tmpContractDocuments[$contractDocument->getId()];
     }
 
+    /**
+     * Calcule l'accès aux documents d'une activité en se basant sur :
+     *  - Les rôles de l'utilisateur dans l'activité
+     *  - La configuration des onglets de document
+     *
+     * @param Activity $activity
+     * @return false[]
+     * @throws \Exception
+     */
     public function getAccessActivityDocument(Activity $activity): array
     {
         static $tmpActivityDocumentAccess;
-
-        $this->getLoggerService()->debug("Calcule d'accès aux documents dans '$activity'");
 
         if ($tmpActivityDocumentAccess === null) {
             $tmpActivityDocumentAccess = [];
         }
 
         if (!array_key_exists($tmpActivityDocumentAccess, $activity->getId())) {
+            $this->getLoggerService()->debug("# Calcule d'accès aux documents dans l'activité : '$activity'");
             $read = false;
             $write = false;
             if ($this->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity)) {
+                $this->getLoggerService()->debug(" - Voit l'activité OK");
                 $roles = array_merge(
                     $this->getBaseRoleId(),
                     $this->getRolesInActivity($this->getCurrentPerson(), $activity)
@@ -1440,11 +1479,21 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $tmpActivityDocumentAccess[$activity->getId()];
     }
 
+    /**
+     * Test l'accès en lecture au document.
+     *
+     * @param ContractDocument $contractDocument
+     * @return bool
+     */
     public function contractDocumentRead(ContractDocument $contractDocument): bool
     {
         return $this->contractDocumentComputeAccess($contractDocument)['read'];
     }
 
+    /**
+     * @param ContractDocument $contractDocument
+     * @return bool
+     */
     public function contractDocumentWrite(ContractDocument $contractDocument): bool
     {
         return $this->contractDocumentComputeAccess($contractDocument)['write'];
@@ -1472,9 +1521,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 // $this->getLoggerService()->info("hasPrivilege $privilege dans $ressource non global");
                 $privileges = $this->getPrivileges($ressource);
                 if ($privilege == Privileges::ACTIVITY_DOCUMENT_SHOW || $privilege == Privileges::ACTIVITY_DOCUMENT_MANAGE) {
-                    if( $ressource instanceof Activity ){
+                    if ($ressource instanceof Activity) {
                         $access = $this->getAccessActivityDocument($ressource);
-                        if( $privilege == Privileges::ACTIVITY_DOCUMENT_MANAGE ){
+                        if ($privilege == Privileges::ACTIVITY_DOCUMENT_MANAGE) {
                             return $access['write'] === true;
                         } else {
                             return $access['read'] === true;

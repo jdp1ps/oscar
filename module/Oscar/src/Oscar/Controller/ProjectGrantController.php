@@ -1522,17 +1522,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $arrayTabs = [];
         $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
 
-        // Récupération des roles appli et des roles dans le contexte de l'activité et merge des roles
-//        echo "<pre>";
         $roles = $this->getOscarUserContextService()->getRolesPersonInActivity($this->getCurrentPerson(), $entity);
-//        echo "READ : ";
-//        var_dump($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $entity));
-//        echo "\nWRITE : ";
-//        var_dump($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity));
-//        echo "\nrôles : ";
-//        var_dump($roles);
         $rolesAppli = $this->getOscarUserContextService()->getBaseRoleId();
         $rolesMerged = array_merge($roles, $rolesAppli);
+
         if( $this->getOscarUserContextService()->getAccessActivityDocument($entity)['read'] != true ){
             return $this->getResponseUnauthorized();
         }
@@ -1620,14 +1613,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     continue;
                 }
                 if (array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
+                    $docAdded['urlDownload'] = $this->url()->fromRoute(
+                        'contractdocument/download',
+                        ['id' => $doc->getId()]
+                    );
                     if( $arrayTabs[$doc->getTabDocument()->getId()]['manage'] ){
 //                    if ($doc->getTabDocument()->isManage($rolesMerged)) {
                         $docAdded['urlDelete'] = $this->url()->fromRoute(
                             'contractdocument/delete',
-                            ['id' => $doc->getId()]
-                        );
-                        $docAdded['urlDownload'] = $this->url()->fromRoute(
-                            'contractdocument/download',
                             ['id' => $doc->getId()]
                         );
                         $docAdded['urlReupload'] = $this->url()->fromRoute(

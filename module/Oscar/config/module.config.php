@@ -378,7 +378,7 @@ return array(
 
                 [
                     'controller' => 'TabDocument',
-                    'action' => ['index', 'new', 'edit', 'delete'],
+                    'action' => ['index', 'new', 'edit', 'delete', 'migrateDocuments'],
                     'roles' => ['user']
                 ],
 

@@ -17,23 +17,32 @@ use Jacksay\PhpFileExtension\PhpFileExtension;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
+use Oscar\Entity\ContractType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
 use Oscar\Entity\TabDocument;
+use Oscar\Entity\TabsDocumentsRepository;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
+use Oscar\Traits\UseActivityLogService;
+use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Utils\FileSystemUtils;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
-class ContractDocumentService implements UseOscarConfigurationService, UseEntityManager
+class ContractDocumentService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
+                                         UseActivityLogService
 {
-    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseActivityLogServiceTrait;
 
     /**
      * @param Activity $grant
@@ -42,7 +51,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      * @param string $information
      * @param integer|null $centaureId
      */
-    public function newDocument(Activity $grant, Person $person, $FileName, $information, $centaureId=null ){
+    public function newDocument(Activity $grant, Person $person, $FileName, $information, $centaureId = null)
+    {
         throw new \RuntimeException('Not implemented');
     }
 
@@ -52,7 +62,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     protected function getExtensionManager()
     {
         static $manager;
-        if( $manager === null ){
+        if ($manager === null) {
             $manager = new PhpFileExtension();
             (new DocumentDictionary())->loadExtensions($manager);
             (new ImageDictonary())->loadExtensions($manager);
@@ -62,7 +72,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $manager->addExtension('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx')
                 ->addExtension('application/vnd.ms-office', 'docx', 'Document Microsoft Office')
                 ->addExtension('text/csv', 'csv', 'Comma Separated Values');
-
         }
         return $manager;
     }
@@ -71,9 +80,10 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      * @param $filePath
      * @return string
      */
-    public function getMime( $filePath ){
+    public function getMime($filePath)
+    {
         static $mimeGetter;
-        if( $mimeGetter === null ){
+        if ($mimeGetter === null) {
             $mimeGetter = new MimeProvider();
         }
         return $mimeGetter->getMimeType($filePath);
@@ -83,11 +93,11 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      * @param $mime
      * @return bool|mixed
      */
-    public function checkMime( $mime )
+    public function checkMime($mime)
     {
         try {
             return $this->getExtensionManager()->getExtension($mime);
-        } catch( NotFoundExtension $e ){
+        } catch (NotFoundExtension $e) {
             return false;
         }
     }
@@ -98,23 +108,98 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      *
      * @return mixed
      */
-    public function getDropLocation(){
+    public function getDropLocation()
+    {
         return $this->getOscarConfigurationService()->getDocumentDropLocation();
     }
 
-    public function createDocument( $source, ContractDocument $doc )
+    /**
+     * @param ContractDocument $contractDocument
+     * @throws OscarException
+     */
+    public function deleteDocument(ContractDocument $contractDocument): void
+    {
+        $this->getLoggerService()->debug("# Suppression du document '$contractDocument'");
+
+        // Nom du document
+        $documentName = $contractDocument->getFileName();
+        $documentActivity = $contractDocument->getActivity();
+
+        // Path document pour déplacement
+        $documentLocation = $this->getOscarConfigurationService()->getDocumentDropLocation();
+
+        // Récupération du document et des ces différentes versions
+        $documents = $this->getContractDocumentRepository()->getDocumentsForFilenameAndActivity($contractDocument);
+
+        if (count($documents) == 0) {
+            throw new OscarException("Ce document n'existe plus");
+        }
+
+        foreach ($documents as $document) {
+            $documentPath = $documentLocation . DIRECTORY_SEPARATOR . $document->generatePath();
+
+            // Suppression du fichier
+            try {
+                FileSystemUtils::getInstance()->unlink($documentPath);
+            } catch (\Exception $exception) {
+                $this->getLoggerService()->error(
+                    "Suppression du fichier '$documentPath' impossible : " . $exception->getMessage()
+                );
+            }
+
+            // Suppression de l'enregistrement
+            try {
+                $this->getEntityManager()->remove($document);
+            } catch (\Exception $exception) {
+                $this->getLoggerService()->error(
+                    "Suppression de l'enregistrement DB du document impossible (remove) : " . $exception->getMessage()
+                );
+                throw $exception;
+            }
+
+            try {
+                $this->getEntityManager()->flush();
+            } catch (\Exception $exception) {
+                $this->getLoggerService()->error(
+                    "Suppression de l'enregistrement DB du document impossible (flush) : " . $exception->getMessage()
+                );
+                throw $exception;
+            }
+        }
+
+        $this->getActivityLogService()->addUserInfo(
+            sprintf(
+                "a supprimé le document '%s' dans l'activité %s.",
+                $documentName,
+                $documentActivity->log()
+            ),
+            'Activity',
+            $documentActivity->getId()
+        );
+    }
+
+    /**
+     * @param $source
+     * @param ContractDocument $doc
+     * @return bool
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function createDocument($source, ContractDocument $doc)
     {
         // Récupération de la version
-        $exists = $this->getEntityManager()->getRepository(ContractDocument::class)->findBy([
-            'fileName' => $doc->getFileName(),
-            'grant' => $doc->getGrant(),
-        ]);
-        $doc->setVersion(count($exists)+1);
+        $exists = $this->getEntityManager()->getRepository(ContractDocument::class)->findBy(
+            [
+                'fileName' => $doc->getFileName(),
+                'grant' => $doc->getGrant(),
+            ]
+        );
+        $doc->setVersion(count($exists) + 1);
         $realName = $doc->generatePath();
         $doc->setPath($realName);
         $directoryLocation = $this->getDropLocation();
 
-        if( @move_uploaded_file($source, $directoryLocation.$realName) ){
+        if (@move_uploaded_file($source, $directoryLocation . $realName)) {
             $this->getEntityManager()->persist($doc);
             $this->getEntityManager()->flush($doc);
             return true;
@@ -123,12 +208,26 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         }
     }
 
+    public function migrateDocumentsTypeToTab(int $typeDocumentId, int $tabDocumentId): void
+    {
+        $typeDocument = $this->getContractDocumentType($typeDocumentId);
+        $tabDocument = $this->getContractTabDocument($tabDocumentId);
+        $this->getContractDocumentRepository()->migrateUntabledDocument( $typeDocumentId, $tabDocumentId);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// REPOSITORY
+    protected function getContractDocumentRepository(): ContractDocumentRepository
+    {
+        return $this->getEntityManager()->getRepository(ContractDocument::class);
+    }
+
     /**
      * @return TypeDocument[]
      */
     public function getContractDocumentTypes(): array
     {
-        return $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
+        return $this->getContractDocumentRepository()->getTypes();
     }
 
     /**
@@ -136,24 +235,23 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      */
     public function getContractTabDocuments(): array
     {
-        return $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+        return $this->getContractDocumentRepository()->getTabDocuments();
+    }
+
+
+    public function getContractTabDocument(int $id): ?TabDocument
+    {
+        return $this->getContractDocumentRepository()->getTabDocumentById($id);
     }
 
     /**
      * @return TypeDocument
      */
-    public function getContractDocumentType( $idDocumentType )
+    public function getContractDocumentType(int $idDocumentType): TypeDocument
     {
-        return $this->getEntityManager()->getRepository(TypeDocument::class)->find($idDocumentType);
+        return $this->getContractDocumentRepository()->getType($idDocumentType);
     }
 
-    /**
-     * @return ContractDocumentRepository
-     */
-    protected function getContractDocumentRepository()
-    {
-        return $this->getEntityManager()->getRepository(ContractDocument::class);
-    }
 
     /**
      * @param int $id
@@ -161,7 +259,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      * @return ContractDocument|null
      * @throws OscarException
      */
-    public function getDocument( int $id, bool $throw = false )
+    public function getDocument(int $id, bool $throw = false)
     {
         return $this->getContractDocumentRepository()->getDocument($id, $throw);
     }

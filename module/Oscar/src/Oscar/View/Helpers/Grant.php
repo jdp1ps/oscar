@@ -9,6 +9,7 @@
 namespace Oscar\View\Helpers;
 
 
+use Oscar\Entity\ContractDocument;
 use Oscar\Service\OscarUserContext;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
@@ -47,6 +48,11 @@ class Grant extends AbstractHtmlElement implements UseOscarUserContextService
 
     public function getRolesPrincipauxOrganization(){
         return $this->getOscarUserContextService()->getRolesOrganisationLeader();
+    }
+
+    public function hasDocumentAccess( ContractDocument $contractDocument ):bool
+    {
+        return $this->getOscarUserContextService()->getAccessDocument($contractDocument)['read'] === true;
     }
 
     /**

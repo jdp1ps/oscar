@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
  * Class TabDocument
  * @package Oscar\Entity
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="Oscar\Entity\TabsDocumentsRepository")
  */
 class TabDocument
 {

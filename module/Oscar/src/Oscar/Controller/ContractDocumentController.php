@@ -105,10 +105,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     protected function getDropLocation(ContractDocument $document = null)
     {
-        if (!is_null($document)){
+        if (!is_null($document)) {
             return $this->getOscarConfigurationService()->getDocumentRealpath($document);
-        }else{
-            return $this->getContractDocumentService()->getDropLocation();
+        } else {
+            return $this->getOscarConfigurationService()->getDocumentDropLocation();
         }
     }
 
@@ -162,84 +162,24 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function deleteAction()
     {
-
         $document = $this->getContractDocumentService()->getDocument(
-            $this->params()->fromQuery('id'), true
+            $this->params()->fromRoute('id'),
+            true
         );
 
-        // Path document pour déplacement
-        $pathsConfig = $this->getOscarConfigurationService()->getConfiguration("paths");
-        $pathDocumentsConfig = $pathsConfig["document_oscar"];
-        $sourceDocumentPath = "";
-        $pathDestination = $pathDocumentsConfig."documentsRemoved/";
+        $access = $this->getOscarUserContextService()->getAccessDocument($document);
 
-        $em = $this->getEntityManager()->getRepository(ContractDocument::class);
-        /** @var ContractDocument $document */
-        $document = $em->find($this->params()->fromRoute('id'));
-        if (!$document) {
-            $this->getResponseNotFound("Ce document n'existe plus...");
-        }
-        $activity = $document->getGrant();
-        if (!$activity) {
-            $this->getResponseInternalError("Ce document n'est plus associé à une activité, faites une demande de suppression auprès de l'administrateur.");
-        }
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
-
-        // Récupération (Attention Cas spécifique documents privés)
-        $documents = $em->createQueryBuilder('d')->select('d');
-        $paramsQuery = [
-            'fileName' => $document->getFileName(),
-            'grant'    => $document->getGrant(),
-        ];
-        // Documents privé
-        if ($document->isPrivate() === true) {
-            $paramsQuery ['private'] = true;
-            $documents->where(
-                'd.fileName = :fileName 
-                AND d.grant = :grant
-                AND d.private = :private'
-            );
+        if ($access['write'] === true) {
+            $activity = $document->getActivity();
+            try {
+                $this->getContractDocumentService()->deleteDocument($document);
+            } catch (Exception $exception) {
+                throw new OscarException("Impossible de supprimer le document : " . $exception->getMessage());
+            }
+            $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
         } else {
-            if (!is_null($document->getTabDocument())) {
-                $paramsQuery ['tabDocument'] = $document->getTabDocument();
-                $documents->where(
-                    'd.fileName = :fileName 
-                    AND d.grant = :grant 
-                    AND d.tabDocument = :tabDocument'
-                );
-            } else {
-                $paramsQuery ['private'] = false;
-                $documents->where(
-                    'd.fileName = :fileName 
-                    AND d.grant = :grant
-                    AND d.private = :private'
-                );
-            }
+            return $this->getResponseUnauthorized("Vous ne pouvez pas supprimer ce document");
         }
-        $results = $documents->setParameters($paramsQuery)->getQuery()->getResult();
-
-        /** @var ?ContractDocument $doc **/
-        foreach ($results as $doc) {
-            if ($doc->isPrivate()){
-                $sourceDocumentPath = "private/".$doc->getPath();
-            }elseif(!is_null($doc->getTabDocument())){
-                $sourceDocumentPath = "tab_".$doc->getTabDocument()->getId()."/".$doc->getPath();
-            }
-            $this->createFolder($pathDestination);
-            $pathDestination = $pathDestination.$doc->getPath().microtime();
-            rename($pathDocumentsConfig.$sourceDocumentPath, $pathDestination);
-
-            $this->getEntityManager()->remove($doc);
-            $this->getEntityManager()->flush();
-        }
-
-        $this->getActivityLogService()->addUserInfo(
-            sprintf("a supprimé le document '%s' dans l'activité %s.", $document, $document->getGrant()->log()),
-            'Activity',
-            $activity->getId()
-        );
-
-        $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
     }
 
 
@@ -255,9 +195,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $request = $this->getRequest();
         if ($request->isPost()) {
             // Récup document
-            /** @var ContractDocument $document */
-            $document = $this->getEntityManager()->getRepository(ContractDocument::class)->find($request->getPost('documentId'));
-            $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $document->getGrant());
+            $document = $this->getContractDocumentService()->getDocument($request->getPost('documentId'));
+            if( !($this->getOscarUserContextService()->getAccessDocument($document)['write'] === true) ){
+                return $this->getResponseUnauthorized("Vous ne pouvez pas modifier ce document");
+            }
 
             $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($request->getPost('type'));
             if (!$type) {
@@ -267,12 +208,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $idsPersons = (trim($request->getPost('persons')) !== "") ? explode(",", $request->getPost('persons')) : [];
             // Passage du doc en non privé ou else -> passage en privé
             if (false === boolval($privateDocument)) {
-                $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find($request->getPost('tabDocument'));
+                $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find(
+                    $request->getPost('tabDocument')
+                );
                 $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, $tabDocument, $type, false);
                 if (false === $succesManageDocuments) {
                     $this->getResponseBadRequest("La gestion des documents associés a échouée !");
                 }
-
             } else {
                 $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, null, $type, true);
                 if (false === $succesManageDocuments) {
@@ -294,16 +236,28 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function uploadAction()
     {
-
         $datas = [
             'informations' => '',
-            'type'         => 0,
-            'error'        => '',
+            'type' => 0,
+            'error' => '',
         ];
         $idActivity = $this->params()->fromRoute('idactivity');
+        $activity = $this->getActivityService()->getActivityById($idActivity);
         $idTab = $this->params()->fromRoute('idtab') === "private" ? null : $this->params()->fromRoute('idtab');
-        $activity = $this->getActivityService()->getGrant($idActivity);
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_MANAGE, $activity);
+
+        if ($idTab === 'private' && !$this->getOscarUserContextService()->hasPrivileges(
+                Privileges::ACTIVITY_DOCUMENT_MANAGE,
+                $activity
+            )) {
+            return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
+        } else {
+            $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
+            if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
+                return $this->getResponseUnauthorized(
+                    "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
+                );
+            }
+        }
 
         try {
             // Get ID doc pour remplacement ou ajout
@@ -338,11 +292,16 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                         if ($infos['error']) {
                             $datas['error'] = $infos['error'];
                         } else {
-                            $this->redirect()->toRoute('contract/show', ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]);
+                            $this->redirect()->toRoute(
+                                'contract/show',
+                                ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]
+                            );
                         }
                         break;
                     default:
-                        throw new Exception("Erreur arrivé dans le cas par défaut switch case ? -> Méthode : " . __METHOD__ . " Fichier : " . __FILE__ . " Ligne : " . __LINE__);
+                        throw new Exception(
+                            "Erreur arrivé dans le cas par défaut switch case ? -> Méthode : " . __METHOD__ . " Fichier : " . __FILE__ . " Ligne : " . __LINE__
+                        );
                         break;
                 }
             } else {
@@ -367,11 +326,18 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $doc = $this->getContractDocumentService()->getDocument($idDoc);
 
         $activity = $doc->getGrant();
-        // Modifier les tests d'accès aux documents
-        $this->getOscarUserContext()->check(Privileges::ACTIVITY_DOCUMENT_SHOW, $activity);
+
+        if( !($this->getOscarUserContextService()->getAccessDocument($doc)['read'] == true) ){
+            return $this->getResponseUnauthorized("Vous n'avez pas accès à ce document");
+        }
 
         $sourceDoc = $this->getDropLocation($doc);
-        $this->getActivityLogService()->addUserInfo(sprintf("a téléchargé le document '%s'", $doc), $this->getDefaultContext(), $idDoc);
+
+        $this->getActivityLogService()->addUserInfo(
+            sprintf("a téléchargé le document '%s'", $doc),
+            $this->getDefaultContext(),
+            $idDoc
+        );
 
         $filename = $doc->getFileName();
 
@@ -397,8 +363,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @return bool
      * @throws OscarException
      */
-    private function manageDocsInTab(ContractDocument $document, array $persons, ?TabDocument $tabDocument, ?TypeDocument $type, bool $docToPrivate): bool
-    {
+    private function manageDocsInTab(
+        ContractDocument $document,
+        array $persons,
+        ?TabDocument $tabDocument,
+        ?TypeDocument $type,
+        bool $docToPrivate
+    ): bool {
         $isSuccess = false;
         $activity = $document->getActivity();
         $pathDocumentsConfig = $this->getOscarConfigurationService()->getDocumentDropLocation();
@@ -409,7 +380,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         // Params pour la requete de base
         $paramsQuery = [
             'fileName' => $document->getFileName(),
-            'grant'    => $activity,
+            'grant' => $activity,
         ];
         if (true === $document->isPrivate()) {
             // Documents privés
@@ -445,7 +416,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         foreach ($result as $doc) {
             //Passage d'un document en privée
             if (true === $docToPrivate) {
-                $pathSource = (!is_null($doc->getTabDocument())) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument()->getId() . '/' . $doc->getPath() : $pathDocumentsConfig;
+                $pathSource = (!is_null($doc->getTabDocument())) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument(
+                    )->getId() . '/' . $doc->getPath() : $pathDocumentsConfig;
                 $pathDestination = $pathDocumentsConfig . 'private/' . $doc->getPath();
                 $destinationFolder = $pathDocumentsConfig . 'private';
                 $this->createFolder($destinationFolder);
@@ -457,7 +429,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 if ($doc->isPrivate()) {
                     $pathSource = $pathDocumentsConfig . 'private/' . $doc->getPath();
                 } else {
-                    $pathSource = (!is_null($doc->getTabDocument())) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument()->getId() . '/' . $doc->getPath() : $pathDocumentsConfig . '/' . $doc->getPath();
+                    $pathSource = (!is_null(
+                        $doc->getTabDocument()
+                    )) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument()->getId() . '/' . $doc->getPath(
+                        ) : $pathDocumentsConfig . '/' . $doc->getPath();
                 }
                 $pathDestination = $pathDocumentsConfig . 'tab_' . $tabDocument->getId() . '/' . $doc->getPath();
                 $destinationFolder = $pathDocumentsConfig . 'tab_' . $tabDocument->getId();
@@ -500,11 +475,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @param string $folder
      * @return void
      */
-    private function createFolder(string $folder){
-        if (!is_dir($folder)){
+    private function createFolder(string $folder)
+    {
+        if (!is_dir($folder)) {
             mkdir($folder);
         }
     }
+
     public function showAction()
     {
         return $this->getResponseNotImplemented();
