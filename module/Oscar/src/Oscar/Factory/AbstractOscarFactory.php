@@ -32,6 +32,7 @@ use Oscar\Traits\UseAdministrativeDocumentService;
 use Oscar\Traits\UseContractDocumentService;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseOrganizationService;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarUserContextService;

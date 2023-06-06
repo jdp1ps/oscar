@@ -863,13 +863,6 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getDocumentRealpath(ContractDocument $document): string
     {
         $basePath = $this->getDocumentDropLocation();
-
-        if ($document->isPrivate()) {
-            $basePath = $this->getDocumentPrivateLocation();
-        } elseif (!is_null($document->getTabDocument())) {
-            $basePath = $this->getDocumentTabLocation($document->getTabDocument());
-        }
-
         return $basePath . DIRECTORY_SEPARATOR . $document->generatePath();
     }
 

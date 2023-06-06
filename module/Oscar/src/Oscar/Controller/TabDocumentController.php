@@ -17,20 +17,27 @@ use Oscar\Entity\Role;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TabsDocumentsRolesRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Form\MigrateDocumentForm;
 use Oscar\Form\TabDocumentForm;
 use Oscar\Provider\Privileges;
+use Oscar\Traits\UseContractDocumentService;
+use Oscar\Traits\UseContractDocumentServiceTrait;
 use Oscar\Utils\FileSystemUtils;
 use Zend\Http\Response;
 use Zend\View\Model\ViewModel;
 
-class TabDocumentController extends AbstractOscarController
+class TabDocumentController extends AbstractOscarController implements UseContractDocumentService
 {
+    use UseContractDocumentServiceTrait;
+
     /**
      * Accueil Page gestion onglets de documents
      * @return array
      */
-    public function indexAction():array
+    public function indexAction(): array
     {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
         return [
             'entities' => $this->getEntityManager()->getRepository(TabDocument::class)->findAll()
         ];
@@ -43,8 +50,10 @@ class TabDocumentController extends AbstractOscarController
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function newAction():ViewModel
+    public function newAction(): ViewModel
     {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
         $roles = $this->getEntityManager()->getRepository(Role::class)->findAll();
         $form = new TabDocumentForm($roles, $this->getEntityManager());
         $request = $this->getRequest();
@@ -63,11 +72,13 @@ class TabDocumentController extends AbstractOscarController
             }
         }
 
-        $view = new ViewModel([
-            'entity' => $entity,
-            'form' => $form,
-            'roles' => $roles,
-        ]);
+        $view = new ViewModel(
+            [
+                'entity' => $entity,
+                'form' => $form,
+                'roles' => $roles,
+            ]
+        );
 
         $view->setTemplate('oscar/tab-document/form.phtml');
         return $view;
@@ -81,9 +92,9 @@ class TabDocumentController extends AbstractOscarController
      * @throws OptimisticLockException
      * @throws OscarException
      */
-    public function deleteAction():Response
+    public function deleteAction(): Response
     {
-        $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 
         // TODO Check avant les docs qui sont raccrochés à ce tabsDocumentsRoles avant de supprimer comme un bourrin
         $id = $this->params()->fromRoute('id');
@@ -105,7 +116,7 @@ class TabDocumentController extends AbstractOscarController
                     . DIRECTORY_SEPARATOR . $document->getFileName();
                 try {
                     FileSystemUtils::getInstance()->rename($fileFrom, $fileTo);
-                } catch (\Exception $exception){
+                } catch (\Exception $exception) {
                     throw new \Exception("Oscar n'est pas parvenu à déplacer un des documents");
                 }
                 $document->setTabDocument(null);
@@ -113,16 +124,43 @@ class TabDocumentController extends AbstractOscarController
             }
 
             $tabsDocumentsRoles = $tabDocument->getTabsDocumentsRoles();
-            foreach ($tabsDocumentsRoles as $tabDocumentRole){
+            foreach ($tabsDocumentsRoles as $tabDocumentRole) {
                 $this->getEntityManager()->remove($tabDocumentRole);
             }
 
             $this->getEntityManager()->remove($tabDocument);
             $this->getEntityManager()->flush();
             return $this->redirect()->toRoute('tabdocument');
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException("Oscar n'a pas pu supprimer le type d'onglet' : " . $e->getMessage());
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function migrateDocumentsAction() :array
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+        $form = new MigrateDocumentForm($this->getEntityManager());
+
+        if($this->getRequest()->isPost()){
+            $form->setData($this->getRequest()->getPost());
+            if ($form->isValid()) {
+                $documentTypeId = (int)$form->getData()['documentType'];
+                $tabDocumentId = (int)$form->getData()['tabDocument'];
+                if( $documentTypeId > 0 && $tabDocumentId > 0 ){
+                    $this->getContractDocumentService()->migrateDocumentsTypeToTab($documentTypeId, $tabDocumentId);
+                    // Traitement
+                } else {
+                    return $this->getResponseBadRequest("Donnèes transmises incorrecte");
+                }
+            }
+        }
+        return [
+            'form' => $form
+        ];
     }
 
     /**
@@ -132,9 +170,11 @@ class TabDocumentController extends AbstractOscarController
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function editAction():ViewModel
+    public function editAction(): ViewModel
     {
-        $entity = $this->getEntityManager()->getRepository(TabDocument::class)->find($this->params()->fromRoute('id'));
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+        $entity = $this->getEntityManager()->getRepository(TabDocument::class)
+            ->find($this->params()->fromRoute('id'));
         $roles = $this->getEntityManager()->getRepository(Role::class)->findAll();
         $form = new TabDocumentForm($roles, $this->getEntityManager());
         $request = $this->getRequest();
@@ -151,11 +191,13 @@ class TabDocumentController extends AbstractOscarController
             }
         }
 
-        $view = new ViewModel([
-            'entity' => $entity,
-            'form' => $form,
-            'roles' => $roles,
-        ]);
+        $view = new ViewModel(
+            [
+                'entity' => $entity,
+                'form' => $form,
+                'roles' => $roles,
+            ]
+        );
 
         $view->setTemplate('oscar/tab-document/form.phtml');
         return $view;

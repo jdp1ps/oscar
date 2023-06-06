@@ -179,11 +179,11 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
 
         <?php if (count($activity->getDocuments()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $activity)): ?>
         <div class="documents">
-            <p class="text-highlight"><i class="icon-book grey"></i>Documents :</p>
+            <p class="text-highlight"><i class="icon-book grey"></i>Documents <?= count($activity->getDocuments()) ?> :</p>
             <ul>
             <?php
             /** @var \Oscar\Entity\ContractDocument $document */
-            foreach( $activity->getDocuments() as $document ): ?>
+            foreach( $activity->getDocuments() as $document ): if (!$this->grant()->hasDocumentAccess($document)) { continue; }?>
                 <li>
                     <a href="<?= $this->url('contractdocument/download', ['id' => $document->getId()]) ?>">
                     <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>

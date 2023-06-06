@@ -5,6 +5,7 @@
  * Date: 12/12/18
  * Time: 11:02
  */
+
 ?>
 <div class="container">
     <header>
@@ -30,11 +31,15 @@
                     <i class="icon-cog"></i>
                     Options
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/parameters') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/parameters') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
 
             </h3>
             <p>Options générales de l'application</p>
@@ -50,20 +55,28 @@
             <ul>
                 <li>
                     <strong>Messages de relance</strong>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/messages') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                    <?php else: ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                        <a href="<?= $this->url('administration/messages') ?>" class="right"><i
+                                    class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php
+                    else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                 </li>
                 <li>
                     <strong>Régles de relance</strong>
                     <small>Liste blanche et liste noire</small>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/listdeclarers') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                    <?php else: ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                        <a href="<?= $this->url('administration/listdeclarers') ?>" class="right"><i
+                                    class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php
+                    else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                 </li>
             </ul>
             <p>Messages et formules</p>
@@ -76,11 +89,15 @@
                     <i class="icon-docs"></i>
                     Sections des documents publiques
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCPUBSEC_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/documents-sections') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCPUBSEC_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/documents-sections') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Configuration des sections de document (documents publiques)</p>
         </article>
@@ -111,11 +128,16 @@
                     <i class="icon-cube"></i>
                     Type d'activité
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('activitytype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)): ?>
+                    <a href="<?= $this->url('activitytype') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Configurer"
+                        ) ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Correpond (généralement) au <strong>type de contrat/convention</strong></p>
         </article>
@@ -126,13 +148,18 @@
                     <i class="icon-calendar"></i>
                     Type de jalon
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('datetype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MILESTONETYPE_MANAGE)): ?>
+                    <a href="<?= $this->url('datetype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?>
+                    </a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
-            <p>Permet de gérer les jalons disponibles dans les activités de recherche ainsi que leur comportement : système de validation, fréquence des rappels</p>
+            <p>Permet de gérer les jalons disponibles dans les activités de recherche ainsi que leur comportement :
+                système de validation, fréquence des rappels</p>
         </article>
 
         <!-- Onglet des documents -->
@@ -142,25 +169,25 @@
                     <i class="icon-cube"></i>
                     Type d'onglet documents
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                    <a href="<?= $this->url('tabdocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                    <h5>Emplacements</h5>
-                    <ul>
-                        <?php foreach ($docLocations as $infos): ?>
-                            <li>
-                                <strong><?= $infos['label'] ?></strong> :
-                                <code><?= $infos['path'] ?></code>
-                                <?php if( $infos['error'] ): ?>
-                                <em class="text-danger"><?= $infos['error'] ?></em>
-                                <?php endif; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                    <a href="<?= $this->url('tabdocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?>
+                    </a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
-            <p>Permet de gérer les onglets des documents au sein des activités de recherche avec leur accès en fonction des rôles</p>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                <a href="<?= $this->url('tabdocument/migrate') ?>" class="btn btn-primary">
+                    <i class="icon-cog"></i><?= _("Migration des documents hors-onglet") ?>
+                </a>
+            <?php endif; ?>
+
+            <p>Permet de gérer les onglets des documents au sein des activités de recherche avec leur accès en fonction
+                des rôles</p>
         </article>
 
         <article class="card">
@@ -169,11 +196,16 @@
                     <i class="icon-euro"></i>
                     TVA
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_TVA_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/tva') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_TVA_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/tva') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Configurer"
+                        ) ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet de configurer les TVAs disponibles.</p>
         </article>
@@ -184,13 +216,18 @@
                     <i class="icon-docs"></i>
                     Type de document
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/typedocument') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
-            <p>Permet de gérer les types de document disponibles dans les activités de recherche lors du dépôt d'un document.</p>
+            <p>Permet de gérer les types de document disponibles dans les activités de recherche lors du dépôt d'un
+                document.</p>
         </article>
 
         <article class="card">
@@ -199,11 +236,15 @@
                     <i class="icon-building-filled"></i>
                     Type d'organisation
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/organizationtype') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ORGANIZATIONTYPE_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/organizationtype') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet de gérer les types d'organisation proposés pour qualifier une organisation.</p>
         </article>
@@ -214,11 +255,15 @@
                     <i class="icon-tags"></i>
                     Disciplines
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/discipline') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/discipline') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet de gérer les disciplines disponibles.</p>
         </article>
@@ -229,11 +274,15 @@
                     <i class="icon-tags"></i>
                     Numérotation
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NUMEROTATION_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/numerotation') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NUMEROTATION_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/numerotation') ?>" class="right"><i
+                                class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet de gérer les numérotations disponibles dans l'écran d'édition des activités.</p>
         </article>
@@ -244,18 +293,25 @@
                     <i class="icon-euro"></i>
                     Type de dépense
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                    <a href="<?= $this->url('depense/manage') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE)): ?>
+                    <a href="<?= $this->url('depense/manage') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Configurer"
+                        ) ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Gestion des types de dépense.</p>
-            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE)): ?>
                 <a href="<?= $this->url('administration/accounts') ?>" class="btn btn-primary"><i class="icon-cog"></i>
                     <?= _("Gérer les masses des comptes utilisés") ?>
                 </a>
-            <?php endif; ?>
+            <?php
+            endif; ?>
 
         </article>
 
@@ -265,16 +321,23 @@
                     <i class="icon-flag"></i>
                     Pays (ISO 3166)
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/countries') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/countries') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Voir"
+                        ) ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <div class="alert alert-info">
                 Charger les informations depuis le référentiel :
                 <form action="<?= $this->url('administration/countries') ?>" method="post">
-                    <button type="submit" name="action" value="update-countries-3166" class="btn btn-default">Actualiser les pays</button>
+                    <button type="submit" name="action" value="update-countries-3166" class="btn btn-default">Actualiser
+                        les pays
+                    </button>
                 </form>
             </div>
             <p>Référenciel des pays proposés dans la fiche organisation</p>
@@ -291,14 +354,17 @@
                 <strong>
                     <i class="icon-signal"></i>
                     Status : OSCARWORKER</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
                     <a href="<?= $this->url('administration/oscarworker') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <small><i class="icon-lock"></i> Privilège insuffisant</small>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Affichage des <strong>logs</strong> du <em>OscarWorker</em>.</p>
         </article>
@@ -308,14 +374,17 @@
                 <strong>
                     <i class="icon-building-filled"></i>
                     Fusion des organisations</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
                     <a href="<?= $this->url('organization/fusion') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <small><i class="icon-lock"></i> Privilège insuffisant</small>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Procédure de fusion des organisations</p>
         </article>
@@ -325,14 +394,17 @@
                 <strong>
                     <i class="icon-building-filled"></i>
                     Scission des organisations</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::ORGANIZATION_EDIT)): ?>
                     <a href="<?= $this->url('organization/scission') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <small><i class="icon-lock"></i> Privilège insuffisant</small>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Procédure de scission des organisations</p>
         </article>
@@ -342,14 +414,17 @@
                 <strong>
                     <i class="icon-cubes"></i>
                     Afficher les projets vides</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_INDEX)): ?>
                     <a href="<?= $this->url('project/empty') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <small><i class="icon-lock"></i> Privilège insuffisant</small>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet des gérer les projets vides pour éventuellement les supprimer</p>
         </article>
@@ -359,16 +434,21 @@
                 <strong>
                     <i class="icon-calendar"></i>
                     Gestion des déclarations</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE)): ?>
                     <a href="<?= $this->url('timesheet/declarations') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
-            <p>Cette interface permet de visualiser les déclarations et leur état. Elle permet également de <strong>gérer les validateurs</strong> et de <strong>modifier la répartition horaire du déclarant</strong> en cas de problème. Enfin, elle permet d'annuler un procédure de validation.</p>
+            <p>Cette interface permet de visualiser les déclarations et leur état. Elle permet également de <strong>gérer
+                    les validateurs</strong> et de <strong>modifier la répartition horaire du déclarant</strong> en cas
+                de problème. Enfin, elle permet d'annuler un procédure de validation.</p>
         </article>
 
         <article class="card xs">
@@ -376,14 +456,17 @@
                 <strong>
                     <i class="icon-calendar"></i>
                     Retard de déclaration</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_VALIDATION_MANAGE)): ?>
                     <a href="<?= $this->url('timesheet/highdelay') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Cette interface permet de visualiser les retards de déclaration.</p>
         </article>
@@ -393,14 +476,17 @@
                 <strong>
                     <i class="icon-docs"></i>
                     Gestion des documents téléversés</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE)): ?>
                     <a href="<?= $this->url('contractdocument') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>Liste des documents téléversés dans les activités de recherche.</p>
         </article>
@@ -410,17 +496,21 @@
                 <strong>
                     <i class="icon-plug"></i>
                     Synchronisation des données (connectors)</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_CONNECTOR_ACCESS)): ?>
                     <a href="<?= $this->url('administration/connectors_home') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
-                Affiche la liste des connecteurs configurés dans <?= _('OScar') ?> pour vérifier s'ils sont bien configurés. Permet également de les éxécuter manuellement depuis l'interface.
+                Affiche la liste des connecteurs configurés dans <?= _('OScar') ?> pour vérifier s'ils sont bien
+                configurés. Permet également de les éxécuter manuellement depuis l'interface.
             </p>
         </article>
 
@@ -429,20 +519,24 @@
                 <strong>
                     <i class="icon-cw-outline"></i>
                     Reconstruire l'index de recherche des activités</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SEARCH_BUILD)): ?>
                     <a href="<?= $this->url('administration/activity_index') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Exécuter") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
                 Lance le reconstruction de l'index de recherche depuis l'interface
             </p>
             <p class="alert-warning alert">
-                Cette opération est coûteuse en ressource et peut dépasser la durée d'execution autorisée. Il est préférable de réaliser cette opération de amintenance depuis l'utilitaire en ligne de commande :
+                Cette opération est coûteuse en ressource et peut dépasser la durée d'execution autorisée. Il est
+                préférable de réaliser cette opération de amintenance depuis l'utilitaire en ligne de commande :
                 <br>$ <code>php bin/oscar.php activity:search-build</code>
             </p>
         </article>
@@ -457,18 +551,28 @@
                     <i class="icon-beaker"></i>
                     PCRU
                 </strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                    <a href="<?= $this->url('administration/pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                <?php else: ?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/pcru') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Configurer"
+                        ) ?></a>
+                <?php
+                else: ?>
                     <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
-            <p>Le modules PCRU permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du CNRS</strong></p>
+            <p>Le modules PCRU permet de configurer l'envois automatique des contrats signés au système <strong>PCRU du
+                    CNRS</strong></p>
             <hr>
             <h4 style="font-weight: bold">Référentiels PCRU</h4>
             <div class="alert alert-info">
-            <p>Les référentiels ci-dessous sont <strong>obligatoires</strong> si vous utilisez PCRU, mais rien ne vous empèche de les utiliser dans la qualification des activités pour compléter les informations.</p>
-            <p>Vous pouvez actualiser les référentiels en cliquant ici <a href="?action=pcru-referentiel-update" class="btn btn-success">Mettre à jour les référentiels</a></p>
+                <p>Les référentiels ci-dessous sont <strong>obligatoires</strong> si vous utilisez PCRU, mais rien ne
+                    vous empèche de les utiliser dans la qualification des activités pour compléter les informations.
+                </p>
+                <p>Vous pouvez actualiser les référentiels en cliquant ici <a href="?action=pcru-referentiel-update"
+                                                                              class="btn btn-success">Mettre à jour les
+                        référentiels</a></p>
 
             </div>
             <ul>
@@ -477,25 +581,34 @@
                         <i class="icon-tags"></i>
                         Correspondance des types de contrat
                     </strong>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/contrat-type-pcru') ?>" class="right"><i class="icon-cog"></i><?= _("Configurer") ?></a>
-                    <?php else: ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                        <a href="<?= $this->url('administration/contrat-type-pcru') ?>" class="right"><i
+                                    class="icon-cog"></i><?= _("Configurer") ?></a>
+                    <?php
+                    else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                     <br><small>Correspondance entre les types d'activités Oscar et les types de contrat PCRU</small>
                 </li>
                 <li>
                     <strong>
                         <i class="icon-tags"></i>
-                    Référenciel des pôles de compétitivité :
+                        Référenciel des pôles de compétitivité :
                     </strong>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
-                    <?php else: ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE)): ?>
+                        <a href="<?= $this->url('administration/poles-competitivite') ?>" class="right"><i
+                                    class="icon-cog"></i><?= _("Voir") ?></a>
+                    <?php
+                    else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                     <br>
-                    <small>La liste des pôles de compétitivité est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                    <small>La liste des pôles de compétitivité est utilisée dans la fiche activité, elle est fournit par
+                        le CNRS.</small>
                 </li>
 
                 <li>
@@ -503,13 +616,18 @@
                         <i class="icon-tags"></i>
                         Référenciel des sources de financement
                     </strong>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ): ?>
-                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i class="icon-cog"></i><?= _("Voir") ?></a>
-                    <?php else: ?>
+                    <?php
+                    if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE)): ?>
+                        <a href="<?= $this->url('administration/sources-financement') ?>" class="right"><i
+                                    class="icon-cog"></i><?= _("Voir") ?></a>
+                    <?php
+                    else: ?>
                         <em><i class="icon-lock"></i> Privilège insuffisant</em>
-                    <?php endif; ?>
+                    <?php
+                    endif; ?>
                     <br>
-                    <small>La liste des sources de financement est utilisée dans la fiche activité, elle est fournit par le CNRS.</small>
+                    <small>La liste des sources de financement est utilisée dans la fiche activité, elle est fournit par
+                        le CNRS.</small>
                 </li>
             </ul>
         </article>
@@ -524,14 +642,17 @@
                 <strong>
                     <i class="icon-group"></i>
                     Privilèges et rôles</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
                     <a href="<?= $this->url('administration') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
                 Gestion des <strong>rôles</strong> des personnes et des <strong>privilèges</strong> accordés à ces rôles
@@ -543,17 +664,21 @@
                 <strong>
                     <i class="icon-plug"></i>
                     Authentifications</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
                     <a href="<?= $this->url('administration/users') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
-                Visualisation des authentifications actives. Permet également d'accorder des <strong>rôles applicatifs particulier</strong>
+                Visualisation des authentifications actives. Permet également d'accorder des <strong>rôles applicatifs
+                    particulier</strong>
             </p>
         </article>
 
@@ -562,14 +687,17 @@
                 <strong>
                     <i class="icon-building-filled"></i>
                     Rôles des organisations</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
                     <a href="<?= $this->url('administration/organizationrole') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
                 Gestion des rôles disponibles lors de l'association d'un organisation à une activité de recherche.
@@ -580,14 +708,17 @@
                 <strong>
                     <i class="icon-database"></i>
                     Accès à l'API</strong>
-                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_API_ACCESS) ):?>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_API_ACCESS)): ?>
                     <a href="<?= $this->url('api/manage-acces') ?>" class="right">
                         <i class="icon-cog"></i>
                         <?= $this->translate("Afficher") ?>
                     </a>
-                <?php else: ?>
+                <?php
+                else: ?>
                     <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
-                <?php endif; ?>
+                <?php
+                endif; ?>
             </h3>
             <p>
                 Vous permet de créer des accès distants aux donnnées (Personnes)

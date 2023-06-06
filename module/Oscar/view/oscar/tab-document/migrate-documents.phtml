@@ -1,0 +1,33 @@
+<?php
+
+?>
+<div class="container">
+    <h1>
+        <i class="icon-calendar"></i>
+        Migration des documents
+    </h1>
+    <p class="alert alert-info">
+        Cet écran permet de traiter le rangement des documents des activités suite à l'ajout des
+        <strong>onglets de documents</strong>.
+        Vous pourrez choisir un <strong>type de document</strong> pour les déplacer dans un
+        <strong>onglet de document</strong>.
+    </p>
+
+    <?= $this->form()->openTag($form->prepare()); ?>
+    <?= $this->formControlGroup($form->get('documentType')); ?>
+    <?= $this->formElementErrors($form->get('documentType'), array('class' => 'help-inline')); ?>
+    <?= $this->formControlGroup($form->get('tabDocument')); ?>
+    <?= $this->formElementErrors($form->get('tabDocument'), array('class' => 'help-inline')); ?>
+    <?= $this->formHidden($form->get('secure')); ?>
+    <?= $this->formElementErrors($form->get('secure'), array('class' => 'help-inline')); ?>
+    <?= $this->formErrors($form) ?>
+    <hr>
+    <div class="text-center">
+        <nav class="btn-group">
+            <a class="btn btn-default" href="<?= $this->url('tabdocument') ?>">Retour à la liste</a>
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+        </nav>
+    </div>
+    <?= $this->form()->closeTag() ?>
+
+</div>

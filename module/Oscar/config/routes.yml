@@ -1468,6 +1468,14 @@ tabdocument:
                 route: /edit/:id
                 defaults:
                     action: edit
+
+        migrate:
+            type: segment
+            options:
+                route: /migrate
+                defaults:
+                    action: migrateDocuments
+
 ################################################################################
 ### ActivityDate
 milestones:

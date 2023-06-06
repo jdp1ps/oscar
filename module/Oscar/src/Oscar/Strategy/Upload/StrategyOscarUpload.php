@@ -83,7 +83,12 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     $fileMime = $file[self::TYPE_FILE];
                 }
                 $fileExtension = $this->document->getDocumentService()->checkMime($fileMime);
-                $fileName = $this->getDocument()->getDocReplaced() ? $this->getDocument()->getDocReplaced(): $file[self::NAME_FILE];
+
+                $fileName = $this->getDocument()->getDocReplaced() ?
+                    $this->getDocument()->getDocReplaced():
+                    substr(md5(date('y-m-d H:i:s')), 0, 4) . "_" .
+                    $file[self::NAME_FILE];
+
                 $fileSize = $file[self::SIZE_FILE];
 
                 if(false === $fileExtension){
@@ -93,17 +98,7 @@ class StrategyOscarUpload implements StrategyTypeInterface
                     $nameClass = $this->document->getDocumentService()->getEffectiveClass();
                     /** @var ContractDocument $document */
                     $document = new $nameClass;
-                    /**
-                    "dateDeposit" => "2022-03-31T00:00:00+02:00"
-                    "dateSend" => "2022-04-08T00:00:00+02:00"
-                    "private" => "true"
-                    "type" => "4"
-                    "tab" => "1"
-                    "informations" => "description"
-                    "persons" => "6,5"
-                    "baseUrlUpload" => "/documents-des-contracts/televerser/2/1"
-                    "init" => "true"
-                     */
+
                     $document
                         ->setVersion(1)
                         ->setDateUpdoad(new \DateTime())

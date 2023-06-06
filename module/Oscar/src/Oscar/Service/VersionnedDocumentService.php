@@ -314,11 +314,7 @@ class VersionnedDocumentService {
         // Init nom de base
         $realName = $doc->generateName();
         $directoryLocation = $this->documentHome;
-        if($doc->isPrivate() === true){
-           $folder = $this->createFolder($directoryLocation, "private");
-        }else{
-            $folder = $this->createFolder($directoryLocation, $doc->getTabDocument()->getId());
-        }
+        $folder = $directoryLocation;
         $doc->setPath($realName);
         if(@move_uploaded_file($source, $folder.'/'.$realName)){
             $this->getEntityManager()->persist($doc);
