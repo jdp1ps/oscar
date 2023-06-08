@@ -85,6 +85,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             ->setAmount($this->decimalPointComma($data['amount']))
             ->setFraisDeGestion($this->decimalOrPercent($data['fraisDeGestion']))
             ->setFraisDeGestionPartHebergeur($this->decimalOrPercent($data['fraisDeGestionPartHebergeur']))
+            ->setFraisDeGestionPartUnite($this->decimalOrPercent($data['fraisDeGestionPartUnite']))
             ->setTva($this->getTVA($data['tva']))
             ->setFinancialImpact($this->getFinancialImpact($data['financialImpact']))
             ->setNoteFinanciere($data['noteFinanciere'])
@@ -184,6 +185,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             'amount' => $object->getAmount(),
             'fraisDeGestion' => $object->getFraisDeGestion(),
             'fraisDeGestionPartHebergeur' => $object->getFraisDeGestionPartHebergeur(),
+            'fraisDeGestionPartUnite' => $object->getFraisDeGestionPartUnite(),
             'financialImpact' => array_search($object->getFinancialImpact(), Activity::getFinancialImpactValues()),
             'noteFinanciere' => $object->getNoteFinanciere(),
             'assietteSubventionnable' => $object->getAssietteSubventionnable(),

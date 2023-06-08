@@ -215,6 +215,12 @@ class Activity implements ResourceInterface
      */
     private $fraisDeGestionPartHebergeur;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $fraisDeGestionPartUnite;
+
 
     /**
      * @var string
@@ -639,6 +645,41 @@ class Activity implements ResourceInterface
         return $this->fraisDeGestionPartHebergeur;
     }
 
+    /**
+     * @return string
+     */
+    public function getFraisDeGestionPartUnite()
+    {
+        return $this->fraisDeGestionPartUnite;
+    }
+
+    public function getFraisDeGestionPartUniteDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
+    {
+        $percent = '';
+        $currency = '';
+        $data = '';
+
+        if( $diplayCurrency ){
+            $currency = ''.$this->getCurrency()->getSymbol();
+        }
+
+        if (($partH = $this->getFraisDeGestionPartUnite())) {
+            if (strpos($partH, '%')) {
+                if( $displayPercentInfo ){
+                    $percent = sprintf(' (%s)', $partH);
+                }
+                $data = $this->getAmount() / 100 * floatval($partH);
+            } else {
+                $data = $partH;
+            }
+
+            return number_format($data, 2, ',', '').$currency.$percent;
+        }
+        return $this->fraisDeGestionPartUnite;
+    }
+
+
+
     public function getFraisDeGestionPartHebergeurDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
     {
         $percent = '';
@@ -670,6 +711,15 @@ class Activity implements ResourceInterface
     public function setFraisDeGestionPartHebergeur($fraisDeGestionPartHebergeur)
     {
         $this->fraisDeGestionPartHebergeur = $fraisDeGestionPartHebergeur;
+        return $this;
+    }
+
+    /**
+     * @param string $fraisDeGestionPartUnite
+     */
+    public function setFraisDeGestionPartUnite($fraisDeGestionPartUnite)
+    {
+        $this->fraisDeGestionPartUnite = $fraisDeGestionPartUnite;
         return $this;
     }
 
@@ -2418,6 +2468,7 @@ class Activity implements ResourceInterface
             'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
             'Frais de gestion' => $this->getFraisDeGestionDisplay(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeurDisplay(true, false),
+            'Frais de gestion (part unité)' => $this->getFraisDeGestionPartUniteDisplay(true, false),
             'incidence financière' => $this->getIncidenceFinanciere(),
             'Assiette subventionnable' => $this->getAssietteSubventionnable(),
             'Note' => $this->getNoteFinanciere(),
@@ -2459,6 +2510,7 @@ class Activity implements ResourceInterface
             'justificatif écart de paiement',
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
+            'Frais de gestion (part unité)',
             'incidence financière',
             'Assiette subventionnable',
             'Note',

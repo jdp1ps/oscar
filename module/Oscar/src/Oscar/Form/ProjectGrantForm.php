@@ -248,6 +248,18 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
 
         // Amount
         $this->add([
+           'name' => 'fraisDeGestionPartUnite',
+           'options' => [
+               'label' => 'Part unité'
+           ],
+           'attributes' => [
+               'class' => 'form-control',
+           ],
+           'type' => 'Text'
+       ]);
+
+        // Amount
+        $this->add([
             'name' => 'assietteSubventionnable',
             'help' => "% de l'assiette éligible",
             'options' => [

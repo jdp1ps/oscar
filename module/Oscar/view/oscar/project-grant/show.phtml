@@ -101,14 +101,18 @@
                                 Frais de gestion :
                                 <b><?= $entity->getFraisDeGestionDisplay() ?></b>
                             </small>
-                            <?php
-                            if ($entity->getFraisDeGestionPartHebergeur()): ?>
+                            <?php if ($entity->getFraisDeGestionPartHebergeur()): ?>
                                 <br><small>
                                     Part hébergeur :
                                     <b><?= $entity->getFraisDeGestionPartHebergeurDisplay() ?></b>
                                 </small>
-                            <?php
-                            endif; ?>
+                            <?php endif; ?>
+                            <?php if ($entity->getFraisDeGestionPartUnite()): ?>
+                                <br><small>
+                                    Part unité :
+                                    <b><?= $entity->getFraisDeGestionPartUniteDisplay() ?></b>
+                                </small>
+                            <?php endif; ?>
                         </div>
                     <?php
                     endif ?>
