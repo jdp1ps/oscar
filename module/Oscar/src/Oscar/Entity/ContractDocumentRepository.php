@@ -123,10 +123,15 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         return $out;
     }
 
+    /**
+     * @param int $fromTypeDocumentId
+     * @param int $toTabDocumentId
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function migrateUntabledDocument(int $fromTypeDocumentId, int $toTabDocumentId): void
     {
-        echo "PARAMS : " . $fromTypeDocumentId . " to TAB : ".$toTabDocumentId."<br><hr>";
-
+        // TODO Trouver un moyen de faire ça en une seule requête, mes tentatives sont plus bas
         $documents = $this->getEntityManager()->createQueryBuilder()
             ->select('d')
             ->from(ContractDocument::class, 'd')
@@ -142,7 +147,6 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         /** @var ContractDocument $document */
         foreach ($documents as $document){
             if( !$document->getTabDocument() ){
-                die("ICI");
                 $document->setTabDocument($tab);
             }
         }

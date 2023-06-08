@@ -12,9 +12,11 @@ namespace Oscar\Service;
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Monolog\Handler\FirePHPHandler;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Oscar\Exception\OscarException;
+use Oscar\Utils\FileSystemUtils;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -38,21 +40,15 @@ class LoggerServiceFactory implements FactoryInterface
         // Niveau de log
         $logLevel = $configurationService->getLoggerLevel();
 
-        if( !is_writable($logPath) ){
-            throw new OscarException("Le fichier de log n'est pas accessible en écriture");
-        }
-
-        if( !file_exists($logPath) ){
-            file_put_contents($logPath, "");
-        }
 
         // Sorties des logs (fichier + PHP stdrout)
-        $stream = new StreamHandler($logPath, $logLevel);
-        $firephp = new FirePHPHandler($logLevel);
+        $stream = new RotatingFileHandler($logPath, 5,  $logLevel);
+        //$stream = new StreamHandler($logPath,$logLevel);
+        //$firephp = new FirePHPHandler($logLevel);
 
         $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);
-        $logger->pushHandler($firephp);
+        //$logger->pushHandler($firephp);
 
         return $logger;
     }

@@ -325,9 +325,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         /** @var ContractDocument $doc */
         $doc = $this->getContractDocumentService()->getDocument($idDoc);
 
-        $activity = $doc->getGrant();
-
-        if( !($this->getOscarUserContextService()->getAccessDocument($doc)['read'] == true) ){
+        if( !$this->getOscarUserContextService()->contractDocumentRead($doc) ){
             return $this->getResponseUnauthorized("Vous n'avez pas accès à ce document");
         }
 
@@ -346,11 +344,15 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $version = $doc->getVersion();
             $filename = preg_replace('/(.*)(\.\w*)/', '$1-version-' . $version . '$2', $filename);
         }
-
-        $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-type: ' . $doc->getFileTypeMime());
-        die($content);
+        try {
+            $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-type: ' . $doc->getFileTypeMime());
+            die($content);
+        } catch (Exception $e) {
+            $this->getLoggerService()->error("Téléchargement du fichier impossible : " . $e->getMessage());
+            throw new OscarException("Ce fichier est indisponible sur le serveur");
+        }
     }
 
     /**

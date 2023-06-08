@@ -228,45 +228,62 @@
     -->
 
 <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
-   <section class="documents-content">
-     <div class="tabs">
-       <div class="tab" :class="{'selected': selectedTab === tab }"
-            v-for="tab in tabsWithDocuments"
-            @click="handlerSelectTab(tab)">
-         {{ tab.label }}
-         <sup class="label label-default">{{ tab.documents.length }}</sup>
-       </div>
-     </div>
-     <div class="tab-content" v-for="tab in tabsWithDocuments" v-show="selectedTab === tab">
-       <nav v-if="tab.manage" class="text-right">
-         <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
-           <i class="icon-download"></i>
-                Téléverser un document
-         </button>
-       </nav>
-       <hr>
-       <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
-         <div class="card-title">
-           <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
-           <small class="text-light">{{ doc.categoryText }} ~ </small>
-           <strong>{{doc.fileName}}</strong>
-           <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
-         </div>
-         <p>
-           {{ doc.information }}
-         </p>
-         <div class="card-content">
-           <p class="text-highlight">
-             Fichier <strong>{{ doc.extension}}</strong>
-             version {{ doc.version }},
-             téléversé le
-             <time>{{ doc.dateUpload | dateFull }}</time>
-             <span v-if="doc.uploader"> par <strong>{{ doc.uploader.displayname }}</strong></span>
-           </p>
-           <h5 v-if="doc.persons.length > 0">Personnes accédants à ces documents</h5>
-           <span class="cartouche" v-for="person in doc.persons" :key="person.personId">
-             {{ person.personName }}
-           </span>
+    <button class="btn-primary btn" @click="fetch()">
+      Recharger
+    </button>
+    <section class="documents-content">
+      <div class="tabs">
+        <div class="tab" :class="{'selected': selectedTabId === tab.id }"
+             v-for="tab in packedDocuments"
+             @click.prevent="handlerSelectTab(tab)">
+          {{ tab.label }}
+          <sup class="label label-default">{{ tab.total }}</sup>
+        </div>
+      </div>
+
+      <div class="tab-content" v-for="tab in packedDocuments" v-show="selectedTabId === tab.id">
+        <nav v-if="tab.manage" class="text-right">
+          <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
+            <i class="icon-download"></i>
+            Téléverser un document
+          </button>
+        </nav>
+        <hr>
+        <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
+          <div class="card-title">
+            <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
+            <small class="text-light">{{ doc.category.label }} ~ </small>
+            <strong>{{doc.fileName}}</strong>
+            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
+          </div>
+          <p>
+            {{ doc.information }}
+          </p>
+          <div class="card-content">
+              <div v-if="doc.versions.length">
+                <div class="exploder">
+                  Versions précédentes :
+                </div>
+                <article v-for="sub in doc.versions" class="subdoc text-highlight">
+                  <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
+                  <strong>{{ sub.fileName }}</strong>
+                  version <em>{{ sub.version }} </em>,
+                  téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
+                  <span v-if="sub.uploader">
+                        par <strong>{{ sub.uploader.displayname }}</strong>
+                        </span>
+
+                  <a :href="sub.urlDownload">
+                    <i class="icon-download-outline"></i>
+                    Télécharger cette version
+                  </a>
+                </article>
+              </div>
+
+<!--            <h5 v-if="doc.persons.length > 0">Personnes accédants à ces documents</h5>-->
+<!--            <span class="cartouche" v-for="person in doc.persons" :key="person.personId">-->
+<!--             {{ person.personName }}-->
+<!--           </span>-->
             <nav class="text-right show-over">
               <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
                 <i class="icon-upload-outline"></i>
@@ -274,7 +291,7 @@
               </a>
               <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload)" class="btn btn-default btn-xs"  v-if="tab.manage">
                 <i class="icon-download-outline"></i>
-                  Nouvelle Version
+                Nouvelle Version
               </button>
               <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)" v-if="tab.manage">
                 <i class="icon-trash"></i>
@@ -372,7 +389,8 @@ export default {
       remoterState: oscarRemoteData.state,
 
       // Onglet active
-      selectedTab: null
+      selectedTab: null,
+      selectedTabId: null
     }
   },
 
@@ -394,6 +412,38 @@ export default {
         }.bind(this));
       };
       return out;
+    },
+
+
+    packedDocuments(){
+      let packed = {};
+
+      if( this.tabsWithDocuments ){
+        for( const [i, tab] of Object.entries(this.tabsWithDocuments) ){
+          let documents = {};
+          for( const [j, doc] of Object.entries(tab.documents) ){
+            let docKey = doc.fileName;
+            if( !documents.hasOwnProperty(docKey) ){
+              doc.versions = [];
+              documents[docKey] = doc;
+            } else {
+              documents[docKey].versions.push(doc);
+            }
+          }
+
+          packed[i] = {
+            id: tab.id,
+            label: tab.label,
+            total: tab.total,
+            description: tab.description,
+            manage: tab.manage,
+            roles: tab.roles,
+            documents,
+          }
+        }
+      }
+
+      return packed;
     }
   },
 
@@ -637,7 +687,32 @@ export default {
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
       this.idCurrentPerson = success.data.idCurrentPerson;
-      this.tabsWithDocuments = success.data.tabsWithDocuments;
+      let documents = success.data.tabsWithDocuments;
+      let defaultTab = null;
+      let selectedTab = null;
+
+      Object.keys(documents).forEach( (item) => {
+        let tab = documents[item];
+        tab.total = tab.documents.length;
+        tab.documents.sort( (x,y) => y.version - x.version );
+        tab.documents.forEach(item => {
+          console.log(item.fileName, item.version);
+          item.explode = true;
+        })
+        if( defaultTab == null ) defaultTab = tab.id;
+        if( selectedTab == null && tab.documents.length > 0 ){
+          selectedTab = tab.id;
+          //browsers.sort((x, y) => x.year - y.year);
+        }
+      });
+      this.tabsWithDocuments = documents;
+      if( this.selectedTabId == null ){
+        this.selectedTabId = selectedTab ? selectedTab : defaultTab;
+      }
+      //   // if( this.tabsWithDocuments[i].documents.length ){
+      //   //   this.selectedTabId = this.tabsWithDocuments[i].id;
+      //   // }
+      // }
 
       if( this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length ){
         this.selectedTab = this.tabsWithDocuments.unclassified;
@@ -673,6 +748,7 @@ export default {
 
     handlerSelectTab(tab){
       this.selectedTab = tab;
+      this.selectedTabId = tab.id;
     },
 
     // Recup datas Docs
