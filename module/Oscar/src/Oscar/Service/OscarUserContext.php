@@ -1378,7 +1378,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $tmpContractDocuments = [];
         }
 
-        if (!array_key_exists($contractDocument->getId())) {
+        if (!array_key_exists($contractDocument->getId(), $tmpContractDocuments)) {
             $this->getLoggerService()->debug("ACCES DOC : " . $contractDocument->getFileName());
             // Document privé
             if ($contractDocument->isPrivate() && $contractDocument->getPersons()->contains(
