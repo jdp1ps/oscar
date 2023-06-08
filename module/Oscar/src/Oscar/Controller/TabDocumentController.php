@@ -139,20 +139,20 @@ class TabDocumentController extends AbstractOscarController implements UseContra
     /**
      * @return array
      */
-    public function migrateDocumentsAction() :array
+    public function migrateDocumentsAction(): array
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 
         $form = new MigrateDocumentForm($this->getEntityManager());
 
-        if($this->getRequest()->isPost()){
+        if ($this->getRequest()->isPost()) {
             $form->setData($this->getRequest()->getPost());
             if ($form->isValid()) {
                 $documentTypeId = (int)$form->getData()['documentType'];
                 $tabDocumentId = (int)$form->getData()['tabDocument'];
-                if( $documentTypeId > 0 && $tabDocumentId > 0 ){
+                if ($documentTypeId > 0 && $tabDocumentId > 0) {
                     $this->getContractDocumentService()->migrateDocumentsTypeToTab($documentTypeId, $tabDocumentId);
-                    // Traitement
+                    return $this->redirect()->toRoute('tabdocument/migrate');
                 } else {
                     return $this->getResponseBadRequest("Donnèes transmises incorrecte");
                 }

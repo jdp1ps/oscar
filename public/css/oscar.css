@@ -6964,7 +6964,7 @@ td.visible-print {
   cursor: pointer;
 }
 .tabs .tab.selected {
-  background: #eee;
+  background: #fff;
 }
 
 .privileges .tab-content {
@@ -7908,6 +7908,11 @@ body::-webkit-scrollbar-thumb {
   content: "";
 }
 
+.documents-content .tab-content > .card {
+  border: solid thin #999;
+  box-shadow: none;
+}
+
 .dropdown-header {
   margin-top: 0.75em;
   border-top: solid thin #ddd;
@@ -7974,14 +7979,13 @@ a.organization.cartouche.unclickable:hover {
 }
 
 .subdoc {
-  display: block;
+  display: flex;
   border-bottom: thin solid #F2F2F2;
   padding: 0.25em 1em;
   background-color: #fff;
   transition: all 0.3s;
 }
 .subdoc a {
-  display: block;
   text-decoration: none;
   margin: 0 0 0 1em;
 }

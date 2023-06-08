@@ -208,10 +208,12 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         }
     }
 
+    /**
+     * @param int $typeDocumentId
+     * @param int $tabDocumentId
+     */
     public function migrateDocumentsTypeToTab(int $typeDocumentId, int $tabDocumentId): void
     {
-        $typeDocument = $this->getContractDocumentType($typeDocumentId);
-        $tabDocument = $this->getContractTabDocument($tabDocumentId);
         $this->getContractDocumentRepository()->migrateUntabledDocument( $typeDocumentId, $tabDocumentId);
     }
 

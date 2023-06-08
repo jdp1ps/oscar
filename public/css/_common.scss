@@ -381,7 +381,7 @@
     cursor: pointer;
 
     &.selected {
-      background: #eee;
+      background: #fff;
     }
   }
 }
@@ -1467,6 +1467,13 @@ $twRadius: 4px;
 
 }
 
+.documents-content {
+  .tab-content > .card {
+    border: solid thin #999;
+    box-shadow: none;
+  }
+}
+
 .dropdown-header {
   margin-top: .75em;
   border-top: solid thin #ddd;
@@ -1521,6 +1528,8 @@ a.organization.cartouche {
   }
 }
 
+
+
 .versions {
   .opener {
     cursor: pointer;
@@ -1539,11 +1548,10 @@ a.organization.cartouche {
 }
 
 .subdoc {
-  display: block;
+  display: flex;
   border-bottom: thin solid #F2F2F2;
   padding: .25em 1em;
   a {
-    display: block;
     text-decoration: none;
     //float: right;
     margin: 0 0 0 1em;
