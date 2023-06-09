@@ -103,6 +103,7 @@
               <!-- Date de dépot -->
               <label>Date de dépôt</label>
               <p class="help">Date à laquelle le fichier a été reçu</p>
+              <code>{{ dateDeposit }}</code>
               <date-picker v-model="dateDeposit" :moment="moment"></date-picker>
               <!-- Date d'envoi' -->
               <label>Date d'envoi</label>
@@ -289,7 +290,7 @@
                 <i class="icon-upload-outline"></i>
                 Télécharger
               </a>
-              <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload)" class="btn btn-default btn-xs"  v-if="tab.manage">
+              <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload, doc.category.id,)" class="btn btn-default btn-xs"  v-if="tab.manage">
                 <i class="icon-download-outline"></i>
                 Nouvelle Version
               </button>
@@ -539,17 +540,19 @@ export default {
      * @param tabId
      * @param urlReupload
      */
-    handlerUploadNewVersionDoc(tabId, urlReupload) {
+    handlerUploadNewVersionDoc(tabId, urlReupload, typeId) {
       //console.log ("JE PASSE PAR NOUVELLE VERSION DE DOCUMENT : handlerUploadNewVersionDoc(tabId, urlReupload)");
       this.uploadDoc = true;
       //Hydratation de l'url de soumission complétée (propre à cet objet)
-      this.uploadNewDocData.baseUrlUpload =  urlReupload
+      this.uploadNewDocData.baseUrlUpload =  urlReupload;
+      this.selectedIdTypeDocument = typeId;
+
       //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
-      this.initUploadDatas(tabId);
+      this.initUploadDatas(tabId, typeId);
     },
 
     // FAIT OFFICE DE METHODE PSEUDO PRIVEE TRAITEMENT SIMILAIRE (nouveau doc, nouvelle version de doc)
-    initUploadDatas(tabId){
+    initUploadDatas(tabId, typeId = null){
       this.dateDeposit = '';
       this.dateSend = '';
       let privateTab = false;
@@ -557,7 +560,7 @@ export default {
         privateTab = true;
       }
       this.privateDocument = privateTab;
-      this.selectedIdTypeDocument = null;
+      this.selectedIdTypeDocument = typeId;
       this.informationsDocument = '';
       this.persons = [];
       // initialise objet de base
