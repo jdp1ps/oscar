@@ -128,7 +128,7 @@ h2.tv-serie-label { border-bottom: none; }
                     $totalProject += $contract->getAmount()  * $rate;
                     $nbrContratYear++;
 
-                    echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $contract, 'hideProject'=> true, 'deepMembers' => false])
+                    echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $contract, 'hideProject'=> true, 'deepMembers' => false, 'documentsDisplay' => false])
                     ?>
                 <?php endforeach; ?>
 
@@ -257,10 +257,13 @@ h2.tv-serie-label { border-bottom: none; }
                         <?php
                         /** @var \Oscar\Entity\ContractDocument $document */
                         foreach( $documents as $document ): ?>
-                            <?= $this->partial('oscar/contract-document/list-item.phtml', ['document' => $document, 'showActivity'=>true]) ?>
+                            <?php if ($this->grant()->hasDocumentAccess($document)): ?>
+                            <?= $this->partial('oscar/contract-document/list-item.phtml',
+                                               ['document' => $document, 'showActivity'=>true]) ?>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p class="no-data">Aucun document pour les activités de recherche de ce projet</p>
+                        <p class="no-data">Aucun document visible pour les activités de recherche de ce projet</p>
                     <?php endif; ?>
                 </section>
             <?php endif; ?>

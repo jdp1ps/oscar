@@ -606,6 +606,27 @@ class ProjectService implements UseServiceContainer
         return $documents;
     }
 
+    /**
+     * Liste des documents du projet en ne conservant que les dernières versions du document.
+     *
+     * @param Project $project
+     * @return array
+     */
+    public function getProjectDocumentsVersionned( Project $project )
+    {
+        $output = [];
+        foreach ($this->getProjectDocuments($project) as $document) {
+            if( !array_key_exists($document->getFileName(), $output) ){
+                $output[$document->getFileName()] = $document;
+            } else {
+                if( $document->getVersion() > $output[$document->getFileName()]->getVersion() ){
+                    $output[$document->getFileName()] = $document;
+                }
+            }
+        }
+        return array_values($output);
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // Consultation

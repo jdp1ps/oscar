@@ -6,6 +6,8 @@
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
+// v.202303
+
 $brand-primary: #455790 !default;
 $brand-complementary: #27556C !default;
 $bg-image: 'bg.jpg' !default;
@@ -37,7 +39,6 @@ $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
 
-
 // Update 2020-11-04
 @import "_common.scss";
 
@@ -64,68 +65,7 @@ $colorGreyBlack: #222;
 body {
 }
 
-.oscar-selector {
-  position: relative;
-
-  .displayed-value {
-    z-index:10;
-    position: absolute;
-    padding-left: 1em;
-    top: 1px;
-    bottom: 1px;
-    right: 1px;
-    left: 3em;
-    background: rgba(255,255,255,1);
-    line-height: 200%;
-    .button-cancel-value {
-      cursor: pointer;
-    }
-  }
-
-  .options {
-    z-index: 9;
-    background: white;
-    position: absolute;
-    max-height: 15em;
-    overflow: hidden;
-    overflow-y: scroll;
-    min-width: 90%;
-    margin-left: 47px;
-    box-shadow: -4px 4px 8px rgba(0,0,0,.25);
-
-    header {
-      font-size: .9em;
-      text-align: center;
-      border-bottom: solid #999999 thin;
-    }
-
-    .option {
-      cursor: pointer;
-      border-bottom: solid thin #ccc;
-      border-left: solid 8px white;
-      transition: background-color linear 300ms;
-      margin: 0 1em 0 0;
-
-      &.selected {
-        border-left-color: #0b93d5;
-        background: #0b93d5 !important;
-        color: white;
-        text-shadow: -1px 1px 1px rgba(0,0,0,.25);
-      }
-      &.closed {
-        background: rgba(193, 210, 210, 0.5);
-        .fullname, .code {
-          text-decoration: line-through;
-        }
-      }
-      &.active {
-        border-left-color: #0b93d5;
-        background-color: rgba(#0b93d5, .3);
-      }
-      .option-infos {
-        border-top: dotted thin #cccccc;
-        opacity: .7;
-      }
-    }
-  }
+.private-document {
+  background: rgba($colorGreyMedium, .025);
+  border-left: 8px $colorRed solid !important;
 }

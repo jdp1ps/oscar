@@ -1422,17 +1422,34 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 $read = false; //$this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $contractDocument->getActivity());
                 $write = false; // $this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $contractDocument->getActivity());
             } else {
+
+                // On charge les différents rôles de la personnes dans l'activités
                 $rolesInActivity = $this->getRolesInActivity(
                     $this->getCurrentPerson(),
                     $contractDocument->getActivity()
                 );
+
+                // Et ceux dans l'application
                 $rolesInApp = $this->getBaseRoleId();
                 $roles = array_merge($rolesInApp, $rolesInActivity);
+
+                // Puis on calcule les accès
                 $access = $this->getAccessTabDocument($contractDocument->getTabDocument(), $roles);
                 $read = $access['read'] === true;
                 $write = $access['write'] === true;
+
+                // accès privé (exception)
+                if ( $contractDocument->isPrivate() ){
+                    if( $contractDocument->getPersons()->contains($this->getCurrentPerson()) ) {
+                        $read = true;
+                    } else {
+                        $read = false;
+                        $write = false;
+                    }
+                }
             }
 
+            // On conserve le calcule de l'accès au document
             $tmpContractDocuments[$contractDocument->getId()] = ['read' => $read, 'write' => $write];
         }
 
