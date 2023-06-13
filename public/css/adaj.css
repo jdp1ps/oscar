@@ -8821,7 +8821,6 @@ hr.separator {
 .exploder {
   background: transparent;
   color: #888;
-  margin-top: 1em;
   padding: 4px;
   border-top: dotted #888 thin;
 }

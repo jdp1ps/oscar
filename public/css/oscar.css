@@ -8821,7 +8821,6 @@ hr.separator {
 .exploder {
   background: transparent;
   color: #AAA;
-  margin-top: 1em;
   padding: 4px;
   border-top: dotted #AAA thin;
 }
@@ -12854,6 +12853,11 @@ article.wp h3 {
 
 .bold {
   font-weight: bold;
+}
+
+.private-document {
+  background: rgba(153, 153, 153, 0.025);
+  border-left: 8px #DD423E solid !important;
 }
 
 /*# sourceMappingURL=oscar.css.map */

@@ -177,7 +177,7 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
             </p>
         <?php endif; ?>
 
-        <?php if (count($activity->getDocuments()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $activity)): ?>
+        <?php if ((isset($documentsDisplay) && $documentsDisplay !== false) && count($activity->getDocuments()) && $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $activity)): ?>
         <div class="documents">
             <p class="text-highlight"><i class="icon-book grey"></i>Documents <?= count($activity->getDocuments()) ?> :</p>
             <ul>

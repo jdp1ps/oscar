@@ -92,6 +92,7 @@
       <div class="overlay-content">
         <h2>
           Téléverser un nouveau document
+          dans <strong>{{ selectedIdTypeDocument }}</strong>
           <span class="overlay-closer" @click="uploadDoc = null">X</span>
         </h2>
         <div style="width: 90%; margin-left: 5%">
@@ -184,54 +185,7 @@
       </div>
     </div>
 
-    <!-- BARRE DE TRI DES DOCUMENTS ACTUELLEMENT ARRETEE -->
-    <!--
-    <div>
-      <div class="oscar-sorter">
-        <i class=" icon-sort"></i>
-        Tier les résultats par :
-        <a @click.prevent="order('dateUpload')" href="#" :class="cssSort('dateUpload')" class="oscar-sorter-item">
-          Date d'upload
-          <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-          <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-        </a>
-        <a @click.prevent="order('fileName')" href="#" :class="cssSort('fileName')" class="oscar-sorter-item">
-          Nom du fichier
-          <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-          <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-        </a>
-        <a @click.prevent="order('categoryText')" href="#" :class="cssSort('categoryText')" class="oscar-sorter-item">
-          Type de document
-          <i class="icon-angle-down" v-show="sortDirection == 1"></i>
-          <i class="icon-angle-up" v-show="sortDirection == -1"></i>
-        </a>
-      </div>
-    </div>
-    -->
-
-    <!-- Section boucle documents Originelle JACK DOCUMENTS VERSIONS -->
-    <!-- <article class="card xs" v-for="document in documentsPacked" :key="document.id">-->
-    <!--
-    <div class="exploder" v-if="document.previous.length" @click="document.explode = !document.explode">
-    Versions précédentes <i class="icon-angle-down" v-show="!document.explode"></i>
-    <i class="icon-angle-up" v-show="document.explode"></i>
-    </div>
-
-    <div v-if="document.previous.length" v-show="document.explode">
-    <article v-for="sub in document.previous" class="subdoc text-highlight" :key="sub.id">
-    <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
-    <strong>{{ sub.fileName }}</strong>
-    version <em>{{ sub.version }} </em>,
-    téléchargé le <time>{{ sub.dateUpload | dateFullSort }}</time>
-    <span v-if="sub.uploader">
-    par <strong>{{ sub.uploader.displayname }}</strong>
-    </span>
-    -->
-
 <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
-    <button class="btn-primary btn" @click="fetch()">
-      Recharger
-    </button>
     <section class="documents-content">
       <div class="tabs">
         <div class="tab" :class="{'selected': selectedTabId === tab.id }"
@@ -250,13 +204,22 @@
           </button>
         </nav>
         <hr>
-        <article class="card xs" v-for="doc in tab.documents" :key="doc.id">
-          <div class="card-title">
+        <article class="card xs" v-for="doc in tab.documents" :key="doc.id" :class="{'private-document': doc.private }">
+          <div class="">
             <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
             <small class="text-light">{{ doc.category.label }} ~ </small>
             <strong>{{doc.fileName}}</strong>
-            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;({{doc.fileSize | filesize}})</small>
+            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;
+              ({{doc.fileSize | filesize}}) - Version {{ doc.version }}
+            </small>
           </div>
+          <section v-if="doc.private">
+            <i class="icon-lock" />
+            Ce document est privé, accessible par :
+            <span class="cartouche" v-for="p in doc.persons">
+                  {{ p.personName }}
+                </span>
+          </section>
           <p>
             {{ doc.information }}
           </p>
@@ -281,16 +244,18 @@
                 </article>
               </div>
 
-<!--            <h5 v-if="doc.persons.length > 0">Personnes accédants à ces documents</h5>-->
-<!--            <span class="cartouche" v-for="person in doc.persons" :key="person.personId">-->
-<!--             {{ person.personName }}-->
-<!--           </span>-->
             <nav class="text-right show-over">
               <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
                 <i class="icon-upload-outline"></i>
                 Télécharger
               </a>
-              <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload, doc.category.id,)" class="btn btn-default btn-xs"  v-if="tab.manage">
+              <!--
+              <button v-on:click="handlerUploadNewVersionDoc(tab.id, doc.urlReupload, doc.category.id)" class="btn btn-default btn-xs"  v-if="tab.manage">
+                <i class="icon-download-outline"></i>
+                Nouvelle Version
+              </button>
+              -->
+              <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"  v-if="tab.manage">
                 <i class="icon-download-outline"></i>
                 Nouvelle Version
               </button>
@@ -520,6 +485,8 @@ export default {
       this.persons.splice(this.persons.indexOf(person), 1);
     },
 
+
+
     /**
      Déclenche ouverture Modal Upload nouveau document initialise datas/reset et affectation de base
      Important surtout dans le scénario de l'ouverture modal avec modification datas et fermeture de la modal,
@@ -532,6 +499,36 @@ export default {
       this.uploadNewDocData.baseUrlUpload = this.urlUploadNewDoc + '/' + tabId;
       //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
       this.initUploadDatas(tabId);
+    },
+
+
+    handlerNewVersion( document ){
+      console.log(JSON.parse(JSON.stringify(document)));
+
+      this.uploadDoc = true;
+      this.uploadNewDocData.baseUrlUpload =  document.urlReupload;
+      this.selectedIdTypeDocument = this.uploadNewDocData.selectedIdTypeDocument =  document.category.id;
+      this.uploadNewDocData.tab = document.tabDocument.id;
+      this.privateDocument = this.uploadNewDocData.private = document.private;
+      this.informationsDocument = '';
+      this.persons = [];
+      document.persons.forEach(p => {
+        this.persons.push(p);
+      })
+      // initialise objet de base
+      this.uploadNewDocData.init = true;
+      // Affectation valeur par défaut champ fichier lié au contexte de l'onglet choisi (tab)
+      this.fileToDownload = null;
+      // Tab choisis pour upload document (TabId est égal id onglet)
+      /**
+      this.uploadDoc = true;
+      //Hydratation de l'url de soumission complétée (propre à cet objet)
+      this.uploadNewDocData.baseUrlUpload =  urlReupload;
+      this.selectedIdTypeDocument = typeId;
+//tab.id, doc.urlReupload, doc.category.id,
+      //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
+      this.initUploadDatas(tabId, typeId);
+       ****/
     },
 
     /**
