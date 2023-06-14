@@ -230,20 +230,18 @@ class ProjectController extends AbstractOscarController
         try {
             $id = $this->params()->fromRoute('id', 0);
             $entity = $this->getProjectService()->getProject($id, true);
+            $this->getOscarUserContextService()->check(Privileges::PROJECT_SHOW, $entity);
+
+            if ($this->getRequest()->isXmlHttpRequest()) {
+                return $this->htmlProjectDetail($entity);
+            }
+
             $documents = [];
-            $documentsActivities = $this->getProjectService()->getProjectDocuments($entity);
             $documentsActivities = $this->getProjectService()->getProjectDocumentsVersionned($entity);
             foreach ($documentsActivities as $document){
                 if( $this->getOscarUserContextService()->contractDocumentRead($document) ){
                     $documents[] = $document;
                 }
-            }
-
-
-            $this->getOscarUserContextService()->check(Privileges::PROJECT_SHOW, $entity);
-
-            if ($this->getRequest()->isXmlHttpRequest()) {
-                return $this->htmlProjectDetail($entity);
             }
 
             $rolesOrganizations = $this->getOscarUserContextService()->getRolesOrganizationInActivity();
