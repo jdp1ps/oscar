@@ -194,8 +194,28 @@
           {{ tab.label }}
           <sup class="label label-default">{{ tab.total }}</sup>
         </div>
+        <div class="tab"  :class="{'selected': displayComputed }" @click.prevent="handlerSelectTab('computed')">
+          Documents générés
+        </div>
       </div>
 
+      <div class="tab-content" v-show="displayComputed">
+        <article class="card xs" v-for="doc in computedDocuments" :key="doc.key">
+          <div class="">
+            <i class="picto icon-doc"></i>
+            <strong>{{doc.label}}</strong>
+            <small class="text-light">&nbsp;
+              (Document généré automatiquement)
+            </small>
+          </div>
+          <nav class="text-right show-over">
+            <a class="btn btn-default btn-xs" :href="doc.url">
+              <i class="icon-upload-outline"></i>
+              Télécharger
+            </a>
+          </nav>
+        </article>
+      </div>
       <div class="tab-content" v-for="tab in packedDocuments" v-show="selectedTabId === tab.id">
         <nav v-if="tab.manage" class="text-right">
           <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
@@ -308,7 +328,8 @@ export default {
     url: {required: true},
     documentTypes: {required: true},
     urlDocumentType: {required: true},
-    moment: {require: true}
+    moment: {require: true},
+    computedDocuments: { requires: false, default: [] }
   },
 
   data() {
@@ -441,6 +462,7 @@ export default {
 
     // Modification d'un document
     handlerEdit(document) {
+      console.log(JSON.parse(JSON.stringify(document)));
       let valueTabDocument = document.tabDocument;
       if (valueTabDocument === null || valueTabDocument === undefined || valueTabDocument.trim === ''){
         valueTabDocument = PRIVATE;
@@ -515,20 +537,8 @@ export default {
       document.persons.forEach(p => {
         this.persons.push(p);
       })
-      // initialise objet de base
       this.uploadNewDocData.init = true;
-      // Affectation valeur par défaut champ fichier lié au contexte de l'onglet choisi (tab)
       this.fileToDownload = null;
-      // Tab choisis pour upload document (TabId est égal id onglet)
-      /**
-      this.uploadDoc = true;
-      //Hydratation de l'url de soumission complétée (propre à cet objet)
-      this.uploadNewDocData.baseUrlUpload =  urlReupload;
-      this.selectedIdTypeDocument = typeId;
-//tab.id, doc.urlReupload, doc.category.id,
-      //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
-      this.initUploadDatas(tabId, typeId);
-       ****/
     },
 
     /**
@@ -747,8 +757,15 @@ export default {
     },
 
     handlerSelectTab(tab){
-      this.selectedTab = tab;
-      this.selectedTabId = tab.id;
+      if( tab == "computed" ){
+        this.displayComputed = true;
+        this.selectedTab = null;
+        this.selectedTabId = null;
+      } else {
+        this.displayComputed = false;
+        this.selectedTab = tab;
+        this.selectedTabId = tab.id;
+      }
     },
 
     // Recup datas Docs

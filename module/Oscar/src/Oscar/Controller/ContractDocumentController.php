@@ -189,38 +189,52 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @return JsonModel
      * @throws OscarException|\HttpException
      */
-    public function changeTypeAction(): JsonModel
+    public function changeTypeAction()
     {
         /** @var Request $request */
         $request = $this->getRequest();
         if ($request->isPost()) {
-            // Récup document
+
+
             $document = $this->getContractDocumentService()->getDocument($request->getPost('documentId'));
+
             if( !($this->getOscarUserContextService()->getAccessDocument($document)['write'] === true) ){
                 return $this->getResponseUnauthorized("Vous ne pouvez pas modifier ce document");
             }
 
-            $type = $this->getEntityManager()->getRepository(TypeDocument::class)->find($request->getPost('type'));
+            // Gestion de l'onglet
+            $tabDest = $document->getTabDocument();
+            $tabDestId = intval($request->getPost()->get('tabDocument'));
+            if( $tabDestId ){
+                $tabDest = $this->getContractDocumentService()->getContractTabDocument($tabDestId);
+                if( $tabDestId != $document->getTabDocument()->getId() ){
+                    // On regarde si on a le droit d'accès à l'onglet
+                    if( $this->getOscarUserContextService()->getAccessTabDocument($tabDest)['write'] === true ){
+                        $document->setTabDocument($tabDest);
+                    } else {
+                        return $this->getResponseUnauthorized("Vous n'avez pas accès à l'onglet de destination");
+                    }
+                }
+            }
+
+            // Type de document
+            $type = $this->getContractDocumentService()->getContractDocumentType($request->getPost('type'));
             if (!$type) {
-                $this->getResponseBadRequest("Type de document invalide");
+                return $this->getResponseBadRequest("Type de document invalide");
             }
-            $privateDocument = $request->getPost('private');
+
+            // Privé
+            $privateDocument = (bool) $request->getPost('private', false);
+
+            // Personnes
             $idsPersons = (trim($request->getPost('persons')) !== "") ? explode(",", $request->getPost('persons')) : [];
-            // Passage du doc en non privé ou else -> passage en privé
-            if (false === boolval($privateDocument)) {
-                $tabDocument = $this->getEntityManager()->getRepository(TabDocument::class)->find(
-                    $request->getPost('tabDocument')
-                );
-                $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, $tabDocument, $type, false);
-                if (false === $succesManageDocuments) {
-                    $this->getResponseBadRequest("La gestion des documents associés a échouée !");
-                }
-            } else {
-                $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, null, $type, true);
-                if (false === $succesManageDocuments) {
-                    $this->getResponseBadRequest("La gestion des documents associés a échouée !");
-                }
+
+            // Traitement
+            $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, $tabDest, $type, $privateDocument);
+            if( !$succesManageDocuments ){
+                return $this->getResponseBadRequest("Impossible de modifier le document");
             }
+
             return new JsonModel(['response' => 'ok']);
         }
         throw new \HttpException();
@@ -377,76 +391,23 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $pathDocumentsConfig = $this->getOscarConfigurationService()->getDocumentDropLocation();
 
         // 1 : On va chercher toutes les versions d'un même document
-        $em = $this->getEntityManager()->getRepository(ContractDocument::class);
-        $documents = $em->createQueryBuilder('d')->select('d');
-        // Params pour la requete de base
-        $paramsQuery = [
-            'fileName' => $document->getFileName(),
-            'grant' => $activity,
-        ];
-        if (true === $document->isPrivate()) {
-            // Documents privés
-            $paramsQuery ['private'] = true;
-            $documents->where(
-                'd.fileName = :fileName 
-                AND d.grant = :grant
-                AND d.private = :private'
-            );
-        } else {
-            if (!is_null($document->getTabDocument())) {
-                $paramsQuery ['tabDocument'] = $document->getTabDocument();
-                $documents->where(
-                    'd.fileName = :fileName 
-                    AND d.grant = :grant 
-                    AND d.tabDocument = :tabDocument'
-                );
-            } else {
-                // Document version antérieur feature onglets de documents (non classés)
-                $paramsQuery ['private'] = false;
-                $documents->where(
-                    'd.fileName = :fileName 
-                    AND d.grant = :grant
-                    AND d.private = :private'
-                );
-            }
-        }
-        $result = $documents->setParameters($paramsQuery)->getQuery()->getResult();
+        $documents = $this->getContractDocumentService()->getContractDocumentRepository()->getDocumentsForFilenameAndActivity(
+            $document
+        );
+
+
 
         $destinationFolder = null;
         //2 : On gère le déplacement de doc et la privatisation
         /** @var ContractDocument $doc */
-        foreach ($result as $doc) {
+        foreach ($documents as $doc) {
             //Passage d'un document en privée
-            if (true === $docToPrivate) {
-                $pathSource = (!is_null($doc->getTabDocument())) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument(
-                    )->getId() . '/' . $doc->getPath() : $pathDocumentsConfig;
-                $pathDestination = $pathDocumentsConfig . 'private/' . $doc->getPath();
-                $destinationFolder = $pathDocumentsConfig . 'private';
-                $this->createFolder($destinationFolder);
-                //On supprime les tabDocuments
-                $doc->setTabDocument(null);
-                //On rend le document privé
-                $doc->setPrivate(true);
-            } else {
-                if ($doc->isPrivate()) {
-                    $pathSource = $pathDocumentsConfig . 'private/' . $doc->getPath();
-                } else {
-                    $pathSource = (!is_null(
-                        $doc->getTabDocument()
-                    )) ? $pathDocumentsConfig . 'tab_' . $doc->getTabDocument()->getId() . '/' . $doc->getPath(
-                        ) : $pathDocumentsConfig . '/' . $doc->getPath();
-                }
-                $pathDestination = $pathDocumentsConfig . 'tab_' . $tabDocument->getId() . '/' . $doc->getPath();
-                $destinationFolder = $pathDocumentsConfig . 'tab_' . $tabDocument->getId();
-                $this->createFolder($destinationFolder);
-                //Passage d'un document dans un onglet
-                $doc->setTabDocument($tabDocument);
-                $doc->setPrivate(false);
-            }
+            $doc->setPrivate($docToPrivate);
+            $doc->setTabDocument($tabDocument);
+
             //on réinitialise les personnes
-            foreach ($doc->getPersons() as $person) {
-                $doc->removePerson($person);
-            }
+            $doc->getPersons()->clear();
+
             //On ajoute les personnes demandées
             if (count($persons) > 0) {
                 foreach ($persons as $idPerson) {
@@ -457,18 +418,15 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             //Ajoute l'utilisateur courant
             $doc->addPerson($this->getCurrentPerson());
             $doc->setTypeDocument($type);
-            $this->getEntityManager()->persist($doc);
-            $this->getEntityManager()->flush();
-            //Déplacement des fichiers dans le bon répertoire
-            rename($pathSource, $pathDestination);
         }
+        $this->getEntityManager()->flush();
 
         $this->getActivityLogService()->addUserInfo(
             sprintf("a modifié le document '%s' dans l'activité %s.", $document, $document->getGrant()->log()),
             'Activity',
             $activity->getId()
         );
-        return $isSuccess;
+        return true;
     }
 
     /**

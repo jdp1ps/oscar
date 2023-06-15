@@ -113,7 +113,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             $organization->getSiret(),
             $organization->getTvaintra(),
             $organization->getDuns(),
-            "",
+            "1",
             $organization->getStreet1(),
             $organization->getZipCode(),
             $organization->getCity(),
@@ -457,6 +457,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException("Le module PCR n'est pas activé");
         }
 
+
         // Récupération des données
         $pcruInfos = $this->getPcruInfosActivity($activity);
         $preview = false;
@@ -476,7 +477,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         $pcruValidation = new PCRUValidator($this->getOscarConfigurationService(), $this->getEntityManager());
         $validation = $pcruValidation->validate($pcruInfos);
-
         $documentPath = "";
         if( $pcruInfos->getDocumentId() ){
             $documentPath = $this->getDocumentPath($pcruInfos->getDocumentId());

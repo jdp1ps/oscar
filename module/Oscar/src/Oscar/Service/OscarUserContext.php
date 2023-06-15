@@ -1506,6 +1506,15 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             if ($ressource) {
                 // $this->getLoggerService()->info("hasPrivilege $privilege dans $ressource non global");
                 $privileges = $this->getPrivileges($ressource);
+
+                if( $privilege == Privileges::PROJECT_DOCUMENT_SHOW && $ressource instanceof Project ){
+                    foreach ($ressource->getActivities() as $activity ){
+                        if( $this->getAccessActivityDocument($activity)['read'] ){
+                            return true;
+                        }
+                    }
+                }
+
                 if ($privilege == Privileges::ACTIVITY_DOCUMENT_SHOW || $privilege == Privileges::ACTIVITY_DOCUMENT_MANAGE) {
                     if ($ressource instanceof Activity) {
                         $access = $this->getAccessActivityDocument($ressource);
