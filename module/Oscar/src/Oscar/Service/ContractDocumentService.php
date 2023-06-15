@@ -119,7 +119,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      */
     public function deleteDocument(ContractDocument $contractDocument): void
     {
-        $this->getLoggerService()->debug("# Suppression du document '$contractDocument'");
+        $this->getLoggerService()->debug("# Suppression du document '$contractDocument'...");
 
         // Nom du document
         $documentName = $contractDocument->getFileName();
@@ -127,9 +127,12 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
         // Path document pour déplacement
         $documentLocation = $this->getOscarConfigurationService()->getDocumentDropLocation();
+        $this->getLoggerService()->debug(" - Dossier : " . $documentLocation);
 
         // Récupération du document et des ces différentes versions
         $documents = $this->getContractDocumentRepository()->getDocumentsForFilenameAndActivity($contractDocument);
+        $this->getLoggerService()->debug(" - Le documents et ces versions implique " . count($documents) . " document(s)");
+
 
         if (count($documents) == 0) {
             throw new OscarException("Ce document n'existe plus");
@@ -219,7 +222,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// REPOSITORY
-    protected function getContractDocumentRepository(): ContractDocumentRepository
+    public function getContractDocumentRepository(): ContractDocumentRepository
     {
         return $this->getEntityManager()->getRepository(ContractDocument::class);
     }

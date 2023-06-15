@@ -345,34 +345,16 @@
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity)): ?>
                 <section id="documents" class="has-btn">
                     <h2><i class="icon-book"></i> Documents</h2>
-                    <?php
-                    /*
-                    if ($manage):
-                    */
-                    ?>
-                    <!--
-                        <div class="btn-area">
-                            <a href="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId(),'idTab'=>""]) ?>"
-                               class="smoke">
-                                <i class="icon-book"></i>
-                                Téléverser un document
-                            </a>
-                        </div>
-                        -->
-
-                    <?php
-                    //endif; ?>
                     <nav>
                         <?php
-                        foreach ($generatedDocuments as $key => $infos): ?>
-                             <a href="<?= $this->url(
-                                'contract/generatedocument',
-                                ['id' => $entity->getId(), 'doc' => $key]
-                            ) ?>" class="btn btn-primary">
-                                <?= $infos['label'] ?>
-                            </a>
-                        <?php
-                        endforeach; ?>
+                        $generatedDocumentsJson = [];
+                        foreach ($generatedDocuments as $key => $infos) {
+                            $generatedDocumentsJson[] = [
+                                    'url' => $this->url('contract/generatedocument', ['id' => $entity->getId(), 'doc' => $key ]),
+                                    'label' =>  $infos['label']
+                                ];
+                        }
+                        ?>
                     </nav>
                     <div id="docv2"></div>
                     <script>
@@ -409,6 +391,7 @@
                                             urlDocumentType: '<?= $this->url(
                                                 'contractdocument/document-change-type'
                                             ) ?>',
+                                            computedDocuments: <?= json_encode($generatedDocumentsJson) ?>,
                                             documentTypes: <?= $documentTypes ?>,
                                             moment: moment
                                         }

@@ -18,14 +18,14 @@ class PCRUPartnerValidator extends AbstractValidator
 
 
     protected $messageTemplates = [
-        self::PCRU_VALIDATOR_CODE_PARTNER => "La structure '%s' n'a ni SIRET, TVA Intra ou DUNS",
+        self::PCRU_VALIDATOR_CODE_PARTNER => "Le partenaire PCRU '%s' a le rôle mais n'a ni SIRET, TVA Intra ou DUNS",
     ];
 
     /**
      * @param Organization $value
      * @return bool|void
      */
-    public function isValid($value)
+    public function isValid($value) :bool
     {
         if( !($value->getSiret() || $value->getDuns() || $value->getTvaintra()) ){
             $this->error(self::PCRU_VALIDATOR_CODE_PARTNER, $value);

@@ -20,7 +20,7 @@ class PCRUUnitValidator extends AbstractValidator
 
     protected $messageTemplates = [
         self::PCRU_VALIDATOR_UNIT => "La structure n'est pas une unité valide pour PCRU",
-        self::PCRU_VALIDATOR_LABINTEL => "La structure '%s' n'a pas de code LABINTEL",
+        self::PCRU_VALIDATOR_LABINTEL => "L'unité PCRU '%s' a le rôle pour être une unité PCRU, mais n'a pas de code LABINTEL",
     ];
 
     /**
