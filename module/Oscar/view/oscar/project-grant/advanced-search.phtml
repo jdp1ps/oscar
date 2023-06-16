@@ -286,7 +286,7 @@
         <article class="criteria criteria-typedocument card">
             <div class="icon-docs"></div>
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
-            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <input type="text" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <small>
                 <strong></p>Ayant au moins un des types de document</strong>
                 (Laisser vide pour n'importe quel type de document)
@@ -903,6 +903,7 @@
                         var checkboxs = filter.find('.val2[type="checkbox"]');
 
                         if( checkboxs.length > 1 ){
+                            console.log("VAL2 CHECKBOX x BEAUCOUP");
                             var values = [];
                             checkboxs.each(i => {
                                 var checkbox = checkboxs[i];
@@ -912,17 +913,19 @@
                             });
                             val2 = values.join(',');
                         } else if (checkboxs.length == 1){
+                            console.log("VAL2 CHECKBOX x 1");
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].checked ? "1" : "0";
                             }
-
+                            console.log('Val2', val2);
                         }
 
                         // Select
                         var select = filter.find('select.val2');
 
                         if( select.length > 0 ){
+                            console.log("VAL2 SELECT");
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].value ? val2Elem[0].value : "0";
@@ -931,15 +934,17 @@
                         }
 
                         // Select
-                        var input = filter.find('input.val2');
+                        var input = filter.find('input[type="text"].val2');
 
                         if( input.length > 0 ){
+                            console.log("VAL2 INPUT");
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].value ? val2Elem[0].value : "";
                             }
-
                         }
+
+                        console.log("VAL2:", val2);
 
                         filter.find('.criteria').val(datas.type
                             + ';' + filter.find('.val1').val()
