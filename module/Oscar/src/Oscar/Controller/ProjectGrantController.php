@@ -2666,33 +2666,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             $accountsInfos = $this->getSpentService()->getAccountsInfosUsed();
 
-            $queryPersons = $this->getEntityManager()->createQueryBuilder()
-                ->select('a.id')
-                ->from(Activity::class, 'a', 'a.id')
-                ->leftJoin('a.project', 'p')
-                ->leftJoin('p.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->leftJoin('p.members', 'm1')
-                ->leftJoin('a.persons', 'm2')
-                ->where('m1.person in(:ids) OR m2.person in (:ids)');
-
-
-            $queryOrganisations = $this->getEntityManager()->createQueryBuilder()
-                ->select('a.id')
-                ->from(Activity::class, 'a', 'a.id')
-                ->leftJoin('a.project', 'p')
-                ->leftJoin('p.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->leftJoin('p.members', 'm1')
-                ->leftJoin('a.persons', 'm2')
-                ->where('(o1.organization in(:ids) OR o2.organization IN(:ids))');
-
-
             // Paramètres de la requête finale
             $parameters = [];
 
             $projectIds = [];
-
 
             if (!$search && count($criteria) === 0) {
                 $ids = [];
@@ -2772,6 +2749,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'vp':
                         $qb->addSelect('c.payments', 'p');
                         break;
+
                     case 'mp':
                         $clause = [];
 
@@ -2844,6 +2822,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;
+
                     case 'cb':
                         // Récupération de l'organisation
                         $value1 = $crit['val1'] = explode(',', $params[1]);
@@ -2878,6 +2857,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                             $ids = $this->getActivityService()
                                 ->getActivitiesIdsWithTypeDocument($value1, $reverse);
+
                         } catch (\Exception $e) {
                             throw new OscarException($e->getMessage());
                         }
