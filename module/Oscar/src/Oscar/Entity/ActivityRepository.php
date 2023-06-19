@@ -131,7 +131,7 @@ class ActivityRepository extends EntityRepository
         $clause = '('
             .implode($clauseA, ' AND ')
             .') OR ('
-            .implode($clauseB, 'AND ')
+            .implode($clauseB, ' AND ')
             . ')';
 
         $queryBuilder->where($clause);
