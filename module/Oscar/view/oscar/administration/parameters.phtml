@@ -153,7 +153,9 @@
             </article>
 
             <article class="card">
-                <h3><i class="icon-"></i>Format du PFI</h3>
+                <h3><i class="icon-"></i>Format du numéro financier (PFI)</h3>
+
+                <h1><?php echo $this->options()->getConfiguration()->getFinancialLabel(); ?></h1>
                 <p class="help-message">
                     <i class="icon-help-circled"></i>
                     Permet de fixer le mode strict
@@ -215,9 +217,7 @@
                     </form>
                 </div>
                 <script>
-                    console.log('HOP');
                     require(['vue', 'vue-resource'], function(Vue, VueResource){
-                        console.log("OK");
                         Vue.use(VueResource);
                         var verif = new Vue({
                             el: "#verifEl",
@@ -242,7 +242,6 @@
 
                                 },
                                 handlerVerify() {
-                                    console.log("véfif ?", this.reg);
                                     this.$http.get('?a=verifypfi&reg=' +this.reg).then(
                                         ok => {
                                             console.log(ok);
