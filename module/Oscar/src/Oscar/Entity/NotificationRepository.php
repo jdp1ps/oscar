@@ -33,6 +33,19 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function removeNotificationPersons( int $notificationId, array $personsIds ) :void
+    {
+        /** @var Notification $notification */
+        $notification = $this->getEntityManager()->find(Notification::class, $notificationId);
+
+        /** @var NotificationPerson $notificationPerson */
+        foreach ($notification->getPersons() as $notificationPerson) {
+            if( in_array($notificationPerson->getPerson()->getId(), $personsIds) ){
+                $this->getEntityManager()->remove($notificationPerson);
+            }
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// NotificationPerson
 
