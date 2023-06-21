@@ -314,7 +314,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
         $this->add([
             'name' => 'dateOpened',
             'options' => [
-                'label' => "Création du PFI"
+                'label' => "Création du N°financier"
             ],
             'attributes' => [
                 'class' => 'input-date form-control'

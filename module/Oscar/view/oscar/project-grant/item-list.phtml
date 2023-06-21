@@ -108,12 +108,12 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
                 <?php endif; ?>
                 <div>
                 <?php if ($activity->getCodeEOTP()): ?>
-                    PFI <strong><?= $activity->getCodeEOTP() ?></strong>
+                    <?= $this->options()->getConfiguration()->getFinancialLabel() ?> <strong><?= $activity->getCodeEOTP() ?></strong>
                     ( Ouverture le
                     <time><?= $this->moment($activity->getDateOpened()) ?></time>)
                 <?php elseif ($activity->getDateOpened()): ?>
                     <i class="icon-warning-empty"></i> Ouverture
-                    <time><?= $this->moment($activity->getDateOpened()) ?></time> SANS PFI
+                    <time><?= $this->moment($activity->getDateOpened()) ?></time> SANS <?= $this->options()->getConfiguration()->getFinancialLabel() ?>
                 <?php endif; ?>
 
 

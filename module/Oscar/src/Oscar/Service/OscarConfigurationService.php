@@ -672,7 +672,17 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
 
     public function getFinancialDescription(): string
     {
-        return $this->getEditableConfKey(self::financial_description, 'Code PFI côté SIFAC');
+        return $this->getEditableConfKey(self::financial_description, 'Numéro PFI');
+    }
+
+    public function setFinancialLabel(string $label)
+    {
+        return $this->saveEditableConfKey(self::financial_label, $label);
+    }
+
+    public function setFinancialDescription(string $description)
+    {
+        return $this->saveEditableConfKey(self::financial_description, $description);
     }
 
     /**
