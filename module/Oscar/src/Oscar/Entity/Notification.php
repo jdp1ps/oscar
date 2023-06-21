@@ -34,6 +34,8 @@ class Notification
     const OBJECT_ACTIVITY = 'activity';
     const OBJECT_APPLICATION = 'application';
     const OBJECT_TIMESHEET = 'timesheet';
+    const OBJECT_PAYMENT = 'payment';
+    const OBJECT_MILESTONE = 'milestone';
 
     // Valeurs par défaut
     const DEFAULT_LEVEL = self::LEVEL_INFO;
@@ -285,12 +287,55 @@ class Notification
         return $this->context;
     }
 
+    private ?string $_contextKey = null;
+    private ?int $_contextId = null;
+
+    private function getContextDatas() :array
+    {
+        if( $this->_contextKey === null ){
+            $contextData = explode(":", $this->getContext());
+            $this->_contextKey = $contextData[0];
+            if( count($contextData) > 1 ){
+                $this->_contextId = $contextData[1];
+            } else {
+                $this->_contextId = null;
+            }
+        }
+        return [
+            'key' => $this->_contextKey,
+            'id' =>$this->_contextId
+        ];
+    }
+
+    public function getContextKey() :string
+    {
+        return $this->getContextDatas()['key'];
+    }
+
+    public function getContextId() :?int
+    {
+        return $this->getContextDatas()['id'];
+    }
+
+    public function isPayement() :bool
+    {
+        return $this->getContextKey() == self::OBJECT_PAYMENT;
+    }
+
+
+    public function getSubscribersIds() :array
+    {
+        return array_map(function($p) { return $p->getPerson()->getId(); }, $this->getPersons()->toArray());
+    }
+
+
     /**
      * @param mixed $context
      */
     public function setContext($context)
     {
         $this->context = $context;
+        $this->_contextKey = null;
 
         return $this;
     }

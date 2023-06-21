@@ -243,14 +243,60 @@ class NotificationService implements UseServiceContainer
      * @return mixed
      * @throws OscarException
      */
-    public function getRolesIdsWithPersonsIds(Activity $activity)
+    public function getRolesIdsWithPersonsIds(Activity $activity): array
     {
         $activityId = $activity->getId();
-        $personsService = $this->getPersonService();
-        /** @var Person[] $persons Liste des personnes impliquées dans une activité avec leurs rôles cherche en profondeur */
-        $persons = $personsService->getAllPersonsWithRolesInActivity($activity);
-        $this->_object_roles_persons[$activityId] = $persons;
+        if (!array_key_exists($activityId, $this->_object_roles_persons)) {
+            $this->_object_roles_persons[$activityId] = $this->getPersonService()->getAllPersonsWithRolesInActivity(
+                $activity
+            );
+        }
         return $this->_object_roles_persons[$activityId];
+    }
+
+    /**
+     * Retourne la liste des IDS des rôles qui peuvent voir les payements.
+     *
+     * @return array
+     * @throws OscarException
+     */
+    public function getRolesIdConcernedByPayments(): array
+    {
+        $rolesAllowPayments = $this->getOscarUserContextService()->getRolesWithPrivileges(
+            Privileges::ACTIVITY_PAYMENT_SHOW
+        );
+        return array_map(
+            function ($r) {
+                return $r->getId();
+            },
+            $rolesAllowPayments
+        );
+    }
+
+    private array $_cacheActivityPayementPersons = [];
+
+    /**
+     * Retourne les identifiants des personnes concernées par les payments d'une activité.
+     *
+     * @param Activity $activity
+     * @return array
+     * @throws OscarException
+     */
+    protected function getPersonsIdsConcernedByPaymentInActivity(Activity $activity): array
+    {
+        $activityId = $activity->getId();
+        if (!array_key_exists($activityId, $this->_cacheActivityPayementPersons)) {
+            $output = [];
+            $idsPersonsRoles = $this->getRolesIdsWithPersonsIds($activity);
+            $idsRolesConcerned = $this->getRolesIdConcernedByPayments();
+            foreach ($idsPersonsRoles as $roleId => $personsIds) {
+                if (in_array($roleId, $idsRolesConcerned)) {
+                    $output = array_merge($output, $idsPersonsRoles[$roleId]);
+                }
+            }
+            $this->_cacheActivityPayementPersons[$activityId] = array_unique($output);
+        }
+        return $this->_cacheActivityPayementPersons[$activityId];
     }
 
 
@@ -592,6 +638,7 @@ class NotificationService implements UseServiceContainer
     public function updateNotificationsActivity(Activity $activity)
     {
         $this->updateNotificationCore($activity);
+        $this->updateNotificationCorePayment($activity);
         $this->updateNotificationsMilestonePersonActivity($activity);
     }
 
@@ -601,6 +648,65 @@ class NotificationService implements UseServiceContainer
             $this->updateNotificationsActivity($activity);
         }
     }
+
+    public function updateNotificationsPayment(Notification $notification): void
+    {
+        /** @var ActivityPayment $payment */
+        $payment = $this->getEntityManager()->getRepository(ActivityPayment::class)->find(
+            $notification->getContextId()
+        );
+
+        if (!$payment) {
+            $this->getLoggerService()->alert("Impossible de mettre à jour les notifications pour le payment ($notification)");
+            return;
+        }
+
+        if( $payment->isDone() ){
+            return;
+        }
+
+        // TODO calculer si le payment est eligible aux notifications (date passée, fait, en retard, etc...)
+
+
+        $haveToSub = $this->getPersonsIdsConcernedByPaymentInActivity($payment->getActivity());
+        $this->updateSubscribersToNotification($notification, $haveToSub);
+    }
+
+
+    /**
+     * Mise à jour des inscriptions des personnes à la notification.
+     *
+     * @param Notification $notification
+     * @param array $expectedSubscribersIds ID des personnes à inscrire
+     */
+    protected function updateSubscribersToNotification(Notification $notification, array $expectedSubscribersIds): void
+    {
+        // identifiants des personnes déjà inscrites
+        $alreadySub = $notification->getSubscribersIds();
+
+        // Personnes à retirer
+        $subscribeToRemove = array_diff($alreadySub, $expectedSubscribersIds);
+
+        // Personnes à ajouter
+        $subscribeToDo = array_diff($expectedSubscribersIds, $alreadySub);
+
+        try {
+            foreach ($subscribeToDo as $idPerson) {
+                $person = $this->getEntityManager()->getRepository(Person::class)->find($idPerson);
+                if (!$person) {
+                    continue;
+                }
+                $subscribe = new NotificationPerson();
+                $this->getEntityManager()->persist($subscribe);
+                $subscribe->setNotification($notification)->setPerson($person);
+            }
+            $this->getNotificationRepository()->removeNotificationPersons($notification->getId(), $subscribeToRemove);
+            $this->getEntityManager()->flush();
+        } catch (\Exception $e) {
+            $this->getLoggerService()->alert("Impossible de mettre à jour les notifications dans '$notification'");
+        }
+    }
+
 
     /**
      * @param Activity $activity
@@ -618,41 +724,56 @@ class NotificationService implements UseServiceContainer
         // Personnes devant être inscrites
         $idsPersonsRoles = $this->getRolesIdsWithPersonsIds($activity);
 
-        $this->getLoggerService()->debug("Rôles concernées : ");
-        foreach ($idsPersonsRoles as $roleId => $personsIds) {
-            $this->getLoggerService()->debug(" - rôle '$roleId' : : " . count($personsIds) . " personne(s)");
-        }
-
-
         $now = (new \DateTime('now'))->modify('-1 month');
 
         //$na = notification
+        /** @var Notification $na */
         foreach ($notificationsActivity as $na) {
             $contextNotification = explode(":", $na->getContext());
 
-            if( count($contextNotification) < 2 ){
+            if (count($contextNotification) < 2) {
                 continue;
             }
             //ActivityDate = Jalon donc Milestone (ancienne nomenclature, terminologie métier)
-            $idActivityDate = $contextNotification[1];
-            try {
-                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(["id"=>$idActivityDate]);
-            } catch (\Exception $e) {
-                die("idActivityDate : $idActivityDate --- " . $na->getContext());
+            $context = $na->getContextKey();
+            $contextId = $na->getContextId();
+
+            if ($context == 'payment') {
+                try {
+                    $this->updateNotificationsPayment($na);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->alert(
+                        "Un problème est survenu lors de la génération des notifications pour le payment $contextId"
+                    );
+                }
+                continue;
             }
 
-            if( !$activityDate ){
+            if ($context != Notification::OBJECT_MILESTONE) {
+                continue;
+            }
+
+            try {
+                $activityDate = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(
+                    ["id" => $contextId]
+                );
+            } catch (\Exception $e) {
+                $this->getLoggerService()->alert("Problème de génération de notification pour $na : " . $e->getMessage());
+                continue;
+            }
+
+            if (!$activityDate) {
                 continue;
             }
 
             //Récupère-les roles associés au jalon (Milestone) grâce au type du jalon (rôles associés au type de jalon)
-            $rolesActivityDate  = $activityDate->getType()->getRoles();
+            $rolesActivityDate = $activityDate->getType()->getRoles();
 
             // Si pas de rôles on passe directement, pas de calcul de notifications
-            if (count($rolesActivityDate) == 0){
-                $this->getLoggerService()->debug(" > Skip (pas de rôles)");
+            if (count($rolesActivityDate) == 0) {
                 continue;
             }
+
             // Si finishable et pas fait
             // TODO
 //            if (!$activityDate->isLate()){
@@ -671,7 +792,7 @@ class NotificationService implements UseServiceContainer
             $idsRolesActivityDate = [];
 
             /** @var  Role $roleActivityDate */
-            foreach ($rolesActivityDate as $roleActivityDate){
+            foreach ($rolesActivityDate as $roleActivityDate) {
                 //idRole associé au type de jalon/milestone (ActivityDate)
                 $idsRolesActivityDate [] = $roleActivityDate->getId();
             }
@@ -680,10 +801,10 @@ class NotificationService implements UseServiceContainer
             $idsExpectedSubscribersById = [];
 
             $rolesAndExpectedSubscribers = $idsPersonsRoles;
-            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons){
-                if (in_array($idRole, $idsRolesActivityDate)){
-                    foreach ($arrayIdspersons as $key => $idPerson){
-                        if (!in_array($idPerson, $idsExpectedSubscribersById)){
+            foreach ($rolesAndExpectedSubscribers as $idRole => $arrayIdspersons) {
+                if (in_array($idRole, $idsRolesActivityDate)) {
+                    foreach ($arrayIdspersons as $key => $idPerson) {
+                        if (!in_array($idPerson, $idsExpectedSubscribersById)) {
                             $idsExpectedSubscribersById [] = $idPerson;
                         }
                     }
@@ -865,7 +986,7 @@ class NotificationService implements UseServiceContainer
      * idoines.
      * @param \DateTime $reference
      */
-    public function generateActivityMilestonesUncompleted( \DateTime $reference ) :void
+    public function generateActivityMilestonesUncompleted(\DateTime $reference): void
     {
         // TODO
 //        /** @var ActivityDateRepository $milestoneRepository */
