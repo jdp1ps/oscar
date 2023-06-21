@@ -1030,6 +1030,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Récupération des informations annexes
+            foreach ($activity->getPersons() as $activityPerson){
+                $this->getPersonService()->personActivityRemove($activityPerson);
+            }
+
+            foreach ($activity->getOrganizations() as $activityOrganization){
+                $this->getActivityService()->activityOrganizationRemove($activityOrganization);
+            }
 
             // On supprime les créneaux
             try {
@@ -1039,6 +1046,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     "Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage()
                 );
             }
+
+            // Suppression des notifications
+            $this->getNotificationService()->deleteNotificationActivityById($activity->getId());
 
             // Suppression des documents
             $documents = $activity->getDocuments();
@@ -2545,39 +2555,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ->leftJoin('a.persons', 'm2')
                 ->where('m1.person in(:ids) OR m2.person in (:ids)');
 
-            $queryOrganisationNoRole = $this->getEntityManager()->createQueryBuilder()
-                ->select('a.id')
-                ->from(Activity::class, 'a', 'a.id')
-                ->leftJoin('a.project', 'p')
-                ->leftJoin('p.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->leftJoin('p.members', 'm1')
-                ->leftJoin('a.persons', 'm2')
-                ->where('(o1.organization = :id OR o2.organization = :id)');
-
-            $queryOrganisationRole = $this->getEntityManager()->createQueryBuilder()
-                ->select('a.id')
-                ->from(Activity::class, 'a', 'a.id')
-                ->leftJoin('a.project', 'p')
-                ->leftJoin('p.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->leftJoin('p.members', 'm1')
-                ->leftJoin('a.persons', 'm2')
-                ->where(
-                    '((o1.organization = :id AND o1.roleObj = :roleObj) OR (o2.organization = :id AND o2.roleObj = :roleObj))'
-                );
-
-            $queryOrganisationRoleNorOrg = $this->getEntityManager()->createQueryBuilder()
-                ->select('a.id')
-                ->from(Activity::class, 'a', 'a.id')
-                ->leftJoin('a.project', 'p')
-                ->leftJoin('p.partners', 'o1')
-                ->leftJoin('a.organizations', 'o2')
-                ->leftJoin('p.members', 'm1')
-                ->leftJoin('a.persons', 'm2')
-                ->where(
-                    '(o1.roleObj = :roleObj OR o2.roleObj = :roleObj)'
-                );
 
             $queryOrganisations = $this->getEntityManager()->createQueryBuilder()
                 ->select('a.id')
@@ -2728,10 +2705,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             )->getQuery()->getArrayResult()
                         );
                         break;
-                    // Organisations (plusieurs)
+
                     case 'om' :
-
-
                         $value1 = explode(',', $params[1]);
                         $crit['val1'] = $value1;
                         $organisationsRequire = $this->getOrganizationService()->getOrganizationsByIds($value1);
@@ -2741,14 +2716,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $filterOrganizations[$organisation->getId()] = (string)$organisation;
                         }
 
-                        $ids = array_keys(
-                            $queryOrganisations->setParameter(
-                                'ids',
-                                $value1
-                            )->getQuery()->getArrayResult()
-                        );
+                        $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOneOfOrganizationsRoled($value1);
 
                         break;
+
                     case 'ap' :
                     case 'sp' :
                         try {
@@ -2759,7 +2730,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $crit['val1Label'] = $person->getDisplayName();
                             $crit['val2Label'] = $value2 > 0 ? $this->getOscarUserContextService()->getAllRoleIdPerson(
                             )[$value2] : '';
-                            $ids = $this->getActivityService()->getActivityRepository()->getIdsForPersonWithRole($person->getId(), $value2 ? $value2 : 0);
+                            $ids = $this->getActivityService()->getActivityRepository()
+                                ->getIdsForPersonWithRole($person->getId(), $value2 ? $value2 : 0);
                         } catch (\Exception $e) {
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
