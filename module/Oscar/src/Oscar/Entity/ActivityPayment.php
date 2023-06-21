@@ -48,11 +48,22 @@ class ActivityPayment implements ITrackable
             self::getStatusPayments()[$this->getStatus()] : '';
     }
 
+    public function getDateRef()
+    {
+        if( $this->getStatus() == self::STATUS_PREVISIONNEL ){
+            return $this->getDatePredicted() ? $this->getDatePredicted()->format('Y-m-d') : 'No Date';
+        }
+        if( $this->getStatus() == self::STATUS_REALISE ){
+            return $this->getDatePayment() ? $this->getDatePayment()->format('Y-m-d') : 'No Date';
+        }
+        return '???';
+    }
+
     public function __toString()
     {
-        return sprintf("Versement %s de %s%s",
+        return sprintf("Versement %s de %s %s (%s)",
             self::getStatusPayments()[$this->getStatus()],
-            $this->getAmount(), $this->getCurrency()
+            $this->getAmount(), $this->getCurrency(), $this->getDateRef()
             );
     }
 
@@ -281,6 +292,11 @@ class ActivityPayment implements ITrackable
      */
     public function isLate(){
         return $this->getStatus() == self::STATUS_PREVISIONNEL && $this->getDatePredicted() < new \DateTime();
+    }
+
+    public function isDone() :bool
+    {
+        return $this->getStatus() == self::STATUS_REALISE;
     }
 
     function __construct()
