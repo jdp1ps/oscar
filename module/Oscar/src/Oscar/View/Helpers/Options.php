@@ -24,7 +24,7 @@ class Options extends AbstractHtmlElement implements UseOscarConfigurationServic
     /**
      * @return OscarConfigurationService
      */
-    private function getConfiguration()
+    public function getConfiguration()
     {
         return $this->getOscarConfigurationService();
     }

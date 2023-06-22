@@ -2308,6 +2308,7 @@ class Activity implements ResourceInterface
         $datas['acronym'] = htmlspecialchars($this->getAcronym());
         $datas['amount'] = $this->getAmount();
         $datas['pfi'] = $this->getCodeEOTP();
+        $datas['financial-number'] = $this->getCodeEOTP();
         $datas['oscar'] = $this->getOscarNum();
         $datas['montant'] = number_format((double)$this->getAmount(), 2, ',', ' ') . $this->getCurrency()->getSymbol();
         $datas['annee-debut'] = $this->getDateStartStr('Y');
@@ -2451,8 +2452,8 @@ class Activity implements ResourceInterface
             'Acronyme' => $this->getAcronym(),
             'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
             'Intitulé' => $this->getLabel(),
-            'PFI' => $this->getCodeEOTP(),
-            'Date du PFI' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
+            'N°Financier' => $this->getCodeEOTP(),
+            'Date du N°Financier' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
             'Montant' => number_format($this->getAmount(), 2, ',', ''), //.$this->getCurrency()->getSymbol(),
             'numéro SAIC' => $this->getCentaureNumConvention(),
             'numéro oscar' => $this->getOscarNum(),
@@ -2493,8 +2494,8 @@ class Activity implements ResourceInterface
             'Acronyme',
             'Projet',
             'Intitulé',
-            'PFI',
-            'Date du PFI',
+            'N°Financier',
+            'Date du N°Financier',
             'Montant',
             'numéro SAIC',
             'numéro oscar',

@@ -153,18 +153,15 @@
             </article>
 
             <article class="card">
-                <h3><i class="icon-"></i>Format du PFI</h3>
-                <p class="help-message">
-                    <i class="icon-help-circled"></i>
-                    Permet de fixer le mode strict
-                </p>
+                <h3><i class="icon-"></i>Numéro financier (<?php echo $this->options()->getConfiguration()->getFinancialLabel(); ?>)</h3>
+
 
                 <div id="verifEl">
                     <div v-if="verify" class="overlay">
                         <div class="overlay-content">
                             <a href="#" class="overlay-closer" @click.prevent="verify=false">Fermer</a>
 
-                            <h2>Résultats pour {{ verify }} PFI testé(s)</h2>
+                            <h2>Résultats pour {{ verify }} <?= $this->options()->getConfiguration()->getFinancialLabel() ?> testé(s)</h2>
                             <p v-if="verifyWarnings.length == 0" class="alert alert-success">
                                 Tous les PFI semblent correspondre au format attendu.
                             </p>
@@ -179,6 +176,29 @@
                         </div>
                     </div>
                     <form action="" method="post" class="form">
+                        <p class="alert alert-info">
+                            Vous pouvez régler ici les informations financières utilisées dans les activités de recherche
+                        </p>
+
+                        <h4>Nommage</h4>
+
+
+                        <div class="input-group">
+                            <label for="<?= \Oscar\Service\OscarConfigurationService::financial_label ?>">
+                                Intitulé pour le numéro financier
+                                <input type="text" name="<?= \Oscar\Service\OscarConfigurationService::financial_label ?>"
+                                       placeholder="Nom du champ financier"
+                                       id="<?= \Oscar\Service\OscarConfigurationService::financial_label ?>"
+                                       value="<?= $this->options()->getConfiguration()->getFinancialLabel() ?>"
+                                />
+                            </label>
+                        </div><!-- /input-group -->
+
+                        <h4>Mode strict</h4>
+                        <p class="help-message">
+                            <i class="icon-help-circled"></i>
+                            Permet de fixer le mode strict
+                        </p>
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="input-group">
@@ -188,7 +208,7 @@
                                             id="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>"
                                         />
                                       </span>
-                                    <label for="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>">Utiliser un PFI strict</label>
+                                    <label for="<?= \Oscar\Service\OscarConfigurationService::pfi_strict ?>">Utiliser un <?= $this->options()->getConfiguration()->getFinancialLabel() ?> strict</label>
                                 </div><!-- /input-group -->
                             </div><!-- /.col-lg-6 -->
                             <div class="col-lg-8">
@@ -215,9 +235,7 @@
                     </form>
                 </div>
                 <script>
-                    console.log('HOP');
                     require(['vue', 'vue-resource'], function(Vue, VueResource){
-                        console.log("OK");
                         Vue.use(VueResource);
                         var verif = new Vue({
                             el: "#verifEl",
@@ -242,7 +260,6 @@
 
                                 },
                                 handlerVerify() {
-                                    console.log("véfif ?", this.reg);
                                     this.$http.get('?a=verifypfi&reg=' +this.reg).then(
                                         ok => {
                                             console.log(ok);
