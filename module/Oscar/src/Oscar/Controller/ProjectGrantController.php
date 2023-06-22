@@ -2222,7 +2222,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
          * @var ActivityOrganization $activityOrganization
          */
         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
-            // FIX (non idéale)
+
+            // Cas particulier (affectation sans rôle)
+            // rôle supprimé ? manipulation extérieur
             if (!$activityOrganization->getRoleObj()) {
                 $this->getLoggerService()->warning(
                     sprintf(
@@ -2231,8 +2233,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $activityOrganization->getEnroller()
                     )
                 );
-                continue;
+                $roleId = 0;
+                $roleprincipal = false;
+                $rolelabel = "Rôle inconnu";
+                $role = null;
+            } else {
+                $roleId = $activityOrganization->getRoleObj()->getId();
+                $roleprincipal = $activityOrganization->getRoleObj()->isPrincipal();
+                $rolelabel = $activityOrganization->getRoleObj()->getRoleId();
+                $role = $activityOrganization->getRoleObj();
             }
+
             $class = get_class($activityOrganization);
 
             if ($class == ActivityOrganization::class) {
@@ -2264,10 +2275,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             $out[] = [
                 'id' => $activityOrganization->getId(),
-                'roleId' => $activityOrganization->getRoleObj()->getId(),
-                'role' => $activityOrganization->getRole(),
-                'roleLabel' => $activityOrganization->getRole(),
-                'rolePrincipal' => $activityOrganization->isPrincipal(),
+                'roleId' => $roleId,
+                'role' => $role,
+                'roleLabel' => $rolelabel,
+                'rolePrincipal' => $roleprincipal,
                 'urlDelete' => $urlDelete,
                 'context' => $context,
                 'contextKey' => $contextKey,
@@ -2277,7 +2288,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'enrollerLabel' => (string)$activity,
                 'editable' => $editable,
                 'deletable' => $deletable,
-//                'hash' => (string)$activityOrganization,
                 'enrolled' => $activityOrganization->getOrganization()->getId(),
                 'enrolledLabel' => $activityOrganization->getOrganization()->getFullName(),
                 'past' => !$activityOrganization->isActive(),
