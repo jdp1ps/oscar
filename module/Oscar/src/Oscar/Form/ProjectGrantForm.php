@@ -202,7 +202,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
         $this->add([
             'name' => 'codeEOTP',
             'options' => [
-                'label' => 'EOTP'
+                'label' => 'N°Financier (' . $this->getProjectGrantService()->getOscarConfigurationService()->getFinancialLabel() . ')'
             ],
             'attributes' => [
                 'class' => 'form-control'
