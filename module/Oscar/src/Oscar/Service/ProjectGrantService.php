@@ -2530,8 +2530,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $buildIndex = true
     ) {
         try {
-            $updateNotification = $activityorganization->getRoleObj()->isPrincipal() !== $roleOrganization->isPrincipal(
-                );
+            if( !$activityorganization->getRoleObj() ){
+                $updateNotification = $roleOrganization->isPrincipal();
+            } else {
+                $updateNotification = $activityorganization->getRoleObj()->isPrincipal() !== $roleOrganization->isPrincipal();
+            }
+
             $activityorganization->setRoleObj($roleOrganization)
                 ->setDateStart($dateStart)
                 ->setDateEnd($dateEnd);

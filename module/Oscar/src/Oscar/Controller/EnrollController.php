@@ -456,7 +456,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 $dateStart,
                 $dateEnd
             );
-            return $this->getResponseOk("La personne a bien été ajouté");
+            return $this->getResponseOk("L'organisation a bien été ajoutée");
         } catch (\Exception $e) {
             $msg = "Impossible d'ajouter l'organisation à l'activité : " . $e->getMessage();
             $this->getLoggerService()->error("$msg : " . $e->getMessage());
