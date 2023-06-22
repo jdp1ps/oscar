@@ -160,7 +160,7 @@
 
         <p class="texthighlight baseline">
             <?= $this->translate("N° Oscar") ?> : <strong><?= $entity->getOscarNum() ?></strong><br/>
-            PFI :
+            <?= $this->options()->getConfiguration()->getFinancialLabel() ?> :
             <?php
             if ($entity->getCodeEOTP()): ?>
                 <strong><?= $entity->getCodeEOTP() ?></strong> -

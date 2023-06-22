@@ -39,6 +39,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const pfi_strict_format = 'pfi_strict_format';
     const allow_node_selection = 'allow_node_selection';
     const empty_project_require_validation = 'empty_project_require_validation';
+    const financial_label = 'financial_label';
+    const financial_description = 'financial_description';
 
 
     const theme = 'theme';
@@ -670,6 +672,26 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getAuthPersonNormalize(): bool
     {
         return $this->getConfiguration(self::auth_person_normalize, false);
+    }
+
+    public function getFinancialLabel(): string
+    {
+        return $this->getEditableConfKey(self::financial_label, 'PFI');
+    }
+
+    public function getFinancialDescription(): string
+    {
+        return $this->getEditableConfKey(self::financial_description, 'Numéro PFI');
+    }
+
+    public function setFinancialLabel(string $label)
+    {
+        return $this->saveEditableConfKey(self::financial_label, $label);
+    }
+
+    public function setFinancialDescription(string $description)
+    {
+        return $this->saveEditableConfKey(self::financial_description, $description);
     }
 
     /**

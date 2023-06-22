@@ -196,7 +196,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             if (preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)) {
                 $out['valids'][] = $pfiTested;
             } else {
-                $badPfi = "Un ou plusieurs PFI ne correspondent pas au format attendu";
+                $badPfi = "Un ou plusieurs N°Financier ne correspondent pas au format attendu";
                 $out['warnings'][] = $pfiTested;
             }
             $out['count']++;
@@ -774,7 +774,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 'label' => 'Intitulé',
                 'status' => 'Status',
                 'oscarNum' => 'N°Oscar',
-                'codeEOTP' => 'PFI',
+                'codeEOTP' => 'N°Financier ('. $this->getOscarConfigurationService()->getFinancialLabel() .')',
                 'amount' => 'Montant'
             ];
         }
@@ -833,7 +833,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 'adc' => 'Date de création',
                 'adm' => 'Date de dernière mise à jour',
                 'ads' => 'Date de signature',
-                'adp' => 'Date d\'ouverture du PFI dans SIFAC',
+                'adp' => 'Date d\'ouverture du N°Financier',
                 'pp' => 'Activités sans projet',
                 'fdt' => 'Activités soumise à feuille de temps',
                 'ds' => 'Ayant pour discipline',

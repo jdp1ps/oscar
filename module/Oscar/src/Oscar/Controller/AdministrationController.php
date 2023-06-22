@@ -346,6 +346,12 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 case OscarConfigurationService::pfi_strict:
                     $strict = $this->params()->fromPost(OscarConfigurationService::pfi_strict) == "on";
                     $regex = $this->params()->fromPost(OscarConfigurationService::pfi_strict_format);
+                    $label = $this->params()->fromPost(OscarConfigurationService::financial_label);
+                    //$description = $this->params()->fromPost(OscarConfigurationService::financial_description);
+
+                    $this->getOscarConfigurationService()->setFinancialLabel($label);
+                    //$this->getOscarConfigurationService()->setFinancialDescription($description);
+
                     if ($strict == true && !$regex) {
                         throw new OscarException(
                             "Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide"
