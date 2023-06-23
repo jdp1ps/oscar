@@ -1,43 +1,47 @@
 <template>
-  <v-select @search="handlerSearchOrganisation"
-            placeholder="Rechercher une structure"
-            :options="filteredOptions"
-            label="label"
-            v-model="value"
-            :reduce="item => item.id"
-            @input="setSelected"
-  >
-    <template #list-header>
-      <li style="text-align: center">
-        <label for="display_closed">
-          Afficher les structures fermées
-          <input type="checkbox" v-model="displayClosed" id="display_closed" />
-        </label>
-      </li>
-    </template>
+  <div>
+    <small>{{ filteredOptions.length }}</small>
+    <v-select @search="handlerSearchOrganisation"
+              placeholder="Rechercher une structure"
+              :options="options"
+              label="label"
+              v-model="value"
+              :reduce="item => item.id"
+              :dropdown-should-open="dropdownShoultOpen"
+              @input="setSelected"
+    >
+      <template #list-header>
+        <li style="text-align: center">
+          <label for="display_closed">
+            Afficher les structures fermées
+            <input type="checkbox" v-model="displayClosed" id="display_closed" />
+          </label>
+        </li>
+      </template>
 
-    <template #option="{ id,code, shortname, longname, city, country, label, closed, email, phone }"
-              class="result-item">
-      <div class="result-item" :class="{'organization-closed': closed }">
-        <h4 style="margin: 0">
-          <code v-if="code">{{ code }}</code>
-          <span>
-            <strong v-if="shortname">{{ shortname }}</strong>
-            <em v-if="longname">{{ longname }}</em>
-          </span>
-        </h4>
-        <div v-if="email || phone" class="infos">
-          <span v-if="email"><i class="icon-mail"></i> {{ email }}</span>
-          <span v-if="phone"><i class="icon-phone-outline"></i> {{ phone }}</span>
+      <template #option="{ id,code, shortname, longname, city, country, label, closed, email, phone }"
+                class="result-item">
+        <div class="result-item" :class="{'organization-closed': closed }">
+          <h4 style="margin: 0">
+            <code v-if="code">{{ code }}</code>
+            <span>
+              <strong v-if="shortname">{{ shortname }}</strong>
+              <em v-if="longname">{{ longname }}</em>
+            </span>
+          </h4>
+          <div v-if="email || phone" class="infos">
+            <span v-if="email"><i class="icon-mail"></i> {{ email }}</span>
+            <span v-if="phone"><i class="icon-phone-outline"></i> {{ phone }}</span>
+          </div>
+          <div v-if="country || city" class="location">
+            <i class="icon-location"></i>
+            <strong v-if="city">{{ city }}</strong>
+            <em v-if="city">{{ country }}</em>
+          </div>
         </div>
-        <div v-if="country || city" class="location">
-          <i class="icon-location"></i>
-          <strong v-if="city">{{ city }}</strong>
-          <em v-if="city">{{ country }}</em>
-        </div>
-      </div>
-    </template>
-  </v-select>
+      </template>
+    </v-select>
+  </div>
 </template>
 <script>
 
@@ -132,7 +136,7 @@ export default {
         if (this.delay != null) {
           clearTimeout(this.delay);
         }
-        this.delay = setTimeout(delayFunction, 1000);
+        this.delay = setTimeout(delayFunction, 300);
       }
     },
 
@@ -143,7 +147,10 @@ export default {
      * @param vm
      */
     searchOrganization(loading, search, vm) {
+
       let closeOpt = this.displayClosed ? '&active=' : '&active=ON'
+
+      console.log("PRELOADVALUE:", this.preloadedValue);
       this.$http.get('/organization?l=m&q=' + encodeURI(search)).then(
           ok => {
             if (this.preloadedValue == false) {
@@ -160,6 +167,10 @@ export default {
             // TODO
           }
       )
+    },
+    dropdownShouldOpen(VueSelect) {
+      console.log("dropdownShouldOpen");
+      return VueSelect.close;
     },
   }
 }

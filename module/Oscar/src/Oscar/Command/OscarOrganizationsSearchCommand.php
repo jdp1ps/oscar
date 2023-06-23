@@ -12,6 +12,7 @@ namespace Oscar\Command;
 use Moment\Moment;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\LogActivity;
+use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\Role;
 use Oscar\Service\ConnectorService;
@@ -59,8 +60,13 @@ class OscarOrganizationsSearchCommand extends OscarCommandAbstract
         try {
             $search = $input->getArgument('search');
             $organisations = $organisationService->search($search);
+            /** @var Organization $organisation */
             foreach ($organisations as $organisation) {
-                $io->writeln(sprintf('- <bold>[%s]</bold> %s (%s)', $organisation->getId(), (string)$organisation, $organisation->getCode()));
+                $io->writeln(sprintf('- <bold>[%s]</bold> [%s] %s (%s)',
+                                     $organisation->getId(),
+                                     $organisation->getShortName(),
+                                     $organisation->getFullName(),
+                                     $organisation->getCode()));
             }
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
