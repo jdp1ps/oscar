@@ -71,6 +71,10 @@ class EnrollToArrayFormatter
         if( $this->oscarUserContext->hasPrivileges($manageEnrollPrivilege, $affectation->getEnroller()) ){
             $output['urlEdit'] = $this->url->fromRoute($this->getConf($affectation)->edit, ['idenroll' => $affectation->getId()]);
             $output['urlDelete'] = $this->url->fromRoute($this->getConf($affectation)->delete, ['idenroll' => $affectation->getId()]);
+            $output['urlShow'] = false;
+            if( $this->oscarUserContext->hasPrivileges($showEnrolledPrivilege) ){
+                $output['urlShow'] = $this->url->fromRoute($this->getConf($affectation)->urlEnrolledShow, ['id' => $affectation->getEnrolled()->getId()]);
+            }
         }
 
         $output['manage'] = $manage;
@@ -91,27 +95,35 @@ class EnrollToArrayFormatter
                 $_conf->context = self::CONTEXT_PROJECT;
                 $_conf->manage = Privileges::PROJECT_ORGANIZATION_MANAGE;
                 $_conf->show = Privileges::PROJECT_ORGANIZATION_SHOW;
+                $_conf->showEnrolled = Privileges::ORGANIZATION_SHOW;
+                $_conf->urlEnrolledShow = 'organization/show';
                 $_conf->edit = 'organizationproject/edit';
                 $_conf->delete = 'organizationproject/delete';
                 break;
             case ProjectMember::class :
                 $_conf->context = self::CONTEXT_PROJECT;
                 $_conf->manage = Privileges::PROJECT_PERSON_MANAGE;
+                $_conf->showEnrolled = Privileges::PERSON_SHOW;
                 $_conf->show = Privileges::PROJECT_PERSON_SHOW;
+                $_conf->urlEnrolledShow = 'person/show';
                 $_conf->edit = 'personproject/edit';
                 $_conf->delete = 'personproject/delete';
                 break;
             case ActivityOrganization::class:
                 $_conf->context = self::CONTEXT_ACTIVITY;
                 $_conf->manage = Privileges::ACTIVITY_ORGANIZATION_MANAGE;
+                $_conf->showEnrolled = Privileges::ORGANIZATION_SHOW;
                 $_conf->show = Privileges::ACTIVITY_ORGANIZATION_SHOW;
+                $_conf->urlEnrolledShow = 'organization/show';
                 $_conf->edit = 'organizationactivity/edit';
                 $_conf->delete = 'organizationactivity/delete';
                 break;
             case ActivityPerson::class :
                 $_conf->context = self::CONTEXT_ACTIVITY;
                 $_conf->manage = Privileges::ACTIVITY_PERSON_MANAGE;
-                $_conf->show = Privileges::ACTIVITY_PAYMENT_SHOW;
+                $_conf->showEnrolled = Privileges::PERSON_SHOW;
+                $_conf->show = Privileges::ACTIVITY_PERSON_SHOW;
+                $_conf->urlEnrolledShow = 'person/show';
                 $_conf->edit = 'personactivity/edit';
                 $_conf->delete = 'personactivity/delete';
                 break;
@@ -132,7 +144,7 @@ class EnrollToArrayFormatter
     }
 
     protected function getShowEnrolledPrivilege($affectation){
-        return $this->getConf($affectation)->show;
+        return $this->getConf($affectation)->showEnrolled;
     }
 
     protected function getContext($affectation) :string {
