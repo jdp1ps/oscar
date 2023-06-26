@@ -558,7 +558,9 @@
         <hr style="opacity: .3">
 
         <nav class="text-right">
-            <a class="btn btn-default" href="<?= $this->url('contract/advancedsearch') ?>">
+            <a class="btn btn-default" href="<?= $this->organizationsPerimeter ?
+                $this->url('project/structure') :
+                $this->url('contract/advancedsearch') ?>">
                 <i class="icon-trash"></i>
                 Réinitialiser les critères</a>
             <button type="submit" class="btn btn-primary">
