@@ -271,7 +271,7 @@ class ProjectToArrayFormatter implements IProjectFormater
                 "absStart" => "Début Abs",
                 "absEnd" => "Fin Abs",
                 'amount' => "Montant",
-                'pfi' => "PFIs",
+                'pfi' => "N°Financier",
                 'oscarNum' => "N° Oscar",
                 'type' => "Types",
                 'status' => "Statuts",

@@ -16,16 +16,16 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
 ### Configuration de base
  - [Authentification](configuration/config-auth.md)
- - [Gestion des documents](config-documents.md) : Configuration de la gestion des documents.
- - [Configuration des documents](config-documents.md)
- - [Configuration du moteur de recherche](config-elasticsearch.md)
- - [Configuration du serveur de tâche](config-gearman.md)
- - [Configuration du PFI](config-pfi.md)
- - [Configuration de la distribution des courriels](config-mailer.md)
- - [Configuration des notifications](config-notifications.md)
- - [Configuration de la numérotation automatique OSCAR](config-numerotation.md)
+ - [Gestion des documents](configuration/config-documents.md) : Configuration de la gestion des documents.
+ - [Configuration des documents](configuration/config-documents.md)
+ - [Configuration du moteur de recherche](configuration/config-elasticsearch.md)
+ - [Configuration du serveur de tâche](configuration/config-gearman.md)
+ - [Configuration du PFI](configuration/config-pfi.md)
+ - [Configuration de la distribution des courriels](configuration/config-mailer.md)
+ - [Configuration des notifications](configuration/config-notifications.md)
+ - [Configuration de la numérotation automatique OSCAR](configuration/config-numerotation.md)
  - [Configuration des feuilles de temps](timesheet.md)
- - [Configuration des dépenses (SIFAC)](config-sifac.md)
+ - [Configuration des dépenses (SIFAC)](configuration/config-sifac.md)
 
 ### Synchronisation au Système d'Information
  - [Connectors Oscar](connectors.md) : Connecter Oscar au système d'information
@@ -34,7 +34,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 ### Utilitaires et utilisation avancée
  - [Administrer Oscar en ligne de commande](oscar-commands.md)
  - [Oscar API](config-api.md) Configurer Oscar pour permettre son accès via une API Rest
- - [Modifier la méthode de génération des PDF](../config-docpdf.md) Permet un gain de performance pour la génération des *certains* documents
+ - [Modifier la méthode de génération des PDF](configuration/config-docpdf.md) Permet un gain de performance pour la génération des *certains* documents
 
 ## Fonctionnalités optionnelles
 

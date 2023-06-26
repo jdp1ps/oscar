@@ -77,7 +77,7 @@ h2.tv-serie-label { border-bottom: none; }
 
                 <h3>Codes</h3>
                 <ul class="text-highlight">
-                    <li>N°PFI : <strong><?= implode(', ', $project->getEotp()) ?></strong></li>
+                    <li>N°<?= $this->options()->getConfiguration()->getFinancialLabel() ?> : <strong><?= implode(', ', $project->getEotp()) ?></strong></li>
                 </ul>
             </div>
 

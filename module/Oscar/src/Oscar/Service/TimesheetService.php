@@ -3419,7 +3419,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         // Déclarant / infos déclarées
         $declarer = $this->getPersonService()->getPersonById($declarerId, true);
-        $datas = $this->getPersonTimesheetsDatas($declarer, $period);
+        $datas = $this->getPersonTimesheetsDatas($declarer, $period, false, 0);
 
         foreach ($datas['daysInfos'] as $day) {
             $needed += $day['dayLength'];
@@ -4589,10 +4589,11 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
 
-    public function getPersonTimesheetsDatas(Person $person, $period, $validatedOnly = false)
+    public function getPersonTimesheetsDatas(Person $person, $period, $validatedOnly = false, int $restrictedActivityId = 0)
     {
         $periodBounds = DateTimeUtils::periodBounds($period);
         $periodInfosObj = PeriodInfos::getPeriodInfosObj($period);
+        $restrictedActivityAggregate = $this->getOthersWPByCode('research');
 
         $query = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
@@ -4607,7 +4608,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             );
 
         // état de la validation pour cette période
-        $validationsStates = $this->getValidationStatePersonPeriod($person, $period);
+        $validationsStates = $this->getValidationStatePersonPeriod($person, $period, $restrictedActivityId);
 
         $commentaires = "";
         $acronyms = [];
@@ -4626,7 +4627,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
 
         $validationsDone = [];
-
 
         $declarations = [
             'activities' => [],
@@ -4650,17 +4650,19 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
 
             if ($timesheet->getActivity()) {
-                if (!in_array($timesheet->getActivity()->getCodeEOTP(), $pfi)) {
-                    $pfi[] = $timesheet->getActivity()->getCodeEOTP();
-                }
-                if (!in_array($timesheet->getActivity()->getAcronym(), $acronyms)) {
-                    $acronyms[] = $timesheet->getActivity()->getAcronym();
-                }
-                if (!in_array($timesheet->getActivity()->getOscarNum(), $num)) {
-                    $num[] = $timesheet->getActivity()->getOscarNum();
-                }
-                if (!in_array($timesheet->getActivity(), $activities)) {
-                    $activities[] = $timesheet->getActivity();
+                if( $restrictedActivityId == 0 || $timesheet->getActivity()->getId() == $restrictedActivityId ){
+                    if (!in_array($timesheet->getActivity()->getCodeEOTP(), $pfi)) {
+                        $pfi[] = $timesheet->getActivity()->getCodeEOTP();
+                    }
+                    if (!in_array($timesheet->getActivity()->getAcronym(), $acronyms)) {
+                        $acronyms[] = $timesheet->getActivity()->getAcronym();
+                    }
+                    if (!in_array($timesheet->getActivity()->getOscarNum(), $num)) {
+                        $num[] = $timesheet->getActivity()->getOscarNum();
+                    }
+                    if (!in_array($timesheet->getActivity(), $activities)) {
+                        $activities[] = $timesheet->getActivity();
+                    }
                 }
             }
 
@@ -4674,20 +4676,33 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             $day = $timesheet->getDateFrom()->format('d');
 
             if ($timesheet->getActivity() && $timesheet->getWorkpackage()) {
-                $path = 'activities';
-                $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
-                $groupType = 'activity';
-                $groupFamily = 'research';
-                $groupId = $timesheet->getActivity()->getId();
-                $subGroup = sprintf(
-                    '%s - %s',
-                    $timesheet->getWorkpackage()->getCode(),
-                    $timesheet->getWorkpackage()->getLabel()
-                );
-                $subGroupId = $timesheet->getWorkpackage()->getId();
-                $subGroupType = "wp";
-                $label = $subGroup;
-                $acronym = $timesheet->getActivity()->getAcronym();
+                if( $restrictedActivityId == 0 || $timesheet->getActivity()->getId() == $restrictedActivityId ){
+                    $path = 'activities';
+                    $group = $timesheet->getActivity()->getAcronym() . " : " . $timesheet->getActivity()->getLabel();
+                    $groupType = 'activity';
+                    $groupFamily = 'research';
+                    $groupId = $timesheet->getActivity()->getId();
+                    $subGroup = sprintf(
+                        '%s - %s',
+                        $timesheet->getWorkpackage()->getCode(),
+                        $timesheet->getWorkpackage()->getLabel()
+                    );
+                    $subGroupId = $timesheet->getWorkpackage()->getId();
+                    $subGroupType = "wp";
+                    $label = $subGroup;
+                    $acronym = $timesheet->getActivity()->getAcronym();
+                } else {
+                    $path = 'others';
+                    $group = $restrictedActivityAggregate['label'];
+                    $groupId = -1;
+                    $groupType = 'others';
+                    $groupFamily = $restrictedActivityAggregate['group'];
+                    $subGroupId = $restrictedActivityAggregate['label'];
+                    $subGroupType = $restrictedActivityAggregate['label'];
+                    $label = $restrictedActivityAggregate['label'];
+                    $subGroup = $restrictedActivityAggregate['group'];
+                    $acronym = "ACRONYM";
+                }
             }
 
             if (array_key_exists($timesheet->getLabel(), $others)) {
@@ -4849,7 +4864,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @return mixed
      * @throws OscarException
      */
-    public function getValidationStatePersonPeriod(Person $person, $periodKey)
+    public function getValidationStatePersonPeriod(Person $person, $periodKey, $restrictedActivityId = 0)
     {
         $periodData = DateTimeUtils::extractPeriodDatasFromString($periodKey);
         $year = $periodData['year'];
@@ -4885,29 +4900,31 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                 $datas['validations'][] = (string)$vp;
                 $globalState = max($globalState, array_search($vp->getStatus(), $states));
 
-                // Récupération des validateurs
-                if ($vp->getValidationActivityById() > 0) {
-                    $validators['prj'][$vp->getValidationActivityById()] = [
-                        'person' => $vp->getValidationActivityBy(),
-                        'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationActivityAt())
-                    ];
-                }
+                if ( $restrictedActivityId == 0 || $vp->getObjectId() <= 0 || $vp->getObjectId() == $restrictedActivityId ){
+                    // Récupération des validateurs
+                    if ($vp->getValidationActivityById() > 0) {
+                        $validators['prj'][$vp->getValidationActivityById()] = [
+                            'person' => $vp->getValidationActivityBy(),
+                            'date' => $vp->getValidationActivityAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationActivityAt())
+                        ];
+                    }
 
-                if ($vp->getValidationSciById() > 0) {
-                    $validators['sci'][$vp->getValidationSciById()] = [
-                        'person' => $vp->getValidationSciBy(),
-                        'date' => $vp->getValidationSciAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationSciAt())
-                    ];
-                }
+                    if ($vp->getValidationSciById() > 0) {
+                        $validators['sci'][$vp->getValidationSciById()] = [
+                            'person' => $vp->getValidationSciBy(),
+                            'date' => $vp->getValidationSciAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationSciAt())
+                        ];
+                    }
 
-                if ($vp->getValidationAdmById() > 0) {
-                    $validators['adm'][$vp->getValidationAdmById()] = [
-                        'person' => $vp->getValidationAdmBy(),
-                        'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
-                        'human_date' => DateTimeUtils::humanDate($vp->getValidationAdmAt())
-                    ];
+                    if ($vp->getValidationAdmById() > 0) {
+                        $validators['adm'][$vp->getValidationAdmById()] = [
+                            'person' => $vp->getValidationAdmBy(),
+                            'date' => $vp->getValidationAdmAt()->format('Y-m-d'),
+                            'human_date' => DateTimeUtils::humanDate($vp->getValidationAdmAt())
+                        ];
+                    }
                 }
             }
 

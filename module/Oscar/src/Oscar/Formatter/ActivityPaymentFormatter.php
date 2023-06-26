@@ -79,7 +79,7 @@ class ActivityPaymentFormatter extends AbstractCSVFormatter implements IFormatte
     public function csvHeaders(){
         $headers = [
             "ID du versement",
-            "PFI de l'activité",
+            "N° financier de l'activité",
             "Montant de l'activité",
             "N°Oscar d'activité",
             "Intitulé de l'Activité",
