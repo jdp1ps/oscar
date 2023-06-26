@@ -211,8 +211,10 @@
       </article>
     </section>
     <section v-else>
-      <span class="cartouche" v-for="e in stacked" :class="e.hasPrimary ? 'primary' : 'default' ">
-        {{ e.enrolledLabel }}
+      <span class="cartouche" v-for="e in stacked" :class="{
+        'primary': e.hasPrimary, 'default': !e.hasPrimary}">
+        <a :href="e.urlShow" v-if="e.urlShow">{{ e.enrolledLabel }}</a>
+        <span v-else>{{ e.enrolledLabel }}</span>
         <span class="addon principal" >
           <span v-for="r in e.roles" class="addon-module" :class="{'primary': r.rolePrincipal}">
             {{ r.role }}
@@ -274,6 +276,7 @@ export default {
         if( !stacks.hasOwnProperty(id) ){
           stacks[id] = {
             enrolled: i.enrolled,
+            urlShow: i.urlShow,
             enrolledLabel: i.enrolledLabel,
             hasPrimary: false
           }

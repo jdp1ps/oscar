@@ -1879,7 +1879,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
 
             if (count($pfis) == 0) {
-                return $this->getResponseInternalError("Pas de PFI");
+                return $this->getResponseInternalError("Pas de numéro financier");
             }
 
             $out = $this->baseJsonResponse();
@@ -2465,7 +2465,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'adc' => 'Date de création',
                 'adm' => 'Date de dernière mise à jour',
                 'ads' => 'Date de signature',
-                'adp' => 'Date d\'ouverture du PFI dans SIFAC',
+                'adp' => 'Date d\'ouverture du numéro financier ('. $this->getOscarConfigurationService()->getFinancialLabel() .')',
                 'pp' => 'Activités sans projet',
                 'fdt' => 'Activités soumise à feuille de temps',
                 'ds' => 'Ayant pour discipline',
@@ -2495,7 +2495,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'dateEnd' => 'Date fin',
                 'dateUpdated' => 'Date de mise à jour',
                 'dateSigned' => 'Date de signature',
-                'dateOpened' => "Date d'ouverture du PFI dans SIFAC",
+                'dateOpened' => "Date d'ouverture du " . $this->getOscarConfigurationService()->getFinancialLabel()
             ];
 
             $milestonesCriterias = [
