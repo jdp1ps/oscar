@@ -17,6 +17,7 @@ use Oscar\Entity\ActivityRequest;
 use Oscar\Entity\ActivityRequestFollow;
 use Oscar\Entity\ActivityRequestRepository;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\Currency;
 use Oscar\Entity\Notification;
 use Oscar\Entity\OrganizationRole;
@@ -190,6 +191,10 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
         $dirSource = $this->getOscarConfigurationService()->getConfiguration('paths.document_request');
         $dirDest = $this->getOscarConfigurationService()->getConfiguration('paths.document_oscar');
 
+        /** @var ContractDocumentRepository $documentRepo */
+        $documentRepo = $this->getEntityManager()->getRepository(ContractDocument::class);
+        $defaultTab = $documentRepo->getDefaultTabDocument();
+
         foreach ($activityRequest->getFilesArray() as $file) {
             $contractDocument = new ContractDocument();
             $this->getEntityManager()->persist($contractDocument);
@@ -197,6 +202,7 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
                 ->setVersion(1)
                 ->setGrant($activity)
                 ->setFileSize($file['size'])
+                ->setTabDocument($defaultTab)
                 ->setPath($file['name'])
                 ->setDateDeposit($activityRequest->getDateCreated())
                 ->setDateUpdoad($activityRequest->getDateCreated())

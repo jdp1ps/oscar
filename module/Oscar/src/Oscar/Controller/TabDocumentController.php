@@ -31,6 +31,14 @@ class TabDocumentController extends AbstractOscarController implements UseContra
     use UseContractDocumentServiceTrait;
 
     /**
+     * @return \Oscar\Entity\ContractDocumentRepository
+     */
+    protected function getDocumentRepository()
+    {
+       return $this->getContractDocumentService()->getContractDocumentRepository();
+    }
+
+    /**
      * Accueil Page gestion onglets de documents
      * @return array
      */
@@ -39,7 +47,7 @@ class TabDocumentController extends AbstractOscarController implements UseContra
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
 
         return [
-            'entities' => $this->getEntityManager()->getRepository(TabDocument::class)->findAll()
+            'entities' => $this->getDocumentRepository()->getTabDocuments()
         ];
     }
 
@@ -67,7 +75,6 @@ class TabDocumentController extends AbstractOscarController implements UseContra
             if ($form->isValid()) {
                 $this->getEntityManager()->persist($entity);
                 $this->getEntityManager()->flush();
-                $path = $this->getOscarConfigurationService()->getDocumentTabLocation($entity);
                 $this->redirect()->toRoute('tabdocument');
             }
         }

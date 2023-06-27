@@ -12,6 +12,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
+use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TabsDocumentsRoles;
@@ -25,7 +27,8 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
 
     private EntityManager $em;
 
-    public function __construct(EntityManager $em){
+    public function __construct(EntityManager $em)
+    {
         $this->em = $em;
     }
 
@@ -35,19 +38,18 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
      * @param TabDocument $object
      * @return array
      */
-    public function extract($object):array
+    public function extract($object): array
     {
         $data = [
             'id' => $object->getId(),
             'label' => $object->getLabel(),
+            'default' => $object->isDefault() ? 'on' : '',
             'description' => $object->getDescription(),
         ];
 
-        foreach ($object->getTabsDocumentsRoles() as $tabDocumentRole){
+        foreach ($object->getTabsDocumentsRoles() as $tabDocumentRole) {
             $data ['roleId_' . $tabDocumentRole->getRole()->getId()] = $tabDocumentRole->getAccess();
         }
-
-
 
         return $data;
     }
@@ -62,20 +64,32 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
      */
     public function hydrate(array $data, $object): TabDocument
     {
+
+        $isDefault = $data['default'] == 'on';
+
+        // On bascule les onglets "non par défaut"
+        if( $isDefault ){
+            /** @var ContractDocumentRepository $documentRepo */
+            $documentRepo = $this->em->getRepository(ContractDocument::class);
+            foreach ( $documentRepo->getTabDocuments() as $tabDocument ){
+                $tabDocument->setDefault(false);
+            }
+        }
+
         // Supprime les relations entre le tabDocument et les TabsDocumentsRoles
         $tabsDocumentsRoles = $object->getTabsDocumentsRoles();
-        foreach ($tabsDocumentsRoles as $tabDocumentRole){
+        foreach ($tabsDocumentsRoles as $tabDocumentRole) {
             $this->em->remove($tabDocumentRole);
             $this->em->flush();
         }
         // Reset Collection de relations
         $object->resetTabDocumentRole();
+
         // Ajoute-les objects en relation
-        foreach ($data as $key => $value){
-            if(strstr($key, 'roleId_'))
-            {
+        foreach ($data as $key => $value) {
+            if (strstr($key, 'roleId_')) {
                 $id = str_replace('roleId_', '', $key);
-                $role = $this->em->getRepository(Role::class)->findOneBy(["id"=>$id]);
+                $role = $this->em->getRepository(Role::class)->findOneBy(["id" => $id]);
                 $entityTabDocumentRole = new TabsDocumentsRoles();
                 $entityTabDocumentRole->setRole($role);
                 $entityTabDocumentRole->setAccess($value);
@@ -84,7 +98,9 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
         }
 
         $object->setDescription($data['description'])
+            ->setDefault($isDefault)
             ->setLabel($data['label']);
+
         return $object;
     }
 
@@ -94,10 +110,11 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
      * @param ?Collection $tabsDocumentsRoles
      * @return ArrayCollection
      */
-    private function getRoles(?Collection $tabsDocumentsRoles):ArrayCollection{
+    private function getRoles(?Collection $tabsDocumentsRoles): ArrayCollection
+    {
         $roles = new ArrayCollection();
         /** @var  TabsDocumentsRoles $tabDocumentRole */
-        foreach ($tabsDocumentsRoles as $tabDocumentRole){
+        foreach ($tabsDocumentsRoles as $tabDocumentRole) {
             $roles->add($tabDocumentRole->getRole());
         }
         return $roles;

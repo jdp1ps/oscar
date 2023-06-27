@@ -23,7 +23,7 @@ export default defineConfig({
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       input: {
-        example: resolve(__dirname, 'src/example.js'),
+        admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {

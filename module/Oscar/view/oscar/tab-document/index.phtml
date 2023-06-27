@@ -14,10 +14,13 @@
     <?php
     foreach( $entities as $entity ):
         ?>
-        <article class="card xs">
+        <article class="card xs <?= $entity->isDefault() ? "active selected" : "" ?>">
             <h2 class="card-title">
             <span>
-                <strong><?= $entity->getLabel() ?></strong>
+                <strong>
+                    <?= $entity->isDefault() ? '*' : "" ?>
+                    <?= $entity->getLabel() ?>
+                </strong>
             </span>
                 <nav class="text-right">
                     <small>
