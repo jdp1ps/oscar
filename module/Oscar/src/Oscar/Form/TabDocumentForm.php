@@ -63,6 +63,21 @@ class TabDocumentForm extends Form implements InputFilterProviderInterface
             'type'=>'Textarea'
         ]);
 
+        // DEFAULT
+        $label = 'Onglet par défaut';
+        $this->add([
+                       'name'   => 'default',
+                       'options' => [
+                           'label' => $label,
+                           'checked_value' => 'on'
+                       ],
+                       'attributes'    => [
+                           'class'       => 'form-control',
+                           'placeholder'   => $label,
+                       ],
+                       'type'=>'Checkbox'
+                   ]);
+
         // Gestion des rôles associés
         foreach($roles as $role)
         {

@@ -22,7 +22,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      */
     public function getTabDocuments(): array
     {
-        return $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+        return $this->getEntityManager()->getRepository(TabDocument::class)->findBy([], ['label' => 'ASC']);
     }
 
     /**
@@ -32,6 +32,14 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     public function getTabDocumentById(int $tabDocumentId): TabDocument
     {
         return $this->getEntityManager()->getRepository(TabDocument::class)->findOneBy(['id' => $tabDocumentId]);
+    }
+
+    /**
+     * @return TabDocument|null
+     */
+    public function getDefaultTabDocument(): ?TabDocument
+    {
+        return $this->getEntityManager()->getRepository(TabDocument::class)->findOneBy(['default' => true]);
     }
 
 

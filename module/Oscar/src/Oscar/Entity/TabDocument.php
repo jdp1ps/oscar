@@ -35,6 +35,12 @@ class TabDocument
     private $description;
 
     /**
+     * @var string
+     * @ORM\Column(type="boolean", options={"default":0}, name="isdefault")
+     */
+    private bool $default = false;
+
+    /**
      * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="tabDocument", cascade={"persist"})
      */
     private Collection $tabsDocumentsRoles;
@@ -87,6 +93,33 @@ class TabDocument
 
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function isDefault(): bool
+    {
+        return $this->getDefault();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefault(): bool
+    {
+        return $this->default;
+    }
+
+    /**
+     * @param string $default
+     */
+    public function setDefault(bool $default): self
+    {
+        $this->default = $default;
+        return $this;
+    }
+
+
 
     function __toString()
     {

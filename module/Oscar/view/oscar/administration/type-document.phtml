@@ -1,5 +1,12 @@
 <link rel="stylesheet" href="<?= $this->basePath(). '/css/privileges.css' ?>">
 <div class="container">
+    <div id="admintypedocument"
+         data-url="<?= $this->url('administration/typedocument/api') ?>"
+         data-manage="1"
+    ></div>
+    <?= $this->Vite()->addJs('src/AdminTypeDocument.js'); ?>
+    <!--
+    <hr>
     <h1>
         <i class="icon-building-filled"></i>
         Liste des types de documents :
@@ -19,5 +26,6 @@
                     })
                 })
             </script>
-</section>
+    </section>
+    -->
 </div>
