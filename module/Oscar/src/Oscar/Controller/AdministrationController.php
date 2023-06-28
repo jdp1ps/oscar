@@ -11,6 +11,9 @@ namespace Oscar\Controller;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
+use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
+use Oscar\Entity\ContractType;
 use Oscar\Entity\Discipline;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
@@ -254,11 +257,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function accountsAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
-        if( $this->isAjax() || $this->params()->fromQuery('f') == 'json' ){
+        if ($this->isAjax() || $this->params()->fromQuery('f') == 'json') {
             $datas = [
                 'accounts' => $this->getSpentService()->getUsedAccount(),
                 'masses' => $this->getOscarConfigurationService()->getMasses()
-                ];
+            ];
             return $this->jsonOutput($datas);
         }
         return [];
@@ -422,13 +425,15 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $action = $this->params()->fromQuery('action');
             $method = $this->getHttpXMethod();
 
-            if( $action == 'migrate' ){
+            if ($action == 'migrate') {
                 switch ($method) {
                     case 'GET':
-                        return $this->jsonOutput([
-                             "referenced" => $usedKey,
-                             "unreferenced" => $unreferenced
-                            ]);
+                        return $this->jsonOutput(
+                            [
+                                "referenced" => $usedKey,
+                                "unreferenced" => $unreferenced
+                            ]
+                        );
                         break;
 
                     case 'POST':
@@ -1394,6 +1399,21 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function typeDocumentAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
+
+        $action = $this->params()->fromPost('action', '');
+
+        if ($action == 'migrate') {
+            $documentRepository = $this->getEntityManager()->getRepository(ContractDocument::class);
+            try {
+                $type = $documentRepository->getType($this->params()->fromPost('destination'));
+                $this->getLoggerService()->info("Migration des documents non-typé vers '$type'");
+                $documentRepository->migrateUntypedDocuments($type);
+                $this->redirect()->toRoute('administration/typedocument');
+            } catch (\Exception $exception) {
+                return $this->jsonErrorLogged("Impossible de migrer les documents sans type", $exception);
+            }
+        }
+
         return new ViewModel([]);
     }
 
@@ -1403,52 +1423,70 @@ class AdministrationController extends AbstractOscarController implements UsePro
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCUMENTTYPE_MANAGE);
         $method = $this->getHttpXMethod();
 
+        /** @var ContractDocumentRepository $documentRepository */
+        $documentRepository = $this->getEntityManager()->getRepository(ContractDocument::class);
+
         switch ($method) {
             case 'GET' :
-                $entityRepos = $this->getEntityManager()->getRepository(TypeDocument::class)->createQueryBuilder(
-                    'd'
-                )->orderBy('d.label');
-                $results = $entityRepos->getQuery()->getResult();
-                $out = [];
-                /** @var OrganizationRole $role */
-                foreach ($results as $row) {
-                    $out[] = $row->toArray();
+                try {
+                    $types = $documentRepository->getTypes();
+                    $infos = $documentRepository->getInfosTypes();
+                    $hasSearchAccess = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX);
+                    $out = [
+                        'untyped_documents' => $documentRepository->countUntypedDocuments(),
+                        'types' => []
+                    ];
+
+                    foreach ($types as $t) {
+                        $dt = $t->toArray();
+                        $dt['documents_total'] = 0;
+                        $dt['documents_view'] = "";
+                        if (array_key_exists($t->getId(), $infos)) {
+                            $dt['documents_total'] = $infos[$t->getId()];
+                            if ($hasSearchAccess) {
+                                $dt['documents_view'] = $this->url()->fromRoute('contract/advancedsearch')
+                                    . '?q=&criteria[]=td%3B' . $t->getId() . '%3B0';
+                            }
+                        }
+                        $out['types'][] = $dt;
+                    }
+                    return $this->ajaxResponse($out);
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->error($e->getMessage());
+                    return $this->getResponseInternalError('Impossible de charger les types de documents');
                 }
-                return $this->ajaxResponse($out);
 
             case 'POST' :
-                $label = $this->params()->fromPost('label');
-                $description = $this->params()->fromPost('description');
-                $type = new TypeDocument();
-                $type->setLabel($label)
-                    ->setDescription($description);
-                $this->getEntityManager()->persist($type);
-                $this->getEntityManager()->flush();
+
+
+                try {
+                    $id = null;
+                    $label = $this->params()->fromPost('label');
+                    $description = $this->params()->fromPost('description');
+                    $default = $this->params()->fromPost('default', '');
+
+                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on');
+                } catch (\Exception $e) {
+                    return $this->jsonErrorLogged("Impossible d'ajouter le type de document", $e);
+                }
                 return $this->getResponseOk();
+
                 break;
 
             case 'PUT' :
                 try {
-                    $_PUT = $_POST;
-                    $typeDocumentId = $_PUT['typedocumentid'];
-                    $this->getLoggerService()->info(
-                        "INFO : typeDocumentActionApi() PUT mise à jour du type de document $typeDocumentId"
-                    );
-                    $this->getLoggerService()->info(print_r($_POST, true));
-                    $typeDocument = $this->getProjectGrantService()->getTypeDocument($typeDocumentId, true);
-                    $typeDocument->setLabel($_PUT['label'])
-                        ->setDescription($_PUT['description']);
-                    $this->getEntityManager()->persist($typeDocument);
-                    $this->getEntityManager()->flush();
+                    $_PUT = $this->getPutDataJson();
+                    $id = $_PUT->get('typedocumentid', null);
+                    if (!$id) {
+                        throw new \Exception("Pas d'identifiant");
+                    }
+                    $label = $_PUT->get('label');
+                    $description = $_PUT->get('description');
+                    $default = $_PUT->get('default', '');
+                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on');
                     return $this->getResponseOk();
                 } catch (\Exception $e) {
-                    $msg = sprintf(
-                        _("Impossible de mettre à jour le type de document %s : %s"),
-                        $typeDocument,
-                        $e->getMessage()
-                    );
-                    $this->getLoggerService()->error($msg);
-                    return $this->getResponseInternalError($msg);
+                    return $this->jsonErrorLogged(_("Impossible de mettre à jour le type de document"), $e);
                 }
 
             case 'DELETE' :

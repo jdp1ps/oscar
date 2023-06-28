@@ -76,12 +76,80 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     }
 
     /**
+     * Liste des types de documents disponibles.
+     *
      * @return TypeDocument[]
      */
     public function getTypes(): array
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)
-            ->findAll();
+            ->findBy([], ['label' => 'ASC']);
+    }
+
+    public function countUntypedDocuments(): int
+    {
+        $infos = $this->getInfosTypes();
+        if( array_key_exists("", $infos) ){
+            return $infos[""];
+        }
+        return 0;
+    }
+
+    /**
+     * Retourne un tableau associatif sous la forme ID => COUNT
+     *
+     * @return array
+     */
+    public function getInfosTypes() :array
+    {
+        $out = [];
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult('total', 'total');
+        $rsm->addScalarResult('type', 'type');
+        $sql = 'SELECT COUNT(d.id) as total, d.typedocument_id AS type 
+                    FROM contractdocument d 
+                    GROUP BY d.typedocument_id 
+                    ';
+        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        $datas = $query->getScalarResult();
+        foreach ($datas as $counted) {
+            $type = $counted['type'];
+            $total = $counted['total'];
+            $out[$type] = $total;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Retourne le type de document par défaut (ou NULL si aucun n'est disponible).
+     *
+     * @return TypeDocument|null
+     */
+    public function getDefaultTypeDocument(): ?TypeDocument
+    {
+        return $this->getEntityManager()->getRepository(TypeDocument::class)->findOneBy(['default' => true]);
+    }
+
+    public function createOrUpdateTypeDocument(?int $id = null, string $label = "", string $description = "", bool $default = false ) :void {
+        if( $id == null ){
+            $type = new TypeDocument();
+            $this->getEntityManager()->persist($type);
+        } else {
+            $type = $this->getType($id);
+        }
+
+        if( $default === true ){
+            foreach ($this->getTypes() as $t) {
+                $t->setDefault(false);
+            }
+        }
+
+        $type->setLabel($label)
+            ->setDefault($default)
+            ->setDescription($description);
+
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -132,6 +200,8 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     }
 
     /**
+     * Mise à jour automatique des documents sans onglet en fonction de leur TypeDocument.
+     *
      * @param int $fromTypeDocumentId
      * @param int $toTabDocumentId
      * @throws \Doctrine\ORM\ORMException
@@ -139,7 +209,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      */
     public function migrateUntabledDocument(int $fromTypeDocumentId, int $toTabDocumentId): void
     {
-        // TODO Trouver un moyen de faire ça en une seule requête, mes tentatives sont plus bas
+        // TODO Trouver un moyen de faire ça en une seule requête
         $documents = $this->getEntityManager()->createQueryBuilder()
             ->select('d')
             ->from(ContractDocument::class, 'd')
@@ -153,34 +223,13 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         $tab = $this->getTabDocumentById($toTabDocumentId);
 
         /** @var ContractDocument $document */
-        foreach ($documents as $document){
-            if( !$document->getTabDocument() ){
+        foreach ($documents as $document) {
+            if (!$document->getTabDocument()) {
                 $document->setTabDocument($tab);
             }
         }
 
         $this->getEntityManager()->flush();
-
-        /*
-        $sql = 'UPDATE Oscar\Entity\ContractDocument 
-            SET tabDocument = :tabdocumentid 
-            WHERE tabDocument IS NULL AND typeDocument = :typedocumentid';
-
-
-        $params = [
-            'tabdocumentid' => $toTabDocumentId,
-            'typedocumentid' => $fromTypeDocumentId
-        ];
-
-        $query = $this->createQueryBuilder('d')
-            ->update()
-            ->set('d.tabDocument', $toTabDocumentId)
-            ->where('d.tabDocument IS NULL AND d.typeDocument = :typeDocument')
-            ->setParameter('typeDocument', $fromTypeDocumentId)
-            ->getQuery()
-            ->execute();
-        */
-
     }
 
     /**
@@ -191,6 +240,17 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     {
         return $this->getEntityManager()->getRepository(TypeDocument::class)
             ->findOneBy(['id' => $typeDocumentId]);
+    }
+
+    public function migrateUntypedDocuments( TypeDocument $typeDocument ):void
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->where('d.typeDocument IS NULL');
+        /** @var ContractDocument $document */
+        foreach ($qb->getQuery()->getResult() as $document) {
+            $document->setTypeDocument($typeDocument);
+        }
+        $this->getEntityManager()->flush();
     }
 
     /**

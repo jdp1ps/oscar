@@ -9,6 +9,7 @@
 namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
+use http\Params;
 use Monolog\Logger;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ActivityLogRepository;
@@ -48,6 +49,7 @@ use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Session\Container;
+use Zend\Stdlib\Parameters;
 use Zend\View\Model\JsonModel;
 
 /**
@@ -258,6 +260,31 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     protected function getResponseUnauthorized($message = "Vous n'avez pas les privilèges suffisants")
     {
         return $this->getHttpResponse(Response::STATUS_CODE_401, $message);
+    }
+
+    /**
+     * @param string $error
+     * @param \Exception $exception
+     * @return Response
+     */
+    protected function jsonErrorLogged( string $error , \Exception $exception ) :Response
+    {
+        $this->getLoggerService()->error(sprintf("ERROR '%s' : %s", $error, $exception->getMessage()));
+        return $this->getResponseInternalError($error);
+    }
+
+    protected function getPutDataJson() :Parameters
+    {
+        $params = new Parameters();
+        $json = json_decode($this->getRequest()->getContent(), true);
+        if( !$json ){
+            throw new OscarException("Aucune données JSON");
+        }
+        foreach ($json as $key=>$value) {
+            $params->set($key, $value);
+        }
+        return $params;
+
     }
 
     protected function getJsonPosted()

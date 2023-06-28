@@ -37,6 +37,38 @@ class TypeDocument implements ITrackable
     private $codeCentaure;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default":0}, name="isdefault")
+     */
+    private bool $default = false;
+
+
+    /**
+     * @return bool
+     */
+    public function getDefault(): bool
+    {
+        return $this->default;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDefault(): bool
+    {
+        return $this->getDefault();
+    }
+
+    /**
+     * @param bool $default
+     */
+    public function setDefault(bool $default): self
+    {
+        $this->default = $default;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getLabel()
@@ -96,7 +128,8 @@ class TypeDocument implements ITrackable
     }
 
 
-    function toJson(){
+    function toJson()
+    {
         return [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
@@ -111,6 +144,7 @@ class TypeDocument implements ITrackable
             'id' => $this->getId(),
             'label' => $this->getLabel(),
             'description' => $this->getDescription(),
+            'default' => $this->isDefault()
         );
     }
 }

@@ -33,7 +33,7 @@ class LoggerServiceFactory implements FactoryInterface
         // Emplacement du fichier de log
         $logPath = $configurationService->getLoggerFilePath();
 
-        if( !$logPath ){
+        if (!$logPath) {
             throw new OscarException("Fichier de log mal configuré (Le chemin est vide)");
         }
 
@@ -42,7 +42,7 @@ class LoggerServiceFactory implements FactoryInterface
 
 
         // Sorties des logs (fichier + PHP stdrout)
-        $stream = new RotatingFileHandler($logPath, 5,  $logLevel);
+        $stream = new RotatingFileHandler($logPath, 5, $logLevel);
         //$stream = new StreamHandler($logPath,$logLevel);
         //$firephp = new FirePHPHandler($logLevel);
 
