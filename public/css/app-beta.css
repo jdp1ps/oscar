@@ -11267,10 +11267,13 @@ pre.alert-danger, pre.alert-info {
   height: 100%;
   width: 100%;
   background: rgba(255, 255, 255, 0.9);
-  z-index: 10;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.overlay .overlay-title {
+  border-bottom: thin solid #ddd;
 }
 .overlay .overlay-content {
   position: relative;

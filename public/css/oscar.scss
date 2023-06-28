@@ -68,3 +68,19 @@ body {
 .private-document {
   border-left: 8px $colorRed solid !important;
 }
+
+.overlay {
+  .overlay-title {
+    margin-top: 0;
+    font-size: 1.6em;
+    padding: .75em 0;
+  }
+  .overlay-message {
+    padding: 0 2em;
+  }
+  .buttons-bar {
+    padding: .75em 0 0;
+    margin-top: .75em;
+    border-top: thin solid #ddd;
+  }
+}
