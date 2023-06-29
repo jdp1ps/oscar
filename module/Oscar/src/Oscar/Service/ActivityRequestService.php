@@ -194,6 +194,7 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
         /** @var ContractDocumentRepository $documentRepo */
         $documentRepo = $this->getEntityManager()->getRepository(ContractDocument::class);
         $defaultTab = $documentRepo->getDefaultTabDocument();
+        $defaultType = $documentRepo->getDefaultTypeDocument();
 
         foreach ($activityRequest->getFilesArray() as $file) {
             $contractDocument = new ContractDocument();
@@ -203,6 +204,7 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
                 ->setGrant($activity)
                 ->setFileSize($file['size'])
                 ->setTabDocument($defaultTab)
+                ->setTypeDocument($defaultType)
                 ->setPath($file['name'])
                 ->setDateDeposit($activityRequest->getDateCreated())
                 ->setDateUpdoad($activityRequest->getDateCreated())
