@@ -1434,6 +1434,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $hasSearchAccess = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX);
                     $out = [
                         'untyped_documents' => $documentRepository->countUntypedDocuments(),
+                        'documents_location' => $this->getOscarConfigurationService()->getDocumentDropLocation(),
+                        'documents_pcru_type' => $this->getOscarConfigurationService()->getPcruContractType(),
                         'types' => []
                     ];
 
