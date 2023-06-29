@@ -80,7 +80,18 @@
       <div class="col-md-4">
         <h2>Informations</h2>
         <div class="alert alert-info">
-          Les <strong>types de document</strong> permettent que qualifier les documents
+          Les <strong>types de document</strong> permettent de qualifier les documents
+        </div>
+        <div>
+          <p>
+            Emplacement où sont stoqués les documents :<br>
+            <code class="cartouche">{{ documents_location }}</code>
+          </p>
+          <p>
+            Type de document utilisé pour les envois PCRU :<br>
+            <strong>{{ documents_pcru_type }}</strong>
+
+          </p>
         </div>
         <template v-if="untyped_documents">
           <div class="alert alert-danger">
@@ -135,6 +146,8 @@ export default {
       form: null,
       dialogDelete: {display: false},
       untyped_documents: 0,
+      documents_location: "",
+      documents_pcru_type: "",
       migrate_dest: null
     }
   },
@@ -232,6 +245,8 @@ export default {
           .then(response => {
             this.types = response.data.types;
             this.untyped_documents = response.data.untyped_documents;
+            this.documents_location = response.data.documents_location;
+            this.documents_pcru_type = response.data.documents_pcru_type;
           })
           .catch(err => flashMessage('error', "Impossible de charger les types de documents : " + err))
           .finally(() => {
