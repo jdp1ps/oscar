@@ -2370,6 +2370,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $this->getOscarUserContextService()->getCurrentPerson(),
             true
         );
+
         if (count($this->organizationsPerimeter) <= 0) {
             throw new UnAuthorizedException();
         }
@@ -2440,6 +2441,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $organizationsIdsPerimeter = $this->getActivityService()
                     ->getActivityRepository()
                     ->getIdsWithOrganizations($include);
+
+                // FIX
+                if( count($organizationsIdsPerimeter) == 0 ){
+                    $organizationsIdsPerimeter = [0];
+                }
             }
 
             // Type de recherche supportée
