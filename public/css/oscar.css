@@ -12844,4 +12844,43 @@ article.wp h3 {
   font-weight: bold;
 }
 
+.oscar-selector {
+  position: relative;
+}
+.oscar-selector .displayed-value {
+  z-index: 10;
+  position: absolute;
+  padding-left: 1em;
+  top: 1px;
+  bottom: 1px;
+  right: 50%;
+  left: 1px;
+  background: white;
+  line-height: 200%;
+}
+.oscar-selector .displayed-value .button-cancel-value {
+  cursor: pointer;
+}
+.oscar-selector .options {
+  background: white;
+  position: absolute;
+  max-height: 15em;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+.oscar-selector .options .option {
+  border-bottom: solid thin #777;
+  border-left: solid 8px white;
+}
+.oscar-selector .options .option.selected {
+  border-left-color: #0b93d5;
+  background: #0b93d5 !important;
+  color: white;
+  text-shadow: -2px 2px 1px rgba(0, 0, 0, 0.5);
+}
+.oscar-selector .options .option.active {
+  border-left-color: #0b93d5;
+  background: rgba(11, 147, 213, 0.3);
+}
+
 /*# sourceMappingURL=oscar.css.map */

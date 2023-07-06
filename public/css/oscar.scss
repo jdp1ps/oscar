@@ -63,3 +63,45 @@ $colorGreyBlack: #222;
 }
 body {
 }
+
+.oscar-selector {
+  position: relative;
+
+  .displayed-value {
+    z-index:10;
+    position: absolute;
+    padding-left: 1em;
+    top: 1px;
+    bottom: 1px;
+    right: 50%;
+    left: 1px;
+    background: rgba(255,255,255,1);
+    line-height: 200%;
+    .button-cancel-value {
+      cursor: pointer;
+    }
+  }
+
+  .options {
+    background: white;
+    position: absolute;
+    max-height: 15em;
+    overflow: hidden;
+    overflow-y: scroll;
+
+    .option {
+      border-bottom: solid thin #777;
+      border-left: solid 8px white;
+      &.selected {
+        border-left-color: #0b93d5;
+        background: #0b93d5 !important;
+        color: white;
+        text-shadow: -2px 2px 1px rgba(0,0,0,.5);
+      }
+      &.active {
+        border-left-color: #0b93d5;
+        background: rgba(#0b93d5, .3);
+      }
+    }
+  }
+}

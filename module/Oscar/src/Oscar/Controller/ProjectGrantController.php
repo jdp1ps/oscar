@@ -2276,7 +2276,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $out[] = [
                 'id' => $activityOrganization->getId(),
                 'roleId' => $roleId,
-                'role' => $role,
+                'role' => $rolelabel,
                 'roleLabel' => $rolelabel,
                 'rolePrincipal' => $roleprincipal,
                 'urlDelete' => $urlDelete,
