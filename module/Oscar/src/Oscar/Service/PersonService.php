@@ -2577,7 +2577,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
 
-        $updateNotification = $activityPerson->getRoleObj()->isPrincipal() != $newRole->isPrincipal();
+        if( $activityPerson->getRoleObj() ){
+            $updateNotification = $activityPerson->getRoleObj()->isPrincipal() != $newRole->isPrincipal();
+        } else {
+            $updateNotification = $newRole->isPrincipal();
+        }
         $activityPerson->setRoleObj($newRole);
         $activityPerson->setDateStart($dateStart)->setDateEnd($dateEnd);
         $this->getEntityManager()->flush($activityPerson);

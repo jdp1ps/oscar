@@ -1117,6 +1117,7 @@ class Organization implements ResourceInterface, IConnectedObject
             'country' => $this->getCountry(),
             'email' => $this->getEmail(),
             'phone' => $this->getPhone(),
+            'type' => $this->getType(),
             'closed' => $this->isClose()
         ];
     }

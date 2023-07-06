@@ -211,8 +211,10 @@
       </article>
     </section>
     <section v-else>
-      <span class="cartouche" v-for="e in stacked" :class="e.hasPrimary ? 'primary' : 'default' ">
-        {{ e.enrolledLabel }}
+      <span class="cartouche" v-for="e in stacked" :class="{
+        'primary': e.hasPrimary, 'default': !e.hasPrimary}">
+        <a :href="e.urlShow" v-if="e.urlShow">{{ e.enrolledLabel }}</a>
+        <span v-else>{{ e.enrolledLabel }}</span>
         <span class="addon principal" >
           <span v-for="r in e.roles" class="addon-module" :class="{'primary': r.rolePrincipal}">
             {{ r.role }}
@@ -220,20 +222,6 @@
         </span>
       </span>
     </section>
-
-<!--
-    <span class="cartouche" v-for="e in entities" :class="{'primary': e.rolePrincipal, 'outofdate past': e.past }">
-      <i v-if="e.context == 'activity'" class="icon-cube"></i>
-      <i v-else class="icon-cubes"></i>
-      <span class="text-clickable" @click="open(e.urlShow)" v-if="e.urlShow">{{ e.enrolledLabel }}</span>
-      <span v-else>{{ e.enrolledLabel }}</span>
-      <span class="addon">
-        {{ e.roleLabel }}
-        <i class="icon-pencil-1 icon-clickable" v-if="manage" @click="handlerEdit(e)"></i>
-        <i class="icon-trash icon-clickable" v-if="manage" @click="handlerDelete(e)"></i>
-      </span>
-    </span>
--->
   </div>
 </template>
 <script>
@@ -242,7 +230,7 @@
 node node_modules/.bin/vue-cli-service build --name EntityWithRole --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/EntityWithRole.vue
 **/
 
-import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter";
+import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter2";
 import PersonAutoCompleter from "./components/PersonAutoCompleter";
 import Datepicker from "./components/Datepicker";
 
@@ -288,6 +276,7 @@ export default {
         if( !stacks.hasOwnProperty(id) ){
           stacks[id] = {
             enrolled: i.enrolled,
+            urlShow: i.urlShow,
             enrolledLabel: i.enrolledLabel,
             hasPrimary: false
           }
@@ -378,7 +367,7 @@ export default {
       this.$http.post(url, data).then(ok => {
 
       }, ko => {
-        this.error = "Erreur : " + ko.body;
+        this.error = "Erreur : Impossible de modifier le rôle : " + ko.body;
       }).then(foo => {
         this.loading = false;
         this.fetch();
