@@ -153,6 +153,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
 
         if ($this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') === 'json') {
+            // test : return $this->getResponseUnauthorized("nop");
             $result = [ 'datas' => []];
             foreach ($organizations as $data) {
                 $result['datas'][] = $data->toArray();
