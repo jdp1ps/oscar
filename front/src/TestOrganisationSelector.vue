@@ -1,9 +1,9 @@
 <template>
   <div>
     <pre>
-      SELECTED : {{ selected }}
+      SELECTED : {{ selectedId }}
     </pre>
-    <organizationselector v-model="selected" />
+    <organizationselector v-model="selectedId" @change="handlerChangeData" />
   </div>
 </template>
 <script>
@@ -25,17 +25,13 @@ export default {
 
   data() {
     return {
-      selected: null,
+      selectedId: null,
     };
-  },
-
-  computed: {
-
   },
 
   methods: {
 
-    handlerEnrolledSelected(data) {
+    handlerChangeData(data) {
       console.log(data);
     }
   },

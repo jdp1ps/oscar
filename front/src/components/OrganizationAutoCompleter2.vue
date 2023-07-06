@@ -22,29 +22,43 @@
                  class="form-control"/>
         </div>
         <div class="options" v-show="showSelector && options.length">
-          <header>Résultat(s) : {{ options.length }}</header>
-          <div class="option" v-for="o, i in options"
+          <header>
+            Résultat(s) : {{ options.length }} /
+            <label for="hidder">
+              Afficher les structures fermées
+              <input type="checkbox" id="hidder" value="on" v-model="hideOff" />
+            </label>
+          </header>
+          <div class="option" v-for="o, i in optionsFiltered"
                @mouseover="highlightedIndex = i"
-               @click.prevent.stop="handlerSelectIndex(i)"
+               @click.prevent.stop="handlerSelectIndex(o.id)"
                :id="'item_'+i"
                :class="{
                  'active': i == highlightedIndex,
-                 'selected': o.id == selectedValue
+                 'selected': o.id == selectedValue,
+                 'closed': o.closed
                }">
             <div class="option-title">
-              <code>
-                [{{ i }}]{{ o.code }}
-              </code>
-              <strong>
-                {{ o.shortname }}
-              </strong>
-              <em>
-                {{ o.longname }}
+              <em class="cartouche code">
+                {{ o.code }}
               </em>
+              <span class="fullname">
+                <strong>
+                  {{ o.shortname }}
+                </strong>
+                <em>
+                  {{ o.longname }}
+                </em>
+              </span>
+              <span v-if="o.type">
+                ({{o.type}})
+              </span>
             </div>
-            <div class="option-infos">
-              <i class="icon-location"></i>
-              {{ o.city }} - {{ o.country }}
+            <div class="option-infos" v-if="o.city || o.country">
+              <small>
+                <i class="icon-location"></i>
+                {{ o.city }} - {{ o.country }}
+              </small>
             </div>
           </div>
         </div>
@@ -81,7 +95,8 @@ export default {
       loading: false,
       inside: false,
       displayValue: false,
-      error: ""
+      error: "",
+      hideOff: false
     }
   },
 
@@ -98,7 +113,21 @@ export default {
         });
         return opts;
       }
+    },
 
+    optionsFiltered(){
+      if( this.hideOff ){
+        return this.options;
+      }
+      else {
+        let output = [];
+        this.options.forEach(i => {
+          if( !i.closed ){
+            output.push(i);
+          }
+        });
+        return output;
+      }
     }
   },
 
@@ -134,17 +163,14 @@ export default {
     },
 
     handlerMouseLeave(){
-      console.log("LEAVE");
       this.inside = false;
     },
 
     handlerMouseEnter(){
-      console.log("ENTER");
       this.inside = true;
     },
 
     handlerClick(e){
-      console.log("CLICK");
       this.displayValue = false;
     },
 
@@ -153,15 +179,23 @@ export default {
       this.selectedLabel = "";
       this.showSelector = false;
       this.displayValue = false;
+      this.$emit('change', null );
+      this.$emit('update:value', null);
+      this.$emit('input', null);
     },
 
-    handlerSelectIndex(index){
-      console.log("SELECT");
-      this.selectedValue = this.options[index].id;
-      this.selectedLabel = this.options[index].label;
-      this.showSelector = false;
-      this.displayValue = true;
-      this.$emit('change', this.selectedValue);
+    handlerSelectIndex(id){
+      this.options.forEach(i => {
+        if( i.id == id ){
+          this.selectedValue = i.id;
+          this.selectedLabel = i.label;
+          this.showSelector = false;
+          this.displayValue = true;
+        }
+      });
+
+
+      this.$emit('change', { id: this.selectedValue, label: this.selectedLabel} );
       this.$emit('update:value', this.selectedValue);
       this.$emit('input', this.selectedValue);
     },
@@ -202,16 +236,20 @@ export default {
       }
     },
 
+    updateSelectedDate(){
+
+    },
+
     handlerKeyUp(e){
       switch(e.code){
         case "ArrowUp":
           this.handlerSelectPrev(true);
-          console.log("ArrowUp");
           break;
+
         case "ArrowDown":
           this.handlerSelectNext(true);
-          console.log("ArrowDown");
           break;
+
         case "ArrowLeft":
         case "ArrowRight":
           break;
@@ -222,7 +260,6 @@ export default {
           break;
 
         default:
-          console.log(e.code);
           if( this.searchFor && this.searchFor.length > 1 ){
             this.handlerChange();
           }
@@ -230,13 +267,11 @@ export default {
     },
 
     handlerChange(e){
-      console.log("Changement ", this.searchFor);
       // Système de retardement Eco+
       if (this.latency != null) {
         clearTimeout(this.latency);
       }
       let delayFunction = function () {
-        console.log("delayFunction");
         this.search();
         clearTimeout(this.latency);
       }.bind(this);
@@ -244,7 +279,6 @@ export default {
     },
 
     search(){
-      console.log("Recherche lancée")
       this.loading = true;
       this.showSelector = false;
       this.$http.get('/organization?l=m&q=' + encodeURI(this.searchFor)).then(
