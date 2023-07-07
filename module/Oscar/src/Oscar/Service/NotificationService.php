@@ -862,6 +862,16 @@ class NotificationService implements UseServiceContainer
         return $this->getNotificationRepository()->deleteNotificationsPerson($person->getId());
     }
 
+    public function deleteNotificationActivityById(int $activityId)
+    {
+        try {
+            $this->getNotificationRepository()->removeNotificationsActivity($activityId);
+        } catch (\Exception $e) {
+            $this->getLoggerService()->err("Suppression des notifications pour l'activité '$activityId' : "
+                . $e->getMessage());
+        }
+    }
+
     /**
      * @param $personId
      * @return array
