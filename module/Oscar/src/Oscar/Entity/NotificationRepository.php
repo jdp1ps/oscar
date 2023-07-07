@@ -126,7 +126,6 @@ class NotificationRepository extends EntityRepository
         foreach ($this->getNotificationsActivity($activityId) as $notification) {
             $this->getEntityManager()->remove($notification);
         }
-        $this->getEntityManager()->flush();
     }
 
     public function purgeAll()
