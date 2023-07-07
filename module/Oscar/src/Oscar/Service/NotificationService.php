@@ -868,9 +868,10 @@ class NotificationService implements UseServiceContainer
             $this->getNotificationRepository()->removeNotificationsActivity($activityId);
         } catch (\Exception $e) {
             $this->getLoggerService()->err("Suppression des notifications pour l'activité '$activityId' : "
-                . $e->getMessage());
+                                           . $e->getMessage());
         }
     }
+
 
     /**
      * @param $personId
