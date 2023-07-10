@@ -2460,9 +2460,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             foreach ($periodInfos as $key => $day) {
                 $totalPeriod += $day['dayLength'];
             }
-            $this->_cache_getPeriodDuration = $totalPeriod;
+            $this->_cache_getPeriodDuration[$key] = $totalPeriod;
         }
-        return $this->_cache_getPeriodDuration = $totalPeriod;
+        return $this->_cache_getPeriodDuration[$key];
     }
 
     public function getResumeActivity(Activity $activity)
