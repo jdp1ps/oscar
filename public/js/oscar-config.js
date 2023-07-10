@@ -124,6 +124,7 @@ requirejs.config({
         "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
         "ValidationUI": "oscar/dist/ValidationUI.umd.min",
         "AccountList": "oscar/dist/AccountList.umd.min",
+        "TestOrganisationSelector": "oscar/dist/TestOrganisationSelector.umd.min",
         "NumberMigrate": "oscar/dist/NumberMigrate.umd.min",
 
         // TEST

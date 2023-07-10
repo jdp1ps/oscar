@@ -230,7 +230,7 @@
 node node_modules/.bin/vue-cli-service build --name EntityWithRole --dest ../public/js/oscar/dist --no-clean --formats umd,umd-min --target lib src/EntityWithRole.vue
 **/
 
-import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter";
+import OrganizationAutoCompleter from "./components/OrganizationAutoCompleter2";
 import PersonAutoCompleter from "./components/PersonAutoCompleter";
 import Datepicker from "./components/Datepicker";
 

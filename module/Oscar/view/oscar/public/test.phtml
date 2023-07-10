@@ -1,9 +1,15 @@
-
-<style>
-
-</style>
 <div class="container">
-
-
+    Selecteur de structure :
+    <div id="foo"></div>
+    <script>
+        require(['vue', 'TestOrganisationSelector'], function(Vue, TestOrganisationSelector){
+            console.log("ICI")
+            new Vue({
+                render(h){
+                    return h(TestOrganisationSelector)
+                }
+            }).$mount('#foo')
+        })
+    </script>
 </div>
 

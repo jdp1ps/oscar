@@ -121,6 +121,14 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->execute();
     }
 
+    public function removeNotificationsActivity(int $activityId)
+    {
+        foreach ($this->getNotificationsActivity($activityId) as $notification) {
+            $this->getEntityManager()->remove($notification);
+        }
+        $this->getEntityManager()->flush();
+    }
+
     public function purgeAll()
     {
         $dql = 'DELETE ' . Notification::class;

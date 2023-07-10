@@ -4805,6 +4805,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'person' => (string)$person,
             'active' => $active,
             'commentaires' => $commentaires,
+            'activities' => $activities,
             'totalGroup' => $totalGroup,
             'organizations' => $organizationsPrimary,
             'num' => implode(', ', $num),
