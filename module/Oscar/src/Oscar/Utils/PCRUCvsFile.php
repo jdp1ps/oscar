@@ -5,6 +5,7 @@ namespace Oscar\Utils;
 
 
 use Doctrine\Inflector\Rules\Word;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\ActivityPcruInfos;
@@ -182,7 +183,7 @@ class PCRUCvsFile
      * @return $this
      * @throws \Oscar\Exception\OscarException
      */
-    public function writeContratsCsv($dest = null)
+    public function writeContratsCsv($dest = null, EntityManager $em = null)
     {
         $headers = $this->getHeaders();
         if ($dest == null) {
@@ -190,7 +191,7 @@ class PCRUCvsFile
         }
         $handler = fopen($dest, 'w');
         fputcsv($handler, array_keys($this->getHeaders()), ';');
-        foreach ($this->getData() as $data) {
+        foreach ($this->getData($em) as $data) {
             fputcsv($handler, $data, ';');
         }
         return $this;
@@ -336,14 +337,14 @@ class PCRUCvsFile
      *
      * @return array
      */
-    public function getData(): array
+    public function getData(EntityManager $em = null): array
     {
         $datas = [];
 
         // Ajout des donnèes
         /** @var ActivityPcruInfos $info */
         foreach ($this->datas as $info) {
-            $datas[] = $info->toArray();
+            $datas[] = $info->toArray($em);
         }
 
         return $datas;

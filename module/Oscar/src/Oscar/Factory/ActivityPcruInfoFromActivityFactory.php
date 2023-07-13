@@ -61,6 +61,7 @@ class ActivityPcruInfoFromActivityFactory
         $codeUniteLabintel = "";
         $sigleUnit = "";
         $idPartenairePrincipal = "";
+        $labelPartenairePrincipal = "";
 
         // Récupération des laboratoires
 
@@ -89,6 +90,7 @@ class ActivityPcruInfoFromActivityFactory
             if ($partner->getCodePcru()) {
                 if ($idPartenairePrincipal == "") {
                     $idPartenairePrincipal = $partner->getCodePcru();
+                    $labelPartenairePrincipal = (string) $partner;
                 } else {
                     $partners[] = $partner->getCodePcru();
                 }
