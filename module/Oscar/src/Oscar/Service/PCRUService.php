@@ -250,7 +250,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
 
         $csvFile = new PCRUCvsFile($this);
         $csvFile->addEntry($pcruInfos);
-        $csvFile->writeContratsCsv($csvtmp);
+        $csvFile->writeContratsCsv($csvtmp, $this->getEntityManager());
         $csvFile->writePartenairesCSV($orgtmp);
 
         file_put_contents($pdftmp, $csvFile->getDocumentSignedFromPcruInfo($pcruInfos));

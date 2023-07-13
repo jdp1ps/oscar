@@ -24,6 +24,7 @@ export default defineConfig({
       // into your library
       input: {
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
+        activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {
