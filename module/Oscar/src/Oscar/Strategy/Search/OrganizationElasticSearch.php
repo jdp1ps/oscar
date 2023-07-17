@@ -15,6 +15,7 @@ use Oscar\Connector\ConnectorRepport;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Exception\OscarException;
 
 class OrganizationElasticSearch implements OrganizationSearchStrategy
 {
@@ -63,6 +64,8 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                 ->setHosts($this->getHosts())
                 ->build();
         }
+
+
         return $this->elasticSearchClient;
     }
 
@@ -173,11 +176,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'country' => $organization->getCountry(),
             'zipcode' => $organization->getZipCode(),
             'description' => $organization->getDescription(),
-//            'address1' => $organization->getStreet1(),
-//            'address2' => $organization->getStreet2(),
-//            'address3' => $organization->getStreet3(),
             'siret' => $organization->getSiret(),
-            'country' => $organization->getCountry(),
             'persons' => $persons,
             'activities' => $activities,
             'connectors' => $connectors
@@ -191,14 +190,12 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'type' => $this->getType(),
             'body' => [
                 'size' => 10000,
-
-
                 "query" => [
-                    'query_string' => [
+                    'multi_match' => [
                         'fields' => [
-                            'code^3',
-                            'shortname^4',
-                            'fullname^8',
+                            'code^7',
+                            'shortname^9',
+                            'fullname^5',
                             'description',
                             'email',
                             'city',
@@ -209,53 +206,11 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                             'persons',
                             'activities'
                         ],
+                        "fuzziness"=> "auto",
                         'query' => $search,
 
                     ]
-//                    "bool" => [
-//                        "should" => [
-//                            [ "match" => [
-//                                "code" => [
-//                                    "query" => "$search",
-//                                    "boost" => 1
-//                                ]
-//                            ]],
-//                            [ "match" => [
-//                                "shortname" => [
-//                                    "query" => "$search",
-//                                    "boost" => 10
-//                                ]
-//                            ]],
-//                            [ "match" => [
-//                                "fullname" => [
-//                                    "query" => "$search",
-//                                    "boost" => 5
-//                                ]
-//                            ]],
-//                        ]
-//                    ]
                 ]
-
-
-                /* OFF
-                'query' => [
-                    'query_string' => [
-                        "search_fields" => [
-                            "shortname" => [
-                                "weight" => 10
-                            ],
-                            "code" => [
-                                "weight" => 2
-                            ],
-                            "fullname" => [
-                                "weight" => 2
-                            ],
-                        ],
-                        'query' => $search,
-                        'use_dis_max' => true
-                    ],
-                ]
-                /******/
             ]
         ];
 
@@ -309,6 +264,78 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         } catch (Missing404Exception $e) {
         } catch (\Exception $e) {
             throw $e;
+        }
+
+        try {
+            $this->getClient()->indices()->create(
+                [
+                    'index' => $this->getIndex(),
+                    'body' => [
+                        'settings' => [
+                            'analysis' => [
+                                'analyzer' => [
+                                    'noaccent' => [
+                                        "type" => "custom",
+                                        "tokenizer" => "standard",
+                                        "filter" => ['asciifolding', "lowercase"]
+                                    ]
+                                ],
+                            ]
+                        ],
+                        'mappings' => [
+                            "organization" => [
+                                'properties' => [
+                                    'code' => [
+                                        'type' => 'keyword',
+                                    ],
+                                    'shortname' => [
+                                        'type' => 'text',
+//                                        'analyzer' => 'noaccent'
+                                    ],
+                                    'fullname' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                    'description' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                    'email' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                    'city' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                    'siret' => [
+                                        'type' => 'keyword',
+                                    ],
+                                    'country' => [
+                                        'type' => 'keyword',
+                                    ],
+                                    'connectors' => [
+                                        'type' => 'keyword',
+                                    ],
+                                    'zipcode' => [
+                                        'type' => 'keyword',
+                                    ],
+                                    'persons' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                    'activities' => [
+//                                        'analyzer' => 'noaccent',
+                                        'type' => 'text',
+                                    ],
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            );
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de créer l'index de recherche : \n---\n" . $e->getMessage());
         }
     }
 }

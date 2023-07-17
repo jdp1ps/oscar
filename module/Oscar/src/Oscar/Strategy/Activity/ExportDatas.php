@@ -51,7 +51,7 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
         $separator = $this->getOscarConfigurationService()->getExportSeparator();
 
         // Format des dates
-        $dateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
+        $dateFormat = 'Y-m-d'; // $this->getOscarConfigurationService()->getExportDateFormat();
 
         $parameters = [];
 
