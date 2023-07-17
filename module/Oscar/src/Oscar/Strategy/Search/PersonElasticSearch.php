@@ -91,7 +91,7 @@ class PersonElasticSearch implements PersonSearchStrategy
             'body' => [
                 'size' => 10000,
                 'query' => [
-                    'query_string' => [
+                    'multi_match' => [
                         'query' => $searchQuery,
                         'fields' => [
                             'fullname^4',
@@ -102,23 +102,12 @@ class PersonElasticSearch implements PersonSearchStrategy
                             'affectation^5',
                             'organizations^5',
                             'activities^5',
-                            'connectors']
+                            'connectors'
+                        ],
+                        "fuzziness"=> "auto"
                     ]
                 ]
             ]
-
-//            'body' => [
-//                'size' => $limit,
-//                'query' => [
-//                    'multi_match' => [
-//                        'query' => $searchQuery,
-//                        'type' => 'phrase_prefix',
-//                        'fields' => ['fullname^6','lastname^5', 'firstname^2', 'email', 'affectation^3', 'location^3', 'organizations', 'activities', 'connectors'],
-//                       /* 'max_expansions' => 20,*/
-//                        /*'fuzziness' => 1*/
-//                    ]
-//                ]
-//            ]
         ];
 
         $response = $this->getClient()->search($params);

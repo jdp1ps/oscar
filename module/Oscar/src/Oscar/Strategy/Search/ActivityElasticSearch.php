@@ -198,12 +198,13 @@ class ActivityElasticSearch implements ActivitySearchStrategy
                             'numbers^9',
                             'oscar^9',
                             'label^7',
-                            'description^7',
+                            'description^2',
                             'project^5',
                             'disciplines^5',
                             'activitytype^2',
                             'partners^5',
-                            'members^5']
+                            'members^5'],
+                        "fuzziness"=> "auto"
                     ]
                 ]
             ]

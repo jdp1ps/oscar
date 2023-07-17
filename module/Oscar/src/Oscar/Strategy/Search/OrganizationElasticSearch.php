@@ -191,7 +191,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
             'body' => [
                 'size' => 10000,
                 "query" => [
-                    'query_string' => [
+                    'multi_match' => [
                         'fields' => [
                             'code^7',
                             'shortname^9',
@@ -206,6 +206,7 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                             'persons',
                             'activities'
                         ],
+                        "fuzziness"=> "auto",
                         'query' => $search,
 
                     ]
@@ -289,22 +290,22 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                                     ],
                                     'shortname' => [
                                         'type' => 'text',
-                                        'analyzer' => 'noaccent'
+//                                        'analyzer' => 'noaccent'
                                     ],
                                     'fullname' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                     'description' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                     'email' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                     'city' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                     'siret' => [
@@ -320,11 +321,11 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
                                         'type' => 'keyword',
                                     ],
                                     'persons' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                     'activities' => [
-                                        'analyzer' => 'noaccent',
+//                                        'analyzer' => 'noaccent',
                                         'type' => 'text',
                                     ],
                                 ]
