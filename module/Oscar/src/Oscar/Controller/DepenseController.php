@@ -247,7 +247,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
 
         try {
             if( !$activity->getCodeEOTP() ){
-                throw new OscarException(sprintf(_("Cette activité n'a pas de PFI")));
+                throw new OscarException(sprintf(_("Cette activité n'a pas de Numéro financier")));
             }
             //$spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
             $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP());

@@ -9,6 +9,10 @@
 namespace Oscar\Formatter;
 
 
+use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class CSVDownloader
@@ -23,39 +27,39 @@ class CSVDownloader
         /** @var \PHPExcel_Worksheet $sheet */
         $sheet = $doc->getActiveSheet();
 
+        ob_start();
+
 
         $handler = fopen($csvPath, 'r');
         $row = 1;
+        //Cell::setValueBinder(new AdvancedValueBinder());
         if (($handle = fopen($csvPath, "r")) !== FALSE) {
             $cell = 1;
-            while (($data = fgetcsv($handle, 1000, "\t")) !== FALSE) {
-
+            while (($data = fgetcsv($handle, 10000, "\t")) !== FALSE) {
                 $num = count($data);
                 for ($c = 0; $c < $num; $c++) {
                     $value = $data[$c];
-
                     if (preg_match('/([0-9 ]*),([0-9]{2})/', $value)) {
-                        //echo "Value reçue : $value\n";
                         // Il faut convertir en "vrai" nombre
                         $value = str_replace(',', '.', $value);
-                        //echo "Convertie : $value\n";
-                        $cell = $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_NUMERIC, true);
+                        $cell = $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, DataType::TYPE_NUMERIC, true);
                         $cell->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR);
                     } elseif (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $value)) {
-                        $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                        $sheet->getCellByColumnAndRow($c, $row)->getStyle()
+                            ->getNumberFormat()
+                            ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
+                        $sheet->setCellValueByColumnAndRow($c, $row, \PHPExcel_Shared_Date::PHPToExcel($value));
                     } else {
-                        $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                        $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, DataType::TYPE_STRING);
                     }
                 }
                 $row++;
             }
             fclose($handle);
-            //die();
         }
-        $writer = \PHPExcel_IOFactory::createWriter($doc, 'Excel5');
+        $writer = \PHPExcel_IOFactory::createWriter($doc, "Excel2007");
         $writer->save($xlsPath);
-        $this->download($xlsPath, 'xls', 'application/vnd.ms-excel');
-
+        $this->download($xlsPath, 'xlsx', 'application/vnd.ms-excel');
 
         @unlink($xlsPath);
 

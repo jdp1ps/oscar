@@ -416,7 +416,7 @@
     <form action="<?= $this->url() ?>" method="get" class="form" id="search">
 
         <div class="input-group input-group-lg">
-            <input placeholder="Rechercher dans l'intitulé, code PFI...&hellip;"
+            <input placeholder="Rechercher dans l'intitulé, <?= $this->options()->getConfiguration()->getFinancialLabel() ?>&hellip;"
                    type="search"
                    class="form-control input-lg"
                    name="q"
@@ -438,7 +438,7 @@
                 <li><strong>"Recherche stricte"</strong>, vous pouvez entourer de guillemets double un terme, par exemple en entourant votre recherche de guillemets double <em>"reseau normand"</em>, le moteur cherchera ce terme précis</li>
                 <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>
                 <li><strong>ET/OU</strong> Les mots clefs <strong>OR</strong> et <strong>AND</strong> permettent de préciser les termes à rechercher : NORMAND* OR RESEAU, cherchera les activités contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
-                <li><strong>PFI</strong> Saisissez directement le PFI.</li>
+                <li><strong><?= $this->options()->getConfiguration()->getFinancialLabel() ?></strong> Saisissez directement le <?= $this->options()->getConfiguration()->getFinancialLabel() ?>.</li>
                 <li><strong>XXXX<?= $this->options()->oscarNumSeparator() ?></strong> Recherche sur le système de numérotation Oscar (2017<?= $this->options()->oscarNumSeparator() ?>...).</li>
                 <li><strong>num=valeur</strong> Permet de chercher sur la numérotation libre proposée dans les activités de recherche.</li>
             </ul>
@@ -558,7 +558,9 @@
         <hr style="opacity: .3">
 
         <nav class="text-right">
-            <a class="btn btn-default" href="<?= $this->url('contract/advancedsearch') ?>">
+            <a class="btn btn-default" href="<?= $this->organizationsPerimeter ?
+                $this->url('project/structure') :
+                $this->url('contract/advancedsearch') ?>">
                 <i class="icon-trash"></i>
                 Réinitialiser les critères</a>
             <button type="submit" class="btn btn-primary">
