@@ -610,7 +610,7 @@ class SpentLine
         ];
     }
 
-    public function toArray()
+    public function toArray() :array
     {
         return [
             // IDs / Numéros
@@ -635,6 +635,8 @@ class SpentLine
             'datePaiement' => $this->getDatePaiement(),
             'datePiece' => $this->getDatePiece(),
             'dateComptable' => $this->getDateComptable(),
+
+            'rldnr' => $this->getRldnr(),
 
             //
         ];

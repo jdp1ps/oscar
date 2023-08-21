@@ -1,9 +1,22 @@
-
-<style>
-
-</style>
 <div class="container">
-
-
+    <div id="depenses2"
+         data-url="<?= $this->url('contract/spent-synthesis', ['id' => 11736]) ?>">
+        DÉPENSES 2 13106
+    </div>
+    <?= $this->Vite()->addJs('src/ActivitySpentSynthesis.js'); ?>
+    <!--
+    Selecteur de structure :
+    <div id="foo"></div>
+    <script>
+        require(['vue', 'TestOrganisationSelector'], function(Vue, TestOrganisationSelector){
+            console.log("ICI")
+            new Vue({
+                render(h){
+                    return h(TestOrganisationSelector)
+                }
+            }).$mount('#foo')
+        })
+    </script>
+    -->
 </div>
 

@@ -11,9 +11,9 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 12;
+    const MINOR = 13;
     const PATCH = 1;
-    const NAME = "Spartan";
+    const NAME = "Ripley";
 
     public static function getBuild(){
         $commitHash = trim(exec('git log -1 --pretty="%h" -n1 HEAD'));
