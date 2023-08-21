@@ -2,10 +2,23 @@
   "_vendor.js": {
     "file": "vendor.js"
   },
-  "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-41e8ecb5.js",
+  "_vendor2.js": {
+    "file": "vendor2.js"
+  },
+  "src/ActivityWorkpackage.js": {
+    "file": "assets/activityworkpackage-9bf00098.js",
     "imports": [
-      "_vendor.js"
+      "_vendor.js",
+      "_vendor2.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivityWorkpackage.js"
+  },
+  "src/AdminTypeDocument.js": {
+    "file": "assets/admintypedocument-cb12f3dd.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js"
     ],
     "isEntry": true,
     "src": "src/AdminTypeDocument.js"

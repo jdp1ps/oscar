@@ -41,6 +41,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const empty_project_require_validation = 'empty_project_require_validation';
     const financial_label = 'financial_label';
     const financial_description = 'financial_description';
+    const spent_effective_clause = 'spent_effective_clause';
+    const spent_predicted_clause = 'spent_predicted_clause';
 
 
     const theme = 'theme';
@@ -174,6 +176,28 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $this->saveEditableConfKey(self::declarers_white_list, $use);
     }
 
+    /**
+     * Retourne la valeur à testé dans la table "spentline" sur le champ "rldnr" pour isoler
+     * les dépenses effectives.
+     *
+     * @return string
+     */
+    public function getSpentEffectiveClauseValue() :string
+    {
+        return $this->getEditableConfKey(self::spent_effective_clause, '9A');
+    }
+
+    /**
+     * Retourne la valeur à testé dans la table "spentline" sur le champ "rldnr" pour isoler
+     * les dépenses prévues.
+     *
+     * @return string
+     */
+    public function getSpentPredictedClauseValue() :string
+    {
+        return $this->getEditableConfKey(self::spent_predicted_clause, '9B');
+    }
+
 
     /**
      * @param $key
@@ -237,7 +261,13 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $file;
     }
 
-    protected function getEditableConfRoot()
+    /**
+     * Chargement de la configuration depuis le fichier YAML 'oscar-editable.yml'
+     *
+     * @return array|mixed|\stdClass|\Symfony\Component\Yaml\Tag\TaggedValue
+     * @throws OscarException
+     */
+    protected function getEditableConfRoot() :array
     {
         $path = $this->getYamlConfigPath();
         if (file_exists($path)) {
@@ -259,7 +289,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return $this
      * @throws OscarException
      */
-    public function saveEditableConfKey($key, $value)
+    public function saveEditableConfKey($key, $value) :self
     {
         $conf = $this->getEditableConfRoot();
         $conf[$key] = $value;

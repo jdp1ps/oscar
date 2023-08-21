@@ -564,34 +564,10 @@
                     </div>
                 <?php
                 else: ?>
-                    <div id="depenses">DÉPENSES</div>
-                    <script>
-                        require(['vue', 'vue-resource', 'activityspentsynthesis', 'VueFilters', 'moment'], function (Vue, VueResource, ActivitySpendSynthesis, VueFilters, moment) {
-                            Vue.use(VueResource);
-                            Vue.filter('money', VueFilters.default.money);
-                            Vue.filter('dateFull', function (date) {
-                                var m = moment(date);
-                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
-                            });
-                            new Vue({
-                                el: "#depenses",
-                                render: function (h) {
-                                    return h(ActivitySpendSynthesis.default, {
-                                        "props":
-                                            {
-                                                "manageDepense": '<?= $this->grant(
-                                                    \Oscar\Provider\Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
-                                                ) ? $this->url('depense/manage') : "null" ?>',
-                                                "url": "<?= $this->url(
-                                                    'contract/spent-synthesis',
-                                                    ['id' => $entity->getId()]
-                                                ) ?>"
-                                            }
-                                    });
-                                }
-                            })
-                        })
-                    </script>
+                    <div id="depenses2"
+                        data-url="<?= $this->url('contract/spent-synthesis', ['id' => $entity->getId()]) ?>">
+                    </div>
+                    <?= $this->Vite()->addJs('src/ActivitySpentSynthesis.js'); ?>
                     <nav>
                         <?php
                         if ($this->grant()->privilege(\Oscar\Provider\Privileges::DEPENSE_DETAILS, $entity)): ?>

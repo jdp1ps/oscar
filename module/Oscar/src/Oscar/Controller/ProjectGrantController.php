@@ -58,6 +58,7 @@ use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
+use Oscar\Service\SpentService;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
 use Oscar\Traits\UseContractDocumentService;
@@ -1503,10 +1504,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      * Affiche les documents pour une activité de recherche, retour JSON.
      * /activites-de-recherche/documents-json/id
      *
-     * @return JsonModel
      * @throws OscarException
      */
-    public function documentsJsonAction(): JsonModel
+    public function documentsJsonAction()
     {
         // Params (id activité)
         $id = $this->params()->fromRoute('id');
@@ -2152,18 +2152,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $msg = "";
         $error = "";
 
-        $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
-
 
         if ($action && $action == 'update') {
             $this->getOscarUserContextService()->check(Privileges::DEPENSE_SYNC, $activity);
             try {
                 $msg = $this->getSpentService()->syncSpentsByEOTP($activity->getCodeEOTP());
-                $spents = $this->getSpentService()->getSpentsByPFI($activity->getCodeEOTP());
             } catch (\Exception $e) {
                 $error = "Impossible de mettre à jour les dépenses : " . $e->getMessage();
             }
         }
+        $spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
         return [
             'masses' => $this->getOscarConfigurationService()->getMasses(),
             'activity' => $activity,
