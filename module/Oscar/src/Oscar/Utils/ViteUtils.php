@@ -8,6 +8,8 @@
 namespace Oscar\Utils;
 
 
+use Oscar\Exception\OscarException;
+
 class ViteUtils
 {
     /** Configuration */
@@ -35,7 +37,9 @@ class ViteUtils
     private function initManifest()
     {
         if ($this->mode == 'prod') {
-            $this->manifest = json_decode(file_get_contents($this->basePath . '/manifest.json'), true);
+            $manifest_location = $this->basePath . '/manifest.json';
+            FileSystemUtils::getInstance()->checkFileReadable($manifest_location);
+            $this->manifest = json_decode(file_get_contents($manifest_location), true);
         }
     }
 
@@ -51,7 +55,7 @@ class ViteUtils
             $jsFile = $script;
         } else {
             if (!array_key_exists($script, $this->manifest)) {
-                throw new \Exception("Script $script");
+                throw new OscarException("Fichier manquant : le script '$script' est absent du manifeste");
             }
 
             $conf = $this->manifest[$script];
