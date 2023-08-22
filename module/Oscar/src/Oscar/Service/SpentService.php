@@ -702,7 +702,17 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $cacheCompte[$code];
     }
 
-    public function getSpentsByPFIs($pfis, $spentType = self::SPENT_EFFECTIVE){
+
+    /**
+     * Chargement des lignes de dépense pour les PFI donnés
+     *
+     * @see getSpentsByPFI
+     * @param array $pfis
+     * @param $spentType
+     * @return array
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getSpentsByPFIs(array $pfis, $spentType = self::SPENT_EFFECTIVE){
         $out = [];
         foreach ($pfis as $pfi) {
             $spents = $this->getSpentsByPFI($pfi, $spentType);
@@ -713,6 +723,14 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $out;
     }
 
+    /**
+     * Chargement des lignes de dépense pour le PFI donné.
+     *
+     * @param $pfi
+     * @param int $spentType
+     * @return float|int|mixed|string
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function getSpentsByPFI($pfi, int $spentType)
     {
         $qb = $this->getEntityManager()
@@ -1105,7 +1123,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         ]);
 
         if (count($activities) > 0) {
-            $spents = $this->getSpentsByPFI($eotp);
+            $spents = $this->getSpentsByPFI($eotp, self::SPENT_EFFECTIVE);
             $total = 0.0;
             /** @var SpentLine $spent */
             foreach ($spents as $spent) {
