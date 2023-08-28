@@ -5,12 +5,18 @@ $showDelete = isset($showDelete) && $showDelete === true ? true : false;
 <article class="card xs <?= $document->isPrivate() ? 'private-document' : '' ?>" data-openable>
     <div class="card-title">
         <div>
+            <?php if( $document->islink() ): ?>
+            <i class="picto icon-link-ext"></i>
+            <?php else: ?>
             <i class="picto icon-doc doc-<?= $document->getExtension() ?>"></i>
-            <?php if( $document->isPrivate() ) { echo " BBBBB "; } ?>
+            <?php endif; ?>
+
             <small class="text-light"><?= $document->getTypeDocument() ?> ~ </small> <br>
             <strong><?= $document->getFileName() ?></strong>
         </div>
+        <?php if( !$document->islink() ): ?>
         <small class="text-light">&nbsp;(<?= $this->fileSize($document->getFileSize()) ?>)</small>
+        <?php endif; ?>
     </div>
     <div class="card-content">
         <p class="text-highlight" style="display: none">
@@ -23,11 +29,18 @@ $showDelete = isset($showDelete) && $showDelete === true ? true : false;
         </p>
         <?php endif; ?>
         <nav class="text-right show-over">
-            <a class="btn btn-default btn-xs" href="<?= $this->url('contractdocument/download',
-                ['id' => $document->getId()]) ?>">
-                <i class="icon-download-outline"></i>
-                Télécharger le fichier
-            </a>
+            <?php if( $document->islink() ): ?>
+                <a class="btn btn-default btn-xs" href="<?= $document->getPath() ?>" target="_blank">
+                    <i class="icon-link-ext"></i>
+                    Ouvrir le lien
+                </a>
+            <?php else: ?>
+                <a class="btn btn-default btn-xs" href="<?= $this->url('contractdocument/download',['id' => $document->getId()]) ?>">
+                    <i class="icon-download-outline"></i>
+                    Télécharger le fichier
+                </a>
+            <?php endif; ?>
+
             <?php if($showDelete): ?>
             <a class="btn btn-default btn-xs" data-confirm="Êtes-vous sûr de vouloir supprimer ce document ?" data-href="<?= $this->url('contractdocument/delete',
                 ['id' => $document->getId()]) ?>">

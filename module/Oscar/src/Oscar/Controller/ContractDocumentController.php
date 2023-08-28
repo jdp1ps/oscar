@@ -39,6 +39,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
+use Zend\Db\Sql\Ddl\Column\Datetime;
 use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Json\Server\Exception\HttpException;
@@ -273,6 +274,38 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
         }
 
+        if( $this->getRequest()->getPost('url') ){
+            $this->getLoggerService()->info(print_r($_POST, true));
+            try {
+                $document = new ContractDocument();
+                $document
+                    ->setVersion(1)
+                    ->setDateUpdoad(new \DateTime())
+                    ->setFileName($this->getRequest()->getPost('label_url'))
+                    ->setPath($this->getRequest()->getPost('url'))
+                    ->setLocation(ContractDocument::LOCATION_URL)
+                    ->setFileSize(0)
+                    ->setFileTypeMime("")
+                    ->setInformation($this->getRequest()->getPost('informations'))
+                    ->setPerson($this->getCurrentPerson())
+                    ->setTabDocument($this->getContractDocumentService()->getContractTabDocument(
+                        $this->getRequest()->getPost('tab')
+                    ))
+                    ->setTypeDocument($this->getContractDocumentService()->getContractDocumentType(
+                        $this->getRequest()->getPost('type')
+                    ))
+                    ->setGrant($activity)
+                    ->setDateDeposit(new \DateTime())
+                    ->setDateSend(new \DateTime());
+
+                $this->getEntityManager()->persist($document);
+                $this->getEntityManager()->flush($document);
+                return $this->jsonOutput(['message' => 'ok']);
+            } catch (Exception $e) {
+                return $this->getResponseInternalError($e->getMessage());
+            }
+        }
+
         try {
             // Get ID doc pour remplacement ou ajout
             $docId = $this->params()->fromRoute('id', null);
@@ -305,6 +338,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                         $infos = $serviceUpload->getStrategy()->getDatas();
                         if ($infos['error']) {
                             $datas['error'] = $infos['error'];
+                            return $this->getResponseInternalError($infos['error']);
                         } else {
                             $this->redirect()->toRoute(
                                 'contract/show',
