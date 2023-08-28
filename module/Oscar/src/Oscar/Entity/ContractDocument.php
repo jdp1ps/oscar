@@ -19,6 +19,10 @@ use Doctrine\ORM\Mapping\ManyToMany;
  */
 class ContractDocument extends AbstractVersionnedDocument
 {
+
+    const LOCATION_LOCAL_FILE = 'local';
+    const LOCATION_URL = 'url';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -89,11 +93,19 @@ class ContractDocument extends AbstractVersionnedDocument
      */
     private $dateSend;
 
+    /**
+     * @var string Emplacement (URL ou fichier physique)
+     *
+     * @ORM\Column(type="string", options={"default":"local"})
+     */
+    private $location;
+
 
     public function __construct()
     {
         parent::__construct();
         $this->persons = new ArrayCollection();
+        $this->location = self::LOCATION_LOCAL_FILE;
     }
 
 
@@ -110,6 +122,23 @@ class ContractDocument extends AbstractVersionnedDocument
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocation(): string
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param string $location
+     */
+    public function setLocation(string $location): self
+    {
+        $this->location = $location;
+        return $this;
     }
 
     /**
@@ -312,12 +341,19 @@ class ContractDocument extends AbstractVersionnedDocument
             }
         }
 
+        $fileName = $this->getFileName();
+        $basename = preg_replace('/(.*)(\.[\w]*)/', '$1', $this->getFileName());
+        if( $this->getLocation() == self::LOCATION_URL ){
+            $basename = $this->getPath();
+        }
+
         return [
             'id'          => $this->getId(),
             'version'     => $this->getVersion(),
             'information' => $this->getInformation(),
-            'fileName'    => $this->getFileName(),
-            'basename'    => preg_replace('/(.*)(\.[\w]*)/', '$1', $this->getFileName()),
+            'fileName'    => $fileName,
+//            'fileName'    => $this->getFileName(),
+            'basename'    => $basename,
             'fileSize'    => $this->getFileSize(),
             'typeMime'    => $this->getFileTypeMime(),
             'dateUpload'  => $this->getDateUpdoad()->format('Y-m-d H:i:s'),
@@ -328,6 +364,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'tabDocument' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,
             'private'     => $this->isPrivate(),
             'persons'     => $this->personsToJson(),
+            'location'     => $this->getLocation(),
             'urlDelete'   => $options['urlDelete'],
             'urlDownload' => $options['urlDownload'],
             'urlReupload' => $options['urlReupload'],
@@ -377,6 +414,11 @@ class ContractDocument extends AbstractVersionnedDocument
     {
         $slugify = new Slugify();
         return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));
+    }
+
+    public function islink() :bool
+    {
+        return $this->getLocation() == self::LOCATION_URL;
     }
 
 

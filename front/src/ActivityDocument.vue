@@ -92,15 +92,35 @@
       <div class="overlay-content">
         <h2>
           Téléverser un nouveau document
-          dans <strong>{{ selectedIdTypeDocument }}</strong>
+          dans <strong>{{ selectedTab.label }}</strong>
           <span class="overlay-closer" @click="uploadDoc = null">X</span>
         </h2>
+        <div class="alert">
+          <label for="switch_mode">
+            Cochez cette case si le fichier est un URL
+            <input type="checkbox" name="switch_mode" v-model="mode_url">
+          </label>
+        </div>
         <div style="width: 90%; margin-left: 5%">
           <div class="row">
             <div class="col-md-6">
-              <!-- Fichier upload -->
-              <label for="file">Fichier</label>
-              <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
+
+              <div v-if="mode_url">
+                <!-- Fichier upload -->
+                <label for="url">URL du fichier</label>
+                <input type="text" class="form-control" name="url" id="url"
+                       placeholder="Lien vers la ressource"
+                       v-model="fileUrl" />
+                <label for="label">Description de l'URL</label>
+                <input type="text" class="form-control" name="label" id="label"
+                       placeholder="Description rapide de la ressource"
+                       v-model="fileUrlLabel" />
+              </div>
+              <div v-else>
+                <!-- Fichier upload -->
+                <label for="file">Fichier</label>
+                <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
+              </div>
               <!-- Date de dépot -->
               <label>Date de dépôt</label>
               <p class="help">Date à laquelle le fichier a été reçu</p>
@@ -122,13 +142,16 @@
               </select>
 
 <!-- PRIVE, SI PRIVE AJOUT PERSONNES -->
-              <div class="row" style="margin-top: 20px;">
+              <div class="row" style="margin-top: 20px;" v-if="mode_url != true">
                 <div class="col-md-6">
                   <label for="private">Document privé</label>
                 </div>
                 <div class="col-md-6">
                   <input type="checkbox" name="private" id="private" class="form-control" v-model="privateDocument">
                 </div>
+              </div>
+              <div v-else class="alert alert-info">
+                Les URL ne peuvent pas être définie comme privée dans Oscar
               </div>
               <span v-if="privateDocument === true">
                 <h4>Ce document sera classé automatiquement dans l'onglet privé</h4>
@@ -226,10 +249,11 @@
         <hr>
         <article class="card xs" v-for="doc in tab.documents" :key="doc.id" :class="{'private-document': doc.private }">
           <div class="">
-            <i class="picto icon-doc" :class="'doc' + doc.extension"></i>
+            <i class="picto icon-anchor-outline" v-if="doc.location == 'link'"></i>
+            <i class="picto icon-doc" :class="'doc' + doc.extension" v-else></i>
             <small class="text-light">{{ doc.category.label }} ~ </small>
             <strong>{{doc.fileName}}</strong>
-            <small class="text-light" :title="doc.fileSize + ' octet(s)'">&nbsp;
+            <small class="text-light" :title="doc.fileSize + ' octet(s)'" v-if="doc.location != 'url'">&nbsp;
               ({{doc.fileSize | filesize}}) - Version {{ doc.version }}
             </small>
           </div>
@@ -265,7 +289,14 @@
               </div>
 
             <nav class="text-right show-over">
-              <a class="btn btn-default btn-xs" :href="doc.urlDownload" v-if="doc.urlDownload">
+              <a class="btn btn-default btn-xs"
+                 :href="doc.basename"
+                 v-if="doc.location == 'url'" target="_blank">
+                <i class="icon-link-ext"></i>
+                Accéder au lien
+              </a>
+              <a class="btn btn-default btn-xs"
+                 :href="doc.urlDownload" v-if="doc.urlDownload && doc.location != 'url'">
                 <i class="icon-upload-outline"></i>
                 Télécharger
               </a>
@@ -275,7 +306,7 @@
                 Nouvelle Version
               </button>
               -->
-              <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"  v-if="tab.manage">
+              <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"  v-if="tab.manage && doc.location != 'url'">
                 <i class="icon-download-outline"></i>
                 Nouvelle Version
               </button>
@@ -283,7 +314,7 @@
                 <i class="icon-trash"></i>
                 Supprimer
               </a>
-              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)" v-if="tab.manage">
+              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)" v-if="tab.manage && doc.location != 'url'">
                 <i class="icon-pencil"></i>
                 Modifier
               </a>
@@ -339,6 +370,8 @@ export default {
       persons: [],
       dateDeposit: '',
       dateSend: '',
+      fileUrl: '',
+      fileUrlLabel: '',
       privateDocument: false,
       selectedIdTypeDocument: null,
       selectedIdTabDocument: null,
@@ -354,6 +387,7 @@ export default {
         'informations': this.informationsDocument,
         'persons': this.persons,
         'baseUrlUpload': this.urlUploadNewDoc,
+        'url': '',
         'init': false
       },
       // Message boite modal pour l'utilisateur (erreurs pour exemple)
@@ -374,6 +408,9 @@ export default {
       sortDirection: -1,
       editable: true,
       remoterState: oscarRemoteData.state,
+      displayComputed: false,
+
+      mode_url: false,
 
       // Onglet active
       selectedTab: null,
@@ -569,6 +606,8 @@ export default {
       this.privateDocument = privateTab;
       this.selectedIdTypeDocument = typeId;
       this.informationsDocument = '';
+      this.fileUrl = this.uploadNewDocData.url = '';
+      this.fileUrlLabel = '';
       this.persons = [];
       // initialise objet de base
       this.uploadNewDocData.init = true;
@@ -610,12 +649,19 @@ export default {
         let value = this.uploadNewDocData[key];
         fd.append(key, value);
       }
-      // Document file
-      if (this.fileToDownload !== null) {
-        fd.append('file', this.fileToDownload, this.fileToDownload.name);
+
+      if( this.mode_url ){
+        fd.append('url', this.fileUrl);
+        fd.append('label_url', this.fileUrlLabel);
       } else {
-        this.errorMessages.push("Aucun fichier sélectionner a téléverser !");
+        // Document file
+        if (this.fileToDownload !== null) {
+          fd.append('file', this.fileToDownload, this.fileToDownload.name);
+        } else {
+          this.errorMessages.push("Aucun fichier sélectionner a téléverser !");
+        }
       }
+
       if (this.uploadNewDocData.type === null) {
         this.errorMessages.push("Vous devez qualifier le type de votre document !");
       }
