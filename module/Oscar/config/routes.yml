@@ -804,6 +804,14 @@ organization:
                 route: '/edit/:id'
                 defaults:
                     action: edit
+
+        suborganization:
+            type: segment
+            options:
+                route: '/suborganization/:idorganization'
+                defaults:
+                    action: suborganization
+
         delete:
             type: segment
             options:

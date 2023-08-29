@@ -387,7 +387,7 @@ return array(
                 ////////////////////////////////////////////////////////////////
                 [
                     'controller' => 'Organization',
-                    'action' => ['delete', 'index', 'search'],
+                    'action' => ['delete', 'index', 'search', 'suborganization'],
                     'roles' => ['user']
 
                 ],

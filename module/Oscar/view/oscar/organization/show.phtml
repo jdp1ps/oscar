@@ -100,6 +100,18 @@
 
     </header>
     <section class="content">
+        <div id="oranizations">
+            <h2>Sous-Structures</h2>
+
+            <div id="suborganizations" data-url="<?= $this->url('organization/suborganization', ['idorganization' => $organization->getId()]) ?>"></div>
+            <?php $this->Vite()->addJs('src/OrganizationSubOrganizations.js') ?>
+
+            <?php foreach($subStructures as $subStructure): ?>
+            <article>
+                <?= $subStructure['label'] ?>
+            </article>
+            <?php endforeach; ?>
+        </div>
 
         <div id="persons">
             <h2><i class="icon-user"></i>Personnes</h2>
