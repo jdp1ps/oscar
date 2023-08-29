@@ -80,7 +80,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $this->personService = $personService;
     }
 
-    public function getTypesIdsByLabel(?array $labels) :array {
+    public function getTypesIdsByLabel(?array $labels): array
+    {
         $types = [];
         $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(
             ['root' => null],
@@ -89,7 +90,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         /** @var OrganizationType $type */
         foreach ($result as $type) {
-            if( in_array($type->getLabel(), $labels) ){
+            if (in_array($type->getLabel(), $labels)) {
                 $types[] = $type->getId();
             }
         }
@@ -103,13 +104,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     /**
      * @return OscarUserContext
      */
-    protected function getOscarUserContext() :OscarUserContext
+    protected function getOscarUserContext(): OscarUserContext
     {
         return $this->getOscarUserContextService();
     }
 
 
-    public function getOrganizationRoleRepository() :OrganizationRoleRepository
+    public function getOrganizationRoleRepository(): OrganizationRoleRepository
     {
         return $this->getEntityManager()->getRepository(OrganizationRole::class);
     }
@@ -127,8 +128,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
      */
-    public function getAvailableRolesOrganisationActivity( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT ) :array
-    {
+    public function getAvailableRolesOrganisationActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT
+    ): array {
         return OscarFormatterFactory::getFormatter($format)->format($this->getOrganizationRoleRepository()->findAll());
     }
 
@@ -307,6 +308,20 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $activities;
     }
 
+    protected function getOrganizationRepository(): OrganizationRepository
+    {
+        return $this->getEntityManager()->getRepository(Organization::class);
+    }
+
+    public function getSubStructure(int $organizationId): array
+    {
+        $structures = [];
+        foreach ($this->getOrganizationRepository()->getSubOrganization($organizationId) as $organization) {
+            $structures[] = $organization->toArray();
+        }
+        return $structures;
+    }
+
     public function getOrganizationTypes()
     {
         $types = [];
@@ -360,7 +375,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
         foreach ($types as $type) {
-            $options[$type->getId()] = (string) $type;
+            $options[$type->getId()] = (string)$type;
         }
         return $options;
     }
@@ -641,15 +656,14 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
 
-
-    public function closeOrganizationPerson(OrganizationPerson $organizationPerson, \DateTime $dateEnd) :void
+    public function closeOrganizationPerson(OrganizationPerson $organizationPerson, \DateTime $dateEnd): void
     {
         $person = $organizationPerson->getPerson();
         $organization = $organizationPerson->getOrganization();
         $role = $organizationPerson->getRoleObj();
 
         $msg = sprintf(
-                "Résiliation du rôle '%s' de '%s' dans l'organisation '%s'",
+            "Résiliation du rôle '%s' de '%s' dans l'organisation '%s'",
             $role->getRoleId(),
             $person,
             $organization
@@ -660,14 +674,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $updateNotification = $role->isPrincipal();
             $organizationPerson->setDateEnd($dateEnd);
             $this->getEntityManager()->flush();
-            if($updateNotification ){
-             $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateNotificationOrganization($organization);
-
+            if ($updateNotification) {
+                $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateNotificationOrganization(
+                    $organization
+                );
             }
             $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
-            $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization($organization);
-
-        } catch (\Exception $e){
+            $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexOrganization(
+                $organization
+            );
+        } catch (\Exception $e) {
             $this->getLoggerService()->error("! closeOrganizationPerson : $person > $organization > $role");
         }
     }
@@ -804,10 +820,10 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function updateCountriesIso3166() :void
+    public function updateCountriesIso3166(): void
     {
         $referencielFilePath = realpath($this->getOscarConfigurationService()->getConfiguration('install.iso-3166'));
-        if( !$referencielFilePath ){
+        if (!$referencielFilePath) {
             throw new OscarException("Fichier référenciel non-disponible");
         }
 
@@ -816,7 +832,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
         foreach ($datas as $data) {
             // Création du pays
-            if( !array_key_exists($data['alpha2'], $exists) ){
+            if (!array_key_exists($data['alpha2'], $exists)) {
                 $country = new Country3166();
                 $this->getEntityManager()->persist($country);
                 $country->setAlpha2($data['alpha2'])

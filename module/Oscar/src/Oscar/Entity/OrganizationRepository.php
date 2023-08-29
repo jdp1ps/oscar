@@ -17,6 +17,20 @@ use Oscar\Import\Data\DataExtractorOrganization;
 class OrganizationRepository extends EntityRepository implements IConnectedRepository
 {
     /**
+     * Retourne les sous-organizations de l'organisation donnée.
+     *
+     * @param int $organizationParentId
+     * @return Organization[]
+     */
+    public function getSubOrganization( int $organizationParentId ) :array
+    {
+        $qb = $this->createQueryBuilder('o')
+            ->where('o.parent = :organizationParentId')
+            ->setParameter('organizationParentId', $organizationParentId);
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
      * Retourne la liste des organizations de la personnes.
      *
      * @param int $personId ID de la personne

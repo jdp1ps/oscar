@@ -67,21 +67,10 @@ class PersonElasticSearch implements PersonSearchStrategy
 
     public function search($search, $limit=10000)
     {
-//        $params = [
-//            'index' => $this->getIndex(),
-//            'type' => $this->getType(),
-//            'body' => [
-//                'size' => 10000,
-//                'query' => [
-//                    'query_string' => [
-//                        'query' => sprintf('%s OR  %s*', $search, $search)
-//                    ]
-//                ]
-//            ]
-//        ];
-        $ext = explode(' ', $search);
-        $searchPlus = [$search, $search.'*'];
-        $searchQuery = implode(' OR ', $searchPlus);
+//        $ext = explode(' ', $search);
+//        $searchPlus = [$search, $search.'*'];
+//        $searchQuery = implode(' OR ', $searchPlus);
+        $searchQuery = $search;
 
         //die($searchQuery);
 
@@ -91,18 +80,15 @@ class PersonElasticSearch implements PersonSearchStrategy
             'body' => [
                 'size' => 10000,
                 'query' => [
-                    'multi_match' => [
+                    'query_string' => [
                         'query' => $searchQuery,
                         'fields' => [
-                            'fullname^4',
-                            'lastname^10',
-                            'firstname^2',
+                            'fullname3',
+                            'lastname^7',
+                            'firstname',
                             'email',
-                            'location^5',
-                            'affectation^5',
-                            'organizations^5',
-                            'activities^5',
-                            'connectors'
+                            'location',
+                            'affectation'
                         ],
                         "fuzziness"=> "auto"
                     ]
@@ -214,7 +200,7 @@ class PersonElasticSearch implements PersonSearchStrategy
             'id' => $person->getId(),
             'firstname' => $person->getFirstname(),
             'lastname' => $person->getLastname(),
-            'fullname' => $person->getDisplayName(),
+            'fullname' => $person->getLastname() . ' ' . $person->getFirstname(),
             'email' => $person->getEmail(),
             'affectation' => $person->getLdapAffectation(),
             'location' => $person->getLdapSiteLocation(),

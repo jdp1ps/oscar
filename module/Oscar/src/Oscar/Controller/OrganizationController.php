@@ -419,6 +419,40 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         }
     }
 
+    /**
+     * Route : /organization/ID/substructure/new
+     * @return void
+     */
+    public function suborganizationAction()
+    {
+        try {
+            $method = $this->getRequest()->getMethod();
+            $organizationId = $this->params()->fromRoute('idorganization', null);
+
+            switch ($method) {
+                case 'GET':
+                    $substructures = [];
+                    foreach ($this->getOrganizationService()->getSubStructure($organizationId) as $s ) {
+                        $substructures[] = $s->toArray();
+                    }
+                    $output = $this->baseJsonResponse();
+                    $output['organizations'] = $substructures;
+                    return $this->jsonOutput($output);
+                    break;
+
+                case 'POST':
+                    return $this->getResponseNotImplemented("TODO");
+                    break;
+
+                default:
+                    return $this->getResponseBadRequest();
+            }
+
+        } catch (\Exception $e) {
+            return $this->getResponseInternalError("Erreur : " . $e->getMessage());
+        }
+    }
+
     public function showAction()
     {
         $organizationId = $this->params()->fromRoute('id');
@@ -426,6 +460,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         return [
             'connectors' => $this->getOrganizationService()->getConnectorsList(),
             'organization' => $this->getOrganizationService()->getOrganization($organizationId),
+            'subStructures' => $this->getOrganizationService()->getSubStructure($organizationId),
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectOrganization($organizationId), $page),
             'activities' => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId),
         ];

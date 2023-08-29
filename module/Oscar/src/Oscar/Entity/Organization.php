@@ -336,6 +336,19 @@ class Organization implements ResourceInterface, IConnectedObject
      */
     protected $tvaintra;
 
+    /**
+     * Références aux sous-structures
+     * @ORM\OneToMany(targetEntity="Organization", mappedBy="parent")
+     */
+    private $children;
+
+    /**
+     * Structure parente
+     * @ORM\ManyToOne(targetEntity="Organization", inversedBy="children")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true)
+     */
+    private $parent;
+
 
     public function __construct()
     {
@@ -358,6 +371,42 @@ class Organization implements ResourceInterface, IConnectedObject
         }
         return null;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param mixed $children
+     */
+    public function setChildren($children): self
+    {
+        $this->children = $children;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent): self
+    {
+        $this->parent = $parent;
+        return $this;
+    }
+
+
 
     public function isClose()
     {
