@@ -2329,11 +2329,16 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param $idOrganization
      * @return Activity[]
      */
-    public function byOrganizationWithoutProject($idOrganization)
+    public function byOrganizationWithoutProject($idOrganization, bool $deep = false)
     {
+        if( $deep ){
+            $ids = $this->getOrganizationService()->getOrganizationIdsDeep($idOrganization);
+        } else {
+            $ids = [$idOrganization];
+        }
         return $this->getBaseQuery()
-            ->where('org.id = :id AND c.project IS NULL')
-            ->setParameter('id', $idOrganization)
+            ->where('org.id IN (:id) AND c.project IS NULL')
+            ->setParameter('id', $ids)
             ->getQuery()
             ->getResult();
     }

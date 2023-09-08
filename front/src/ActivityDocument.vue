@@ -742,64 +742,48 @@ export default {
 
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
-      this.idCurrentPerson = success.data.idCurrentPerson;
-      let documents = success.data.tabsWithDocuments;
-      let defaultTab = null;
-      let selectedTab = null;
+      console.log("handlerSuccess(", success);
+      try {
+        this.idCurrentPerson = success.data.idCurrentPerson;
+        let documents = Array.isArray(success.data.tabsWithDocuments) ? {} : success.data.tabsWithDocuments;
+        let defaultTab = null;
+        let selectedTab = null;
 
-      Object.keys(documents).forEach( (item) => {
-        let tab = documents[item];
-        tab.total = tab.documents.length;
-        tab.documents.sort( (x,y) => y.version - x.version );
-        tab.documents.forEach(item => {
-          console.log(item.fileName, item.version);
-          item.explode = true;
-        })
-        if( defaultTab == null ) defaultTab = tab.id;
-        if( selectedTab == null && tab.documents.length > 0 ){
-          selectedTab = tab.id;
-          //browsers.sort((x, y) => x.year - y.year);
+        Object.keys(documents).forEach( (item) => {
+          let tab = documents[item];
+          tab.total = tab.documents.length;
+          tab.documents.sort( (x,y) => y.version - x.version );
+          tab.documents.forEach(item => {
+            console.log(item.fileName, item.version);
+            item.explode = true;
+          })
+          if( defaultTab == null ) defaultTab = tab.id;
+          if( selectedTab == null && tab.documents.length > 0 ){
+            selectedTab = tab.id;
+            //browsers.sort((x, y) => x.year - y.year);
+          }
+        });
+        this.tabsWithDocuments = documents;
+        if( this.selectedTabId == null ){
+          this.selectedTabId = selectedTab ? selectedTab : defaultTab;
         }
-      });
-      this.tabsWithDocuments = documents;
-      if( this.selectedTabId == null ){
-        this.selectedTabId = selectedTab ? selectedTab : defaultTab;
-      }
-      //   // if( this.tabsWithDocuments[i].documents.length ){
-      //   //   this.selectedTabId = this.tabsWithDocuments[i].id;
-      //   // }
-      // }
+        //   // if( this.tabsWithDocuments[i].documents.length ){
+        //   //   this.selectedTabId = this.tabsWithDocuments[i].id;
+        //   // }
+        // }
 
-      if( this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length ){
-        this.selectedTab = this.tabsWithDocuments.unclassified;
-      }
-      else {
-        let keys = Object.keys(this.tabsWithDocuments)[0];
-        if( keys.length ){
-          this.selectedTab = this.tabsWithDocuments[keys[0]];
+        if( this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length ){
+          this.selectedTab = this.tabsWithDocuments.unclassified;
         }
-      }
-      // Voir avec Jack est-ce que l'on remet l'ordre des documents ? Et si oui comment ?
-      /*
-      let data = success.data.datas;
-      let documentsOrdered = [];
-      let documents = {};
-
-      data.forEach(function (doc) {
-        doc.categoryText = doc.category ? doc.category.label : "";
-        doc.explode = true;
-        //var filename = doc.fileName;
-        let filename = doc.fileName;
-        if (!documents[filename]) {
-          documents[filename] = doc;
-          documents[filename].previous = [];
-          documentsOrdered.push(doc);
-        } else {
-          documents[filename].previous.push(doc);
+        else {
+          let keys = Object.keys(this.tabsWithDocuments)[0];
+          if( keys.length ){
+            this.selectedTab = this.tabsWithDocuments[keys[0]];
+          }
         }
-      });
-      this.documents = documentsOrdered;
-      */
+      } catch (err) {
+        console.log("Erreur de traitement ", err)
+      }
     },
 
     handlerSelectTab(tab){
@@ -816,6 +800,7 @@ export default {
 
     // Recup datas Docs
     fetch() {
+      console.log("fetch()");
       // Object JS Ajax
       oscarRemoteData
           .setPendingMessage("Chargement des documents")

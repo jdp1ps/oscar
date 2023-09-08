@@ -5944,6 +5944,32 @@ pre.alert-danger, pre.alert-info {
 }
 
 .card {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+
+  .card-title {
+    width: 100%;
+    flex-wrap: wrap;
+
+
+
+    .card-title-subsection {
+      flex-grow: 1;
+      flex-basis: 100%;
+    }
+  }
+
+  .card-content {
+    margin-bottom: auto;
+    width: 100%;
+  }
+  .card-footer {
+    padding-top: .25em;
+    width: 100%;
+    margin-top: auto;
+  }
+
   &.light {
     background-color: rgba(255,255,255,.5) !important;
   }

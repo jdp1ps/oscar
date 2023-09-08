@@ -456,7 +456,21 @@
                 Vous pouvez utiliser les filtres ci-dessous pour réduire les résultats aux structures sous votre responsabilité.
             </p>
 
-                <?php foreach($this->grant()->getCurrentPerson()->getOrganizations() as $affectation ): ?>
+                <?php foreach ($affectationsDetails as $detailsOrganization): ?>
+                    <span class="cartouche primary">
+                        <input name="include[]" class="inline-checkbox"
+                               value="<?= $detailsOrganization['organization']->getId() ?>"
+                               type="checkbox"
+                                <?= in_array($detailsOrganization['organization']->getId(), $include) ? ' checked="checked"' : '' ?>>
+
+                        <?= $detailsOrganization['organization'] ?>
+                        <span class="addon">
+                            <?= implode(', ', $detailsOrganization['roles_display']) ?>
+                        </span>
+                    </span>
+                <?php endforeach; ?>
+
+                <?php /* foreach($this->grant()->getCurrentPerson()->getOrganizations() as $affectation ): ?>
                     <?php if( $affectation->isPrincipal() ): ?>
                     <span class="cartouche <?= $affectation->isPrincipal() ? 'primary' : '' ?>">
                         <input name="include[]" class="inline-checkbox" value="<?= $affectation->getOrganization()->getId() ?>" type="checkbox" <?= in_array($affectation->getOrganization()->getId(), $include) ? ' checked="checked"' : '' ?>>
@@ -466,7 +480,7 @@
                         </span>
                     </span>
                     <?php endif; ?>
-                <?php endforeach; ?>
+                <?php endforeach;*/ ?>
             </p>
             <hr>
             <nav>

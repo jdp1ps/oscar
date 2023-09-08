@@ -380,6 +380,15 @@ class Organization implements ResourceInterface, IConnectedObject
         return $this->children;
     }
 
+    public function getSelfWithAncestors( $out = [] ) :array
+    {
+        $out[] = $this;
+        if( $this->getParent() ){
+            $out = $this->getParent()->getSelfWithAncestors($out);
+        }
+        return $out;
+    }
+
     /**
      * @param mixed $children
      */

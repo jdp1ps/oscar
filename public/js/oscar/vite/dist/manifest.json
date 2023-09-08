@@ -3,33 +3,58 @@
     "file": "vendor.js"
   },
   "_vendor2.js": {
-    "file": "vendor2.js"
-  },
-  "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-83e2c197.js",
+    "file": "vendor2.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor3.js"
+    ]
+  },
+  "_vendor3.js": {
+    "file": "vendor3.js"
+  },
+  "src/ActivitySpentSynthesis.js": {
+    "file": "assets/activityspentsynthesis-6325e583.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-9bf00098.js",
+    "file": "assets/activityworkpackage-04d307f7.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-cb12f3dd.js",
+    "file": "assets/admintypedocument-eb50ed02.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor2.js",
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/AdminTypeDocument.js"
+  },
+  "src/OrganizationSubOrganizations.css": {
+    "file": "assets/OrganizationSubOrganizations-bd2af7b5.css",
+    "src": "src/OrganizationSubOrganizations.css"
+  },
+  "src/OrganizationSubOrganizations.js": {
+    "css": [
+      "assets/OrganizationSubOrganizations-bd2af7b5.css"
+    ],
+    "file": "assets/organizationsuborganizations-544d65b9.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor3.js",
+      "_vendor2.js"
+    ],
+    "isEntry": true,
+    "src": "src/OrganizationSubOrganizations.js"
   }
 }

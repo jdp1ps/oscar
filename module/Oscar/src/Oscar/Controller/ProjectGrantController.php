@@ -1563,9 +1563,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         //Docs reliés à une activité
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
-            $this->getLoggerService()->info($doc->getFileName() . " - " . $doc->getTabDocument());
+            $this->getLoggerService()->debug($doc->getFileName() . " - " . $doc->getTabDocument());
 
             if( !$this->getOscarUserContextService()->contractDocumentRead($doc) ){
+                $this->getLoggerService()->debug("Non lisible");
                 continue;
             }
 
@@ -2544,6 +2545,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $organizationsIdsPerimeter = null;
 
             if ($this->getOrganizationPerimeter()) {
+
                 $include = $this->params()->fromQuery('include', null);
                 if ($include) {
                     foreach ($include as $index => $value) {
@@ -3146,6 +3148,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             // Données de la vue
             $documentsTypes = $this->getActivityService()->getTypesDocuments(true);
 
+            $affectationsDetails = $this->getOrganizationService()
+                ->getPersonAffectationDetails($this->getCurrentPerson());
+
+
+
             $view = new ViewModel(
                 [
                     'projectview' => $projectview,
@@ -3165,6 +3172,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     'filterOrganizations' => $filterOrganizations,
                     'include' => $include,
                     'organizationsPerimeter' => $this->getOrganizationPerimeter(),
+                    'affectationsDetails' => $affectationsDetails,
                     'sort' => $sort,
                     'sortCriteria' => $sortCriteria,
                     'sortDirection' => $sortDirection,

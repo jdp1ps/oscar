@@ -420,6 +420,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
     }
 
     /**
+     * Gestion des sous-structures
      * Route : /organization/ID/substructure/new
      * @return void
      */
@@ -431,17 +432,33 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
             switch ($method) {
                 case 'GET':
-                    $substructures = [];
-                    foreach ($this->getOrganizationService()->getSubStructure($organizationId) as $s ) {
-                        $substructures[] = $s->toArray();
-                    }
                     $output = $this->baseJsonResponse();
-                    $output['organizations'] = $substructures;
+                    $subStructures = $this->getOrganizationService()->getSubStructure($organizationId);
+                    foreach ($subStructures as &$organization) {
+                        $organization['show'] = $this->url()->fromRoute(
+                            'organization/show', ['id' => $organization['id']]
+                        );
+                    }
+                    $output['organizations'] = $subStructures;
                     return $this->jsonOutput($output);
                     break;
 
                 case 'POST':
-                    return $this->getResponseNotImplemented("TODO");
+                    $idSubStructure = $this->getRequest()->getPost('idSubStructure');
+                    if( !$idSubStructure ){
+                        return $this->getResponseBadRequest("Vous devez selectionner une organisation");
+                    }
+                    $this->getOrganizationService()->saveSubStructure($organizationId, $idSubStructure);
+                    return $this->getResponseOk("Sous structure enregistrée");
+                    break;
+
+                case 'DELETE':
+                    $idSubStructure = $this->getRequest()->getQuery('idsubstructure');
+                    if( !$idSubStructure ){
+                        return $this->getResponseBadRequest("Données manquante");
+                    }
+                    $this->getOrganizationService()->removeSubStructure($organizationId, $idSubStructure);
+                    return $this->getResponseOk("Sous structure retirée");
                     break;
 
                 default:
@@ -455,15 +472,23 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     public function showAction()
     {
+
+        // TODO
+        // Gérer les accès à cette partie pour la gestion des structures
+        // de recherche.
         $organizationId = $this->params()->fromRoute('id');
         $page = $this->params()->fromQuery('page', 1);
-        return [
+
+        $output = [
             'connectors' => $this->getOrganizationService()->getConnectorsList(),
             'organization' => $this->getOrganizationService()->getOrganization($organizationId),
+            'ancestors' => $this->getOrganizationService()->getAncestors($organizationId),
             'subStructures' => $this->getOrganizationService()->getSubStructure($organizationId),
             'projects' => new UnicaenDoctrinePaginator($this->getProjectService()->getProjectOrganization($organizationId), $page),
-            'activities' => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId),
+            'activities' => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId, true),
         ];
+
+        return $output;
     }
 
     public function newAction()
