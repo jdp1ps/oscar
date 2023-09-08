@@ -23,7 +23,9 @@ use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\OrganizationTypeRepository;
+use Oscar\Entity\Person;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\OscarFormatterFactory;
@@ -167,6 +169,93 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
+     * Retourne la liste des ID (Id de l'organisation et de ces sous-structures).
+     *
+     * @param $idParentOrganization
+     * @return array
+     */
+    public function getOrganizationIdsDeep( int $idParentOrganization, &$output = [] ):array
+    {
+        return $this->getDescentsIdsDeep($idParentOrganization);
+    }
+
+    public function getAncestors( int $idOrganization ) :array {
+        $ancestors = [];
+        $ids = $this->getAncestorsIdsDeep($idOrganization);
+        foreach ($ids as $id) {
+            if( $id == $idOrganization ) continue;
+            $ancestors[] = $this->getOrganization($id);
+        }
+        return array_reverse($ancestors);
+    }
+
+    public function getAncestorsIds( int $organizationId ):array
+    {
+        $out= [];
+        return $this->getAncestorsIdsDeep($organizationId, $out);
+    }
+
+    private function getAncestorsIdsDeep( int $organizationId, &$output = [] ):array
+    {
+        $organization = $this->getOrganization($organizationId);
+        $output[] = $organization->getId();
+        if( $organization->getParent() ){
+            $output = $this->getAncestorsIdsDeep($organization->getParent()->getId(), $output);
+        }
+        return $output;
+    }
+
+    public function getDescentsIds( int $fromParent ): array
+    {
+        return $this->getDescentsIdsDeep($fromParent);
+    }
+
+    private function getDescentsIdsDeep( int $fromParent, &$output = [] ): array
+    {
+        $organization = $this->getOrganization($fromParent);
+        $output[] = $organization->getId();
+        if( $organization->getChildren() ){
+            foreach ($organization->getChildren() as $organization) {
+                $output = $this->getDescentsIdsDeep($organization->getId(), $output);
+            }
+        }
+        return $output;
+    }
+
+    public function getPersonAffectationDetails( Person $person, bool $principal = true ):array {
+        $output = [];
+        /** @var OrganizationPerson $personOrganization */
+        foreach ($person->getOrganizations() as $personOrganization) {
+            if( $principal === true && !$personOrganization->isPrincipal() ){
+                continue;
+            }
+            $this->buildPersonAffectationDetailsDeep( $personOrganization->getRoleObj(), $personOrganization->getOrganization(), $output);
+        }
+        return $output;
+    }
+
+    private function buildPersonAffectationDetailsDeep( Role $roleToAdd, Organization $organization, &$output ) :void
+    {
+        if( !array_key_exists($organization->getId(), $output)) {
+            $output[$organization->getId()] = [
+                'organization' => $organization,
+                'roles_display' => [],
+                'roles' => []
+            ];
+        }
+        $output[$organization->getId()]['roles'][] = $roleToAdd;
+        if( !in_array($roleToAdd->getRoleId(), $output[$organization->getId()]['roles_display']) ){
+            $output[$organization->getId()]['roles_display'][] = $roleToAdd->getRoleId();
+        }
+
+        if( $organization->getChildren() ){
+            foreach ($organization->getChildren() as $subOrganization) {
+                $this->buildPersonAffectationDetailsDeep($roleToAdd, $subOrganization, $output);
+            }
+        }
+    }
+
+    /**
      * @param $id
      * @throws OscarException
      * @throws \Doctrine\ORM\ORMException
@@ -306,11 +395,59 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getSubStructure(int $organizationId): array
     {
         $structures = [];
-        foreach ($this->getOrganizationRepository()->getSubOrganization($organizationId) as $organization) {
-            $structures[] = $organization->toArray();
+        $subStructures = $this->getOrganizationRepository()->getSubOrganizations($organizationId);
+        foreach ( $subStructures as $organization) {
+            $infos = $organization->toArray();
+            $infos['show'] = "";
+            $infos['persons'] = [];
+            $infos['organizations'] = [];
+
+            // personnels
+            /** @var OrganizationPerson $p */
+            foreach ($organization->getPersons() as $p) {
+                if( !array_key_exists($p->getPerson()->getId(), $infos['persons']) ){
+                    $infos['persons'][$p->getPerson()->getId()] = [
+                        'label' => $p->getPerson()->getFullname(),
+                        'roles' => []
+                    ];
+                }
+                $infos['persons'][$p->getPerson()->getId()]['roles'][] = $p->getRoleObj()->getRoleId();
+            }
+
+            /** @var Organization $o */
+            foreach ($organization->getChildren() as $o) {
+                if( !array_key_exists($o->getId(), $infos['organizations']) ){
+                    $infos['organizations'][$o->getId()] = $o->toArray();
+                }
+            }
+
+            $structures[] = $infos;
         }
         return $structures;
     }
+
+    public function saveSubStructure(int $masterOrganizationId, int $subOrganizationId): void
+    {
+        $subStructure = $this->getOrganizationRepository()->getOrganisationById($subOrganizationId);
+        $parent = $this->getOrganizationRepository()->getOrganisationById($masterOrganizationId);
+        $idsInAffected = $this->getOrganizationIdsDeep($subStructure->getId());
+
+        if (!in_array($subStructure->getId(), $idsInAffected)) {
+            $subStructure->setParent($parent);
+            $this->getEntityManager()->flush($subStructure);
+        } else {
+            throw new OscarException("L'affectation va provoquer une récurence, opération annulée");
+        }
+    }
+
+    //removeSubStructure
+    public function removeSubStructure(int $masterOrganizationId, int $subOrganizationId): void
+    {
+        $subStructure = $this->getOrganizationRepository()->getOrganisationById($subOrganizationId);
+        $subStructure->setParent(null);
+        $this->getEntityManager()->flush($subStructure);
+    }
+
 
     public function getOrganizationTypes()
     {

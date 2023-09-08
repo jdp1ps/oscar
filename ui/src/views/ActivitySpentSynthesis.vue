@@ -56,7 +56,7 @@
       <tr>
         <th>masse</th>
         <th style="text-align: right;">Réalisées</th>
-        <th style="text-align: right;">Prévues</th>
+        <th style="text-align: right;">Engagées</th>
       </tr>
       <tr v-for="m,k in masses">
         <th>{{ m }}</th>
@@ -93,14 +93,6 @@
         <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis.recettes.total) }}&nbsp;€</td>
       </tr>
     </table>
-
-    <!--
-    <div class="table table-condensed" v-if="synthesis">
-      <pre>
-        {{ synthesis.details }}
-      </pre>
-    </div>
-    -->
     <small>Données mise à jour : <strong v-if="dateUpdated">{{ dateUpdated.date | dateFull }}</strong></small>
   </section>
 </template>

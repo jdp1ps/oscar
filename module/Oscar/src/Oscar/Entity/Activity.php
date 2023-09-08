@@ -1760,6 +1760,15 @@ class Activity implements ResourceInterface
         return $partners;
     }
 
+    protected function deepParent(Organization $organization, &$out = []) :array
+    {
+        if( $organization->getParent() ){
+            $out[] = $organization->getParent();
+            $out = $this->deepParent($organization->getParent());
+        }
+        return $out;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////
     public function getTypeSlug()

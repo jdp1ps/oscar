@@ -4,14 +4,30 @@
         <a href="javascript:history.back()" class="link">Retour</a>
     </div>
     <header class="header jumbotron organization type-<?= $organization->getTypeSlug() ?>">
-        <h2><?= $organization->getTypeObj() ?></h2>
+        <?php if(count($ancestors)): ?>
+        <h3>
+            <small style="display: block">Structure référente</small>
+            <?php foreach ($ancestors as $a): ?>
+                <span class="ancestor">
+                    <i class="icon-angle-right"></i>
+                    <a href="<?= $this->url('organization/show', ['id' => $a->getId()]) ?>">
+                        <?= $a ?>
+                    </a>
+                </span>
+            <?php endforeach; ?>
+        </h3>
+        <?php endif; ?>
         <h1>
             <?php if( $organization->getCode() ): ?>
                 <abbr><?= $organization->getCode() ?></abbr>
             <?php endif; ?>
-
+            <i class="icon-building-filled"></i>
             <?= $organization->getShortName() ? $organization->getShortName().', ' : '' ?>
             <?= $organization->getFullname() ?>
+
+            <?php if( $organization->getTypeObj() ):?>
+            <sup><small> (<?= $organization->getTypeObj() ?>)</small></sup>
+            <?php endif;?>
         </h1>
         <div class="details row">
             <dl class="col-xs-8">
@@ -102,15 +118,8 @@
     <section class="content">
         <div id="oranizations">
             <h2>Sous-Structures</h2>
-
             <div id="suborganizations" data-url="<?= $this->url('organization/suborganization', ['idorganization' => $organization->getId()]) ?>"></div>
             <?php $this->Vite()->addJs('src/OrganizationSubOrganizations.js') ?>
-
-            <?php foreach($subStructures as $subStructure): ?>
-            <article>
-                <?= $subStructure['label'] ?>
-            </article>
-            <?php endforeach; ?>
         </div>
 
         <div id="persons">
@@ -140,7 +149,6 @@
 
         <?= $this->pager($projects, preg_replace("/\\??&page=[0-9]*/", '', $_SERVER['REQUEST_URI']) . '?&page=%s') ?>
 
-        <?php /*
         <section class="activities">
             <h2>Activités (sans projet) <span class="label <?= count($activities)>0?'label-info':'label-default' ?>"><?= count($activities) ?></span></h2>
             <?php $currentYear=null; foreach( $activities as $activity ):
@@ -156,7 +164,6 @@
             )); ?>
             <?php endforeach; ?>
         </section>
- */ ?>
     </section>
 
     <div class="overlay" id="overlay" style="display: none">

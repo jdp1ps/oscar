@@ -147,6 +147,50 @@ $markText = function( $text, $search ){
 
             </span>
           </h2>
+            <div class="container">
+                <div class="row">
+                    <?php if(count($entity->getChildren())): ?>
+                    <div class="col-md-6">
+                        <h4>
+                            <i class="icon-building"></i>
+                            Sous-structures</h4>
+                        <ul>
+                        <?php
+                        /** @var \Oscar\Entity\Organization $o */
+                        foreach( $entity->getChildren() as $o ): ?>
+                            <li>
+                                <?php if($o->getCode()): ?>
+                                <code><?= $o->getCode() ?></code>
+                                <?php endif; ?>
+
+                                <?php if($o->getShortName()): ?>
+                                    <strong><?= $o->getShortName() ?></strong>
+                                <?php endif; ?>
+
+                                <?php if($o->getFullName()): ?>
+                                    <em>&nbsp;<?= $o->getFullName() ?></em>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(count($entity->getPersons())): ?>
+                    <div class="col-md-6">
+                        <h4>Personnel</h4>
+                        <ul>
+                        <?php foreach( $entity->getPersons() as $person ): ?>
+                            <li>
+                                <strong><?= $person->getPerson()->getDisplayName() ?></strong>
+                                <em> - <?= $person->getRole() ?></em>
+                            </li>
+                        <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
             <?php if ($entity->getDateEnd()): ?>
                 <p class="text-highlight">
                     <?php if( $entity->isClose() ): ?>Fermé depuis le
@@ -154,12 +198,6 @@ $markText = function( $text, $search ){
                     <?php endif; ?>
                     <strong><?= $this->moment($entity->getDateEnd()) ?></strong>
                 </p>
-            <?php endif; ?>
-
-            <?php if(count($entity->getPersons())): ?>
-                <?php foreach( $entity->getPersons() as $person ): ?>
-                    <?= $this->link()->organisationPerson($person) ?>
-                <?php endforeach; ?>
             <?php endif; ?>
 
         </article>
@@ -190,8 +228,6 @@ $markText = function( $text, $search ){
             });
             // TOFIX
             document.location = '<?= $this->url('organization/merge') ?>?ids=' + ids.join(',');
-
-            console.log(ids);
         });
     })
 </script>

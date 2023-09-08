@@ -26,6 +26,7 @@ export default defineConfig({
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
+        organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {
