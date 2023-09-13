@@ -56,7 +56,7 @@
       <tr>
         <th>masse</th>
         <th style="text-align: right;">Réalisées</th>
-        <th style="text-align: right;">Prévues</th>
+        <th style="text-align: right;">Engagées</th>
       </tr>
       <tr v-for="m,k in masses">
         <th>{{ m }}</th>
