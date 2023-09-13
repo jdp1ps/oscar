@@ -773,6 +773,14 @@ organization:
             action: index
     may_terminate: true
     child_routes:
+        fiche:
+            type: segment
+            options:
+                route: '/fiche/:id'
+                defaults:
+                    action: fiche
+            may_terminate: true
+
         show:
             type: segment
             options:
