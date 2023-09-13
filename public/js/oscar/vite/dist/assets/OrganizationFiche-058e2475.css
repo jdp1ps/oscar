@@ -1,0 +1,1 @@
+h2{background:rgba(255,255,255,.5)}h2 small{display:block}h2 .fullname{border-top:solid thin black;border-bottom:solid thin black;padding:.5em}h2 .fullname code{border-radius:4px;text-shadow:-1px 1px 1px rgba(0,0,0,.5);background:#5e80a1;color:#fff;padding:0 .3em}h2 .fullname strong,h2 .fullname em{padding:0 .3em}h2 .fullname em{color:#969696}
