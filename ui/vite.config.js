@@ -27,6 +27,7 @@ export default defineConfig({
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
+        organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {

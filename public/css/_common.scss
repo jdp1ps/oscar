@@ -6010,15 +6010,17 @@ pre.alert-danger, pre.alert-info {
 }
 
 .card {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
+
+
+  &.suborganization {
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+  }
 
   .card-title {
     width: 100%;
     flex-wrap: wrap;
-
-
 
     .card-title-subsection {
       flex-grow: 1;
@@ -6385,17 +6387,21 @@ $onColor: saturate($baseColor, 25%);
 }
 
 .card.locked, .card.closed {
-  opacity: .7;
+  opacity: .8;
   .week-header {
     cursor: default
   }
 }
 
 .card.closed {
-  opacity: .4;
+  opacity: .7;
   .week-header {
     cursor: default
   }
+}
+
+.card.organization.closed {
+  border-left-color: $colorGreyMedium;
 }
 
 article.wp {

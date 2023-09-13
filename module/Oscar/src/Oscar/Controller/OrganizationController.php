@@ -470,6 +470,33 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         }
     }
 
+    public function ficheAction()
+    {
+        $organizationId = $this->params()->fromRoute('id');
+
+        try {
+            $organization = $this->getOrganizationService()->getOrganization($organizationId);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de charger l'organisation");
+        }
+
+        if( $this->isAjax() ){
+            $action = $this->getRequest()->getQuery('a', '');
+            $response = $this->baseJsonResponse();
+            switch ($action) {
+                case 'infos':
+                    $response['infos'] = $organization->toArray();
+                    return $this->jsonOutput($response);
+                default:
+                    return $this->getResponseBadRequest();
+            }
+        }
+
+        return [
+            'id' => $organizationId
+        ];
+    }
+
     public function showAction()
     {
 
