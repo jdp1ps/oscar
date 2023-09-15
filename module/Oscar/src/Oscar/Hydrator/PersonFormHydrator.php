@@ -9,6 +9,7 @@ namespace Oscar\Hydrator;
 
 
 use Oscar\Entity\Person;
+use Oscar\Utils\DateTimeUtils;
 use Zend\Hydrator\HydratorInterface;
 
 class PersonFormHydrator implements HydratorInterface
@@ -27,12 +28,18 @@ class PersonFormHydrator implements HydratorInterface
      */
     public function hydrate(array $data, $object)
     {
+        $dateFin = $data['ldapfininscription'];
+        if($dateFin == ""){
+            $dateFin = null;
+        }
+
         $object->setFirstname($data['firstname'])
             ->setLastname($data['lastname'])
             ->setCodeHarpege($data['codeHarpege'])
             ->setLadapLogin($data['ladapLogin'])
             ->setLdapAffectation($data['ldapAffectation'])
             ->setLdapSiteLocation($data['ldapSiteLocation'])
+            ->setLdapFinInscription($dateFin)
             ->setEmail($data['email'])
             ->setPhone($data['phone']);
 
@@ -57,6 +64,7 @@ class PersonFormHydrator implements HydratorInterface
             'phone' => $object->getPhone(),
             'ldapAffectation' => $object->getLdapAffectation(),
             'ldapSiteLocation' => $object->getLdapSiteLocation(),
+            'ldapfininscription' => $object->getLdapFinInscription(),
             'email' => $object->getEmail(),
         ];
 

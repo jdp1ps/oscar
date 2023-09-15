@@ -2535,6 +2535,9 @@ abbr {
 
 .person.card {
   margin-bottom: $font-size-base;
+  &.inactive {
+    border-left: 8px #811717 solid;
+  }
 }
 
 .details {
@@ -5736,7 +5739,26 @@ pre.alert-danger, pre.alert-info {
   background: rgba(0,0,0,.05);
 }
 
+.fiche {
+  &.header {
+    background: white;
+    padding: 1em;
+  }
+  &.menu {
+    padding: .3em 0;
+    background: white !important;
+    border-top: thin solid #c2ceda;
+    border-bottom: thin solid #c2ceda;
 
+    .intitule {
+      font-weight: 100;
+      color: #647b93;
+    }
+    &.align-left {
+      text-align: right;
+    }
+  }
+}
 
 //////////////////////////////////////////////////////////
 ///
@@ -6011,7 +6033,6 @@ pre.alert-danger, pre.alert-info {
 
 .card {
 
-
   &.suborganization {
     flex-direction: column;
     display: flex;
@@ -6096,10 +6117,6 @@ pre.alert-danger, pre.alert-info {
     }
   }
 }
-
-
-
-
 
 .repport-item {
   .icon-attention-circled {

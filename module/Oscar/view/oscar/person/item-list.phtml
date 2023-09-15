@@ -1,7 +1,8 @@
 <?php
 /** @var \Oscar\Entity\Person $person */
 ?>
-<article class="card xs openable selectable person <?= $person->isLeader() ? "leader" : "" ?>" data-id="<?= $person->getId() ?>">
+<article class="card xs openable selectable person <?= $person->isLeader() ? "leader" : "" ?> <?= $person->isLdapActive() ? "" : "inactive" ?>"
+         data-id="<?= $person->getId() ?>">
     <h2 class="card-title" style="display: flex">
         <?php if($person->getEmail()): ?>
             <img class="thumb32"
@@ -9,24 +10,44 @@
                  alt="">
         <?php endif; ?>
 
-
         <span class="fn">
 
-                    <span class="family-name">
-                        <?= $markText($person->getLastName(), $search) ?>
-                    </span>
-                    <span class="given-name">
-                        <?= $markText($person->getFirstname(), $search) ?>
-                    </span>
-                    <span class="counter <?= count($person->getProjectAffectations()) ? ' filled' : 'empty' ?>">
-                        <?= count($person->getProjectAffectations()) ?>
-                    </span>
+            <span class="family-name">
+                <?= $markText($person->getLastName(), $search) ?>
+            </span>
+            <span class="given-name">
+                <?= $markText($person->getFirstname(), $search) ?>
+            </span>
+            <span class="counter <?= count($person->getProjectAffectations()) ? ' filled' : 'empty' ?>">
+                <?= count($person->getProjectAffectations()) ?>
+            </span>
 
-                    <a href="<?= $this->url('person/show', ['id'=>$person->getId()]) ?>" class="more">Fiche</a>
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
-                    <a href="<?= $this->url('notification/person', ['idperson'=>$person->getId()]) ?>" class="more"><i class="icon-bell"></i> Notifier</a>
-                    <?php endif; ?>
+            <a href="<?= $this->url('person/show', ['id'=>$person->getId()]) ?>" class="more">Fiche</a>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
+            <a href="<?= $this->url('notification/person', ['idperson'=>$person->getId()]) ?>" class="more"><i class="icon-bell"></i> Notifier</a>
+            <?php endif; ?>
+
+            <?php if( !$person->isLdapActive() ): ?>
+            <span class="text-danger" style="position: absolute; right: 1em; line-height: 1em">
+                <i class="icon-calendar"></i>
+                Compte désactivé <br>
+                <span style="font-weight: 100; font-size: .8em">
+                    depuis le <?= $this->moment($person->getLdapFinInscription()) ?>
+                    (<?= $this->moment($person->getLdapFinInscription())->since() ?>)
                 </span>
+            </span>
+            <?php elseif( $person->getLdapFinInscription() ): ?>
+                <span class="text-danger" style="position: absolute; right: 1em; font-size: .8em">
+                    <span style="font-weight: 100">
+                        <i class="icon-calendar"></i>
+                        Désactivation à venir :
+                    </span>
+                    <?= $this->moment($person->getLdapFinInscription()) ?>
+                    (<?= $this->moment($person->getLdapFinInscription())->since() ?>)
+            </span>
+            <?php endif; ?>
+        </span>
     </h2>
     <div class="card-content text-highlight">
         <i class="icon-phone-outline"></i><strong class="addon"><?= $person->getPhone() ?></strong> |

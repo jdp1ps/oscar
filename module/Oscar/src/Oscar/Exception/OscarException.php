@@ -10,5 +10,6 @@ namespace Oscar\Exception;
 
 class OscarException extends \Exception
 {
+    const ACCOUNT_DISABLED = "PERSON_ACCOUNT_DISBLED";
 
 }

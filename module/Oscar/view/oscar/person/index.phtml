@@ -89,6 +89,15 @@
                         <option value="<?= $value ?>"<?= ($orderBy == $value ? ' selected="selected"' : '') ?>><?= $order ?></option>
                     <?php endforeach; ?>
                 </select>
+                <h5>Actif / Inactif</h5>
+                <p class="help">
+                    Filtrer les résultats en fonction de l'activité de la personne
+                </p>
+                <select name="filteractive" class="form-control">
+                    <?php foreach( $filtersActive as $value=>$active ):?>
+                        <option value="<?= $value ?>"<?= ($filteractive == $value ? ' selected="selected"' : '') ?>><?= $active ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
     </form>

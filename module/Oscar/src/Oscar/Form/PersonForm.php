@@ -63,6 +63,19 @@ class PersonForm extends Form implements InputFilterProviderInterface
         ]);
 
         $this->add([
+           'name'   => 'ldapfininscription',
+           'attributes' => [
+               'class' => 'form-control'
+           ],
+           'options' => [
+               'label' => "Date fin d'inscription"
+           ],
+           'type'=>'Date'
+       ]);
+
+        //
+
+        $this->add([
             'name'   => 'email',
             'attributes' => [
                 'class' => 'form-control'
@@ -135,6 +148,9 @@ class PersonForm extends Form implements InputFilterProviderInterface
     public function getInputFilterSpecification()
     {
         return [
+            'ldapfininscription' => [
+                'required' => false
+            ],
             'email' => [
                 'required'  => true,
                 'filters' => [

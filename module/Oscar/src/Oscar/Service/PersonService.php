@@ -1886,12 +1886,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     ) {
         $query = $this->getBaseQuery();
 
-        // PATCH : Visiblement, ces INNER JOIN provoquent un delais
-        // de requêtage de l'espace
-        /*
-         $query->leftJoin('p.organizations', 'o')
-            ->leftJoin('p.activities', 'a');
-        */
         if ($filters['declarers'] == 'on') {
             $ids = $this->getDeclarersIds();
             if (array_key_exists('ids', $filters)) {
@@ -1923,17 +1917,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $query->addOrderBy('p.' . $filters['order_by'], 'ASC');
         }
 
-//        if( preg_match('/id:([0-9]*)/m', $search, $matches) ){
-//            $id = $matches[1];
-//            $ids = [
-//                $this->getPerson($id)->getId()
-//            ];
-//            if (array_key_exists('ids', $filters)) {
-//                $filters['ids'] = array_intersect($filters['ids'], $ids);
-//            } else {
-//                $filters['ids'] = $ids;
-//            }
-//        }
+        if ($filters['filteractive'] == 3 ) {
+            $where = "p.ldapFinInscription IS NOT NULL";
+            $query->where($where);
+        }
+
+        if ($filters['filteractive'] == 1 || $filters['filteractive'] == 2 ) {
+            $now = date('Y-m-d');
+            $where = "p.ldapFinInscription IS NULL OR (p.ldapFinInscription IS NOT NULL AND p.ldapFinInscription > '$now')";
+            if( $filters['filteractive'] == 2 ){
+                $where = "NOT($where)";
+            }
+            $query->where($where);
+        }
 
         // RECHERCHE sur le connector
         // Ex: rest:p00000001

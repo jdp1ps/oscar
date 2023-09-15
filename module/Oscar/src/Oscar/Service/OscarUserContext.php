@@ -693,6 +693,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getCurrentPerson()
     {
         try {
+            $person = null;
             if ($this->getUserContext()->getLdapUser()) {
                 // PATCH : Ensam (Matthieu MARC), 2020-08
                 $attribute = $this->getOscarConfigurationService()->getServiceLocator()->get(
@@ -708,12 +709,16 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     $pseudo = $this->getUserContext()->getLdapUser()->getUid();
                 }
 
-                return $this->getPersonService()->getPersonByLdapLogin($pseudo);
+                $person = $this->getPersonService()->getPersonByLdapLogin($pseudo);
             } elseif ($this->getUserContext()->getDbUser()) {
-                return $this->getPersonService()->getPersonByLdapLogin(
+                $person = $this->getPersonService()->getPersonByLdapLogin(
                     $this->getUserContext()->getDbUser()->getUsername()
                 );
             }
+            if( $person && !$person->isLdapActive() ){
+                //throw new OscarException(OscarException::ACCOUNT_DISABLED);
+            }
+            return $person;
         } catch (NoResultException $ex) {
             // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
             // ... can happening with users stored in database directly
@@ -1100,8 +1105,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             }
         }
 
-        $this->getLoggerService()->debug("Accès '$person' dans $organization : " . implode(', ', $output[$key]));
-
         $output[$key] = array_unique($output[$key]);
     }
 
@@ -1189,7 +1192,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
 
         if (!isset($tmpActivities[$key])) {
-            $this->getLoggerService()->debug("compute acces : $key");
             try {
                 $roles = $activity->getPersonRoles($person);
 
