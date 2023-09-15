@@ -102,7 +102,9 @@ set_error_handler('oscar_exception');
 // ON LOG LES PROBEMES
 function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $errcontext=[]){
     static $codeLabels;
-
+    if( strpos($errstr, \Oscar\Exception\OscarException::ACCOUNT_DISABLED) ){
+        //die("Compte désactivé");
+    }
     if( $codeLabels === null ){
         $codeLabels = [
             E_WARNING => 'WARNING',

@@ -8887,6 +8887,9 @@ abbr {
 .person.card {
   margin-bottom: 14px;
 }
+.person.card.inactive {
+  border-left: 8px #811717 solid;
+}
 
 .details dt, .details h5 {
   font-size: 1em;
@@ -11843,6 +11846,24 @@ pre.alert-danger, pre.alert-info {
   font-size: 0.9em;
   font-weight: lighter;
   background: rgba(0, 0, 0, 0.05);
+}
+
+.fiche.header {
+  background: white;
+  padding: 1em;
+}
+.fiche.menu {
+  padding: 0.3em 0;
+  background: white !important;
+  border-top: thin solid #c2ceda;
+  border-bottom: thin solid #c2ceda;
+}
+.fiche.menu .intitule {
+  font-weight: 100;
+  color: #647b93;
+}
+.fiche.menu.align-left {
+  text-align: right;
 }
 
 .activity-timesheet-synthesis {

@@ -288,6 +288,8 @@ class PersonController extends AbstractOscarController
         $allow = false;
         $justXHR = true;
 
+
+
         // On test les accès
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)) {
             $allow = true;
@@ -309,8 +311,16 @@ class PersonController extends AbstractOscarController
             }
         }
 
+        $filtersActive = [
+            0 => "Ignorer",
+            1 => "Compte actif",
+            2 => "Compte inactif",
+            3 => "Compte avec une date de fin",
+        ];
+
         // Donnèes GET
         $page = (int)$this->params()->fromQuery('page', 1);
+        $filteractive = (int) $this->params()->fromQuery('filteractive', 0);
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
@@ -352,7 +362,8 @@ class PersonController extends AbstractOscarController
                     'order_by' => $orderBy,
                     'leader' => $leader,
                     'declarers' => $declarers,
-                    'np1' => $np1
+                    'np1' => $np1,
+                    'filteractive' => $filteractive
                 ],
                 $limit
             );
@@ -445,6 +456,8 @@ class PersonController extends AbstractOscarController
             'filter_roles' => $filterRoles,
             'orderBy' => $orderBy,
             'orders' => $orders,
+            'filteractive' => $filteractive,
+            'filtersActive' => $filtersActive,
             'leader' => $leader,
             'declarers' => $declarers,
             'np1' => $np1,

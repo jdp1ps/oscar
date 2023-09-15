@@ -769,6 +769,17 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function isLdapActive() :bool
+    {
+        if( $this->getLdapFinInscription() ){
+            if( date('Y-m-d') > $this->getLdapFinInscription() ){
+                return false;
+            }
+            return true;
+        }
+        return true;
+    }
+
     /**
      * @return string
      */

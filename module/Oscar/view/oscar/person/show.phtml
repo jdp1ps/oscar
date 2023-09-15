@@ -80,62 +80,96 @@
         background: green;
         color: #dddddd;
     }
+
+    .fiche.menu > div, .fiche.menu > div .replace-strengthen-person { display: inline }
 </style>
 <section class="container">
     <div class="row">
-        <h1 class="">
-            <?= $entity->getFirstname() ?>
-            <strong class="lastname"><?= $entity->getLastname() ?></strong>
-            <?php if($entity->getLdapAffectation() ):?>
-            <span><?= $entity->getLdapAffectation() ?></span>
-            <?php endif; ?>
-        </h1>
 
-        <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
-        <div id="replacer"></div>
-        <script>
-            require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
-                Vue.use(VueResource);
-                new Vue({
-                    el: "#replacer",
-                    render(h){
-                        return h(ReplaceStengthenPerson, {props: {
-                                urlReplace: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=replace",
-                                urlAffectation: "<?= $this->url('person/affectation', ['id'=>$entity->getId()]) ?>",
-                                urlStrengthen: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=strengthen",
-                                person: <?= json_encode($entity->toArray()) ?>,
-                                affectations: <?= json_encode($affectations) ?>,
-                            }})
-                    }
-                })
+        <header class="fiche header">
+            <h1 class="">
+                <?= $entity->getFirstname() ?>
+                <strong class="lastname"><?= $entity->getLastname() ?></strong>
+                <?php if($entity->getLdapAffectation() ):?>
+                    <small> (<?= $entity->getLdapAffectation() ?>)</small>
+                <?php endif; ?>
+            </h1>
+        </header>
 
-            });
-        </script>
-        <?php endif ?>
-        <p>
-            <i class="icon-mail"></i> <?= $entity->getEmail() ?>
+        <nav class="fiche menu align-left">
+
+            <small class="intitule">
+                <i class="icon-cog"></i>
+                Actions :
+            </small>
+
+            <?php if( $this->grant(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
+                <div id="replacer"></div>
+                <script>
+                    require(['vue', 'vue-resource', 'replacestrengthenperson'], function(Vue, VueResource, ReplaceStengthenPerson){
+                        Vue.use(VueResource);
+                        new Vue({
+                            el: "#replacer",
+                            render(h){
+                                return h(ReplaceStengthenPerson, {props: {
+                                        urlReplace: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=replace",
+                                        urlAffectation: "<?= $this->url('person/affectation', ['id'=>$entity->getId()]) ?>",
+                                        urlStrengthen: "<?= $this->url('person/show', ['id'=>$entity->getId()]) ?>?a=strengthen",
+                                        person: <?= json_encode($entity->toArray()) ?>,
+                                        affectations: <?= json_encode($affectations) ?>,
+                                    }})
+                            }
+                        })
+
+                    });
+                </script>
+            <?php endif ?>
+
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::DROIT_PRIVILEGE_VISUALISATION)): ?>
-                <a href="<?= $this->url('person/access', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-xs">
+                <a href="<?= $this->url('person/access', ['id' => $entity->getId()]) ?>" class="btn btn-default btn-lg">
                     <i class="icon-lock"></i>
                     Voir les privilèges
                 </a>
             <?php endif; ?>
 
             <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT)): ?>
-            <form action="<?= $this->url('person/delete', ['id' => $entity->getId()]) ?>" method="post">
-                <button type="submit" class="btn btn-default btn-xs">
-                    <i class="icon-lock"></i>
-                    Supprimer
-                </button>
-            </form>
+                <form class="form-inline" action="<?= $this->url('person/delete', ['id' => $entity->getId()]) ?>" method="post">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="icon-lock"></i>
+                        Supprimer
+                    </button>
+                </form>
             <?php endif; ?>
 
             <?php if( $allowTimesheet ): ?>
-                <a href="<?= $this->url('timesheet/declarant') ?>?person=<?= $entity->getId() ?>" class="btn btn-default btn-xs">
+                <a href="<?= $this->url('timesheet/declarant') ?>?person=<?= $entity->getId() ?>" class="btn btn-default btn-lg">
                     <i class="icon-calendar"></i>
                     Compléter la feuille de temps
                 </a>
             <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
+                <a class="btn btn-default" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
+                    <i class="icon-pencil"></i>
+                    Éditer les informations
+                </a>
+            <?php endif; ?>
+
+            <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
+                <a class="btn btn-default" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
+                    <i class="icon-bell"></i>
+                    Voir les notifications
+                </a>
+            <?php endif; ?>
+        </nav>
+
+
+
+
+        <p>
+
+
+
         </p>
 
 
@@ -152,6 +186,31 @@
                     </div>
                     <div class="col col-2">
                         <div class="data-list">
+                            <div class="data-row">
+                                <div class="data-label">Validité du compte</div>
+                                <div class="data-value">
+                                    <?php if( $entity->isLdapActive() ): ?>
+                                    <span class="cartouche success">
+                                        <i class="icon-valid"></i>
+                                        Compte ACTIF
+                                    </span>
+                                    <?php else: ?>
+                                        <span class="cartouche danger">
+                                        <i class="icon-cancel-circled-outline"></i>
+                                        Compte DESACTIVE
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if( $entity->getLdapFinInscription() ):?>
+                                    <br>
+                                    <small style="font-weight: 100">
+                                        <i class="icon-calendar"></i>
+                                        Désactivation
+                                        <?= $this->moment($entity->getLdapFinInscription()) ?>
+                                        (<?= $this->moment($entity->getLdapFinInscription())->since() ?>)
+                                    </small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                             <div class="data-row">
                                 <div class="data-label">Nom affiché</div>
                                 <div class="data-value"><?= $entity->getDisplayName() ?></div>
@@ -185,6 +244,14 @@
                                 <div class="data-value"><?= $entity->getLdapStatus() ?></div>
                             </div>
                             <div class="data-row">
+                                <div class="data-label">LDAP (Fin d'inscription)</div>
+                                <div class="data-value">
+                                    <?= $entity->getLdapFinInscription()
+                                        ? $this->moment($entity->getLdapFinInscription())
+                                        : 'NON' ?>
+                                </div>
+                            </div>
+                            <div class="data-row">
                                 <div class="data-label">Projets</div>
                                 <div class="data-value"><i class="icon-cubes"></i>
                                     Impliqué dans <a href="#projects"><?= count($projects) ?> projet(s)</a>
@@ -212,26 +279,6 @@
                         </div>
                     </div>
                 </div>
-                <nav class="admin-bar text-center">
-                    <div class="btn-group">
-
-                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_EDIT) ): ?>
-                        <a class="btn btn-default btn-xs" href="<?= $this->url('person/edit', ['id'=>$entity->getId()]) ?>">
-                            <i class="icon-pencil"></i>
-                            Éditer les informations
-                        </a>
-                        <?php endif; ?>
-
-                        <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_NOTIFICATION_PERSON) ): ?>
-                            <a class="btn btn-default btn-xs" href="<?= $this->url('person/notification', ['id'=>$entity->getId()]) ?>">
-                                <i class="icon-bell"></i>
-                                Voir les notifications
-                            </a>
-                        <?php endif; ?>
-
-
-                    </div>
-                </nav>
             </section>
 
             <section class="col">

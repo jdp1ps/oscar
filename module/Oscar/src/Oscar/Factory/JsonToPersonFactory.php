@@ -67,6 +67,13 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         if (property_exists($jsonData, 'structure')) {
             $object->setLdapSiteLocation($jsonData->structure);
         }
+        if (property_exists($jsonData, 'datefininscription')) {
+            $date = null;
+            if( $jsonData->datefininscription ){
+                $date = new \DateTime($jsonData->datefininscription);
+            }
+            $object->setLdapFinInscription($date);
+        }
         if (property_exists($jsonData, 'affectation')) {
             $object->setLdapAffectation($jsonData->affectation);
         }

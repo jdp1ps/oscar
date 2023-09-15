@@ -100,12 +100,21 @@
 
     <h3>Authentification / Accès</h3>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="form-group" id="short">
                 <div class="input-group input-group-lg">
                     <span class="input-group-addon">Identifiant</span>
                     <?= $this->formInput($form->get('ladapLogin')) ?>
                     <?= $this->formElementErrors($form->get('ladapLogin')); ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group" id="short">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">Validité</span>
+                    <?= $this->formInput($form->get('ldapfininscription')) ?>
+                    <?= $this->formElementErrors($form->get('ldapfininscription')); ?>
                 </div>
             </div>
         </div>
