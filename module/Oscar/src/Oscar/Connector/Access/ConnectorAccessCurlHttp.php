@@ -46,8 +46,7 @@ class ConnectorAccessCurlHttp implements IConnectorAccess
         if (false === $return) {
             throw new ConnectorException(
                 sprintf(
-                    "ConnectorAccessCurlHttp(%s) n'a pas fournis les données attendues : %s",
-                    $url,
+                    "ConnectorAccessCurlHttp n'a pas fournis les données attendues : %s",
                     curl_error($curl)
                 )
             );

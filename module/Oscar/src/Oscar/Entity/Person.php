@@ -798,6 +798,11 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function disabledLdapNow()
+    {
+        return $this->setLdapFinInscription(date('Y-m-d'));
+    }
+
     /**
      * @return string
      */
