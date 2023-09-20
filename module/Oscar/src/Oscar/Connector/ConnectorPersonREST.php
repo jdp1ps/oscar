@@ -250,7 +250,6 @@ class ConnectorPersonREST extends AbstractConnector
                 $this->getLogger()->error($msg);
                 throw new OscarException($msg);
             }
-
             // Fix : Nouveau format
             if( property_exists($personData, 'error_code') ){
                 switch($personData->error_code){

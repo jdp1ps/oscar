@@ -832,7 +832,7 @@ class Person implements ResourceInterface
 
     public function disabledLdapNow()
     {
-        return $this->setLdapFinInscription(date('Y-m-d'));
+        return $this->setLdapFinInscription((new \DateTime('-1 day'))->format('Y-m-d'));
     }
 
     /**
