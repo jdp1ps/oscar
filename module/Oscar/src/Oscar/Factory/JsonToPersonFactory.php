@@ -70,7 +70,7 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         if (property_exists($jsonData, 'datefininscription')) {
             $date = null;
             if( $jsonData->datefininscription ){
-                $date = new \DateTime($jsonData->datefininscription);
+                $date = (new \DateTime($jsonData->datefininscription))->format('Y-m-d');
             }
             $object->setLdapFinInscription($date);
         }

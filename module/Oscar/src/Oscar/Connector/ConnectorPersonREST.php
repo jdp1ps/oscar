@@ -14,6 +14,7 @@ use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
+use Oscar\Exception\OscarException;
 
 class ConnectorPersonREST extends AbstractConnector
 {
@@ -241,7 +242,28 @@ class ConnectorPersonREST extends AbstractConnector
     {
         if ($person->getConnectorID($this->getName())) {
             $personIdRemote = $person->getConnectorID($this->getName());
-            $personData = $this->getAccessStrategy()->getDataSingle($personIdRemote);
+
+            try {
+                $personData = $this->getAccessStrategy()->getDataSingle($personIdRemote);
+            } catch (\Exception $e) {
+                $msg = "Aucune données de correspondance pour la personne '$personIdRemote' : " . $e->getMessage();
+                $this->getLogger()->error($msg);
+                throw new OscarException($msg);
+            }
+
+            // Fix : Nouveau format
+            if( property_exists($personData, 'error_code') ){
+                switch($personData->error_code){
+                    case 'PERSON_DISABLED':
+                        $person->disabledLdapNow();
+                        $this->getLogger()->info("'$person' a été désactivée");
+                        return $person;
+                    default:
+                        throw new OscarException("Code d'erreur '".$personData->error_code."' inconnu");
+
+                }
+                $personData = $personData->person;
+            }
 
             // Fix : Nouveau format
             if( property_exists($personData, 'person') ){
@@ -251,7 +273,9 @@ class ConnectorPersonREST extends AbstractConnector
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
 
         } else {
-            throw new \Exception('Impossible de synchroniser la personne ' . $person);
+            $msg = 'Impossible de synchroniser la personne ' . $person;
+            $this->getLogger()->error($msg);
+            throw new \Exception($msg);
         }
     }
 
