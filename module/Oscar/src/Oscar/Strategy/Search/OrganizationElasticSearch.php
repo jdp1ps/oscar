@@ -265,77 +265,77 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         } catch (\Exception $e) {
             throw $e;
         }
-
-        try {
-            $this->getClient()->indices()->create(
-                [
-                    'index' => $this->getIndex(),
-                    'body' => [
-                        'settings' => [
-                            'analysis' => [
-                                'analyzer' => [
-                                    'noaccent' => [
-                                        "type" => "custom",
-                                        "tokenizer" => "standard",
-                                        "filter" => ['asciifolding', "lowercase"]
-                                    ]
-                                ],
-                            ]
-                        ],
-                        'mappings' => [
-                            "organization" => [
-                                'properties' => [
-                                    'code' => [
-                                        'type' => 'keyword',
-                                    ],
-                                    'shortname' => [
-                                        'type' => 'text',
-//                                        'analyzer' => 'noaccent'
-                                    ],
-                                    'fullname' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                    'description' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                    'email' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                    'city' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                    'siret' => [
-                                        'type' => 'keyword',
-                                    ],
-                                    'country' => [
-                                        'type' => 'keyword',
-                                    ],
-                                    'connectors' => [
-                                        'type' => 'keyword',
-                                    ],
-                                    'zipcode' => [
-                                        'type' => 'keyword',
-                                    ],
-                                    'persons' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                    'activities' => [
-//                                        'analyzer' => 'noaccent',
-                                        'type' => 'text',
-                                    ],
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            );
-        } catch (\Exception $e) {
-            throw new OscarException("Impossible de créer l'index de recherche : \n---\n" . $e->getMessage());
-        }
+//
+//        try {
+//            $this->getClient()->indices()->create(
+//                [
+//                    'index' => $this->getIndex(),
+//                    'body' => [
+//                        'settings' => [
+//                            'analysis' => [
+//                                'analyzer' => [
+//                                    'noaccent' => [
+//                                        "type" => "custom",
+//                                        "tokenizer" => "standard",
+//                                        "filter" => ['asciifolding', "lowercase"]
+//                                    ]
+//                                ],
+//                            ]
+//                        ],
+//                        'mappings' => [
+//                            "organization" => [
+//                                'properties' => [
+//                                    'code' => [
+//                                        'type' => 'keyword',
+//                                    ],
+//                                    'shortname' => [
+//                                        'type' => 'text',
+////                                        'analyzer' => 'noaccent'
+//                                    ],
+//                                    'fullname' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                    'description' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                    'email' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                    'city' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                    'siret' => [
+//                                        'type' => 'keyword',
+//                                    ],
+//                                    'country' => [
+//                                        'type' => 'keyword',
+//                                    ],
+//                                    'connectors' => [
+//                                        'type' => 'keyword',
+//                                    ],
+//                                    'zipcode' => [
+//                                        'type' => 'keyword',
+//                                    ],
+//                                    'persons' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                    'activities' => [
+////                                        'analyzer' => 'noaccent',
+//                                        'type' => 'text',
+//                                    ],
+//                                ]
+//                            ]
+//                        ]
+//                    ]
+//                ]
+//            );
+//        } catch (\Exception $e) {
+//            throw new OscarException("Impossible de créer l'index de recherche : \n---\n" . $e->getMessage());
+//        }
     }
 }
