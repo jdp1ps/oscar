@@ -44,11 +44,8 @@ class ConnectorSpentSifacOCI
 
     public function sync( $pfi ){
         $c = $this->getConnection();
-
+        echo "Traitement pour '$pfi'\n";
         $exists = $this->spentService->getSpentsSyncIdByPFI($pfi);
-
-        // Limite de 5 secondes pour cette requête
-        //oci_set_call_timeout(3000, $c);
 
         if( $c ){
             $stid = oci_parse($c, sprintf($this->sifacAccess['spent_query'], $pfi));
@@ -63,6 +60,7 @@ class ConnectorSpentSifacOCI
             $nbrExist = count($exists);
 
             while ($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) {
+                echo "foo.\n";
                 $nbr++;
                 if( !in_array($row['IDSYNC'], $exists) ) {
                     try {

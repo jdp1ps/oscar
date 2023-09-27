@@ -10,6 +10,7 @@ namespace Oscar\Controller;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Oscar\Entity\Activity;
+use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\Spent\SpentActivityDetailsExcelFormater;
@@ -250,7 +251,8 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                 throw new OscarException(sprintf(_("Cette activité n'a pas de Numéro financier")));
             }
             //$spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
-            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP());
+            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP(), SpentService::SPENT_BOTH);
+            $spents['informations'] = $activity->toArray();
 
             $format = $this->params()->fromQuery('format', 'json');
             switch($format){

@@ -58,21 +58,17 @@ class PersonElasticSearch implements PersonSearchStrategy
      */
     protected function getClient()
     {
-        if (!$this->elasticSearchClient)
+        if (!$this->elasticSearchClient) {
             $this->elasticSearchClient = ClientBuilder::create()
                 ->setHosts($this->getHosts())
                 ->build();
+        }
         return $this->elasticSearchClient;
     }
 
-    public function search($search, $limit=10000)
+    public function search($search, $limit = 10000)
     {
-//        $ext = explode(' ', $search);
-//        $searchPlus = [$search, $search.'*'];
-//        $searchQuery = implode(' OR ', $searchPlus);
         $searchQuery = $search;
-
-        //die($searchQuery);
 
         $params = [
             'index' => $this->getIndex(),
@@ -88,9 +84,10 @@ class PersonElasticSearch implements PersonSearchStrategy
                             'firstname',
                             'email',
                             'location',
-                            'affectation'
+                            'affectation',
+                            'connectors'
                         ],
-                        "fuzziness"=> "auto"
+                        "fuzziness" => "auto"
                     ]
                 ]
             ]
@@ -179,19 +176,20 @@ class PersonElasticSearch implements PersonSearchStrategy
 
         /** @var ActivityPerson $activityPerson */
         foreach ($person->getActivities() as $activityPerson) {
-            if( $activityPerson->getActivity()->getProject() ){
-                $project = (string) $activityPerson->getActivity()->getProject()->getAcronym() ." " . (string) $activityPerson->getActivity()->getProject()->getLabel();
-                if( !in_array($project, $projects) ){
+            if ($activityPerson->getActivity()->getProject()) {
+                $project = (string)$activityPerson->getActivity()->getProject()->getAcronym(
+                    ) . " " . (string)$activityPerson->getActivity()->getProject()->getLabel();
+                if (!in_array($project, $projects)) {
                     $projects[] = $project;
                 }
             }
             $activity = (string)$activityPerson->getActivity()->getLabel();
-            if( !in_array($activity, $activities) ){
+            if (!in_array($activity, $activities)) {
                 $activities[] = $activity;
             }
         }
-        if( $person->getConnectors() ){
-            foreach ($person->getConnectors() as $name=>$value) {
+        if ($person->getConnectors()) {
+            foreach ($person->getConnectors() as $name => $value) {
                 $connectors[] = $value;
             }
         }
@@ -232,7 +230,7 @@ class PersonElasticSearch implements PersonSearchStrategy
         ];
         try {
             return $this->getClient()->update($params);
-        } catch (Missing404Exception $e){
+        } catch (Missing404Exception $e) {
             return $this->addActivity($person);
         }
     }

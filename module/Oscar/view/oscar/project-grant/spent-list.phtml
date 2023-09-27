@@ -16,6 +16,15 @@
 
 </style>
 <section class="container-fluid">
+    <h1>TEST</h1>
+    <div id="depensesdetails"
+         data-informations="<?= json_encode($activity->toArray()) ?>"
+         data-url="<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
+
+    >
+    </div>
+    <?= $this->Vite()->addJs('src/ActivitySpentDetails.js'); ?>
+    <?php /******
     <!--
     <h1>Dépenses pour <strong><?= $activity->getCodeEOTP() ?></strong> (<?= $activity ?>)</h1>
     <nav>
@@ -49,6 +58,9 @@
     </nav>
     -->
     <?php if( count($spents) ): ?>
+
+
+
         <div id="spentlines"></div>
         <script>
             require(['vue', 'vue-resource', 'SpentLinePFI', 'VueFilters'], function(Vue, VueResource, SpentLinePFI, VueFilters){
@@ -92,5 +104,5 @@
             <button type="submit" name="action" value="update">Synchroniser</button>
         </form>
     <?php endif; ?>
-
+    ****/ ?>
 </section>
