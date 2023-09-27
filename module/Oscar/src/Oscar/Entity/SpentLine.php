@@ -43,6 +43,11 @@ class SpentLine
     private $rldnr = '9A';
 
     /**
+     * @ORM\Column(type="string", nullable=true, options={"default":"0250"})
+     */
+    private $btart = '0250';
+
+    /**
      * @ORM\Column(type="string", nullable=true)
      */
     private $numSifac;
@@ -185,6 +190,23 @@ class SpentLine
     public function setRldnr(string $rldnr): self
     {
         $this->rldnr = $rldnr;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBtart(): string
+    {
+        return $this->btart;
+    }
+
+    /**
+     * @param string $btart
+     */
+    public function setBtart(string $btart): self
+    {
+        $this->btart = $btart;
         return $this;
     }
 
@@ -610,7 +632,7 @@ class SpentLine
         ];
     }
 
-    public function toArray() :array
+    public function toArray(): array
     {
         return [
             // IDs / Numéros
@@ -619,6 +641,9 @@ class SpentLine
             'pfi' => $this->getPfi(),
             'numSifac' => $this->getNumSifac(),
             'numPiece' => $this->getNumPiece(),
+
+            // btart
+            'btart' => $this->getBtart(),
 
             // Infos
             'montant' => $this->getMontant(),

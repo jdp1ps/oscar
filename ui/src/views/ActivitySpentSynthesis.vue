@@ -78,7 +78,8 @@
             <span v-else>Merci de contacter un administrateur pour que les annexes des comptes soient configurés.</span>
           </small>
         </th>
-        <td style="text-align: right; white-space: nowrap">$filters.money({{ synthesis['N.B']  }})&nbsp;€</td>
+        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['effective_totals']['N.B']) }}&nbsp;€</td>
+        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['predicted_totals']['N.B']) }}&nbsp;€</td>
       </tr>
       <tr style="border-top: solid #000 thin; font-size: 1.6em">
         <th>TOTAL : </th>

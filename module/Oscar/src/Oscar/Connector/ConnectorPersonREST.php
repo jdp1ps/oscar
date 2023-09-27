@@ -34,11 +34,13 @@ class ConnectorPersonREST extends AbstractConnector
     /** @var  ConnectorPersonHydrator */
     private $personHydrator = null;
 
-    public function setEditable($editable){
+    public function setEditable($editable)
+    {
         $this->editable = $editable;
     }
 
-    public function isEditable(){
+    public function isEditable()
+    {
         return $this->editable;
     }
 
@@ -57,7 +59,7 @@ class ConnectorPersonREST extends AbstractConnector
         // TODO: Implement getPersonData() method.
     }
 
-    public function execute( $force = false)
+    public function execute($force = false)
     {
         $personRepository = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
 
@@ -69,7 +71,7 @@ class ConnectorPersonREST extends AbstractConnector
      */
     public function getPersonHydrator()
     {
-        if( $this->personHydrator === null ){
+        if ($this->personHydrator === null) {
             $this->personHydrator = new ConnectorPersonHydrator(
                 $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
             );
@@ -78,8 +80,9 @@ class ConnectorPersonREST extends AbstractConnector
         return $this->personHydrator;
     }
 
-    protected function log( string $text ) :void {
-        if( true ){
+    protected function log(string $text): void
+    {
+        if (true) {
             echo "$text";
         }
     }
@@ -95,7 +98,13 @@ class ConnectorPersonREST extends AbstractConnector
         $exist = $personRepository->getUidsConnector($this->getName());
         $repport = new ConnectorRepport();
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-        $repport->addnotice(sprintf("Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'", count($exist), $this->getName()));
+        $repport->addnotice(
+            sprintf(
+                "Il y'a déjà %s personne(s) synchronisée(s) pour le connector '%s'",
+                count($exist),
+                $this->getName()
+            )
+        );
         $access = $this->getAccessStrategy();
         $this->log("Pending access : " . count($exist));
 
@@ -104,63 +113,70 @@ class ConnectorPersonREST extends AbstractConnector
             $this->log("data gain : " . count($json));
             $personsDatas = null;
 
-            if( is_object($json) && property_exists($json, 'persons') ){
+            if (is_object($json) && property_exists($json, 'persons')) {
                 $personsDatas = $json->persons;
             } else {
                 $personsDatas = $json;
             }
 
-            if( !is_array($personsDatas) ){
+            if (!is_array($personsDatas)) {
                 throw new \Exception("L'API n'a pas retourné un tableau de donnée");
             }
-            $nbrPersonsConnector = count($personsDatas);
-            $repport->addnotice(count($personsDatas). " résultat(s) a traiter.");
+            $repport->addnotice(count($personsDatas) . " résultat(s) a traiter.");
             ////////////////////////////////////
 
-            foreach( $personsDatas as $personData ){
-
-                if( ! property_exists($personData, 'uid') ){
+            foreach ($personsDatas as $personData) {
+                if (!property_exists($personData, 'uid')) {
                     $repport->addwarning(sprintf("Les donnèes %s n'ont pas d'UID.", print_r($personData, true)));
                     continue;
                 }
 
-                if( $this->getOptionPurge() ){
-                    $uid = $personData->uid;
-                    if( ($index = array_search($uid, $exist)) >= 0 ){
-                        array_splice($exist, $index, 1);
-                    }
+                $uid = $personData->uid;
+                if (($index = array_search($uid, $exist)) >= 0) {
+                    array_splice($exist, $index, 1);
                 }
 
                 try {
                     /** @var Person $personOscar */
-                    $personOscar = $personRepository->getPersonByConnectorID($this->getName(),
-                        $personData->uid);
+                    $personOscar = $personRepository->getPersonByConnectorID(
+                        $this->getName(),
+                        $personData->uid
+                    );
                     $action = "update";
-                } catch( NoResultException $e ){
+                } catch (NoResultException $e) {
                     $personOscar = $personRepository->newPersistantPerson();
                     $action = "add";
-
-                } catch( NonUniqueResultException $e ){
+                } catch (NonUniqueResultException $e) {
                     $repport->adderror(sprintf("La personne avec l'ID %s est en double dans oscar.", $personData->uid));
                     continue;
-                } catch(\Exception $e){
+                } catch (\Exception $e) {
                     // FIX : Erreur de conversion de type survenue
-                    $repport->adderror(sprintf("La personne avec l'ID %s provoque une exception : %s - %s.", $personData->uid, $e->getMessage(), $e->getTraceAsString()));
+                    $repport->adderror(
+                        sprintf(
+                            "La personne avec l'ID %s provoque une exception : %s - %s.",
+                            $personData->uid,
+                            $e->getMessage(),
+                            $e->getTraceAsString()
+                        )
+                    );
                     continue;
                 }
 
-                if( $personData->dateupdated == null
+                if ($personData->dateupdated == null
                     || $personOscar->getDateSyncLdap() == null
                     || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated
-                    || $force == true )
-                {
-                    $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+                    || $force == true) {
+                    $personOscar = $this->getPersonHydrator()->hydratePerson(
+                        $personOscar,
+                        $personData,
+                        $this->getName()
+                    );
 
                     $repport->addRepport($this->getPersonHydrator()->getRepport());
 
                     $personRepository->flush($personOscar);
 
-                    if( $action == 'add' ){
+                    if ($action == 'add') {
                         $repport->addadded(sprintf("%s a été ajouté.", $personOscar->log()));
                     } else {
                         $repport->addupdated(sprintf("%s a été mis à jour.", $personOscar->log()));
@@ -170,51 +186,60 @@ class ConnectorPersonREST extends AbstractConnector
                 }
             }
 
-            if( $this->getOptionPurge() ){
 
-                $idsToDelete = [];
+            $idsToDelete = [];
 
-                foreach ($exist as $uid){
-                    try {
-                        /** @var Person $personOscarToDelete */
-                        $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
+            foreach ($exist as $uid) {
+                if (!$uid) {
+                    continue;
+                }
 
+                try {
+                    /** @var Person $personOscarToDelete */
+                    $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
+                    $personOscarToDelete->disabledLdapNow();
+
+                    if ($this->getOptionPurge()) {
                         $activeIn = [];
 
-                        if( count($personOscarToDelete->getActivities()) > 0 ){
+                        if (count($personOscarToDelete->getActivities()) > 0) {
                             $activeIn[] = "activité";
                         }
 
-                        if( count($personOscarToDelete->getProjectAffectations()) > 0 ){
+                        if (count($personOscarToDelete->getProjectAffectations()) > 0) {
                             $activeIn[] = "projet";
                         }
 
                         // Récupération des affectations issues de la synchro
                         $synchronizedAffectationsOrganizations = $personOscarToDelete->getOrganizationsSync();
-                        if( count($synchronizedAffectationsOrganizations) > 0 ){
+                        if (count($synchronizedAffectationsOrganizations) > 0) {
                             $personRepository->removeOrganizationPersons($synchronizedAffectationsOrganizations);
                             $personRepository->flush($synchronizedAffectationsOrganizations);
                         }
 
-                        if( count($personOscarToDelete->getOrganizations()) > 0 ){
+                        if (count($personOscarToDelete->getOrganizations()) > 0) {
                             $activeIn[] = "organisation";
                         }
 
 
-                        if( count($activeIn) == 0 ){
+                        if (count($activeIn) == 0) {
                             $idsToDelete[] = $personOscarToDelete->getId();
                         } else {
-
                             // Tentative de suppression des rôles synchronisés
 
 
-
-                            $repport->addwarning("$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(', ', $activeIn));
+                            $repport->addwarning(
+                                "$personOscarToDelete n'a pas été supprimé car il est actif dans : " . implode(
+                                    ', ',
+                                    $activeIn
+                                )
+                            );
                         }
-
-                    } catch (\Exception $e){
-                        $repport->adderror("$personOscarToDelete n'a pas été supprimé car il est utilisé dans oscar : " . $e->getMessage());
                     }
+                } catch (\Exception $e) {
+                    $repport->adderror(
+                        "$personOscarToDelete n'a pas été supprimé car il est utilisé dans oscar : " . $e->getMessage()
+                    );
                 }
 
                 foreach ($idsToDelete as $idPerson) {
@@ -226,7 +251,7 @@ class ConnectorPersonREST extends AbstractConnector
                     }
                 }
             }
-        } catch (\Exception $e ){
+        } catch (\Exception $e) {
             $this->log("ERROR : " . $e->getMessage());
             throw new \Exception("Impossible de synchroniser les personnes : " . $e->getMessage());
         }
@@ -251,26 +276,24 @@ class ConnectorPersonREST extends AbstractConnector
                 throw new OscarException($msg);
             }
             // Fix : Nouveau format
-            if( property_exists($personData, 'error_code') ){
-                switch($personData->error_code){
+            if (property_exists($personData, 'error_code')) {
+                switch ($personData->error_code) {
                     case 'PERSON_DISABLED':
                         $person->disabledLdapNow();
                         $this->getLogger()->info("'$person' a été désactivée");
                         return $person;
                     default:
-                        throw new OscarException("Code d'erreur '".$personData->error_code."' inconnu");
-
+                        throw new OscarException("Code d'erreur '" . $personData->error_code . "' inconnu");
                 }
                 $personData = $personData->person;
             }
 
             // Fix : Nouveau format
-            if( property_exists($personData, 'person') ){
+            if (property_exists($personData, 'person')) {
                 $personData = $personData->person;
             }
 
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
-
         } else {
             $msg = 'Impossible de synchroniser la personne ' . $person;
             $this->getLogger()->error($msg);

@@ -750,13 +750,13 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             ->setParameter('ids', $ids);
 
         if( $spentType == self::SPENT_EFFECTIVE ){
-            $qb->andWhere('s.rldnr = :rldnr')
-                ->setParameter('rldnr', '9A');
+            $qb->andWhere('s.btart = :btart')
+                ->setParameter('btart', '0250');
         }
 
         if( $spentType == self::SPENT_PREVISIONNAL ){
-            $qb->andWhere('s.rldnr = :rldnr')
-                ->setParameter('rldnr', '9B');
+            $qb->andWhere('s.btart = :btart')
+                ->setParameter('btart', '0100');
         }
 
         $filtreCompte = $this->getOscarConfigurationService()->getSpentAccountFilter();
@@ -1241,6 +1241,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $comptes = [];
 
 
+
         /** @var SpentLine $spent */
         foreach ( $spents as $spent) {
             $compte = $this->getCompte($spent->getCompteGeneral());
@@ -1504,6 +1505,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $spentLine->setPfi($data['PFI']);
         $spentLine->setNumSifac($data['NUMSIFAC']);
         $spentLine->setRldnr($data['AB9']);
+        $spentLine->setBtart($data['BTART']);
         $spentLine->setNumCommandeAff($data['NUMCOMMANDEAFF']);
         $spentLine->setNumPiece($data['NUMPIECE']);
         $spentLine->setNumFournisseur($data['NUMFOURNISSEUR']);
