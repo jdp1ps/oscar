@@ -20,6 +20,9 @@ use Zend\Permissions\Acl\Resource\ResourceInterface;
  */
 class SpentLine
 {
+    const BTART_ENGAGE = '0100';
+    const BTART_EFFECTUE = '0250';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -646,6 +649,9 @@ class SpentLine
             'btart' => $this->getBtart(),
 
             // Infos
+            'montant' => $this->getMontant(),
+            'montant_engage' => $this->getBtart() == self::BTART_ENGAGE ? $this->getMontant() : 0.0,
+            'montant_effectue' => $this->getBtart() == self::BTART_EFFECTUE ? $this->getMontant() : 0.0,
             'montant' => $this->getMontant(),
             'compteBudgetaire' => $this->getCompteBudgetaire(),
             'centreProfit' => $this->getCentreDeProfit(),
