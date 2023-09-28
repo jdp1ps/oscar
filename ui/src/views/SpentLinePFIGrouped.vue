@@ -8,7 +8,8 @@
                 <th>Statut</th>
                 <th>Type</th>
                 <th>Description</th>
-                <th style="width: 8%">Montant</th>
+                <th style="width: 8%">Montant engagé</th>
+                <th style="width: 8%">Montant effectué</th>
                 <th style="width: 8%">Compte Budgetaire</th>
                 <th style="width: 8%">Compte</th>
                 <th style="width: 8%">Date Comptable</th>
@@ -22,6 +23,9 @@
                 <td>
                     <button @click="$emit('detailsline', l)" class="btn btn-default xs">{{ l.details.length }}
                     </button>
+                    <span class="cartouche xs" v-for="n in l.numSifac" title="N°SIFAC">
+                      {{ n }}
+                    </span>
                 </td>
                 <td>
                   <span v-if="l.btart == '0250'">
@@ -40,7 +44,8 @@
                 </td>
                 <td><small>{{ l.types ? l.types.join(',') : '' }}</small></td>
                 <td><small>{{ l.text.join(', ') }}</small></td>
-                <td style="text-align: right"><strong>{{ $filters.money(l.montant) }}</strong></td>
+                <td style="text-align: right"><strong>{{ $filters.money(l.montant_engage) }}</strong></td>
+                <td style="text-align: right"><strong>{{ $filters.money(l.montant_effectue) }}</strong></td>
                 <td>{{ l.compteBudgetaires.join(', ') }}</td>
                 <td>
                     <span v-for="c in l.comptes" class="cartouche default xs" style="white-space: nowrap" @click="handlerEditCompte(c)">
@@ -55,8 +60,9 @@
             </tbody>
             <tfoot>
             <tr style="font-weight: bold; font-size: 1.2em">
-                <td colspan="4" style="text-align: right">Total :</td>
-                <td style="text-align: right">{{ total | money }}</td>
+                <td colspan="5" style="text-align: right">Total :</td>
+                <td style="text-align: right">{{ $filters.money(total_engage) }}</td>
+                <td style="text-align: right">{{ $filters.money(total_effectue) }}</td>
                 <td colspan="2">&nbsp;</td>
             </tr>
             </tfoot>
@@ -77,6 +83,26 @@
         props: {
             lines: { required: true },
             total: { required: true }
+        },
+        computed: {
+          total_engage(){
+            let t = 0.0;
+            if( this.lines ){
+              Object.keys(this.lines).forEach( k => {
+                t += this.lines[k].montant_engage
+              })
+            }
+            return t;
+          },
+          total_effectue(){
+            let t = 0.0;
+            if( this.lines ){
+              Object.keys(this.lines).forEach( k => {
+                t += this.lines[k].montant_effectue
+              })
+            }
+            return t;
+          }
         },
         methods: {
             handlerEditCompte( compteNum ){

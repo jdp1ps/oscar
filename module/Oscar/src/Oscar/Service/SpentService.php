@@ -1273,27 +1273,57 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             '1' => [
                 'label' => "Recettes",
                 'total' => 0.0,
+                'total_engage' => 0.0,
+                'total_effectue' => 0.0,
+                'nbr_engage' => 0,
+                'nbr_effectue' => 0,
                 'nbr' => 0
             ],
             '0' => [
                 'label' => "Ignorés",
                 'total' => 0.0,
+                'total_engage' => 0.0,
+                'total_effectue' => 0.0,
+                'nbr_engage' => 0,
+                'nbr_effectue' => 0,
                 'nbr' => 0
             ],
             'N.B' => [
                 'label' => "Hors-Masse",
                 'total' => 0.0,
+                'total_engage' => 0.0,
+                'total_effectue' => 0.0,
+                'nbr_engage' => 0,
+                'nbr_effectue' => 0,
                 'nbr' => 0
+            ],
+            'totaux' => [
+                'engage' => 0.0,
+                'effectue' => 0.0,
             ]
         ];
 
+        $massesKeys = array_keys($this->getOscarConfigurationService()->getMasses());
 
         foreach ($this->getOscarConfigurationService()->getMasses() as $masseKey => $masseLabel) {
             $synthesis[$masseKey] = [
                 'label' => $masseLabel,
                 'total' => 0.0,
+                'total_engage' => 0.0,
+                'total_effectue' => 0.0,
+                'nbr_engage' => 0,
+                'nbr_effectue' => 0,
                 'nbr' => 0
             ];
+        }
+
+
+        $numSifacDone = [];
+        /** @var SpentLine $spent */
+        foreach ($spents as $spent) {
+            if($spent->getBtart() == SpentLine::BTART_EFFECTUE && !in_array($spent->getNumSifac(), $numSifacDone)){
+                $numSifacDone[] = $spent->getNumSifac();
+            }
         }
 
         /** @var SpentLine $spent */
@@ -1303,10 +1333,34 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             if( !array_key_exists($masse, $synthesis) ){
                 $masse = 'N.B';
             }
+
+            $totalEffectue = 0.0;
+            $totalEngage = 0.0;
+
+            if( $spent->getBtart() == SpentLine::BTART_ENGAGE ){
+                $synthesis[$masse]['nbr_engage']++;
+                if( !in_array($spent->getNumSifac(), $numSifacDone) ){
+                    $totalEngage = $spent->getMontant();
+                }
+            }
+
+            if( $spent->getBtart() == SpentLine::BTART_EFFECTUE ){
+                $synthesis[$masse]['nbr_effectue']++;
+                $totalEffectue = $spent->getMontant();
+            }
+
             $synthesis[$masse]['total'] += $spent->getMontant();
+            $synthesis[$masse]['total_effectue'] += $totalEffectue;
+            $synthesis[$masse]['total_engage'] += $totalEngage;
+            
+            if( in_array($masse, $massesKeys) ){
+                $synthesis['totaux']['effectue'] += $totalEffectue;
+                $synthesis['totaux']['engage'] += $totalEngage;
+            }
             $synthesis[$masse]['nbr']++;
 
         }
+
 
         return $synthesis;
     }

@@ -260,9 +260,9 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         if ($zip->open($ziptmp, \ZipArchive::CREATE) !== true) {
             throw new OscarPCRUException("Impossible de créer l'archive");
         }
-        $zip->addFile($csvtmp, 'contrats.csv');
+        $zip->addFile($csvtmp, $this->getOscarConfigurationService()->getPcruContratFile(false));
         if (file_exists($orgtmp)) {
-            $zip->addFile($orgtmp, 'partenaires.csv');
+            $zip->addFile($orgtmp, $this->getOscarConfigurationService()->getPcruPartenaireFile(false));
         }
         $zip->addFile($pdftmp, $num . '.pdf');
         $zip->close();

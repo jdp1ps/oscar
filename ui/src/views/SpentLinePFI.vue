@@ -47,9 +47,11 @@
                     <thead>
                     <tr>
                         <th>ID</th>
+                        <th>N°SIFAC</th>
                         <th>Btart</th>
                         <th>Description</th>
-                        <th>Montant</th>
+                        <th>Montant engagé</th>
+                        <th>Montant effectué</th>
                         <th>Compte Budgetaire</th>
                         <th>Centre de profit</th>
                         <th>Compte général</th>
@@ -62,9 +64,11 @@
                     <tbody>
                     <tr class="text-small" v-for="d in details.details">
                         <td>{{ d.syncid }}</td>
+                        <td>{{ d.numSifac }}</td>
                         <td>{{ d.btart }}</td>
                         <td>{{ d.texteFacture|d.designation }}</td>
-                        <td style="text-align: right">{{ $filters.money(d.montant) }}</td>
+                        <td style="text-align: right">{{ $filters.money(d.montant_engage) }}</td>
+                        <td style="text-align: right">{{ $filters.money(d.montant_effectue) }}</td>
                         <td>{{ d.compteBudgetaire }}</td>
                         <td>{{ d.centreFinancier }}</td>
                         <td><strong>{{ d.compteGeneral }}</strong> : {{ d.type }}</td>
@@ -81,7 +85,7 @@
         <div class="container-fluid">
 
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <h3>
                         <i class="icon-help-circled"></i>
                         Informations
@@ -138,28 +142,41 @@
 
                     <h3><i class="icon-calculator"></i>Dépenses</h3>
                     <table class="table table-condensed card synthesis" v-if="spentlines">
+                        <thead>
+                        <tr>
+                          <th>Masse</th>
+                          <th style="text-align: right">Engagé</th>
+                          <th style="text-align: right">Effectué</th>
+                        </tr>
+                        </thead>
+
                         <tbody>
                         <tr v-for="dt,key in spentlines.masses">
                             <th>
                                 <small>{{ dt }}</small>
-                                <a class="label label-info xs" :href="'#repport-' + key">{{ spentlines.synthesis[key].nbr}}</a>
+                                <a class="label label-info xs" :href="'#repport-' + key">{{ spentlines.synthesis[key].nbr_effectue }} / {{ spentlines.synthesis[key].nbr_engage }}</a>
                             </th>
-                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis[key].total) }}</td>
-                        </tr>
-                        <tr v-if="spentlines.synthesis['N.B'].total != 0">
-                            <th>
-                              <small><i class="icon-attention"></i> Hors-masse</small>
-                              <a href="#repport-nb" class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</a>
-                            </th>
-                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis['N.B'].total) }}</td>
+                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis[key].total_engage) }}</td>
+                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis[key].total_effectue) }}</td>
                         </tr>
                         </tbody>
-                        <tfoot>
+                        <tbody>
                         <tr class="total">
                             <th>Total</th>
-                            <td style="text-align: right">{{ $filters.money(totalDepenses) }}</td>
+                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis.totaux.engage) }}</td>
+                            <td style="text-align: right">{{ $filters.money(spentlines.synthesis.totaux.effectue) }}</td>
                         </tr>
-                        </tfoot>
+                        </tbody>
+                        <tbody>
+                        <tr v-if="spentlines.synthesis['N.B'].total != 0">
+                          <th>
+                            <small><i class="icon-attention"></i> Hors-masse</small>
+                            <a href="#repport-nb" class="label label-info">{{ spentlines.synthesis['N.B'].nbr}}</a>
+                          </th>
+                          <td style="text-align: right">{{ $filters.money(spentlines.synthesis['N.B'].total_engage) }}</td>
+                          <td style="text-align: right">{{ $filters.money(spentlines.synthesis['N.B'].total_effectue) }}</td>
+                        </tr>
+                        </tbody>
                     </table>
 
                     <div v-if="manageRecettes">
@@ -193,7 +210,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="col-md-10" style="height: 80vh; overflow-y: scroll">
+                <div class="col-md-9" style="height: 80vh; overflow-y: scroll">
 
                     <div v-if="spentlines != null">
                         <div v-for="m, k in masses">
@@ -249,7 +266,6 @@
     export default {
         props: [
             'url',
-            'masses',
             'urlSpentAffectation',
             'urlActivity',
             'urlSync',
@@ -268,6 +284,7 @@
                 error: null,
                 pendingMsg: "",
                 spentlines: null,
+                masses: {},
                 details: null,
                 displayIgnored: false,
                 editCompte: null,
@@ -307,6 +324,7 @@
 
                 if( this.spentlines ) {
                     for (let s in this.spentlines.spents) {
+
                         let line = this.spentlines.spents[s];
                         let masse = line.masse;
                         let btart = line.btart;
@@ -323,9 +341,12 @@
                             out.datas[masse][numPiece] = {
                                 'ids': [],
                                 'numpiece': numPiece,
+                                'numSifac': [],
                                 'text': [],
                                 'types': [],
                                 'montant': 0.0,
+                                'montant_engage': 0.0,
+                                'montant_effectue': 0.0,
                                 'btart': btart,
                                 'compteBudgetaires': [],
                                 'comptes': [],
@@ -345,7 +366,14 @@
                         let compte = line.compteGeneral;
                         let compteBudgetaire = line.compteBudgetaire;
 
+                        if( out.datas[masse][numPiece].numSifac.indexOf(line.numSifac) == -1 ){
+                          out.datas[masse][numPiece].numSifac.push(line.numSifac);
+                        }
+
                         out.datas[masse][numPiece].montant += line.montant;
+                        out.datas[masse][numPiece].montant_effectue += line.montant_effectue;
+                        out.datas[masse][numPiece].montant_engage += line.montant_engage;
+
 
                         if( text && out.datas[masse][numPiece].text.indexOf(text) < 0 ){
                             out.datas[masse][numPiece].text.push(text);
@@ -425,6 +453,7 @@
 
                 axios.get(this.url).then(
                     success => {
+                        this.masses = success.data.spents.masses;
                         this.spentlines = success.data.spents;
                         this.informations = success.data.spents.informations;
                     },
