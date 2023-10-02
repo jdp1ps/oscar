@@ -52,6 +52,8 @@
             </div>
         </transition>
 
+      {{ synthesis }}
+
         <table class="table table-condensed" v-if="!pendingMsg">
             <tr v-for="m,k in masses">
                 <th>{{ m }}</th>
@@ -91,9 +93,6 @@
     </section>
 </template>
 <script>
-    // nodejs node_modules/.bin/poi watch --format umd --moduleName  ActivitySpentSynthesis --filename.js ActivitySpentSynthesis.js --dist public/js/oscar/dist public/js/oscar/src/ActivitySpentSynthesis.vue
-
-
     export default {
         props: ['url', 'manageDepense'],
 
@@ -106,7 +105,13 @@
                 masses: {},
                 dateUpdated: null,
                 showCuration: false,
-                affectations: {}
+                affectations: {},
+
+              // URL
+              url_activity: null,
+              url_sync: null,
+              url_download: null,
+              url_spentaffectation: null,
             }
         },
 

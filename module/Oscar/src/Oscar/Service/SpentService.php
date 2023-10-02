@@ -847,204 +847,90 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param false $curationNB
      * @return array
      */
-    public function getSynthesisDatasPFI($pfi, $curationNB = false) :array
+    public function getSynthesisDatasPFI($pfis, $curationNB = false, string $mode = 'advanced' ) :array
     {
-        $clauseEffective = $this->getOscarConfigurationService()->getSpentEffectiveClauseValue();
-        $clausePredicted = $this->getOscarConfigurationService()->getSpentPredictedClauseValue();
-
-        // Récupération des dépenses
-        $effectives = $spents = $this->getSpentsByPFIs($pfi, self::SPENT_EFFECTIVE);
-        $predicted = $this->getSpentsByPFIs($pfi, self::SPENT_PREVISIONNAL);
+        $spents = [];
+        foreach ($pfis as $pfi) {
+            $spents = array_merge($spents, $this->getSpentsByPFI($pfi, self::SPENT_BOTH));
+        }
 
         // Récupération des Masses comptable configurées dans config
         $masses = $this->getOscarConfigurationService()->getMasses();
 
-        // Structuration du tableau de retour
-        $out = [];
-
-        $out['N.B'] = 0.0;
-        $out['entries'] = count($spents);
-        $out['total'] = 0.0;
-
-        $predicted_aggregator = [];
-
-
-        // Dépenses "prévues"
-        $out['predicted'] = [
-            'N.B' => []
-        ];
-        $out['predicted_count'] = count($predicted);
-        $out['predicted_total'] = 0.0;
-        $out['details'] = [];
-        $out['predicted_totals'] = [
-            'N.B' => 0.0
+        return [
+            'pfi' => $pfi,
+            'masses' => $masses,
+            'synthesis' => $this->getSpentDatasSynthesisBySpents($spents)
         ];
 
-        // Dépenses "effectives"
-        $out['effective'] = [
-            'N.B' => []
-        ];
-        $out['effective_count'] = count($effectives);
-        $out['effective_total'] = 0.0;
-        $out['effective_totals'] = [
-            'N.B' => 0.0
-        ];
 
-        $out['details'] = [
-            'N.B' => []
-        ];
-        $out['totals'] = [
-            'N.B' => 0.0
-        ];
-        $out['recettes'] = [
-            'total'     => 0.0,
-            'details'   => []
-        ];
-
-        if( $curationNB ){
-            $out['curations'] = [];
-        }
-
-        foreach ($masses as $key => $label) {
-            $out[$key] = 0.0;
-            $out['totals'][$key] = 0.0;
-            $out['details'][$key] = [];
-
-            $out['predicted'][$key] = [];
-            $out['predicted_totals'][$key] = 0.0;
-
-            $out['effective'][$key] = [];
-            $out['effective_totals'][$key] = 0.0;
-        }
-
-        // On commence par traiter les données effectives
-        $idsEffectiveDone = [];
-        // Aggrégation des données
-        /** @var SpentLine $spent */
-        foreach ($effectives as $spent) {
-
-            $compte = $spent->getCompteGeneral();
-            $compteInfos = $this->getCompte($compte);
-            $annexe = $compteInfos['annexe'];
-            $montant = floatval($spent->getMontant());
-            $out['details'][] = $spent->toArray();
-            $idSifac = $spent->getNumSifac();
-            $idsEffectiveDone[] = $idSifac;
-
-            if( $annexe == '' || $annexe == null ){
-                $annexe = $compteInfos['masse_inherit'];
-            }
-
-            if( $annexe == '0' ){
-                continue;
-            }
-
-            if( $annexe == '1' ){
-                $out['recettes']['total'] += $montant;
-                $out['recettes']['details'][] = $spent->toArray();
-                continue;
-            }
-
-            if ($annexe == '') {
-                if( $curationNB ){
-                    $exist = $compte == $compteInfos['code'];
-                    if( !array_key_exists($compte, $out['curations']) ){
-                        $out['curations'][$compte] = [
-                            'compte' => $compte,
-                            'compteInfos' => $compteInfos,
-                            'label' => $compteInfos['label'],
-                            'montant' => 0.0,
-                            'totalEntries' => 0,
-                            'exist' => $exist ? 'true' : 'false'
-                        ];
-                    }
-                    $out['curations'][$compte]['montant'] += $montant;
-                    $out['curations'][$compte]['totalEntries']++;
-                }
-                $annexe = 'N.B';
-                if (!in_array($compte, $out['details'][$annexe]))
-                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
-            }
-
-
-
-            $out[$annexe] += $montant;
-            $out['total'] += $montant;
-            $out['totals'][$annexe] += $montant;
-
-            $out['effective_total'] += $montant;
-            $out['effective_totals'][$annexe] += $montant;
-        }
-
-        // Puis les données prévues en évacuant les lignes déjà présentes dans les données effectives
-        //        /** @var SpentLine $spent */
-        foreach ($predicted as $spent) {
-
-            $idSifac = $spent->getNumSifac();
-            if( in_array($idSifac, $idsEffectiveDone) ){
-                continue;
-            }
-            $compte = $spent->getCompteGeneral();
-            $compteInfos = $this->getCompte($compte);
-            $annexe = $compteInfos['annexe'];
-            $montant = floatval($spent->getMontant());
-            $out['details'][] = $spent->toArray();
-
-            if( $annexe == '' || $annexe == null ){
-                $annexe = $compteInfos['masse_inherit'];
-            }
-
-            if( $annexe == '0' ){
-                continue;
-            }
-
-            if( $annexe == '1' ){
-                $out['recettes']['total'] += $montant;
-                $out['recettes']['details'][] = $spent->toArray();
-                continue;
-            }
-
-            if ($annexe == '') {
-                if( $curationNB ){
-                    $exist = $compte == $compteInfos['code'];
-                    if( !array_key_exists($compte, $out['curations']) ){
-                        $out['curations'][$compte] = [
-                            'compte' => $compte,
-                            'compteInfos' => $compteInfos,
-                            'label' => $compteInfos['label'],
-                            'montant' => 0.0,
-                            'totalEntries' => 0,
-                            'exist' => $exist ? 'true' : 'false'
-                        ];
-                    }
-                    $out['curations'][$compte]['montant'] += $montant;
-                    $out['curations'][$compte]['totalEntries']++;
-                }
-                $annexe = 'N.B';
-                if (!in_array($compte, $out['details'][$annexe]))
-                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
-            }
-
-
-
-            $out[$annexe] += $montant;
-            $out['total'] += $montant;
-            $out['totals'][$annexe] += $montant;
-
-            $out['predicted_total'] += $montant;
-            $out['predicted_totals'][$annexe] += $montant;
-        }
-
-
+//
+//
+//        // Structuration du tableau de retour
+//        $out = [];
+//
+//        $out['N.B'] = 0.0;
+//        $out['entries'] = count($spents);
+//        $out['total'] = 0.0;
+//
+//        $predicted_aggregator = [];
+//
+//
+//        // Dépenses "prévues"
+//        $out['predicted'] = [
+//            'N.B' => []
+//        ];
+//        $out['predicted_count'] = count($predicted);
+//        $out['predicted_total'] = 0.0;
+//        $out['predicted_totals'] = [
+//            'N.B' => 0.0
+//        ];
+//
+//        // Dépenses "effectives"
+//        $out['effective'] = [
+//            'N.B' => []
+//        ];
+//        $out['effective_count'] = count($effectives);
+//        $out['effective_total'] = 0.0;
+//        $out['effective_totals'] = [
+//            'N.B' => 0.0
+//        ];
+//
+//        $out['totals'] = [
+//            'N.B' => 0.0
+//        ];
+//        $out['recettes'] = [
+//            'total'     => 0.0,
+//        ];
+//
+//        if( $curationNB ){
+//            $out['curations'] = [];
+//        }
+//
+//        foreach ($masses as $key => $label) {
+//            $out[$key] = 0.0;
+//            $out['totals'][$key] = 0.0;
+//
+//            $out['predicted'][$key] = [];
+//            $out['predicted_totals'][$key] = 0.0;
+//
+//            $out['effective'][$key] = [];
+//            $out['effective_totals'][$key] = 0.0;
+//        }
+//
+//        // On commence par traiter les données effectives
+//        $idsEffectiveDone = [];
 //        // Aggrégation des données
 //        /** @var SpentLine $spent */
-//        foreach (array_merge($effectives, $predicted) as $spent) {
+//        foreach ($effectives as $spent) {
 //
 //            $compte = $spent->getCompteGeneral();
 //            $compteInfos = $this->getCompte($compte);
 //            $annexe = $compteInfos['annexe'];
 //            $montant = floatval($spent->getMontant());
-//            $out['details'][] = $spent->toArray();
+//            //$out['details'][] = $spent->toArray();
+//            $idSifac = $spent->getNumSifac();
+//            $idsEffectiveDone[] = $idSifac;
 //
 //            if( $annexe == '' || $annexe == null ){
 //                $annexe = $compteInfos['masse_inherit'];
@@ -1056,7 +942,66 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 //
 //            if( $annexe == '1' ){
 //                $out['recettes']['total'] += $montant;
-//                $out['recettes']['details'][] = $spent->toArray();
+//                //$out['recettes']['details'][] = $spent->toArray();
+//                continue;
+//            }
+//
+//            if ($annexe == '') {
+//                if( $curationNB ){
+//                    $exist = $compte == $compteInfos['code'];
+//                    if( !array_key_exists($compte, $out['curations']) ){
+//                        $out['curations'][$compte] = [
+//                            'compte' => $compte,
+//                            'compteInfos' => $compteInfos,
+//                            'label' => $compteInfos['label'],
+//                            'montant' => 0.0,
+//                            'totalEntries' => 0,
+//                            'exist' => $exist ? 'true' : 'false'
+//                        ];
+//                    }
+//                    $out['curations'][$compte]['montant'] += $montant;
+//                    $out['curations'][$compte]['totalEntries']++;
+//                }
+//                $annexe = 'N.B';
+////                if (!in_array($compte, $out['details'][$annexe]))
+////                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
+//            }
+//
+//
+//
+//            $out[$annexe] += $montant;
+//            $out['total'] += $montant;
+//            $out['totals'][$annexe] += $montant;
+//
+//            $out['effective_total'] += $montant;
+//            $out['effective_totals'][$annexe] += $montant;
+//        }
+//
+//        // Puis les données prévues en évacuant les lignes déjà présentes dans les données effectives
+//        //        /** @var SpentLine $spent */
+//        foreach ($predicted as $spent) {
+//
+//            $idSifac = $spent->getNumSifac();
+//            if( in_array($idSifac, $idsEffectiveDone) ){
+//                continue;
+//            }
+//            $compte = $spent->getCompteGeneral();
+//            $compteInfos = $this->getCompte($compte);
+//            $annexe = $compteInfos['annexe'];
+//            $montant = floatval($spent->getMontant());
+//            //$out['details'][] = $spent->toArray();
+//
+//            if( $annexe == '' || $annexe == null ){
+//                $annexe = $compteInfos['masse_inherit'];
+//            }
+//
+//            if( $annexe == '0' ){
+//                continue;
+//            }
+//
+//            if( $annexe == '1' ){
+//                $out['recettes']['total'] += $montant;
+//                //$out['recettes']['details'][] = $spent->toArray();
 //                continue;
 //            }
 //
@@ -1087,18 +1032,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 //            $out['total'] += $montant;
 //            $out['totals'][$annexe] += $montant;
 //
-//            if( $spent->getRldnr() == $clauseEffective ){
-//                $out['effective_total'] += $montant;
-//                $out['effective_totals'][$annexe] += $montant;
-//            }
-//            elseif ($spent->getRldnr() == $clausePredicted) {
-//                $out['predicted_total'] += $montant;
-//                $out['predicted_totals'][$annexe] += $montant;
-//            }
-//            else {
-//                $this->getLoggerService()->error("Une valeur de dépenses pour $spent est incohérente pour le champ RLDNR");
-//            }
+//            $out['predicted_total'] += $montant;
+//            $out['predicted_totals'][$annexe] += $montant;
 //        }
+
         return $out;
     }
 
@@ -1269,7 +1206,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @return array[]
      */
     public function getSpentDatasSynthesisBySpents($spents){
+        $pfis = [];
         $synthesis = [
+            'lines' => count($spents),
             '1' => [
                 'label' => "Recettes",
                 'total' => 0.0,
@@ -1321,6 +1260,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $numSifacDone = [];
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
+            if( !in_array($spent->getPfi(), $pfis) ){
+                $pfis[] = $spent->getPfi();
+            }
             if($spent->getBtart() == SpentLine::BTART_EFFECTUE && !in_array($spent->getNumSifac(), $numSifacDone)){
                 $numSifacDone[] = $spent->getNumSifac();
             }
@@ -1352,7 +1294,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $synthesis[$masse]['total'] += $spent->getMontant();
             $synthesis[$masse]['total_effectue'] += $totalEffectue;
             $synthesis[$masse]['total_engage'] += $totalEngage;
-            
+
             if( in_array($masse, $massesKeys) ){
                 $synthesis['totaux']['effectue'] += $totalEffectue;
                 $synthesis['totaux']['engage'] += $totalEngage;
@@ -1360,6 +1302,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $synthesis[$masse]['nbr']++;
 
         }
+        $synthesis['pfis'] = $pfis;
 
 
         return $synthesis;

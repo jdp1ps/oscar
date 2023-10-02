@@ -5,9 +5,7 @@ import MoneyFilter from "./utils/MoneyFilter";
 
 let elemDatas = document.querySelector('#depensesdetails');
 const app = createApp(SpentLinePFI, {
-    "url": elemDatas.dataset.url,
-    "syncurl": elemDatas.dataset.syncurl,
-    "informations": elemDatas.dataset.informations
+    "url": elemDatas.dataset.url
 });
 app.config.globalProperties.$filters = {
    money: function (value){

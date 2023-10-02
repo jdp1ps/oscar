@@ -52,48 +52,76 @@
       </div>
     </transition>
 
-    <table class="table table-condensed" v-if="!pendingMsg && synthesis != null">
+    <table class="table table-condensed card synthesis" v-if="synthesis">
+      <thead>
       <tr>
-        <th>masse</th>
-        <th style="text-align: right;">Réalisées</th>
-        <th style="text-align: right;">Engagées</th>
+        <th>Masse</th>
+        <th style="text-align: right">Engagé</th>
+        <th style="text-align: right">Réalisé</th>
       </tr>
-      <tr v-for="m,k in masses">
-        <th>{{ m }}</th>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['effective_totals'][k]) }} €</td>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['predicted_totals'][k]) }}&nbsp;€</td>
-      </tr>
-      <tr style="border-top: solid #000 thin" v-if="synthesis['N.B']">
+      </thead>
+
+      <tbody>
+      <tr v-for="dt,key in synthesis.masses">
         <th>
-          Hors masse<br>
-          <small style="font-weight: 300" class="error-block"><i class="icon-attention"></i> Les annexes de certains comptes ne sont pas renseignés :
-            <ul>
-              <li v-for="c in getNoMasse"><strong>{{c}}</strong>
-                <div v-if="synthesis.curations">
-
-                </div>
-              </li>
-            </ul>
-            <a @click="handlerCuration" v-if="manageDepense" class="btn btn-xs btn-default"> <i class="icon-cog"></i>Qualifer les comptes</a>
-            <span v-else>Merci de contacter un administrateur pour que les annexes des comptes soient configurés.</span>
-          </small>
+          <small>{{ dt }}</small>
+          <a class="label label-info xs" :href="'#repport-' + key">{{ synthesis.synthesis[key].nbr_effectue }} /
+            {{ synthesis.synthesis[key].nbr_engage }}</a>
         </th>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['effective_totals']['N.B']) }}&nbsp;€</td>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['predicted_totals']['N.B']) }}&nbsp;€</td>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis[key].total_engage) }}</td>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis[key].total_effectue) }}</td>
       </tr>
-      <tr style="border-top: solid #000 thin; font-size: 1.6em">
-        <th>TOTAL : </th>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['effective_total']) }}&nbsp;€</td>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis['predicted_total']) }}&nbsp;€</td>
+      </tbody>
+      <tbody>
+      <tr class="total">
+        <th>Total</th>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis.totaux.engage) }}</td>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis.totaux.effectue) }}</td>
       </tr>
+      </tbody>
+      <tbody>
+      <tr v-if="synthesis.synthesis['N.B'].total != 0">
+        <th>
+          <small><i class="icon-attention"></i> Hors-masse</small>
+          <a href="#repport-nb" class="label label-info">{{ synthesis.synthesis['N.B'].nbr}}</a>
+        </th>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis['N.B'].total_engage) }}</td>
+        <td style="text-align: right">{{ $filters.money(synthesis.synthesis['N.B'].total_effectue) }}</td>
+      </tr>
+      </tbody>
     </table>
 
-    <table class="table table-condensed" v-if="synthesis && synthesis.recettes">
-      <tr>
-        <th><i class="icon-euro"></i>Recettes</th>
-        <td style="text-align: right; white-space: nowrap">{{ $filters.money(synthesis.recettes.total) }}&nbsp;€</td>
-      </tr>
-    </table>
+    <div v-if="manageRecettes">
+      <h3><i class="icon-calculator"></i>Recettes</h3>
+      <table class="table table-condensed card synthesis" v-if="spentlines">
+        <tbody>
+        <tr>
+          <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
+          <td style="text-align: right">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="manageIgnored && synthesis.synthesis['0'].total != 0">
+      <a href="#" @click.prevent="displayIgnored = !displayIgnored">
+        <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
+        <span v-else><i class="icon-eye"></i> Montrer</span>
+        les données ignorées
+      </a>
+      <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
+        <tbody>
+        <tr>
+          <th>
+            Ignorées
+            <a class="label label-info" href="#repport-0">{{ synthesis.synthesis['0'].nbr}}</a>
+          </th>
+          <td style="text-align: right">{{ $filters.money(synthesis.synthesis['0'].total)}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
     <small>Données mise à jour : <strong v-if="dateUpdated">{{ dateUpdated.date | dateFull }}</strong></small>
   </section>
 </template>
@@ -118,7 +146,8 @@ export default {
       infos: null,
       pendingMsg: null,
       showCuration: false,
-      masses: []
+      masses: [],
+      synthesis: null
     }
   },
 
@@ -127,8 +156,7 @@ export default {
       this.pendingMsg = "Chargement des données financières";
       axios.get(this.url).then(
           ok => {
-            console.log("OK",ok);
-            this.infos = ok.data.synthesis;
+            this.synthesis = ok.data.synthesis;
             this.masses = ok.data.masses;
           },
           ko => {

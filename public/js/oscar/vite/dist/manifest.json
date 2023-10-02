@@ -3,33 +3,74 @@
     "file": "vendor.js"
   },
   "_vendor2.js": {
-    "file": "vendor2.js"
-  },
-  "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-0f0af6a6.js",
+    "file": "vendor2.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor3.js"
+    ]
+  },
+  "_vendor3.js": {
+    "file": "vendor3.js"
+  },
+  "src/ActivitySpentSynthesis.js": {
+    "file": "assets/activityspentsynthesis-641b1fe6.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-9bf00098.js",
+    "file": "assets/activityworkpackage-04d307f7.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-cb12f3dd.js",
+    "file": "assets/admintypedocument-eb50ed02.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js"
+      "_vendor2.js",
+      "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/AdminTypeDocument.js"
+  },
+  "src/OrganizationFiche.css": {
+    "file": "assets/OrganizationFiche-058e2475.css",
+    "src": "src/OrganizationFiche.css"
+  },
+  "src/OrganizationFiche.js": {
+    "css": [
+      "assets/OrganizationFiche-058e2475.css"
+    ],
+    "file": "assets/organizationfiche-caca872a.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor3.js"
+    ],
+    "isEntry": true,
+    "src": "src/OrganizationFiche.js"
+  },
+  "src/OrganizationSubOrganizations.css": {
+    "file": "assets/OrganizationSubOrganizations-afd5a062.css",
+    "src": "src/OrganizationSubOrganizations.css"
+  },
+  "src/OrganizationSubOrganizations.js": {
+    "css": [
+      "assets/OrganizationSubOrganizations-afd5a062.css"
+    ],
+    "file": "assets/organizationsuborganizations-5973de23.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor3.js",
+      "_vendor2.js"
+    ],
+    "isEntry": true,
+    "src": "src/OrganizationSubOrganizations.js"
   }
 }
