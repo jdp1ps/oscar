@@ -214,12 +214,13 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             // Récupération des affectations
             $postedAffectations = $this->params()->fromPost('affectation');
 
+
             if( !$postedAffectations ){
                 return $this->getResponseBadRequest("Erreur de transmission : " . print_r($_POST, true));
             }
 
             try {
-                $this->getSpentService()->updateAffectation($postedAffectations);
+                $this->getSpentService()->updateAffectation(json_decode($postedAffectations, true));
 
             } catch (\Exception $e) {
                 return $this->getResponseInternalError($e->getMessage());
@@ -246,15 +247,28 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
 
         $this->getOscarUserContextService()->check(Privileges::DEPENSE_DETAILS, $activity);
 
+        $format = $this->params()->fromQuery('format', 'json');
+
         try {
             if( !$activity->getCodeEOTP() ){
                 throw new OscarException(sprintf(_("Cette activité n'a pas de Numéro financier")));
             }
             //$spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
-            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP(), SpentService::SPENT_BOTH);
+            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP(),SpentService::SPENT_BOTH);
             $spents['informations'] = $activity->toArray();
+            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
+                $spents['url_activity'] = $this->url()->fromRoute('contract/show', ['id' => $activity->getId()]);
+            }
+            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $activity) ){
+                $spents['url_sync'] = $this->url()->fromRoute('contract/list-spent', ['id' => $activity->getId()]);
+            }
+            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_DOWNLOAD, $activity) ){
+                $spents['url_download'] = $this->url()->fromRoute('spent/activity-api', ['id' => $activity->getId()]) . '?format=excel&mode=details';
+            }
+            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ){
+                $spents['url_spentaffectation'] = $this->url()->fromRoute('spent/compte-affectation');
+            }
 
-            $format = $this->params()->fromQuery('format', 'json');
             switch($format){
                 case 'json' :
                     $datas = $this->baseJsonResponse();

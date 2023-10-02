@@ -16,11 +16,8 @@
 
 </style>
 <section class="container-fluid">
-    <h1>TEST</h1>
     <div id="depensesdetails"
-         data-informations="<?= json_encode($activity->toArray()) ?>"
          data-url="<?= $this->url('spent/activity-api', ['id' => $activity->getId()]) ?>"
-
     >
     </div>
     <?= $this->Vite()->addJs('src/ActivitySpentDetails.js'); ?>

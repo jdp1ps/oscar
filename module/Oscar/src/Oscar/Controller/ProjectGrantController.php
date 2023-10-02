@@ -2003,18 +2003,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $out['error'] = null; // Affiche les erreurs survenue lors de la récupération/synchronisation des données
             $out['warning'] = null; // Affiche les avertissements
 
-//            if ($this->getOscarConfigurationService()->getAutoUpdateSpent()) {
-//                if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $entity)) {
-//                    $out['warning'] = "Vous n'êtes pas autorisé à mettre à jour les dépenses, les données peuvent ne pas être à jour";
-//                } else {
-//                    try {
-//                        $this->spentService->syncSpentsByEOTP($pfi);
-//                    } catch (\Exception $e) {
-//                        $out['error'] = $e->getMessage();
-//                    }
-//                }
-//            }
-
             // Construction des données de dépense
             $out['masses'] = $masses;
             $out['dateUpdated'] = $entity->getDateTotalSpent();
@@ -2022,7 +2010,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $pfis,
                 $this->getOscarUserContextService()->hasPrivileges(
                     Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE
-                )
+                ),
+                'basic'
             );
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
