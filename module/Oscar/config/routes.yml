@@ -929,6 +929,13 @@ contract:
                 defaults:
                     action: searchActivity
 
+        personaccess:
+            type: segment
+            options:
+                route: /acces/:id
+                defaults:
+                    action: personsAccessDeep
+
         advancedsearch:
             type: segment
             options:

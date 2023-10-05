@@ -746,8 +746,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     $this->getUserContext()->getDbUser()->getUsername()
                 );
             }
-            if( $person && !$person->isLdapActive() ){
-                //throw new OscarException(OscarException::ACCOUNT_DISABLED);
+            if ($person && !$person->isLdapActive()) {
+                session_destroy();
+                throw new OscarException(OscarException::ACCOUNT_DISABLED);
             }
             return $person;
         } catch (NoResultException $ex) {
@@ -1099,14 +1100,19 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         static $tmpRolesOrganization = [];
         $key = sprintf('%s-%s', $person->getId(), $organization->getId());
         if (!isset($tmpRolesOrganization[$key])) {
-            $this->writeRolesPersonInOrganizationDeep($person, $this->getRootOrganization($organization), $tmpRolesOrganization, []);
+            $this->writeRolesPersonInOrganizationDeep(
+                $person,
+                $this->getRootOrganization($organization),
+                $tmpRolesOrganization,
+                []
+            );
         }
         return $tmpRolesOrganization[$key];
     }
 
-    protected function getRootOrganization( Organization $organization ): Organization
+    protected function getRootOrganization(Organization $organization): Organization
     {
-        if( $organization->getParent() ){
+        if ($organization->getParent()) {
             return $this->getRootOrganization($organization->getParent());
         }
         return $organization;
@@ -1125,12 +1131,12 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         /** @var OrganizationPerson $organizationPerson */
         foreach ($organization->getPersons(false) as $organizationPerson) {
-            if( $organizationPerson->getPerson()->getId() == $person->getId() ){
+            if ($organizationPerson->getPerson()->getId() == $person->getId()) {
                 $output[$key][] = $organizationPerson->getRole();
             }
         }
 
-        if( $organization->getChildren() ){
+        if ($organization->getChildren()) {
             foreach ($organization->getChildren() as $subOrganization) {
                 $this->writeRolesPersonInOrganizationDeep($person, $subOrganization, $output, $output[$key]);
             }

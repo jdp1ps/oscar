@@ -68,11 +68,6 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         return $this;
     }
 
-
-
-
-
-
     public function deleteAction(){
 
         $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_DELETE);

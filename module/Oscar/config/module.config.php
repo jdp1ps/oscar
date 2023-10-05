@@ -162,11 +162,12 @@ return array(
                         'spentList',
                         'newInStructure',
                         'spentSynthesisActivity',
+                        'personsAccessDeep',
                         'pcru',
                         'pcruInfos',
                         "pcruList",
                         "apiUi",
-                        "timesheet"
+                        "timesheet",
                     ],
 
                     'roles' => ['user'],

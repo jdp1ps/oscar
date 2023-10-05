@@ -23,11 +23,12 @@ export default defineConfig({
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       input: {
+        activityspentdetails: resolve(__dirname, 'src/ActivitySpentDetails.js'),
+        activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
-        activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
-        organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
+        organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {
