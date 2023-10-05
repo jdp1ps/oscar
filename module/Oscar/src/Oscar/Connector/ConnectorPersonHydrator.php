@@ -98,14 +98,22 @@ class ConnectorPersonHydrator
         return $this->repport;
     }
 
-    public function setPurge( $boolean ){
+    /**
+     * @param $boolean
+     * @return void
+     */
+    public function setPurge($boolean)
+    {
         $this->purge = $boolean;
     }
 
-    public function getPurge(){
+    /**
+     * @return mixed
+     */
+    public function getPurge()
+    {
         return $this->purge;
     }
-
 
     /**
      * @return bool
@@ -115,22 +123,35 @@ class ConnectorPersonHydrator
         return $this->repport != null && $this->repport->isSuspect();
     }
 
-    protected function factory(){
+    /**
+     * @return mixed|JsonToPersonFactory
+     */
+    protected function factory()
+    {
         static $factory;
-        if( $factory === null )
+        if ($factory === null) {
             $factory = new JsonToPersonFactory();
+        }
         return $factory;
     }
 
 
-    public function hydratePerson(Person $personOscar, $personData, $connectorName) {
-
+    /**
+     * @param Person $personOscar
+     * @param $personData
+     * @param $connectorName
+     * @return Person
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function hydratePerson(Person $personOscar, $personData, $connectorName)
+    {
         $rolesOscar = $this->getRolesOscarByRoleId();
         $this->repport = new ConnectorRepport();
 
         try {
             $personOscar = $this->factory()->hydrateWithDatas($personOscar, $personData, $connectorName);
-        } catch (OscarException $e ){
+        } catch (OscarException $e) {
             $this->repport->adderror($e->getMessage());
             throw $e;
         }
@@ -141,18 +162,19 @@ class ConnectorPersonHydrator
         $syncRoles = [];
         /** @var OrganizationPerson $organizationperson */
         foreach ($personOscar->getOrganizations() as $organizationperson) {
-            if( $organizationperson->getOrigin() == $connectorName ){
+            if ($organizationperson->getOrigin() == $connectorName) {
                 $organizationCode = $organizationperson->getOrganization()->getCode();
-                if( !array_key_exists($organizationCode, $syncRoles) ){
+                if (!array_key_exists($organizationCode, $syncRoles)) {
                     $syncRoles[$organizationCode] = [];
                 }
-                if( !in_array($organizationperson->getRoleObj()->getRoleId(), $syncRoles[$organizationCode]) ){
+                if (!in_array($organizationperson->getRoleObj()->getRoleId(), $syncRoles[$organizationCode])) {
                     $syncRoles[$organizationCode][] = $organizationperson->getRoleObj()->getRoleId();
                 }
             }
         }
 
         if (property_exists($personData, 'roles')) {
+            var_dump($personData->roles);
 
             foreach ($personData->roles as $organizationCode => $roles) {
                 try {
@@ -160,12 +182,14 @@ class ConnectorPersonHydrator
                     $organization = $this->getOrganisationByCode($organizationCode);
 
                     if ($organization) {
-
                         foreach ($roles as $roleId) {
-                            if( array_key_exists($organizationCode, $syncRoles) ){
-                                if( in_array($roleId, $syncRoles[$organizationCode]) ){
-                                    array_splice($syncRoles[$organizationCode], array_search($roleId, $syncRoles[$organizationCode]), 1);
-
+                            if (array_key_exists($organizationCode, $syncRoles)) {
+                                if (in_array($roleId, $syncRoles[$organizationCode])) {
+                                    array_splice(
+                                        $syncRoles[$organizationCode],
+                                        array_search($roleId, $syncRoles[$organizationCode]),
+                                        1
+                                    );
                                 }
                             }
                             if (array_key_exists($roleId, $rolesOscar)) {
@@ -177,30 +201,55 @@ class ConnectorPersonHydrator
                                         ->setOrigin($connectorName)
                                         ->setRoleObj($rolesOscar[$roleId]);
                                     $personOscar->getOrganizations()->add($roleOscar);
-                                    $this->repport->addupdated(sprintf("Ajout du rôle '%s' dans '%s' pour '%s' ", $roleId, $organization, $personOscar));
+                                    $this->repport->addupdated(
+                                        sprintf(
+                                            "Ajout du rôle '%s' dans '%s' pour '%s' ",
+                                            $roleId,
+                                            $organization,
+                                            $personOscar
+                                        )
+                                    );
                                 }
                             } else {
-                                $this->repport->addwarning(sprintf("Le role '%s' n'a pas été ajouté à '%s' dans '%s' car il est absent de Oscar",
-                                    $roleId, $personOscar, $organization));
+                                $this->repport->addwarning(
+                                    sprintf(
+                                        "Le role '%s' n'a pas été ajouté à '%s' dans '%s' car il est absent de Oscar",
+                                        $roleId,
+                                        $personOscar,
+                                        $organization
+                                    )
+                                );
                             }
                         }
                     } else {
-                        $this->repport->addwarning(sprintf("L'organisation avec le code '%s' n'existe pas dans Oscar",
-                            $organizationCode));
+                        $this->repport->addwarning(
+                            sprintf(
+                                "L'organisation avec le code '%s' n'existe pas dans Oscar",
+                                $organizationCode
+                            )
+                        );
                     }
                 } catch (NoResultException $e) {
-                    $this->repport->addwarning(sprintf("Impossible de charger l'organisation avec le code '%s'.",
-                        $organizationCode));
+                    $this->repport->addwarning(
+                        sprintf(
+                            "Impossible de charger l'organisation avec le code '%s'.",
+                            $organizationCode
+                        )
+                    );
                 } catch (NonUniqueResultException $e) {
-                    $this->repport->addwarning(sprintf("L'organisation avec le code '%s' est présente plusieurs fois.",
-                        $organizationCode));
+                    $this->repport->addwarning(
+                        sprintf(
+                            "L'organisation avec le code '%s' est présente plusieurs fois.",
+                            $organizationCode
+                        )
+                    );
                 }
             }
         }
 
         // Purge des rôles supprimés
-        foreach ($syncRoles as $code=>$roles){
-            if( count($syncRoles[$code])<0 ){
+        foreach ($syncRoles as $code => $roles) {
+            if (count($syncRoles[$code]) < 0) {
                 continue;
             }
 
@@ -208,22 +257,32 @@ class ConnectorPersonHydrator
             foreach ($personOscar->getOrganizations() as $organizationPerson) {
                 $roleId = $organizationPerson->getRole();
                 $codeOrg = $organizationPerson->getOrganization()->getCode();
-                if( $codeOrg == $code ){
-                    if( in_array($roleId, $syncRoles[$code]) ){
-                        if( $this->getPurge() ){
+                if ($codeOrg == $code) {
+                    if (in_array($roleId, $syncRoles[$code])) {
+                        if ($this->getPurge()) {
                             $this->entityManager->remove($organizationPerson);
-                            $this->repport->addremoved(sprintf("Suppression du rôle %s pour %s dans %s.", $roleId, $personOscar, $organizationPerson->getOrganization()));
+                            $this->repport->addremoved(
+                                sprintf(
+                                    "Suppression du rôle %s pour %s dans %s.",
+                                    $roleId,
+                                    $personOscar,
+                                    $organizationPerson->getOrganization()
+                                )
+                            );
                         } else {
-                            $this->repport->addwarning(sprintf("Suppression du rôle %s pour %s dans %s dans la source (activer la purge pour le supprimer).", $roleId, $personOscar, $organizationPerson->getOrganization()));
+                            $this->repport->addwarning(
+                                sprintf(
+                                    "Suppression du rôle %s pour %s dans %s dans la source (activer la purge pour le supprimer).",
+                                    $roleId,
+                                    $personOscar,
+                                    $organizationPerson->getOrganization()
+                                )
+                            );
                         }
                     }
                 }
             }
         }
-
-
         return $personOscar;
     }
-
-
 }
