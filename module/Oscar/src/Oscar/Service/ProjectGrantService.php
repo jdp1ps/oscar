@@ -2747,7 +2747,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         try {
             $activity = $activityOrganization->getActivity();
             $organization = $activityOrganization->getOrganization();
-            $updateNotification = $activityOrganization->getRoleObj()->isPrincipal();
+            $updateNotification = $activityOrganization->getRoleObj() &&
+                $activityOrganization->getRoleObj()->isPrincipal();
             $this->getEntityManager()->remove($activityOrganization);
             $this->getEntityManager()->flush();
 
