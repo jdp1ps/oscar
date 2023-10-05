@@ -116,28 +116,52 @@
 
     </header>
     <section class="content">
-        <div id="oranizations">
-            <h2>Sous-Structures</h2>
-            <div id="suborganizations" data-url="<?= $this->url('organization/suborganization', ['idorganization' => $organization->getId()]) ?>"></div>
-            <?php $this->Vite()->addJs('src/OrganizationSubOrganizations.js') ?>
-        </div>
+        <section class="row">
+            <div class="col-md-6">
+                <div id="oranizations">
+                    <h2><i class="icon-building-filled"></i>Sous-Structures</h2>
+                    <div id="suborganizations" data-url="<?= $this->url('organization/suborganization', ['idorganization' => $organization->getId()]) ?>"></div>
+                    <?php $this->Vite()->addJs('src/OrganizationSubOrganizations.js') ?>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="persons">
+                    <h2><i class="icon-user"></i>Personnes</h2>
+                    <?php
+                    /** @var \Oscar\Entity\OrganizationPerson $person */
+                    foreach($organization->getPersons() as $person): ?>
+                        <?= $this->partial('/partials/person-enrolled-card.phtml', array(
+                            'enroll'    => $person,
+                            'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
+                            'urlClose'  => $this->url('organizationperson/close', ['idenroll' => '']),
+                        )); ?>
+                    <?php endforeach; ?>
+                    <hr>
+                    <a href="<?= $this->url('organizationperson/new', ['idenroller' => $organization->getId()]) ?>" class="btn btn-primary">
+                        <i class="icon-plus-circled"></i> Lier une personne
+                    </a>
+                    <?php if( count($ancestors) ): ?>
+                    <hr>
+                    <h2><i class="icon-user"></i>Personnes (structures parentes)</h2>
+                    <?php foreach ($ancestors as $ancestor): ?>
+                    <article>
+                        <h3><?= $ancestor ?></h3>
+                        <?php
+                        /** @var \Oscar\Entity\OrganizationPerson $person */
+                        foreach($ancestor->getPersons() as $person): ?>
+                            <?= $this->partial('/partials/person-enrolled-card.phtml', array(
+                                'enroll'    => $person
+                            )); ?>
+                        <?php endforeach; ?>
+                    </article>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
 
-        <div id="persons">
-            <h2><i class="icon-user"></i>Personnes</h2>
-            <?php
-            /** @var \Oscar\Entity\OrganizationPerson $person */
-            foreach($organization->getPersons() as $person): ?>
-                <?= $this->partial('/partials/person-enrolled-card.phtml', array(
-                    'enroll'    => $person,
-                    'urlDelete' => $this->url('organizationperson/delete', ['idenroll' => $person->getId()]),
-                    'urlClose'  => $this->url('organizationperson/close', ['idenroll' => '']),
-                )); ?>
-            <?php endforeach; ?>
-            <hr>
-            <a href="<?= $this->url('organizationperson/new', ['idenroller' => $organization->getId()]) ?>" class="btn btn-primary">
-                <i class="icon-plus-circled"></i> Lier une personne
-            </a>
-        </div>
+
+
 
         <h2>Projet <span class="label <?= count($projects)>0?'label-info':'label-default' ?>"><?= count($projects) ?></span></h2>
         <?php foreach($projects as $project): ?>

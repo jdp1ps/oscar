@@ -2134,6 +2134,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function personsAccessDeepAction()
+    {
+        $activityId = $this->params()->fromRoute('id');
+        $activity = $this->getActivityService()->getActivityById($activityId);
+        $access = $this->getActivityService()->getPersonsAccessDeeper($activity);
+        die("ACCES dans '$activity'");
+    }
+
     public function spentListAction()
     {
         $action = $this->params()->fromPost('action', null);

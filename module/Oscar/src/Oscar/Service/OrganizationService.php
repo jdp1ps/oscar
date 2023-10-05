@@ -174,10 +174,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * @param $idParentOrganization
      * @return array
      */
-    public function getOrganizationIdsDeep( int $idParentOrganization, &$output = [] ):array
+    public function getOrganizationIdsDeep( int $idParentOrganization, bool $ignoreFirst = false ):array
     {
-        return $this->getDescentsIdsDeep($idParentOrganization);
+        $ids = $this->getDescentsIdsDeep($idParentOrganization);
+        if( $ids[0] == $idParentOrganization ){
+            $ids = array_slice($ids, 1);
+        }
+        return $ids;
     }
+
+
 
     public function getAncestors( int $idOrganization ) :array {
         $ancestors = [];
@@ -205,9 +211,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $output;
     }
 
-    public function getDescentsIds( int $fromParent ): array
+    public function getDescentsIds( int $fromParent, bool $ignoreFirst = false ): array
     {
-        return $this->getDescentsIdsDeep($fromParent);
+        $descents = $this->getDescentsIdsDeep($fromParent);
+        if( $ignoreFirst == true && $descents[0] == $fromParent ){
+            $descents = array_slice($descents, 1);
+        }
+        return $descents;
     }
 
     private function getDescentsIdsDeep( int $fromParent, &$output = [] ): array
@@ -426,17 +436,29 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $structures;
     }
 
+    /**
+     * @param int $masterOrganizationId
+     * @param int $subOrganizationId
+     * @return void
+     * @throws OscarException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function saveSubStructure(int $masterOrganizationId, int $subOrganizationId): void
     {
         $subStructure = $this->getOrganizationRepository()->getOrganisationById($subOrganizationId);
         $parent = $this->getOrganizationRepository()->getOrganisationById($masterOrganizationId);
-        $idsInAffected = $this->getOrganizationIdsDeep($subStructure->getId());
+        $this->getLoggerService()->info(sprintf('Ajout de %s dans %s', $subStructure->log(), $parent->log()));
 
-        if (!in_array($subStructure->getId(), $idsInAffected)) {
+        $parentChildren = $this->getAncestorsIdsDeep($masterOrganizationId);
+
+//        $idsInAffected = $this->getDescentsIds($subStructure->getId(), true);
+
+        if (!in_array($subStructure->getId(), $parentChildren) && $masterOrganizationId != $subOrganizationId) {
             $subStructure->setParent($parent);
             $this->getEntityManager()->flush($subStructure);
         } else {
-            throw new OscarException("L'affectation va provoquer une récurence, opération annulée");
+            throw new OscarException("L'affectation va provoquer une récurrence, opération annulée");
         }
     }
 

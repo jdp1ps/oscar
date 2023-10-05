@@ -1224,10 +1224,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             /** @var ActivityOrganization $organization */
             foreach ($activity->getOrganizationsDeep() as $organization) {
                 if ($organization->isPrincipal()) {
-                    /** @var OrganizationPerson $personOrganization */
-                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
-                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
-                        )->getId();
+
+                    // Récupération des organizations
+                    $organizationTree = $this->getOrganizationService()
+                        ->getAncestorsIds($organization->getOrganization()->getId());
+                    foreach ($this->getOrganizationService()->getOrganizationsByIds($organizationTree) as $org) {
+                        /** @var OrganizationPerson $personOrganization */
+                        foreach ($org->getPersons(false) as $personOrganization) {
+                            $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
+                            )->getId();
+                        }
                     }
                 }
             }

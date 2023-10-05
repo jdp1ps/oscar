@@ -25,6 +25,7 @@ use Oscar\Entity\ContractType;
 use Oscar\Entity\Activity;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\PcruPoleCompetitivite;
@@ -175,6 +176,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
+
+
 
     public function checkPFIRegex($regex): array
     {
@@ -330,6 +333,86 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function getProjectById(int $id, bool $throw = true): ?Project
     {
         return $this->getProjectService()->getProject($id, $throw);
+    }
+
+    /**
+     * Retourne la liste des structures impliquées dans l'activité, incluant :
+     * les sous-structures, les structures mères.
+     *
+     * @param Activity $activity
+     * @return void
+     */
+    public function getOrganizationsAccessDeeper( Activity $activity, bool $principal = true, bool $withRole = false )
+    {
+        $out = [
+            'organizations_ids' => [],
+            'organizations' => []
+        ];
+
+        /** @var ActivityOrganization $activityOrganization */
+        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            if( $activityOrganization->isPrincipal() ){
+                $organization = $activityOrganization->getOrganization();
+                $organizationId = $organization->getId();
+
+                if(array_key_exists($organizationId, $out['organizations'])){
+                    continue;
+                }
+                $out['organizations'][$organizationId] = $organization;
+                $out['organizations_ids'][] = $organizationId;
+
+                // sous-organization
+                $organizationsMain = $this->getOrganizationService()
+                    ->getAncestors($activityOrganization->getOrganization()->getId());
+
+                foreach ($organizationsMain as $main) {
+                    if(!array_key_exists($main->getId(), $out['organizations'])){
+                        $out['organizations'][$main->getId()] = $main;
+                        $out['organizations_ids'][] = $main->getId();
+                    }
+                }
+            }
+        }
+        return $out;
+
+    }
+
+    public function getPersonsAccessDeeper( Activity $activity ) {
+
+        $out = [
+            "persons" => [],
+            "persons_ids" => []
+        ];
+
+        /** @var ActivityPerson $person */
+        foreach ($activity->getPersonsDeep() as $activityPerson) {
+            $person = $activityPerson->getPerson();
+            $personId = $person->getId();
+            if( !array_key_exists($personId, $out['persons']) ){
+                $out['persons'][$personId] = $person;
+                $out['persons_ids'][] = $personId;
+            }
+        }
+
+        $organizations = $this->getOrganizationsAccessDeeper($activity);
+
+        /** @var Organization $o */
+        foreach ($organizations['organizations'] as $o) {
+            /** @var OrganizationPerson $person */
+            foreach ($o->getPersons() as $organizationPerson) {
+                $person = $organizationPerson->getPerson();
+                $personId = $person->getId();
+                if( !array_key_exists($personId, $out['persons']) ){
+                    $out['persons'][$personId] = $person;
+                    $out['persons_ids'][] = $personId;
+                }
+            }
+        }
+
+        foreach ($out['persons'] as $p) {
+            echo " - $p<br>";
+        }
+        die("Caclule des accès");
     }
 
     public function getActivityByOscarNum(string $oscarNum, $throw = true): ?Activity
@@ -2242,6 +2325,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         if( $deep ){
             $ids = $this->getOrganizationService()->getOrganizationIdsDeep($idOrganization);
+            $ids[] = $idOrganization;
         } else {
             $ids = [$idOrganization];
         }

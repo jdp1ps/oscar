@@ -3,39 +3,53 @@
     "file": "vendor.js"
   },
   "_vendor2.js": {
-    "file": "vendor2.js",
-    "imports": [
-      "_vendor.js",
-      "_vendor3.js"
-    ]
+    "file": "vendor2.js"
   },
   "_vendor3.js": {
     "file": "vendor3.js"
   },
-  "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-641b1fe6.js",
+  "_vendor4.js": {
+    "file": "vendor4.js",
     "imports": [
       "_vendor.js",
+      "_vendor2.js"
+    ]
+  },
+  "src/ActivitySpentDetails.js": {
+    "file": "assets/activityspentdetails-4ad3212d.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js",
+      "_vendor3.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivitySpentDetails.js"
+  },
+  "src/ActivitySpentSynthesis.js": {
+    "file": "assets/activityspentsynthesis-17aceb6c.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js",
       "_vendor3.js"
     ],
     "isEntry": true,
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-04d307f7.js",
+    "file": "assets/activityworkpackage-c113392b.js",
     "imports": [
       "_vendor.js",
-      "_vendor3.js"
+      "_vendor2.js"
     ],
     "isEntry": true,
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-eb50ed02.js",
+    "file": "assets/admintypedocument-176f324a.js",
     "imports": [
       "_vendor.js",
-      "_vendor2.js",
-      "_vendor3.js"
+      "_vendor4.js",
+      "_vendor2.js"
     ],
     "isEntry": true,
     "src": "src/AdminTypeDocument.js"
@@ -48,10 +62,10 @@
     "css": [
       "assets/OrganizationFiche-058e2475.css"
     ],
-    "file": "assets/organizationfiche-caca872a.js",
+    "file": "assets/organizationfiche-431971c0.js",
     "imports": [
       "_vendor.js",
-      "_vendor3.js"
+      "_vendor2.js"
     ],
     "isEntry": true,
     "src": "src/OrganizationFiche.js"
@@ -64,11 +78,11 @@
     "css": [
       "assets/OrganizationSubOrganizations-afd5a062.css"
     ],
-    "file": "assets/organizationsuborganizations-5973de23.js",
+    "file": "assets/organizationsuborganizations-bebebab5.js",
     "imports": [
       "_vendor.js",
-      "_vendor3.js",
-      "_vendor2.js"
+      "_vendor2.js",
+      "_vendor4.js"
     ],
     "isEntry": true,
     "src": "src/OrganizationSubOrganizations.js"

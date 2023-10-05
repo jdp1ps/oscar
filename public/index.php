@@ -102,8 +102,11 @@ set_error_handler('oscar_exception');
 // ON LOG LES PROBEMES
 function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $errcontext=[]){
     static $codeLabels;
+
     if( strpos($errstr, \Oscar\Exception\OscarException::ACCOUNT_DISABLED) ){
-        //die("Compte désactivé");
+        $err = "Votre compte a été désactivé";
+        require __DIR__.'/error.php';
+        die();
     }
     if( $codeLabels === null ){
         $codeLabels = [
@@ -154,7 +157,7 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
             <div class="container">
                 <section class="alert alert-danger">
                     <h1>
-                        Erreur d'execution PHP
+                        Erreur d'execution PHP : <?= $msg ?>
                     </h1>
 
                     <pre><?= $errorDisplayed ?></pre>

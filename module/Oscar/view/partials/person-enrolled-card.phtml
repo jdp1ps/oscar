@@ -49,7 +49,9 @@ $person = $enroll->getPerson();
                 <i class="icon-plug"></i>
                 <?= $enroll->getOrigin() ?></span>
         <?php else: ?>
+            <?php if( isset($urlDelete) ): ?>
             <a href="<?= $urlDelete ?>" class="link-show"><i class="icon-trash"></i> Supprimer ce rôle</a>
+            <?php endif; ?>
             <?php if( isset($urlClose) ):?>
                 <button data-enrollid="<?= $enroll->getId() ?>">Résilier</button>
             <?php endif; ?>
