@@ -492,7 +492,7 @@ class ProjectService implements UseServiceContainer
     {
         $organization = $projectPartner->getOrganization();
         $project = $projectPartner->getProject();
-        $update = $projectPartner->getRoleObj()->isPrincipal();
+        $update = $projectPartner->getRoleObj() && $projectPartner->getRoleObj()->isPrincipal();
 
         $this->getLogger()->debug("Suppression du partenaire $projectPartner");
 
