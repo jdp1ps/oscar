@@ -826,6 +826,16 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             $this->getConfiguration('pcru.filename_contrats');
     }
 
+    public function getPcruSendCsvOkFile() :string
+    {
+        return $this->getConfiguration('pcru.filename_csv_ok');
+    }
+
+    public function getPcruSendPdfOkFile() :string
+    {
+        return $this->getConfiguration('pcru.filename_pdf_ok');
+    }
+
     /**
      * @param bool $withPath
      * @return string

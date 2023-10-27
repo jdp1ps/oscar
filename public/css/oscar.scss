@@ -44,6 +44,13 @@ $colorGreyBlack: #222;
 @import "_common.scss";
 
 
+.cartouche.light {
+  background: $grey-ultra-light;
+  color: #333;
+  box-shadow: none;
+  text-shadow: none;
+}
+
 .cartouche .addon .addon-module {
   border-right: none;
 }

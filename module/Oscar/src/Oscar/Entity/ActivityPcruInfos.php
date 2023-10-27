@@ -194,31 +194,11 @@ class ActivityPcruInfos
      */
     private $poleCompetivite = "";
 
-    const STATUS_PREVIEW = "preview"; // Aperçu
-    const STATUS_DRAFT = "draft"; // Aperçu
-    const STATUS_ERROR_DATA = "error_data"; // Erreur dans les données
-    const STATUS_SEND_READY = "send_ready"; // Prêt pour envoi
-    const STATUS_FILE_READY = "file_wait"; // En attente d'envoi
-    const STATUS_SEND_PENDING = "send_pending"; // Envoyé (attente du retour)
-    const STATUS_ERROR_REMOTE = "error_remote"; // Erreur (retour PCRU)
-    const STATUS_DONE = "done"; // Envoyé (OK)
-
-    static $status_str = null;
-    public static function statusStr( $status )
-    {
-        if( self::$status_str == null ){
-            self::$status_str = [
-                self::STATUS_PREVIEW => "Aperçu",
-                self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
-                self::STATUS_SEND_READY => "Prêt pour l'envoi",
-                self::STATUS_FILE_READY => "Fichier prêt (Attente du transfert)",
-                self::STATUS_SEND_PENDING => "Envoyé",
-                self::STATUS_ERROR_REMOTE => "ERREUR (PCRU)",
-                self::STATUS_DONE => "OK",
-            ];
-        }
-        return self::$status_str[$status];
-    }
+    /**
+     * @var string Nom du pôle de compétitivité qui a validé le projet
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $errorsRemote = null;
 
     /**
      * @ORM\Column(type="string", length=20, nullable=true)
@@ -229,6 +209,11 @@ class ActivityPcruInfos
      * @ORM\Column(type="array", nullable=true)
      */
     private $error = [];
+
+    /**
+     * @ORM\Column(type="array", nullable=true)
+     */
+    private $warnings = [];
 
     /**
      * @var string Commentaire du gestionnaire de contrat
@@ -278,6 +263,38 @@ class ActivityPcruInfos
      */
     private $documentId = null;
 
+
+    const STATUS_PREVIEW = "preview"; // Aperçu
+    const STATUS_DRAFT = "draft"; // Aperçu
+    const STATUS_ERROR_DATA = "error_data"; // Erreur dans les données
+    const STATUS_SEND_READY = "send_ready"; // Prêt pour envoi
+    const STATUS_FILE_READY = "file_wait"; // En attente d'envoi
+    const STATUS_SEND_PENDING = "send_pending"; // Envoyé (attente du retour)
+    const STATUS_ERROR_REMOTE = "error_remote"; // Erreur (retour PCRU)
+    const STATUS_CONTRACT_SEND_PENDING = "contract_send_pending"; // Envoyé (attente du retour)
+    const STATUS_CONTRACT_ERROR_REMOTE = "contract_error_remote"; // Erreur (retour PCRU)
+    const STATUS_DONE = "done"; // Envoyé (OK)
+
+    static ?array $status_str = null;
+
+    public static function statusStr( string $status ) :string
+    {
+        if( self::$status_str == null ){
+            self::$status_str = [
+                self::STATUS_PREVIEW => "Aperçu",
+                self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
+                self::STATUS_SEND_READY => "Prêt pour l'envoi",
+                self::STATUS_FILE_READY => "Fichier prêt (Attente du transfert)",
+                self::STATUS_SEND_PENDING => "Envoyé",
+                self::STATUS_ERROR_REMOTE => "ERREUR (PCRU)",
+                self::STATUS_CONTRACT_SEND_PENDING => "En attente d'envoi du contrat",
+                self::STATUS_CONTRACT_ERROR_REMOTE => "PCRU en retourné une erreur concernant le contrat",
+                self::STATUS_DONE => "OK",
+            ];
+        }
+        return self::$status_str[$status];
+    }
+
     /**
      * ActivityPcruInfos constructor.
      * @param string $status
@@ -289,11 +306,13 @@ class ActivityPcruInfos
 
     public function __toString()
     {
-        return sprintf("[%s] %s : %s (%s)",
+        return sprintf("[%s] %s : %s (%s) - %s:%s",
             $this->getNumContratTutelleGestionnaire(),
             $this->getAcronyme(),
             $this->getObjet(),
-            $this->getResponsableScientifique()
+            $this->getResponsableScientifique(),
+            $this->getStatus(),
+            $this->getStatusStr()
         );
     }
 
@@ -321,7 +340,7 @@ class ActivityPcruInfos
         $out['EmployeurResponsableScientifique'] = $this->getEmployeurResponsableScientifique();
         $out['CoordinateurConsortium'] = $this->isCoordinateurConsortium() ? 'True' : 'False';
         $out['Partenaires'] = $this->getPartenaires();
-        $out['PartenairePrincipal'] = $partenairePrincipal;
+        $out['PartenairePrincipal'] = "$partenairePrincipal";
         $out['IdPartenairePrincipal'] = $this->getIdPartenairePrincipal();
         $out['SourceFinancement'] = $this->getSourceFinancement() ? $this->getSourceFinancement()->getLabel() : "";
         $out['LieuExecution'] = $this->getLieuExecution();
@@ -347,6 +366,7 @@ class ActivityPcruInfos
     public function validation(OscarConfigurationService $oscarConfigurationService) :array
     {
         $this->error = [];
+        $this->warnings = [];
         $datas = $this->toArray();
 
         $out = [];
@@ -1168,6 +1188,50 @@ class ActivityPcruInfos
     {
         $this->error = $error;
         return $this;
+    }
+
+    public function getWarnings(): ?array
+    {
+        return $this->warnings;
+    }
+
+    public function addWarning( string $warningMessage ) :self
+    {
+        $this->warnings[] = $warningMessage;
+        return $this;
+    }
+
+    public function setWarnings(?array $warnings): self
+    {
+        $this->warnings = $warnings;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorsRemote(): ?string
+    {
+        return $this->errorsRemote;
+    }
+
+    /**
+     * @param string $errorsRemote
+     */
+    public function setErrorsRemote(?string $errorsRemote): self
+    {
+        $this->errorsRemote = $errorsRemote;
+        return $this;
+    }
+
+    public function hasErrors() :bool
+    {
+        return $this->errorsRemote != null;
+    }
+
+    public function clearErrors() :void
+    {
+        $this->errorsRemote = null;
     }
 
 

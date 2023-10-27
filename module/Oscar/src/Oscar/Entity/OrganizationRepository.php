@@ -251,8 +251,11 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->getQuery()
             ->setParameter('code', $code)
         ;
-
-        return $qb->getSingleResult();
+        try {
+            return $qb->getSingleResult();
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
 

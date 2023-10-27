@@ -39,15 +39,6 @@ class OscarPcruSendCommand extends OscarCommandAbstract
         /** @var SymfonyStyle $io */
         $io = new SymfonyStyle($input, $output);
 
-        // Récupération des données
-        $numeroOscar = $input->getOption('oscarid');
-        if( !$numeroOscar ){
-            $io->error("Vous devez renseigner un IDOSCAR");
-        }
-
-        die($numeroOscar);
-
-
         if( !$configuration->getPcruEnabled() ){
             $io->error("Le module PCRU n'est pas actif");
         } else {
