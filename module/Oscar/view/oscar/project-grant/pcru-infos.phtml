@@ -42,6 +42,20 @@
         }
     endif; ?>
 
+    <?php if (count($warnings)): ?>
+    <div class="alert alert-warning">
+        <p><strong>Certaines données ne sont pas éligible pour un envoi PCRU, vous ne pourrez les utiliser si elles
+                sont necessaires </strong>: </p>
+        <ul>
+            <?php
+            foreach ($warnings as $warning): ?>
+                <li><?= $warning ?></li>
+            <?php
+            endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+
     <?php
     switch ($status):
         case 'preview' :

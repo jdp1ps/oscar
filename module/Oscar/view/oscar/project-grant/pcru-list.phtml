@@ -27,17 +27,23 @@
                         En attente de transfert</span>
                 <?php break; ?>
 
-                <?php case 'send_pending': ?>
+                <?php case \Oscar\Entity\ActivityPcruInfos::STATUS_SEND_PENDING: ?>
                     <span class="cartouche xs success">
                         <i class="icon-paper-plane"></i>
                         Transférée (en attente d'un retour)</span>
                 <?php break; ?>
 
-                <?php case 'draft': ?>
+                <?php case \Oscar\Entity\ActivityPcruInfos::STATUS_DRAFT: ?>
                     <span class="cartouche xs default">
                     <i class="icon-edit"></i>
                     Brouillon</span>
                     <?php break; ?>
+
+                <?php case \Oscar\Entity\ActivityPcruInfos::STATUS_ERROR_DATA: ?>
+                        <span class="cartouche xs danger">
+                    <i class="icon-attention-1"></i>
+                    Erreur</span>
+                        <?php break; ?>
 
                 <?php default: ?>
                     <pre><?php var_dump($pcruInfos); ?></pre>
@@ -46,6 +52,13 @@
                 <a href="<?= $this->url('contract/show', ['id' => $pcruInfo->getActivity()->getId()]) ?>">
                     <i class="icon-cube"></i>
                     Voir la fiche activité</a>
+            </h4>
+            <?php if( $pcruInfo->hasErrors() ): ?>
+            <div class="alert alert-danger">
+                <?= $pcruInfo->getErrorsRemote() ?>
+            </div>
+            <?php endif; ?>
+
         </article>
         <?php endforeach; ?>
     </section>

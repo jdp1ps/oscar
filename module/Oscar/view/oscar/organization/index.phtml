@@ -100,6 +100,17 @@ $markText = function( $text, $search ){
                 <?php endforeach; ?>
             <?php endif; ?>
 
+                  <?php if($entity->getLabintel()): ?>
+                      <span class="cartouche xs">
+                    Labintel : <strong><?= $entity->getLabintel() ?></strong>
+                </span>
+                  <?php endif; ?>
+                  <?php if($entity->getRnsr()): ?>
+                      <span class="cartouche xs">
+                    RNSR : <strong><?= $entity->getRnsr() ?></strong>
+                </span>
+                  <?php endif; ?>
+
             <span class="label <?= ($nbrProjects + $nbrActivities) ? ' label-primary' : 'label-default' ?>">
                 <?= $nbrProjects + $nbrActivities ?>
             </span>
@@ -147,49 +158,38 @@ $markText = function( $text, $search ){
 
             </span>
           </h2>
-            <div class="container">
-                <div class="row">
-                    <?php if(count($entity->getChildren())): ?>
-                    <div class="col-md-6">
-                        <h4>
-                            <i class="icon-building"></i>
-                            Sous-structures</h4>
-                        <ul>
+            <div class="">
+                <?php if(count($entity->getChildren())): ?>
+                    <div>
                         <?php
                         /** @var \Oscar\Entity\Organization $o */
                         foreach( $entity->getChildren() as $o ): ?>
-                            <li>
-                                <?php if($o->getCode()): ?>
-                                <code><?= $o->getCode() ?></code>
-                                <?php endif; ?>
-
+                            <span class="cartouche light">
+                                <i class="icon-building"></i>
+                                <?= $o->getCode() ?>
+                                <span class="addon">
                                 <?php if($o->getShortName()): ?>
-                                    <strong><?= $o->getShortName() ?></strong>
-                                <?php endif; ?>
-
-                                <?php if($o->getFullName()): ?>
+                                    <?= $o->getShortName() ?>
+                                <?php elseif ($o->getFullName()): ?>
                                     <em>&nbsp;<?= $o->getFullName() ?></em>
                                 <?php endif; ?>
-                            </li>
+                                </span>
+                            </span>
                         <?php endforeach; ?>
-                        </ul>
                     </div>
                     <?php endif; ?>
-
-                    <?php if(count($entity->getPersons())): ?>
-                    <div class="col-md-6">
-                        <h4>Personnel</h4>
-                        <ul>
-                        <?php foreach( $entity->getPersons() as $person ): ?>
-                            <li>
-                                <strong><?= $person->getPerson()->getDisplayName() ?></strong>
-                                <em> - <?= $person->getRole() ?></em>
-                            </li>
-                        <?php endforeach; ?>
-                        </ul>
+                <?php if(count($entity->getPersons())): ?>
+                    <div>
+                    <?php foreach( $entity->getPersons() as $person ): ?>
+                        <span class="cartouche light" title="<?=  $person->getRole() ?>">
+                            <i class="icon-user"></i>
+                            <span class="addon">
+                                <?= $person->getPerson()->getDisplayName() ?>
+                            </span>
+                        </span>
+                    <?php endforeach; ?>
                     </div>
-                    <?php endif; ?>
-                </div>
+                <?php endif; ?>
             </div>
             <?php if ($entity->getDateEnd()): ?>
                 <p class="text-highlight">

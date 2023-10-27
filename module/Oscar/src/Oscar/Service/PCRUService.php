@@ -31,6 +31,7 @@ use Oscar\Utils\PCRUCvsFile;
 use Oscar\Validator\PCRUPartnerValidator;
 use Oscar\Validator\PCRUUnitValidator;
 use Oscar\Validator\PCRUValidator;
+use PHPUnit\Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PCRUService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager, UseServiceContainer
@@ -126,6 +127,27 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return $this->getEntityManager()->getRepository(Organization::class)->getOrganizationByCodePCRU($codePcru);
     }
 
+    /////////////////////////// Gestion des étapes
+    ///
+    const STEP_0_NOTHING_TO_DO = 'STEP_0_NOTHING_TO_DO';
+    const STEP_1_CONTRACT_CSV_READY_TO_SEND = 'STEP_1_CONTRACT_CSV_READY_TO_SEND';
+    const STEP_2_CONTRACT_CSV_WAIT_PCRU_RESPONSE = 'STEP_2_CONTRACT_CSV_WAIT_PCRU_RESPONSE';
+    const STEP_3_CONTRACT_CSV_ERROR_PCRU_RESPONSE = 'STEP_3_CONTRACT_CSV_ERROR_PCRU_RESPONSE';
+    const STEP_4_CONTRACT_CSV_OK_PCRU_RESPONSE = 'STEP_4_CONTRACT_CSV_OK_PCRU_RESPONSE';
+    const STEP_5_CONTRACT_PDF_READY_TO_SEND = 'STEP_5_CONTRACT_PDF_READY_TO_SEND';
+    const STEP_6_CONTRACT_PDF_WAIT_PCRU_RESPONSE = 'STEP_6_CONTRACT_PDF_WAIT_PCRU_RESPONSE';
+
+    public function getCurrentStep() :string
+    {
+        var_dump($this->getDirectoryForUpload());
+        die();
+    }
+
+    public function process() :void
+    {
+
+    }
+
     ///
 
     /// 1. Récupération des donnèes PCRU
@@ -184,6 +206,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
     }
 
+
     public function updatePcruInfos(Activity $activity, ?ActivityPcruInfos $pcruInfos = null, $json = false): void
     {
         if (!$this->getOscarConfigurationService()->getPcruEnabled()) {
@@ -211,7 +234,6 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             throw new OscarException(sprintf("Une erreur est survenue lors de l'enregistrement des données PCRU : %s", $e->getMessage()));
         }
     }
-
 
     /**
      * @return bool
@@ -492,11 +514,19 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
 
         $validatorUnit = new PCRUUnitValidator();
+        $unitValid = false;
+
         foreach ($activity->getOrganizationsWithOneRoleIn($this->getOscarConfigurationService()->getPcruUnitRoles()) as $partner) {
             if( !$validatorUnit->isValid($partner) ){
                 $msg = implode(',', $validatorUnit->getMessages());
-                $pcruInfos->addError(sprintf($msg, $partner));
+                $pcruInfos->addWarning(sprintf($msg, $partner));
+            } else {
+                echo "OK";
+                $unitValid = true;
             }
+        }
+        if( $unitValid === false ){
+            $pcruInfos->addError("Aucune unité valide");
         }
 
         return [
@@ -507,6 +537,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             'documentPath' => $documentPath,
             'infos' => $pcruInfos,
             'errors' => $pcruInfos->getError(),
+            'warnings' => $pcruInfos->getWarnings(),
             'status' => $pcruInfos->getStatus(),
             'preview' => $preview
         ];
@@ -634,13 +665,17 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         if ($conn == null) {
             // Configuration FTP
             $config = $this->getConfiguration();
-
-            $conn = ftp_connect($config['host'], $config['port'], $config['timeout']);
+            $this->log("FTP access to '" . $config['host'].":".$config['port']."'");
+            $this->logPool("Connexion '".$config['host'].":".$config['port']."'");
+            $conn = ssh2_connect($config['host'], $config['port']);
             if ($conn == null) {
-                $this->getLoggerService()->throwAdvancedLoggedError(
-                    "Erreur PCRU (Accès FTP)",
-                    "Impossible de se connecter à '" . $config['host'] . "' - " . error_get_last()
-                );
+                $err = error_get_last()['message'];
+                $this->logPool("Erreur : '". $err . "'");
+                $this->error("Can't connect to '".$config['host']."') : $err");
+                throw new \Exception("Impossible de se connecter au serveur FTP");
+            } else {
+                $this->log("FTP access OK");
+                $this->logPool("Success");
             }
         }
 
@@ -657,9 +692,16 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
     {
         $config = $this->getConfiguration();
         $conn = $this->getFtpAccess();
-        if (ftp_login($conn, $config['user'], $config['pass'])) {
-        } else {
+        $this->log("FTP Authentification with '".$config['user']."'");
+        $this->logPool("FTP Authentification '".$config['user']."' / '".$config['pass']."'");
+        if (!ssh2_auth_password($conn, $config['user'], $config['pass'])) {
+            $err = error_get_last();
+            $this->logPool("Error : '$err'");
+            $this->error("Authentification fail : '$err'" );
             throw new OscarException("Echec de l'authentification");
+        } else {
+            $this->log("FTP Authentification OK");
+            $this->logPool("Authentification OK");
         }
         return $conn;
     }
@@ -719,8 +761,189 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         return file_exists($path);
     }
 
-    public function upload(): void
+    protected function sftp_put_file($sftp_ressource, $file) :void
     {
+        var_dump(is_readable($file));
+        $filename = basename($file);
+        $data = file_get_contents($file);
+        $this->sftp_put_file_data($sftp_ressource, $filename, $data);
+    }
+
+    protected function sftp_put_file_data($sftp_ressource, string $filename, string $data ) :void
+    {
+        $writer = fopen('ssh2.sftp://' . intval($sftp_ressource) . '/Echanges/' . $filename, 'w');
+        if( fwrite($writer, $data) ){
+            $this->logPool(" - OK write '$filename'");
+        } else {
+            $errors = error_get_last();
+            $err = 'Erreur inconnue';
+            if( is_array($errors) ){
+                $err = $errors['message'];
+            }
+            $this->logPool(" - ERROR write '$filename' : $err with '$data'");
+            throw new \Exception($err);
+        }
+        fclose($writer);
+    }
+
+    /**
+     * Chargement du fichier distant.
+     *
+     * @param $sftp_ressource
+     * @param $filename
+     * @return string
+     * @throws \Exception
+     */
+    protected function sftp_get_file($sftp_ressource, $filename) :string
+    {
+        $fileURI = 'ssh2.sftp://' . intval($sftp_ressource) . '/Echanges/' . $filename;
+        $this->log("GET FILE '$filename' ($fileURI)");
+        $reader = @fopen($fileURI, 'r');
+        if( !$reader ){
+            $this->log("File not found");
+            throw new \Exception("Can't open '$filename'");
+        }
+        if( ($content = fread($reader, filesize($fileURI))) ){
+            return $content;
+        } else {
+            $errors = error_get_last();
+            $err = 'Erreur inconnue';
+            if( is_array($errors) ){
+                $err = $errors['message'];
+            }
+            $this->error("ERROR FILE READ : '$err'");
+            throw new \Exception($err);
+        }
+        fclose($reader);
+        return "";
+    }
+
+    protected function sftp_remove_file($sftp_ressource, $filename) :string
+    {
+        $fileURI = 'ssh2.sftp://' . intval($sftp_ressource) . '/Echanges/' . $filename;
+        $this->log("REMOVE FILE '$filename' ($fileURI)");
+        if( unlink($fileURI) ){
+            $this->log("REMOVE OK");
+            return "";
+        } else {
+            $this->error("REMOVE FAIL");
+        }
+        return "";
+    }
+
+    const PCRU_ERRORS_JSON_FILE = 'DEPOT-CSV.ERRORS.json';
+
+
+    public function checkLocalErrors() :void
+    {
+        $localErrors = $this->getActivityPCRUInfoRepository()->getPcruInfoActivityInError();
+        /** @var ActivityPcruInfos $info */
+        foreach ($localErrors as $info){
+            echo " - " . $info->getStatus() . "\n";
+        }
+        die();
+    }
+
+    /**
+     * Contrôle la présence d'un fichier d'erreur, le traite avant de le supprimer.
+     *
+     * @param $ftp_ressource
+     * @return void
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function checkRemoteErrors($ftp_ressource) :void
+    {
+        $this->log("Check for remote errors...");
+        try {
+            $content_get = $this->sftp_get_file($ftp_ressource, self::PCRU_ERRORS_JSON_FILE);
+        } catch (\Exception $e) {
+            throw new \Exception("NO_ERROR");
+        }
+
+        $this->log("Remote error result found...");
+        // Patch caractère vide
+        $pos = strpos($content_get, '﻿');
+        if( $pos === 0 ){
+            $this->log("ZWNBSP patch apply");
+            $content_get = substr($content_get, 3);
+        }
+
+        $json_errors = json_decode($content_get);
+        if( $json_errors === null ){
+            $err = json_last_error_msg();
+            $this->error("PARSE JSON FAIL : $err");
+            throw new \Exception("JSON ERROR '$err' dans '$content_get'");
+        } else {
+            foreach($json_errors->contratsWithErrors as $error){
+                $activityOscarId = $error->id;
+                $errors = implode($error->errors, ", ");
+                $this->log("Activity mark as error '$activityOscarId' : '$errors'");
+                $pcruinfos = $this->getActivityPCRUInfoRepository()->getPcruInfoActivityFromOscarId($activityOscarId);
+                $pcruinfos->setErrorsRemote($errors)
+                    ->setStatus(ActivityPcruInfos::STATUS_ERROR_DATA);
+                $this->getEntityManager()->flush();
+            }
+        }
+        $this->sftp_remove_file($ftp_ressource,self::PCRU_ERRORS_JSON_FILE);
+        $this->sftp_remove_file($ftp_ressource,$this->getOscarConfigurationService()->getPcruContratFile());
+        $this->sftp_remove_file($ftp_ressource,$this->getOscarConfigurationService()->getPcruPartenaireFile());
+
+        throw new \Exception("JSON ERROR");
+    }
+
+    public function upload(): array
+    {
+        $output = [
+            "message" => "",
+            "errors" => [],
+            "logs" => [],
+        ];
+
+        $pcruActivities = $this->getActivityPCRUInfoRepository()->getPcruInfoActivityUnDone();
+
+        if( count($pcruActivities) == 0 ){
+            $output['message'] = "Rien à faire";
+            return $output;
+        }
+
+        $status_global = null;
+        /** @var ActivityPcruInfos $pcruInfoActivity */
+        foreach ($pcruActivities as $pcruInfoActivity) {
+            if( $status_global != null ) continue;
+            if( $pcruInfoActivity->getStatus() === ActivityPcruInfos::STATUS_ERROR_DATA ){
+                $output['message'] = "Il y'a des erreurs dans le dernier envoi, merci de les corriger";
+                return $output;
+            }
+            if( $pcruInfoActivity->getStatus() === ActivityPcruInfos::STATUS_SEND_PENDING ){
+                $status_global = ActivityPcruInfos::STATUS_SEND_PENDING;
+            }
+        }
+
+        $co = $this->ftpConnect();
+        $sftp = ssh2_sftp($co);
+
+        switch($status_global){
+            case ActivityPcruInfos::STATUS_SEND_PENDING;
+            // TRAITEMENT du RETOUR
+                try {
+                    $this->checkRemoteErrors($sftp);
+                } catch (\Exception $e) {
+                    if( $e->getMessage() != 'NO_ERROR' ){
+                        die("Il y'a des erreurs");
+                    }
+                    else {
+
+                    }
+                }
+
+        }
+
+        return $output;
+
+
+        die();
+
         if ($this->hasUploadInProgress()) {
             throw new OscarPCRUException("Une soumission PCRU est déjà en attente de traitement.");
         }
@@ -730,6 +953,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         if (count($files) <= 1) {
             throw new OscarPCRUException("Aucune donnèes PCRU en attente.");
         }
+
+        $remotePath = 'Echanges';
 
         // Lecture du fichier CSV pour tagguer les Informations PCRU à traiter
         $infos = [];
@@ -748,6 +973,8 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
                 $num = $data[3];
                 $info = $this->getInfosByNumOscar($data[3]);
                 if ($info->getStatus() == ActivityPcruInfos::STATUS_FILE_READY) {
+                    $info->setStatus(ActivityPcruInfos::STATUS_SEND_PENDING);
+                    $this->getEntityManager()->flush($info);
                     $pdf = "$num.pdf";
                     $infos[$pdf] = $info;
                 } else {
@@ -760,112 +987,23 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
             fclose($handle);
         }
 
-        $remotePath = 'pcru';
         $local_file = '/tmp/PCRU_MARKER.tmp';
-        $remote_file = $remotePath . '/RETOUR-PCRU.OK';
-        $pcruResponseFile = $remotePath . '/CONTRACT-PCRU.csv';
+        $remote_file = $remotePath . DIRECTORY_SEPARATOR . 'RETOUR-PCRU.OK';
+        $pcruResponseFile = $remotePath . DIRECTORY_SEPARATOR . 'CONTRACT-PCRU.csv';
+        
+        ////////////////////////////////////////// ETAPE 1
+        $this->logPool("Envoi ETAPE 1 (Fichiers de base)");
 
-        // Fichier à déposer une fois le transfert terminé
-        $marker_complete = 'DEPOT-PDF.OK';
-        $marker_complete_tmp = '/tmp/' . $marker_complete;
-        $marker_complete_remote = $remotePath . DIRECTORY_SEPARATOR . $marker_complete;
+        $fileContractLocal = $this->getOscarConfigurationService()->getPcruContratFile(true);
+        //$filePartners = $this->getOscarConfigurationService()->getPcruPartenaireFile(true);
 
-        $this->logPool("Connexion FTP...");
-        $co = $this->ftpConnect();
+        $this->sftp_put_file($sftp, $fileContractLocal);
+        //$this->sftp_put_file($sftp, $filePartners);
 
-        // Mode PASSIVE
-        ftp_pasv($co, true);
-
-        // Ouverture du fichier pour écriture
-        $handle = fopen($local_file, 'w');
-
-        // On récupère les fichier FTP
-        $remoteFiles = ftp_nlist($co, $remotePath);
-
-        if (in_array($remote_file, $remoteFiles)) {
-            // Déjà des fichiers envoyés, on regarde si la réponse PCRU est disponible
-            if (in_array($pcruResponseFile, $remoteFiles)) {
-                // 1.Récupérer la réponse et la traiter
-                if (ftp_fget($co, $handle, $remote_file, FTP_ASCII, 0)) {
-                    $this->logPool("Ecriture dans le fichier $local_file avec succès");
-                    die("TRAITER la REPONSE PCRU");
-                    // 2.Supprimer les fichiers
-                } else {
-                    throw new OscarPCRUException(
-                        "Impossible de traiter le fichier de réponse PCRU, Il y a un problème lors du téléchargement du fichier $remote_file dans $local_file"
-                    );
-                }
-            } else {
-                $err = "Un envoi PCRU est déjà en attente d'un retour";
-                $this->logPool($err);
-                throw new OscarPCRUException($err);
-            }
-        } else {
-            // Envoi des fichiers
-            $this->logPool("Envoi des fichiers via FTP");
+        // création du marqueur
+        $this->sftp_put_file_data($sftp, $this->getOscarConfigurationService()->getPcruSendCsvOkFile(), "done");
 
 
-            foreach ($files as $info) {
-                $filename = $info['name'];
-                $filepath = $info['path'];
-                $this->logPool("Envoi du contrat $filename");
-                $dest = $remotePath . DIRECTORY_SEPARATOR . $filename;
-                $stream = fopen($filepath, 'r');
-
-                // Envois des données FTP
-                ftp_pasv($co, true);
-                if (!ftp_fput($co, $dest, $stream, FTP_ASCII)) {
-                    $errors = error_get_last();
-                    ftp_close($co);
-                    fclose($stream);
-                    $err = "Erreur PCRU(FTP), impossible d'envoyer le fichier $filename : " . $errors['message'];
-                    $this->logPool($err);
-                    $this->getLoggerService()->throwAdvancedLoggedError($err, "");
-                }
-
-                try {
-                    if ($filename != $this->getOscarConfigurationService()->getPcruContratFile(false)) {
-                        $pcruInfos = $infos[$filename];
-                        if (!$pcruInfos) {
-                            throw new OscarPCRUException("L'objet ActivityPcruInfo ne correspond pas pour $filename");
-                        }
-                        $this->logPool("Changement d'état pour " . $pcruInfos);
-                        $pcruInfos->setStatus(ActivityPcruInfos::STATUS_SEND_PENDING);
-                        $this->getEntityManager()->flush($pcruInfos);
-                    }
-                } catch (\Exception $e) {
-                    $this->logPool("Erreur : " . $e->getMessage());
-                }
-
-                fclose($stream);
-            }
-
-            // Ajout du fichier marker
-            $this->logPool("Ajout du marqueur");
-            file_put_contents($marker_complete_tmp, "");
-            $marker = fopen($marker_complete_tmp, 'r');
-
-            ftp_pasv($co, true);
-            if (!ftp_fput($co, $marker_complete_remote, $marker, FTP_BINARY)) {
-                $errors = error_get_last();
-                $err = "Erreur FTP, impossible d'envoyer le $marker_complete" . $errors['message'];
-                $this->logPool($err);
-            }
-            fclose($marker);
-
-            ftp_close($co);
-
-            $dirWait = $this->getOscarConfigurationService()->getPcruDirectoryForUpload();
-            $dirEffective = $this->getOscarConfigurationService()->getPcruDirectoryForUploadEffective();
-            $this->logPool("Déplacement du dossier $dirWait vers $dirEffective");
-
-            if (!@rename($dirWait, $dirEffective)) {
-                $this->getLoggerService()->throwAdvancedLoggedError(
-                    "Error lors de la création du dossier de traitement après upload",
-                    ""
-                );
-            }
-        }
     }
 
     /**
@@ -1052,6 +1190,16 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         }
 
         return true;
+    }
+
+    protected function log( string $msg ): void
+    {
+        $this->getLoggerService()->info(sprintf('[process pcru - info] %s', $msg), []);
+    }
+
+    protected function error( string $msg ): void
+    {
+        $this->getLoggerService()->error(sprintf('[process pcru - erro] %s', $msg), []);
     }
 }
 

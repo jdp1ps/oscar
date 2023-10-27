@@ -19,6 +19,14 @@ Mise à jour du schéma de donnée :
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
+Module SSH2 (php) si vous utilisez PCRU
+
+```bash
+sudo apt install php7.4-ssh2
+```
+
+
+
 ## Configuration des documents
 
 Se rendre dans la partie Administration > Configuration et maintenance

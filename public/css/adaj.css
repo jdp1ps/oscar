@@ -10510,16 +10510,13 @@ pre.alert {
 .person-card .intitule {
   color: #1F180D;
   display: flex;
-}
-.person-card .fullname {
-  font-size: 1.4em;
+  font-size: 1em;
 }
 .person-card .fullname, .person-card .role {
   display: block;
 }
 .person-card .lastname {
   font-weight: bold;
-  font-size: 1.25em;
 }
 .person-card .affectation {
   color: #d9dcdf;

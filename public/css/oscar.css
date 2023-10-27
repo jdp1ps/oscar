@@ -10510,16 +10510,13 @@ pre.alert {
 .person-card .intitule {
   color: #1F180D;
   display: flex;
-}
-.person-card .fullname {
-  font-size: 1.4em;
+  font-size: 1em;
 }
 .person-card .fullname, .person-card .role {
   display: block;
 }
 .person-card .lastname {
   font-weight: bold;
-  font-size: 1.25em;
 }
 .person-card .affectation {
   color: #d9dcdf;
@@ -12881,6 +12878,13 @@ article.wp h3 {
 .result-item.organization-closed h4 {
   opacity: 0.7;
   text-decoration: line-through;
+}
+
+.cartouche.light {
+  background: #CCC;
+  color: #333;
+  box-shadow: none;
+  text-shadow: none;
 }
 
 .cartouche .addon .addon-module {

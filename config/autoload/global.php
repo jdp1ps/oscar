@@ -51,6 +51,8 @@ return array(
             'files_path' => __DIR__.'/../../tmp',       // Dossier où seront gérés les fichiers à envoyer
             'filename_contrats' => 'SitePMA_UniCaen.csv',       // Nom du fichier CSV (contrats)
             'filename_partenaires' => 'SitePMA_UniCaen.PARTENAIRES.csv', // Nom du fichier (Partenaires)
+            'filename_csv_ok' => 'DEPOT-CSV.OK', // Nom du fichier (Marqueur de dépot CSV)
+            'filename_pdf_ok' => 'DEPOT-PDF.OK', // Nom du fichier (Marqueur de dépot PDF)
             'pool_current' => 'waiting',                // Nom du dossier où sont stoqués les fichiers avant envoi
             'pool_effective' => 'uploaded',                // Nom du dossier où sont stoqués les fichiers avant envoi
             'pool_history' => 'send-%s',                // Nom des dossiers archivés

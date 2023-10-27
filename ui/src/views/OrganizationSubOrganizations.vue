@@ -185,7 +185,7 @@ export default {
   flex-flow: wrap;
   flex: 1;
   .suborganization {
-    max-width: 20%;
+    max-width: 30%;
     min-width: 150px;
     position: relative;
     margin: .3em;

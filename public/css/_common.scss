@@ -4220,16 +4220,17 @@ pre.alert {
   .intitule {
     color: $colorDark;
     display: flex;
+    font-size: 1em;
   }
   .fullname {
-    font-size: 1.4em;
+
   }
   .fullname, .role {
     display: block;
   }
   .lastname {
     font-weight: bold;
-    font-size: 1.25em;
+
   }
   .affectation {
     color: $greyLight
