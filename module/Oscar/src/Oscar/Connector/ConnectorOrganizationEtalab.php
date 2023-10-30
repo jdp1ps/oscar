@@ -8,13 +8,12 @@
 namespace Oscar\Connector;
 
 
-use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Exception\ConnectorException;
+use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\ServiceManager;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\ServiceManager\ServiceManager;
 
 class ConnectorOrganizationEtalab extends ConnectorOrganizationJSON implements ServiceLocatorAwareInterface
 {

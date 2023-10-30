@@ -10,18 +10,12 @@ namespace Oscar\Command;
 
 
 use Oscar\Entity\Authentification;
-use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
-use Zend\Crypt\Password\Bcrypt;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Crypt\Password\Bcrypt;
 
 class OscarAuthAddCommand extends OscarCommandAbstract
 {

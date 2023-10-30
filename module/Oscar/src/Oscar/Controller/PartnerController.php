@@ -10,7 +10,7 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ProjectPartner;
-use Zend\View\Model\JsonModel;
+use Laminas\View\Model\JsonModel;
 
 class PartnerController extends AbstractOscarController
 {

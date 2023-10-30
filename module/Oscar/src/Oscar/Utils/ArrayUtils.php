@@ -9,6 +9,15 @@ namespace Oscar\Utils;
  */
 class ArrayUtils
 {
+    public static function implode(string $separator, ?array $array) :string
+    {
+        if( $array === null ) {
+            return "";
+        }
+        return implode($separator, $array);
+    }
+
+
     public static function explodeFromString( ?string $from, string $separator, bool $throw = true ) :array
     {
         if( $from == null ){

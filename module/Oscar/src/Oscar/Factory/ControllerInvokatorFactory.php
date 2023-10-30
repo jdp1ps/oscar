@@ -10,12 +10,7 @@ namespace Oscar\Factory;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Oscar\Controller\PublicController;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 class ControllerInvokatorFactory implements AbstractFactoryInterface
 {

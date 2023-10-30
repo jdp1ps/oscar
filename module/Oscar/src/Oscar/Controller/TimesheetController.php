@@ -9,7 +9,6 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use mysql_xdevapi\Exception;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Organization;
@@ -36,11 +35,11 @@ use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\StringUtils;
-use Zend\Http\Request;
-use Zend\Http\Response;
-use Zend\Mvc\Console\View\Renderer;
-use Zend\View\Model\JsonModel;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\Http\Request;
+use Laminas\Http\Response;
+use Laminas\Mvc\Console\View\Renderer;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et

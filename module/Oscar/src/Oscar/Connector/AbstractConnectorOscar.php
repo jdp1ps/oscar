@@ -12,8 +12,7 @@ namespace Oscar\Connector;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
-use Zend\Config\Reader\Yaml;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 abstract class AbstractConnectorOscar implements IConnectorOscar
 {

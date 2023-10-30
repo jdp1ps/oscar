@@ -8,11 +8,10 @@
 
 namespace Oscar\Formatter;
 
-use Oscar\Formatter\File\IHtmlToPdfFormatter;
-use Zend\View\Model\ViewModel;
-use Zend\View\Renderer\RendererInterface;
-use Zend\View\Resolver\AggregateResolver;
-use Zend\View\Resolver\TemplateMapResolver;
+use Laminas\View\Model\ViewModel;
+use Laminas\View\Renderer\RendererInterface;
+use Laminas\View\Resolver\AggregateResolver;
+use Laminas\View\Resolver\TemplateMapResolver;
 
 /**
  * Effectue la mise en forme HTML des données de déclaration pour une activité pour une période.

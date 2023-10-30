@@ -9,7 +9,6 @@ namespace Oscar\Service;
 
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
@@ -20,23 +19,12 @@ use Jacksay\PhpFileExtension\Dictonary\OfficeDocumentDictonary;
 use Jacksay\PhpFileExtension\Exception\NotFoundExtension;
 use Jacksay\PhpFileExtension\PhpFileExtension;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
-use mysql_xdevapi\Exception;
 use Oscar\Entity\AbstractVersionnedDocument;
-use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
-use Oscar\Entity\Activity;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\Http\Request;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-
-use function PHPUnit\Framework\directoryExists;
-use function PHPUnit\Framework\throwException;
-
+use Laminas\Http\Request;
 
 class VersionnedDocumentService {
 

@@ -10,7 +10,7 @@ namespace Oscar\View\Helpers;
 
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class Access extends AbstractHtmlElement implements ServiceLocatorAwareInterface
 {

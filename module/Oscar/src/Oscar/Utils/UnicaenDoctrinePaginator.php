@@ -12,7 +12,6 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Traversable;
-use Zend\Stdlib\ArrayObject;
 
 class UnicaenDoctrinePaginator implements \Countable, \IteratorAggregate
 {

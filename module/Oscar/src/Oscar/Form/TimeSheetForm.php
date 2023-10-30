@@ -6,14 +6,8 @@
  */
 namespace Oscar\Form;
 
-use Oscar\Entity\Activity;
-use Oscar\Service\ProjectGrantService;
-use Oscar\Validator\EOTP;
-use UnicaenApp\Util;
-use Zend\Filter\StringTrim;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Oscar\Hydrator\ProjectGrantFormHydrator;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 

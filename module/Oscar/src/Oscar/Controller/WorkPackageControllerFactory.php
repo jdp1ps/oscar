@@ -11,13 +11,10 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class WorkPackageControllerFactory implements FactoryInterface
 {

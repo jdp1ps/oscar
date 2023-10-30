@@ -10,16 +10,8 @@ namespace Oscar\Controller;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Oscar\Entity\ActivityRequest;
 use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Service\ActivityRequestService;
-use Oscar\Service\OscarConfigurationService;
-use Oscar\Service\OscarUserContext;
-use Oscar\Service\TimesheetService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class PublicControllerFactory extends AbstractOscarFactory
 {

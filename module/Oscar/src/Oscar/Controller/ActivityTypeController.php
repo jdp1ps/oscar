@@ -16,7 +16,7 @@ use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityTypeService;
 use Oscar\Traits\UseActivityTypeServiceTrait;
-use Zend\View\Model\ViewModel;
+use Laminas\View\Model\ViewModel;
 
 class ActivityTypeController extends AbstractOscarController implements UseActivityTypeService
 {

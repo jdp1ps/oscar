@@ -23,8 +23,7 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
-use Zend\Http\Response;
-use Zend\View\Model\JsonModel;
+use Laminas\View\Model\JsonModel;
 
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>

@@ -8,19 +8,11 @@
 namespace Oscar\Hydrator;
 
 
-use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityType;
 use Oscar\Entity\Currency;
-use Oscar\Entity\DateType;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Utils\DateTimeUtils;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class ActivityPaymentFormHydrator implements HydratorInterface
 {

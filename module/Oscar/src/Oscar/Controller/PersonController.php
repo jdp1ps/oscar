@@ -47,9 +47,9 @@ use Oscar\Traits\UseUserParametersService;
 use Oscar\Traits\UseUserParametersServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\Http\Response;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Response;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class PersonController extends AbstractOscarController
     implements UsePersonService, UseTimesheetService, UseProjectService,

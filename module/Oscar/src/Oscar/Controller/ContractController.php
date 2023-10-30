@@ -11,10 +11,7 @@ namespace Oscar\Controller;
 use Oscar\Entity\Project;
 use Oscar\Entity\Activity;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\Http\Request;
-use Zend\Http\Response;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Request;
 
 /**
  * Class ContractController
@@ -34,7 +31,8 @@ class ContractController extends AbstractOscarController
             case Request::METHOD_DELETE:
                 try {
                     $grant = $this->getProjectGrantFromRoute();
-                    $grant->setStatus(Activity::STATUS_DELETE);
+                    die("ERREUR manageGrantAction");
+                    $grant->setStatus(Activity::STATUS_CLOSED);
                     $this->getEntityManager()->flush($grant);
 
                     return $this->getResponseOk();

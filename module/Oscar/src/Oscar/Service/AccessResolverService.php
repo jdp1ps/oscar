@@ -23,7 +23,7 @@ use ZendTest\XmlRpc\Server\Exception;
  */
 class AccessResolverService implements ServiceLocatorAwareInterface
 {
-    use \Zend\ServiceManager\ServiceLocatorAwareTrait;
+    use \Laminas\ServiceManager\ServiceLocatorAwareTrait;
 
 
     //////////////////////////////////////////////////////////////////// ACTIONS

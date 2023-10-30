@@ -9,8 +9,8 @@ namespace Oscar\Form;
 
 use Oscar\Entity\ActivityType;
 use Oscar\Hydrator\ActivityTypeFormHydrator;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 
 class ActivityTypeForm extends Form implements InputFilterProviderInterface
 {

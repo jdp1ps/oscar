@@ -5,7 +5,7 @@ namespace Oscar\Validator;
 
 
 use Oscar\Entity\Organization;
-use Zend\Validator\AbstractValidator;
+use Laminas\Validator\AbstractValidator;
 
 /**
  * Cette classe permet de vérifier si une structure est éliglible à PCRU comme UNIT

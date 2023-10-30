@@ -10,11 +10,8 @@ namespace Oscar\Formatter;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Oscar\Service\OscarConfigurationService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class TimesheetPersonPeriodHtmlFormatterFactory implements FactoryInterface
 {

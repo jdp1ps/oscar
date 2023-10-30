@@ -8,8 +8,7 @@
 namespace Oscar\Validator;
 
 
-use Zend\Validator\AbstractValidator;
-use Zend\Validator\Exception;
+use Laminas\Validator\AbstractValidator;
 
 class EOTP extends AbstractValidator
 {

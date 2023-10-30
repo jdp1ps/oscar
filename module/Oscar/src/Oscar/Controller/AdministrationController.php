@@ -44,10 +44,9 @@ use Oscar\Traits\UseTypeDocumentServiceTrait;
 use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Http\Request;
-use Oscar\Entity\TypeDocument;
-use Zend\View\Model\ViewModel;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Http\Request;
+use Laminas\View\Model\ViewModel;
 
 class AdministrationController extends AbstractOscarController implements UseProjectGrantService,
                                                                           UseTypeDocumentService,
@@ -610,7 +609,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * Liste des pays ISO 3166
      *
-     * @return array|\Zend\Http\Response
+     * @return array|\Laminas\Http\Response
      * @throws OscarException
      */
     public function paysIso3166Action()
@@ -1161,7 +1160,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * Gestion/visualisation des rôles.
      *
-     * @return \Zend\Http\Response|\Zend\View\Model\JsonModel
+     * @return \Laminas\Http\Response|\Laminas\View\Model\JsonModel
      */
     public function roleAPIAction()
     {
@@ -1573,7 +1572,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
     /**
      * Administration des types de contrat PCRU.
      *
-     * @return array|\Zend\Http\Response|\Zend\View\Model\JsonModel
+     * @return array|\Laminas\Http\Response|\Laminas\View\Model\JsonModel
      * @throws OscarException
      */
     public function contratTypePcruAction()
@@ -1615,7 +1614,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     /**
      * Configuration FTP pour PCRU + Activation du module
-     * @return array|\Zend\Http\Response|\Zend\View\Model\JsonModel
+     * @return array|\Laminas\Http\Response|\Laminas\View\Model\JsonModel
      */
     public function pcruAction()
     {

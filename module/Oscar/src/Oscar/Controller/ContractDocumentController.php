@@ -12,9 +12,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Jacksay\PhpFileExtension\Strategy\MimeProvider;
-use Oscar\Constantes\Constantes;
-use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
 use Oscar\Entity\TabDocument;
@@ -29,22 +26,14 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
 use Oscar\Strategy\Upload\conventionSignee;
 use Oscar\Strategy\Upload\ServiceContextUpload;
-use Oscar\Strategy\Upload\StrategyGedUpload;
-use Oscar\Strategy\Upload\StrategyOscarUpload;
-use Oscar\Strategy\Upload\StrategyTypeInterface;
-use Oscar\Strategy\Upload\TypeGed;
-use Oscar\Strategy\Upload\TypeOscar;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
-use Zend\Db\Sql\Ddl\Column\Datetime;
-use Zend\Http\Request;
-use Zend\Http\Response;
-use Zend\Json\Server\Exception\HttpException;
-use Zend\Mvc\Controller\Plugin\Redirect;
-use Zend\View\Model\JsonModel;
+use Laminas\Http\Request;
+use Laminas\Json\Server\Exception\HttpException;
+use Laminas\View\Model\JsonModel;
 
 
 /**

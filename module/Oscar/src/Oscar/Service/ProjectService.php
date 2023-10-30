@@ -33,7 +33,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\Mvc\Controller\Plugin\Url;
+use Laminas\Mvc\Controller\Plugin\Url;
 
 /**
  * Cette classe fournit des automatismes liés à la manipulation et la

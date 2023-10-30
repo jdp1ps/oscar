@@ -5,12 +5,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use Oscar\Entity\Role;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TabsDocumentsRoles;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class MigrateDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

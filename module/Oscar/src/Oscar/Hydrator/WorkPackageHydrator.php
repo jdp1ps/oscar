@@ -12,7 +12,7 @@ use Oscar\Hydrator\Hydrator;
 use Oscar\Utils\DateTimeUtils;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class WorkPackageHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

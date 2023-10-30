@@ -13,17 +13,13 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\DateType;
-use Oscar\Entity\DateTypeRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\DateTypeForm;
 use Oscar\Provider\Privileges;
-use Oscar\Service\OscarUserContext;
-use Oscar\Traits\UseEntityManager;
-use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
-use Zend\Http\Response;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Response;
+use Laminas\View\Model\ViewModel;
 
 class DateTypeController extends AbstractOscarController implements UseOscarUserContextService
 {

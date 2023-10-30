@@ -20,11 +20,11 @@ use Oscar\Entity\Project;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ProjectMember;
 use Oscar\Import\ImportPartners;
-use Zend\Console\Adapter\AdapterInterface;
-use Zend\Console\Request as ConsoleRequest;
-use Zend\Console\Request;
-use Zend\ModuleManager\Feature\ConsoleBannerProviderInterface;
-use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
+use Laminas\Console\Adapter\AdapterInterface;
+use Laminas\Console\Request as ConsoleRequest;
+use Laminas\Console\Request;
+use Laminas\ModuleManager\Feature\ConsoleBannerProviderInterface;
+use Laminas\ModuleManager\Feature\ConsoleUsageProviderInterface;
 
 /**
  * Script de syncronisation des données issues de la base de données Centaure.
@@ -959,7 +959,7 @@ SELECT PER_CLEUNIK_VALO AS CLEUNIK, NOM_PERS as NOM, PREN_PERS AS PRENOM, E_MAIL
      * The banner is shown in the console window, when the user supplies invalid command-line parameters or invokes
      * the application with no parameters.
      *
-     * The method is called with active Zend\Console\Adapter\AdapterInterface that can be used to directly access Console and send
+     * The method is called with active Laminas\Console\Adapter\AdapterInterface that can be used to directly access Console and send
      * output.
      *
      * @param AdapterInterface $console
@@ -973,7 +973,7 @@ SELECT PER_CLEUNIK_VALO AS CLEUNIK, NOM_PERS as NOM, PREN_PERS AS PRENOM, E_MAIL
 
     /**
      * Returns an array or a string containing usage information for this module's Console commands.
-     * The method is called with active Zend\Console\Adapter\AdapterInterface that can be used to directly access
+     * The method is called with active Laminas\Console\Adapter\AdapterInterface that can be used to directly access
      * Console and send output.
      *
      * If the result is a string it will be shown directly in the console window.

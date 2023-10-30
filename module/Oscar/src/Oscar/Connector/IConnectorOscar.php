@@ -9,7 +9,7 @@
 namespace Oscar\Connector;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 interface IConnectorOscar
 {

@@ -2,22 +2,10 @@
 
 namespace Oscar\Service;
 
-use Doctrine\ORM\Query;
 use Oscar\Connector\ConnectorPersonOrganization;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
-use Oscar\Entity\Person;
-use Oscar\Entity\PersonRepository;
-use Oscar\Entity\ProjectMember;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
-use Oscar\Utils\UnicaenDoctrinePaginator;
-use UnicaenApp\Mapper\Ldap\People;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 /**
  * Gestion des Personnes :

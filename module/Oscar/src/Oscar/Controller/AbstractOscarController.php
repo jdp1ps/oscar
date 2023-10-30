@@ -8,29 +8,9 @@
  */
 namespace Oscar\Controller;
 
-use Doctrine\ORM\EntityManager;
-use http\Params;
-use Monolog\Logger;
-use Oscar\Entity\LogActivity;
-use Oscar\Entity\ActivityLogRepository;
-use Oscar\Entity\Person;
-use Oscar\Entity\ProjectGrantRepository;
-use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
 use Oscar\OscarVersion;
-use Oscar\Service\ActivityLogService;
-use Oscar\Service\ActivityTypeService;
-use Oscar\Service\ConfigurationParser;
-use Oscar\Service\NotificationService;
-use Oscar\Service\OrganizationService;
-use Oscar\Service\OscarConfigurationService;
-use Oscar\Service\OscarUserContext;
-use Oscar\Service\PersonService;
-use Oscar\Service\ProjectGrantService;
-use Oscar\Service\ProjectService;
 use Oscar\Service\SearchService;
-use Oscar\Service\SessionService;
-use Oscar\Service\UserParametersService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -41,16 +21,13 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerTrait;
 use Symfony\Component\Yaml\Parser;
 use UnicaenAuth\Service\UserContext;
-use Zend\Http\Request;
-use Zend\Http\Response;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\Session\Container;
-use Zend\Stdlib\Parameters;
-use Zend\View\Model\JsonModel;
+use Laminas\Http\Request;
+use Laminas\Http\Response;
+use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\Stdlib\Parameters;
+use Laminas\View\Model\JsonModel;
 
 /**
  * Cette classe sert principalement à fournir des accesseurs aux Controlleurs

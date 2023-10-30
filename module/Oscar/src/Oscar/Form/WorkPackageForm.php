@@ -10,10 +10,7 @@ namespace Oscar\Form;
 
 
 use Oscar\Hydrator\WorkPackageHydrator;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Laminas\Form\Form;
 
 class WorkPackageForm extends Form /*implements InputFilterProviderInterface*/
 {

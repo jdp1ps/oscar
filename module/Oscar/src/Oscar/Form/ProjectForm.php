@@ -2,11 +2,13 @@
 
 namespace Oscar\Form;
 
+use Laminas\Form\Form;
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2015
  */
-class ProjectForm extends \Zend\Form\Form
+class ProjectForm extends Form
 {
 
     function __construct()

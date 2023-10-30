@@ -10,9 +10,9 @@ namespace Oscar\Entity;
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
 use Doctrine\ORM\Mapping\OneToOne as OneToOne;
 
 /**

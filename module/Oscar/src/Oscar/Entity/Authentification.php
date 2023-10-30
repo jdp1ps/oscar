@@ -10,9 +10,8 @@ namespace Oscar\Entity;
 use BjyAuthorize\Provider\Role\ProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use UnicaenAuth\Entity\Db\AbstractRole;
-use UnicaenAuth\Entity\Db\AbstractUser;
-use ZfcUser\Entity\UserInterface;
+use UnicaenUtilisateur\Entity\Db\RoleInterface;
+use UnicaenUtilisateur\Entity\Db\UserInterface;
 
 
 /**
@@ -99,9 +98,9 @@ class Authentification implements UserInterface, ProviderInterface
      * @param AbstractRole|null $lastRole
      * @return self
      */
-    public function setLastRole(AbstractRole $lastRole = null)
+    public function setLastRole(RoleInterface $lastRole = null) :void
     {
-        return $this;
+
     }
 
     /**
@@ -387,8 +386,20 @@ class Authentification implements UserInterface, ProviderInterface
         return false;
     }
 
+    public function getPasswordResetToken()
+    {
+        // TODO: Implement getPasswordResetToken() method.
+    }
 
+    public function setPasswordResetToken($passwordResetToken)
+    {
+        // TODO: Implement setPasswordResetToken() method.
+    }
 
+    public function isLocal()
+    {
+        // TODO: Implement isLocal() method.
+    }
 
 
     /**

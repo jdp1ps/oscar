@@ -7,10 +7,10 @@
 
 namespace Oscar\Form;
 
-use Zend\Form\Element\Select;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Form\Element\Select;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 /**
  * Formulaire générique pour la fusion des données statiques entre une ou

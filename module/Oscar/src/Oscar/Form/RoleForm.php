@@ -9,8 +9,8 @@ namespace Oscar\Form;
 
 
 use Oscar\Hydrator\RoleFormHydrator;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 
 class RoleForm extends Form implements InputFilterProviderInterface
 {

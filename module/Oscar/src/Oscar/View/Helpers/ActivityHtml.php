@@ -7,7 +7,7 @@
 
 namespace Oscar\View\Helpers;
 
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class ActivityHtml extends AbstractHtmlElement
 {

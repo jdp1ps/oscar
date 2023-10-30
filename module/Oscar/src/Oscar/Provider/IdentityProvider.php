@@ -11,9 +11,6 @@ namespace Oscar\Provider;
 
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenAuth\Provider\Identity\ChainableProvider;
-use UnicaenAuth\Provider\Identity\ChainEvent;
-use UnicaenAuth\Service\UserContext;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use BjyAuthorize\Provider\Identity\ProviderInterface as IdentityProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;

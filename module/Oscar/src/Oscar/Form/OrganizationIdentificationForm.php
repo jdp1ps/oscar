@@ -4,15 +4,15 @@ namespace Oscar\Form;
 
 use Oscar\Hydrator\OrganizationFormHydrator;
 use Oscar\Service\OrganizationService;
-use Zend\Form\Element;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Form\Element;
+use Laminas\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2015
  */
-class OrganizationIdentificationForm extends \Zend\Form\Form implements InputFilterProviderInterface
+class OrganizationIdentificationForm extends \Laminas\Form\Form implements InputFilterProviderInterface
 {
     use ServiceLocatorAwareTrait;
 

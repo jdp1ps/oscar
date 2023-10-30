@@ -4,7 +4,7 @@
 namespace Oscar\Auth;
 
 
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class UserAuthenticatedEventListenerFactory
 {

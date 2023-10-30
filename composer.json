@@ -1,16 +1,21 @@
 {
-  "repositories": [
-    { "type": "vcs", "url": "https://git.unicaen.fr/lib/unicaen/app" },
-    { "type": "vcs", "url": "https://git.unicaen.fr/lib/unicaen/auth" },
-    { "type": "vcs", "url": "https://git.unicaen.fr/lib/unicaen/bjy-authorize" }
+  "repositories"     : [
+    {
+      "type": "composer",
+      "url" : "https://gest.unicaen.fr/packagist"
+    }
   ],
+
   "name": "unicaen/oscar",
   "license": "proprietary",
   "description": "",
 
   "require": {
-    "unicaen/app": "^3.1",
-    "unicaen/auth": "^3.2.0",
+    "unicaen/app": "6.0.6",
+    "unicaen/authentification": "6.0.3",
+    "unicaen/privilege": "6.0.1",
+    "unicaen/utilisateur": "6.0.4",
+    "laminas/laminas-file": "^2.8",
     "oro/doctrine-extensions": "^1.2",
     "symfony/yaml": "^4.3",
     "fightbulc/moment": "^1.30",
@@ -22,18 +27,15 @@
     "phpoffice/phpspreadsheet": "^1.9",
     "dompdf/dompdf": "^0.8.3",
     "swiftmailer/swiftmailer": "^6.2",
-    "phpoffice/phpword": "^0.16.0",
-    "phpoffice/phpexcel": "^1.8",
-    "zendframework/zend-console": "^2.8",
-    "zendframework/zend-mvc-console": "^1.2",
-    "symfony/console": "^4.3",
+    "symfony/console": "*",
     "ext-gettext": "*",
     "ext-json": "*",
     "guzzlehttp/guzzle": "^7.0"
   },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "require-dev": {
-    "zendframework/zend-developer-tools": "^1.2",
-    "phpunit/phpunit": "^9.0"
+    "phpunit/phpunit": "*"
   },
   "config": {
     "github-protocols": ["https", "ssh"],
@@ -41,8 +43,7 @@
   },
   "autoload": {
     "psr-0": {
-      "Oscar": ["module/Oscar/src/", "local/src/"],
-      "UnicaenAde": "unicaen/unicaen-ade/src/"
+      "Oscar": ["module/Oscar/src/", "local/src/"]
     }
   },
   "scripts": {

@@ -7,29 +7,14 @@
 
 namespace Oscar\Service;
 
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
-use Moment\Moment;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityNotification;
-use Oscar\Entity\ActivityOrganization;
-use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRepository;
-use Oscar\Entity\Authentification;
 use Oscar\Entity\EstimatedSpentLine;
-use Oscar\Entity\Notification;
-use Oscar\Entity\NotificationPerson;
-use Oscar\Entity\OrganizationPerson;
-use Oscar\Entity\Person;
-use Oscar\Entity\Project;
 use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\SpentTypeGroupRepository;
-use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
-use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -38,11 +23,9 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\AccountInfoUtil;
 use Oscar\Utils\StringUtils;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\Log\Logger;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Laminas\Log\Logger;
+use Laminas\ServiceManager\ServiceLocatorAwareInterface;
+use Laminas\ServiceManager\ServiceLocatorAwareTrait;
 
 class SpentService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager
 {

@@ -20,9 +20,8 @@ use Oscar\Traits\UseTimesheetService;
 use Oscar\Traits\UseTimesheetServiceTrait;
 use Oscar\Traits\UseUserParametersService;
 use Oscar\Traits\UseUserParametersServiceTrait;
-use Zend\EventManager\Event;
-use Zend\Mvc\Application;
-use Zend\View\Model\ViewModel;
+use Laminas\EventManager\Event;
+use Laminas\View\Model\ViewModel;
 
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>

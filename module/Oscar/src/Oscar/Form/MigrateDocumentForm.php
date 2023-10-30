@@ -12,10 +12,10 @@ use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\TabDocument;
 use Oscar\Hydrator\TabDocumentFormHydrator;
-use Zend\Form\Element\Select;
-use Zend\Form\Form;
+use Laminas\Form\Element\Select;
+use Laminas\Form\Form;
 
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\InputFilter\InputFilterProviderInterface;
 
 class MigrateDocumentForm extends Form implements InputFilterProviderInterface
 {

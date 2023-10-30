@@ -9,30 +9,12 @@
 namespace Oscar\Command;
 
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\SchemaValidator;
-use Moment\Moment;
 use Monolog\Logger;
-use Oscar\Entity\Authentification;
-use Oscar\Entity\LogActivity;
-use Oscar\Entity\Person;
-use Oscar\Entity\Role;
-use Oscar\OscarVersion;
-use Oscar\Service\ConfigurationParser;
-use Oscar\Service\ConnectorService;
-use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
-use Oscar\Service\PersonService;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Yaml\Parser;
-use Zend\Config\Reader\Yaml;
 
 class OscarCheckLoggerCommand extends OscarCommandAbstract
 {

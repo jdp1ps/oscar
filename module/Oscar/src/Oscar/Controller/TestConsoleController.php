@@ -9,7 +9,7 @@
 namespace Oscar\Controller;
 
 
-use Zend\Mvc\Console\Controller\AbstractConsoleController;
+use Laminas\Mvc\Console\Controller\AbstractConsoleController;
 
 class TestConsoleController extends AbstractConsoleController
 {

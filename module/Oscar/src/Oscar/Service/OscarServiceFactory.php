@@ -11,7 +11,7 @@ namespace Oscar\Service;
 
 use Oscar\Exception\OscarException;
 use Psr\Container\ContainerInterface;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
+use Laminas\ServiceManager\Exception\ServiceNotFoundException;
 
 class OscarServiceFactory
 {

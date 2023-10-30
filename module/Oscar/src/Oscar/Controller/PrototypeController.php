@@ -2,7 +2,7 @@
 
 namespace Oscar\Controller;
 
-use Zend\View\Model\ViewModel;
+use Laminas\View\Model\ViewModel;
 
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>

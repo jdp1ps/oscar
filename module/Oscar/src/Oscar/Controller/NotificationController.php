@@ -20,7 +20,7 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
 use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
-use Zend\View\Model\JsonModel;
+use Laminas\View\Model\JsonModel;
 
 /**
  * Class NotificationController

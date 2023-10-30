@@ -9,7 +9,7 @@ namespace Oscar\Connector;
 
 
 use phpDocumentor\Reflection\Types\Mixed_;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 interface IConnector
 {

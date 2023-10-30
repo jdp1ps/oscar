@@ -14,7 +14,7 @@
     <?php $form->prepare(); echo  $this->form()->openTag($form); ?>
 
     <?php
-    /** @var \Zend\Form\Element\Select $field */
+    /** @var \Laminas\Form\Element\Select $field */
     foreach( $form as $field): ?>
         <?= $this->formControlGroup($field) ?>
     <?php endforeach; ?>

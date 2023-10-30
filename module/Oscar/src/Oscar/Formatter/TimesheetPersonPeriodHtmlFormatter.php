@@ -8,12 +8,11 @@
 
 namespace Oscar\Formatter;
 
-use Dompdf\Dompdf;
 use Oscar\Exception\OscarException;
-use Zend\View\Model\ViewModel;
-use Zend\View\Renderer\RendererInterface;
-use Zend\View\Resolver\AggregateResolver;
-use Zend\View\Resolver\TemplateMapResolver;
+use Laminas\View\Model\ViewModel;
+use Laminas\View\Renderer\RendererInterface;
+use Laminas\View\Resolver\AggregateResolver;
+use Laminas\View\Resolver\TemplateMapResolver;
 
 /**
  * Sortie HTML pour les données de déclaration d'une personne pour une période (Mois : YYYY-MM) donné.

@@ -7,7 +7,7 @@ use Oscar\Connector\Access\IConnectorAccess;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Symfony\Component\Yaml\Yaml;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 abstract class AbstractConnector implements IConnector
 {

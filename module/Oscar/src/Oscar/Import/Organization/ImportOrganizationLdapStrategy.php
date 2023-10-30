@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManager;
 use Oscar\Entity\Organization;
 use Oscar\Import\ImportInterface;
 use UnicaenApp\Mapper\Ldap\Structure;
-use Zend\Mvc\Controller\Plugin\Url;
+use Laminas\Mvc\Controller\Plugin\Url;
 
 
 class ImportOrganizationLdapStrategy implements ImportInterface

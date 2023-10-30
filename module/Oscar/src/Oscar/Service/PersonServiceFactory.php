@@ -11,10 +11,10 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseOscarUserContextService;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class PersonServiceFactory implements FactoryInterface
 {

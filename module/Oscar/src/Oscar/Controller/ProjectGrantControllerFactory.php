@@ -24,9 +24,7 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Service\SpentService;
 use Oscar\Service\TimesheetService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ProjectGrantControllerFactory implements FactoryInterface
 {

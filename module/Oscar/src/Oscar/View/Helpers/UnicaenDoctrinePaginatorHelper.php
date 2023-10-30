@@ -8,7 +8,7 @@
 namespace Oscar\View\Helpers;
 
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class UnicaenDoctrinePaginatorHelper extends AbstractHtmlElement
 {

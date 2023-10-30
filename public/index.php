@@ -235,5 +235,5 @@ require __DIR__.'/../vendor/autoload.php';
 $conf = require 'config/application.config.php';
 
 
-$app = Zend\Mvc\Application::init(require 'config/application.config.php');
+$app = \Laminas\Mvc\Application::init(require 'config/application.config.php');
 $app->run();

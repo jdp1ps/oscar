@@ -9,9 +9,7 @@
 namespace Oscar\Validator;
 
 
-use Oscar\Exception\OscarException;
-use Zend\Validator\AbstractValidator;
-use Zend\Validator\Exception;
+use Laminas\Validator\AbstractValidator;
 
 class StringArrayInput extends AbstractValidator
 {

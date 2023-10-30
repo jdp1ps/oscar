@@ -10,16 +10,10 @@ namespace Oscar\Service;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Monolog\Handler\FirePHPHandler;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Monolog\Handler\RotatingFileHandler;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Oscar\Exception\OscarException;
-use Oscar\Utils\FileSystemUtils;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+
 
 class LoggerServiceFactory implements FactoryInterface
 {

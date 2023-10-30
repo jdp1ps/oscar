@@ -11,7 +11,6 @@ namespace Oscar\Factory;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
@@ -29,9 +28,7 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseServiceContainer;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Laminas\ServiceManager\Factory\AbstractFactoryInterface;
 
 class OscarUseFactory implements AbstractFactoryInterface
 {

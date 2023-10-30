@@ -11,7 +11,7 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ActivityRequestServiceFactory implements FactoryInterface
 {
@@ -19,7 +19,6 @@ class ActivityRequestServiceFactory implements FactoryInterface
     {
         $s = new ActivityRequestService();
 
-        //  use UseEntityManagerTrait, UsePersonServiceTrait, UseOscarConfigurationServiceTrait, UseNotificationServiceTrait, UseProjectGrantServiceTrait
         $s->setEntityManager($container->get(EntityManager::class));
         $s->setPersonService($container->get(PersonService::class));
         $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));

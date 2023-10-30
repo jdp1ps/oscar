@@ -9,14 +9,13 @@
 namespace Oscar\Formatter\Spent;
 
 
-use Oscar\Entity\Activity;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\IFormatter;
-use Zend\View\Model\ViewModel;
-use Zend\View\Renderer\PhpRenderer;
-use Zend\View\Resolver\AggregateResolver;
-use Zend\View\Resolver\TemplateMapResolver;
+use Laminas\View\Model\ViewModel;
+use Laminas\View\Renderer\PhpRenderer;
+use Laminas\View\Resolver\AggregateResolver;
+use Laminas\View\Resolver\TemplateMapResolver;
 
 class EstimatedSpentActivityHTMLFormater implements IFormatter
 {

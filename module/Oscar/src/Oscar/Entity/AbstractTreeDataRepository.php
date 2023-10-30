@@ -9,10 +9,6 @@ namespace Oscar\Entity;
 
 
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\MappedSuperclass;
-use Doctrine\ORM\Query\Expr\Literal;
-use Oscar\Service\LoggerStdoutColor;
-use Zend\ServiceManager\AbstractFactoryInterface;
 
 /**
  * Class AbstractTreeDataRepository

@@ -10,13 +10,8 @@ namespace Oscar\View\Helpers;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Oscar\Service\OscarConfigurationService;
-use Oscar\Service\OscarUserContext;
-use Oscar\Utils\ViteUtils;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ViteFactory implements FactoryInterface
 {

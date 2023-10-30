@@ -7,10 +7,10 @@
 namespace Oscar\Form;
 
 use Oscar\Hydrator\PersonFormHydrator;
-use Zend\Filter\StringTrim;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
-use Zend\Validator\EmailAddress;
+use Laminas\Filter\StringTrim;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
+use Laminas\Validator\EmailAddress;
 
 class PersonForm extends Form implements InputFilterProviderInterface
 {
