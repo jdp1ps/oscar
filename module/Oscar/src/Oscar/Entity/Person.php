@@ -8,11 +8,10 @@
 namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\ManyToMany;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Utils\StringUtils;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
 
 /**
  * Class Person

@@ -9,7 +9,7 @@ use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\VersionnedDocumentService;
-use Zend\Http\Request;
+use Laminas\Http\Request;
 
 interface TypeDocumentInterface
 {

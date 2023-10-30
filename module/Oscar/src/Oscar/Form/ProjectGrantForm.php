@@ -8,22 +8,17 @@
 namespace Oscar\Form;
 
 use Oscar\Entity\Activity;
-use Oscar\Entity\TimeSheet;
 use Oscar\Form\Element\KeyValue;
-use Oscar\Formatter\AsArrayFormatter;
-use Oscar\Service\ActivityTypeService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Validator\EOTP;
 use UnicaenApp\Util;
-use Zend\Filter\StringTrim;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Filter\StringTrim;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 use Oscar\Hydrator\ProjectGrantFormHydrator;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ProjectGrantForm extends Form implements InputFilterProviderInterface, UseServiceContainer
 {

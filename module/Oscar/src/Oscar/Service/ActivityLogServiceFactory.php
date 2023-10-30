@@ -9,12 +9,8 @@
 namespace Oscar\Service;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ActivityLogServiceFactory implements FactoryInterface
 {

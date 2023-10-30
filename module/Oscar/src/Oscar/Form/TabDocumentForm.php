@@ -9,10 +9,10 @@ namespace Oscar\Form;
 
 use Doctrine\ORM\EntityManager;
 use Oscar\Hydrator\TabDocumentFormHydrator;
-use Zend\Form\Element\Select;
-use Zend\Form\Form;
+use Laminas\Form\Element\Select;
+use Laminas\Form\Form;
 
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\InputFilter\InputFilterProviderInterface;
 
 class TabDocumentForm extends Form implements InputFilterProviderInterface
 {

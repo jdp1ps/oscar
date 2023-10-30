@@ -7,12 +7,8 @@
 
 namespace Oscar\Entity;
 
-use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Oscar\Import\Data\DataExtractorDate;
-use Oscar\Service\ActivityTypeService;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
 
 /**
  * Demande d'activité

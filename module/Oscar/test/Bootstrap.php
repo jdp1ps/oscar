@@ -8,9 +8,9 @@
  */
 namespace OscarTest;
 
-use Zend\Loader\AutoloaderFactory;
-use Zend\Mvc\Service\ServiceManagerConfig;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Loader\AutoloaderFactory;
+use Laminas\Mvc\Service\ServiceManagerConfig;
+use Laminas\ServiceManager\ServiceManager;
 
 //
 error_reporting(E_ALL);
@@ -71,14 +71,14 @@ class Bootstrap
             include $vendorPath.'/autoload.php';
         }
 
-        if (! class_exists('Zend\Loader\AutoloaderFactory')) {
+        if (! class_exists('Laminas\Loader\AutoloaderFactory')) {
             throw new RuntimeException(
                 'Unable to load ZF2. Run `php composer.phar install`'
             );
         }
 
         AutoloaderFactory::factory(array(
-            'Zend\Loader\StandardAutoloader' => array(
+            'Laminas\Loader\StandardAutoloader' => array(
                 'autoregister_zf' => true,
                 'namespaces' => array(
                     __NAMESPACE__ => __DIR__ . '/' . __NAMESPACE__,

@@ -9,8 +9,6 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\Tackable;
-use Oscar\Form\RoleForm;
-use Zend\View\Model\ViewModel;
 
 /**
  * Class ActivityOrganizationController

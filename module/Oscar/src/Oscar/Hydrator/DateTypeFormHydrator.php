@@ -9,13 +9,12 @@ namespace Oscar\Hydrator;
 
 
 use Doctrine\ORM\EntityManager;
-use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OscarFacet;
 use Oscar\Entity\Role;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

@@ -16,9 +16,9 @@ use Oscar\Form\ActivityDateForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\MilestoneService;
 use Oscar\Service\ProjectGrantService;
-use Zend\Http\Request;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Request;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class ActivityDateController extends AbstractOscarController
 {
@@ -91,7 +91,7 @@ class ActivityDateController extends AbstractOscarController
     /**
      * Gestion des Jalons (v 2.0)
      *
-     * @return \Zend\Http\Response|JsonModel
+     * @return \Laminas\Http\Response|JsonModel
      */
     public function activityAction()
     {

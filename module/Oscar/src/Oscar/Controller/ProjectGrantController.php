@@ -13,7 +13,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPcruInfos;
@@ -75,15 +74,14 @@ use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
+use Oscar\Utils\ArrayUtils;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use PhpOffice\PhpWord\Settings;
-use Zend\Http\PhpEnvironment\Request;
-use Zend\Mvc\Console\View\Renderer;
-use Zend\Stdlib\ArrayUtils;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Mvc\Console\View\Renderer;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
+use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Controlleur pour les Activités de recherche. Le nom du controlleur est (il
@@ -784,7 +782,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             foreach ($documentDatas as $key => $value) {
                 echo "<tr>";
                 if (is_array($value)) {
-                    echo "<th>$key</th><td><small>[LIST]</small></td><td>" . implode(", ", $value) . "</td>";
+                    echo "<th>$key</th><td><small>[LIST]</small></td><td>" . ArrayUtils::implode(", ", $value) . "</td>";
                 } else {
                     echo "<th>$key</th><td><small>STRING</small></td><td><code>" . $value . "</code></td>";
                 }
@@ -842,7 +840,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     // ACTIONS
     ////////////////////////////////////////////////////////////////////////////
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function editAction()
     {
@@ -900,7 +898,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function duplicateAction()
     {
@@ -1022,7 +1020,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function deleteAction()
     {
@@ -1948,7 +1946,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Retourne les données de synthèse des dépenses d'une activité de recherche.
      *
-     * @return \Zend\Http\Response|JsonModel
+     * @return \Laminas\Http\Response|JsonModel
      * @throws \Exception
      */
     public function spentSynthesisActivityAction()
@@ -2179,7 +2177,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $entity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
 
         if ($entity) {
-            /** @var \Zend\Http\Request $request */
+            /** @var \Laminas\Http\Request $request */
             $request = $this->getRequest();
             if ($request->isPost()) {
                 try {
@@ -2688,7 +2686,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (!$search && count($criteria) === 0) {
                 $ids = [];
                 if ($include) {
-                    $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) . ')');
+                    $qb->andWhere('c.id IN(' . ArrayUtils::implode(',', $organizationsIdsPerimeter) . ')');
                 }
             } else {
                 if ($search) {
@@ -2779,7 +2777,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         if (!$value1 && !$value2) {
                             $crit['error'] = 'Plage numérique farfelue...';
                         } else {
-                            $qb->andWhere(implode(' AND ', $clause));
+                            $qb->andWhere(ArrayUtils::implode(' AND ', $clause));
                         }
                         break;
 
@@ -3004,7 +3002,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
                             $progressArray = explode(',', $progressStr);
                             $crit['val1'] = $value1;
-                            $crit['val2'] = implode(',', $progressArray);
+                            $crit['val2'] = ArrayUtils::implode(',', $progressArray);
                         } else {
                             $crit['val2'] = '';
                         }
@@ -3042,7 +3040,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
 
                         if ($clause) {
-                            $qb->andWhere(implode(' AND ', $clause));
+                            $qb->andWhere(ArrayUtils::implode(' AND ', $clause));
                         } else {
                             $crit['error'] = 'Plage de date invalide';
                         }
@@ -3089,7 +3087,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // FILTRE STATIC SUR LES ORGA
             if ($this->getOrganizationPerimeter()) {
-                $qb->andWhere('c.id IN(' . implode(',', $organizationsIdsPerimeter) . ')');
+                $qb->andWhere('c.id IN(' . ArrayUtils::implode(',', $organizationsIdsPerimeter) . ')');
             }
 
             $activities = null;
@@ -3153,7 +3151,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $view = new ViewModel(
                 [
                     'projectview' => $projectview,
-                    'exportIds' => implode(',', $idsExport),
+                    'exportIds' => ArrayUtils::implode(',', $idsExport),
                     'filtersType' => $filtersType,
                     'error' => $error,
                     'criteria' => $criterias,
@@ -3415,7 +3413,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Gestion/récapitulatif des informations PCRU
      *
-     * @return array|\Zend\Http\Response
+     * @return array|\Laminas\Http\Response
      * @throws OscarException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException

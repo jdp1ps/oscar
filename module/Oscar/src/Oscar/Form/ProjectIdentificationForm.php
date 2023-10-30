@@ -2,15 +2,14 @@
 
 namespace Oscar\Form;
 
-use Doctrine\ORM\EntityManager;
 use Oscar\Hydrator\ProjectFormHydrator;
-use Zend\Form\Element;
+use Laminas\Form\Element;
 
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2015
  */
-class ProjectIdentificationForm extends \Zend\Form\Form
+class ProjectIdentificationForm extends \Laminas\Form\Form
 {
 
     function init()

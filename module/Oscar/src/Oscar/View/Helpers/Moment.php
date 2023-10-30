@@ -7,7 +7,7 @@
 
 namespace Oscar\View\Helpers;
 
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 /**
  * Mise en forme des dates (\DateTime).

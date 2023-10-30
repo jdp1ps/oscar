@@ -23,8 +23,8 @@ use Oscar\Provider\Privileges;
 use Oscar\Traits\UseContractDocumentService;
 use Oscar\Traits\UseContractDocumentServiceTrait;
 use Oscar\Utils\FileSystemUtils;
-use Zend\Http\Response;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Response;
+use Laminas\View\Model\ViewModel;
 
 class TabDocumentController extends AbstractOscarController implements UseContractDocumentService
 {

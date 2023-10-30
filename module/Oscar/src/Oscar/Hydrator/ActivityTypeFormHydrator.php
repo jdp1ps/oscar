@@ -11,7 +11,7 @@ namespace Oscar\Hydrator;
 use Oscar\Entity\ActivityType;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class ActivityTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

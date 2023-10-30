@@ -8,7 +8,7 @@
 namespace Oscar\Connector;
 
 
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 abstract class AbstractConnectorOracle extends AbstractConnectorBdd
 {

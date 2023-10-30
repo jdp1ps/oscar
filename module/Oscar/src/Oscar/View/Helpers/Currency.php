@@ -9,7 +9,7 @@ namespace Oscar\View\Helpers;
 
 use Oscar\Entity\Activity;
 use Oscar\Utils\FilesizeFormatter;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 /**
  * Mise en forme des dates (\DateTime).

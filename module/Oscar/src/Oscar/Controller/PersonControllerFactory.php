@@ -9,19 +9,12 @@
 namespace Oscar\Controller;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Monolog\Logger;
 use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Service\ActivityRequestService;
-use Oscar\Service\OscarConfigurationService;
-use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class PersonControllerFactory extends AbstractOscarFactory implements FactoryInterface
 {

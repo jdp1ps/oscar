@@ -4,11 +4,10 @@
 namespace Oscar\Hydrator;
 
 
-use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Service\PersonService;
 use Oscar\Utils\DateTimeUtils;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class RoleFormHydrator implements HydratorInterface
 {

@@ -9,10 +9,8 @@
 namespace Oscar\Service;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class TypeDocumentServiceFactory extends AbstractOscarFactory
 {

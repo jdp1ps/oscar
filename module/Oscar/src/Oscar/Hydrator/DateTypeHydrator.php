@@ -7,11 +7,10 @@
 
 namespace Oscar\Hydrator;
 
-use Oscar\Entity\ActivityType;
 use Oscar\Entity\DateType;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class DateTypeHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

@@ -2,10 +2,12 @@
 
 namespace Oscar\Entity;
 
-use Oscar\Entity\Role;
-use Oscar\Provider\Privileges;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
+use Doctrine\Common\Collections\Collection;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Doctrine\ORM\Mapping as ORM;
+use UnicaenPrivilege\Entity\Db\PrivilegeCategorieInterface;
+use UnicaenPrivilege\Entity\Db\PrivilegeInterface;
+use UnicaenUtilisateur\Entity\Db\RoleInterface;
 
 /**
  *
@@ -13,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="privilege")
  * @ORM\Entity(repositoryClass="Oscar\Entity\PrivilegeRepository")
  */
-class Privilege implements ResourceInterface
+class Privilege implements ResourceInterface, PrivilegeInterface
 {
     const LEVEL_ACTIVITY = 1;
     const LEVEL_ORGANIZATION = 2;
@@ -53,9 +55,9 @@ class Privilege implements ResourceInterface
     private $categorie;
 
     /**
-    * @var int
-    * @ORM\Column(name="spot", type="integer", nullable=true, options={"default"=7})
-    */
+     * @var int
+     * @ORM\Column(name="spot", type="integer", nullable=true, options={"default"=7})
+     */
     private $spot = 7;
 
     /**
@@ -81,7 +83,6 @@ class Privilege implements ResourceInterface
      * @ORM\OneToMany(targetEntity="Privilege", mappedBy="root")
      */
     private $children;
-
 
 
     /**
@@ -172,12 +173,10 @@ class Privilege implements ResourceInterface
     }
 
 
-
     public function getFullCode()
     {
         return $this->getCategorie()->getCode() . '-' . $this->getCode();
     }
-
 
 
     /**
@@ -195,7 +194,6 @@ class Privilege implements ResourceInterface
     }
 
 
-
     /**
      * Get libelle
      *
@@ -206,6 +204,10 @@ class Privilege implements ResourceInterface
         return $this->libelle;
     }
 
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
 
     /**
@@ -216,7 +218,6 @@ class Privilege implements ResourceInterface
     {
         return $this->ordre;
     }
-
 
 
     /**
@@ -233,7 +234,6 @@ class Privilege implements ResourceInterface
     }
 
 
-
     /**
      * Get id
      *
@@ -245,7 +245,6 @@ class Privilege implements ResourceInterface
     }
 
 
-
     /**
      * Set categorie
      *
@@ -253,13 +252,12 @@ class Privilege implements ResourceInterface
      *
      * @return self
      */
-    public function setCategorie(CategoriePrivilege $categorie = null)
+    public function setCategorie(PrivilegeCategorieInterface $categorie = null)
     {
         $this->categorie = $categorie;
 
         return $this;
     }
-
 
 
     /**
@@ -279,7 +277,7 @@ class Privilege implements ResourceInterface
      *
      * @return self
      */
-    public function addRole(Role $role)
+    public function addRole(RoleInterface $role)
     {
         $this->role->add($role);
 
@@ -290,7 +288,7 @@ class Privilege implements ResourceInterface
      * @param \Oscar\Entity\Role $role
      * @return bool
      */
-    public function hasRole(Role $role)
+    public function hasRole(RoleInterface $role)
     {
         return $this->role->contains($role);
     }
@@ -300,11 +298,10 @@ class Privilege implements ResourceInterface
      *
      * @param Role $role
      */
-    public function removeRole(Role $role)
+    public function removeRole(RoleInterface $role)
     {
         $this->role->removeElement($role);
     }
-
 
 
     /**
@@ -317,6 +314,10 @@ class Privilege implements ResourceInterface
         return $this->role;
     }
 
+    public function getRoles()
+    {
+        return $this->role;
+    }
 
 
     /**
@@ -326,7 +327,6 @@ class Privilege implements ResourceInterface
     {
         return $this->getLibelle();
     }
-
 
 
     /**
@@ -340,7 +340,7 @@ class Privilege implements ResourceInterface
     public function getRoleIds()
     {
         $roleIds = [];
-        foreach( $this->getRole() as $role ){
+        foreach ($this->getRole() as $role) {
             $roleIds[] = $role->getId();
         }
         return $roleIds;
@@ -360,9 +360,9 @@ class Privilege implements ResourceInterface
             'spot' => $this->getSpot()
         ];
 
-        if( $flat != true ){
+        if ($flat != true) {
             $data['children'] = [];
-            foreach ($this->getChildren() as $child ){
+            foreach ($this->getChildren() as $child) {
                 $data['children'][] = $child->asArray();
             }
         }

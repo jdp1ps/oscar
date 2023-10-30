@@ -2,14 +2,18 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Oscar\Provider\Privileges;
+use UnicaenPrivilege\Entity\Db\PrivilegeCategorieInterface;
+use UnicaenPrivilege\Entity\Db\PrivilegeInterface;
 
 /**
  *
  * @ORM\Entity
  * @ORM\Table(name="categorie_privilege")
  */
-class CategoriePrivilege
+class CategoriePrivilege implements PrivilegeCategorieInterface
 {
     /**
      * @var int
@@ -63,6 +67,32 @@ class CategoriePrivilege
         $this->privilege = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function setId($id)
+    {
+        // TODO: Implement setId() method.
+    }
+
+    public function getNamespace()
+    {
+        die("getNamespace");
+    }
+
+    public function setNamespace($namespace)
+    {
+        die("setNamespace($namespace");
+        // TODO: Implement setNamespace() method.
+    }
+
+    public function getPrivileges()
+    {
+        return $this->getPrivilege();
+    }
+
+    public function getClassname()
+    {
+        die("getClassname");
+        // TODO: Implement getClassname() method.
+    }
 
 
     /**
@@ -166,7 +196,7 @@ class CategoriePrivilege
      *
      * @return Privilege
      */
-    public function addPrivilege(Privilege $privilege)
+    public function addPrivilege(PrivilegeInterface $privilege)
     {
         $this->privilege[] = $privilege;
 
@@ -180,7 +210,7 @@ class CategoriePrivilege
      *
      * @param Privilege $privilege
      */
-    public function removePrivilege(Privilege $privilege)
+    public function removePrivilege(PrivilegeInterface $privilege)
     {
         $this->privilege->removeElement($privilege);
     }

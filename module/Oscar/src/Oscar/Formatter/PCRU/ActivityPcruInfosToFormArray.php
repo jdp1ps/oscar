@@ -6,7 +6,7 @@ namespace Oscar\Formatter\PCRU;
 
 use Oscar\Entity\ActivityPcruInfos;
 use Oscar\Utils\DateTimeUtils;
-use Zend\Hydrator\ArraySerializable;
+use Laminas\Hydrator\ArraySerializable;
 
 class ActivityPcruInfosToFormArray
 {

@@ -14,7 +14,7 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class HasRole extends AbstractHtmlElement implements UseOscarUserContextService
 {

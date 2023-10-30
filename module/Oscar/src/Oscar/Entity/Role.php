@@ -12,7 +12,9 @@ use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use UnicaenAuth\Acl\NamedRole;
+use UnicaenPrivilege\Entity\Db\PrivilegeInterface;
+use UnicaenUtilisateur\Entity\Db\RoleInterface;
+use UnicaenUtilisateur\Entity\Db\UserInterface;
 
 /**
  * Cette classe référence les rôles GLOBAUX sur l'application.
@@ -21,7 +23,7 @@ use UnicaenAuth\Acl\NamedRole;
  * @ORM\Table(name="user_role")
  * @ORM\Entity(repositoryClass="RoleRepository")
  */
-class Role implements HierarchicalRoleInterface
+class Role implements HierarchicalRoleInterface, RoleInterface
 {
     const LEVEL_ACTIVITY = 1;
     const LEVEL_ORGANIZATION = 2;
@@ -35,12 +37,12 @@ class Role implements HierarchicalRoleInterface
 
     /**
      * Role constructor.
-     * @param int $id
      */
     public function __construct()
     {
         $this->privileges = new ArrayCollection();
         $this->tabsDocumentsRoles = new ArrayCollection();
+        $this->datesType = new ArrayCollection();
     }
 
 
@@ -191,6 +193,11 @@ class Role implements HierarchicalRoleInterface
      */
     protected $accessibleExterieur = true;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="DateType", mappedBy="roles", fetch="EAGER")
+     */
+    private $datesType;
+
 
     ///////////////////////////////////////////////////////////////// PRIVILEGES
 
@@ -254,7 +261,7 @@ class Role implements HierarchicalRoleInterface
      *
      * @return int
      */
-    public function getId()
+    public function getId() :int
     {
         return $this->id;
     }
@@ -266,17 +273,15 @@ class Role implements HierarchicalRoleInterface
      *
      * @return self
      */
-    public function setId($id)
+    public function setId($id) :void
     {
-        $this->id = (int)$id;
-
-        return $this;
+        $this->id = $id;
     }
 
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription() :?string
     {
         return $this->description;
     }
@@ -284,11 +289,9 @@ class Role implements HierarchicalRoleInterface
     /**
      * @param string $description
      */
-    public function setDescription($description)
+    public function setDescription(?string $description) :void
     {
         $this->description = $description;
-
-        return $this;
     }
 
     /**
@@ -332,7 +335,7 @@ class Role implements HierarchicalRoleInterface
      *
      * @return string
      */
-    public function getRoleId()
+    public function getRoleId(): ?string
     {
         return $this->roleId;
     }
@@ -344,11 +347,9 @@ class Role implements HierarchicalRoleInterface
      *
      * @return self
      */
-    public function setRoleId($roleId)
+    public function setRoleId(?string $roleId) :void
     {
         $this->roleId = (string)$roleId;
-
-        return $this;
     }
 
     /**
@@ -380,7 +381,7 @@ class Role implements HierarchicalRoleInterface
      *
      * @return Role
      */
-    public function getParent()
+    public function getParent() :?RoleInterface
     {
         return $this->parent;
     }
@@ -388,42 +389,32 @@ class Role implements HierarchicalRoleInterface
     /**
      * @return string
      */
-    public function getLdapFilter()
+    public function getLdapFilter() :?string
     {
-        return $this->ldapFilter;
+
+        return ""; //$this->ldapFilter;
     }
 
     /**
      * @param string $ldapFilter
      */
-    public function setLdapFilter($ldapFilter)
+    public function setLdapFilter(?string $ldapFilter) :void
     {
         $this->ldapFilter = $ldapFilter;
-
-        return $this;
     }
 
-
-    /**
-     * Set the parent role.
-     *
-     * @param Role $role
-     *
-     * @return self
-     */
-    public function setParent(Role $parent)
+    public function setParent(?RoleInterface $parent = null): void
     {
         $this->parent = $parent;
-
-        return $this;
     }
+
 
     /**
      * Get users.
      *
      * @return array
      */
-    public function getUsers()
+    public function getUsers() :Collection
     {
         return $this->users->getValues();
     }
@@ -435,7 +426,7 @@ class Role implements HierarchicalRoleInterface
      *
      * @return void
      */
-    public function addUser($user)
+    public function addUser(UserInterface $user) :void
     {
         $this->users[] = $user;
     }
@@ -444,7 +435,7 @@ class Role implements HierarchicalRoleInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString() :string
     {
         return $this->getRoleId();
     }
@@ -505,4 +496,83 @@ class Role implements HierarchicalRoleInterface
     {
         return $this->isLevel(self::LEVEL_ACTIVITY);
     }
+
+    /**
+     * @return Collection|DateType[]
+     */
+    public function getDatesType(): Collection
+    {
+        return $this->datesType;
+    }
+
+    /**
+     * @param DateType $dateType
+     * @return $this
+     */
+    public function addDateType(DateType  $dateType): self
+    {
+        if (!$this->datesType->contains($dateType)) {
+            $this->datesType[] = $dateType;
+        }
+        return $this;
+    }
+
+    /**
+     * @param DateType $dateType
+     * @return $this
+     */
+    public function removeDateType(DateType $dateType): self
+    {
+        if ($this->datesType->contains($dateType)) {
+            $this->datesType->removeElement($dateType);
+        }
+        return $this;
+    }
+
+    public function getLibelle(): ?string
+    {
+        return $this->getRoleId();
+    }
+
+    public function setLibelle(?string $libelle): void
+    {
+        // TODO: Implement setLibelle() method.
+    }
+
+    public function isDefault(): bool
+    {
+        // TODO: Implement isDefault() method.
+    }
+
+    public function setDefault(bool $default): void
+    {
+        // TODO: Implement setDefault() method.
+    }
+
+    public function isAuto(): bool
+    {
+        // TODO: Implement isAuto() method.
+    }
+
+    public function setAuto(bool $auto): void
+    {
+        // TODO: Implement setAuto() method.
+    }
+
+    public function removeUser(UserInterface $user): void
+    {
+        $this->getUsers()->removeElement($user);
+    }
+
+    public function addPrivilege(PrivilegeInterface $privilege): void
+    {
+        $this->getPrivileges()->add($privilege);
+    }
+
+    public function removePrivilege(PrivilegeInterface $privilege): void
+    {
+        $this->getPrivileges()->removeElement($privilege);
+    }
+
+
 }

@@ -8,14 +8,11 @@
 namespace Oscar\View\Helpers;
 
 
-use Oscar\Entity\Activity;
 use Oscar\Entity\Project;
-use Oscar\Entity\ProjectMember;
-use Oscar\Entity\ProjectPartner;
 use Oscar\Service\AccessResolverService;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class UserUIHelper extends AbstractHtmlElement implements ServiceLocatorAwareInterface
 {

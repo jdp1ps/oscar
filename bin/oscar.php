@@ -12,7 +12,7 @@ chdir(dirname(__DIR__));
 
 $console = new \Symfony\Component\Console\Application();
 $conf = require __DIR__.'/../config/application.config.php';
-$app = Zend\Mvc\Application::init($conf);
+$app = \Laminas\Mvc\Application::init($conf);
 
 $commands = [];
 // On parse automatiquement le dossier des commandes

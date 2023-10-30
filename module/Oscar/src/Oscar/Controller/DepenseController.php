@@ -9,8 +9,6 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Oscar\Entity\Activity;
-use Oscar\Entity\SpentLine;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\Spent\SpentActivityDetailsExcelFormater;
@@ -20,12 +18,10 @@ use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\SpentService;
-use Oscar\Traits\UseActivityService;
-use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
-use Zend\Http\Request;
-use Zend\View\Model\JsonModel;
+use Laminas\Http\Request;
+use Laminas\View\Model\JsonModel;
 
 class DepenseController extends AbstractOscarController implements UseServiceContainer
 {
@@ -234,7 +230,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
     /**
      * Données des dépenses pour une activité.
      *
-     * @return \Zend\Http\Response|JsonModel
+     * @return \Laminas\Http\Response|JsonModel
      */
     public function activityApiAction(){
 

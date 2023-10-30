@@ -50,8 +50,8 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
-use Zend\Mvc\Controller\Plugin\Url;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\Mvc\Controller\Plugin\Url;
+use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Gestion des Personnes :

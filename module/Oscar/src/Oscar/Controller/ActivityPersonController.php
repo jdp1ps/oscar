@@ -9,9 +9,8 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Tackable;
-use Oscar\Entity\TraitTrackable;
 use Oscar\Form\RoleForm;
-use Zend\View\Model\ViewModel;
+use Lamainas\View\Model\ViewModel;
 
 class ActivityPersonController extends AbstractOscarController
 {

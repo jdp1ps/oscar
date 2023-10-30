@@ -8,7 +8,7 @@
 namespace Oscar\Form\Element;
 
 
-use Zend\Form\Element;
+use Laminas\Form\Element;
 
 class KeyValue extends Element
 {

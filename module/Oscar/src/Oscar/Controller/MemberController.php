@@ -9,8 +9,8 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\ProjectMember;
-use Zend\Http\Response;
-use Zend\View\Model\JsonModel;
+use Laminas\Http\Response;
+use Laminas\View\Model\JsonModel;
 
 class MemberController extends AbstractOscarController
 {
@@ -58,7 +58,7 @@ class MemberController extends AbstractOscarController
             $project->getId(),
             LogActivity::LEVEL_INCHARGE);
 
-        return new \Zend\View\Model\JsonModel($project->toArray());
+        return new JsonModel($project->toArray());
     }
 
     public function manageAction()

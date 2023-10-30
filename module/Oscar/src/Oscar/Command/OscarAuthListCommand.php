@@ -119,5 +119,6 @@ class OscarAuthListCommand extends OscarCommandAbstract
         }
         $table->setRows($rows);
         $table->render();
+        return self::SUCCESS;
     }
 }

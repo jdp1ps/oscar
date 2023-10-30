@@ -9,11 +9,11 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Utils\StringUtils;
 use phpDocumentor\Reflection\Types\Integer;
-use Zend\Form\Annotation;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
-use ZendTest\Code\Annotation\TestAsset\DoctrineAnnotation;
+use Laminas\Form\Annotation;
+
 
 /**
  * Class Project
@@ -25,7 +25,7 @@ class Project implements ResourceInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
-     * @Annotation\Type("Zend\Form\Element\Hidden")
+     * @Annotation\Type("Laminas\Form\Element\Hidden")
      */
     private $id;
 

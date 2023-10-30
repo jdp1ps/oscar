@@ -11,10 +11,8 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Monolog\Logger;
-use Oscar\Exception\OscarException;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class OrganizationServiceFactory implements FactoryInterface
 {

@@ -11,7 +11,7 @@ namespace Oscar\Provider;
 
 use Oscar\Entity\Privilege;
 
-class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
+class Privileges extends \UnicaenPrivilege\Provider\Privilege\Privileges
 {
 
     const ACTIVITY_EXPORT = 'ACTIVITY-EXPORT';
@@ -142,6 +142,11 @@ class Privileges extends \UnicaenAuth\Provider\Privilege\Privileges
     const DEPENSE_DOWNLOAD = 'DEPENSE-DOWNLOAD';
     const DEPENSE_RECETTES = 'DEPENSE-RECETTES';
     const DEPENSE_IGNORED = 'DEPENSE-IGNORED';
+
+    const DROIT_ROLE_VISUALISATION          = 'droit-role-visualisation';
+    const DROIT_ROLE_EDITION                = 'droit-role-edition';
+    const DROIT_PRIVILEGE_VISUALISATION     = 'droit-privilege-visualisation';
+    const DROIT_PRIVILEGE_EDITION           = 'droit-privilege-edition';
 
     public static function getResourceId($privilege)
     {

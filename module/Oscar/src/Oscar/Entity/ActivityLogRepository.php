@@ -9,9 +9,6 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use UnicaenAuth\Service\UserContext;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class ActivityLogRepository extends EntityRepository
 {

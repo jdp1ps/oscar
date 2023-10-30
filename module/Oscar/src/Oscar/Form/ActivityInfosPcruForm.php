@@ -7,15 +7,15 @@ use Oscar\Hydrator\ActivityInfosPCRUFormHydrator;
 use Oscar\Hydrator\OrganizationFormHydrator;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
-use Zend\Form\Element;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Form\Element;
+use Laminas\InputFilter\InputFilterProviderInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2021
  */
-class ActivityInfosPcruForm extends \Zend\Form\Form implements InputFilterProviderInterface
+class ActivityInfosPcruForm extends \Laminas\Form\Form implements InputFilterProviderInterface
 {
 
     private $projectGrantService;

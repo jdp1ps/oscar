@@ -9,12 +9,8 @@ namespace Oscar\Service;
 
 
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
-use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\NoResultException;
-use mysql_xdevapi\Exception;
-use Oscar\Constantes\Constantes;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\AuthentificationRepository;
@@ -30,7 +26,6 @@ use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
 use Oscar\Entity\Project;
-use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
@@ -43,17 +38,9 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
-use Oscar\Traits\UsePersonService;
-use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
-use Oscar\Utils\OscarConstants;
-use UnicaenAuth\Acl\NamedRole;
-use UnicaenAuth\Service\UserContext;
-use Zend\Http\Request;
-use Zend\Json\Server\Exception\HttpException;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use Laminas\Http\Request;
 
 /**
  * Cette classe centralise les informations liées à l'authentification et à l'identité
@@ -81,7 +68,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     protected $sessionContainer;
 
     /**
-     * @return UserContext
+     * @return UserContext\
      */
     public function getUserContext()
     {
@@ -99,7 +86,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @param UserContext $userContext
      */
-    public function setUserContext(UserContext $userContext)
+    public function setUserContext(\UnicaenAuthentification\Service\UserContext $userContext)
     {
         $this->userContext = $userContext;
     }

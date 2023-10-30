@@ -9,11 +9,8 @@
 namespace Oscar\Service;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
-use Oscar\Traits\UseProjectGrantService;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class ProjectGrantServiceFactory extends AbstractOscarFactory
 {

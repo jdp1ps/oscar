@@ -9,9 +9,8 @@
 namespace Oscar\Service;
 
 
-use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class SessionServiceFactory implements FactoryInterface
 {

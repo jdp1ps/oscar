@@ -41,7 +41,7 @@ use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Zend\View\Model\ViewModel;
+use Laminas\View\Model\ViewModel;
 
 /**
  * Ce controlleur centralise la gestion des rôles pour les projets et les
@@ -339,7 +339,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     /**
      * Ajout d'une nouvelle personne dans une activité.
      *
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      * @throws OscarException
      */
     public function personActivityNewAction()
@@ -375,7 +375,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     /**
      * Suppression d'une personne dans une activité.
      *
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function personActivityDeleteAction()
     {
@@ -399,7 +399,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     /**
      * Modification d'une personne dans une activité.
      *
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function personActivityEditAction()
     {
@@ -434,7 +434,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function organizationActivityNewAction()
     {
@@ -465,7 +465,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     }
 
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function activityOrganizationDeleteAction()
     {
@@ -489,7 +489,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     }
 
     /**
-     * @return \Zend\Http\Response
+     * @return \Laminas\Http\Response
      */
     public function activityOrganizationEditAction()
     {

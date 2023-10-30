@@ -1,33 +1,35 @@
 <?php
 $config = array(
     'modules' => array(
-        'Zend\Cache',
-        'Zend\Filter',
-        'Zend\Form',
-        'Zend\Hydrator',
-        'Zend\I18n',
-        'Zend\InputFilter',
-        'Zend\Log',
-        'Zend\Mail',
-        'Zend\Mvc\Console',
-        'Zend\Mvc\I18n',
-//    'Zend\Mvc\Plugin\FilePrg',
-        'Zend\Mvc\Plugin\FlashMessenger',
-//    'Zend\Mvc\Plugin\Identity',
-        'Zend\Mvc\Plugin\Prg',
-        'Zend\Navigation',
-        'Zend\Paginator',
-        'Zend\Router',
-        'Zend\Session',
-        'Zend\Validator',
+
+        'Laminas\Cache',
+        'Laminas\Filter',
+        'Laminas\Form',
+        'Laminas\Hydrator',
+        'Laminas\I18n',
+        'Laminas\InputFilter',
+        'Laminas\Log',
+        'Laminas\Mail',
+        'Unicaen\Console',
+        'Laminas\Mvc\I18n',
+        'Laminas\Mvc\Plugin\FlashMessenger',
+        'Laminas\Mvc\Plugin\Prg',
+        'Laminas\Navigation',
+        'Laminas\Paginator',
+        'Laminas\Router',
+        'Laminas\Session',
+        'Laminas\Validator',
 
         'DoctrineModule',
         'DoctrineORMModule',
         'ZfcUser',
-//        'ZfcUserDoctrineORM',
         'BjyAuthorize',
         'UnicaenApp',
-        'UnicaenAuth',
+        'UnicaenAuthentification',
+        'UnicaenPrivilege',
+        'UnicaenUtilisateur',
+
+//        'UnicaenSignature',
         'Oscar',
     ),
 
@@ -42,18 +44,8 @@ $config = array(
     ),
 );
 
-if (\Zend\Console\Console::isConsole()) {
-    unset($config['modules'][array_search('BjyAuthorize', $config['modules'])]);
-}
-
 if( getenv('APPLICATION_ENV') == 'development' ){
     //$config['modules'][] = 'ZendDeveloperTools';
 }
-
-
-if( !\Zend\Console\Console::isConsole() ){
-  // $config['modules'][] = 'BjyAuthorize';
-}
-
 
 return $config;

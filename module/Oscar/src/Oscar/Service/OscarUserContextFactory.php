@@ -11,10 +11,8 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Monolog\Logger;
-use Oscar\Exception\OscarException;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class OscarUserContextFactory implements FactoryInterface
 {
@@ -22,7 +20,7 @@ class OscarUserContextFactory implements FactoryInterface
     {
         $oscarUserContext = new OscarUserContext();
         $oscarUserContext->setOscarConfigurationService($container->get(OscarConfigurationService::class));
-        $oscarUserContext->setUserContext($container->get(UserContext::class));
+        $oscarUserContext->setUserContext($container->get(\UnicaenAuthentification\Service\UserContext::class));
         $oscarUserContext->setServiceContainer($container);
         $oscarUserContext->setEntityManager($container->get(EntityManager::class));
         $oscarUserContext->setLoggerService($container->get("Logger"));

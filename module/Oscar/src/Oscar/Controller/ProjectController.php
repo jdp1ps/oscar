@@ -10,39 +10,27 @@
 namespace Oscar\Controller;
 
 use BjyAuthorize\Exception\UnAuthorizedException;
-use Doctrine\ORM\Query;
 use Oscar\Entity\ActivityOrganization;
-use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\ContractDocument;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Project;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
-use Oscar\Entity\ProjectRepository;
 use Oscar\Exception\OscarException;
-use Oscar\Form\ProjectForm;
 use Oscar\Form\ProjectIdentificationForm;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\OscarFormatterConst;
-use Oscar\Formatter\ProjectFormatterFactory;
 use Oscar\Formatter\ProjectToArrayFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
-use Oscar\Utils\DateTimeUtils;
-use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
 use UnicaenAuth\Entity\Ldap\People;
-use Zend\Http\Request;
-use Zend\Stdlib\RequestInterface;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
-use ZfcUser\Entity\UserInterface;
+use Laminas\Http\Request;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class ProjectController extends AbstractOscarController
 {

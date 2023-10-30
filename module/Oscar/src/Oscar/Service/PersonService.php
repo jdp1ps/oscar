@@ -51,7 +51,7 @@ use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Zend\Mvc\Controller\Plugin\Url;
+use Laminas\Mvc\Controller\Plugin\Url;
 
 /**
  * Gestion des Personnes :

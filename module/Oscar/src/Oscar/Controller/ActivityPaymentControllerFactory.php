@@ -10,16 +10,13 @@ namespace Oscar\Controller;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ActivityPaymentControllerFactory implements FactoryInterface
 {

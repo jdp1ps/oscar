@@ -19,7 +19,7 @@ use Oscar\Entity\TabDocument;
 use Oscar\Entity\TabsDocumentsRoles;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareInterface
 {

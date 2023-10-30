@@ -12,7 +12,7 @@ namespace Oscar\View\Helpers;
 use Oscar\Service\OscarUserContext;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class HasPrivilege extends AbstractHtmlElement implements ServiceLocatorAwareInterface
 {

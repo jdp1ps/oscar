@@ -7,7 +7,7 @@ use Monolog\Logger;
 use Oscar\Entity\ProjectRepository;
 use UnicaenAuth\Entity\Ldap\People;
 use UnicaenAuth\Service\UserContext;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\ServiceManager\ServiceManager;
 
 /**
  * Class ServiceManagerAwareTrait.

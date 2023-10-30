@@ -21,8 +21,6 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
-use Oscar\Traits\UseActivityService;
-use Oscar\Traits\UseActivityServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -31,14 +29,7 @@ use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
-use Oscar\Traits\UseProjectGrantService;
-use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Utils\DateTimeUtils;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\Log\Logger;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService, UseNotificationService, UseActivityLogService
 {

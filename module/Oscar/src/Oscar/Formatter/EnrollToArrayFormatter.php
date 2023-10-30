@@ -12,7 +12,7 @@ use Oscar\Entity\ProjectPartner;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\OscarUserContext;
-use \Zend\Mvc\Controller\Plugin\Url;
+use \Laminas\Mvc\Controller\Plugin\Url;
 
 class EnrollToArrayFormatter
 {

@@ -11,7 +11,7 @@ namespace Oscar\View\Helpers;
 use Oscar\Service\ActivityTypeService;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class ActivityTypeHelper extends AbstractHtmlElement implements ServiceLocatorAwareInterface
 {

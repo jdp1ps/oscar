@@ -2,12 +2,14 @@
 
 namespace Oscar\View\Helpers;
 
+use Laminas\View\Helper\AbstractHtmlElement;
+
 /**
  * Description of unAllowed.
  *
  * @author Stéphane Bouvry <stephane.bouvry@unicaen.fr>
  */
-class UnAllowed extends \Zend\View\Helper\AbstractHtmlElement
+class UnAllowed extends AbstractHtmlElement
 {
     public function __invoke()
     {

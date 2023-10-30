@@ -11,8 +11,6 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Monolog\Logger;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
@@ -20,9 +18,7 @@ use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
 use Oscar\Service\SessionService;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class OrganizationControllerFactory implements FactoryInterface
 {

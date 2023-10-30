@@ -9,14 +9,7 @@ namespace Oscar\View\Helpers;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Container\Exception\ContainerException;
-use Oscar\Service\ActivityTypeService;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
-use Zend\ServiceManager\Exception\ServiceNotFoundException;
-use Zend\ServiceManager\Factory\FactoryInterface;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ActivityTypeHelperFactory implements FactoryInterface {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)

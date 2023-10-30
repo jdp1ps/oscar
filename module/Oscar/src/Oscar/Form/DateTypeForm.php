@@ -10,10 +10,10 @@ namespace Oscar\Form;
 use Doctrine\ORM\EntityManager;
 use Oscar\Entity\OscarFacet;
 use Oscar\Hydrator\DateTypeFormHydrator;
-use Zend\Form\Element\Checkbox;
-use Zend\Form\Element\MultiCheckbox;
-use Zend\Form\Form;
-use Zend\InputFilter\InputFilterProviderInterface;
+use Laminas\Form\Element\Checkbox;
+use Laminas\Form\Element\MultiCheckbox;
+use Laminas\Form\Form;
+use Laminas\InputFilter\InputFilterProviderInterface;
 
 class DateTypeForm extends Form implements InputFilterProviderInterface
 {

@@ -13,20 +13,15 @@ use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use Oscar\Connector\IConnector;
-use Oscar\Connector\IConnectorOrganization;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
-use Oscar\Entity\Project;
 use Oscar\Entity\ProjectPartner;
-use Oscar\Entity\Role;
-use Oscar\Entity\RoleRepository;
 use Oscar\Exception\OscarException;
 use Oscar\Form\OrganizationIdentificationForm;
 use Oscar\Provider\Privileges;
-use Oscar\Service\OrganizationService;
 use Oscar\Service\SessionService;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
@@ -36,12 +31,10 @@ use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
-use Oscar\Utils\EntityHydrator;
 use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\Http\PhpEnvironment\Request;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class OrganizationController extends AbstractOscarController implements UseOrganizationService, UseProjectService, UseProjectGrantService, UseActivityLogService
 {

@@ -8,9 +8,8 @@ namespace Oscar\Hydrator;
 
 
 use Oscar\Entity\ActivityPcruInfos;
-use Oscar\Entity\Organization;
 use Oscar\Service\ProjectGrantService;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class ActivityInfosPCRUFormHydrator implements HydratorInterface
 {

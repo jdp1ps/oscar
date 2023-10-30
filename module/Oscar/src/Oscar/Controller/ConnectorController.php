@@ -11,7 +11,6 @@ namespace Oscar\Controller;
 use Oscar\Connector\ConnectorOrganizationREST;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
-use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ConnectorService;
@@ -22,8 +21,8 @@ use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use UnicaenCode\Controller\Controller;
-use Zend\Http\Request;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
+use Laminas\Http\Request;
+
 
 class ConnectorController extends AbstractOscarController implements UseOscarUserContextService, UsePersonService,
                                                                      UseServiceContainer

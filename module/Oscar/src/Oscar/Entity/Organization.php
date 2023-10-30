@@ -10,9 +10,9 @@ namespace Oscar\Entity;
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Connector\IConnectedObject;
 use Oscar\Utils\StringUtils;
-use Zend\Permissions\Acl\Resource\ResourceInterface;
 
 /**
  * Class Organization

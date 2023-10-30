@@ -9,39 +9,24 @@
 namespace Oscar\Command;
 
 
-use Moment\Moment;
-use Oscar\Entity\Activity;
-use Oscar\Entity\Authentification;
-use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
-use Oscar\Entity\Role;
-use Oscar\Entity\WorkPackage;
-use Oscar\Entity\WorkPackagePerson;
-use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Renderer\ConsoleActivityRenderer;
-use Oscar\Service\ConnectorService;
-use Oscar\Service\OscarConfigurationService;
-use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
 use Oscar\Service\TimesheetService;
-use Oscar\Utils\DateTimeUtils;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Zend\Validator\Date;
 
 class OscarTimesheetDeclarerInfosCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'timesheets:declarer-infos';
 
-    const ARG_DECLARER      = "declarer";
+    const ARG_DECLARER = "declarer";
 
-    const OPT_PERIOD      = "period";
-    const OPT_ACTIVITY      = "activity";
+    const OPT_PERIOD = "period";
+    const OPT_ACTIVITY = "activity";
 
     protected function configure()
     {
@@ -49,8 +34,7 @@ class OscarTimesheetDeclarerInfosCommand extends OscarCommandAbstract
             ->setDescription("Fourni des informations sur les informations sur les feuilles de temps.")
             ->addOption(self::OPT_ACTIVITY, 'a', InputOption::VALUE_NONE)
             ->addOption(self::OPT_PERIOD, 'p', InputOption::VALUE_OPTIONAL)
-            ->addArgument(self::ARG_DECLARER, InputArgument::REQUIRED)
-        ;
+            ->addArgument(self::ARG_DECLARER, InputArgument::REQUIRED);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -69,21 +53,18 @@ class OscarTimesheetDeclarerInfosCommand extends OscarCommandAbstract
             $io->title("Déclarant '$declarer'");
             $io->write("Activités où des déclarations sont attendues : ");
 
-            if( $period ){
+            if ($period) {
                 $io->write("pour la période <bold>$period</bold>");
             }
             $io->writeln("");
 
-            if( $activity ){
+            if ($activity) {
                 $rendererActivity = new ConsoleActivityRenderer($io);
                 $activities = $this->getTimesheetService()->getActivitiesDeclarer($declarer->getId(), $period);
-                foreach ($activities as $activity){
+                foreach ($activities as $activity) {
                     $rendererActivity->render($activity);
                 }
             }
-
-
-
         } catch (\Exception $e) {
             $io->error("Impossible de charger les informations pour le déclarant '$declarer' : " . $e->getMessage());
         }
@@ -114,19 +95,21 @@ class OscarTimesheetDeclarerInfosCommand extends OscarCommandAbstract
     /**
      * @return TimesheetService
      */
-    protected function getTimesheetService(){
+    protected function getTimesheetService()
+    {
         return $this->getServicemanager()->get(TimesheetService::class);
     }
 
     /**
      * @return PersonService
      */
-    protected function getPersonService(){
+    protected function getPersonService()
+    {
         return $this->getServicemanager()->get(PersonService::class);
     }
 
-    public function declarer( InputInterface $input, OutputInterface $output, $declarerId ){
-
+    public function declarer(InputInterface $input, OutputInterface $output, $declarerId)
+    {
         $io = new SymfonyStyle($input, $output);
 
         try {
@@ -136,27 +119,27 @@ class OscarTimesheetDeclarerInfosCommand extends OscarCommandAbstract
             $periods = $this->getTimesheetService()->getPersonRecallDeclaration($declarer);
 
             $io->table(["Période", "Durée", "état"], $periods);
-
         } catch (\Exception $e) {
             $io->error('Impossible de charger le déclarant : ' . $e->getMessage());
             exit(0);
         }
     }
 
-    public function declarersList( InputInterface $input, OutputInterface $output ){
+    public function declarersList(InputInterface $input, OutputInterface $output)
+    {
         $io = new SymfonyStyle($input, $output);
         $io->title("Lite des déclarants");
         try {
             $declarants = $this->getTimesheetService()->getDeclarers();
             $out = [];
             /** @var Person $declarer */
-            foreach ($declarants['persons'] as $personId=>$datas) {
+            foreach ($declarants['persons'] as $personId => $datas) {
                 $out[] = [$personId, $datas['displayname'], $datas['affectation'], count($datas['declarations'])];
             }
             $headers = ['ID', 'Déclarant', 'Affectation', 'Déclaration(s)'];
             $io->table($headers, $out);
 
-            $io->comment("Entrez la commande '".self::getName()." <ID> [PERIOD]' pour afficher les détails");
+            $io->comment("Entrez la commande '" . self::getName() . " <ID> [PERIOD]' pour afficher les détails");
         } catch (\Exception $e) {
             $io->error($e->getMessage());
         }

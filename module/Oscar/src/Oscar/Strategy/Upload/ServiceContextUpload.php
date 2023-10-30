@@ -19,7 +19,7 @@ use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
-use Zend\Http\Request;
+use Laminas\Http\Request;
 
 class ServiceContextUpload
 {

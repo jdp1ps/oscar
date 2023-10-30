@@ -13,7 +13,7 @@ use Oscar\Entity\ContractDocument;
 use Oscar\Service\OscarUserContext;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class Grant extends AbstractHtmlElement implements UseOscarUserContextService
 {

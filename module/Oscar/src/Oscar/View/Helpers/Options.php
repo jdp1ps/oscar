@@ -9,13 +9,10 @@
 namespace Oscar\View\Helpers;
 
 
-use Oscar\Service\ConfigurationParser;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\View\Helper\AbstractHtmlElement;
+use Laminas\View\Helper\AbstractHtmlElement;
 
 class Options extends AbstractHtmlElement implements UseOscarConfigurationService
 {

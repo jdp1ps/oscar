@@ -9,7 +9,6 @@ namespace Oscar\Controller;
 
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
-use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
 use Oscar\Entity\Person;
 use Oscar\Entity\WorkPackage;
@@ -18,9 +17,8 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\WorkPackageForm;
 use Oscar\Hydrator\WorkPackageHydrator;
 use Oscar\Provider\Privileges;
-use Zend\Http\Response;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 
 /**

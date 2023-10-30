@@ -8,24 +8,16 @@
 namespace Oscar\Controller;
 
 
-use Doctrine\ORM\Query;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\ActivityType;
-use Oscar\Entity\Currency;
-use Oscar\Exception\OscarException;
-use Oscar\Form\ActivityDateForm;
 use Oscar\Form\ActivityPaymentForm;
-use Oscar\Form\ActivityTypeForm;
 use Oscar\Provider\Privileges;
 use Oscar\Service\NotificationService;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
-use Oscar\Utils\UnicaenDoctrinePaginator;
-use Zend\Http\Request;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Http\Request;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class ActivityPaymentController extends AbstractOscarController
 {

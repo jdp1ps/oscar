@@ -8,49 +8,31 @@
 namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
-use Oscar\Entity\ActivityDateRepository;
-use Oscar\Entity\ActivityNotification;
-use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
-use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
-use Oscar\Entity\DateType;
 use Oscar\Entity\Notification;
 use Oscar\Entity\NotificationPerson;
 use Oscar\Entity\NotificationRepository;
-use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
 use Oscar\Entity\Role;
-use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
-use Oscar\Traits\UseEntityManager;
-use Oscar\Traits\UseEntityManagerTrait;
-use Oscar\Traits\UseLoggerService;
-use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use phpDocumentor\Reflection\Types\Iterable_;
-use PHPUnit\Framework\Error\Deprecated;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use Zend\Log\Logger;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
 
 class NotificationService implements UseServiceContainer
 {
     use UseServiceContainerTrait;
 
     /**
-     * @return Logger
+     * @return \Monolog\Logger
      */
     public function getLoggerService()
     {

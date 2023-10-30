@@ -13,9 +13,7 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\DateTimeUtils;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
 {

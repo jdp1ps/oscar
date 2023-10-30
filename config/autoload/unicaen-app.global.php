@@ -80,8 +80,8 @@ return array(
     'session_manager' => [
         // Session validators (used for security).
         'validators' => [
-            \Zend\Session\Validator\RemoteAddr::class,
-            \Zend\Session\Validator\HttpUserAgent::class,
+            \Laminas\Session\Validator\RemoteAddr::class,
+            \Laminas\Session\Validator\HttpUserAgent::class,
 
             // Erreur rencontrée avec ce validateur lorsqu'on passe en "Version pour ordinateur" sur un téléphone Android :
             // `Fatal error: Uncaught Zend\Session\Exception\RuntimeException: Session validation failed
@@ -93,7 +93,7 @@ return array(
     // Session storage configuration.
     //
     'session_storage' => [
-        'type' => \Zend\Session\Storage\SessionArrayStorage::class
+        'type' => \Laminas\Session\Storage\SessionArrayStorage::class
     ],
 
 );
