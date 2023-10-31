@@ -16,40 +16,46 @@ use Oscar\Formatter\OscarFormatterConst;
 
 class RoleRepository extends EntityRepository
 {
-    public function getRolesAtApplication() :QueryBuilder
+    const FORMAT_ROLEID_ARRAY_KEY = 'FORMAT_ROLEID_ARRAY_KEY';
+
+    public function getRolesAtApplication(): QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_APPLICATION);
     }
 
-    public function getRolesAtOrganization() :QueryBuilder
+    public function getRolesAtOrganization(): QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION);
     }
 
-    public function getRolesAtActivity() :QueryBuilder
+    public function getRolesAtActivity(): QueryBuilder
     {
         return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY);
     }
 
     /**
+     * Retourne la liste des rôles possible pour une personne sur une organisation.
+     *
      * @param string $format
      * @return array
      */
-    public function getRolesAtOrganizationArray( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE) :array
+    public function getRolesAtOrganizationArray(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE): array
     {
         $return = [];
         $roles = $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
 
-        if( $format == OscarFormatterConst::FORMAT_ARRAY_OBJECT ){
+        if ($format == OscarFormatterConst::FORMAT_ARRAY_OBJECT) {
             return $roles;
         }
 
-        if( $format == OscarFormatterConst::FORMAT_ARRAY_FLAT ){
-            return array_map(function($role){ return $role->getRoleId(); }, $roles);
+        if ($format == OscarFormatterConst::FORMAT_ARRAY_FLAT) {
+            return array_map(function ($role) {
+                return $role->getRoleId();
+            }, $roles);
         }
 
         /** @var Role $role */
-        foreach( $roles as $role ){
+        foreach ($roles as $role) {
             switch ($format) {
                 case OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT:
                     $return[$role->getRoleId()] = $role;
@@ -67,21 +73,23 @@ class RoleRepository extends EntityRepository
      * @param string $format
      * @return array
      */
-    public function getRolesAtActivityArray( string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE) :array
+    public function getRolesAtActivityArray(string $format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE): array
     {
         $return = [];
         $roles = $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult();
 
-        if( $format == OscarFormatterConst::FORMAT_ARRAY_OBJECT ){
+        if ($format == OscarFormatterConst::FORMAT_ARRAY_OBJECT) {
             return $roles;
         }
 
-        if( $format == OscarFormatterConst::FORMAT_ARRAY_FLAT ){
-            return array_map(function($role){ return $role->getRoleId(); }, $roles);
+        if ($format == OscarFormatterConst::FORMAT_ARRAY_FLAT) {
+            return array_map(function ($role) {
+                return $role->getRoleId();
+            }, $roles);
         }
 
         /** @var Role $role */
-        foreach( $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult() as $role ){
+        foreach ($this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult() as $role) {
             switch ($format) {
                 case OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT:
                     $return[$role->getId()] = $role;
@@ -100,12 +108,12 @@ class RoleRepository extends EntityRepository
      *
      * @return array
      */
-    public function getRolesAvailableForPersonInOrganizationArray() :array
+    public function getRolesAvailableForPersonInOrganizationArray(): array
     {
         static $rolesOrganization;
-        if( $rolesOrganization === null ){
+        if ($rolesOrganization === null) {
             $rolesOrganization = [];
-            foreach( $this->getRolesAvailableForPersonInOrganization() as $role ){
+            foreach ($this->getRolesAvailableForPersonInOrganization() as $role) {
                 $rolesOrganization[$role->getId()] = $role->getRoleId();
             }
         }
@@ -117,35 +125,67 @@ class RoleRepository extends EntityRepository
      *
      * @return Role[]
      */
-    public function getRolesAvailableForPersonInOrganization() :array
+    public function getRolesAvailableForPersonInOrganization(): array
     {
         return $this->getRolesAtLevel(Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
     }
 
-    public function getRolesAvailableForPersonInActivity() :array
+    public function getRolesAvailableForPersonInActivity(): array
     {
         return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult();
     }
 
-    public function getRolesAvailableForPersonInActivityArray() :array
+    public function getRolesAvailableForPersonInActivityArray(): array
     {
         static $rolesActivity;
-        if( $rolesActivity === null ){
+        if ($rolesActivity === null) {
             $rolesActivity = [];
-            foreach( $this->getRolesAvailableForPersonInActivity() as $role ){
+            foreach ($this->getRolesAvailableForPersonInActivity() as $role) {
                 $rolesActivity[$role->getId()] = $role->getRoleId();
             }
         }
         return $rolesActivity;
     }
 
+
+    /**
+     * Organisation des données retournées :
+     *  - FORMAT_ARRAY_OBJECT : [Role,Role,...]
+     *  - FORMAT_ROLEID_ARRAY_KEY : [RoleId => Role, RoleId => Role,...]
+     *  - FORMAT_ARRAY_ID_OBJECT : [ID => Role, ID => Role,...]
+     *  - FORMAT_ARRAY_FLAT : [RoleId, RoleId,...]
+     *
+     * @param array $roles
+     * @param string $format
+     * @return array
+     */
+    protected function formatOutput(array $roles, string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
+    {
+        if ($format == OscarFormatterConst::FORMAT_ARRAY_OBJECT) {
+            return $roles;
+        }
+
+        $formatter = new RepositoryResultFormatter();
+        if ($format == self::FORMAT_ROLEID_ARRAY_KEY) {
+            $formatter->addFormat(self::FORMAT_ROLEID_ARRAY_KEY, 'getRoleId');
+        }
+
+        return $formatter->output($roles, $format);
+    }
+
+    public function getRolesAvailableForPerson(string $format = self::FORMAT_ROLEID_ARRAY_KEY): array
+    {
+        $roles = $this->findAll();
+        return $this->formatOutput($roles, $format);
+    }
+
     /**
      * Retourne la liste des rôles au niveau spécifié.
      *
      * @param $level
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
-    public function getRolesAtLevel($level)
+    public function getRolesAtLevel($level): QueryBuilder
     {
         return $this->createQueryBuilder('r')
             ->andWhere('BIT_AND(r.spot, :level) > 0')
@@ -157,28 +197,27 @@ class RoleRepository extends EntityRepository
      *
      * @return array|null
      */
-    public function getRolesOscarByRoleId()
+    public function getRolesOscarByRoleId(): array
     {
         static $rolesByRoleId;
-        if( $rolesByRoleId === null ){
+        if ($rolesByRoleId === null) {
             $rolesByRoleId = $this->getRolesAtOrganizationArray(OscarFormatterConst::FORMAT_ARRAY_ID_OBJECT);
         }
         return $rolesByRoleId;
     }
 
     /**
-     * Retourne le rôle en fonction du ROLEID.
-     *
-     * @param $roleId
-     * @return mixed
+     * @param string $roleId
+     * @return array
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getRoleByRoleId($roleId){
-        static $queryRole;
-        if( $queryRole === null ){
-            $queryRole = $this->createQueryBuilder('r')
-                ->from( Role::class, 'role')
-                ->where('r.roleId = :roleId');
-        }
+    public function getRoleByRoleId(string $roleId): array
+    {
+        $queryRole = $this->createQueryBuilder('r')
+            ->from(Role::class, 'role')
+            ->where('r.roleId = :roleId');
+
         return $queryRole->setParameter('roleId', $roleId)->getQuery()->getSingleResult();
     }
 
@@ -204,10 +243,10 @@ class RoleRepository extends EntityRepository
     }
 
 
-    public function getRolesWithPrivilege( $privilege )
+    public function getRolesWithPrivilege($privilege)
     {
         $roles = $this->createQueryBuilder('r')
-            ->from( Role::class, 'role')
+            ->from(Role::class, 'role')
             ->innerJoin('role.privileges', 'p')
             ->innerJoin('p.categorie', 'c')
             //->where('1')
@@ -216,9 +255,10 @@ class RoleRepository extends EntityRepository
         return $roles;
     }
 
-    public function getRolesLdapFilter( $ldapFilter = null ){
+    public function getRolesLdapFilter($ldapFilter = null)
+    {
         $qb = $this->createQueryBuilder('r');
-        if( $ldapFilter == null ){
+        if ($ldapFilter == null) {
             $qb->where('r.ldapFilter IS NOT NULL');
         }
         return $qb->getQuery()->getResult();
@@ -229,9 +269,8 @@ class RoleRepository extends EntityRepository
      *
      * @param Person $person
      */
-    public function getDistinctRolesPersonInActivities( Person $person )
+    public function getDistinctRolesPersonInActivities(Person $person)
     {
-
         $sql = "select distinct roleobj_id from activityperson a where person_id = :idPerson
                     union 
                 select distinct roleobj_id from projectmember p where person_id = :idPerson";
@@ -239,7 +278,7 @@ class RoleRepository extends EntityRepository
         $query = $this->getEntityManager()->getConnection()->prepare($sql);
         $idPerson = $person->getId();
 
-        if( !$query->execute(['idPerson'=>$idPerson]) ){
+        if (!$query->execute(['idPerson' => $idPerson])) {
             throw new OscarException("Impossible de charger les rôles de $person dans les activités");
         }
         $idsRoles = $query->fetchAll();
@@ -258,17 +297,16 @@ class RoleRepository extends EntityRepository
      *
      * @param Person $person
      */
-    public function getDistinctRolesPersonInOrganizations( Person $person )
+    public function getDistinctRolesPersonInOrganizations(Person $person)
     {
-
         $sql = "SELECT DISTINCT ur.id FROM user_role ur "
-            ."LEFT JOIN organizationperson op ON ur.id = op.roleobj_id "
-            ."WHERE op.person_id = :idPerson";
+            . "LEFT JOIN organizationperson op ON ur.id = op.roleobj_id "
+            . "WHERE op.person_id = :idPerson";
 
         $query = $this->getEntityManager()->getConnection()->prepare($sql);
         $idPerson = $person->getId();
 
-        if( !$query->execute(['idPerson'=>$idPerson]) ){
+        if (!$query->execute(['idPerson' => $idPerson])) {
             throw new OscarException("Impossible de charger les rôles de $person dans les organisations");
         }
         $idsRoles = $query->fetchAll();

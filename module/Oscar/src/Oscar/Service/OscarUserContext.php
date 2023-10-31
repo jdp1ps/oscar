@@ -25,6 +25,7 @@ use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Entity\Privilege;
+use Oscar\Entity\PrivilegeRepository;
 use Oscar\Entity\Project;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
@@ -40,7 +41,8 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
-use Laminas\Http\Request;
+use UnicaenAuthentification\Service\UserContext;
+use ZfcUser\Entity\UserInterface;
 
 /**
  * Cette classe centralise les informations liées à l'authentification et à l'identité
@@ -61,45 +63,83 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     const AUTHENTIFICATION_METHOD_SHIB = 'SHIB';
     const AUTHENTIFICATION_METHOD_NONE = 'NONE';
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Accès SERVICES
 
     /** @var UserContext */
-    protected $userContext;
-
-    protected $sessionContainer;
+    protected UserContext $userContext;
 
     /**
-     * @return UserContext\
+     * @param UserContext $userContext
      */
-    public function getUserContext()
+    public function setUserContext(UserContext $userContext): void
+    {
+        $this->userContext = $userContext;
+    }
+
+    /**
+     * @return UserContext
+     */
+    public function getUserContext(): UserContext
     {
         return $this->userContext;
     }
 
     /**
      * @return PersonService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getPersonService()
+    public function getPersonService(): PersonService
     {
         return $this->getServiceContainer()->get(PersonService::class);
     }
 
-    /**
-     * @param UserContext $userContext
-     */
-    public function setUserContext(\UnicaenAuthentification\Service\UserContext $userContext)
-    {
-        $this->userContext = $userContext;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Accès REPOSITORY
 
     /**
      * @return AuthentificationRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
      */
-    public function getAuthentificationRepository()
+    public function getAuthentificationRepository(): AuthentificationRepository
     {
         return $this->getEntityManager()->getRepository(Authentification::class);
     }
 
-    public function getDbUser()
+    /**
+     * @return RoleRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    protected function getRoleRepository(): RoleRepository
+    {
+        return $this->getEntityManager()->getRepository(Role::class);
+    }
+
+    /**
+     * @return OrganizationRoleRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getOrganizationRoleRepository(): OrganizationRoleRepository
+    {
+        return $this->getEntityManager()->getRepository(OrganizationRole::class);
+    }
+
+    /**
+     * @return PrivilegeRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getPrivilegeRepository(): PrivilegeRepository
+    {
+        return $this->getEntityManager()->getRepository(Privilege::class);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return UserInterface|null
+     */
+    public function getDbUser(): ?UserInterface
     {
         return $this->getUserContext()->getDbUser();
     }
@@ -123,7 +163,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return object|null
      * @throws OscarException
      */
-    public function getOrganizationRoleById(int $id, bool $throw = false)
+    public function getOrganizationRoleById(int $id, bool $throw = false): ?OrganizationRole
     {
         $roleObj = $this->getOrganizationRoleRepository()->find($id);
         if (!$roleObj && $throw) {
@@ -138,7 +178,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return OrganizationRole|null
      * @throws OscarException
      */
-    public function getOrganizationRoleByRoleId(string $roleId, bool $throw = false)
+    public function getOrganizationRoleByRoleId(string $roleId, bool $throw = false): ?OrganizationRole
     {
         $roleObj = $this->getOrganizationRoleRepository()->findOneBy(['label' => $roleId]);
         if (!$roleObj && $throw) {
@@ -148,23 +188,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /**
-     * @return RoleRepository
-     */
-    protected function getRoleRepository(): RoleRepository
-    {
-        return $this->getEntityManager()->getRepository(Role::class);
-    }
-
-    /**
-     * @return OrganizationRoleRepository
-     */
-    public function getOrganizationRoleRepository(): OrganizationRoleRepository
-    {
-        return $this->getEntityManager()->getRepository(OrganizationRole::class);
-    }
-
-    /**
      * @return array
+     * @throws \Doctrine\ORM\Exception\NotSupported
      */
     public function getAvailabledRolesPersonOrganization(): array
     {
@@ -173,55 +198,35 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
     /**
      * @return array
+     * @throws \Doctrine\ORM\Exception\NotSupported
      */
     public function getAvailabledRolesPersonActivity(): array
     {
         return $this->getRoleRepository()->getRolesAvailableForPersonInActivityArray();
     }
 
+    /**
+     * @return array
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
     public function getAvailabledRolesOrganizationActivity(): array
     {
         return $this->getOrganizationRoleRepository()->getRolesAvailableInActivityArray();
     }
 
     /**
-     * Retourne les IDS des rôles ayant le privilège donné.
-     *
      * @param $privilegeCode
      * @param $roleLevel
-     * @return int[]
-     * @throws OscarException
-     */
-    public function getRolesIdsWithPrivileges($privilegeCode, $roleLevel = 0) :array
-    {
-        $ids = [];
-        foreach ($this->getRolesWithPrivileges($privilegeCode, $roleLevel) as $privilege) {
-            $ids[] = $privilege->getId();
-        }
-        return $ids;
-    }
-
-    /**
-     * Retourne les Role ayant le privilège donné.
-     *
-     * @param $privilegeCode
-     * @param $roleLevel
-     * @return Role[]
+     * @return array|void
      * @throws OscarException
      */
     public function getRolesWithPrivileges($privilegeCode, $roleLevel = 0)
     {
-        static $roles_privileges;
-
-        if( $roles_privileges == null ){
-            $roles_privileges = [];
-        }
-
+        static $roles_privileges = [];
         if (!array_key_exists($privilegeCode, $roles_privileges)) {
             try {
                 /** @var Privilege $privilege */
-                $privilege = $this->getEntityManager()->getRepository(Privilege::class)
-                    ->getPrivilegeByCode($privilegeCode);
+                $privilege = $this->getPrivilegeRepository()->getPrivilegeByCode($privilegeCode);
 
                 /** @var Role $role */
                 foreach ($privilege->getRole() as $role) {
@@ -229,38 +234,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                         $roles_privileges[] = $role;
                     }
                 }
-                return $roles_privileges;
             } catch (\Exception $e) {
-                $this->getLoggerService()->critical("Impossible de charger le privilège '$privilegeCode'");
                 throw new OscarException(
                     sprintf('Impossible de charger le privilège %s : %s', $privilegeCode, $e->getMessage())
                 );
             }
         }
-    }
-
-
-    /**
-     * @return string Retourne une chaîne (utilisée dans les logs pour donner des informations sur l'utilisateur actif).
-     */
-    public function getCurrentUserLog()
-    {
-        $person = 'UNPERSON';
-        $identitifiant = "NOUID";
-        $method = 'UNLOG';
-
-        if ($this->getUserContext()->getLdapUser()) {
-            $method = 'LDAP';
-            $identitifiant = $this->getUserContext()->getLdapUser()->getSupannAliasLogin() ?? $this->getUserContext(
-                )->getLdapUser()->getUid();
-        } elseif ($this->getUserContext()->getDbUser()) {
-            $method = 'BDD';
-            $identitifiant = $this->getUserContext()->getDbUser()->getUsername();
-        }
-
-        $person = $this->getPersonService()->getPersonByLdapLogin($identitifiant) ?? 'NoPerson';
-
-        return sprintf('[P:%s] %s (%s)', $person, $identitifiant, $method);
+        return $roles_privileges;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,26 +299,33 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @param $roleId
      * @return Role|null
      */
-    public function getRoleByRoleId($roleId)
+    public function getRoleByRoleId($roleId): ?Role
     {
-        return $this->getEntityManager()->getRepository(Role::class)->findOneBy(['roleId' => $roleId]);
+        return $this->getRoleRepository()->findOneBy(['roleId' => $roleId]);
     }
 
     /**
      * @param string $login
      * @return Authentification|null
      */
-    public function getAuthentificationByLogin(string $login, $throw = false)
+    public function getAuthentificationByLogin(string $login, $throw = false): ?Authentification
     {
         $authentification = $this->getAuthentificationRepository()->findOneBy(['username' => $login]);
-        if (!$authentification && $throw == true) {
+        if (!$authentification && $throw === true) {
             throw new OscarException("Aucune authentification trouvé");
         }
         return $authentification;
     }
 
 
-    public function hasPersonnelAccess()
+    /**
+     * @return bool
+     * @throws OscarException
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function hasPersonnelAccess(): bool
     {
         if (!$this->getCurrentPerson()) {
             return false;
@@ -387,24 +374,12 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @return null|Authentification
      */
-    public function getAuthentification()
+    public function getAuthentification(): ?Authentification
     {
         if ($this->getUserContext()->getDbUser()) {
             return $this->getAuthentificationRepository()->find($this->getDbUser()->getId());
         }
         return null;
-    }
-
-    /**
-     * Retourne la liste des rôles disponibles.
-     *
-     * @return array
-     * @deprecated Utilisé pendant les test sur les droits
-     */
-    public function getAvailabledRoles()
-    {
-        throw new Exception("FIX IT !");
-        //return $this->getUserContext()getServiceAuthorize()->getRoles();
     }
 
     public function getRequestToken()
@@ -457,7 +432,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $_ROLES_IDS;
     }
 
-    public function isDeclarer()
+    public function isDeclarer(): bool
     {
         if ($this->getCurrentPerson()) {
             return $this->getCurrentPerson()->getWorkPackages()->count() > 0;
@@ -523,15 +498,12 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      *
      * @return null
      */
-    public function getOscarRoles()
+    public function getOscarRoles(): array
     {
         static $_ROLES;
+
         if ($_ROLES === null) {
-            $_ROLES = [];
-            /** @var Role $role */
-            foreach ($this->getEntityManager()->getRepository(Role::class)->findAll() as $role) {
-                $_ROLES[$role->getRoleId()] = $role;
-            }
+            $_ROLES = $this->getRoleRepository()->getRolesAvailableForPerson(RoleRepository::FORMAT_ROLEID_ARRAY_KEY);
         }
 
         return $_ROLES;
@@ -542,16 +514,11 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      *
      * @return array
      */
-    public function getRoleId()
+    public function getRoleId(): array
     {
         static $_ROLES_ALL;
         if ($_ROLES_ALL === null) {
-            $_ROLES_ALL = array_map(
-                function ($r) {
-                    return $r->getRoleId();
-                },
-                $this->getOscarRoles()
-            );
+            $_ROLES_ALL = array_keys($this->getOscarRoles());
         }
         return $_ROLES_ALL;
     }
@@ -562,7 +529,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      *
      * @return array
      */
-    public function getRoleIdPrimary()
+    public function getRoleIdPrimary(): array
     {
         static $_ROLES_PRIMARY;
         if ($_ROLES_PRIMARY === null) {
@@ -576,26 +543,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
 
         return $_ROLES_PRIMARY;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRolesOrganization()
-    {
-        static $_ROLES_ORGANISATION;
-        if ($_ROLES_ORGANISATION === null) {
-            $_ROLES_ORGANISATION = [];
-
-            /** @var Role $role */
-            foreach ($this->getOscarRoles() as $role) {
-                if ($role->isPrincipal()) {
-                    $_ROLES_ORGANISATION[] = $role->getRoleId();
-                }
-            }
-        }
-
-        return $_ROLES_ORGANISATION;
     }
 
     /**
@@ -1493,7 +1440,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $tmpActivityDocumentAccess = [];
         }
 
-        if (!array_key_exists($tmpActivityDocumentAccess, $activity->getId())) {
+        if (!array_key_exists($activity->getId(), $tmpActivityDocumentAccess)) {
             $read = false;
             $write = false;
             if ($this->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity)) {
@@ -1586,6 +1533,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @param string $privilege
      * @return bool
+     * @throws \Exception
      */
     public function hasPrivilegeDeep(string $privilege): bool
     {
@@ -1598,6 +1546,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * @param string $privilege
      * @return bool
+     * @throws OscarException
      */
     public function hasPrivilegeInOrganizations(string $privilege): bool
     {
@@ -1622,10 +1571,10 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
     /**
      * @param $privilege
-     * @return Organization[]
+     * @return false|Organization[]
      * @throws \Exception
      */
-    public function getOrganizationsWithPrivilege($privilege)
+    public function getOrganizationsWithPrivilege($privilege): ?array
     {
         $person = $this->getCurrentPerson();
 
