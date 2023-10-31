@@ -10,9 +10,12 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use Oscar\Formatter\OscarFormatterConst;
 
 class OrganizationRoleRepository extends EntityRepository
 {
+    const FORMAT_ID_ROLE_ID = 'FORMAT_ID_ROLE_ID';
+
     public function getRoleByRoleIdOrCreate($roleId)
     {
         try {
@@ -31,13 +34,15 @@ class OrganizationRoleRepository extends EntityRepository
         }
     }
 
+    /**
+     * @return array
+     * @throws \Oscar\Exception\OscarException
+     */
     public function getRolesAvailableInActivityArray(): array
     {
-        $out = [];
-        foreach ($this->getRolesAvailableInActivity() as $organizationRole) {
-            $out[$organizationRole->getId()] = $organizationRole->getRoleId();
-        }
-        return $out;
+        $formatter = new RepositoryResultFormatter();
+        $formatter->addFormat(self::FORMAT_ID_ROLE_ID, 'getRoleId');
+        return $formatter->output($this->getRolesAvailableInActivity(), self::FORMAT_ID_ROLE_ID);
     }
 
     /**
