@@ -26,6 +26,7 @@
     "monolog/monolog": "^2.0",
     "phpoffice/phpspreadsheet": "^1.9",
     "dompdf/dompdf": "^0.8.3",
+    "phpoffice/phpword": "*",
     "swiftmailer/swiftmailer": "^6.2",
     "symfony/console": "*",
     "ext-gettext": "*",

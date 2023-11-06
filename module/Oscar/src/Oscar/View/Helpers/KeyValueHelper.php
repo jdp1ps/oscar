@@ -36,7 +36,7 @@ class KeyValueHelper extends FormElement
         return $tpl;
     }
 
-        public function render(ElementInterface $element)
+        public function render(ElementInterface $element): string
         {
             $name = $element->getAttribute('name');
             $value = $element->getValue();

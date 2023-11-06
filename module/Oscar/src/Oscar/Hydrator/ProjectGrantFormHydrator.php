@@ -169,7 +169,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
      * @param Activity $object
      * @return array
      */
-    public function extract( $object )
+    public function extract( object $object ): array
     {
         return [
             'id' => $object->getId() ? $object->getId() : '',
