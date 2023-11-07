@@ -102,6 +102,9 @@ class CSVDownloader
                             ->setFormatCode(NumberFormat::FORMAT_ACCOUNTING_EUR);
                     } elseif (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $value)) {
                         // Traitement des dates
+                        $dateTimeValue = new \DateTime($value);
+                        $dateValue = Date::PHPToExcel($dateTimeValue);
+                        $doc->getActiveSheet()->setCellValue($cell, $dateValue);
                         $doc->getActiveSheet()->getStyle($cell)
                             ->getNumberFormat()
                             ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
