@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Hydrator;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -17,7 +18,8 @@ class MigrateDocumentFormHydrator implements HydratorInterface, ServiceLocatorAw
 
     private EntityManager $em;
 
-    public function __construct(EntityManager $em){
+    public function __construct(EntityManager $em)
+    {
         $this->em = $em;
     }
 
@@ -27,7 +29,7 @@ class MigrateDocumentFormHydrator implements HydratorInterface, ServiceLocatorAw
      * @param TabDocument $object
      * @return array
      */
-    public function extract($object):array
+    public function extract(object $object): array
     {
         $data = [
             'typeDocument' => $object['typeDocument'],
@@ -57,10 +59,11 @@ class MigrateDocumentFormHydrator implements HydratorInterface, ServiceLocatorAw
      * @param ?Collection $tabsDocumentsRoles
      * @return ArrayCollection
      */
-    private function getRoles(?Collection $tabsDocumentsRoles):ArrayCollection{
+    private function getRoles(?Collection $tabsDocumentsRoles): ArrayCollection
+    {
         $roles = new ArrayCollection();
         /** @var  TabsDocumentsRoles $tabDocumentRole */
-        foreach ($tabsDocumentsRoles as $tabDocumentRole){
+        foreach ($tabsDocumentsRoles as $tabDocumentRole) {
             $roles->add($tabDocumentRole->getRole());
         }
         return $roles;

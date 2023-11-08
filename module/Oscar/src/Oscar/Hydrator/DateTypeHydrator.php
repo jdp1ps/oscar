@@ -20,7 +20,7 @@ class DateTypeHydrator implements HydratorInterface, ServiceLocatorAwareInterfac
      * @param DateType $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         return [
             'label' => $object->getLabel(),

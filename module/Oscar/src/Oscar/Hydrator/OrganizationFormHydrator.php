@@ -78,7 +78,7 @@ class OrganizationFormHydrator implements HydratorInterface
      * @param Organization $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
 
         $datas = [
