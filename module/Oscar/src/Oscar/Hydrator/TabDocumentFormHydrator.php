@@ -38,7 +38,7 @@ class TabDocumentFormHydrator implements HydratorInterface, ServiceLocatorAwareI
      * @param TabDocument $object
      * @return array
      */
-    public function extract($object): array
+    public function extract(object $object): array
     {
         $data = [
             'id' => $object->getId(),

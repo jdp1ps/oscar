@@ -29,7 +29,7 @@ class ProjectFormHydrator implements HydratorInterface
      * @param Project $object
      * @return array
      */
-    public function extract( $object )
+    public function extract( object $object ): array
     {
         return [
             'id'        => $object->getId(),

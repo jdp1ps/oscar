@@ -18,7 +18,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
     /**
      * OrganizationFormHydrator constructor.
      */
-    public function __construct( ProjectGrantService $projectGrantService )
+    public function __construct(ProjectGrantService $projectGrantService)
     {
         $this->projectGrantService = $projectGrantService;
     }
@@ -38,7 +38,9 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
         $object->setReference($data['reference']);
         $object->setEquipe($data['equipe']);
 
-        $typeContrat = $this->projectGrantService->getPcruTypeContratRepository()->getPcruTypeContratByLabel($data['typecontrat']);
+        $typeContrat = $this->projectGrantService->getPcruTypeContratRepository()->getPcruTypeContratByLabel(
+            $data['typecontrat']
+        );
         $object->setTypeContrat($typeContrat);
 
         $object->setAcronyme($data["acronyme"]);
@@ -50,7 +52,9 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
         $object->setPartenairePrincipal($data["partenaireprincipal"]);
         $object->setIdPartenairePrincipal($data["idpartenaireprincipal"]);
 
-        $sourceFinancement = $this->projectGrantService->getPcruSourceFinancementRepository()->findOneByLabel($data['sourcefinancement']);
+        $sourceFinancement = $this->projectGrantService->getPcruSourceFinancementRepository()->findOneByLabel(
+            $data['sourcefinancement']
+        );
         $object->setSourceFinancement($sourceFinancement);
 
         $dateSignature = $data["datedernieresignature"] ? new \DateTime($data["datedernieresignature"]) : null;
@@ -83,7 +87,7 @@ class ActivityInfosPCRUFormHydrator implements HydratorInterface
      * @param ActivityPcruInfos $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         $datas = [
             'objet' => $object->getObjet(),

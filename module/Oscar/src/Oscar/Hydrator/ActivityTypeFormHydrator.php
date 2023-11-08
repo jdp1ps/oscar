@@ -21,7 +21,7 @@ class ActivityTypeFormHydrator implements HydratorInterface, ServiceLocatorAware
      * @param ActivityType $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         return [
             'description' => $object->getDescription(),

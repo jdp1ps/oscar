@@ -39,7 +39,7 @@ class ActivityPaymentFormHydrator implements HydratorInterface
      * @param ActivityPayment $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         return [
             'id' => $object->getId(),

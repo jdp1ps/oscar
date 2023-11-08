@@ -32,7 +32,7 @@ class DateTypeFormHydrator implements HydratorInterface, ServiceLocatorAwareInte
      * @param DateType $object
      * @return array
      */
-    public function extract($object): array
+    public function extract(object $object): array
     {
         $data = [
             'id' => $object->getId(),

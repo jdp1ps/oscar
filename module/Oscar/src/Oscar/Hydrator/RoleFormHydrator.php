@@ -31,7 +31,7 @@ class RoleFormHydrator implements HydratorInterface
      * @param OrganizationPerson $object
      * @return array|void
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         return [
             'enrolled' => $object->getPerson() ? $object->getPerson()->getId() : null,

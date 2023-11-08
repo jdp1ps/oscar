@@ -15,7 +15,7 @@ class PersonFormHydrator implements HydratorInterface
 {
     private $connectorsName;
 
-    public function __construct( $connectorsName )
+    public function __construct($connectorsName)
     {
         $this->connectorsName = $connectorsName;
     }
@@ -28,7 +28,7 @@ class PersonFormHydrator implements HydratorInterface
     public function hydrate(array $data, $object)
     {
         $dateFin = $data['ldapfininscription'];
-        if($dateFin == ""){
+        if ($dateFin == "") {
             $dateFin = null;
         }
 
@@ -42,8 +42,8 @@ class PersonFormHydrator implements HydratorInterface
             ->setEmail($data['email'])
             ->setPhone($data['phone']);
 
-        foreach( $this->connectorsName as $connector ){
-            $object->setConnectorID($connector, $data['connector_'.$connector]);
+        foreach ($this->connectorsName as $connector) {
+            $object->setConnectorID($connector, $data['connector_' . $connector]);
         }
 
         return $object;
@@ -53,10 +53,10 @@ class PersonFormHydrator implements HydratorInterface
      * @param Person $object
      * @return array
      */
-    public function extract( $object )
+    public function extract(object $object): array
     {
         $d = [
-            'id'        => $object->getId(),
+            'id' => $object->getId(),
             'firstname' => $object->getFirstname(),
             'lastname' => $object->getLastname(),
             'ladapLogin' => $object->getLadapLogin(),
@@ -67,10 +67,9 @@ class PersonFormHydrator implements HydratorInterface
             'email' => $object->getEmail(),
         ];
 
-        foreach( $this->connectorsName as $connector ){
-            $d['connector_'.$connector] = $object->getConnectorID($connector);
+        foreach ($this->connectorsName as $connector) {
+            $d['connector_' . $connector] = $object->getConnectorID($connector);
         }
         return $d;
-
     }
 }

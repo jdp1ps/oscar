@@ -19,7 +19,7 @@ class ContractDocumentFormHydrator implements HydratorInterface
      * @param  object $object
      * @return array
      */
-    public function extract($object)
+    public function extract(object $object): array
     {
         // TODO: Implement extract() method.
     }

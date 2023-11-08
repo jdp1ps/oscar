@@ -39,7 +39,7 @@ class WorkPackageHydrator implements HydratorInterface, ServiceLocatorAwareInter
      * @param WorkPackage $object
      * @return array
      */
-    public function extract( $object )
+    public function extract( object $object ): array
     {
         return [
             'id' => $object->getId() ? $object->getId() : '',
