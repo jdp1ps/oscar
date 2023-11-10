@@ -28,8 +28,7 @@ $config = array(
         'UnicaenAuthentification',
         'UnicaenPrivilege',
         'UnicaenUtilisateur',
-
-//        'UnicaenSignature',
+        'UnicaenSignature',
         'Oscar',
     ),
 
