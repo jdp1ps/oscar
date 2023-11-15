@@ -520,15 +520,27 @@ class ValidationPeriodRepository extends EntityRepository
 
     public function getDatasValidationPersonsPeriod($personsIds, $start, $end){
 
-        $rsm = new ResultSetMapping();
-        $result = $this->getEntityManager()->getConnection()->fetchAll("SELECT CONCAT(v.year, '-', v.month) as period, * 
+        try {
+            $stm = $this->getEntityManager()->getConnection()->prepare("SELECT CONCAT(v.year, '-', v.month) as period, * 
+        FROM validationperiod as v WHERE v.declarer_id IN(".implode(',', $personsIds).") AND v.year >= $start AND v.year <= $end");
+
+
+
+            $result = $stm->executeQuery();
+            return $result->fetchAllAssociative();
+        } catch (\Exception $e) {
+            throw new OscarException("ERREUR SQL : Impossible de charger des données de validation");
+        }
+
+        /*
+        $result = $this->getEntityManager()->getConnection()->fetchAll("SELECT CONCAT(v.year, '-', v.month) as period, *
 	FROM validationperiod as v WHERE v.declarer_id IN(".implode(',', $personsIds).") AND v.year >= $start AND v.year <= $end");
+        */
 
         /*
     SELECT p.id as person_id, CONCAT(p.firstname, ' ', p.lastname) as displayname, to_char(t.datefrom, 'YYYY-MM') as period, t.activity_id, COALESCE(pr.acronym, t.label) as context, CASE WHEN t.activity_id > 0 THEN 'wp' ELSE 'other' END as type, SUM(EXTRACT(EPOCH from dateto - datefrom) / 3600) as duration FROM timesheet t INNER JOIN person p ON p.id = t.person_id LEFT JOIN activity a ON t.activity_id = a.id LEFT JOIN project pr ON pr.id = a.project_id WHERE p.id IN(".implode(',', $personIds).") GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period
          */
 
-        return $result;
     }
 
 

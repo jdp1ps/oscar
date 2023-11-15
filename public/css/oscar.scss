@@ -43,6 +43,24 @@ $colorGreyBlack: #222;
 @import "_common.scss";
 
 
+.div-connexion {
+  .card {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    ul.card-header-tabs {
+      background: none;
+      .nav-link {
+        padding: .4em 1em;
+        &.active {
+          color: black;
+          background-color: white;
+        }
+      }
+    }
+  }
+}
+
 .cartouche.light {
   background: $grey-ultra-light;
   color: #333;
