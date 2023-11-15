@@ -12942,6 +12942,22 @@ article.wp h3 {
   text-decoration: line-through;
 }
 
+.div-connexion .card {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.div-connexion .card ul.card-header-tabs {
+  background: none;
+}
+.div-connexion .card ul.card-header-tabs .nav-link {
+  padding: 0.4em 1em;
+}
+.div-connexion .card ul.card-header-tabs .nav-link.active {
+  color: black;
+  background-color: white;
+}
+
 .cartouche.light {
   background: #CCC;
   color: #333;

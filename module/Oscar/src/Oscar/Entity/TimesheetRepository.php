@@ -226,7 +226,9 @@ class TimesheetRepository extends EntityRepository
         }
         $sql .= "GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period";
 
-        return $this->getEntityManager()->getConnection()->fetchAll($sql);
+        $stm = $this->getEntityManager()->getConnection()->prepare($sql);
+        return $stm->executeQuery()->fetchAllAssociative();
+//        return $this->getEntityManager()->getConnection()->fetchAll($sql);
     }
 
     public function getPersonPeriodSynthesisBounds($personIds, $from, $to)

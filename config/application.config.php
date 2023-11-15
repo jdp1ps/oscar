@@ -19,7 +19,6 @@ $config = array(
         'Laminas\Router',
         'Laminas\Session',
         'Laminas\Validator',
-
         'DoctrineModule',
         'DoctrineORMModule',
         'ZfcUser',
@@ -28,7 +27,6 @@ $config = array(
         'UnicaenAuthentification',
         'UnicaenPrivilege',
         'UnicaenUtilisateur',
-        'UnicaenSignature',
         'Oscar',
     ),
 
