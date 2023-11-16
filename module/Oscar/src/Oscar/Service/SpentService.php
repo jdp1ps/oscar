@@ -724,9 +724,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $queryPG = "SELECT s.id FROM spentline s LEFT JOIN spenttypegroup st ON '00' || rpad(st.code, 8, '0') = s.comptegeneral WHERE s.pfi = '$pfi'";
 
         $conn = $this->getEntityManager()->getConnection();
-        $stmt = $conn->executeQuery($queryPG);
-        $stmt->execute();
-        $ids = array_map('current', $stmt->fetchAll()); // Fetch
+        $stmt = $conn->prepare($queryPG);
+        $result = $stmt->executeQuery();
+        $ids = array_map('current', $result->fetchAllAssociative()); // Fetch
 
         $qb->where('s.id IN(:ids)')
             ->orderBy('s.datePaiement', 'ASC')
