@@ -82,6 +82,8 @@ data/generated-documents/activity/**
 !data/generated-documents/activity/bordereau.docx
 !data/generated-documents/activity/fiche.docx
 !data/generated-documents/activity/sample.docx
+data/documents/signature/**
+!data/documents/signature/.gitkeep
 
 # Gabarits
 data/templates/timesheet_activity_synthesis.html.php
