@@ -8,8 +8,8 @@
 
 namespace Oscar\Formatter;
 
-use Dompdf\Dompdf;
-use Oscar\Formatter\File\IHtmlToPdfFormatter;
+use Oscar\Formatter\Output\OutputWkhtmltopdfStrategy;
+use Oscar\Formatter\Timesheet\TimesheetActivityPeriodHtmlFormatter;
 
 /**
  * Effectue la mise en forme PDF des données.
@@ -19,27 +19,22 @@ use Oscar\Formatter\File\IHtmlToPdfFormatter;
  */
 class TimesheetActivityPeriodPdfFormatter extends TimesheetActivityPeriodHtmlFormatter
 {
-    public function render( array $datas, $method ){
+    const FILENAME_TPL = 'Activity-Period-%s---%s-%s.pdf';
 
-        /** @var IHtmlToPdfFormatter $transformer */
-        $transformer = new $method;
+    /**
+     * @param array $datas
+     * @return void
+     */
+    public function stream(array $datas): void
+    {
+        $filename = sprintf(self::FILENAME_TPL,
+                            $datas['activity']['numOscar'],
+                            $datas['period']['year'],
+                            $datas['period']['month']);
 
-        /** @var string $html Contenu HTML du document */
-        $html = parent::render($datas, null);
+        $html = $this->render($datas);
 
-        /** @var string $filename Nom du fichier */
-        $filename = $datas['activity']['numOscar'].'-'.$datas['period']['year'].'-'.$datas['period']['month'];
-
-        $transformer->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)
-            ->convert($html, $filename, true);
-        /*
-
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-        $dompdf->stream($filename);
-        */
-        return;
+        $renderPdf = new OutputWkhtmltopdfStrategy();
+        $renderPdf->output($html, $filename, OutputWkhtmltopdfStrategy::ORIENTATION_LANDSCAPE);
     }
 }

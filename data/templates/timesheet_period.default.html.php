@@ -1,3 +1,7 @@
+<?php
+require __DIR__ . '/functions.inc.php';
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,26 +46,6 @@
 </head>
 <?php
 
-$duration = function($value) {
-    return $this->duration($value);
-};
-
-$durationRounded = function( $duration ) {
-    $roundStep = 5;
-    $heures = floor($duration);
-    $minutes = round(($duration - $heures)*60 / $roundStep)*$roundStep;
-    if( $minutes < 10 ){
-        $minutes = '0'.$minutes;
-    }
-    return sprintf('%s:%s', $heures, $minutes);
-};
-
-$renderDate = function( $str ){
-    setlocale(LC_ALL, 'fr_FR');
-    $date = new DateTime($str);
-    return $date->format("F Y m d");
-};
-
 $lines = $facet == 'period' ? $by_periods : $by_persons;
 ?>
 <body>
@@ -105,21 +89,21 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
         <tr class="person">
             <th><?= $line['label'] ?></th>
             <?php foreach ($line['datas']['current']['workpackages'] as $wp): ?>
-            <td class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($wp['total']) ?> </td>
+            <td class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= duration($wp['total']) ?> </td>
             <?php endforeach; ?>
-            <td class="main research total <?= $line['datas']['current']['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($line['datas']['current']['total']) ?></td>
+            <td class="main research total <?= $line['datas']['current']['total'] == 0 ? 'none' : 'valued'?>"><?= duration($line['datas']['current']['total']) ?></td>
 
             <?php foreach ($line['datas']['prjs'] as $prj): ?>
-            <td class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></td>
+            <td class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= duration($prj['total']) ?></td>
             <?php endforeach; ?>
 
             <?php foreach ($line['datas']['others'] as $other):
                 // On n'affiche pas la colonne "Invalid" si ça n'est pas utile
                 if( $other['label'] == 'Invalid' && ($headings['has_invalid'] == false) ) continue;
                 ?>
-                <td class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></td>
+                <td class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= duration($other['total']) ?></td>
             <?php endforeach; ?>
-            <td class="total <?= $line['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($line['total']) ?></td>
+            <td class="total <?= $line['total'] == 0 ? 'none' : 'valued'?>"><?= duration($line['total']) ?></td>
         </tr>
     <?php endforeach; ?>
     </tbody>
@@ -127,21 +111,21 @@ $lines = $facet == 'period' ? $by_periods : $by_persons;
     <tfoot>
     <th>TOTAUX</th>
     <?php foreach ($headings['current']['workpackages'] as $wp): ?>
-        <th class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($wp['total']) ?></th>
+        <th class="main research <?= $wp['total'] == 0 ? 'none' : 'valued'?>"><?= duration($wp['total']) ?></th>
     <?php endforeach; ?>
-    <th class="main research total <?= $headings['current']['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($headings['current']['total']) ?></th>
+    <th class="main research total <?= $headings['current']['total'] == 0 ? 'none' : 'valued'?>"><?= duration($headings['current']['total']) ?></th>
 
     <?php foreach ($headings['prjs']['prjs'] as $prj): ?>
-        <th class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($prj['total']) ?></th>
+        <th class="research <?= $prj['total'] == 0 ? 'none' : 'valued'?>"><?= duration($prj['total']) ?></th>
     <?php endforeach; ?>
 
     <?php foreach ($headings['others'] as $other):
         // On n'affiche pas la colonne "Invalid" si ça n'est pas utile
         if( $other['label'] == 'Invalid' && ($headings['has_invalid'] == false) ) continue;
         ?>
-        <th class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($other['total']) ?></th>
+        <th class="<?= $other['group'] ?> <?= $other['total'] == 0 ? 'none' : 'valued'?>"><?= duration($other['total']) ?></th>
     <?php endforeach; ?>
-    <th class="total <?= $headings['total'] == 0 ? 'none' : 'valued'?>"><?= $duration($headings['total']) ?></th>
+    <th class="total <?= $headings['total'] == 0 ? 'none' : 'valued'?>"><?= duration($headings['total']) ?></th>
     </tfoot>
 </table>
 </body>

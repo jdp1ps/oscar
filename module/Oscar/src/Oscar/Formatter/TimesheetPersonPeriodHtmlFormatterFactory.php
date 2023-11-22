@@ -10,8 +10,8 @@ namespace Oscar\Formatter;
 
 
 use Interop\Container\ContainerInterface;
-use Oscar\Service\OscarConfigurationService;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Oscar\Service\OscarConfigurationService;
 
 class TimesheetPersonPeriodHtmlFormatterFactory implements FactoryInterface
 {
@@ -19,6 +19,6 @@ class TimesheetPersonPeriodHtmlFormatterFactory implements FactoryInterface
     {
         $renderer = $container->get('ViewRenderer');
         $templatePath = $container->get(OscarConfigurationService::class)->getConfiguration('timesheet_person_month_template');
-        return new \Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter($templatePath, $renderer);
+        return new Timesheet\TimesheetPersonPeriodHtmlFormatter($templatePath, $renderer);
     }
 }

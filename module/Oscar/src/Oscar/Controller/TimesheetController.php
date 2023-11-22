@@ -9,6 +9,11 @@ namespace Oscar\Controller;
 
 
 use BjyAuthorize\Exception\UnAuthorizedException;
+use Laminas\Http\Request;
+use Laminas\Http\Response;
+use Laminas\Mvc\Console\View\Renderer;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Renderer\PhpRenderer;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Organization;
@@ -21,12 +26,13 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
 use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\Timesheet\TimesheetActivityPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPeriodPdfFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodPdfFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodFormatter;
-use Oscar\Formatter\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
-use Oscar\Formatter\TimesheetPeriodHtmlFormatter;
-use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
-use Oscar\Formatter\TimesheetPersonPeriodPdfFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\PersonService;
@@ -35,11 +41,6 @@ use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\StringUtils;
-use Laminas\Http\Request;
-use Laminas\Http\Response;
-use Laminas\Mvc\Console\View\Renderer;
-use Laminas\View\Model\JsonModel;
-use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -736,36 +737,21 @@ class TimesheetController extends AbstractOscarController
             throw new OscarException($e->getMessage());
         }
 
-
         switch ($format) {
             case OscarFormatterConst::FORMAT_IO_JSON :
                 return $this->jsonOutput($datas);
 
             case OscarFormatterConst::FORMAT_IO_HTML :
-                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
-                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
-
                 $formatter = new TimesheetPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
-                    $this->getViewRenderer()
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template')
                 );
-                $formatter->render($datas);
-                $html = $formatter->render($datas);
-                die($html);
+                $formatter->output($datas);
 
             case OscarFormatterConst::FORMAT_IO_PDF :
-                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
-                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
-
-                $formatter = new TimesheetPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
-                    $this->getViewRenderer()
+                $formatter = new TimesheetPeriodPdfFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template')
                 );
-                $formatter->render($datas);
-                $html = $formatter->render($datas);
-                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
-                $pdfRendrer->convert($html, $datas['filename']);
-                die("terminé");
+                $formatter->output($datas);
 
             default:
                 return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
@@ -786,6 +772,7 @@ class TimesheetController extends AbstractOscarController
         $period = $this->params()->fromQuery('period', null);
         $year = $this->params()->fromQuery('year', null);
         $error = null;
+
 
         try {
             // Contrôle d'accès
@@ -818,19 +805,16 @@ class TimesheetController extends AbstractOscarController
                 $formatter = new TimesheetActivityPeriodFormatter();
                 $formatter->output($output, 'excel');
             } elseif ($format == "pdf") {
-                $output['format'] = 'pdf';
-
                 $formatter = new TimesheetActivityPeriodPdfFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
-                    $this->getViewRenderer()
+                    $this->getTimesheetService()->getOscarConfigurationService()->getTimesheetTemplateActivityPeriod()
                 );
 
-                $formatter->render($output, $this->getOscarConfigurationService()->getHtmlToPdfMethod());
-                die();
+                $formatter->stream($output);
             } elseif ($format == "json") {
                 $output['format'] = 'json';
                 return $this->jsonOutput($output);
             } else {
+                die("HTML");
                 $output['format'] = 'html';
                 $formatter = new TimesheetActivityPeriodHtmlFormatter(
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
@@ -1083,7 +1067,6 @@ class TimesheetController extends AbstractOscarController
     {
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_TIMESHEET_VIEW);
 
-
         $currentActivityId = $this->params()->fromRoute('id');
         $month = $this->params()->fromQuery('month', date('m'));
         $year = $this->params()->fromQuery('year', date('Y'));
@@ -1313,7 +1296,7 @@ class TimesheetController extends AbstractOscarController
                         $allow = true;
                     }
                 }
-                if ($allow == false) {
+                if (!$allow) {
                     return $this->getResponseUnauthorized(
                         "Vous ne pouvez pas voir cette feuille de temps pour cette période"
                     );
@@ -1365,33 +1348,15 @@ class TimesheetController extends AbstractOscarController
             $datas['format'] = $out;
 
             if ($out == 'pdf') {
-                /** @var HtmlToPdfDomPDFFormatter $pdfRendrer */
-                $pdfRendrer = $this->getOscarConfigurationService()->getHtmlToPdfMethod();
-
-                $formatter = new TimesheetPersonPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
-                    $this->getViewRenderer()
+                $formatter = new TimesheetPersonPeriodPdfFormatter(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template')
                 );
-                $formatter->render($datas);
-                $html = $formatter->render($datas);
-                $pdfRendrer->setOrientation(HtmlToPdfDomPDFFormatter::ORIENTATION_LANDSCAPE);
-                $pdfRendrer->convert($html, $datas['filename']);
-                die("OK");
-//                die("ICI");
-//                $formatter = new TimesheetPersonPeriodPdfFormatter(
-//                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
-//                    $this->getViewRenderer()
-//                );
-//                $formatter->render($datas);
-//                die();
+                $formatter->output($datas);
             } elseif ($out == 'html') {
                 $formatter = new TimesheetPersonPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
-                    $this->getViewRenderer()
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template')
                 );
-                $formatter->render($datas);
-                $html = $formatter->render($datas);
-                die($html);
+                $formatter->output($datas);
             } else {
                 return $this->getResponseBadRequest("Format non-géré");
             }
@@ -1636,6 +1601,9 @@ class TimesheetController extends AbstractOscarController
 
         $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
 
+        echo "<pre>";
+        echo json_encode($datas, JSON_PRETTY_PRINT);
+        echo "</pre>";
 
         return [
             "datas" => $datas,
@@ -2036,10 +2004,10 @@ class TimesheetController extends AbstractOscarController
 
     public function validations2Action()
     {
-        if( $this->getHttpXMethod() == 'POST' ){
+        if ($this->getHttpXMethod() == 'POST') {
             try {
                 $action = $this->params()->fromPost('action');
-                switch($action){
+                switch ($action) {
                     case 'validate':
                         $declarer_id = $this->params()->fromPost('declarer');
                         $period = $this->params()->fromPost('period');
@@ -2073,10 +2041,10 @@ class TimesheetController extends AbstractOscarController
         }
 
         // Lecture des informations
-        if( $this->isAjax() || $this->params()->fromQuery('f', null) == 'json' ){
+        if ($this->isAjax() || $this->params()->fromQuery('f', null) == 'json') {
             $json = $this->baseJsonResponse();
             $action = $this->params()->fromQuery('action', '');
-            if($action == 'details'){
+            if ($action == 'details') {
                 $period = $this->params()->fromQuery('period', null);
                 $declarer_id = $this->params()->fromQuery('declarer_id', null);
                 $json['declarer'] = $declarer_id;
@@ -2084,9 +2052,12 @@ class TimesheetController extends AbstractOscarController
                 $json['validation'] = $this->getTimesheetService()->getDatasValidationDeclarerPeriod(
                     $this->getCurrentPerson()->getId(),
                     $declarer_id,
-                    $period);
+                    $period
+                );
             } else {
-                $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator($this->getCurrentPerson());
+                $json['synthesis'] = $this->getTimesheetService()->getDatasValidationsForValidator(
+                    $this->getCurrentPerson()
+                );
             }
             return $this->jsonOutput($json);
         }
@@ -2098,7 +2069,6 @@ class TimesheetController extends AbstractOscarController
 
     public function validationsAction()
     {
-
         if ($this->isAjax()) {
             $method = $this->getHttpXMethod();
             $serviceTimesheet = $this->getTimesheetService();
@@ -2719,11 +2689,11 @@ class TimesheetController extends AbstractOscarController
             }
         }
 
-        if ($this->isAjax() || $this->params()->fromQuery('format') == 'json' ) {
+        if ($this->isAjax() || $this->params()->fromQuery('format') == 'json') {
             switch ($method) {
                 case 'GET' :
                     $person_ids = $this->params()->fromQuery('person_ids', '');
-                    if( $person_ids ){
+                    if ($person_ids) {
                         $filterPersons = StringUtils::intArray($person_ids);
                     } else {
                         $filterPersons = [];

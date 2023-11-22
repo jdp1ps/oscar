@@ -9,11 +9,18 @@
     </head>
 <?php
 
-$duration = function($value) {
-    return $this->duration($value);
+$duration = function($duration) {
+    $duration = (float)$duration;
+    $heures = floor($duration);
+    $minutes = round(($duration - $heures)*60);
+    if( $minutes < 10 ){
+        $minutes = '0'.$minutes;
+    }
+    return sprintf('%s:%s', $heures, $minutes);
 };
 
 $durationRounded = function( $duration ) {
+    $duration = (float)$duration;
     $roundStep = 5;
     $heures = floor($duration);
     $minutes = round(($duration - $heures)*60 / $roundStep)*$roundStep;

@@ -9,7 +9,7 @@
 namespace Oscar\Formatter;
 
 use Dompdf\Dompdf;
-use Oscar\Exception\OscarException;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
 
 /**
  * Sortie PDF pour les données de déclaration d'une personne.

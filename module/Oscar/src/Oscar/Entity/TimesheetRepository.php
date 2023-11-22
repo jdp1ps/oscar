@@ -263,7 +263,7 @@ class TimesheetRepository extends EntityRepository
             ;";
 
         $rsm = new ResultSetMapping();
-        $result = $this->getEntityManager()->getConnection()->fetchAll($query);
+        $result = $this->getEntityManager()->getConnection()->prepare($query)->executeQuery()->fetchAllAssociative();
 
         return $result;
     }
@@ -302,7 +302,7 @@ class TimesheetRepository extends EntityRepository
             ;";
 
         $rsm = new ResultSetMapping();
-        $result = $this->getEntityManager()->getConnection()->fetchAll($query);
+        $result = $this->getEntityManager()->getConnection()->prepare($query)->executeQuery()->fetchAllAssociative();
 
         return $result;
     }

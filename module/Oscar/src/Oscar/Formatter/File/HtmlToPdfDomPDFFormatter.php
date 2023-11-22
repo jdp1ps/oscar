@@ -5,6 +5,7 @@ namespace Oscar\Formatter\File;
 
 
 use Dompdf\Dompdf;
+use Oscar\Exception\OscarException;
 
 class HtmlToPdfDomPDFFormatter implements IHtmlToPdfFormatter
 {
@@ -27,16 +28,19 @@ class HtmlToPdfDomPDFFormatter implements IHtmlToPdfFormatter
      */
     public function convert($html, $filename = null, $tobrowser = true)
     {
-
         if ($filename == null) {
             $filename = uniqid('document-') . '.pdf';
         }
-        $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', $this->orientation);
-        $dompdf->render();
-        $dompdf->stream($filename);
-        return;
+        try {
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', $this->orientation);
+            $dompdf->render();
+            $dompdf->stream($filename);
+            die("fin");
+        } catch (\Exception $e) {
+            throw new OscarException($e->getMessage());
+        }
     }
 
     /**

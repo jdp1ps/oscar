@@ -1,243 +1,35 @@
 <?php
-
-use Psr\Container\ContainerInterface;
-
 return [
-    /**  **/
     'unicaen-signature' => [
-
-        /////////////////////////////////////////////////////////////////////////////////
-        // DEVELOPPEMENT
-        'vite_mode'              => 'prod', // mode développement de l'UI
-        // Mode dev (voir doc)
-//        'vite_mode'      => 'dev', // mode développement de l'UI
-
-        // Emplacement où sont archivés les document en cours de signature
-        'documents_path' => __DIR__ . '/../../data/documents/signature',
-
-
-        /////////////////////////////////////////////////////////////////////////////////
-        /// SYSTEME de LOG
-        'logger'         => [
-            ///////////////////////////////////////
-            // Activation d'un logger autonome
-            'enable'          => true, // Actif
-            'level'           => \Monolog\Logger::DEBUG, // Niveau de log
-            'file'            => __DIR__ . '/../../logs/signature.log', // Fichier d'écriture
-            'file_permission' => 0666,
-
-            ///////////////////////////////////////
-            /// Sortie standard (pour le développement le built-in serveur)
-            'stdout'          => false,
-
-            ///////////////////////////////////////
-            /// Logger complémentaire (celui de l'application utilisant le module)
-            /// -> implementation de LoggerInterface (ex: Monolog)
-            // 'customLogger' => null
-            'customLogger'    => 'Logger' // customLogger (LoggerInterface)
-        ],
-        /////////////////////////////////////////////////////////////////////////////////
-
-        /////////////////////////////////////////////////////////////////////////////////
-        /// Logique métier
-
-        /**
-         * Retourne l'email de l'utilisateur courant. Cette méthode est utilisé lors d'un VISA INTERNE pour vérifier
-         * si l'utilisateur courant est autorisé à Valider/Refuser le document.
-         */
-        'current_user'   => function (ContainerInterface $sc): string {
-            $person = $sc->get(\Oscar\Service\OscarUserContext::class)->getCurrentPerson();
-            if ($person) {
-                return $person->getEmail();
-            }
-            return "";
-        },
-
-        'notifications_messages' => [
-            'base_url' => 'http://localhost',
-            'subject' => 'Document à {ACTION} sur OSCAR(dev)',
-            'body'    => "Bonjour {FULLNAME},\r\nVous avez un document à {ACTION} sur OSCAR(dev). \r\n
-                {URL}
-            "
-        ],
-
-        /**
-         * Liste des procédures déclenchées lors des notifications.
-         */
-        'notifications'          => [
-            function (
-                ContainerInterface $sc,
-                $recipient,
-                string $subject,
-                string $message
-            ): void {
-                $logger = $sc->get("Logger");
-                $logger->debug("CONFIG:Notification $recipient | $subject | $message");
-                try {
-                    /** @var \Oscar\Service\MailingService $mailer */
-                    $mailer = $sc->get(\Oscar\Service\MailingService::class);
-                    $mail = $mailer->newMessage($subject);
-                    $mail->setTo($recipient->getEmail())
-                        ->setBody($message);
-                    $mailer->send($mail);
-                } catch (Exception $e) {
-                    $logger->error("ERREUR MAIL SIGNATURE : ". $e->getMessage());
-                }
-
-            }
-        ],
-
-        /**
-         * Méthodes personnalisées de récupération des utilisateurs
-         *
-         * La finalité est d'obtenir une liste de destinataires sous la forme :
-         * [
-         *   ['email'=>string, 'firstname'=>string, 'lastname'=>string ],
-         *   ['email'=>string, 'firstname'=>string, 'lastname'=>string ],
-         *  ]
-         *
-         * Note : firstname/lastname sont optionnels
-         */
-        'get_recipients_methods' => [
+        'letterfiles' => [
             [
-                'key' => 'dri_members',
-                'label' => 'Membres de la DRI',
-                'Description' => 'Personnes associées à la DRI',
-                'options' => [],
-                'getRecipients'     => function ($sc, $options) {
-                    return $sc->get(\Oscar\Service\PersonService::class)->getPersonsInOrganizationsByCodes(['G73'], \Oscar\Formatter\OscarFormatterConst::FORMAT_RECIPIENTS);
-                }
-            ],
-            [
-                ///// key : Clef unique pour identifier le méthode
-                'key'               => 'persons_by_role',
-                'label'             => 'Personnes par rôle', // Intitulé
-                'description'       => 'Selectionne les personnes en fonction de leurs rôles', // Description
-
-                // Les options sont utilisées pour configurer la méthode d'obtention des destinataires
-                // Il y'a 2 étapes :
-                //  ETAPE 1 - options
-                // Les options permettent de définir un ou plusieurs critères
-                // Chaque critère a un nom unique (key), et un tableau de valeurs possibles.
-                // Ces valeurs sont fixées avec la clef 'values', soit des valeurs fixes, soit une fonction retournant
-                // la liste des CLEFS=>VALEURS disponible pour cette option.
-                //  ETAPE 2 - getRecipients
-                // Un méthode 'getRecipients' est appelé lors du déclenchement d'un étape de signature,
-                // cette méthode reçoit les options configurées sous la forme KEY_OPTION => [VALEURA,VALEURSB,...]
-                'options'           => [ // Options
-                    [
-                        'key'          => 'role_person_id',
-                        'label'        => "Rôle dans l'activité",
-                        // Type d'affichage (checkbox / recipients)
-                        'type'         => 'checkbox',
-
-                        ///////////////////////////////////////////////////
-                        // array|function
-                        // Retourne un tableau VALEUR => LABEL.
-                        //
-                        // Ex : [
-                        //        15 => "Valeur d'option A",
-                        //        24 => "Valeur d'option B",
-                        //        37 => "Valeur d'option C",
-                        //      ]
-                        'values'       => function (ContainerInterface $s) {
-                            return $s->get(
-                                \Oscar\Service\OscarUserContext::class
-                            )->getAvailableRolesActivityOrOrganization();
-                        },
-
-                        // Valeurs par défaut
-                        'defaultValue' => []
-                    ],
-                    [
-                        'key'    => 'role_organisation_id',
-                        'label'  => "étendre aux structures",
-                        'type'   => 'checkbox',
-                        'values' => function ($s) {
-                            return $s->get(
-                                \Oscar\Service\OscarUserContext::class
-                            )->getAvailabledRolesOrganizationActivity();
-                        },
-
-                        'defaultValue' => []
-                    ]
+                'label'     => 'ESUP signature',
+                'name'      => 'esup',
+                'default'   => true,
+                'class'     => \UnicaenSignature\Strategy\Letterfile\EsupLetterfileStrategy::class,
+                'levels'    => [
+                    'visa_visuel' => 'visa_visuel_in_esup',
+                    'sign_visuel' => 'sign_visuel_in_esup',
+                    'sign_certif' => 'sign_certif_in_esup',
+                    'sign_eidas' => 'sign_eidas_in_esup',
                 ],
-
-                //////////////////////////////////////
-                /// TODO / DEPRECATED ?
-                'methods_on_create' => null,
-
-                //////////////////////////////////////
-                /// Retourne les destinataires sous la forme :
-                /// [
-                ///    ['email'=>string, 'firstname'=>string, 'lastname'=>string ],
-                ///    ['email'=>string, 'firstname'=>string, 'lastname'=>string ],
-                /// ]
-                ///
-                /// $options corresponds au options configurées avant, dans cet exemple, 'getRecipients' va recevoir les
-                /// valeurs :
-                /// [
-                ///   'role_person_id' => [VALEUR1,VALEUR2],
-                ///   'role_organisation_id' => [VALEURA,VALEURB]
-                /// ]
-                ///
-                'getRecipients'     => function ($sc, $options) {
-                    return $sc->get(\Oscar\Service\ProjectGrantService::class)->getRecipients($options);
-                }
-            ],
-        ],
-
-        // Configuration des parafeurs numérique
-        'letterfiles'            => [
-            [
-                // Nom visible côté applicatif
-                'label' => 'ESUP',
-
-                // Code (unique)
-                'name'  => 'esup',
-
-                'description' => 'Parafeur numérique ESUP',
-
-                // Utilisé par défaut
-                'default'     => true,
-
-                // Classe
-                'class'       => \UnicaenSignature\Strategy\Letterfile\Esup\EsupLetterfileStrategy::class,
-
-                // Niveaux de signature disponible
-                'levels'      => [
-                    \UnicaenSignature\Utils\SignatureConstants::VISA_HIDDEN => 'hidden',
-                    \UnicaenSignature\Utils\SignatureConstants::VISA_VISUAL => 'visa',
-                    \UnicaenSignature\Utils\SignatureConstants::SIGN_VISUAL => 'pdfImageStamp',
-                    \UnicaenSignature\Utils\SignatureConstants::SIGN_CERTIF => 'certSign',
-                    \UnicaenSignature\Utils\SignatureConstants::SIGN_EIDAS  => 'nexuSign',
-                ],
-
-                // Configuration du parafeur
-                'config'      => [
+                'config'    => [
                     // ESUP configuration
-                    'url'           => "https://signature-pp.unicaen.fr",
-
-                    // Créateur
-                    'createdByEppn' => 'bouvry@unicaen.fr',
+                    'url' => "https://esup.unicaen.fr/"
                 ]
             ],
             [
-                'label'   => 'OSCAR visa',
-                'name'    => 'internal', // internal est une clef dédiée pour identifier le parapheur interne
-                'default' => false,
-                'class'   => \UnicaenSignature\Strategy\Letterfile\InternalVisa\InternalVisaStrategy::class,
-                'levels'  => [
+                'label'     => 'OSCAR visa',
+                'name'      => 'oscar',
+                'default'   => false,
+                'class'     => \UnicaenSignature\Strategy\Letterfile\OscarLetterfileStrategy::class,
+                'levels'    => [
                     'visa_hidden' => 'visa_hidden',
                 ],
-                'config'  => [
-                    'checkUserAcces' => function ($sc, $signatureRecipient) {
-                        return true;
-                        //return $sc->get(\Oscar\Service\ProjectGrantService::class)->getRecipients($options);
-                    }
+                'config'    => [
+
                 ]
             ]
         ]
     ]
-    /******/
 ];

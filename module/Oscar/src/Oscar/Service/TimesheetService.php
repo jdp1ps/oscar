@@ -5,6 +5,8 @@ namespace Oscar\Service;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
+use Laminas\Mvc\Controller\Plugin\Url;
+use Laminas\View\Renderer\PhpRenderer;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
@@ -27,7 +29,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Formatter\person\IPersonFormatter;
 use Oscar\Formatter\person\PersonToJsonBasic;
-use Oscar\Formatter\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
 use Oscar\Formatter\TimesheetsMonthFormatter;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseActivityLogService;
@@ -50,8 +52,6 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
-use Laminas\Mvc\Controller\Plugin\Url;
-use Laminas\View\Renderer\PhpRenderer;
 
 /**
  * Gestion des Personnes :
@@ -2064,7 +2064,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $infosProjects = [
             'total' => 0.0,
-            'activities' => []
+            'activities' => [],
+            'projects' => []
         ];
 
         $datasPersons = [];
@@ -2179,6 +2180,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             }
         }
 
+        $output['activity'] = $activity->toArray();
         $output['headings'] = $headings;
         $output['activity'] = $activity->toJson();
         $output['by_persons'] = $datasPersons;
@@ -5048,12 +5050,12 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'activity' => (string)$timesheet->getActivity(),
                     'project' => (string)$timesheet->getActivity()->getProject(),
                     'activity_id' => $timesheet->getActivity()->getId(),
+                    'timesheets' => []
                 ];
             }
 
-            if (!array_key_exists($period, $datas[$activityId])) {
-                $datas[$activityId][$period] = [
-                    'toto' => 'tata',
+            if (!array_key_exists($period, $datas[$activityId]['timesheets'])) {
+                $datas[$activityId]['timesheets'][$period] = [
                     'unvalidate' => $validationState['state'],
                     'total' => 0.0,
                 ];

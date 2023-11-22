@@ -47,49 +47,53 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getSpentTypeRepository()->find($id);
     }
 
-    public function getAccountsUsed()
+    /**
+     * @return array
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getAccountsUsed() :array
     {
         $out = [];
 
-        // On test si il y'a des comptes
+        try {
+            // On test si il y'a des comptes
+            $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral';
+            $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
+            $used = $stmt->executeQuery()->fetchAllAssociative();
+            $masses = $this->getMasses();
 
-        $sql = 'SELECT DISTINCT comptegeneral FROM spentline ORDER BY comptegeneral';
-        $stmt = $this->getEntityManager()->getConnection()->prepare($sql);
-        $stmt->execute();
-        $used = $stmt->fetchAll();
+            foreach ($used as $compte) {
+                $compteInfos = $this->getCompte($compte['comptegeneral']);
+                $compteMasse = $compteInfos['annexe'];
+                $compteCode = strval($compteInfos['code']);
+                $compteLabel = $compteInfos['label'];
+                $compteInherit = $compteInfos['compte_inherit'];
+                $masseInherit = $compteInfos['masse_inherit'];
+                if( !$compteMasse )
+                    $compteMasse = $masseInherit;
 
+                if (!array_key_exists($compteMasse, $out)) {
+                    $out[$compteMasse] = [
+                        'code' => $compteMasse,
+                        'label' => array_key_exists($compteMasse, $masses) ? $masses[$compteMasse] : 'N.D.',
+                        'comptes' => []
+                    ];
+                }
 
-
-        $masses = $this->getMasses();
-        $i = 0;
-        foreach ($used as $compte) {
-
-            $compteInfos = $this->getCompte($compte['comptegeneral']);
-            $compteMasse = $compteInfos['annexe'];
-            $compteCode = strval($compteInfos['code']);
-            $compteLabel = $compteInfos['label'];
-            $compteInherit = $compteInfos['compte_inherit'];
-            $masseInherit = $compteInfos['masse_inherit'];
-            if( !$compteMasse )
-                $compteMasse = $masseInherit;
-
-            if (!array_key_exists($compteMasse, $out)) {
-                $out[$compteMasse] = [
-                    'code' => $compteMasse,
-                    'label' => array_key_exists($compteMasse, $masses) ? $masses[$compteMasse] : 'N.D.',
-                    'comptes' => []
-                ];
+                if (!array_key_exists($compteCode, $out[$compteMasse]['comptes'])) {
+                    $out[$compteMasse]['comptes'][$compteCode] = [
+                        'code' => $compteCode,
+                        'label' => $compteLabel,
+                        'annexe' => $compteMasse,
+                        'compte_inherit' => $compteInherit,
+                        'masse_inherit' => $masseInherit,
+                    ];
+                }
             }
-
-            if (!array_key_exists($compteCode, $out[$compteMasse]['comptes'])) {
-                $out[$compteMasse]['comptes'][$compteCode] = [
-                    'code' => $compteCode,
-                    'label' => $compteLabel,
-                    'annexe' => $compteMasse,
-                    'compte_inherit' => $compteInherit,
-                    'masse_inherit' => $masseInherit,
-                ];
-            }
+        } catch (\Exception $e) {
+            $msg = "Erreur lors de la récupération des comptes";
+            $this->getLogger()->err("$msg : " . $e->getMessage());
+            throw new OscarException($msg);
         }
 
         return $out;
