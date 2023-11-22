@@ -11,10 +11,10 @@
   "description": "",
 
   "require": {
-    "unicaen/app": "6.0.6",
-    "unicaen/authentification": "6.0.3",
-    "unicaen/privilege": "6.0.1",
-    "unicaen/utilisateur": "6.0.4",
+    "unicaen/app": "^6",
+    "unicaen/authentification": "^6",
+    "unicaen/utilisateur": "^6",
+    "unicaen/privilege": "^6",
     "laminas/laminas-file": "^2.8",
     "oro/doctrine-extensions": "^1.2",
     "symfony/yaml": "^4.3",
@@ -24,13 +24,9 @@
     "jacksay/php-file-extension": "^0.0.1",
     "elasticsearch/elasticsearch": "^7.2",
     "monolog/monolog": "^2.0",
-    "phpoffice/phpspreadsheet": "^1.9",
     "dompdf/dompdf": "^0.8.3",
-    "phpoffice/phpword": "*",
     "swiftmailer/swiftmailer": "^6.2",
     "symfony/console": "*",
-    "ext-gettext": "*",
-    "ext-json": "*",
     "guzzlehttp/guzzle": "^7.0"
   },
   "minimum-stability": "dev",
@@ -40,11 +36,15 @@
   },
   "config": {
     "github-protocols": ["https", "ssh"],
-    "secure-http": false
+    "secure-http": false,
+    "allow-plugins": {
+      "laminas/laminas-dependency-plugin": true
+    }
   },
   "autoload": {
     "psr-0": {
-      "Oscar": ["module/Oscar/src/", "local/src/"]
+      "Oscar": ["module/Oscar/src/", "local/src/"],
+      "PhpOffice": "lib/PhpSpreadsheet/src"
     }
   },
   "scripts": {

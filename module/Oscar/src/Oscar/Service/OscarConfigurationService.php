@@ -505,6 +505,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false);
     }
 
+    public function getTimesheetTemplateActivityPeriod() :string
+    {
+        return $this->getConfiguration('timesheet_activity_synthesis_template');
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// MAILS D'envoi/rejet
     public function getEmailRejectBody(): string

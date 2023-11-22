@@ -1,9 +1,10 @@
 body, th, td {
-    font-size: 9px;
+    font-size: 12px;
     font-family: Arial, sans-serif;
     padding: 1px;
     margin: 2px;
 }
+
 
 table {
     width: 100%;
@@ -40,11 +41,7 @@ thead th {
 .subgroup .label {
     font-weight: normal;
 }
-th {
-    /*border: thin solid #adb6bd;*/
-}
 thead td {
-    /*background: #e3e8e6;*/
     border-bottom: dotted 1px #333;
 }
 thead td.valueLabel, tfoot td.valueLabel {
@@ -133,7 +130,6 @@ tr {
     vertical-align: center;
 }
 
-/*** Feuille de temps de la personne **/
 .group > th { font-weight: bold; text-align: left }
 .group th {
     font-weight: 800;
@@ -151,3 +147,4 @@ tr {
 .wrapper-page:last-child {
     page-break-after: avoid;
 }
+/****/

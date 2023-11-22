@@ -36,7 +36,7 @@ function displayTotaux( $array, $label ){
     <tr class="sous-total-year">
         <th><?= $label ?></th>
         <?php foreach( $array as $col=>$value): ?>
-        <th class="text-right"><?= number_format($value, 2) ?></th>
+        <th class="text-right"><?= $col == 'unvalidate' ? "" : number_format($value, 2) ?></th>
         <?php endforeach; ?>
     </tr>
     <?php
