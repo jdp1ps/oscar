@@ -29,7 +29,7 @@ class CSVDownloader
 
         ob_start();
 
-
+        $re_single_date = '/^([0-9]{4})-((0[1-9])|(1[1-2]))-[0-9]{2}$/';
         $handler = fopen($csvPath, 'r');
         $row = 1;
         //Cell::setValueBinder(new AdvancedValueBinder());
@@ -44,7 +44,8 @@ class CSVDownloader
                         $value = str_replace(',', '.', $value);
                         $cell = $sheet->setCellValueExplicitByColumnAndRow($c, $row, $value, DataType::TYPE_NUMERIC, true);
                         $cell->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR);
-                    } elseif (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $value)) {
+                    } elseif (preg_match($re_single_date, $value)) {
+                        error_log($value);
                         $sheet->getCellByColumnAndRow($c, $row)->getStyle()
                             ->getNumberFormat()
                             ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
