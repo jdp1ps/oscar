@@ -853,7 +853,6 @@ class TimesheetController extends AbstractOscarController
         $error = null;
         $validations = null;
 
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Synthèse pour une activités
         if ($activity_id != null) {

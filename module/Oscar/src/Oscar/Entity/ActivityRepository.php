@@ -8,6 +8,7 @@
 
 namespace Oscar\Entity;
 
+use \DateTime;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Oscar\Exception\OscarException;
@@ -43,7 +44,9 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
-
+    /**
+     * @return QueryBuilder
+     */
     protected function baseQueryWithOrganizationOf(): QueryBuilder
     {
         return $this->createQueryBuilder('c')
@@ -90,7 +93,7 @@ class ActivityRepository extends EntityRepository
     /**
      * Retourne les IDS des activités impliquant une organisation ayant un des pays spécifiés.
      *
-     * @param array $organizationTypeIds ID des types d'organisation
+     * @param array $countries
      * @return array
      */
     public function getIdsWithOrganizationOfCountry(array $countries): array
@@ -108,25 +111,28 @@ class ActivityRepository extends EntityRepository
 
     /**
      * Retourne les IDs des activités impliquant une des organizations donnée avec le rôle spécifié
+     *
      * @param array $organizationsIds IDS des organisations
      * @param int $roleObjId ID rôle
+     * @throws OscarException
      */
-    public function getIdsWithOneOfOrganizationsRoled( array $organizationsIds, int $roleObjId = 0 ) :array
+    public function getIdsWithOneOfOrganizationsRoled(array $organizationsIds, int $roleObjId = 0): array
     {
-        if( count($organizationsIds) == 0 && $roleObjId <= 0 ){
+        if (count($organizationsIds) == 0 && $roleObjId <= 0) {
             throw new OscarException("Vous devez préciser une organisation et/ou un rôle");
         }
 
         $clauseA = [];
         $clauseB = [];
+        $params = [];
 
-        if( $roleObjId > 0) {
+        if ($roleObjId > 0) {
             $clauseA[] = 'p1.roleObj = :roleId';
             $clauseB[] = 'p2.roleObj = :roleId';
             $params['roleId'] = $roleObjId;
         }
 
-        if( count($organizationsIds) > 0 ) {
+        if (count($organizationsIds) > 0) {
             $clauseA[] = 'orga1.id IN(:orgIds)';
             $clauseB[] = 'orga2.id IN(:orgIds)';
             $params['orgIds'] = $organizationsIds;
@@ -134,19 +140,24 @@ class ActivityRepository extends EntityRepository
 
         $queryBuilder = $this->baseQueryWithOrganizationOf();
         $clause = '('
-            .implode($clauseA, ' AND ')
-            .') OR ('
-            .implode($clauseB, ' AND ')
+            . implode(' AND ', $clauseA)
+            . ') OR ('
+            . implode(' AND ', $clauseB)
             . ')';
 
         $queryBuilder->where($clause);
-
         $queryBuilder->setParameters($params);
 
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
-    public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0) :array
+    /**
+     * @param int $organizationId
+     * @param int $roleObjId
+     * @return array
+     * @throws OscarException
+     */
+    public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0): array
     {
         return $this->getIdsWithOneOfOrganizationsRoled([$organizationId], $roleObjId);
     }
@@ -154,7 +165,8 @@ class ActivityRepository extends EntityRepository
     /**
      * Retourne les IDS des activités qui impliquent un des types de documents donnés.
      *
-     * @param array $idsTypeDocument
+     * @param array $typeDocumentIds
+     * @param bool $reverse
      * @return array
      */
     public function getActivitiesIdsWithTypeDocument(array $typeDocumentIds, bool $reverse = false): array
@@ -163,11 +175,8 @@ class ActivityRepository extends EntityRepository
             ->select('DISTINCT a.id')
             ->innerJoin('a.documents', 'd');
 
-        $parameters = [];
-
         if (count($typeDocumentIds) > 0) {
             $queryBuilder->where('d.typeDocument IN(:typesDocument)');
-            $parameters['typesDocument'] = $typeDocumentIds;
             $queryBuilder->setParameter('typesDocument', $typeDocumentIds);
         }
 
@@ -208,6 +217,10 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $queryBuilder->getQuery()->getArrayResult());
     }
 
+    /**
+     * @param array $pfis
+     * @return array
+     */
     public function getActivitiesIdsByPfis(array $pfis): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
@@ -218,11 +231,9 @@ class ActivityRepository extends EntityRepository
     }
 
     /**
-     * @param null $limitEnd
-     * @param bool $statusActive
      * @return Activity[]
      */
-    public function getActivitiesActive($limitEnd = null, $statusActive = true)
+    public function getActivitiesActive(): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->where('a.status = :status');
@@ -239,9 +250,11 @@ class ActivityRepository extends EntityRepository
     /**
      * Retourne la liste des IDS des activités impliquant l'organisation (avec un rôle principal).
      *
-     * @param $idOrganization
+     * @param array $idsOrganization
+     * @param bool $principal
+     * @return array
      */
-    public function getActivitiesIdsForOrganizations($idsOrganization, $principal = true)
+    public function getActivitiesIdsForOrganizations(array $idsOrganization, bool $principal = true): array
     {
         $query = $this->createQueryBuilder('a')
             ->select('a.id')
@@ -262,7 +275,12 @@ class ActivityRepository extends EntityRepository
         );
     }
 
-    public function getActivitiesPersonDate(int $personId, \DateTime $date)
+    /**
+     * @param int $personId
+     * @param DateTime $date
+     * @return array
+     */
+    public function getActivitiesPersonDate(int $personId, DateTime $date) :array
     {
         $qb = $this->createQueryBuilder('a')
             ->innerJoin('a.persons', 'ap')
@@ -277,9 +295,7 @@ class ActivityRepository extends EntityRepository
                     'date' => $date
                 ]
             );
-        $result = $qb->getQuery()->getResult();
-
-        return $result;
+        return $qb->getQuery()->getResult();
     }
 
 
@@ -289,7 +305,7 @@ class ActivityRepository extends EntityRepository
      * @param $periodeCodeStr
      * @return mixed
      */
-    public function getActivitiesAtPeriod($periodeCodeStr)
+    public function getActivitiesAtPeriod($periodeCodeStr): array
     {
         $periodInfos = DateTimeUtils::periodBounds($periodeCodeStr);
         $query = $this->createQueryBuilder('a')
@@ -300,8 +316,7 @@ class ActivityRepository extends EntityRepository
                     'end' => $periodInfos['end'],
                 ]
             );
-        $activities = $query->getQuery()->getResult();
-        return $activities;
+        return $query->getQuery()->getResult();
     }
 
     /**

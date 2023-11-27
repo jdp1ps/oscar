@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/variables.inc.php';
+require_once __DIR__ . '/variables.inc.php';
 
 /**
  * @param $duration

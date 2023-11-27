@@ -3,6 +3,34 @@
 
 ## Avant Mise à jour
 
+### Installation de PHP 8.2
+
+Installation du paquet `php8.2`
+
+```bash
+apt install php8.2
+```
+
+Configuration de `php8` comme PHP par défaut.
+
+```bash
+update-alternatives --set php /usr/bin/php8.2
+update-alternatives --set phar /usr/bin/phar8.2 
+update-alternatives --set phar.phar /usr/bin/phar.phar8.2 
+update-alternatives --set phpize /usr/bin/phpize8.2 
+update-alternatives --set php-config /usr/bin/php-config8.2 
+```
+
+Installation des extensions necessaires : 
+
+```bash
+apt install php8.2-intl
+apt install php8.2-ldap
+apt install php8.2-gd
+apt install php8.2-curl
+apt install php8.2-pgsql
+```
+
 
 ## Mise à jour technique
 

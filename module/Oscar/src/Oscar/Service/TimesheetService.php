@@ -27,6 +27,8 @@ use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\File\IHtmlToPdfFormatter;
+use Oscar\Formatter\Output\OutputHtmlStrategy;
+use Oscar\Formatter\Output\OutputWkhtmltopdfStrategy;
 use Oscar\Formatter\person\IPersonFormatter;
 use Oscar\Formatter\person\PersonToJsonBasic;
 use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
@@ -1874,10 +1876,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $html .= $pages;
         $html .= $close;
 
-        $this->getOscarConfigurationService()
-            ->getHtmlToPdfMethod()
-            ->setOrientation(IHtmlToPdfFormatter::ORIENTATION_LANDSCAPE)
-            ->convert($html, 'Synthèse-des-feuilles-de-temps.pdf');
+        $activityNum = $activity->getOscarNum();
+        $output = new OutputWkhtmltopdfStrategy();
+        $output->output($html, "Synthèse-annuelle-$activityNum---$year.html", OutputWkhtmltopdfStrategy::ORIENTATION_LANDSCAPE);
         die();
     }
 
@@ -2445,6 +2446,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a')
             ->innerJoin('a.workPackages', 'wp')
             ->innerJoin('wp.persons', 'wpp')
+            ->innerJoin('a.project', 'p')
             ->where('wpp.person = :person')
             ->getQuery()
             ->setParameter('person', $person)
@@ -2638,7 +2640,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         foreach ($declarantInActivities as $activity) {
             $activityDatas = [
                 'id' => $activity->getId(),
-                'acronym' => $activity->getAcronym(),
+                'acronym' => $activity->getProject()->getAcronym(),
                 'label' => $activity->getLabel(),
                 'workpackages' => [],
                 'total' => 0.0,
@@ -4071,7 +4073,16 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         return [];
     }
 
-    public function getTimesheetDatasPersonPeriod(Person $person, $period)
+    /**
+     * Retourne les données des feuilles de temps de la personne pour la période de temps donnée.
+     *
+     * @param Person $person
+     * @param $period
+     * @return array
+     * @throws OscarException
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getTimesheetDatasPersonPeriod(Person $person, $period) :array
     {
         $output = [];
 
@@ -4212,7 +4223,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             if (!array_key_exists($activity->getId(), $activities)) {
                 $activities[$activity->getId()] = [
                     'id' => $activity->getId(),
-                    'acronym' => $activity->getAcronym(),
+                    'acronym' => $activity->getProject()->getAcronym(),
                     'project' => (string)$activity->getProject(),
                     'project_id' => $activity->getProject()->getId(),
                     'label' => $activity->getLabel(),
