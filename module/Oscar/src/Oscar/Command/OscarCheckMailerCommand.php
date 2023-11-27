@@ -58,14 +58,19 @@ class OscarCheckMailerCommand extends OscarCommandAbstract
                     ])->setTo($oscarConfigurationService->getConfiguration('mailer.administrators'));
                     $mailer->send($message, true);
                     $io->section("Oscar a bien envoyé le mail de test");
+                    return self::SUCCESS;
                 } catch (\Exception $err) {
                     $io->error($err->getMessage() . "\n" . $err->getTraceAsString());
+                    return self::FAILURE;
                 }
+            } else {
+                return self::INVALID;
             }
 
         } catch (\Exception $e) {
             $io->error($e->getMessage());
             $io->error($e->getTraceAsString());
+            return self::FAILURE;
         }
 
     }

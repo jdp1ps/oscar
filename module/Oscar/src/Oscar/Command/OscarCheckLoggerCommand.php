@@ -27,7 +27,7 @@ class OscarCheckLoggerCommand extends OscarCommandAbstract
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -75,5 +75,7 @@ class OscarCheckLoggerCommand extends OscarCommandAbstract
 
         $logFile = realpath($oscarConfig->getLoggerFilePath());
         $io->note("Vérifier le fichier '$logFile' : tail -f $logFile");
+
+        return self::SUCCESS;
     }
 }

@@ -470,6 +470,7 @@ class Organization implements ResourceInterface, IConnectedObject
     public function setTypeObj($typeObj)
     {
         $this->typeObj = $typeObj;
+        return $this;
     }
 
     /**
@@ -570,24 +571,10 @@ class Organization implements ResourceInterface, IConnectedObject
         return false;
     }
 
-
-    public function hasResponsable(Person $person)
-    {
-        $responsables = [ProjectMember::ROLE_RESPONSABLE];
-        /** @var OrganizationPerson $member */
-        foreach ($this->getPersons() as $member) {
-            if ($member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function touch()
     {
         $this->setDateUpdated(new \DateTime());
     }
-
 
     /**
      * @return string

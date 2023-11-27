@@ -117,6 +117,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $this->getEntityManager()->getRepository(OrganizationRole::class);
     }
 
+    public function getOrganizationRepository() :OrganizationRepository
+    {
+        return $this->getEntityManager()->getRepository(Organization::class);
+    }
+
+    public function getOrganizationWithRnsr() :array
+    {
+        return $this->getOrganizationRepository()->getOrganizationsWithRnsr();
+    }
+
     /**
      * Retourne la liste des Roles disponible pour une organisation dans une activité.
      */
@@ -395,11 +405,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         }
 
         return $activities;
-    }
-
-    protected function getOrganizationRepository(): OrganizationRepository
-    {
-        return $this->getEntityManager()->getRepository(Organization::class);
     }
 
     public function getSubStructure(int $organizationId): array

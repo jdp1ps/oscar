@@ -30,7 +30,7 @@ class OscarAuthPassCommand extends OscarCommandAbstract
             ->addOption('ldap', 'p', InputOption::VALUE_NONE, "Définit le mot de passe sur la source LDAP");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -55,7 +55,7 @@ class OscarAuthPassCommand extends OscarCommandAbstract
             $output->writeln("Modification du mot de passe pour <bold>$authentification</bold>.");
         } catch (\Exception $e) {
             $output->writeln("<error>Impossible de charger l'authentification : " . $e->getMessage() . ".</error>");
-            return;
+            return self::FAILURE;
         }
 
         if ($ldap) {
@@ -78,7 +78,7 @@ class OscarAuthPassCommand extends OscarCommandAbstract
         );
 
         if (!$helper->ask($input, $output, $question)) {
-            return;
+            return self::FAILURE;
         }
 
         try {
@@ -86,10 +86,12 @@ class OscarAuthPassCommand extends OscarCommandAbstract
             $oscarUserContextService->getEntityManager()->persist($authentification);
             $oscarUserContextService->getEntityManager()->flush();
             $io->success("Le mot de passe de $authentification a bien été modifié.");
+            return self::SUCCESS;
         } catch (\Exception $e) {
             $output->writeln(
                 "<error>Impossible de modifier le mot de passe de $authentification : " . $e->getMessage()
             );
+            return self::FAILURE;
         }
     }
 }

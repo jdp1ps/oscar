@@ -29,28 +29,25 @@ class OscarAuthPromoteCommand extends OscarCommandAbstract
         $this
             ->setDescription("Permet d'ajouter un rôle applicatif à une authentification")
             ->addOption('login', 'l', InputOption::VALUE_OPTIONAL, 'Identifiant du compte', null)
-            ->addOption('role', 'r', InputOption::VALUE_OPTIONAL, 'Rôle à attribuer', null)
-        ;
+            ->addOption('role', 'r', InputOption::VALUE_OPTIONAL, 'Rôle à attribuer', null);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
         $io = new SymfonyStyle($input, $output);
         $io->title("Affection de rôle à un utilisateur");
-        $helper = $this->getHelper('question');
 
         /** @var OscarUserContext $oscarUserContextService */
         $oscarUserContextService = $this->getServicemanager()->get(OscarUserContext::class);
 
-        /** @var EntityManager $em */
         $em = $oscarUserContextService->getEntityManager();
 
         // -------------------------------------------------------------------------------------------------------------
         // LOGIN
         $io->section("Identifiant : ");
         $login = trim($input->getOption('login'));
-        if( !$login ){
+        if (!$login) {
             $login = $io->ask("Entrez l'identifiant de connexion : ");
         }
 
@@ -62,10 +59,9 @@ class OscarAuthPromoteCommand extends OscarCommandAbstract
             }
             $io->writeln("Rôle déjà utilisés pour $authentification : ");
             $io->listing($existRoles);
-
-        } catch ( \Exception $e ){
+        } catch (\Exception $e) {
             $io->error(sprintf("Problème d'identifiant (%s) : %s", $login, $e->getMessage()));
-            return;
+            return self::FAILURE;
         }
 
         // -------------------------------------------------------------------------------------------------------------
@@ -86,19 +82,21 @@ class OscarAuthPromoteCommand extends OscarCommandAbstract
         $role = $oscarUserContextService->getRoleByRoleId($roleIdSelected);
         if (!$role) {
             $io->error("Impossible de charge ce rôle.");
-            return;
+            return self::FAILURE;
         }
 
-        if( in_array($role->getRoleId(), $existRoles) ){
+        if (in_array($role->getRoleId(), $existRoles)) {
             $io->error("$authentification as déjà le rôle '$role'.");
-            return;
+            return self::FAILURE;
         }
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion(sprintf("Ajouter le rôle %s à %s(%s) (y|N) ?", $role, $authentification, $login), false);
+        $question = new ConfirmationQuestion(
+            sprintf("Ajouter le rôle %s à %s(%s) (y|N) ?", $role, $authentification, $login), false
+        );
 
         if (!$helper->ask($input, $output, $question)) {
-            return;
+            return self::FAILURE;
         }
 
         $userId = $authentification->getId();
@@ -106,14 +104,15 @@ class OscarAuthPromoteCommand extends OscarCommandAbstract
 
         try {
             //$io->writeln("insert $userId, $roleId");
-            $query = $em->createNativeQuery("INSERT INTO authentification_role VALUES($userId, $roleId)",
-                new ResultSetMapping());
+            $query = $em->createNativeQuery(
+                "INSERT INTO authentification_role VALUES($userId, $roleId)",
+                new ResultSetMapping()
+            );
             $query->execute();
+            return self::SUCCESS;
         } catch (UniqueConstraintViolationException $e) {
             $io->error(sprintf("Le compte '%s' a déjà ce rôle.", $authentification));
-
-            return;
+            return self::FAILURE;
         }
-
     }
 }

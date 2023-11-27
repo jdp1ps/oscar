@@ -9,6 +9,7 @@ namespace Oscar\Factory;
 
 
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationType;
 
 /**
  * Class JsonToPersonFactory
@@ -17,9 +18,20 @@ use Oscar\Entity\Organization;
  */
 class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
 {
-    public function __construct()
+    public function __construct($types)
     {
         parent::__construct(['uid', 'code', 'shortname']);
+        $this->types = $types;
+    }
+
+    private ?array $types;
+
+    protected function getTypeObj( string $typeLabel ) :?OrganizationType
+    {
+        if( is_array($this->types) && array_key_exists($typeLabel, $this->types) ){
+            return $this->types[$typeLabel];
+        }
+        return null;
     }
 
     /**
@@ -50,7 +62,6 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
                 $this->getFieldValue($jsonData, 'uid')
             );
         }
-
         $object
             ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', null)))
             ->setLabintel($this->getFieldValue($jsonData, 'labintel', null))
@@ -63,6 +74,7 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setUrl($this->getFieldValue($jsonData, 'url'))
             ->setSiret($this->getFieldValue($jsonData, 'siret'))
             ->setType($this->getFieldValue($jsonData, 'type'))
+            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type')))
 
             // Ajout de champs
             ->setDuns($this->getFieldValue($jsonData, 'duns'))
@@ -81,7 +93,6 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
                     ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
             }
         }
-
 
         return $object;
     }

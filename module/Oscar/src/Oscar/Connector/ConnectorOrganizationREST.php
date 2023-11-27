@@ -67,8 +67,10 @@ class ConnectorOrganizationREST extends AbstractConnector
      */
     protected function factory(){
         static $factory;
-        if( $factory === null )
-            $factory = new JsonToOrganization();
+        if( $factory === null ) {
+            $types = $this->getRepository()->getTypesKeyLabel();
+            $factory = new JsonToOrganization($types);
+        }
         return $factory;
     }
 

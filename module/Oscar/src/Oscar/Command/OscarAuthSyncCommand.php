@@ -10,6 +10,7 @@ namespace Oscar\Command;
 
 
 use Doctrine\ORM\EntityManager;
+use Laminas\Crypt\Password\Bcrypt;
 use Oscar\Connector\ConnectorAuthentificationJSON;
 use Oscar\Formatter\ConnectorRepportToPlainText;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,11 +26,10 @@ class OscarAuthSyncCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Synchronisation des authentifications depuis un fichier JSON")
-            ->addArgument('jsonPath', InputArgument::REQUIRED, 'Emplacement du fichier JSON')
-        ;
+            ->addArgument('jsonPath', InputArgument::REQUIRED, 'Emplacement du fichier JSON');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->addOutputStyle($output);
 
@@ -42,22 +42,25 @@ class OscarAuthSyncCommand extends OscarCommandAbstract
 
             if (!$jsonpath) {
                 $io->error("ERR : Vous devez spécifier le chemin complet vers le fichier JSON");
-                return;
+                return self::FAILURE;
             }
 
-            if( !file_exists($jsonpath) ){
+            if (!file_exists($jsonpath)) {
                 $io->error("ERR : '$jsonpath' n'est pas un emplacement de fichier valide");
-                return;
+                return self::FAILURE;
             }
-
 
             $fileContent = file_get_contents($jsonpath);
-            if (!$fileContent)
-                die("ERR : Oscar n'a pas réussi à charger le contenu du fichier '$jsonpath'");
+            if (!$fileContent) {
+                $io->error("ERR : Oscar n'a pas réussi à charger le contenu du fichier '$jsonpath'");
+                return self::FAILURE;
+            }
 
             $datas = json_decode($fileContent);
-            if (!$datas)
-                die("ERR : Les données du fichier '$jsonpath' n'ont pas pu être converties au format JSON.");
+            if (!$datas) {
+                $io->error("ERR : Les données du fichier '$jsonpath' n'ont pas pu être converties au format JSON.");
+                return self::FAILURE;
+            }
 
             // Système pour crypter les mots de pass (Zend)
             $options = $this->getServicemanager()->get('zfcuser_module_options');
@@ -72,10 +75,10 @@ class OscarAuthSyncCommand extends OscarCommandAbstract
             $connectorFormatter = new ConnectorRepportToPlainText();
 
             echo $connectorFormatter->format($repport);
-
         } catch (\Exception $ex) {
             $io->error("ERR : " . $ex->getMessage());
+            return self::FAILURE;
         }
-
+        return self::SUCCESS;
     }
 }

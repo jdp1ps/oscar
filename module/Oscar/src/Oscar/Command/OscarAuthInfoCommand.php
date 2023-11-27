@@ -37,7 +37,7 @@ class OscarAuthInfoCommand extends OscarCommandAbstract
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -52,7 +52,7 @@ class OscarAuthInfoCommand extends OscarCommandAbstract
             $authentification = $oscaruserContext->getAuthentificationByLogin($login, true);
         } catch (\Exception $e){
             $io->error($e->getMessage());
-            return;
+            return self::FAILURE;
         }
 
         //////////////////////////////////////////////////////////////////////////////////:
@@ -99,8 +99,10 @@ class OscarAuthInfoCommand extends OscarCommandAbstract
 
         if( !$person ){
             $io->warning("Aucune personne associée à cette authentification");
+            return self::FAILURE;
         } else {
             $io->writeln(sprintf("Fiche personne N°%s", $person->getId()));
+            return self::SUCCESS;
         }
 
     }
