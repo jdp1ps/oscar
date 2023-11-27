@@ -18,6 +18,7 @@ use Oscar\Entity\Country3166;
 use Oscar\Entity\Country3166Repository;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\OrganizationRoleRepository;
 use Oscar\Entity\OrganizationType;
@@ -111,6 +112,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getOrganizationRoleRepository() :OrganizationRoleRepository
     {
         return $this->getEntityManager()->getRepository(OrganizationRole::class);
+    }
+
+    public function getOrganizationRepository() :OrganizationRepository
+    {
+        return $this->getEntityManager()->getRepository(Organization::class);
+    }
+
+    public function getOrganizationWithRnsr() :array
+    {
+        return $this->getOrganizationRepository()->getOrganizationsWithRnsr();
     }
 
     /**

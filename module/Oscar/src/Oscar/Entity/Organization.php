@@ -412,6 +412,7 @@ class Organization implements ResourceInterface, IConnectedObject
     public function setTypeObj($typeObj)
     {
         $this->typeObj = $typeObj;
+        return $this;
     }
 
     /**

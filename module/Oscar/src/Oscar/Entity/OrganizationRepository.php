@@ -232,5 +232,31 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         return $qb->getSingleResult();
     }
 
+    /**
+     * @return array
+     */
+    public function getOrganizationsWithRnsr() :array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder('o')
+            ->select('o')
+            ->from(Organization::class, 'o')
+            ->where("o.rnsr IS NOT NULL AND o.rnsr != ''")
+            ->getQuery()
+        ;
+
+        return $qb->getResult();
+    }
+
+    public function getTypesKeyLabel() :array
+    {
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findAll();
+        $out = [];
+        /** @var OrganizationType $organizationType */
+        foreach ($types as $organizationType){
+            $out[$organizationType->getLabel()] = $organizationType;
+        }
+        return $out;
+    }
+
 
 }
