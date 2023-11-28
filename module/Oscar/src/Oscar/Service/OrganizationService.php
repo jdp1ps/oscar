@@ -30,7 +30,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\OscarFormatterFactory;
 use Oscar\Import\Organization\ImportOrganizationLdapStrategy;
-use Oscar\Strategy\Search\OrganizationSearchStrategy;
+use Oscar\Strategy\Search\IOrganizationSearchStrategy;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -545,7 +545,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
     /**
-     * @return OrganizationSearchStrategy
+     * @return IOrganizationSearchStrategy
      */
     public function getSearchEngineStrategy()
     {

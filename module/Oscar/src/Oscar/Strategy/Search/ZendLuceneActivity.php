@@ -13,7 +13,7 @@ use Oscar\Entity\Activity;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\StringUtils;
 
-class ActivityZendLucene implements ActivitySearchStrategy
+class ZendLuceneActivity implements IActivitySearchStrategy
 {
     private $index;
     private $path;
@@ -99,7 +99,7 @@ class ActivityZendLucene implements ActivitySearchStrategy
     /**
      * @param $id
      */
-    public function searchDelete( $id )
+    public function deleteActivity( $id )
     {
         $hits = $this->getIndex()->find('key:'.md5($id));
         foreach ($hits as $hit) {
@@ -177,10 +177,10 @@ class ActivityZendLucene implements ActivitySearchStrategy
         $this->getIndex()->addDocument($corpus);
     }
 
-    public function searchUpdate( Activity $activity )
+    public function updateActivity( Activity $activity )
     {
         try {
-            $this->searchDelete($activity->getId());
+            $this->deleteActivity($activity->getId());
         } catch(\Exception $e ){
 
         }

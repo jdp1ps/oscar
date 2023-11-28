@@ -23,7 +23,7 @@ abstract class OscarCommandAbstract extends Command
     const COMMAND_ACTIVITY_SEARCH_REINDEX_ALL = 'activity:search-rebuild';
     const COMMAND_ACTIVITY_NOTIFICATION_UPDATE = 'activity:notification:update';
 
-    const COMMAND_DATACONTROL_PFI = 'datacontrol:pfi';
+    const COMMAND_DATACONTROL_PFI = 'check:pfi';
 
 
     const COMMAND_NOTIFICATIONS_REBUILD = 'notifications:rebuild';
@@ -51,9 +51,8 @@ abstract class OscarCommandAbstract extends Command
         return $this->servicemanager;
     }
 
-
-
-    public function addOutputStyle(OutputInterface $output) {
+    public function addOutputStyle(OutputInterface $output) :void
+    {
         $outputStyle = new OutputFormatterStyle('cyan', 'default', ['bold']);
         $output->getFormatter()->setStyle('id', $outputStyle);
 

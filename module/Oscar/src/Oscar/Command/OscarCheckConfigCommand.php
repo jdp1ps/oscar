@@ -350,7 +350,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
 
             // ELASTIC SEARCH
-            if ($searchClass == 'Oscar\Strategy\Search\ActivityElasticSearch') {
+            if ($searchClass == 'Oscar\Strategy\Search\ElasticActivitySearch') {
                 $io->write(" * Moteur Elastic Search ");
                 $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
 

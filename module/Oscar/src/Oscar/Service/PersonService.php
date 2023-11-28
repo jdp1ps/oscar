@@ -27,7 +27,7 @@ use Oscar\Entity\RoleRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\OscarFormatterConst;
-use Oscar\Strategy\Search\PersonSearchStrategy;
+use Oscar\Strategy\Search\IPersonISearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -71,7 +71,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
-     * @return PersonSearchStrategy
+     * @return IPersonISearchStrategy
      */
     public function getSearchEngineStrategy()
     {

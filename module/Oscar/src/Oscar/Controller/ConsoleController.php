@@ -43,8 +43,8 @@ use Oscar\Service\ConfigurationParser;
 use Oscar\Service\ConnectorService;
 use Oscar\Service\MailingService;
 use Oscar\Service\NotificationService;
-use Oscar\Strategy\Search\ActivityElasticSearch;
-use Oscar\Strategy\Search\ActivityZendLucene;
+use Oscar\Strategy\Search\ElasticActivitySearch;
+use Oscar\Strategy\Search\ZendLuceneActivity;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -743,7 +743,7 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
             $searchClass = $config->getConfiguration('oscar.strategy.activity.search_engine.class');
 
             // ELASTIC SEARCH
-            if( $searchClass == ActivityElasticSearch::class ){
+            if( $searchClass == ElasticActivitySearch::class ){
 
                 $this->getConsole()->write(" * Moteur Elastic Search ", ColorInterface::WHITE);
                 $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
@@ -765,7 +765,7 @@ class ConsoleController extends AbstractConsoleController implements UseEntityMa
                 }
             }
             // LUCENE
-            elseif ($searchClass == ActivityZendLucene::class ){
+            elseif ($searchClass == ZendLuceneActivity::class ){
                 $params = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
                 $this->checkPath($params[0], "Dossier pour l'index de recherche LUCENE");
             }

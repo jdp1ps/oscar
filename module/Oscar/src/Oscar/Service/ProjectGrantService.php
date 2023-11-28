@@ -50,7 +50,7 @@ use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\OscarFormatterFactory;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
-use Oscar\Strategy\Search\ActivitySearchStrategy;
+use Oscar\Strategy\Search\IActivitySearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseActivityTypeService;
@@ -177,8 +177,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
-
-
+    /**
+     * @param $regex
+     * @return array
+     */
     public function checkPFIRegex($regex): array
     {
         $out = [
@@ -1546,9 +1548,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
 
     /**
-     * @return ActivitySearchStrategy
+     * @return IActivitySearchStrategy
      */
-    private function getSearchEngineStrategy()
+    public function getSearchEngineStrategy()
     {
         static $searchStrategy;
         if ($searchStrategy === null) {
@@ -1572,13 +1574,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function searchDelete($id)
     {
         $this->getLoggerService()->debug("[elastic:activity:delete] Activity:" . $id);
-        $this->getSearchEngineStrategy()->searchDelete($id);
+        $this->getSearchEngineStrategy()->deleteActivity($id);
     }
 
     public function searchUpdate(Activity $activity)
     {
         $this->getLoggerService()->debug("[elastic:activity:update] Activity:" . $activity->getId());
-        $this->getSearchEngineStrategy()->searchUpdate($activity);
+        $this->getSearchEngineStrategy()->updateActivity($activity);
     }
 
     public function testGearmanError()
