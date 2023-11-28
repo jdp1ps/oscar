@@ -26,7 +26,7 @@ class OscarCheckSequenceNumCommand extends OscarCommandAbstract
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -60,6 +60,7 @@ class OscarCheckSequenceNumCommand extends OscarCommandAbstract
         ];
 
         $entityManager = $this->getServicemanager()->get(EntityManager::class);
+        $return = self::SUCCESS;
 
         foreach ($sequences as $sequence) {
             $result = new ResultSetMapping();
@@ -74,7 +75,10 @@ class OscarCheckSequenceNumCommand extends OscarCommandAbstract
             } catch (\Exception $e) {
                 $io->writeln("<error>ERROR</error> $msg");
                 $io->error(sprintf("<bold>[] %s</bold> : %s", $e->getCode(), $e->getMessage(), $e->getTraceAsString()));
+                $return = self::FAILURE;
             }
         }
+
+        return $return;
     }
 }

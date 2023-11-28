@@ -17,124 +17,25 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Exception\OscarException;
 
-class OrganizationElasticSearch implements OrganizationSearchStrategy
+class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganizationSearchStrategy
 {
-    private $elasticSearchClient;
-    private $hosts;
-    private $index = 'oscar-organization';
-    private $type = 'organization';
-
-    /**
-     * ActivityElasticSearch constructor.
-     * @param $hosts
-     */
-    public function __construct($hosts)
+    public function getIndex(): string
     {
-        $this->hosts = $hosts;
+        return 'oscar-organization';
     }
 
-    /**
-     * @return string
-     */
-    public function getIndex()
+    public function getType(): string
     {
-        return $this->index;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    public function getHosts()
-    {
-        return $this->hosts;
-    }
-
-    /**
-     * @return \Elasticsearch\Client
-     */
-    protected function getClient()
-    {
-        if (!$this->elasticSearchClient) {
-            $this->elasticSearchClient = ClientBuilder::create()
-                ->setHosts($this->getHosts())
-                ->build();
-        }
-
-
-        return $this->elasticSearchClient;
+        return 'organization';
     }
 
 
-    public function add(Organization $organization)
+    public function add(Organization $organization) :callable|array
     {
-        $params = ['body' => []];
-
-        $params['body'][] = [
-            'index' => [
-                '_index' => $this->getIndex(),
-                '_type' => $this->getType(),
-                '_id' => $organization->getId(),
-            ]
-        ];
-
-        $params['body'][] = $this->getIndexableDatas($organization);
-
-        return $this->getClient()->bulk($params);
+        $this->addItem($organization);
     }
 
-    /**
-     * La reconstruction d'index utilise BULK pour des raisons de performance.
-     *
-     * @param $activities
-     */
-    public function rebuildIndex($organizations)
-    {
-        $repport = new ConnectorRepport();
-        $this->resetIndex();
-        $repport->addnotice("Index réinitialisé");
-
-
-        /****/
-
-
-        $i = 0;
-        /** @var Activity $organization */
-        foreach ($organizations as $organization) {
-            $i++;
-            $repport->addadded((string)$organization);
-            $params['body'][] = [
-                'index' => [
-                    '_index' => $this->getIndex(),
-                    '_type' => $this->getType(),
-                    '_id' => $organization->getId()
-                ]
-            ];
-
-            $params['body'][] = $this->getIndexableDatas($organization);
-
-            // On envoi par paquet de 1000
-            if ($i % 1000 == 0) {
-                $responses = $this->getClient()->bulk($params);
-
-                // clean datas
-                $params = ['body' => []];
-                unset($responses);
-            }
-        }
-
-        if (!empty($params['body'])) {
-            $this->getClient()->bulk($params);
-        }
-
-        return $repport;
-    }
-
-    protected function getIndexableDatas(Organization $organization)
+    public function getIndexableDatas(mixed $organization) :array
     {
         $projects = [];
         $activities = [];
@@ -183,159 +84,70 @@ class OrganizationElasticSearch implements OrganizationSearchStrategy
         ];
     }
 
-    public function search($search)
-    {
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'size' => 10000,
-                "query" => [
-                    'multi_match' => [
-                        'fields' => [
-                            'code^7',
-                            'shortname^9',
-                            'fullname^5',
-                            'description',
-                            'email',
-                            'city',
-                            'siret',
-                            'country',
-                            'connectors',
-                            'zipcode',
-                            'persons',
-                            'activities'
-                        ],
-                        "fuzziness"=> "auto",
-                        'query' => $search,
-
-                    ]
-                ]
-            ]
-        ];
-
-        $response = $this->getClient()->search($params);
-        $ids = [];
-
-        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
-            foreach ($response['hits']['hits'] as $hit) {
-                $ids[] = $hit["_id"];
-            }
-        }
-
-        return $ids;
-    }
-
-    public function remove($id)
-    {
-        $parms = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'id' => "$id"
-        ];
-        return $this->getClient()->delete($parms);
-    }
-
-    public function update(Organization $organization)
-    {
-        $params = [
-            'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'id' => $organization->getId(),
-            'body' => [
-                'doc' => $this->getIndexableDatas($organization)
-            ]
-        ];
-        try {
-            return $this->getClient()->update($params);
-        } catch (Missing404Exception $e) {
-            return $this->add($organization);
-        }
-    }
-
-    public function resetIndex()
-    {
-        $params = [
-            'index' => $this->getIndex()
-        ];
-
-        try {
-            $this->getClient()->indices()->delete($params);
-        } catch (Missing404Exception $e) {
-        } catch (\Exception $e) {
-            throw $e;
-        }
-//
-//        try {
-//            $this->getClient()->indices()->create(
-//                [
-//                    'index' => $this->getIndex(),
-//                    'body' => [
-//                        'settings' => [
-//                            'analysis' => [
-//                                'analyzer' => [
-//                                    'noaccent' => [
-//                                        "type" => "custom",
-//                                        "tokenizer" => "standard",
-//                                        "filter" => ['asciifolding', "lowercase"]
-//                                    ]
-//                                ],
-//                            ]
+//    public function search($search)
+//    {
+//        $params = [
+//            'index' => $this->getIndex(),
+//            'type' => $this->getType(),
+//            'body' => [
+//                'size' => 10000,
+//                "query" => [
+//                    'multi_match' => [
+//                        'fields' => [
+//                            'code^7',
+//                            'shortname^9',
+//                            'fullname^5',
+//                            'description',
+//                            'email',
+//                            'city',
+//                            'siret',
+//                            'country',
+//                            'connectors',
+//                            'zipcode',
+//                            'persons',
+//                            'activities'
 //                        ],
-//                        'mappings' => [
-//                            "organization" => [
-//                                'properties' => [
-//                                    'code' => [
-//                                        'type' => 'keyword',
-//                                    ],
-//                                    'shortname' => [
-//                                        'type' => 'text',
-////                                        'analyzer' => 'noaccent'
-//                                    ],
-//                                    'fullname' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                    'description' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                    'email' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                    'city' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                    'siret' => [
-//                                        'type' => 'keyword',
-//                                    ],
-//                                    'country' => [
-//                                        'type' => 'keyword',
-//                                    ],
-//                                    'connectors' => [
-//                                        'type' => 'keyword',
-//                                    ],
-//                                    'zipcode' => [
-//                                        'type' => 'keyword',
-//                                    ],
-//                                    'persons' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                    'activities' => [
-////                                        'analyzer' => 'noaccent',
-//                                        'type' => 'text',
-//                                    ],
-//                                ]
-//                            ]
-//                        ]
+//                        "fuzziness"=> "auto",
+//                        'query' => $search,
+//
 //                    ]
 //                ]
-//            );
-//        } catch (\Exception $e) {
-//            throw new OscarException("Impossible de créer l'index de recherche : \n---\n" . $e->getMessage());
+//            ]
+//        ];
+//
+//        $response = $this->getClient()->search($params);
+//        $ids = [];
+//
+//        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
+//            foreach ($response['hits']['hits'] as $hit) {
+//                $ids[] = $hit["_id"];
+//            }
 //        }
+//
+//        return $ids;
+//    }
+
+
+    public function getFieldsSearchedWeighted(): array
+    {
+        return [
+            'code^7',
+            'shortname^9',
+            'fullname^5',
+            'description',
+            'email',
+            'city',
+            'siret',
+            'country',
+            'connectors',
+            'zipcode',
+            'persons',
+            'activities'
+        ];
+    }
+
+    public function update(Organization $entity): callable|array
+    {
+        return $this->searchUpdate($entity);
     }
 }

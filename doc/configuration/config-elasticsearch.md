@@ -17,7 +17,7 @@ return array(
         'strategy' => [
             'activity' => [
                 'search_engine' => [
-                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
+                    'class' => \Oscar\Strategy\Search\ElasticActivitySearch::class,
                     'params' => [['127.0.0.1:9200']]
                 ]
             ]
@@ -41,7 +41,7 @@ php bin/oscar.php activity:search-rebuild
 
 Depuis *Oscar 2.10 (Creed)*, la recherche des personnes utilise le système de recherche basé sur **ElasticSearch** afin d'obtenir des résultats plus pertinents.
 
-Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` : 
+Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` :
 
 ```php
 <?php
@@ -55,7 +55,7 @@ return array(
     'person' => [
       'search_engine' => [
         // Elasticsearch
-        'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
+        'class' => \Oscar\Strategy\Search\IPersonElasticSearch::class,
         'params' => [['localhost:9200']]
       ]
     ]
@@ -74,7 +74,7 @@ php bin/oscar.php persons:search-rebuild
 
 Depuis *Oscar 2.10 (Creed)*, la recherche des organisations utilise le système de recherche basé sur **ElasticSearch** afin d'obtenir des résultats plus pertinents.
 
-Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` : 
+Vous devez configurer la stratégie de recherche dans le fichier de configuration `config/autoload/local.php` :
 
 ```php
 <?php

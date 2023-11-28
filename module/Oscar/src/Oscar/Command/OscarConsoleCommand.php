@@ -28,7 +28,7 @@ class OscarConsoleCommand extends OscarCommandAbstract
             ->addArgument('params', null, InputOption::VALUE_OPTIONAL, "paramêtres");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -104,7 +104,7 @@ class OscarConsoleCommand extends OscarCommandAbstract
 
             default :
                 $this->getServicemanager()->get('Logger')->error("BAD COMMAND $action");
-                break;
+                return self::FAILURE;
         }
     }
 }
