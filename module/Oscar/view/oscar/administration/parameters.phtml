@@ -167,11 +167,15 @@
                             </p>
                             <p>
                                 Dont {{ verifyOk.length }} <strong>valide : </strong>
-                                {{ verifyOk.join(', ') }}
+                                <span class="cartouche success xs" v-for="k in verifyOk">
+                                    {{ k }}
+                                </span>
                             </p>
                             <p>
                                 Et {{ verifyWarnings.length }} <strong>non-Valide : </strong>
-                                {{ verifyWarnings.join(', ') }}
+                                <span class="cartouche danger xs" v-for="k in verifyWarnings">
+                                    {{ k }}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -241,7 +245,7 @@
                             el: "#verifEl",
                             data(){
                                 return {
-                                    reg: "<?= $pfi_strict_format ?>",
+                                    reg: "<?= addslashes($pfi_strict_format) ?>",
                                     useStrict: <?= $pfi_strict ? "true" : "false" ?>,
                                     changed: false,
                                     canSave: true,
@@ -260,7 +264,8 @@
 
                                 },
                                 handlerVerify() {
-                                    this.$http.get('?a=verifypfi&reg=' +this.reg).then(
+                                    console.log(this.reg);
+                                    this.$http.get('?a=verifypfi&reg=' +encodeURI(this.reg)).then(
                                         ok => {
                                             console.log(ok);
                                             this.verify = ok.data.pfi.count;
