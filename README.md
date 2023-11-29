@@ -1,10 +1,11 @@
 # OSCAR 2.12 "Spartan" (Documentation technique)
 
 ### Version actuelle
-- **VERSION 2.12.1 "Spartan"** ([Note de version](doc/versions/version-2.12.1.md))
-- **VERSION 2.12 "Spartan"** ([Note de version](doc/versions/version-2.12.md) / [Mise à jour technique](doc/upgrade-to-spartan.md) )
+- **VERSION 2.13** "Ripley" ([Mise à jour](doc/versions/version-2.13-ripley.md))
   
 ### Version antérieurs
+- VERSION 2.12.1 "Spartan" ([Note de version](doc/versions/version-2.12.1.md))
+- VERSION 2.12 "Spartan" ([Note de version](doc/versions/version-2.12.md) / [Mise à jour technique](doc/upgrade-to-spartan.md) )
  - VERSION 2.11 "MacClane" ([Note de version](doc/versions/version-2.11.md))
  - VERSION 2.10 "Creed" ([Note de version](doc/versions/version-2.10.md))
  - VERSION 2.9 "Matrix" ([Note de version](doc/versions/version-2.9.md))
