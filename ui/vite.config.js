@@ -29,6 +29,7 @@ export default defineConfig({
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
+        declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {

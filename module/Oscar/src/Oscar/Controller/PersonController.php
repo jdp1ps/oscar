@@ -289,14 +289,18 @@ class PersonController extends AbstractOscarController
         $justXHR = true;
 
 
-
         // On test les accès
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)) {
             $allow = true;
             $justXHR = false;
         } else {
             $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
-                [Privileges::ACTIVITY_INDEX, Privileges::ACTIVITY_PERSON_MANAGE, Privileges::PROJECT_PERSON_MANAGE, Privileges::ORGANIZATION_EDIT]
+                [
+                    Privileges::ACTIVITY_INDEX,
+                    Privileges::ACTIVITY_PERSON_MANAGE,
+                    Privileges::PROJECT_PERSON_MANAGE,
+                    Privileges::ORGANIZATION_EDIT
+                ]
             );
         }
 
@@ -320,7 +324,7 @@ class PersonController extends AbstractOscarController
 
         // Donnèes GET
         $page = (int)$this->params()->fromQuery('page', 1);
-        $filteractive = (int) $this->params()->fromQuery('filteractive', 0);
+        $filteractive = (int)$this->params()->fromQuery('filteractive', 0);
         $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
@@ -601,6 +605,7 @@ class PersonController extends AbstractOscarController
         $period = $this->params()->fromQuery('period', date('Y-m'));
 
         if ($this->isAjax() || $format == 'json') {
+
             $method = $this->getHttpXMethod();
             switch ($method) {
                 case "GET":
