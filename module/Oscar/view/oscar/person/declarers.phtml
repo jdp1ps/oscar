@@ -1,4 +1,9 @@
 <div class="container">
+    <div id="declarers-list" data-entrypoint="<?= $this->url('person/declarers') ?>"></div>
+    <?= $this->Vite()->addJs('src/DeclarersList.js'); ?>
+    <?php
+    /****
+
     <h1><i class="icon-group"></i> Déclarants</h1>
     <div id="declarers"></div>
     <script>
@@ -12,4 +17,5 @@
             })
         })
     </script>
+     ****/ ?>
 </div>

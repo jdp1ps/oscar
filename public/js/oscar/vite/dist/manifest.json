@@ -54,6 +54,22 @@
     "isEntry": true,
     "src": "src/AdminTypeDocument.js"
   },
+  "src/DeclarersList.css": {
+    "file": "assets/DeclarersList-87a946a0.css",
+    "src": "src/DeclarersList.css"
+  },
+  "src/DeclarersList.js": {
+    "css": [
+      "assets/DeclarersList-87a946a0.css"
+    ],
+    "file": "assets/declarerslist-9d77481d.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js"
+    ],
+    "isEntry": true,
+    "src": "src/DeclarersList.js"
+  },
   "src/OrganizationFiche.css": {
     "file": "assets/OrganizationFiche-058e2475.css",
     "src": "src/OrganizationFiche.css"
