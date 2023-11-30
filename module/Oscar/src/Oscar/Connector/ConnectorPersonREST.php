@@ -300,6 +300,4 @@ class ConnectorPersonREST extends AbstractConnector
             throw new \Exception($msg);
         }
     }
-
-
 }
