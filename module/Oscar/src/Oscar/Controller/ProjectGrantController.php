@@ -82,6 +82,7 @@ use Laminas\Mvc\Console\View\Renderer;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Laminas\View\Renderer\PhpRenderer;
+use PhpOffice\PhpSpreadsheet\Settings;
 
 /**
  * Controlleur pour les Activités de recherche. Le nom du controlleur est (il
@@ -797,7 +798,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         }
         $config = $configDocuments[$doc];
 
-        Settings::setOutputEscapingEnabled(true);
+        //setOutputEscapingEnabled(true);
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($config['template']);
 
         foreach ($documentDatas as $key => $value) {
