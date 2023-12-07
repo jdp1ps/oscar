@@ -390,7 +390,7 @@ return array(
                 'cache' => 'array',
                 'paths' => array(
                     __DIR__ . '/../../module/Oscar/src/Oscar/Entity',
-                    __DIR__ . '/../../module/UnicaenSignature/src/Entity/Db',
+                   // __DIR__ . '/../../module/UnicaenSignature/src/Entity/Db',
                 ),
             ),
         ),
