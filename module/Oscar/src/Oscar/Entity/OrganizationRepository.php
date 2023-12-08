@@ -193,6 +193,10 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
     }
 
+    /**
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getObjectByConnectorID($connectorName, $connectorID)
     {
         return $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
@@ -200,7 +204,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->getSingleResult();
     }
 
-    public function getOrganisationByCode( $code ){
+    /**
+     * @param string $code
+     * @return Organization
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getOrganisationByCode( string $code ){
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
