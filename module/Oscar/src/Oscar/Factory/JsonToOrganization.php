@@ -26,9 +26,9 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
 
     private ?array $types;
 
-    protected function getTypeObj( string $typeLabel ) :?OrganizationType
+    protected function getTypeObj(string $typeLabel): ?OrganizationType
     {
-        if( is_array($this->types) && array_key_exists($typeLabel, $this->types) ){
+        if (is_array($this->types) && array_key_exists($typeLabel, $this->types)) {
             return $this->types[$typeLabel];
         }
         return null;
@@ -80,6 +80,13 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setDuns($this->getFieldValue($jsonData, 'duns'))
             ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra'))
             ->setRnsr($this->getFieldValue($jsonData, 'rnsr'));
+
+        if (property_exists($jsonData, 'parent')) {
+            echo $jsonData->code . " a un parent '" . $jsonData->parent . "'\n";
+            $object->updateParentCycleCode($jsonData->parent);
+            //$object->setParent()
+        }
+
 
         if (property_exists($jsonData, 'address')) {
             $address = $jsonData->address;

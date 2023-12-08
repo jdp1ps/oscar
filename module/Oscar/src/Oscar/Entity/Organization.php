@@ -350,12 +350,61 @@ class Organization implements ResourceInterface, IConnectedObject
     private $parent;
 
 
+    /**
+     * Flag pour conserver le code du parent à mettre à jour.
+     * @var mixed|bool
+     */
+    private ?string $flag_newParentCycle = "";
+
+    private bool $flag_newParentCycleUpdated = false;
+
+
+    /**
+     * Vérifie si un nouveau parent est attendu.
+     *
+     * @return bool
+     */
+    public function hasUpdatedParentInCycle() :bool
+    {
+        return $this->flag_newParentCycleUpdated;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUpdatedParentInCycle() :string
+    {
+        return $this->flag_newParentCycle;
+    }
+
+    /**
+     * Mise à jour (temporaire) du parent
+     * @param string|null $newParent code(string) ou NULL(pas de parent)
+     * @return void
+     */
+    public function updateParentCycleCode( ?string $newParent ):void
+    {
+        $currentParentCode = null;
+        if( $this->getParent() && $this->getParent()->getCode() ){
+            $currentParentCode = $this->getParent()->getCode();
+        }
+
+        echo " --> $currentParentCode => $newParent\n";
+
+        if( $currentParentCode != $newParent ){
+            $this->flag_newParentCycleUpdated = true;
+            $this->flag_newParentCycle = $newParent;
+        }
+    }
+
+
     public function __construct()
     {
         $this->projects = new ArrayCollection();
         $this->activities = new ArrayCollection();
         $this->persons = new ArrayCollection();
         $this->setDateCreated(new \DateTime());
+        $this->flag_newParentCycle = null;
     }
 
     public function getCodePcru()
