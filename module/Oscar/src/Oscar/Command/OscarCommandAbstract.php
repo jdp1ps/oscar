@@ -27,6 +27,7 @@ abstract class OscarCommandAbstract extends Command
 
 
     const COMMAND_NOTIFICATIONS_REBUILD = 'notifications:rebuild';
+    const COMMAND_NOTIFICATIONS_RUN = 'notifications:run';
 
     const COMMAND_ORGANIZATION_SEARCH_REINDEX = 'organization:search:reindex';
 

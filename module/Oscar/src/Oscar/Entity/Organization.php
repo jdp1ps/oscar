@@ -431,7 +431,7 @@ class Organization implements ResourceInterface, IConnectedObject
 
     public function getSelfWithAncestors( $out = [] ) :array
     {
-        $out[] = $this;
+        $out[$this->getId()] = $this;
         if( $this->getParent() ){
             $out = $this->getParent()->getSelfWithAncestors($out);
         }

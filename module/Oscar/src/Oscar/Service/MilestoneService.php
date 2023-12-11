@@ -13,6 +13,7 @@ use Doctrine\ORM\Query;
 use Interop\Container\ContainerInterface;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityDate;
+use Oscar\Entity\ActivityDateRepository;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\DateType;
 use Oscar\Entity\LogActivity;
@@ -31,7 +32,8 @@ use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 
-class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService, UseNotificationService, UseActivityLogService
+class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUserContextService,
+                                  UseNotificationService, UseActivityLogService
 {
 
     use UseEntityManagerTrait, UseLoggerServiceTrait, UseOscarUserContextServiceTrait, UseNotificationServiceTrait, UseActivityLogServiceTrait;
@@ -39,7 +41,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
 
     private $serviceContainer;
 
-    public function setServiceContainer( $sc )
+    public function setServiceContainer($sc)
     {
         $this->serviceContainer = $sc;
     }
@@ -52,12 +54,18 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $this->serviceContainer;
     }
 
-    public function getProjectGrantService()
+    /**
+     * @return ProjectGrantService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getProjectGrantService() :ProjectGrantService
     {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
-    public function getMilestonesByActivityId( $idActivity ){
+    public function getMilestonesByActivityId($idActivity)
+    {
         // Droit d'accès
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
 
@@ -67,20 +75,22 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     /**
      * @return Person
      */
-    public function getCurrentPerson(){
+    public function getCurrentPerson()
+    {
         return $this->getOscarUserContextService()->getCurrentPerson();
     }
 
     /**
      * @return string
      */
-    public function getCurrentPersonText(){
+    public function getCurrentPersonText()
+    {
         $person = $this->getCurrentPerson();
-        if( $person ){
+        if ($person) {
             return $person->log();
         } else {
             $dbUser = $this->getOscarUserContextService()->getUserContext()->getDbUser();
-            return 'BD ' . $dbUser->getDisplayName(). '(' . $dbUser->getEmail() . ')';
+            return 'BD ' . $dbUser->getDisplayName() . '(' . $dbUser->getEmail() . ')';
         }
     }
 
@@ -89,9 +99,10 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @param string $format
      * @return mixed
      */
-    public function getMilestoneTypes($format = 'object'){
+    public function getMilestoneTypes($format = 'object')
+    {
         $hydratationMode = Query::HYDRATE_OBJECT;
-        if( $format == 'array' ){
+        if ($format == 'array') {
             $hydratationMode = Query::HYDRATE_ARRAY;
         }
 
@@ -106,12 +117,13 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $result;
     }
 
-    public function getMilestoneTypeForSelect(){
+    public function getMilestoneTypeForSelect()
+    {
         $output = [];
         /** @var DateType $milestoneType */
         foreach ($this->getMilestoneTypes() as $milestoneType) {
             $facet = $milestoneType->getFacet();
-            if( !array_key_exists($facet, $output) ){
+            if (!array_key_exists($facet, $output)) {
                 $output[$facet] = [];
             }
             $output[$facet][] = [
@@ -122,11 +134,12 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $output;
     }
 
-    public function getMilestoneTypeFlat(){
+    public function getMilestoneTypeFlat()
+    {
         $output = [];
         /** @var DateType $milestoneType */
         foreach ($this->getMilestoneTypes() as $milestoneType) {
-            $output[$milestoneType->getId()] =$milestoneType->getLabel();
+            $output[$milestoneType->getId()] = $milestoneType->getLabel();
         }
         return $output;
     }
@@ -134,7 +147,8 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     /**
      * @return mixed
      */
-    public function getMilestones(){
+    public function getMilestones()
+    {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('m')
             ->from(ActivityDate::class, 'm')
@@ -143,14 +157,14 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     }
 
 
-    public function search( $search, $filters)
+    public function search($search, $filters)
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('m')
             ->from(ActivityDate::class, 'm')
             ->orderBy('m.dateStart', 'DESC');
 
-        if( $search ){
+        if ($search) {
             $activitiesIds = $this->getProjectGrantService()->search($search);
             $qb->innerJoin('m.activity', 'a')
                 ->where('a.id IN(:ids)')
@@ -158,13 +172,13 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             //$filterIds = $this->
         }
 
-        if( $filters ){
-            if( array_key_exists('periodStart', $filters) && $filters['periodStart']){
+        if ($filters) {
+            if (array_key_exists('periodStart', $filters) && $filters['periodStart']) {
                 $periodStart = DateTimeUtils::periodBounds($filters['periodStart']);
                 $from = $periodStart['start'];
                 $to = $periodStart['end'];
 
-                if( array_key_exists('periodEnd', $filters) && $filters['periodEnd']){
+                if (array_key_exists('periodEnd', $filters) && $filters['periodEnd']) {
                     $periodEnd = DateTimeUtils::periodBounds($filters['periodEnd']);
                     $to = $periodEnd['end'];
                 }
@@ -174,7 +188,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
                     ->setParameter('to', $to);
             }
 
-            if( array_key_exists('type', $filters) && $filters['type'] ){
+            if (array_key_exists('type', $filters) && $filters['type']) {
                 $qb->andWhere('m.type = :typeid')
                     ->setParameter('typeid', $filters['type']);
             }
@@ -183,7 +197,8 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     }
 
 
-    public function getMiletonesByActivity( Activity $activity ){
+    public function getMiletonesByActivity(Activity $activity)
+    {
         /** @var OscarUserContext $oscarUserContext */
         $oscarUserContext = $this->getOscarUserContextService();
 
@@ -192,7 +207,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
 
         // Droits plus précis à transmettre aux objets
         $deletable = $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity);
-        $progression =  $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
+        $progression = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity);
 
         $qb = $this->getEntityManager()->getRepository(ActivityDate::class)->createQueryBuilder('d')
             ->addSelect('t')
@@ -205,16 +220,16 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
 
         $out = [];
         $now = new \DateTime();
-        foreach( $dates as $data ){
+        foreach ($dates as $data) {
             $data['deletable'] = true;
-            $data['past'] = ($data['dateStart']<$now);
-            $data['css'] = ($data['dateStart']<$now) ? 'past' : '';
+            $data['past'] = ($data['dateStart'] < $now);
+            $data['css'] = ($data['dateStart'] < $now) ? 'past' : '';
             $data['deletable'] = $deletable;
             $data['editable'] = $editable;
             $data['validable'] = $progression;
             $data['isPayment'] = false;
 
-            $out[$data['dateStart']->format('YmdHis').$data['id']] = $data;
+            $out[$data['dateStart']->format('YmdHis') . $data['id']] = $data;
         }
 
         //  versements sous la forme JALON
@@ -225,9 +240,9 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             ->andWhere('a.id = :idactivity');
 
         $versements = $versementsQB->setParameters([
-            'idactivity' => $activity->getId(),
-            'status' => ActivityPayment::STATUS_PREVISIONNEL
-        ])->getQuery()->getResult();
+                                                       'idactivity' => $activity->getId(),
+                                                       'status' => ActivityPayment::STATUS_PREVISIONNEL
+                                                   ])->getQuery()->getResult();
 
         ksort($out, SORT_STRING);
 
@@ -239,15 +254,21 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @return ActivityDate
      * @throws OscarException
      */
-    public function getMilestone( $milestoneId ){
+    public function getMilestone($milestoneId)
+    {
         try {
-            $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(['id' => $milestoneId]);
-        } catch ( \Exception $e ){
-            $message = sprintf("Erreur BDD, Impossible de charger le jalon '%s' : %s !", $milestoneId, $e->getMessage());
+            $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->findOneBy(['id' => $milestoneId]
+            );
+        } catch (\Exception $e) {
+            $message = sprintf(
+                "Erreur BDD, Impossible de charger le jalon '%s' : %s !",
+                $milestoneId,
+                $e->getMessage()
+            );
             $this->getLoggerService()->err($message);
             throw new OscarException($message);
         }
-        if( !$milestone ){
+        if (!$milestone) {
             throw new OscarException("Ce jalon($milestoneId) est introuvable");
         }
         return $milestone;
@@ -257,10 +278,11 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * Suppression d'un jalon
      * @param $id
      */
-    public function deleteMilestoneById( $id ){
+    public function deleteMilestoneById($id)
+    {
         /** @var ActivityDate $milestone */
         $milestone = $this->getEntityManager()->getRepository(ActivityDate::class)->find($id);
-        if( $milestone) {
+        if ($milestone) {
             $this->deleteMilestone($milestone);
         }
     }
@@ -269,7 +291,8 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * Suppression d'un jalon
      * @param $id
      */
-    public function deleteMilestone( ActivityDate $milestone ){
+    public function deleteMilestone(ActivityDate $milestone)
+    {
         try {
             $this->getEntityManager()->remove($milestone);
             $this->getEntityManager()->flush();
@@ -286,7 +309,8 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         }
     }
 
-    public function updateFromArray( ActivityDate $milestone, array $dataArray ){
+    public function updateFromArray(ActivityDate $milestone, array $dataArray)
+    {
         $typeId = $dataArray['type_id'];
         $comment = $dataArray['comment'];
         $date = new \DateTime($dataArray['dateStart']);
@@ -296,11 +320,11 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             $type = $this->getEntityManager()
                 ->getRepository(DateType::class)->find($typeId);
 
-            if( $milestone->getType()->getId() != $type->getId() ){
+            if ($milestone->getType()->getId() != $type->getId()) {
                 $milestone->setType($type);
             }
 
-            if( $milestone->getDateStart() != $date ){
+            if ($milestone->getDateStart() != $date) {
                 $milestone->setDateStart($date);
             }
 
@@ -316,16 +340,14 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             $this->getNotificationService()->jobUpdateNotificationsActivity($milestone->getActivity());
 
             return $milestone;
-
         } catch (\Exception $e) {
             return $this->getResponseNotFound("Type de jalon non-trouvé.");
         }
     }
 
-    public function setMilestoneProgression( ActivityDate $milestone, $progressionName ){
-
-
-        switch ($progressionName ){
+    public function setMilestoneProgression(ActivityDate $milestone, $progressionName)
+    {
+        switch ($progressionName) {
             case ActivityDate::PROGRESSION_VALID:
                 $milestone->setFinished(ActivityDate::VALUE_VALIDED)->setFinishedBy($this->getCurrentPersonText());
                 break;
@@ -345,13 +367,16 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             case ActivityDate::PROGRESSION_CANCEL:
                 $milestone->setFinished(ActivityDate::VALUE_CANCELED)->setFinishedBy($this->getCurrentPersonText());
                 break;
-
         }
 
         $this->getEntityManager()->flush($milestone);
 
         $this->getActivityLogService()->addUserInfo(
-            sprintf("a modifié la progression du jalon %s dans l'activité %s", $milestone, $milestone->getActivity()->log()),
+            sprintf(
+                "a modifié la progression du jalon %s dans l'activité %s",
+                $milestone,
+                $milestone->getActivity()->log()
+            ),
             LogActivity::CONTEXT_ACTIVITY,
             $milestone->getActivity()->getId()
         );
@@ -360,12 +385,121 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         return $milestone;
     }
 
-    public function createFromArray( $dataArray ){
+    /**
+     * @return ActivityDateRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getMilestoneRepository(): ActivityDateRepository
+    {
+        return $this->getEntityManager()->getRepository(ActivityDate::class);
+    }
 
+    /**
+     * @param \DateTime $dateRef
+     * @return ActivityDate[]
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getMilestonesAtDate(\DateTime $dateRef): array
+    {
+        return array_merge(
+        // Jalons qui se terminent le jour de la date de référence
+            $this->getMilestoneRepository()->getMilestoneAt($dateRef),
+
+            // Jalons dont une date de rappel tombe le jour donné
+            $this->getMilestoneRepository()->getMilestoneWithRecursivityMatch($dateRef),
+
+            // Jalons à faire non finalisé
+            $this->getMilestoneRepository()->getMilestonesFinishableUnfinishedAt($dateRef)
+        );
+    }
+
+    /**
+     * @param \DateTime $dateRef
+     * @return array
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getMilestonesRecallableAtDate(\DateTime $dateRef = new \DateTime()): array
+    {
+        $milestones = [];
+        foreach ($this->getMilestonesAtDate($dateRef) as $t) {
+            if (array_key_exists($t->getId(), $milestones)) {
+                continue;
+            }
+            $dt = $t->toJson();
+
+            // nature du rappel
+            if ($t->isToday($dateRef)) {
+                $dt['nature_recall'] = "TODAY";
+            } elseif ($t->isLate($dateRef)) {
+                $late = $t->getLateDays($dateRef);
+                $dt['nature_recall'] = "LATE ( $late jours)";
+            } else {
+                $dt['nature_recall'] = "RECALL";
+            }
+            $milestones[$t->getId()] = $dt;
+        }
+        return $milestones;
+    }
+
+    private static array $_tmp_persons_milestones = [];
+    public function getMilestonesRecallableWithPersons(\DateTime $dateRef = new \DateTime()): array
+    {
+        $out = [];
+        $milestonesRoles = $this->computeMilestoneTypesRoles();
+        $milestones = $this->getMilestonesAtDate($dateRef);
+        $activityPersons = [];
+        foreach ($milestones as $milestone) {
+            $activityId = $milestone->getActivity()->getId();
+            if( !array_key_exists($activityId, $activityPersons) ){
+                $persons = $this->getProjectGrantService()->getPersonsRoles($milestone->getActivity());
+                $activityPersons[$activityId] = $persons;
+            }
+
+            $personsMilestone = $activityPersons[$activityId];
+            $milestoneRoleId = $milestone->getType()->getRolesIds();
+            $persons = [];
+
+            foreach ($personsMilestone as $personId=>$personDetails){
+                if( count(array_intersect($personDetails['role_ids'], $milestoneRoleId)) ){
+                    $persons[$personId] = (string)$personDetails['person'];
+                }
+            }
+            $dt = $milestone->toJson();
+            // nature du rappel
+            if ($milestone->isToday($dateRef)) {
+                $dt['nature_recall'] = "TODAY";
+            } elseif ($milestone->isLate($dateRef)) {
+                $late = $milestone->getLateDays($dateRef);
+                $dt['nature_recall'] = "LATE ( $late jours)";
+            } else {
+                $dt['nature_recall'] = "RECALL";
+            }
+
+            $dt['persons'] = implode(",", $persons);
+            var_dump($dt);
+            $out[$milestone->getId()] = $dt;
+
+        }
+        return $out;
+    }
+
+    private static array $_tmp_milestones_roles = [];
+    public function computeMilestoneTypesRoles() :array
+    {
+        if( !self::$_tmp_milestones_roles ){
+            self::$_tmp_milestones_roles = $this->getMilestoneRepository()->getMilestoneTypesRolesArray();
+        }
+        return self::$_tmp_milestones_roles;
+    }
+
+
+    public function createFromArray($dataArray)
+    {
         // Récupération du type
         $type = $this->getEntityManager()->getRepository(DateType::class)->find($dataArray['type_id']);
-        if( !$type )
+        if (!$type) {
             throw new OscarException("Ce type de jalon est introuvable");
+        }
 
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($dataArray['activity_id']);
 

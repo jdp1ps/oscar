@@ -342,7 +342,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * les sous-structures, les structures mères.
      *
      * @param Activity $activity
-     * @return void
+     * @return array
      */
     public function getOrganizationsAccessDeeper( Activity $activity, bool $principal = true, bool $withRole = false )
     {
@@ -376,45 +376,69 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
         }
         return $out;
-
     }
 
-    public function getPersonsAccessDeeper( Activity $activity ) {
+    // TODO cleanup
+    public function getPersonsRoles( Activity $activity ) :array
+    {
 
         $out = [
-            "persons" => [],
-            "persons_ids" => []
+
         ];
 
-        /** @var ActivityPerson $person */
+        /** @var ActivityPerson $activityPerson */
         foreach ($activity->getPersonsDeep() as $activityPerson) {
             $person = $activityPerson->getPerson();
             $personId = $person->getId();
-            if( !array_key_exists($personId, $out['persons']) ){
-                $out['persons'][$personId] = $person;
-                $out['persons_ids'][] = $personId;
+            if( !array_key_exists($personId, $out) ){
+                $out[$personId] = [
+                    'person' => $person,
+                    'role_ids' => [],
+                    'role_labels' => []
+
+                ];
             }
+            $roleId = $activityPerson->getRoleObj()->getId();
+            $roleLabel = $activityPerson->getRoleObj()->getRoleId();
+            if( !in_array($roleId, $out[$personId]['role_ids']) )
+                $out[$personId]['role_ids'][] = $roleId;
+
+            if( !in_array($roleLabel, $out[$personId]['role_labels']) )
+                $out[$personId]['role_labels'][] = $roleLabel;
         }
 
-        $organizations = $this->getOrganizationsAccessDeeper($activity);
+        $org = [];
+        /** @var ActivityOrganization $o */
+        foreach ($activity->getOrganizationsDeep() as $o) {
+            if( $o->isPrincipal() ){
+                $org = $o->getOrganization()->getSelfWithAncestors($org);
+            }
+        }
 
         /** @var Organization $o */
-        foreach ($organizations['organizations'] as $o) {
-            /** @var OrganizationPerson $person */
-            foreach ($o->getPersons() as $organizationPerson) {
-                $person = $organizationPerson->getPerson();
+        foreach ($org as $o) {
+            foreach ($o->getPersons() as $personOrganization) {
+                $person = $personOrganization->getPerson();
                 $personId = $person->getId();
-                if( !array_key_exists($personId, $out['persons']) ){
-                    $out['persons'][$personId] = $person;
-                    $out['persons_ids'][] = $personId;
+                if( !array_key_exists($personId, $out) ){
+                    $out[$personId] = [
+                        'person' => $person,
+                        'role_ids' => [],
+                        'role_labels' => []
+
+                    ];
                 }
+                $roleId = $personOrganization->getRoleObj()->getId();
+                $roleLabel = $personOrganization->getRoleObj()->getRoleId();
+                if( !in_array($roleId, $out[$personId]['role_ids']) )
+                    $out[$personId]['role_ids'][] = $roleId;
+
+                if( !in_array($roleLabel, $out[$personId]['role_labels']) )
+                    $out[$personId]['role_labels'][] = $roleLabel;
             }
         }
 
-        foreach ($out['persons'] as $p) {
-            echo " - $p<br>";
-        }
-        die("Caclule des accès");
+        return $out;
     }
 
     public function getActivityByOscarNum(string $oscarNum, $throw = true): ?Activity
