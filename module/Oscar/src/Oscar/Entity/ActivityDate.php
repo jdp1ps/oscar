@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -19,21 +20,22 @@ class ActivityDate implements ITrackable
 {
     use TraitTrackable;
 
-    const PROGRESSION_VALID         = 'valid';
-    const PROGRESSION_UNVALID       = 'unvalid';
-    const PROGRESSION_CANCEL        = 'cancel';
-    const PROGRESSION_REFUSED       = 'refused';
-    const PROGRESSION_INPROGRESS    = 'inprogress';
+    const PROGRESSION_VALID = 'valid';
+    const PROGRESSION_UNVALID = 'unvalid';
+    const PROGRESSION_CANCEL = 'cancel';
+    const PROGRESSION_REFUSED = 'refused';
+    const PROGRESSION_INPROGRESS = 'inprogress';
 
 
     // Jalon terminé
-    const VALUE_TODO        = 0;
-    const VALUE_INPROGRESS  = 50;
-    const VALUE_VALIDED     = 100;
-    const VALUE_CANCELED    = 200;
-    const VALUE_REFUSED     = 400;
+    const VALUE_TODO = 0;
+    const VALUE_INPROGRESS = 50;
+    const VALUE_VALIDED = 100;
+    const VALUE_CANCELED = 200;
+    const VALUE_REFUSED = 400;
 
-    static public function progressInfos() {
+    static public function progressInfos()
+    {
         return [
             self::VALUE_TODO => "A faire",
             self::VALUE_INPROGRESS => "En cours",
@@ -86,25 +88,26 @@ class ActivityDate implements ITrackable
     private $finishedBy;
 
 
-
     /**
      * Date à laquelle le jalon a été complété.
      *
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(type="date", nullable=true)
      */
     private $dateFinish;
 
 
-    public function finish( $value = 100, $date = null ){
+    public function finish($value = 100, $date = null)
+    {
         $this->finished = $value;
-        if( $this->finished >= self::VALUE_VALIDED ){
-            $this->dateFinish = $date === null ? new \DateTime() : $date;
+        if ($this->finished >= self::VALUE_VALIDED) {
+            $this->dateFinish = $date === null ? new DateTime() : $date;
         }
     }
 
-    public function isFinishable(){
-        if( $this->getType() ){
+    public function isFinishable()
+    {
+        if ($this->getType()) {
             return $this->getType()->isFinishable();
         }
         return false;
@@ -128,17 +131,17 @@ class ActivityDate implements ITrackable
     }
 
 
-
-    public function isFinished(){
+    public function isFinished()
+    {
         return $this->getFinished() >= self::VALUE_VALIDED;
     }
 
     /**
      * Retourne TRUE sie le jalon doit être complété et qu'il est en retard.
      */
-    public function isLate(){
-        $now = new \DateTime('now');
-        return  $this->isFinishable() && !$this->isFinished() && ($now > $this->getDateStart());
+    public function isLate( DateTime $now = new DateTime()) :bool
+    {
+        return $this->isFinishable() && !$this->isFinished() && ($now > $this->getDateStart());
     }
 
     /**
@@ -181,8 +184,9 @@ class ActivityDate implements ITrackable
      * Test
      * @return array
      */
-    public function getRecursivity(){
-        if( $this->getType() ){
+    public function getRecursivity()
+    {
+        if ($this->getType()) {
             return $this->getType()->getRecursivityArray();
         }
         return [];
@@ -193,11 +197,12 @@ class ActivityDate implements ITrackable
      *
      * Retourne les dates de notification du jalon.
      */
-    public function getRecursivityDate(){
+    public function getRecursivityDate()
+    {
         $dates = [];
-        foreach ( $this->getRecursivity() as $days ){
-            $date = new \DateTime($this->getDateStart()->format('Y-m-d'));
-            $interval = new \DateInterval('P'.$days.'D');
+        foreach ($this->getRecursivity() as $days) {
+            $date = new DateTime($this->getDateStart()->format('Y-m-d'));
+            $interval = new \DateInterval('P' . $days . 'D');
             $interval->invert = 1;
             $date->add($interval);
             $dates[] = $date;
@@ -206,17 +211,18 @@ class ActivityDate implements ITrackable
     }
 
     /**
-     * @return datetime
+     * @return DateTime
      */
-    public function getDateStart()
+    public function getDateStart() : DateTime
     {
         return $this->dateStart;
     }
 
-    public function getDateStartStr( $format = 'Y-m-d' ) :string
+    public function getDateStartStr($format = 'Y-m-d'): string
     {
-        if( $this->getDateStart() )
+        if ($this->getDateStart()) {
             return $this->getDateStart()->format($format);
+        }
         return "";
     }
 
@@ -286,10 +292,29 @@ class ActivityDate implements ITrackable
 
     function __toString()
     {
-        return $this->getDateStart()->format('d M Y').' ('.$this->getType().')';
+        return $this->getDateStart()->format('d M Y') . ' (' . $this->getType() . ')';
     }
 
-    function toArray(){
+    public function isToday( DateTime $dateRef = new DateTime() ):bool
+    {
+        return $this->getDateStart()->format('Y-m-d') == $dateRef->format('Y-m-d');
+    }
+
+    public function getLateDays(DateTime $now = new DateTime()): ?int
+    {
+        if ($this->isFinishable() && $this->isLate()) {
+            $interval = $now->diff($this->getDateStart());
+            $days = $interval->days;
+            if ($days) {
+                return $days;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    function toArray()
+    {
         return [
             'id' => $this->getId(),
             'type' => $this->getType()->getLabel(),
@@ -297,6 +322,17 @@ class ActivityDate implements ITrackable
             'type_facet' => $this->getType()->getFacet(),
             'comment' => $this->getComment(),
             'dateStart' => $this->getDateStart()
+        ];
+    }
+
+    function toJson()
+    {
+        return [
+            'id' => $this->getId(),
+            'project' => $this->getActivity()->getAcronym(),
+            'activity' => $this->getActivity()->getOscarNum(),
+            'type' => $this->getType()->getLabel(),
+            'dateStart' => $this->getDateStartStr(),
         ];
     }
 

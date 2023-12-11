@@ -191,6 +191,9 @@ class DateType implements ITrackable
         ];
     }
 
+    /**
+     * @return Role[]
+     */
     public function getRoles()
     {
         return $this->roles;
@@ -202,6 +205,18 @@ class DateType implements ITrackable
             $roles[] = $role->getId();
         }
         return $roles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRolesIds() :array
+    {
+        $ids = [];
+        foreach ($this->getRoles() as $r) {
+            $ids[] = $r->getId();
+        }
+        return $ids;
     }
 
     /**
@@ -243,7 +258,7 @@ class DateType implements ITrackable
 
     function __toString()
     {
-        return $this->getLabel();
+        return $this->getLabel() . ($this->getRecursivity() ? ' (' . $this->getRecursivity() .')' : "");
     }
 
     function trac(){
