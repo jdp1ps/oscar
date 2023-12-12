@@ -364,7 +364,7 @@ class Organization implements ResourceInterface, IConnectedObject
      *
      * @return bool
      */
-    public function hasUpdatedParentInCycle() :bool
+    public function hasUpdatedParentInCycle(): bool
     {
         return $this->flag_newParentCycleUpdated;
     }
@@ -372,7 +372,7 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return string|null
      */
-    public function getUpdatedParentInCycle() :string
+    public function getUpdatedParentInCycle(): string
     {
         return $this->flag_newParentCycle;
     }
@@ -382,16 +382,16 @@ class Organization implements ResourceInterface, IConnectedObject
      * @param string|null $newParent code(string) ou NULL(pas de parent)
      * @return void
      */
-    public function updateParentCycleCode( ?string $newParent ):void
+    public function updateParentCycleCode(?string $newParent): void
     {
         $currentParentCode = null;
-        if( $this->getParent() && $this->getParent()->getCode() ){
+        if ($this->getParent() && $this->getParent()->getCode()) {
             $currentParentCode = $this->getParent()->getCode();
         }
 
         echo " --> $currentParentCode => $newParent\n";
 
-        if( $currentParentCode != $newParent ){
+        if ($currentParentCode != $newParent) {
             $this->flag_newParentCycleUpdated = true;
             $this->flag_newParentCycle = $newParent;
         }
@@ -405,6 +405,7 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->persons = new ArrayCollection();
         $this->setDateCreated(new \DateTime());
         $this->flag_newParentCycle = null;
+        $this->children = [];
     }
 
     public function getCodePcru()
@@ -422,18 +423,36 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
     /**
-     * @return mixed
+     * @return Organization[]
      */
     public function getChildren()
     {
         return $this->children;
     }
 
-    public function getSelfWithAncestors( $out = [] ) :array
+    public function getSelfWithAncestors($out = []): array
     {
         $out[$this->getId()] = $this;
-        if( $this->getParent() ){
+        if ($this->getParent()) {
             $out = $this->getParent()->getSelfWithAncestors($out);
+        }
+        return $out;
+    }
+
+
+    public function getChildrenDeepWithSelf(array $out = [], bool $justId = false): array
+    {
+        $out[] = $justId ? $this->getId() : $this;
+        return $this->getChildrenDeep($out, $justId);
+    }
+
+    public function getChildrenDeep($out = [], $justId = false): array
+    {
+        foreach ($this->getChildren() as $organization) {
+            $out[] = $justId ? $organization->getId() : $organization;
+            if (count($organization->getChildren())) {
+                $out = array_merge($out, $organization->getChildrenDeep($out, $justId));
+            }
         }
         return $out;
     }
@@ -463,7 +482,6 @@ class Organization implements ResourceInterface, IConnectedObject
         $this->parent = $parent;
         return $this;
     }
-
 
 
     public function isClose()

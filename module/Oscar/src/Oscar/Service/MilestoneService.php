@@ -59,7 +59,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function getProjectGrantService() :ProjectGrantService
+    public function getProjectGrantService(): ProjectGrantService
     {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
@@ -418,10 +418,17 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
      * @return array
      * @throws \Doctrine\ORM\Exception\NotSupported
      */
-    public function getMilestonesRecallableAtDate(\DateTime $dateRef = new \DateTime()): array
+    public function getMilestonesRecallableAtDate(\DateTime $dateRef = new \DateTime(), ?Person $person = null): array
     {
+        $activityIds = [];
+        if( $person ){
+            $activityIds = $this->getProjectGrantService()->getActivityIdsForPerson($person);
+        }
         $milestones = [];
         foreach ($this->getMilestonesAtDate($dateRef) as $t) {
+            if( $person && !in_array($t->getActivity()->getId(), $activityIds) ){
+                continue;
+            }
             if (array_key_exists($t->getId(), $milestones)) {
                 continue;
             }
@@ -442,6 +449,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
     }
 
     private static array $_tmp_persons_milestones = [];
+
     public function getMilestonesRecallableWithPersons(\DateTime $dateRef = new \DateTime()): array
     {
         $out = [];
@@ -450,7 +458,7 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
         $activityPersons = [];
         foreach ($milestones as $milestone) {
             $activityId = $milestone->getActivity()->getId();
-            if( !array_key_exists($activityId, $activityPersons) ){
+            if (!array_key_exists($activityId, $activityPersons)) {
                 $persons = $this->getProjectGrantService()->getPersonsRoles($milestone->getActivity());
                 $activityPersons[$activityId] = $persons;
             }
@@ -459,8 +467,8 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             $milestoneRoleId = $milestone->getType()->getRolesIds();
             $persons = [];
 
-            foreach ($personsMilestone as $personId=>$personDetails){
-                if( count(array_intersect($personDetails['role_ids'], $milestoneRoleId)) ){
+            foreach ($personsMilestone as $personId => $personDetails) {
+                if (count(array_intersect($personDetails['role_ids'], $milestoneRoleId))) {
                     $persons[$personId] = (string)$personDetails['person'];
                 }
             }
@@ -476,17 +484,16 @@ class MilestoneService implements UseLoggerService, UseEntityManager, UseOscarUs
             }
 
             $dt['persons'] = implode(",", $persons);
-            var_dump($dt);
             $out[$milestone->getId()] = $dt;
-
         }
         return $out;
     }
 
     private static array $_tmp_milestones_roles = [];
-    public function computeMilestoneTypesRoles() :array
+
+    public function computeMilestoneTypesRoles(): array
     {
-        if( !self::$_tmp_milestones_roles ){
+        if (!self::$_tmp_milestones_roles) {
             self::$_tmp_milestones_roles = $this->getMilestoneRepository()->getMilestoneTypesRolesArray();
         }
         return self::$_tmp_milestones_roles;

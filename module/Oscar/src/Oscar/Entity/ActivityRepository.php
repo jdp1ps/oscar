@@ -429,6 +429,32 @@ class ActivityRepository extends EntityRepository
         );
     }
 
+    /**
+     * @param array $idsOrganisations
+     * @return int[]
+     */
+    public function getIdsForOrganizations( array $idsOrganisations ):array{
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.organizations', 'act_org')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.partners', 'prj_org');
+
+        $parameters = [
+            'organizations' => $idsOrganisations
+        ];
+
+        $qb->where('act_org.organization IN(:organizations) OR prj_org.organization IN(:organizations)');
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
     public function getIdsForPersons(array $idsPersons): array
     {
         $qb = $this->createQueryBuilder('a')

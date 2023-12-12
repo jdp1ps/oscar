@@ -344,7 +344,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param Activity $activity
      * @return array
      */
-    public function getOrganizationsAccessDeeper( Activity $activity, bool $principal = true, bool $withRole = false )
+    public function getOrganizationsAccessDeeper(Activity $activity, bool $principal = true, bool $withRole = false)
     {
         $out = [
             'organizations_ids' => [],
@@ -353,11 +353,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         /** @var ActivityOrganization $activityOrganization */
         foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
-            if( $activityOrganization->isPrincipal() ){
+            if ($activityOrganization->isPrincipal()) {
                 $organization = $activityOrganization->getOrganization();
                 $organizationId = $organization->getId();
 
-                if(array_key_exists($organizationId, $out['organizations'])){
+                if (array_key_exists($organizationId, $out['organizations'])) {
                     continue;
                 }
                 $out['organizations'][$organizationId] = $organization;
@@ -368,7 +368,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                     ->getAncestors($activityOrganization->getOrganization()->getId());
 
                 foreach ($organizationsMain as $main) {
-                    if(!array_key_exists($main->getId(), $out['organizations'])){
+                    if (!array_key_exists($main->getId(), $out['organizations'])) {
                         $out['organizations'][$main->getId()] = $main;
                         $out['organizations_ids'][] = $main->getId();
                     }
@@ -379,9 +379,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     // TODO cleanup
-    public function getPersonsRoles( Activity $activity ) :array
+    public function getPersonsRoles(Activity $activity): array
     {
-
         $out = [
 
         ];
@@ -390,7 +389,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         foreach ($activity->getPersonsDeep() as $activityPerson) {
             $person = $activityPerson->getPerson();
             $personId = $person->getId();
-            if( !array_key_exists($personId, $out) ){
+            if (!array_key_exists($personId, $out)) {
                 $out[$personId] = [
                     'person' => $person,
                     'role_ids' => [],
@@ -400,17 +399,19 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
             $roleId = $activityPerson->getRoleObj()->getId();
             $roleLabel = $activityPerson->getRoleObj()->getRoleId();
-            if( !in_array($roleId, $out[$personId]['role_ids']) )
+            if (!in_array($roleId, $out[$personId]['role_ids'])) {
                 $out[$personId]['role_ids'][] = $roleId;
+            }
 
-            if( !in_array($roleLabel, $out[$personId]['role_labels']) )
+            if (!in_array($roleLabel, $out[$personId]['role_labels'])) {
                 $out[$personId]['role_labels'][] = $roleLabel;
+            }
         }
 
         $org = [];
         /** @var ActivityOrganization $o */
         foreach ($activity->getOrganizationsDeep() as $o) {
-            if( $o->isPrincipal() ){
+            if ($o->isPrincipal()) {
                 $org = $o->getOrganization()->getSelfWithAncestors($org);
             }
         }
@@ -420,7 +421,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             foreach ($o->getPersons() as $personOrganization) {
                 $person = $personOrganization->getPerson();
                 $personId = $person->getId();
-                if( !array_key_exists($personId, $out) ){
+                if (!array_key_exists($personId, $out)) {
                     $out[$personId] = [
                         'person' => $person,
                         'role_ids' => [],
@@ -430,11 +431,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 }
                 $roleId = $personOrganization->getRoleObj()->getId();
                 $roleLabel = $personOrganization->getRoleObj()->getRoleId();
-                if( !in_array($roleId, $out[$personId]['role_ids']) )
+                if (!in_array($roleId, $out[$personId]['role_ids'])) {
                     $out[$personId]['role_ids'][] = $roleId;
+                }
 
-                if( !in_array($roleLabel, $out[$personId]['role_labels']) )
+                if (!in_array($roleLabel, $out[$personId]['role_labels'])) {
                     $out[$personId]['role_labels'][] = $roleLabel;
+                }
             }
         }
 
@@ -487,12 +490,25 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getActivitiesWithUndoneMilestones()
+    public function getActivityIdsForOrganization(Organization $organization): array
     {
-        return $this->getActivityRepository()->getActivitiesWithUndoneMilestones();
     }
 
-    public function getActivitiesIdsPerson(Person $person)
+    /**
+     * @param Person $person
+     * @return int[]
+     */
+    public function getActivityIdsForPerson(Person $person): array
+    {
+        $idsActivityDirect = $this->getActivityRepository()->getIdsForPersons([$person->getId()]);
+
+        $idsOrganizations = $this->getOrganizationService()->getIdsForPerson($person);
+        $idsActivityInOrganization = $this->getActivityRepository()->getIdsForOrganizations($idsOrganizations);
+
+        return array_unique(array_merge($idsActivityDirect, $idsActivityInOrganization));
+    }
+
+    public function getActivitiesIdsPerson(Person $person) :array
     {
         $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
         $query->select('a.id')
@@ -640,7 +656,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $step = microtime(true);
         }
 
-        if ($restricted_ids) {
+        if (is_array($restricted_ids)) {
             if ($ids_search === null) {
                 $ids_search = $restricted_ids;
             } else {
@@ -1181,91 +1197,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function getRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
     {
         return $this->getRoleRepository()->getRolesAtActivityArray($format);
-    }
-
-    public $_cachedPersonRileIdsInActivity;
-
-    public function getPersonRoleIdsInActivity(Activity $activity, Person $person): array
-    {
-        if ($this->_cachedPersonRileIdsInActivity == null) {
-            $this->_cachedPersonRileIdsInActivity = [];
-        }
-
-        if (!array_key_exists($person->getId(), $this->_cachedPersonRileIdsInActivity)) {
-            $this->_cachedPersonRileIdsInActivity[$person->getId()] = [];
-        }
-
-        if (!array_key_exists($activity->getId(), $this->_cachedPersonRileIdsInActivity[$person->getId()])) {
-            $roleIds = [];
-            /** @var ActivityPerson $activityPerson */
-            foreach ($activity->getPersonsDeep() as $activityPerson) {
-                if ($activityPerson->getPerson() == $person) {
-                    $roleId = $activityPerson->getRoleObj()->getId();
-                    if (!in_array($roleId, $roleIds)) {
-                        $roleIds[] = $roleId;
-                    }
-                }
-
-                /** @var ActivityOrganization $activityPartner */
-                foreach ($activity->getOrganizationsDeep() as $activityPartner) {
-                    if ($activityPartner->getOrganization()->hasPerson($person)) {
-                        foreach ($activityPartner->getOrganization()->getPersonRolesId($person) as $roleId) {
-                            if (!in_array($roleId, $roleIds)) {
-                                $roleIds[] = $roleId;
-                            }
-                        }
-                    }
-                }
-            }
-            $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()] = $roleIds;
-        }
-
-        return $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()];
-    }
-
-    /**
-     * Retourne la liste des Jalons(ActivityDate) non-réalisé pour la personne.
-     *
-     * @param Person $person
-     * @return ActivityDate[]
-     */
-    public function getUndoneMilestonesForPerson(Person $person): array
-    {
-        $activityWithUndoneMilestones = $this->getActivitiesWithUndoneMilestones();
-        $milestonesUndone = [];
-        foreach ($activityWithUndoneMilestones as $a) {
-            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($a, $person);
-            /** @var ActivityDate $m */
-            foreach ($a->getMilestones() as $m) {
-                if (!$m->isFinished() && array_intersect($m->getType()->getRolesId(), $roleIdsInActivity)) {
-                    $milestonesUndone[] = $m;
-                }
-            }
-        }
-        return $milestonesUndone;
-    }
-
-
-    /**
-     * Retourne les payements en retard de la personne.
-     *
-     * @param Person $person
-     * @return ActivityPayment[]
-     */
-    public function getUndonePayementsForPerson(Person $person): array
-    {
-        $rolesIds = $this->getOscarUserContextService()->getRolesIdsWithPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE);
-
-        $paymentsLate = $this->getPaymentsLate();
-        $payements = [];
-        /** @var ActivityPayment $p */
-        foreach ($paymentsLate as $p) {
-            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($p->getActivity(), $person);
-            if ($p->isLate() && array_intersect($roleIdsInActivity, $rolesIds)) {
-                $payements[] = $p;
-            }
-        }
-        return $payements;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2440,7 +2371,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      */
     public function byOrganizationWithoutProject($idOrganization, bool $deep = false)
     {
-        if( $deep ){
+        if ($deep) {
             $ids = $this->getOrganizationService()->getOrganizationIdsDeep($idOrganization);
             $ids[] = $idOrganization;
         } else {
@@ -2723,7 +2654,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
     }
 
-    public function getDocumentTabInfos() :array
+    public function getDocumentTabInfos(): array
     {
         /** @var TabsDocumentsRolesRepository $documentTabRepository */
         $documentTabRepository = $this->getEntityManager()->getRepository(TabDocument::class);

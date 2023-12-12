@@ -77,7 +77,7 @@ class ActivityDateRepository extends EntityRepository
             ->select('m')
             ->innerJoin('m.type', 't')
             ->andWhere('t.finishable = TRUE')
-            ->andWhere('m.dateStart < :date AND m.finished < 100') // AND m.dateStart <= :now')
+            ->andWhere('m.dateStart < :date AND (m.finished < 100 OR m.finished IS NULL)') // AND m.dateStart <= :now')
         ;
         $query->setParameters([
                                   'date' => $date
