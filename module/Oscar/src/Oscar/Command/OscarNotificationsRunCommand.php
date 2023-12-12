@@ -22,7 +22,8 @@ class OscarNotificationsRunCommand extends OscarAdvancedCommandAbstract
     protected static $defaultName = OscarCommandAbstract::COMMAND_NOTIFICATIONS_RUN;
 
     const OPTION_DATEREF = 'date';
-    const OPTION_PERSON = 'persons';
+    const OPTION_PERSON = 'show-persons';
+    const OPTION_USER = 'users';
 
     protected function configure()
     {
@@ -41,16 +42,25 @@ class OscarNotificationsRunCommand extends OscarAdvancedCommandAbstract
                 'p',
                 InputOption::VALUE_NONE,
                 "Afficher les personnes impliquées"
-            );
+            )
+            ->addOption(
+                self::OPTION_USER,
+                'u',
+                InputOption::VALUE_REQUIRED,
+                "Affiche uniquement pour la personne (identifiant)"
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
         $io = $this->getIO();
-        $io->title("Calcule des notifications (v2)");
+
         $dateRef = $input->getOption(self::OPTION_DATEREF);
         $displayPersons = $input->getOption(self::OPTION_PERSON);
+        $user = $input->getOption(self::OPTION_USER);
+
         if ($dateRef === false) {
             $date = new \DateTime();
         } else {
@@ -61,6 +71,8 @@ class OscarNotificationsRunCommand extends OscarAdvancedCommandAbstract
                 return self::INVALID;
             }
         }
+
+        $infoDate = $date->format("d M Y");
 
         try {
             /** @var MilestoneService $milestoneService */
@@ -75,11 +87,25 @@ class OscarNotificationsRunCommand extends OscarAdvancedCommandAbstract
                 "Nature du rappel"
             ];
 
+
+            $person = null;
+            if( $user ){
+                try {
+                    $person = $this->getPersonService()->getPersonByLdapLogin($user);
+                } catch (Exception $e) {
+                    $io->error("Impossible de trouver la personne associée à l'identifiant '$user'");
+                    return self::FAILURE;
+                }
+                $io->title("Calcule des notifications pour $person($user) le $infoDate (v2)");
+            } else {
+                $io->title("Calcule des notifications le $infoDate (v2)");
+            }
+
             if ($displayPersons) {
                 $milestones = $milestoneService->getMilestonesRecallableWithPersons($date);
                 $headers[] = "Personnes";
             } else {
-                $milestones = $milestoneService->getMilestonesRecallableAtDate($date);
+                $milestones = $milestoneService->getMilestonesRecallableAtDate($date, $person);
             }
 
             $io->table($headers, $milestones);

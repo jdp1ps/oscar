@@ -117,12 +117,12 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $this->getEntityManager()->getRepository(OrganizationRole::class);
     }
 
-    public function getOrganizationRepository() :OrganizationRepository
+    public function getOrganizationRepository(): OrganizationRepository
     {
         return $this->getEntityManager()->getRepository(Organization::class);
     }
 
-    public function getOrganizationWithRnsr() :array
+    public function getOrganizationWithRnsr(): array
     {
         return $this->getOrganizationRepository()->getOrganizationsWithRnsr();
     }
@@ -184,57 +184,59 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * @param $idParentOrganization
      * @return array
      */
-    public function getOrganizationIdsDeep( int $idParentOrganization, bool $ignoreFirst = false ):array
+    public function getOrganizationIdsDeep(int $idParentOrganization, bool $ignoreFirst = false): array
     {
         $ids = $this->getDescentsIdsDeep($idParentOrganization);
-        if( $ids[0] == $idParentOrganization ){
+        if ($ids[0] == $idParentOrganization) {
             $ids = array_slice($ids, 1);
         }
         return $ids;
     }
 
 
-
-    public function getAncestors( int $idOrganization ) :array {
+    public function getAncestors(int $idOrganization): array
+    {
         $ancestors = [];
         $ids = $this->getAncestorsIdsDeep($idOrganization);
         foreach ($ids as $id) {
-            if( $id == $idOrganization ) continue;
+            if ($id == $idOrganization) {
+                continue;
+            }
             $ancestors[] = $this->getOrganization($id);
         }
         return array_reverse($ancestors);
     }
 
-    public function getAncestorsIds( int $organizationId ):array
+    public function getAncestorsIds(int $organizationId): array
     {
-        $out= [];
+        $out = [];
         return $this->getAncestorsIdsDeep($organizationId, $out);
     }
 
-    private function getAncestorsIdsDeep( int $organizationId, &$output = [] ):array
+    private function getAncestorsIdsDeep(int $organizationId, &$output = []): array
     {
         $organization = $this->getOrganization($organizationId);
         $output[] = $organization->getId();
-        if( $organization->getParent() ){
+        if ($organization->getParent()) {
             $output = $this->getAncestorsIdsDeep($organization->getParent()->getId(), $output);
         }
         return $output;
     }
 
-    public function getDescentsIds( int $fromParent, bool $ignoreFirst = false ): array
+    public function getDescentsIds(int $fromParent, bool $ignoreFirst = false): array
     {
         $descents = $this->getDescentsIdsDeep($fromParent);
-        if( $ignoreFirst == true && $descents[0] == $fromParent ){
+        if ($ignoreFirst == true && $descents[0] == $fromParent) {
             $descents = array_slice($descents, 1);
         }
         return $descents;
     }
 
-    private function getDescentsIdsDeep( int $fromParent, &$output = [] ): array
+    private function getDescentsIdsDeep(int $fromParent, &$output = []): array
     {
         $organization = $this->getOrganization($fromParent);
         $output[] = $organization->getId();
-        if( $organization->getChildren() ){
+        if ($organization->getChildren()) {
             foreach ($organization->getChildren() as $organization) {
                 $output = $this->getDescentsIdsDeep($organization->getId(), $output);
             }
@@ -242,21 +244,26 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $output;
     }
 
-    public function getPersonAffectationDetails( Person $person, bool $principal = true ):array {
+    public function getPersonAffectationDetails(Person $person, bool $principal = true): array
+    {
         $output = [];
         /** @var OrganizationPerson $personOrganization */
         foreach ($person->getOrganizations() as $personOrganization) {
-            if( $principal === true && !$personOrganization->isPrincipal() ){
+            if ($principal === true && !$personOrganization->isPrincipal()) {
                 continue;
             }
-            $this->buildPersonAffectationDetailsDeep( $personOrganization->getRoleObj(), $personOrganization->getOrganization(), $output);
+            $this->buildPersonAffectationDetailsDeep(
+                $personOrganization->getRoleObj(),
+                $personOrganization->getOrganization(),
+                $output
+            );
         }
         return $output;
     }
 
-    private function buildPersonAffectationDetailsDeep( Role $roleToAdd, Organization $organization, &$output ) :void
+    private function buildPersonAffectationDetailsDeep(Role $roleToAdd, Organization $organization, &$output): void
     {
-        if( !array_key_exists($organization->getId(), $output)) {
+        if (!array_key_exists($organization->getId(), $output)) {
             $output[$organization->getId()] = [
                 'organization' => $organization,
                 'roles_display' => [],
@@ -264,11 +271,11 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             ];
         }
         $output[$organization->getId()]['roles'][] = $roleToAdd;
-        if( !in_array($roleToAdd->getRoleId(), $output[$organization->getId()]['roles_display']) ){
+        if (!in_array($roleToAdd->getRoleId(), $output[$organization->getId()]['roles_display'])) {
             $output[$organization->getId()]['roles_display'][] = $roleToAdd->getRoleId();
         }
 
-        if( $organization->getChildren() ){
+        if ($organization->getChildren()) {
             foreach ($organization->getChildren() as $subOrganization) {
                 $this->buildPersonAffectationDetailsDeep($roleToAdd, $subOrganization, $output);
             }
@@ -411,7 +418,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     {
         $structures = [];
         $subStructures = $this->getOrganizationRepository()->getSubOrganizations($organizationId);
-        foreach ( $subStructures as $organization) {
+        foreach ($subStructures as $organization) {
             $infos = $organization->toArray();
             $infos['show'] = "";
             $infos['persons'] = [];
@@ -420,7 +427,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             // personnels
             /** @var OrganizationPerson $p */
             foreach ($organization->getPersons() as $p) {
-                if( !array_key_exists($p->getPerson()->getId(), $infos['persons']) ){
+                if (!array_key_exists($p->getPerson()->getId(), $infos['persons'])) {
                     $infos['persons'][$p->getPerson()->getId()] = [
                         'label' => $p->getPerson()->getFullname(),
                         'roles' => []
@@ -431,7 +438,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
             /** @var Organization $o */
             foreach ($organization->getChildren() as $o) {
-                if( !array_key_exists($o->getId(), $infos['organizations']) ){
+                if (!array_key_exists($o->getId(), $infos['organizations'])) {
                     $infos['organizations'][$o->getId()] = $o->toArray();
                 }
             }
@@ -473,6 +480,20 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $subStructure = $this->getOrganizationRepository()->getOrganisationById($subOrganizationId);
         $subStructure->setParent(null);
         $this->getEntityManager()->flush($subStructure);
+    }
+
+    /**
+     * @param Person $person
+     * @return int[]
+     */
+    public function getIdsForPerson(Person $person): array
+    {
+        $idsOrganization = [];
+        /** @var OrganizationPerson $organizationPerson */
+        foreach ($person->getOrganizations() as $organizationPerson) {
+            $idsOrganization = $organizationPerson->getOrganization()->getChildrenDeepWithSelf($idsOrganization, true);
+        }
+        return $idsOrganization;
     }
 
 

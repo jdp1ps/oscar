@@ -245,11 +245,14 @@ class ActivityDate implements ITrackable
     }
 
     /**
-     * @param mixed $type
+     * @param DateType $type
      */
     public function setType($type)
     {
         $this->type = $type;
+        if( $type && $type->isFinishable() ){
+
+        }
 
         return $this;
     }
