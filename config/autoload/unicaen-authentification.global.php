@@ -30,7 +30,7 @@ $settings = [
     /**
      * Attribut LDAP utilisé pour le username des utilisateurs
      */
-    'ldap_username'                => "username",
+    'ldap_username'                => "supannaliaslogin",
 
     /**
      * Gestion des autorisations d'usurpation
