@@ -105,7 +105,7 @@ class ValidationPeriod
      * @var string
      * @ORM\Column(type="string", nullable=false)
      */
-    private int $object_id;
+    private string $object_id;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Validation niveau activité

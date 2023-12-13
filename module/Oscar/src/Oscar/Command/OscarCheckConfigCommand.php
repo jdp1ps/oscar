@@ -262,7 +262,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             if (count($errors) > 0) {
                 $io->warning("Obsolète");
                 foreach ($errors as $error) {
-                    $io->error(" - " . $error . " - " . print_r($error));
+                    $io->error(" - " . print_r($error));
                 }
                 $io->error("EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force");
                 return self::FAILURE;
@@ -270,7 +270,8 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $io->writeln("<green>OK</green>");
             }
         } catch (\Exception $e) {
-            $io->writeln("ERROR " . $e->getMessage());
+            $io->writeln("ERROR DB : " . $e->getMessage());
+            return self::FAILURE;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,6 +295,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $this->checkPath($io, $pathDocuments, "Documents temporaires PCRU");
         } catch (OscarException $e) {
             $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
+            return self::FAILURE;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,6 +340,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $io->writeln("");
         } catch (OscarException $e) {
             $io->error(sprintf("Configuration manquante : %s", $e->getMessage()));
+            return self::FAILURE;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -378,6 +381,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             }
         } catch (OscarException $e) {
             $io->error(sprintf(" ! INDEXEUR : Configuration du système de recherche incomplet : %s", $e->getMessage()));
+            return self::FAILURE;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +411,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         $oscarWorkerFile = __DIR__ . '/../../../../../config/oscarworker.service';
         if (!file_exists($oscarWorkerFile)) {
             $io->error("Le fichier OscarWorker est absent (config/oscarworker.service)");
-            die();
+            return self::FAILURE;
         }
 
         $io->write(sprintf("* Envoi d'un job 'HELLO' à Gearman sur '%s' : ", $oscarConfig->getGearmanHost()));
@@ -424,6 +428,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                     "LE WORKER NE RÉAGIT PAS, Vérifiez qu'il est bien lancé, si vous avez réalisé une mise à jour, pensez à relancer le service.\n Gearman a répondu : " . $client->error(
                     )
                 );
+                return self::FAILURE;
             } else {
                 $io->writeln("OscarWorker a répondu : '<green>$response</green>'");
             }
@@ -432,6 +437,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 "GEARMAN FAIL, Impossible de se connecter au serveur Gearman '" . $oscarConfig->getGearmanHost(
                 ) . "' : \n Erreur : " . $client->error()
             );
+            return self::FAILURE;
         }
         return self::SUCCESS;
     }
