@@ -504,7 +504,11 @@ class Activity implements ResourceInterface
 
     public function getPercentSpent()
     {
-        return 100 / $this->getAmount() * abs($this->getTotalSpent());
+        if( $this->getAmount() ){
+            return 100 / $this->getAmount() * abs($this->getTotalSpent());
+        } else {
+            return 0;
+        }
     }
 
     public function getRemainder()
