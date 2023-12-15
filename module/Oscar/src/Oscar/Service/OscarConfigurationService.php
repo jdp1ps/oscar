@@ -17,6 +17,7 @@ use Oscar\Formatter\File\IHtmlToPdfFormatter;
 use Oscar\Import\Data\DataStringArray;
 use Oscar\OscarVersion;
 use Oscar\Utils\FileSystemUtils;
+use ReflectionException;
 use Symfony\Component\Yaml\Dumper;
 use Symfony\Component\Yaml\Parser;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
@@ -222,15 +223,19 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     /**
      * @return IHtmlToPdfFormatter
      * @throws OscarException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getHtmlToPdfMethod()
+    public function getHtmlToPdfMethod() :IHtmlToPdfFormatter
     {
-        $config = $this->getConfiguration('htmltopdfrenderer');
-        $class = $config['class'];
-        $arguments = $config['arguments'];
-        $instance = new \ReflectionClass($class);
-        return $instance->newInstanceArgs($arguments);
+        try {
+            $config = $this->getConfiguration('htmltopdfrenderer');
+            $class = $config['class'];
+            $arguments = $config['arguments'];
+            $instance = new \ReflectionClass($class);
+            return $instance->newInstanceArgs($arguments);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de charger le moteur de rendu PDF ('htmltopdfrenderer')");
+        }
     }
 
 

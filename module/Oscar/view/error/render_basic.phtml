@@ -1,0 +1,14 @@
+<?php
+/** @var Exception $err */
+$err = $exception;
+
+$orderError = [
+        'code' => $err->getCode(),
+        'file' => $err->getFile(),
+        'line' => $err->getLine(),
+        'message' => $err->getMessage(),
+        'stack' => $err->getTraceAsString(),
+];
+
+echo json_encode($orderError, JSON_PRETTY_PRINT);
+?>

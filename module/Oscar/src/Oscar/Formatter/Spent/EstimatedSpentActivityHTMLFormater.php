@@ -46,23 +46,26 @@ class EstimatedSpentActivityHTMLFormater implements IFormatter
             throw new OscarException("Le gabarit pour générer les dépenses prévisionnelles n'existe pas : $this->templatePath");
         }
 
+        try {
+            $resolver = new AggregateResolver();
+            $map = new TemplateMapResolver([
+                'estimated_spent_activity' => $this->templatePath
+            ]);
+            $this->viewRenderer->setResolver($resolver);
+            $resolver->attach($map);
+        } catch (\Exception $e) {
+            throw new OscarException('Impossible de charger le template');
+        }
+
         $view = new ViewModel($this->datas);
         $view->setTemplate('estimated_spent_activity');
         $view->setTerminal(true);
 
-        $resolver = new AggregateResolver();
-        $map = new TemplateMapResolver([
-            'estimated_spent_activity' => $this->templatePath
-        ]);
-        $this->viewRenderer->setResolver($resolver);
-        $resolver->attach($map);
-
-        return $this->viewRenderer->render($view);
-
-        //
-        if( array_key_exists('download', $options) && $options['download'] === true ){
-            $downloader = new CSVDownloader();
-            $downloader->downloadCSVToExcel($filename);
+        try {
+            return $this->viewRenderer->render($view);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de générer la vue : " . $e->getMessage());
         }
+
     }
 }

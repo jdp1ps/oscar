@@ -62,7 +62,7 @@ return array(
         ],
 
         'htmltopdfrenderer' => [
-            'class' => \Oscar\Formatter\File\HtmlToPdfDomPDFFormatter::class,
+            'class' => \Oscar\Formatter\File\HtmlToPdfWkhtmltopdfFormatter::class,
             'arguments' => []
         ],
 

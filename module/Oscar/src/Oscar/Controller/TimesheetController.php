@@ -24,7 +24,6 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
-use Oscar\Formatter\File\HtmlToPdfDomPDFFormatter;
 use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Formatter\Timesheet\TimesheetActivityPeriodHtmlFormatter;
 use Oscar\Formatter\Timesheet\TimesheetPeriodHtmlFormatter;
@@ -35,6 +34,7 @@ use Oscar\Formatter\TimesheetActivityPeriodFormatter;
 use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\DocumentFormatterService;
 use Oscar\Service\PersonService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
@@ -62,6 +62,27 @@ class TimesheetController extends AbstractOscarController
 
     /** @var  ProjectGrantService */
     private $projectGrantService;
+
+    /** @var DocumentFormatterService */
+    private DocumentFormatterService $documentFormatterService;
+
+    /**
+     * @return DocumentFormatterService
+     */
+    public function getDocumentFormatterService(): DocumentFormatterService
+    {
+        return $this->documentFormatterService;
+    }
+
+    /**
+     * @param DocumentFormatterService $documentFormatterService
+     * @return TimesheetController
+     */
+    public function setDocumentFormatterService(DocumentFormatterService $documentFormatterService): self
+    {
+        $this->documentFormatterService = $documentFormatterService;
+        return $this;
+    }
 
     /**
      * @return ProjectGrantService
@@ -698,7 +719,13 @@ class TimesheetController extends AbstractOscarController
         return [];
     }
 
-    public function synthesisActivityPeriodsBoundsAction()
+    /**
+     * Synthèse des déclarations de temps pour la période donnée.
+     *
+     * @return Response|JsonModel
+     * @throws OscarException
+     */
+    public function synthesisActivityPeriodsBoundsAction(): Response|JsonModel
     {
         $datas = [];
         $activity_id = $this->params()->fromRoute('id', null);
@@ -742,16 +769,15 @@ class TimesheetController extends AbstractOscarController
                 return $this->jsonOutput($datas);
 
             case OscarFormatterConst::FORMAT_IO_HTML :
-                $formatter = new TimesheetPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template')
-                );
-                $formatter->output($datas);
-
             case OscarFormatterConst::FORMAT_IO_PDF :
-                $formatter = new TimesheetPeriodPdfFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template')
+                $this->getDocumentFormatterService()->buildAndDownload(
+                    $this->getOscarConfigurationService()->getConfiguration('timesheet_period_template'),
+                    $datas,
+                    $format,
+                    $datas['activity']['num'] . '-synthese-feuille-de-temps',
+                    DocumentFormatterService::PDF_ORIENTATION_LANDSCAPE
                 );
-                $formatter->output($datas);
+                break;
 
             default:
                 return $this->getResponseBadRequest(sprintf("Format '%s' non pris en charge.", $format));
@@ -1261,7 +1287,7 @@ class TimesheetController extends AbstractOscarController
     /**
      * Exportation et visualisation des feuilles de temps.
      *
-     * @return array
+     * @return Response
      * @throws OscarException
      */
     public function excelAction()
@@ -1278,8 +1304,9 @@ class TimesheetController extends AbstractOscarController
         $currentPersonId = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : -1;
 
         if ($activityId) {
-            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
+            $activity = $this->getProjectGrantService()->getActivityById($activityId);
         }
+
 
         if ($personIdQuery != null && $currentPersonId != $personIdQuery) {
             if ($activity == null) {
@@ -1287,14 +1314,15 @@ class TimesheetController extends AbstractOscarController
                 $activities = $this->getProjectGrantService()->getActivitiesPersonPeriod($personIdQuery, $period);
                 $allow = false;
 
-                foreach ($activities as $activity) {
+                foreach ($activities as $a) {
                     if ($allow === false && $this->getOscarUserContextService()->hasPrivileges(
                             Privileges::ACTIVITY_TIMESHEET_VIEW,
-                            $activity
+                            $a
                         )) {
                         $allow = true;
                     }
                 }
+
                 if (!$allow) {
                     return $this->getResponseUnauthorized(
                         "Vous ne pouvez pas voir cette feuille de temps pour cette période"
@@ -1307,16 +1335,13 @@ class TimesheetController extends AbstractOscarController
             $personId = $currentPersonId;
         }
 
-        /** @var Person $person */
-        $person = $this->getEntityManager()->getRepository(Person::class)->find($personId);
+        $person = $this->getPersonService()->getPerson($personId);
 
         if (!$person) {
             throw new OscarException("Impossible de trouver la personne.");
         }
 
-        /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
-
 
         if ($action == "csv") {
             die("Cette fonctionnalité est provisoirement indisponible.");
@@ -1345,20 +1370,13 @@ class TimesheetController extends AbstractOscarController
             $restrictedActivity = $this->params()->fromQuery('activityid', 0);
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period, false, $restrictedActivity);
             $datas['format'] = $out;
-
-            if ($out == 'pdf') {
-                $formatter = new TimesheetPersonPeriodPdfFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template')
-                );
-                $formatter->output($datas);
-            } elseif ($out == 'html') {
-                $formatter = new TimesheetPersonPeriodHtmlFormatter(
-                    $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template')
-                );
-                $formatter->output($datas);
-            } else {
-                return $this->getResponseBadRequest("Format non-géré");
-            }
+            $this->getDocumentFormatterService()->buildAndDownload(
+                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                $datas,
+                $out,
+                $datas['filename'],
+                DocumentFormatterService::PDF_ORIENTATION_LANDSCAPE
+            );
         }
 
         if ($action == "export") {
@@ -1599,15 +1617,9 @@ class TimesheetController extends AbstractOscarController
 
 
         $datas = $timesheetService->getPersonTimesheets($person, false, $period, null);
-
-        echo "<pre>";
-        echo json_encode($datas, JSON_PRETTY_PRINT);
-        echo "</pre>";
-
         return [
             "datas" => $datas,
             "person" => $person,
-
         ];
     }
 

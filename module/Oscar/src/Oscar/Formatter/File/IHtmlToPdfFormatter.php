@@ -9,12 +9,12 @@ interface IHtmlToPdfFormatter
     const ORIENTATION_LANDSCAPE = 'landscape';
     const ORIENTATION_PORTRAIT = 'portrait';
 
-    public function convert($html, $filename=null, $tobrowser=true);
+    public function convert(string $html, string $baseFilename, bool $download = true): ?string;
 
     /**
      * @param $orientation
      * @return IHtmlToPdfFormatter
      */
-    public function setOrientation($orientation);
+    public function setOrientation(string $orientation): void;
 
 }

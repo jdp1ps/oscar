@@ -1,40 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Document PDF</title>
+    <style>
+        <?php include __DIR__.'/common.css'; ?>
+
+        .thead-main {
+            font-size: 1em;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        th {
+            text-align: left;
+        }
+
+        .presenter {
+            width: 80%;
+            margin-left: 5%;
+        }
+
+        .prevision {
+            width: 90%;
+            margin-left: 5%;
+        }
+    </style>
+</head>
+<body>
 <?php
 /** Activity $activity */
-
-
 function montant($value){
    return number_format($value, 2);
 }
 
-
 $colors = ['#c0e1f1', "#BCF1C3", "#F0F1C0", "#F1C2AF", "#F1C8DE"];
-
 ?>
-<style>
-    <?php include __DIR__.'/common.css'; ?>
 
-    .thead-main {
-        font-size: 1em;
-    }
 
-    .total {
-        font-weight: bold;
-    }
-
-    th {
-        text-align: left;
-    }
-
-    .presenter {
-        width: 80%;
-        margin-left: 5%;
-    }
-
-    .prevision {
-        width: 90%;
-        margin-left: 5%;
-    }
-</style>
 
     <table class="presenter">
         <tr>
@@ -112,3 +117,5 @@ $colors = ['#c0e1f1', "#BCF1C3", "#F0F1C0", "#F1C2AF", "#F1C8DE"];
         </tfoot>
     </table>
 
+</body>
+</html>

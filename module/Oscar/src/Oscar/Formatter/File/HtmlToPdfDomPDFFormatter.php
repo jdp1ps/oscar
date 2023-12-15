@@ -1,55 +1,47 @@
 <?php
 
-
 namespace Oscar\Formatter\File;
-
 
 use Dompdf\Dompdf;
 use Oscar\Exception\OscarException;
 
 class HtmlToPdfDomPDFFormatter implements IHtmlToPdfFormatter
 {
-    private $orientation = 'portrait';
+    private string $orientation = 'portrait';
 
     /**
-     * HtmlToPdfDomPDFFormatter constructor.
-     * @param string $orientation
+     * @param string $html
+     * @param string $baseFilename
+     * @param bool $download
+     * @return string|null
+     * @throws OscarException
      */
-    public function __construct()
+    public function convert(string $html, string $baseFilename, bool $download = true): ?string
     {
-
-    }
-
-
-    /**
-     * @param $html
-     * @param null $filename
-     * @param bool $tobrowser
-     */
-    public function convert($html, $filename = null, $tobrowser = true)
-    {
-        if ($filename == null) {
-            $filename = uniqid('document-') . '.pdf';
+        if ($baseFilename == null) {
+            $baseFilename = uniqid('document-');
         }
+
+        $filename = "$baseFilename.pdf";
+
         try {
             $dompdf = new Dompdf();
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', $this->orientation);
             $dompdf->render();
             $dompdf->stream($filename);
-            die("fin");
+            die();
         } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
         }
     }
 
     /**
-     * @param $orientation
-     * @return $this
+     * @param string $orientation
+     * @return void
      */
-    public function setOrientation($orientation)
+    public function setOrientation(string $orientation): void
     {
         $this->orientation = $orientation;
-        return $this;
     }
 }

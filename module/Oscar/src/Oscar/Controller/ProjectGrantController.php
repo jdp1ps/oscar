@@ -46,22 +46,19 @@ use Oscar\Formatter\ActivityToJsonFormatter;
 use Oscar\Formatter\CSVDownloader;
 use Oscar\Formatter\JSONFormatter;
 use Oscar\Formatter\OscarFormatterConst;
-use Oscar\Formatter\Spent\EstimatedSpentActivityHTMLFormater;
-use Oscar\Formatter\Spent\EstimatedSpentActivityPDFFormater;
 use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
-use Oscar\Service\ContractDocumentService;
-use Oscar\Service\NotificationService;
+use Oscar\Service\DocumentFormatterService;
 use Oscar\Service\OrganizationService;
 use Oscar\Service\ProjectGrantService;
-use Oscar\Service\SpentService;
 use Oscar\Service\TimesheetService;
 use Oscar\Strategy\Activity\ExportDatas;
 use Oscar\Traits\UseContractDocumentService;
 use Oscar\Traits\UseContractDocumentServiceTrait;
+use Oscar\Traits\UseDocumentFormatterServiceTrait;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePCRUService;
@@ -82,7 +79,6 @@ use Laminas\Mvc\Console\View\Renderer;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Laminas\View\Renderer\PhpRenderer;
-use PhpOffice\PhpSpreadsheet\Settings;
 
 /**
  * Controlleur pour les Activités de recherche. Le nom du controlleur est (il
@@ -97,7 +93,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                                                         UseContractDocumentService
 {
 
-    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait, UseContractDocumentServiceTrait;
+    use UseNotificationServiceTrait, UsePersonServiceTrait, UseServiceContainerTrait, UseProjectServiceTrait, UseSpentServiceTrait, UsePCRUServiceTrait, UseContractDocumentServiceTrait, UseDocumentFormatterServiceTrait;
 
     /** @var ActivityRequestService */
     private $activityRequestService;
@@ -1741,6 +1737,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             'total' => 0.0
         ];
 
+
         foreach ($years as $year) {
             $totaux['years'][$year] = 0.0;
         }
@@ -1754,8 +1751,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $totaux['lines'][$code][$year] = 0.0;
             }
         }
-
-        //var_dump($totaux); die();
 
         foreach ($lines as $line) {
             $masse = $line['annexe'];
@@ -1785,41 +1780,68 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
         }
 
-        if ($format == 'pdf') {
-            $formatter = new EstimatedSpentActivityPDFFormater(
+        $datas = [
+            'lines' => $lines,
+            'masses' => $masses,
+            'years' => $years,
+            'totaux' => $totaux,
+            'values' => $values,
+            'activity' => $entity
+        ];
+
+        try {
+            $this->getDocumentFormatterService()->buildAndDownload(
                 $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
-                $this->getViewRenderer(),
-                [
-                    'lines' => $lines,
-                    'masses' => $masses,
-                    'years' => $years,
-                    'totaux' => $totaux,
-                    'values' => $values,
-                    'activity' => $entity
-                ]
+                $datas,
+                $format,
+                'depenses-previsionnelles-' . $entity->getOscarNum(),
+                DocumentFormatterService::PDF_ORIENTATION_PORTRAIT
             );
-            $formatter->format(['download' => true]);
-            die();
-        } else {
-            if ($format == "html") {
-                //
-                $formatter = new EstimatedSpentActivityHTMLFormater(
-                    $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
-                    $this->getViewRenderer(),
-                    [
-                        'lines' => $lines,
-                        'masses' => $masses,
-                        'years' => $years,
-                        'totaux' => $totaux,
-                        'values' => $values,
-                        'activity' => $entity
-                    ]
-                );
-                die($formatter->format());
-            } else {
-                throw new OscarException("Format non-pris en charge");
-            }
+        } catch (\Exception $e){
+            throw new OscarException("Impossible de générer le document d'estimation des dépenses : " . $e->getMessage());
         }
+
+
+//        if ($format == 'pdf') {
+//            try {
+//                $template = $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate();
+//                $formatter = new EstimatedSpentActivityPDFFormater(
+//                    $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+//                    $this->getViewRenderer(),
+//                    [
+//                        'lines' => $lines,
+//                        'masses' => $masses,
+//                        'years' => $years,
+//                        'totaux' => $totaux,
+//                        'values' => $values,
+//                        'activity' => $entity
+//                    ]
+//                );
+//            } catch (\Exception $e) {
+//                throw new OscarException("Impossible de générer le PDF");
+//            }
+//            $formatter->format(['download' => true]);
+//            die();
+//        } else {
+//            if ($format == "html") {
+//                //
+//                $formatter = new EstimatedSpentActivityHTMLFormater(
+//                    $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
+//                    $this->getViewRenderer(),
+//                    [
+//                        'lines' => $lines,
+//                        'masses' => $masses,
+//                        'years' => $years,
+//                        'totaux' => $totaux,
+//                        'values' => $values,
+//                        'activity' => $entity
+//                    ]
+//                );
+//                die($formatter->format());
+//            } else {
+//                throw new OscarException("Format non-pris en charge");
+//            }
+//        }
     }
 
     /**
