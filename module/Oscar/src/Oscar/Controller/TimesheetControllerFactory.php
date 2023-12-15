@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
+use Oscar\Service\DocumentFormatterService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
@@ -32,6 +33,7 @@ class TimesheetControllerFactory implements FactoryInterface
         $c->setPersonService($container->get(PersonService::class));
         $c->setViewRenderer($container->get('ViewRenderer'));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
+        $c->setDocumentFormatterService($container->get(DocumentFormatterService::class));
         return $c;
     }
 

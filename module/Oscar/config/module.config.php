@@ -526,8 +526,9 @@ return array(
             \Oscar\Service\AdministrativeDocumentService::class => \Oscar\Service\AdministrativeDocumentServiceFactory::class,
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
-            'Logger' => \Oscar\Service\LoggerServiceFactory::class,
+            \Oscar\Service\DocumentFormatterService::class => \Oscar\Service\DocumentFormatterServiceFactory::class,
             \Oscar\Service\GearmanJobLauncherService::class => \Oscar\Service\GearmanJobLauncherServiceFactory::class,
+            'Logger' => \Oscar\Service\LoggerServiceFactory::class,
             \Oscar\Service\MailingService::class => \Oscar\Service\MailingServiceFactory::class,
             \Oscar\Service\MaintenanceService::class => \Oscar\Service\MaintenanceServiceFactory::class,
             \Oscar\Service\MilestoneService::class => \Oscar\Service\MilestoneServiceFactory::class,
@@ -544,7 +545,7 @@ return array(
             \Oscar\Service\SpentService::class => \Oscar\Service\SpentServiceFactory::class,
             \Oscar\Service\TypeDocumentService::class => \Oscar\Service\TypeDocumentServiceFactory::class,
             'RoleProvider' => \Oscar\Provider\RoleProviderFactory::class,
-            \Oscar\Service\UserParametersService::class => \Oscar\Service\UserParametersServiceFactory::class
+            \Oscar\Service\UserParametersService::class => \Oscar\Service\UserParametersServiceFactory::class,
         ),
     ),
 
@@ -573,7 +574,6 @@ return array(
             'DateType' => \Oscar\Controller\DateTypeControllerFactory::class,
             'Depense' => \Oscar\Controller\DepenseControllerFactory::class,
             \Oscar\Controller\EnrollController::class => \Oscar\Controller\EnrollControllerFactory::class,
-            \Oscar\Controller\ConsoleController::class => \Oscar\Factory\OscarUseFactory::class,
             'ContractDocument' => \Oscar\Controller\ContractDocumentControllerFactory::class,
             'TabDocument' => \Oscar\Controller\TabDocumentControllerFactory::class,
             'Notification' => \Oscar\Controller\NotificationControllerFactory::class,
@@ -585,7 +585,6 @@ return array(
             'WorkPackage' => \Oscar\Controller\WorkPackageControllerFactory::class,
         ],
         "aliases" => [
-            'Console' => \Oscar\Controller\ConsoleController::class,
             'Enroll' => \Oscar\Controller\EnrollController::class
         ]
     ),

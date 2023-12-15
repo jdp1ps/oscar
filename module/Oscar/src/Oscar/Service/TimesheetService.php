@@ -4813,8 +4813,18 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $periodLabel = DateTimeUtils::extractPeriodDatasFromString($period);
 
+        $nbrJours = count($daysInfos);
+        $width = $nbrJours + 2;
+        $colSize4 = ceil(($nbrJours - 3) / 4);
+        $nbrJours - ($colSize4 * 4);
+
         $output = [
             'filename' => Slugify::create()->slugify("feuille de temps $person $period"),
+            'nbrJours' => $nbrJours,
+            'width' => $width,
+            'colSize4' => $colSize4,
+            'padding' => $nbrJours - ($colSize4 * 4),
+
             'person' => (string)$person,
             'active' => $active,
             'commentaires' => $commentaires,

@@ -16,7 +16,11 @@ class EstimatedSpentActivityPDFFormater extends EstimatedSpentActivityHTMLFormat
     {
         $filename = sprintf("%s - dépenses-prévisionnelles.pdf", $this->datas['activity']->getOscarNum());
 
+        $html = parent::format();
+        die($html);
+
         $dompdf = new Dompdf();
+
         $dompdf->loadHtml(parent::format());
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();

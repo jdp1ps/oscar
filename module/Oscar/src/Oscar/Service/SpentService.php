@@ -1307,7 +1307,21 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $out = [];
         $grouped = [];
         $byMasses = [
-            'N.B' => []
+            'N.B' => [
+                'label' => 'Non-définit',
+                'key' => 'N.B',
+                'spents' => []
+            ],
+            '1' => [
+                'label' => 'Recette',
+                'key' => '1',
+                'spents' => []
+            ],
+            '0' => [
+                'label' => 'Ignoré',
+                'key' => '0',
+                'spents' => []
+            ]
         ];
 
         // Tableau contenant les masses
@@ -1337,7 +1351,11 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             if( !in_array($masseGroup, $massesKey) ){
                 $masseGroup = 'N.B';
             }
-
+            if( !is_array($byMasses[$masseGroup]) ){
+                echo "<h1>$masseGroup</h1>";
+                var_dump($compte);
+                var_dump($byMasses); die();
+            }
             if (!array_key_exists($numPiece, $byMasses[$masseGroup]['spents'])) {
                 $byMasses[$masseGroup]['spents'][] = [
                     'ids' => [],

@@ -63,14 +63,18 @@ define('REQUEST_MICROTIME', microtime(true));
 
 // Default ENV (development) pour les buildt-in server
 if( !getenv('APPLICATION_ENV') && php_sapi_name() === 'cli-server' ){
-    putenv('APPLICATION_ENV=development');
+    if( array_key_exists('APPLICATION_ENV', $_ENV) ){
+        putenv('APPLICATION_ENV=' . $_ENV['APPLICATION_ENV']);
+    } else {
+        putenv('APPLICATION_ENV=development');
+    }
 }
 elseif( !getenv('APPLICATION_ENV' )){
     putenv('APPLICATION_ENV=production');
 }
 
 if( php_sapi_name() === 'cli-server' ){
-    putenv('APPLICATION_ENV=development');
+
     header("Access-Control-Allow-Origin: http://localhost:8081");
     header("Access-Control-Allow-Credentials: true");
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');

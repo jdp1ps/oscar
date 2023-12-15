@@ -182,7 +182,6 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     {
         $r = new JsonModel();
         $r->setVariables($datas);
-
         return $r;
     }
 

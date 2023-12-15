@@ -108,7 +108,7 @@ git checkout ripley-laminas-php8
 
 ### Installation des librairies tiers 
 
->Un système de jeton de sécurité (*token*) est en place sur **Github**. Pensez à générer un jeton de sécurité depuis Github : https://github.com/settings/tokens puis de configurer ce jeton pour **Composer** :
+> ⚠️ Un système de jeton de sécurité (*token*) est en place sur **Github**. Vous devez générer un jeton de sécurité depuis Github : https://github.com/settings/tokens puis de configurer ce jeton pour **Composer** :
 > ```bash
 > composer config --global --auth github-oauth.github.com JETON
 > ```
@@ -159,12 +159,22 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 ### Utilisateur du CRON
 
-Le nouveau système de log propose une rotation des logs par fichier à la journée. Donc quand Oscar produit des logs, il va créer un fichier de log pour la journée. Si le fichier est créé par une tache CRON, l'accès au fichier de log sera limité, et le serveur apache ne pourra pas écrire dedans.
+> ⚠️ Le nouveau système de log propose une rotation des logs par fichier à la journée. Donc quand Oscar produit des logs, il va créer un fichier de log pour la journée. Si le fichier est créé par une tache CRON, l'accès au fichier de log en écriture sera limité à l'utilisateur CRON, et le serveur apache pourait ne pas pouvoir pas écrire dedans.
 
-Donc, planifez vos taches CRON avec **www-data** (ou l'utilisateur que vous utilisez pour les droits apache)
+Voici la commande pour planifier vos taches CRON avec **www-data** (ou l'utilisateur que vous utilisez pour les droits Apache).
 
 ```bash
 crontab -u www-data -e
+```
+
+### Système de génération des documents
+
+La procédure de création de document (PDF) a évolué. Elle exploite maintenant un utilitaire plus performant : [wkhtmltopdf](https://wkhtmltopdf.org/), une librairie Open source (LGPLv3) dédiée à la convertion HTML > PDF
+
+Pour l'installer sous Debian : 
+
+```bash
+apt install wkhtmltopdf
 ```
 
 ### Configuration des documents
@@ -173,16 +183,15 @@ Se rendre dans la partie Administration > Configuration et maintenance
 
 #### Etape 1 : Qualifier les documents sans type
 
-Allez dans la partie "Type de document", migrer les documents non typé si besoin
+Allez dans la partie "Type de document", migrer les documents non typés. Cela permettra ensuite des deplacer ces documents
 
-> Cela permettra ensuite des deplacer ces documents
+Ensuite, choisir un type de document par défaut en éditant un des types, et cocher l'option "type par défaut".
 
-Ensuite choisir un type de document par défaut en éditant un des types, et cocher l'option "type par défaut".
-Les documents nouvellement déposés via des procédures automatisées seront automatiquement qualifié avec de type si ça n'est pas précisé.
+> Les documents nouvellement déposés via des procédures automatisées seront automatiquement qualifié avec de type si ça n'est pas précisé.
 
 #### Etape 2 : Créer les onglets
 
-Dans la partie  **Type d'onglet documents** (bouton "Configurer" à droite),
+Dans la partie **Type d'onglet documents** (bouton "Configurer" à droite),
 créer les différents onglets de documents prévus. Pensez à sélectionner l'onglet par défaut pour les envois de document des demandes d'activité et choisir les rôles concernés par les différents onglets.
 
 #### Etape 3 : Migration des documents
@@ -192,10 +201,12 @@ Par défaut, les documents ne sont rangés dans aucun onglet, et ne seront pas v
 Dans **Administration > Nomenclatures > Type d'onglet documents**, vous pouvez sélectionner un type de document
 
 
-
 ## Les choses à vérifier
 
-- Accès à l'application : Authentification
+- Accès à l'application : Authentification CAS, LDAP, Compte local (si besoin)
+- Accès à une fiche activité contenant des documents (visibilité des documents)
+- Envoi/suppression de document dans une activité
+- Document généré
 
 
 ## Organisations Parents
