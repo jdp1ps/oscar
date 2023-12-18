@@ -1,6 +1,6 @@
 <template>
   <div v-if="remote">
-    Message: "{{ remote }}" // URL: "{{ url }}"
+    Chargement
   </div>
 
   <oscar-dialog :options="dialogDelete"/>
@@ -68,7 +68,7 @@
           <i class="icon-link-outline"></i>
           Voir la fiche
         </a>
-        <a href="#" class="btn btn-danger btn-xs"
+        <a href="#" class="btn btn-danger btn-xs" v-if="manage"
            @click.prevent="handlerRemoveSubStructure(o)">
           <i class="icon-trash"></i>
           Retirer
@@ -77,11 +77,12 @@
     </article>
   </section>
 
-
+  <!--
   <button class="btn btn-primary" @click="fetch">
     Recharger
   </button>
-  <button class="btn btn-primary" @click="handlerNew">
+  -->
+  <button class="btn btn-primary" @click="handlerNew" v-if="manage">
     Ajouter une sous-structure
   </button>
 </template>
@@ -92,8 +93,7 @@ import OscarDialog from "../components/OscarDialog.vue";
 
 export default {
   props: {
-    url: { require: true },
-    manageSubOragnization: { default: true }
+    url: { require: true }
   },
 
   components: {
@@ -106,8 +106,9 @@ export default {
       remote: "Initialisation",
       error: "",
       organizations: [],
-      manageSubOragnization: null,
-      dialogDelete: null
+      dialogDelete: null,
+      manage: false,
+      manageSubOragnization: null
     }
   },
 
@@ -115,8 +116,10 @@ export default {
     fetch(){
       this.remote = "Chargement des sous-structures";
       axios.get(this.url).then(ok => {
+
         this.remote = "";
         this.organizations = ok.data.organizations;
+        this.manage = ok.data.manage;
       }, ko => {
         this.remote = "";
         this.error = "Impossible de charger les sous-structures : " + ko.response.data;
