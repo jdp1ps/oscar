@@ -3,7 +3,6 @@
        @click="handlerClick"
        @mouseleave="handlerMouseLeave"
        @mouseenter="handlerMouseEnter">
-    hop {{ selectedValue }}
 
     <div class="input-group" style="position: relative;">
       <div v-if="error" class="displayed-value text-danger" style="">
