@@ -11,7 +11,7 @@ class JsonToOrganizationFactoryTest extends TestCase {
     protected function getFactory(){
         static $factory;
         if( $factory === null )
-            $factory = new \Oscar\Factory\JsonToOrganization();
+            $factory = new \Oscar\Factory\JsonToOrganization([]);
         return $factory;
     }
 

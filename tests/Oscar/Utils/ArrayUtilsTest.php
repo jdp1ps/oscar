@@ -18,6 +18,7 @@ class ArrayUtilsTest extends TestCase
         $this->assertEquals([1,2,3], ArrayUtils::explodeIntegerFromString('1,2,3'));
         $this->assertEquals([7], ArrayUtils::explodeIntegerFromString('7'));
     }
+
     public function testException1(){
         $this->expectException(OscarTypeException::class);
         $foo = ArrayUtils::explodeIntegerFromString('pas un int');

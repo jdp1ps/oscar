@@ -3,6 +3,7 @@ config/autoload/local.php
 config/autoload/oscar-editable.yml
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
+config/autoload/unicaen-signature.local.php
 config/oscarworker.service
 trash
 

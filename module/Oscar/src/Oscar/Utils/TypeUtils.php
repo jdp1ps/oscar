@@ -2,18 +2,21 @@
 
 namespace Oscar\Utils;
 
+use Oscar\Exception\OscarException;
+
 class TypeUtils
 {
     public static function getIntegerFromString(?string $from, bool $throw = true): ?int
     {
-        set_error_handler(
-            function ($errno, $errstr, $errfile, $errline) {
-                throw new OscarTypeException("Non integer string");
+        if($from == "0"){
+            return 0;
+        } else {
+            $inted = intval($from);
+            if( $inted !== 0 ){
+                return $inted;
+            } else {
+                throw new OscarTypeException("Impossible de convertir la chaîne '$from' en entier");
             }
-        );
-        $temp = 1 / ($from + ($from === "0"));
-        $int = (int)$from;
-        restore_error_handler();
-        return $int;
+        }
     }
 }

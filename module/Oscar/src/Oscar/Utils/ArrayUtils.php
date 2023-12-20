@@ -9,7 +9,7 @@ namespace Oscar\Utils;
  */
 class ArrayUtils
 {
-    public static function implode(string $separator, ?array $array) :string
+    public static function implode(string $separator, ?array $array = null) :string
     {
         if( $array === null ) {
             return "";
@@ -18,7 +18,7 @@ class ArrayUtils
     }
 
 
-    public static function explodeFromString( ?string $from, string $separator, bool $throw = true ) :array
+    public static function explodeFromString( ?string $from = null, string $separator = ',', bool $throw = true ) :array
     {
         if( $from == null ){
             return [];
