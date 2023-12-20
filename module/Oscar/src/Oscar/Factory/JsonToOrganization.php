@@ -73,20 +73,23 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setEmail($this->getFieldValue($jsonData, 'email'))
             ->setUrl($this->getFieldValue($jsonData, 'url'))
             ->setSiret($this->getFieldValue($jsonData, 'siret'))
-            ->setType($this->getFieldValue($jsonData, 'type', ''))
-            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type', '')))
+            ->setType($this->getFieldValue($jsonData, 'type'))
 
             // Ajout de champs
             ->setDuns($this->getFieldValue($jsonData, 'duns'))
             ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra'))
             ->setRnsr($this->getFieldValue($jsonData, 'rnsr'));
 
+
+
+
         if (property_exists($jsonData, 'parent')) {
-            echo $jsonData->code . " a un parent '" . $jsonData->parent . "'\n";
             $object->updateParentCycleCode($jsonData->parent);
-            //$object->setParent()
         }
 
+        if (property_exists($jsonData, 'type')) {
+            $object->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type')));
+        }
 
         if (property_exists($jsonData, 'address')) {
             $address = $jsonData->address;

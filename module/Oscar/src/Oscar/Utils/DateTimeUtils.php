@@ -169,7 +169,7 @@ class DateTimeUtils
      * @param mixed ...$bounds
      * @return array
      */
-    public static function allPeriodsFromDates(...$bounds)
+    static public function allPeriodsFromDates(...$bounds)
     {
         $out = [];
         foreach ($bounds as $bound) {
