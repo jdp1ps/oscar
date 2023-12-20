@@ -1,7 +1,8 @@
 # OSCAR 2.12 "Spartan" (Documentation technique)
 
 ### Version actuelle
-- **VERSION 2.13** "Ripley" ([Mise à jour](doc/versions/version-2.13-ripley.md))
+- **VERSION 2.13.2** (PHP8.2) "Ripley" ([Mise à jour](doc/versions/version-2.13.2-ripley-php8.md))
+- **VERSION 2.13.1** "Ripley" ([Mise à jour](doc/versions/version-2.13-ripley.md))
   
 ### Version antérieurs
 - VERSION 2.12.1 "Spartan" ([Note de version](doc/versions/version-2.12.1.md))
