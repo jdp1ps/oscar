@@ -773,18 +773,33 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $documentDatas["type-full"] = $this->getActivityTypeService()->getActivityTypeChainFormatted(
             $activity->getActivityType()
         );
+
+        ksort($documentDatas);
+
         if ($doc == "dump") {
-            echo "<table border='1'>";
-            foreach ($documentDatas as $key => $value) {
-                echo "<tr>";
-                if (is_array($value)) {
-                    echo "<th>$key</th><td><small>[LIST]</small></td><td>" . ArrayUtils::implode(", ", $value) . "</td>";
-                } else {
-                    echo "<th>$key</th><td><small>STRING</small></td><td><code>" . $value . "</code></td>";
-                }
-                echo "</tr>";
-            }
-            die("</table>");
+            ?>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8"><title>DUMP des données</title>
+            </head>
+            <body>
+            <table border='1'>
+            <?php foreach ($documentDatas as $key => $value): ?>
+                <tr>
+                <?php if (is_array($value)): ?>
+                    <th><?= $key ?></th><td><small>[LIST]</small></td><td><?= ArrayUtils::implode(", ", $value) ?></td>
+                <?php else: ?>
+                    <th><?= $key ?></th>
+                    <td><small>STRING</small></td>
+                    <td><code><?= $value ?></code></td>
+                <?php endif; ?>
+                </tr>
+            <?php endforeach; ?>
+            </table>
+            </body>
+            </html>
+            <?php die();
         }
 
         $configDocuments = $this->getOscarConfigurationService()->getConfiguration('generated-documents.activity');
