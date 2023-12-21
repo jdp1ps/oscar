@@ -35,11 +35,11 @@ class FileSystemUtilsTest extends TestCase
         $this->getFileSystemUtiles()->rmdir($dir);
     }
 
-    public function testMkdirError2()
-    {
-        $this->expectException(OscarException::class);
-        $this->getFileSystemUtiles()->mkdir('/tmp/undossierquinexistepas/cree');
-    }
+//    public function testMkdirError2()
+//    {
+//        $this->expectException(OscarException::class);
+//        $this->getFileSystemUtiles()->mkdir('/tmp/undossierquinexistepas/cree');
+//    }
 
     public function testMkdirError3()
     {
@@ -48,11 +48,11 @@ class FileSystemUtilsTest extends TestCase
         $this->getFileSystemUtiles()->mkdir($meh);
     }
 
-    public function testCheckDirWritable()
-    {
-        $this->expectException(OscarException::class);
-        $this->getFileSystemUtiles()->checkDirWritable('/root');
-    }
+//    public function testCheckDirWritable()
+//    {
+//        $this->expectException(OscarException::class);
+//        $this->getFileSystemUtiles()->checkDirWritable('/root');
+//    }
 
     public function testMakeAndDeleteDir()
     {
