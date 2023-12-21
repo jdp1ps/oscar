@@ -2917,11 +2917,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $roleId = (int)$value2;
 
                         // Récupération de l'organisation
-                        try {
-                            $organization = $this->getOrganizationService()->getOrganization($value1);
-                            $organizations[$organization->getId()] = $organization;
-                            $crit['val1Label'] = (string)$organization;
-                        } catch (\Exception $e) {
+                        if( $organizationId > 0 ){
+                            try {
+                                $organization = $this->getOrganizationService()->getOrganization($value1);
+                                $organizations[$organization->getId()] = $organization;
+                                $crit['val1Label'] = (string)$organization;
+                            } catch (\Exception $e) {
+                            }
                         }
 
                         try {

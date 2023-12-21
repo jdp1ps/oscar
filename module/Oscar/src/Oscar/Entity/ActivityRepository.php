@@ -159,7 +159,12 @@ class ActivityRepository extends EntityRepository
      */
     public function getIdsWithOrganizationAndRole(int $organizationId = 0, int $roleObjId = 0): array
     {
-        return $this->getIdsWithOneOfOrganizationsRoled([$organizationId], $roleObjId);
+        $organizationIds = [];
+        if ($organizationId > 0) {
+            $organizationIds[] = $organizationId;
+        }
+
+        return $this->getIdsWithOneOfOrganizationsRoled($organizationIds, $roleObjId);
     }
 
     /**
@@ -280,7 +285,7 @@ class ActivityRepository extends EntityRepository
      * @param DateTime $date
      * @return array
      */
-    public function getActivitiesPersonDate(int $personId, DateTime $date) :array
+    public function getActivitiesPersonDate(int $personId, DateTime $date): array
     {
         $qb = $this->createQueryBuilder('a')
             ->innerJoin('a.persons', 'ap')
@@ -433,7 +438,8 @@ class ActivityRepository extends EntityRepository
      * @param array $idsOrganisations
      * @return int[]
      */
-    public function getIdsForOrganizations( array $idsOrganisations ):array{
+    public function getIdsForOrganizations(array $idsOrganisations): array
+    {
         $qb = $this->createQueryBuilder('a')
             ->select('a.id')
             ->leftJoin('a.organizations', 'act_org')
