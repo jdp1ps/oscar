@@ -2319,6 +2319,7 @@ class Activity implements ResourceInterface
         //
         $datas['id'] = $this->getId();
         $datas['acronym'] = htmlspecialchars($this->getAcronym());
+        $datas['description'] = htmlspecialchars($this->getDescription());
         $datas['amount'] = $this->getAmount();
         $datas['pfi'] = $this->getCodeEOTP();
         $datas['financial-number'] = $this->getCodeEOTP();
