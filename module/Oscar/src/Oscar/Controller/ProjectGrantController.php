@@ -768,7 +768,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $id = $this->params()->fromRoute('id');
         $doc = $this->params()->fromRoute('doc');
         $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
-        $baseDatas = $this->getProjectGrantService()->getBaseDataTemplate();
         $activity = $this->getProjectGrantService()->getGrant($id);
         $documentDatas = $activity->documentDatas($baseDatas);
         $documentDatas["type-full"] = $this->getActivityTypeService()->getActivityTypeChainFormatted(
