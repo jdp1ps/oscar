@@ -17,20 +17,31 @@ $app = \Laminas\Mvc\Application::init($conf);
 $commands = [];
 // On parse automatiquement le dossier des commandes
 $path = __DIR__.'/../module/Oscar/src/Oscar/Command';
-function scanCommandFiles($dir){
+
+$paths = [
+   'Oscar\Command\\' => __DIR__.'/../module/Oscar/src/Oscar/Command',
+    'UnicaenSignature\Command\\' => __DIR__ . '/../module/UnicaenSignature/src/Command',
+];
+
+function scanCommandFiles(string $namespace, string $dir){
     global $app;
     $output = [];
     $re = '/.*Command\.php/m';
+
+    if( !file_exists($dir) ){
+        echo ("[WARNING] Command path : Le dossier '$dir' n'existe pas\n");
+        return [];
+    }
+
     $scan = scandir($dir);
     foreach ($scan as $key => $value) {
         if( !in_array($value, ['.', '..']) ){
             if( is_dir($dir.DIRECTORY_SEPARATOR.$value) ){
 
             } else {
-
                 if( preg_match($re, $value, $matches) ){
                     $class = substr($value, 0, strlen($value)-4);
-                    $reflector = new ReflectionClass('Oscar\Command\\'.$class);
+                    $reflector = new ReflectionClass($namespace.$class);
                     if( $reflector->isSubclassOf(\Symfony\Component\Console\Command\Command::class) ){
                         $result[] = $reflector->newInstanceArgs([$app->getServiceManager()]);
                     }
@@ -40,7 +51,10 @@ function scanCommandFiles($dir){
     }
     return $result;
 }
-$commands = scanCommandFiles($path);
-$console->addCommands($commands);
+
+foreach ($paths as $namespace=>$path) {
+    $commands = scanCommandFiles($namespace, $path);
+    $console->addCommands($commands);
+}
 
 $console->run();

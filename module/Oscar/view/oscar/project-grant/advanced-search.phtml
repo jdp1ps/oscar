@@ -343,7 +343,7 @@
             <div class="progression val2-options">
                 <i class="icon-cog"></i> Options
                 <div class="choose">
-                <?php foreach( \Oscar\Entity\ActivityDate::progressInfos() as $value=>$label ): $uniq = uniqid('cb'); ?>
+                <?php foreach(\Oscar\Entity\ActivityDate::progressLabels() as $value=> $label ): $uniq = uniqid('cb'); ?>
                     <div>
                         <label for="<?= $uniq ?>">
                             <input id="<?= $uniq ?>" type="checkbox" value="<?= $value ?>" class="val2 changer" /> <?= $label ?>
