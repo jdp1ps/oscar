@@ -84,6 +84,7 @@ class ActivityDateController extends AbstractOscarController
             'periodStart' => $periodStart,
             'periodEnd' => $periodEnd,
             'filterType' => $typeId,
+            'filterTypeStates' => [],
             'typesDate' => $typesDate,
         ];
     }

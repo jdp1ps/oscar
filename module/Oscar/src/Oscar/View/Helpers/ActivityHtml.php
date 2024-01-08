@@ -13,7 +13,6 @@ class ActivityHtml extends AbstractHtmlElement
 {
     public function __invoke($message)
     {
-
         $matches = [];
         $re = "/\\[(Project|Organization|Person|Activity):([0-9]+):([^\\]]*)\\]/u";
 

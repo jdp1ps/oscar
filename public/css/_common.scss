@@ -29,23 +29,23 @@
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/navbar";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/breadcrumbs";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/pagination";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/pager";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/pager";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/labels";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/badges";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/jumbotron";
 //@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/thumbnails";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/alerts";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/progress-bars";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/media";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/list-group";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/panels";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/responsive-embed";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/progress-bars";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/media";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/list-group";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/panels";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/responsive-embed";
 //@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/wells";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/close";
 
 // Components w/ JavaScript
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/modals";
-//@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/tooltip";
+@import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/tooltip";
 @import "../js/vendor/bootstrap-sass/assets/stylesheets/bootstrap/popovers";
 
 // Utility classes
@@ -699,6 +699,22 @@ html body {
   padding: 15px 10px;
   border-right: solid thin rgba(0, 0, 0, .15)
 }
+.bs-docs-sidebar .nav {
+  .year > a, .month > a {
+    padding: 0;
+    margin: 0;
+  }
+  .active > a {
+    font-weight: bold;
+  }
+  .month {
+    margin-left: 1em;
+  }
+  .year {
+    margin-top: 1em;
+  }
+}
+
 
 .navbar.navbar-main .dropdown-menu a {
   color: #51BADD;
@@ -4632,6 +4648,83 @@ time.date-missing {
         background: white;
       }
     }
+  }
+}
+
+.progress-item {
+  border-left: solid 4px $colorLight;
+  &.progress-item-valid {
+    border-left-color: $colorGreen;
+    .icon-progress:before {
+      color: white;
+      content: '\e85b';
+    }
+    .progress-cartouche {
+      @extend .success;
+    }
+  }
+  &.progress-item-inprogress {
+    border-left-color: $colorBlue;
+    .progress-cartouche {
+      @extend .info;
+    }
+  }
+  &.progress-item-cancel {
+    border-left-color: $colorDark;
+    .progress-cartouche {
+    }
+  }
+  &.progress-item-late {
+    border-left-color: $colorRed;
+    .icon-progress:before {
+      color: white;
+      content: '\e865';
+    }
+    .progress-cartouche {
+      @extend .danger;
+    }
+  }
+  &.progress-item-todo {
+    border-left-color: $colorGreyMedium;
+    .icon-progress:before {
+      color: white;
+      content: '\e885';
+    }
+  }
+  &.progress-item-inprogress {
+    border-left-color: $colorGreen;
+    .icon-progress:before {
+      color: white;
+      content: '\e8a8';
+    }
+    .progress-cartouche {
+      @extend .info;
+    }
+  }
+  &.progress-item-refused {
+    border-left-color: $colorDark;
+    .icon-progress:before {
+      color: white;
+      content: '\e85d';
+    }
+    .progress-cartouche {
+      @extend .danger;
+    }
+  }
+  &.progress-item-past {
+    border-left-color: $colorGreen;
+  }
+
+  .by-person.addon {
+    a.link {
+      color: $colorDark;
+      text-shadow: 0px 0px 1px rgba(255,255,255,.7);
+      text-decoration: none;
+    }
+  }
+
+  .icon-progress:before {
+    content: '\e865';
   }
 }
 

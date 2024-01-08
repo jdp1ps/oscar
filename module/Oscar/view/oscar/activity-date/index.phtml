@@ -14,16 +14,65 @@
         line-height: 30px;
         width: 140px;
         text-align: right;
-        position: absolute;
+        position: sticky;
         background: white;
        /* left: -110px;*/
         margin: 0;
         margin-left: -150px;
     }
+    .active {
+        background: #0b93d5;
+    }
+    .active a {
+        color: white;
+    }
+
+    #navbar-example a:hover {
+        background: rgba(0, 75, 112, 0.8);
+        color: white;
+    }
+    #navbar-example {
+        width: 150px;
+    }
+    #navbar-example li {
+        margin: 0 0 0 0em;
+        padding: 0 0 0 .3em;
+    }
+
+    .fixed-navigation {
+        position: fixed;
+        overflow: hidden;
+        overflow-y: scroll;
+        width: 175px;
+        top: 50px;
+        bottom: 0;
+    }
+
+    .year ul {
+        display: none;
+    }
+    .year.open ul, .year.active ul {
+        display: block;
+    }
+
+    #list-milestones h2, #list-milestones h3 {
+        margin: 0;
+    }
+    #list-milestones h2 {
+        padding-top: 2em;
+    }
+    #list-milestones h3 {
+        padding-top: 2em;
+    }
+
+    body {
+        scroll-margin-top: 60px;
+    }
+
+
 </style>
 <section class="container" style="position: relative">
     <h1><i class="icon-calendar-outlilne"></i> Jalons</h1>
-
     <section>
         <form action="<?= $this->url() ?>" method="get" class="form" id="search">
             <div class="input-group input-group-lg">
@@ -54,58 +103,183 @@
                         </script>
                     </div>
                     <div class="col-md-6">
-                        Type :
-                        <select name="typedate" class="form-control">
-                            <option value="">Aucun filtre...</option>
-                            <?php
-                            $group = "";
-                            /** @var \Oscar\Entity\DateType $typeDate */
-                            foreach ($typesDate as $facets=>$types){
-                                echo "<optgroup label=\"$facets\">";
-                                foreach ($types as $type) {
-                                    $selected = "";
-                                    if( $type['id'] == $filterType ){
-                                        $selected = " selected=\"selected\"";
+                        <div class="row">
+                            <div class="col-md-8">
+                                Type :
+                                <select name="typedate" class="form-control">
+                                    <option value="">Aucun filtre...</option>
+                                    <?php
+                                    $group = "";
+                                    /** @var \Oscar\Entity\DateType $typeDate */
+                                    foreach ($typesDate as $facets=>$types){
+                                        echo "<optgroup label=\"$facets\">";
+                                        foreach ($types as $type) {
+                                            $selected = "";
+                                            if( $type['id'] == $filterType ){
+                                                $selected = " selected=\"selected\"";
+                                            }
+                                            echo '<option value="'.$type['id'].'"'.$selected.'>'.$type['label'].'</option>';
+                                        }
+                                        echo "</optgroup>";
                                     }
-                                    echo '<option value="'.$type['id'].'"'.$selected.'>'.$type['label'].'</option>';
-                                }
-                                echo "</optgroup>";
-                            }
-                            ?>
-                        </select>
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                Statut :
+                                <select name="typedatestate" class="form-control" id="states">
+                                    <option value="">Ignorer</option>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </form>
     </section>
-    <?php /** @var Oscar\Entity\ActivityDate $milestone */
-    $annee = $mois = '';
-    foreach( $milestones as $milestone ):
-        $dateRef = $milestone->getDateStart();
+    <section style=""
+             id="milestones"
+             class="">
+    <div class="row">
+        <div class="col-md-10" role="main" id="list-milestones">
+            <?php /** @var Oscar\Entity\ActivityDate $milestone */
+            $annee = $mois = '';
+            foreach( $milestones as $milestone ):
+                $dateRef = $milestone->getDateStart();
 
-        if( $annee != $dateRef->format('Y') ){
-            $annee = $dateRef->format('Y');
-            $mois = '';
-            echo "<h2 class=\"marged-h\">$annee</h2>";
-        }
+                if( $annee != $dateRef->format('Y') ){
+                    $annee = $dateRef->format('Y');
+                    $mois = '';
+                    echo '<h2 id="year-'.$annee.'">'.$annee.'</h2>';
+                }
 
-        $currentMois = ucfirst($this->moment($dateRef, 'F'));
-        if( $mois != $currentMois ){
-            $mois = $currentMois;
-            echo "<hr><h3 class=\"marged-h\">$mois</h3>";
-        }
-        ?>
-        <article class="card">
-            <h3 class="card-title">
+                $currentMois = ucfirst($this->moment($dateRef, 'F'));
+                if( $mois != $currentMois ){
+                    $mois = $currentMois;
+                    echo "<h3 id=\"month-". $annee.'-'.$mois.'">'.$mois.' ' . $annee . '</h3>';
+                }
+                ?>
+                <article class="card progress-item <?= $milestone->isLate() ? 'progress-item-late' : $milestone->getStateCssClass() ?>">
+                    <h3 class="card-title">
                 <span>
-                <?= $milestone->getType() ?>
+                    <?= $milestone->getType() ?>
+                    <?php if( $milestone->isFinishable() ): ?>
+                        <?php if($milestone->isLate()): ?>
+                            <strong class="cartouche xs progress-cartouche progress-cartouche-late">
+                            <i class="icon-progress"></i>
+                            EN RETARD
+                        </strong>
+                        <?php else: ?>
+                            <strong class="cartouche xs progress-cartouche">
+                            <i class="icon-progress"></i>
+                            <?= $milestone->getFinishState()['finished_label'] ?>
+                                <?php if($milestone->getFinishState()['finished_by']): ?>
+                                    <span class="addon by-person">
+                                par <?= $this->activity($milestone->getFinishState()['finished_by']) ?>
+                            </span>
+                                <?php endif; ?>
+                        </strong>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </span>
-                <nav class="menu text-highlight">
-                le <time><?= $this->moment($milestone->getDateStart()) ?></time>
-                </nav>
-            </h3>
-            <p><?= $this->link($milestone->getActivity()) ?></p>
-            <p><?= $milestone->getComment() ?></p>
-        </article>
-    <?php endforeach; ?>
+                        <nav class="menu text-highlight">
+                            le <time><?= $this->moment($milestone->getDateStart()) ?></time>
+                        </nav>
+                    </h3>
+                    <p><?= $this->link($milestone->getActivity()) ?></p>
+                    <p><?= $milestone->getComment() ?></p>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <div class="col-md-2" role="complementary">
+            <nav id="navbar-example" class="bs-docs-sidebar">
+                <h4 style="padding-top: 2em;">
+                    <i class="icon-location"></i>
+                    Navigation
+                </h4>
+                <ul class="nav bs-docs-sidenav">
+                    <?php /** @var Oscar\Entity\ActivityDate $milestone */
+                    $annee = $mois = '';
+                    foreach( $milestones as $milestone ):
+                        $dateRef = $milestone->getDateStart();
+
+                        if( $annee != $dateRef->format('Y') ){
+                            if( $annee != '' ){
+                                echo "</ul></li>";
+                            }
+                            $annee = $dateRef->format('Y');
+                            $mois = '';
+                            echo "<li class='year'><a class='goto' href=" . "#year-".$annee. " data-year='$annee'>$annee</a><ul class='nav'>";
+                        }
+
+                        $currentMois = ucfirst($this->moment($dateRef, 'F'));
+                        if( $mois != $currentMois ){
+                            $mois = $currentMois;
+                            echo "<li class='month'><a class='goto' href=" . "#month-".$annee.'-'.$mois . " data-year='$annee' data-month='$mois'>$mois</a></li>";
+                        }
+                        ?>
+                    <?php endforeach; ?>
+                    <?php if($annee) echo "</ul>";?>
+
+                    <li>
+                        <small>
+                            <a href="#">
+                                <i class="icon-angle-up"></i>
+                                Revenir aux filtres
+                            </a>
+                        </small>
+                    </li>
+                </ul>
+                <hr>
+
+            </nav>
+        </div>
+    </div>
+    </section>
 </section>
+<script>
+    require(['jquery','bootstrap'], function($, Bootstrap){
+
+        let refreshNavPosition = function(){
+            let scrollTop = $(window).scrollTop();
+            let fixedStart = $('#milestones').position().top;
+            if( scrollTop > fixedStart ){
+                $('#navbar-example').addClass('fixed-navigation');
+            } else {
+                $('#navbar-example').removeClass('fixed-navigation');
+            }
+        };
+
+        $('#navbar-example a.goto').on('click', (e) => {
+            // Remove active
+            $('#navbar-example li').removeClass('active');
+            let clicked = $(e.target);
+            clicked.parent().addClass('active');
+            clicked.parents('.year').addClass('active');
+        });
+
+        let hash = window.location.hash.substring(1);
+        if( hash ){
+            let split = hash.split('-');
+            if( split[0] == 'month' ){
+                let enchor = '#month-' +split[1] +'-' +split[2];
+                let el = $('#navbar-example a[href="'+enchor+'"]')
+                el.parent().addClass('active');
+                el.parents('.year').addClass('active');
+            } else {
+                let enchor = '#year-' +split[1];
+                $('#navbar-example a[href="'+enchor+'"]').parent().addClass('active');
+            }
+        }
+
+        $(document).on('scroll', ()=>{
+            refreshNavPosition();
+        })
+
+        refreshNavPosition();
+    });
+</script>
+
+    });
+</script>

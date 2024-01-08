@@ -20,6 +20,7 @@ class ActivityDate implements ITrackable
 {
     use TraitTrackable;
 
+    const PROGRESSION_TODO = 'todo';
     const PROGRESSION_VALID = 'valid';
     const PROGRESSION_UNVALID = 'unvalid';
     const PROGRESSION_CANCEL = 'cancel';
@@ -34,7 +35,10 @@ class ActivityDate implements ITrackable
     const VALUE_CANCELED = 200;
     const VALUE_REFUSED = 400;
 
-    static public function progressInfos()
+    /**
+     * @return string[]
+     */
+    static public function progressLabels() :array
     {
         return [
             self::VALUE_TODO => "A faire",
@@ -43,6 +47,38 @@ class ActivityDate implements ITrackable
             self::VALUE_CANCELED => "Annulé",
             self::VALUE_REFUSED => "Refusé"
         ];
+    }
+
+    /**
+     * @return string[]
+     */
+    static public function progressCodes() :array
+    {
+        return [
+            self::VALUE_TODO => self::PROGRESSION_TODO,
+            self::VALUE_INPROGRESS => self::PROGRESSION_INPROGRESS,
+            self::VALUE_VALIDED => self::PROGRESSION_VALID,
+            self::VALUE_CANCELED => self::PROGRESSION_CANCEL,
+            self::VALUE_REFUSED => self::PROGRESSION_REFUSED
+        ];
+    }
+
+    static public function progressInfoCode( int $finishedValue ) :string
+    {
+        $codes = self::progressCodes();
+        if( array_key_exists($finishedValue, $codes) ){
+            return $codes[$finishedValue];
+        }
+        return "";
+    }
+
+    static public function progressInfoLabel( int $finishedValue ): string
+    {
+        $states = self::progressLabels();
+        if( array_key_exists($finishedValue, $states) ){
+            return $states[$finishedValue];
+        }
+        return "UNKNOW";
     }
 
     /**
@@ -105,7 +141,10 @@ class ActivityDate implements ITrackable
         }
     }
 
-    public function isFinishable()
+    /***
+     * @return bool
+     */
+    public function isFinishable() :bool
     {
         if ($this->getType()) {
             return $this->getType()->isFinishable();
@@ -113,10 +152,56 @@ class ActivityDate implements ITrackable
         return false;
     }
 
+    public function getFinishState() :?array
+    {
+
+        if( $this->isFinishable() ){
+            $finishedValueLabel = $this->getFinished() != null ? $this->getFinished() : self::VALUE_TODO;
+            return [
+                'finish' => $this->getFinished(),
+                'finished_label' => self::progressInfoLabel($finishedValueLabel),
+                'finished_code' => self::progressInfoCode($finishedValueLabel),
+                'finished_by' => $this->getFinishedBy() ? $this->getFinishedBy() : ""
+            ];
+        }
+        return null;
+    }
+
+    public function getStateCssClass() :string
+    {
+        if( $this->isFinishable() ){
+            $finishedValueLabel = $this->getFinished() != null ? $this->getFinished() : self::VALUE_TODO;
+            if( $this->isLate() ){
+                return 'progress-item-late';
+            } else {
+                return 'progress-item-'.self::progressInfoCode($finishedValueLabel);
+            }
+        } else {
+            if( $this->isToday() ){
+                return 'progress-item-today';
+            }
+            elseif ( $this->isFutur() ){
+                return 'progress-item-futur';
+            }
+            else {
+                return 'progress-item-past';
+            }
+        }
+    }
+
+
+
+    public function getProgressInfo() :string
+    {
+        if( $this->isFinishable() ){
+            return self::getProgressInfo()[$this->getFinished()];
+        }
+    }
+
     /**
      * @return string
      */
-    public function getFinishedBy(): string
+    public function getFinishedBy(): ?string
     {
         return $this->finishedBy;
     }
@@ -301,6 +386,11 @@ class ActivityDate implements ITrackable
     public function isToday( DateTime $dateRef = new DateTime() ):bool
     {
         return $this->getDateStart()->format('Y-m-d') == $dateRef->format('Y-m-d');
+    }
+
+    public function isFutur( DateTime $dateRef = new DateTime() ):bool
+    {
+        return $this->getDateStart()->format('Y-m-d') > $dateRef->format('Y-m-d');
     }
 
     public function getLateDays(DateTime $now = new DateTime()): ?int

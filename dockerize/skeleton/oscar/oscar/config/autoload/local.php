@@ -86,14 +86,14 @@ return array(
             'activity' => [
                 'search_engine' => [
                     // Elasticsearch
-                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
+                    'class' => \Oscar\Strategy\Search\ElasticActivitySearch::class,
                     'params' => [['£CONTAINER_ELASTICSEARCH:9200']]
                 ]
             ],
             'person' => [
                 'search_engine' => [
                     // Elasticsearch
-                    'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
+                    'class' => \Oscar\Strategy\Search\IPersonElasticSearch::class,
                     'params' => [['£CONTAINER_ELASTICSEARCH:9200']]
                 ]
             ],
