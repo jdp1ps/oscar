@@ -155,7 +155,7 @@ return array(
     'person' => [
       'search_engine' => [
         // Elasticsearch
-        'class' => \Oscar\Strategy\Search\IPersonElasticSearch::class,
+        'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
         'params' => [['localhost:9200']]
       ]
     ]
