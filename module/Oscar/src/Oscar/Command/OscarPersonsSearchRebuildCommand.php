@@ -57,6 +57,8 @@ class OscarPersonsSearchRebuildCommand extends OscarCommandAbstract
             $io->success(sprintf('Index de recherche mis à jour avec %s personnes indexées', count($persons)));
         } catch ( \Exception $e ){
             $io->error($e->getMessage());
+            return self::FAILURE;
         }
+        return self::SUCCESS;
     }
 }
