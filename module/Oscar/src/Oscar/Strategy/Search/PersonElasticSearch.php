@@ -17,7 +17,7 @@ use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 
-class IPersonElasticSearch extends ElasticSearchEngine implements IPersonISearchStrategy
+class PersonElasticSearch extends ElasticSearchEngine implements IPersonISearchStrategy
 {
 
     public function getIndex(): string
