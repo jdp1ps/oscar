@@ -15,13 +15,8 @@ $conf = require __DIR__.'/../config/application.config.php';
 $app = \Laminas\Mvc\Application::init($conf);
 
 $commands = [];
-// On parse automatiquement le dossier des commandes
-$path = __DIR__.'/../module/Oscar/src/Oscar/Command';
 
-$paths = [
-   'Oscar\Command\\' => __DIR__.'/../module/Oscar/src/Oscar/Command',
-    'UnicaenSignature\Command\\' => __DIR__ . '/../module/UnicaenSignature/src/Command',
-];
+$paths = $app->getConfig()['console_commands'];
 
 function scanCommandFiles(string $namespace, string $dir){
     global $app;
@@ -43,7 +38,11 @@ function scanCommandFiles(string $namespace, string $dir){
                     $class = substr($value, 0, strlen($value)-4);
                     $reflector = new ReflectionClass($namespace.$class);
                     if( $reflector->isSubclassOf(\Symfony\Component\Console\Command\Command::class) ){
-                        $result[] = $reflector->newInstanceArgs([$app->getServiceManager()]);
+                        $instance = $reflector->newInstanceArgs([$app->getServiceManager()]);
+                        if( property_exists($instance, 'disabled') ) {
+                            continue;
+                        }
+                        $result[] = $instance;
                     }
                 }
             }

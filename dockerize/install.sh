@@ -19,6 +19,7 @@ DIR_POSTGRESQL_DATAS="$DIR_DEST/databases"
 OPT_PROXY="$2"
 OPT_PORT_OSCAR=8181
 OPT_PORT_ADMINER=8182
+OPT_PORT_MAILHOG=8085
 
 # Nom des containers
 CONTAINER_OSCAR="oscar_$PRJ"
@@ -27,6 +28,7 @@ CONTAINER_ELASTICSEARCH="oscar_"$PRJ"_elasticsearch"
 CONTAINER_GEARMAN="oscar_"$PRJ"_gearman"
 CONTAINER_NETWORK="oscar_"$PRJ"_network"
 CONTAINER_ADMINER="oscar_"$PRJ"_adminer"
+CONTAINER_MAILHOG="oscar_"$PRJ"_mailhog"
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # STEP
@@ -55,15 +57,16 @@ for i in $(find $DIR_DEST -type f); do
   sed -i s%£DIR_INSTALL%$DIR_DEST%g "$i"
   sed -i s%£PORT_ADMINER%$OPT_PORT_ADMINER%g "$i"
   sed -i s%£PORT_OSCAR%$OPT_PORT_OSCAR%g "$i"
+  sed -i s%£PORT_MAILHOG%$OPT_PORT_MAILHOG%g "$i"
   sed -i s%£DIR_OSCAR%$DIR_OSCAR%g "$i"
   sed -i s%£DIR_POSTGRESQL_DATAS%$DIR_POSTGRESQL_DATAS%g "$i"
-
   sed -i s%£CONTAINER_OSCAR%$CONTAINER_OSCAR%g "$i"
   sed -i s%£CONTAINER_POSTGRESQL%$CONTAINER_POSTGRESQL%g "$i"
   sed -i s%£CONTAINER_ELASTICSEARCH%$CONTAINER_ELASTICSEARCH%g "$i"
   sed -i s%£CONTAINER_GEARMAN%$CONTAINER_GEARMAN%g "$i"
   sed -i s%£CONTAINER_NETWORK%$CONTAINER_NETWORK%g "$i"
   sed -i s%£CONTAINER_ADMINER%$CONTAINER_ADMINER%g "$i"
+  sed -i s%£CONTAINER_MAILHOG%$CONTAINER_MAILHOG%g "$i"
 done
 
 echo "# For Build / Run"

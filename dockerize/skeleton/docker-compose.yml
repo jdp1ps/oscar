@@ -97,6 +97,16 @@ services:
     tty: true
     restart: "unless-stopped"
 
+  # MAILHOG (Ajout proposé par Joachim Dornbusch)
+  £CONTAINER_MAILHOG:
+    container_name: £CONTAINER_HOG
+    image: mailhog/mailhog:latest
+    restart: "always"
+    ports:
+      - £PORT_MAILHOG:8085
+    networks:
+      - £CONTAINER_NETWORK
+
 # RéSEAU VIRUEL
 networks:
   £CONTAINER_NETWORK:
