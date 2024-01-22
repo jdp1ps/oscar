@@ -22,6 +22,7 @@ les containers créé dans le dossier `local/<TAG>` :
  - `oscar_<TAG>_gearman` : Container Gearman
  - `oscar_<TAG>_elasticsearch` : L'index de recherche (Elastic Search)
  - `oscar_<TAG>_adminer` : Une instance d'Adminer
+ - `oscar_<TAG>_mailhog` : Une instance de Mailhog
 
 # Build / Run
 

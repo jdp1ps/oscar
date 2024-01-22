@@ -4,6 +4,10 @@ return array(
         'locale' => 'fr_FR',
     ),
 
+    'console_commands' => [
+        'Oscar\Command\\' => realpath(__DIR__.'/../../module/Oscar/src/Oscar/Command'),
+    ],
+
     ////////////////////////////////////////////////////////////////////////////
     /// CONFIGURATION PAR DÉFAUT
     /// Vous pouvez surcharger ces paramètres en les redéclarants dans le
@@ -390,7 +394,7 @@ return array(
                 'cache' => 'array',
                 'paths' => array(
                     __DIR__ . '/../../module/Oscar/src/Oscar/Entity',
-                   // __DIR__ . '/../../module/UnicaenSignature/src/Entity/Db',
+                    __DIR__ . '/../../module/UnicaenSignature/src/Entity/Db',
                 ),
             ),
         ),

@@ -153,9 +153,6 @@ $this->headScript();
             </div>
         </div>
 
-
-
-
         <div class="container flash-messages" id="flash-messages" style="opacity: 0"><?php
             $types = ['error', 'info', 'default', 'success', 'warning'];
             foreach( $types as $type ): ?>
@@ -234,7 +231,7 @@ $this->headScript();
 
 
             if( !$('#flash-messages').is(':empty') ){
-                $('#flash-messages .flashmsg').delay(5000).fadeOut();
+                //$('#flash-messages .flashmsg').delay(10000).fadeOut();
                 $('#flash-messages').css({'top':250, 'opacity':0}).animate({top: 60, opacity: 1});
             }
 		});
