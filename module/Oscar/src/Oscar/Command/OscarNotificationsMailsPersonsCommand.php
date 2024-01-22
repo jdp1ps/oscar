@@ -33,7 +33,7 @@ class OscarNotificationsMailsPersonsCommand extends OscarCommandAbstract
         $date = $input->getOption('date');
         $dateRef = new \DateTime();
         if( $date ){
-            $dateRef = new \DateTime(date('Y-m-d ') . $date);
+            $dateRef = new \DateTime($date);
         }
 
         /** @var PersonService $personService */

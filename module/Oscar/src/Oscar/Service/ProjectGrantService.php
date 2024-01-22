@@ -375,6 +375,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $query->getQuery()->getSingleScalarResult();
     }
 
+    public function getActivitiesWithUndoneMilestones()
+    {
+        return $this->getActivityRepository()->getActivitiesWithUndoneMilestones();
+    }
+
     public function getActivitiesIdsPerson(Person $person)
     {
         $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
@@ -402,17 +407,17 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
 
-    public function getActivityIdsByJalon($jalonTypeId, $progression = null )
+    public function getActivityIdsByJalon($jalonTypeId, $progression = null)
     {
         $q = $this->getActivityRepository()->createQueryBuilder('c')
             ->select('c.id')
             ->innerJoin('c.milestones', 'm')
             ->where('m.type = :jalonId');
 
-        if( is_array($progression) && count($progression) > 0 ){
+        if (is_array($progression) && count($progression) > 0) {
             $clause = 'm.finished IN(:progression)';
 
-            if( in_array('0', $progression) ){
+            if (in_array('0', $progression)) {
                 $clause .= ' OR m.finished IS NULL';
             }
             $q->andWhere($clause)
@@ -771,7 +776,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 'label' => 'Intitulé',
                 'status' => 'Status',
                 'oscarNum' => 'N°Oscar',
-                'codeEOTP' => 'N°Financier ('. $this->getOscarConfigurationService()->getFinancialLabel() .')',
+                'codeEOTP' => 'N°Financier (' . $this->getOscarConfigurationService()->getFinancialLabel() . ')',
                 'amount' => 'Montant'
             ];
         }
@@ -1066,6 +1071,91 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getRoleRepository()->getRolesAtActivityArray($format);
     }
 
+    public $_cachedPersonRileIdsInActivity;
+
+    public function getPersonRoleIdsInActivity(Activity $activity, Person $person): array
+    {
+        if ($this->_cachedPersonRileIdsInActivity == null) {
+            $this->_cachedPersonRileIdsInActivity = [];
+        }
+
+        if (!array_key_exists($person->getId(), $this->_cachedPersonRileIdsInActivity)) {
+            $this->_cachedPersonRileIdsInActivity[$person->getId()] = [];
+        }
+
+        if (!array_key_exists($activity->getId(), $this->_cachedPersonRileIdsInActivity[$person->getId()])) {
+            $roleIds = [];
+            /** @var ActivityPerson $activityPerson */
+            foreach ($activity->getPersonsDeep() as $activityPerson) {
+                if ($activityPerson->getPerson() == $person) {
+                    $roleId = $activityPerson->getRoleObj()->getId();
+                    if (!in_array($roleId, $roleIds)) {
+                        $roleIds[] = $roleId;
+                    }
+                }
+
+                /** @var ActivityOrganization $activityPartner */
+                foreach ($activity->getOrganizationsDeep() as $activityPartner) {
+                    if ($activityPartner->getOrganization()->hasPerson($person)) {
+                        foreach ($activityPartner->getOrganization()->getPersonRolesId($person) as $roleId) {
+                            if (!in_array($roleId, $roleIds)) {
+                                $roleIds[] = $roleId;
+                            }
+                        }
+                    }
+                }
+            }
+            $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()] = $roleIds;
+        }
+
+        return $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()];
+    }
+
+    /**
+     * Retourne la liste des Jalons(ActivityDate) non-réalisé pour la personne.
+     *
+     * @param Person $person
+     * @return ActivityDate[]
+     */
+    public function getUndoneMilestonesForPerson(Person $person): array
+    {
+        $activityWithUndoneMilestones = $this->getActivitiesWithUndoneMilestones();
+        $milestonesUndone = [];
+        foreach ($activityWithUndoneMilestones as $a) {
+            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($a, $person);
+            /** @var ActivityDate $m */
+            foreach ($a->getMilestones() as $m) {
+                if (!$m->isFinished() && array_intersect($m->getType()->getRolesId(), $roleIdsInActivity)) {
+                    $milestonesUndone[] = $m;
+                }
+            }
+        }
+        return $milestonesUndone;
+    }
+
+
+    /**
+     * Retourne les payements en retard de la personne.
+     *
+     * @param Person $person
+     * @return ActivityPayment[]
+     */
+    public function getUndonePayementsForPerson(Person $person): array
+    {
+        $rolesIds = $this->getOscarUserContextService()->getRolesIdsWithPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE);
+
+        $paymentsLate = $this->getPaymentsLate();
+        $payements = [];
+        /** @var ActivityPayment $p */
+        foreach ($paymentsLate as $p) {
+            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($p->getActivity(), $person);
+            if ($p->isLate() && array_intersect($roleIdsInActivity, $rolesIds)) {
+                $payements[] = $p;
+            }
+        }
+        return $payements;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// EXPORT
@@ -1185,7 +1275,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $hasUnknow = false;
             foreach (array_keys($activity->getNumbers()) as $key) {
                 if (!in_array($key, $authorisedKeys)) {
-                    if( !in_array($key, $keys) ){
+                    if (!in_array($key, $keys)) {
                         $keys[] = $key;
                     }
                     $hasUnknow = true;
@@ -1202,11 +1292,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ];
     }
 
-    public function getActivitiesIdsWithTypeDocument( array $idsTypeDocument, bool $reverse = false ):array {
+    public function getActivitiesIdsWithTypeDocument(array $idsTypeDocument, bool $reverse = false): array
+    {
         return $this->getActivityRepository()->getActivitiesIdsWithTypeDocument($idsTypeDocument, $reverse);
     }
 
-    public function getActivitiesWithNumerotation( array $numerotations ) :array
+    public function getActivitiesWithNumerotation(array $numerotations): array
     {
         $ids = $this->getActivityRepository()->getActivitiesIdsWithNumerotations($numerotations);
         return $ids;
@@ -1218,18 +1309,18 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param $from
      * @param $to
      */
-    public function administrationMoveKey($from, $to) :int
+    public function administrationMoveKey($from, $to): int
     {
-       $activities = $this->getActivityRepository()->getActivitiesWithNumber($from);
-       $out = [];
-       /** @var Activity $activity */
+        $activities = $this->getActivityRepository()->getActivitiesWithNumber($from);
+        $out = [];
+        /** @var Activity $activity */
         foreach ($activities as $activity) {
-           $value = $activity->getNumber($from);
-           $activity->removeNumber($from);
-           $activity->addNumber($to, $value);
-           $out[] = $activity->getId();
-           $this->getEntityManager()->flush($activity);
-       }
+            $value = $activity->getNumber($from);
+            $activity->removeNumber($from);
+            $activity->addNumber($to, $value);
+            $out[] = $activity->getId();
+            $this->getEntityManager()->flush($activity);
+        }
         return count($out);
     }
 
@@ -2523,10 +2614,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $buildIndex = true
     ) {
         try {
-            if( !$activityorganization->getRoleObj() ){
+            if (!$activityorganization->getRoleObj()) {
                 $updateNotification = $roleOrganization->isPrincipal();
             } else {
-                $updateNotification = $activityorganization->getRoleObj()->isPrincipal() !== $roleOrganization->isPrincipal();
+                $updateNotification = $activityorganization->getRoleObj()->isPrincipal(
+                    ) !== $roleOrganization->isPrincipal();
             }
 
             $activityorganization->setRoleObj($roleOrganization)

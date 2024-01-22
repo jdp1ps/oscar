@@ -145,6 +145,11 @@ class ActivityPayment implements ITrackable
         return $this->datePredicted;
     }
 
+    public function getDatePredictedStr($format='Y-m-d')
+    {
+        return $this->datePredicted ? $this->getDatePredicted()->format($format) : null;
+    }
+
     /**
      * @param datetime $datePredicted
      */

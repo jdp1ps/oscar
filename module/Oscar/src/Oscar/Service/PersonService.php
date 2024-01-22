@@ -6,6 +6,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Moment\Moment;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Authentification;
@@ -27,6 +28,7 @@ use Oscar\Entity\RoleRepository;
 use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Provider\Privileges;
 use Oscar\Strategy\Search\PersonSearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
@@ -1034,12 +1036,23 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function mailNotificationsPerson($person, $debug = true)
     {
-        /** @var ConfigurationParser $configOscar */
+        $this->getLoggerService()->debug("Calcule du mail pour '$person'");
+
         $configOscar = $this->getOscarConfigurationService();
 
+        // Passage en FR
+        Moment::setLocale('fr_FR');
+
+        // Pour générer les URLs dans les messages
+        $url = $this->getServiceContainer()
+            ->get('ViewHelperManager')
+            ->get('url');
+
+        // Récupération du nom de l'application
         $conf = $this->getOscarConfigurationService()->getConfigArray();
         $appName = $conf['unicaen-app']['app_infos']['nom'];
 
+        // Pour le DEBUG
         if ($debug) {
             $log = function ($msg) {
                 $this->getLoggerService()->debug($msg);
@@ -1049,41 +1062,99 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             };
         }
 
+        /////////////////////////// NOTIFICATIONS NON-LUES
         $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
         $notifications = $datas['notifications'];
 
-        if (count($notifications) == 0) {
-            $log(sprintf(" - Pas de notifications non-lues pour %s", $person));
+        /////////////////////////// PAYMENTS en RETARD
+        $paymentsUndone = $this->getProjectGrantService()->getUndonePayementsForPerson($person);
+
+        /////////////////////////// JALONS NON-FAIT
+        $milestonesUndone = $this->getProjectGrantService()->getUndoneMilestonesForPerson($person);
+
+
+        /////////////////////////// PAYEMENTS NON-FAIT
+
+
+        $sending = false;
+
+        $milestonesUndone_content = "";
+        $notificationsUnread_content = "";
+        $payments_content = "";
+
+        if( count($paymentsUndone) > 0 ){
+            $sending = true;
+            $payments_content = "<p>Payements en retard : </p><ul>";
+            foreach ($paymentsUndone as $payment) {
+                $moment = new Moment($payment->getDatePredictedStr());
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
+                $link = $configOscar->getConfiguration("urlAbsolute") . $url(
+                        'contract/show',
+                        array('id' => $payment->getActivity()->getId())
+                    );
+                $activity = (string)$payment->getActivity();
+                $payments_content .= "<li><strong>$formatted ($since)</strong> ".
+                    (string)$payment
+                    . " dans <a href='$link'>$activity</a> </li>";
+            }
+            $payments_content .= "</ul>";
+        }
+
+        if( count($milestonesUndone) > 0 ){
+            $sending = true;
+            $milestonesUndone_content = "<p>Jalons à faire : </p><ul>";
+            foreach ($milestonesUndone as $milestone) {
+                $moment = new Moment($milestone->getDateStartStr());
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
+                $link = $configOscar->getConfiguration("urlAbsolute") . $url(
+                        'contract/show',
+                        array('id' => $milestone->getActivity()->getId())
+                    );
+                $activity = (string)$milestone->getActivity();
+                $milestonesUndone_content .= "<li><strong>$formatted ($since)</strong> ".
+                    $milestone->getComment()
+                    . " dans <a href='$link'>$activity</a> </li>";
+            }
+            $milestonesUndone_content .= "</ul>";
+
+        }
+
+        if( count($notifications) > 0 ){
+            $sending = true;
+            $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
+            $notificationsUnread_content = "<p>Notifications non-lues : </p><ul>";
+            foreach ($notifications as $n) {
+                $moment = new Moment($n['dateEffective']);
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
+                $message = $n['message'];
+                if (preg_match($reg, $n['message'], $matches)) {
+                    $link = $configOscar->getConfiguration("urlAbsolute") . $url(
+                            'contract/show',
+                            array('id' => $matches[2])
+                        );
+                    $message = preg_replace($reg, '$1 <a href="' . $link . '">$3</a> $4', $n['message']);
+                }
+                $notificationsUnread_content .= "<li><strong>" . $formatted . " (" . $since . ") : </strong> " . $message . "</li>\n";
+            }
+        }
+
+
+        if ($sending === false) {
+            $log(sprintf(" - Pas de mail pour %s", $person));
             return;
         }
 
-        $url = $this->getServiceContainer()
-            ->get('ViewHelperManager')
-            ->get('url');
-
-        $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
-
         $content = "Bonjour $person, <br>\n";
-        $content .= "Vous avez des notifications non-lues sur $appName : \n";
-        $content .= "<ul>\n";
-
-        Moment::setLocale('fr_FR');
-
-        foreach ($notifications as $n) {
-            $moment = new Moment($n['dateEffective']);
-            $formatted = $moment->format('l d F Y');
-            $since = $moment->from('now')->getRelative();
-
-            $message = $n['message'];
-            if (preg_match($reg, $n['message'], $matches)) {
-                $link = $configOscar->getConfiguration("urlAbsolute") . $url(
-                        'contract/show',
-                        array('id' => $matches[2])
-                    );
-                $message = preg_replace($reg, '$1 <a href="' . $link . '">$3</a> $4', $n['message']);
-            }
-            $content .= "<li><strong>" . $formatted . " (" . $since . ") : </strong> " . $message . "</li>\n";
-        }
+        $content .= "<p>Il y'a des actions en attentes sur <strong>$appName</strong></p>";
+        $content .= $milestonesUndone_content;
+        $content .= $payments_content;
+        $content .= $notificationsUnread_content;
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */

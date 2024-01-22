@@ -513,6 +513,22 @@ class Organization implements ResourceInterface, IConnectedObject
         return false;
     }
 
+    public function getPersonRolesId( Person $person) {
+        $roleIds = [];
+        if( $this->hasPerson($person) ){
+            /** @var OrganizationPerson $member */
+            foreach ($this->getPersons() as $member) {
+                if ($member->getPerson()->getId() == $person->getId()) {
+                    $roleId = $member->getRoleObj()->getId();
+                    if( !in_array($roleId, $roleIds) ){
+                        $roleIds[] = $roleId;
+                    }
+                }
+            }
+        }
+        return $roleIds;
+    }
+
 
     public function hasResponsable(Person $person)
     {

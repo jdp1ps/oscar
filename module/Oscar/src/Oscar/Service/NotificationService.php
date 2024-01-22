@@ -884,6 +884,28 @@ class NotificationService implements UseServiceContainer
             'notifications' => []
         ];
 
+//        $person = $this->getPersonService()->getPerson($personId);
+//
+//        $rolesFilter = $this->getOscarUserContextService()->getRolesWithPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW);
+//        $rolesIds = [];
+//        foreach ($rolesFilter as $role) {
+//            $rolesIds[] = $role->getId();
+//        }
+//
+//        // Liste des payements en retard
+//
+//        // liste des notifications non-faites
+//        $notificationUnDone = $this->getPersonService()->getProjectGrantService()->getActivitiesWithUndoneMilestones();
+//        foreach ($notificationUnDone as $a) {
+//            $roleIdsInActivity = $this->getPersonService()->getProjectGrantService()->getPersonRoleIdsInActivity($a, $person);
+//            /** @var ActivityDate $m */
+//            foreach ($a->getMilestones() as $m) {
+//                if( !$m->isFinished() && array_intersect($m->getType()->getRolesId(), $roleIdsInActivity) ){
+//                    echo " NOTIFICATION POUR '$a' > $m\n";
+//                }
+//            }
+//        }
+
         $notificationsPerson = $this->getNotificationRepository()->getNotificationsPerson($personId, true, $onlyFresh);
         $series = [];
 
