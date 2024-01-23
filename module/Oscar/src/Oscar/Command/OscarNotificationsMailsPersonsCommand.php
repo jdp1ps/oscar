@@ -33,12 +33,17 @@ class OscarNotificationsMailsPersonsCommand extends OscarCommandAbstract
         $date = $input->getOption('date');
         $dateRef = new \DateTime();
         if( $date ){
-            $dateRef = new \DateTime(date('Y-m-d ') . $date);
+            $dateRef = new \DateTime($date);
         }
 
         /** @var PersonService $personService */
         $personService = $this->getServicemanager()->get(PersonService::class);
-
-        $personService->mailPersonsWithUnreadNotification($dateRef->format('Y-m-d H:i:s'), $io);
+        try {
+            $personService->mailPersonsWithUnreadNotification($dateRef->format('Y-m-d H:i:s'), $io);
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
+            return self::FAILURE;
+        }
+        return self::SUCCESS;
     }
 }

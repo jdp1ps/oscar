@@ -211,6 +211,10 @@ Dans **Administration > Nomenclatures > Type d'onglet documents**, vous pouvez s
 
 ## Organisations Parents
 
+> Cette partie est encore expérimental, si vous ignorez le champ `parent` pour le moment cela n'aura aucune répercussion sur sur les données
+
 Oscar **Ripley** propose une gestion des structures arborescente. Un champ ``parent`` a été ajouté au modèle et permet de gérer cette filiation entre les structures.
 
 Ce champ a été ajouté au **connecteur organization** et doit contenir le **CODE** de la structure parente (facultatif).
+
+L'objectif est de pouvoir gérer plus facilement les droits d'accès sur une modèle de structure arborescent. 

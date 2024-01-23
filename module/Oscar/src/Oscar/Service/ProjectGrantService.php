@@ -177,10 +177,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
-    /**
-     * @param $regex
-     * @return array
-     */
     public function checkPFIRegex($regex): array
     {
         $out = [
@@ -508,7 +504,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return array_unique(array_merge($idsActivityDirect, $idsActivityInOrganization));
     }
 
-    public function getActivitiesIdsPerson(Person $person) :array
+    public function getActivitiesWithUndoneMilestones()
+    {
+        return $this->getActivityRepository()->getActivitiesWithUndoneMilestones();
+    }
+
+    public function getActivitiesIdsPerson(Person $person)
     {
         $query = $this->getEntityManager()->getRepository(Activity::class)->createQueryBuilder('a');
         $query->select('a.id')
@@ -1197,6 +1198,91 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function getRolesPersonActivity(string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
     {
         return $this->getRoleRepository()->getRolesAtActivityArray($format);
+    }
+
+    public $_cachedPersonRileIdsInActivity;
+
+    public function getPersonRoleIdsInActivity(Activity $activity, Person $person): array
+    {
+        if ($this->_cachedPersonRileIdsInActivity == null) {
+            $this->_cachedPersonRileIdsInActivity = [];
+        }
+
+        if (!array_key_exists($person->getId(), $this->_cachedPersonRileIdsInActivity)) {
+            $this->_cachedPersonRileIdsInActivity[$person->getId()] = [];
+        }
+
+        if (!array_key_exists($activity->getId(), $this->_cachedPersonRileIdsInActivity[$person->getId()])) {
+            $roleIds = [];
+            /** @var ActivityPerson $activityPerson */
+            foreach ($activity->getPersonsDeep() as $activityPerson) {
+                if ($activityPerson->getPerson() == $person) {
+                    $roleId = $activityPerson->getRoleObj()->getId();
+                    if (!in_array($roleId, $roleIds)) {
+                        $roleIds[] = $roleId;
+                    }
+                }
+
+                /** @var ActivityOrganization $activityPartner */
+                foreach ($activity->getOrganizationsDeep() as $activityPartner) {
+                    if ($activityPartner->getOrganization()->hasPerson($person)) {
+                        foreach ($activityPartner->getOrganization()->getPersonRolesId($person) as $roleId) {
+                            if (!in_array($roleId, $roleIds)) {
+                                $roleIds[] = $roleId;
+                            }
+                        }
+                    }
+                }
+            }
+            $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()] = $roleIds;
+        }
+
+        return $this->_cachedPersonRileIdsInActivity[$person->getId()][$activity->getId()];
+    }
+
+    /**
+     * Retourne la liste des Jalons(ActivityDate) non-réalisé pour la personne.
+     *
+     * @param Person $person
+     * @return ActivityDate[]
+     */
+    public function getUndoneMilestonesForPerson(Person $person): array
+    {
+        $activityWithUndoneMilestones = $this->getActivitiesWithUndoneMilestones();
+        $milestonesUndone = [];
+        foreach ($activityWithUndoneMilestones as $a) {
+            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($a, $person);
+            /** @var ActivityDate $m */
+            foreach ($a->getMilestones() as $m) {
+                if (!$m->isFinished() && array_intersect($m->getType()->getRolesId(), $roleIdsInActivity)) {
+                    $milestonesUndone[] = $m;
+                }
+            }
+        }
+        return $milestonesUndone;
+    }
+
+
+    /**
+     * Retourne les payements en retard de la personne.
+     *
+     * @param Person $person
+     * @return ActivityPayment[]
+     */
+    public function getUndonePayementsForPerson(Person $person): array
+    {
+        $rolesIds = $this->getOscarUserContextService()->getRolesIdsWithPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE);
+
+        $paymentsLate = $this->getPaymentsLate();
+        $payements = [];
+        /** @var ActivityPayment $p */
+        foreach ($paymentsLate as $p) {
+            $roleIdsInActivity = $this->getPersonRoleIdsInActivity($p->getActivity(), $person);
+            if ($p->isLate() && array_intersect($roleIdsInActivity, $rolesIds)) {
+                $payements[] = $p;
+            }
+        }
+        return $payements;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

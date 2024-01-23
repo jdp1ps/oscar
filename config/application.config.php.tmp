@@ -28,7 +28,7 @@ $config = array(
         'UnicaenPrivilege',
         'UnicaenUtilisateur',
         'Oscar',
-        //'UnicaenSignature'
+        'UnicaenSignature'
     ),
 
     'module_listener_options' => array(

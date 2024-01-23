@@ -199,6 +199,14 @@ class DateType implements ITrackable
         return $this->roles;
     }
 
+    public function getRolesId() :array {
+        $roles = [];
+        foreach ($this->getRoles() as $role) {
+            $roles[] = $role->getId();
+        }
+        return $roles;
+    }
+
     /**
      * @return array
      */
