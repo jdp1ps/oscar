@@ -73,8 +73,8 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setEmail($this->getFieldValue($jsonData, 'email'))
             ->setUrl($this->getFieldValue($jsonData, 'url'))
             ->setSiret($this->getFieldValue($jsonData, 'siret'))
-            ->setType($this->getFieldValue($jsonData, 'type'))
-            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type')))
+            ->setType($this->getFieldValue($jsonData, 'type', ''))
+            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type', '')))
 
             // Ajout de champs
             ->setDuns($this->getFieldValue($jsonData, 'duns'))
