@@ -823,5 +823,34 @@
     "code": "PARAMETERS_MANAGE",
     "libelle": "Peut gérer les paramètres",
     "fullcode": "MAINTENANCE-PARAMETERS_MANAGE"
+  },
+
+  "SIGNATURE-SIGNATURE_INDEX": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_INDEX",
+    "libelle": "Liste des signatures",
+    "fullcode": "SIGNATURE-SIGNATURE_INDEX"
+  },
+  "SIGNATURE-SIGNATURE_DELETE": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_DELETE",
+    "libelle": "Suppression des signatures",
+    "fullcode": "SIGNATURE-SIGNATURE_DELETE"
+  },
+  "SIGNATURE-SIGNATURE_CREATE": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_CREATE",
+    "libelle": "Création de signature",
+    "fullcode": "SIGNATURE-SIGNATURE_CREATE"
+  },
+  "SIGNATURE-SIGNATURE_SYNC": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_SYNC",
+    "libelle": "Synchronisation de signature",
+    "fullcode": "SIGNATURE-SIGNATURE_SYNC"
   }
 }

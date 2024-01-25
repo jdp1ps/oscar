@@ -29,7 +29,8 @@
     "symfony/console": "*",
     "guzzlehttp/guzzle": "^7.0",
     "phpoffice/phpspreadsheet": "^1.29",
-    "phpoffice/phpword": "^1.1"
+    "phpoffice/phpword": "^1.1",
+    "unicaen/signature": "^0.0.1"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

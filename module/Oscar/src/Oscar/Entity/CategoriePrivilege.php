@@ -69,7 +69,7 @@ class CategoriePrivilege implements PrivilegeCategorieInterface
 
     public function setId($id)
     {
-        // TODO: Implement setId() method.
+        $this->id = $id;
     }
 
     public function getNamespace()
@@ -108,6 +108,8 @@ class CategoriePrivilege implements PrivilegeCategorieInterface
 
         return $this;
     }
+
+
 
 
 

@@ -38,7 +38,7 @@ class OscarCheckPrivilegesCommand extends OscarAdvancedCommandAbstract
 
             return 0;
         } catch (\Exception $e) {
-            $this->finalFatalError($e->getMessage());
+            $this->finalFatalError($e);
             return 1;
         }
     }

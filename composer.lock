@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "91fae2b4cf5aaf5b898afe75709ff72c",
+    "content-hash": "2230aec14e549f49b6822996842bfb1c",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -8951,6 +8951,24 @@
             },
             "description": "Module reprenant la gestion des privileges  - Version laminas",
             "time": "2023-11-15T15:38:30+00:00"
+        },
+        {
+            "name": "unicaen/signature",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://git.unicaen.fr/lib/unicaen/signature.git",
+                "reference": "b5313e7ab06c8937eea841233f0384ceb8ad9676"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": [],
+                "classmap": [
+                    "Module.php"
+                ]
+            },
+            "description": "Module de signature électronique",
+            "time": "2024-01-23T15:12:11+00:00"
         },
         {
             "name": "unicaen/utilisateur",
