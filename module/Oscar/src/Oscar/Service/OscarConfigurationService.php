@@ -938,5 +938,44 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $basePath . DIRECTORY_SEPARATOR . $document->generatePath();
     }
 
+    //////////////////////////////////////////////////////////////////////// CONTRATS SIGNES
+
+    /**
+     * @return bool
+     */
+    public function useSignedContract() :bool
+    {
+        return is_array($this->getSignedContractConfiguration());
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getSignedContractConfiguration() : ?array
+    {
+        try {
+            return $this->getConfiguration('documents_process.signed');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function getSignedContractRolesPersons() :array {
+        return $this->getOptionalConfiguration('documents_signed_roles_persons', []);
+    }
+
+    public function getSignedContractRolesOrganizations() :array {
+        return $this->getOptionalConfiguration('documents_signed_roles_organizations', []);
+    }
+
+    /**
+     * @return array
+     * @throws OscarException
+     */
+    protected function getDocumentProcess() :array
+    {
+        return $this->getConfiguration('documents_process');
+    }
+
 
 }

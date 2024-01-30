@@ -355,6 +355,18 @@
                         }
                         ?>
                     </nav>
+                    <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CONTRACT_SHOW, $entity)): ?>
+                    <section class="card">
+                        <h4>Contrat signé numériquement</h4>
+                        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CONTRACT_SEND, $entity)): ?>
+                            <a href="<?php echo $this->url('contract/process-document-signed-send', ['id'=>$entity->getId() ]) ?>"
+                               class="btn btn-info">
+                                <i class="icon-paper-plane"></i>
+                                Soumettre un contrat pour signature
+                            </a>
+                        <?php endif; ?>
+                    </section>
+                    <?php endif; ?>
                     <div id="docv2"></div>
                     <script>
                         requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {

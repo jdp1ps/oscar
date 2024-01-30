@@ -47,6 +47,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Http\Request;
 use Laminas\View\Model\ViewModel;
+use UnicaenSignature\Service\SignatureService;
 
 class AdministrationController extends AbstractOscarController implements UseProjectGrantService,
                                                                           UseTypeDocumentService,
@@ -99,6 +100,27 @@ class AdministrationController extends AbstractOscarController implements UsePro
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_VISUALISATION);
         return [];
+    }
+
+    public function contractSignedAction() :ViewModel
+    {
+        /** @var SignatureService $signatureService */
+        $signatureService = $this->getServiceLocator()->get(SignatureService::class);
+
+        return new ViewModel([
+            'signed_contract' => $this->getOscarConfigurationService()->useSignedContract() ?
+                 [
+                    'documents_signed_roles_persons' => $this->getOscarConfigurationService()->getSignedContractRolesPersons(),
+                    'documents_signed_roles_organizations' => $this->getOscarConfigurationService()->getSignedContractRolesOrganizations(),
+                    'roles_organizations' => $this->getOscarUserContextService()->getRolesOrganisationLeader(),
+                    'roles_persons' => $this->getOscarUserContextService()->getAvailableRolesActivityOrOrganization(),
+                 ] : null,
+            'letterfiles_configuration' => $signatureService->getLetterfileService()
+                ->getSignatureConfigurationService()->getLetterfileConfiguration(),
+            'levels' => $signatureService->getLetterfileService()
+                ->getSignatureConfigurationService()->getLevels()
+        ]);
+
     }
 
     public function documentSectionsAction()

@@ -119,6 +119,22 @@
     "libelle": "Permet d'activer les données PCRU pour une activité",
     "fullcode": "ACTIVITY-PCRU_ACTIVATE"
   },
+  "ACTIVITY-CONTRACT_SHOW": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "CONTRACT_SHOW",
+    "libelle": "Voir le contrat signé",
+    "fullcode": "ACTIVITY-CONTRACT_SHOW"
+  },
+  "ACTIVITY-CONTRACT_SEND": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "CONTRACT_SEND",
+    "libelle": "Soumettre un contrat signé",
+    "fullcode": "ACTIVITY-CONTRACT_SEND"
+  },
 
   "ACTIVITY-PERSON_SHOW": {
     "category_id": 2,

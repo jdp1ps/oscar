@@ -177,6 +177,110 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityTypeService()->getActivityFullText($activity->getActivityType());
     }
 
+    public function getSignedProcessDefaultPersons(Activity $activity): array
+    {
+        $signedConfig = $this->getOscarConfigurationService()->getSignedContractConfiguration();
+        $signedRolesPersons = $this->getOscarConfigurationService()->getSignedContractRolesPersons();
+        $signedRolesOrganizations = $this->getOscarConfigurationService()->getSignedContractRolesOrganizations();
+
+        foreach ($this->getPersonsDeepActivity($activity, $signedRolesPersons, $signedRolesOrganizations) as $person) {
+            var_dump($person);
+        }
+        die("TEST");
+    }
+
+    /**
+     * Retourne la liste des personnes en profondeur impliquées dans l'activité.
+     *  - Implication directe (Activité/Projet)
+     *  - Implication via les structures
+     *  - Implication via les structures maitres
+     *
+     * @param Activity $activity
+     * @param array $rolesIdsPersons IDs des rôles des personnes à retenir
+     * @param array $rolesIdOrganizations ID des rôles des organizations à retenir
+     *
+     * @return array
+     */
+    public function getPersonsDeepActivity(
+        Activity $activity,
+        array $rolesIdsPersons = [],
+        array $rolesIdOrganizations = []
+    ): array {
+        $out = [];
+
+        /** @var ActivityPerson $activityPerson */
+        foreach ($activity->getPersonsDeep() as $activityPerson) {
+
+            $person = $activityPerson->getPerson();
+            $role = $activityPerson->getRoleObj();
+
+            if (count($rolesIdsPersons) && !in_array($role->getId(), $rolesIdsPersons)) {
+                continue;
+            }
+
+            if (!array_key_exists($person->getId(), $out)) {
+                $out[$person->getId()] = [
+                    'email' => $person->getEmail(),
+                    'label' => $person->getFullname(),
+                    'roles_ids' => [],
+                ];
+            }
+            if (!array_key_exists($role->getId(), $out[$person->getId()]['roles_ids'])) {
+                $out[$person->getId()]['roles_ids'][$role->getId()] = $role->getRoleId();
+            }
+        }
+
+        $organizations = [];
+
+        /** @var ActivityOrganization $activityOrganization */
+        foreach ($activity->getOrganizationsDeep() as $activityOrganization) {
+            $role = $activityOrganization->getRoleObj();
+
+            if (count($rolesIdOrganizations) && !in_array($role->getId(), $rolesIdOrganizations)) {
+                continue;
+            }
+
+            if ($activityOrganization->isPrincipal()) {
+                $org = $activityOrganization->getOrganization();
+                $organizations[$org->getId()] = $org;
+                if ($org->hasParent()) {
+                    foreach ($org->getParents() as $sub) {
+                        $organizations[$sub->getId()] = $sub;
+                    }
+                }
+            }
+        }
+
+        /** @var Organization $o */
+        foreach ($organizations as $o) {
+            /** @var OrganizationPerson $organizationPerson */
+            foreach ($o->getPersons() as $organizationPerson) {
+                /** @var Person $person */
+                $person = $organizationPerson->getPerson();
+
+                /** @var Role $role */
+                $role = $organizationPerson->getRoleObj();
+
+                if (count($rolesIdsPersons) && !in_array($role->getId(), $rolesIdsPersons)) {
+                    continue;
+                }
+
+                if (!array_key_exists($person->getId(), $out)) {
+                    $out[$person->getId()] = [
+                        'email' => $person->getEmail(),
+                        'label' => $person->getFullname(),
+                        'roles_ids' => [],
+                    ];
+                }
+                if (!array_key_exists($role->getId(), $out[$person->getId()]['roles_ids'])) {
+                    $out[$person->getId()]['roles_ids'][$role->getId()] = $role->getRoleId();
+                }
+            }
+        }
+
+        return $out;
+    }
+
     public function checkPFIRegex($regex): array
     {
         $out = [

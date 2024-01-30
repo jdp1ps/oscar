@@ -632,6 +632,27 @@
             </ul>
         </article>
 
+        <article class="card">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-beaker"></i>
+                    Signature éléctronique
+                </strong>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                    <a href="<?= $this->url('administration/contract-signed') ?>" class="right"><i class="icon-cog"></i><?= _(
+                            "Configurer"
+                        ) ?></a>
+                <?php
+                else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php
+                endif; ?>
+            </h3>
+            <p>Description</strong></p>
+
+        </article>
+
         <h2>
             <i class="icon-lock"></i>
             Privilèges et droits d'accès

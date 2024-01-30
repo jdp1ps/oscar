@@ -174,7 +174,6 @@ class ConnectorPersonHydrator
         }
 
         if (property_exists($personData, 'roles')) {
-            var_dump($personData->roles);
 
             foreach ($personData->roles as $organizationCode => $roles) {
                 try {

@@ -15,6 +15,7 @@ use Jacksay\PhpFileExtension\Dictonary\OfficeDocumentDictonary;
 use Jacksay\PhpFileExtension\Exception\NotFoundExtension;
 use Jacksay\PhpFileExtension\PhpFileExtension;
 use Jacksay\PhpFileExtension\Strategy\MimeProvider;
+use Laminas\EventManager\Event;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\ContractType;
@@ -54,6 +55,20 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     public function newDocument(Activity $grant, Person $person, $FileName, $information, $centaureId = null)
     {
         throw new \RuntimeException('Not implemented');
+    }
+
+    /**
+     * @param Event $evt
+     * @return void
+     */
+    public function onSignatureChange($evt): void
+    {
+        $idSignature = $evt->getParam('id', null);
+        if ($idSignature) {
+            $this->getLoggerService()->info("UPDATE triggered 'signature:status' on '$idSignature'");
+        } else {
+            $this->getLoggerService()->error("Can't trigger 'signature:status', no ID given");
+        }
     }
 
     /**
@@ -131,7 +146,9 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
         // Récupération du document et des ces différentes versions
         $documents = $this->getContractDocumentRepository()->getDocumentsForFilenameAndActivity($contractDocument);
-        $this->getLoggerService()->debug(" - Le documents et ces versions implique " . count($documents) . " document(s)");
+        $this->getLoggerService()->debug(
+            " - Le documents et ces versions implique " . count($documents) . " document(s)"
+        );
 
 
         if (count($documents) == 0) {
@@ -217,7 +234,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      */
     public function migrateDocumentsTypeToTab(int $typeDocumentId, int $tabDocumentId): void
     {
-        $this->getContractDocumentRepository()->migrateUntabledDocument( $typeDocumentId, $tabDocumentId);
+        $this->getContractDocumentRepository()->migrateUntabledDocument($typeDocumentId, $tabDocumentId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
