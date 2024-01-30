@@ -56,6 +56,7 @@ return array(
                         'connectorExecute',
                         'connectorsHome',
                         'connectorConfigure',
+                        'contractSigned',
                         'contratTypePcru',
                         'declarersList',
                         'discipline', // OK
@@ -161,6 +162,7 @@ return array(
                         'estimatedSpentExport',
                         'spentList',
                         'newInStructure',
+                        'signedDocumentSend',
                         'spentSynthesisActivity',
                         'personsAccessDeep',
                         'pcru',

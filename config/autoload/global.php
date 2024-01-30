@@ -20,6 +20,13 @@ return array(
             "typeStockage" => \Oscar\Strategy\Upload\TypeOscar::class
         ],
 
+        // Niveau de log par défaut
+        'log_level' => \Monolog\Logger::ERROR,
+
+        // DEV : Sortie des log en mode server built-in
+        'log_stdout_enabled' => false,
+        'log_stdout_level' => \Monolog\Logger::DEBUG,
+
         // Par défaut, pas de socket
         'socket' => false,
 
@@ -42,6 +49,18 @@ return array(
         'install' => [
             // Liste des pays (Norme ISO 3166)
             'iso-3166' => __DIR__ . '/../../install/iso/iso-3166-final.js'
+        ],
+
+        'documents_process' => [
+//            'signed' => [
+//                'label' => 'Soumettre un contrat pour signature',
+//                'name' => 'contrat_a_signer_%s',
+//                'tmp_dir' => '/tmp/',
+//                'document_type' => 'Contrat signé',
+//                'document_tab' => 'Contrat signé',
+//                'letterfile' => 'esup',
+//                'process' => 'todo'
+//            ]
         ],
 
 

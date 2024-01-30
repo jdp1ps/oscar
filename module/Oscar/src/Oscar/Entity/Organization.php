@@ -347,7 +347,7 @@ class Organization implements ResourceInterface, IConnectedObject
      * @ORM\ManyToOne(targetEntity="Organization", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true)
      */
-    private $parent;
+    private ?Organization $parent;
 
 
     /**
@@ -467,17 +467,37 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
     /**
-     * @return mixed
+     * @return ?Organization
      */
-    public function getParent()
+    public function getParent() :?Organization
     {
         return $this->parent;
     }
 
     /**
+     * @return mixed
+     */
+    public function getParents() :array
+    {
+        if( $this->hasParent() ){
+            $parents = [$this->getParent()];
+            if( $this->getParent()->hasParent() ){
+                $parents = array_merge($parents, $this->getParent()->getParents());
+            }
+            return $parents;
+        }
+        return [];
+    }
+
+    public function hasParent() :bool
+    {
+        return $this->getParent() != null;
+    }
+
+    /**
      * @param mixed $parent
      */
-    public function setParent($parent): self
+    public function setParent(?Organization $parent): self
     {
         $this->parent = $parent;
         return $this;

@@ -8,6 +8,7 @@
  */
 namespace Oscar\Controller;
 
+use Laminas\Mvc\Plugin\FlashMessenger\FlashMessenger;
 use Oscar\Exception\OscarException;
 use Oscar\OscarVersion;
 use Oscar\Service\SearchService;
@@ -54,6 +55,14 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
             $format = $this->params()->fromQuery('format', '');
 
         return $format;
+    }
+
+    /**
+     * @return FlashMessenger
+     */
+    protected function getFlashMessenger(): FlashMessenger
+    {
+        return $this->getPluginManager()->get('flashmessenger');
     }
 
     public function oscarRest( $default, $get, $post=null, $delete=null)

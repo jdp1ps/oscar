@@ -12,6 +12,7 @@ namespace Oscar\Service;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\StreamHandler;
 use Oscar\Exception\OscarException;
 
 
@@ -33,16 +34,20 @@ class LoggerServiceFactory implements FactoryInterface
 
         // Niveau de log
         $logLevel = $configurationService->getLoggerLevel();
+        $stdoutLevel = $configurationService->getConfiguration('log_stdout_level');
 
 
         // Sorties des logs (fichier + PHP stdrout)
         $stream = new RotatingFileHandler($logPath, 5, $logLevel);
-        //$stream = new StreamHandler($logPath,$logLevel);
-        //$firephp = new FirePHPHandler($logLevel);
 
         $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);
-        //$logger->pushHandler($firephp);
+
+        // Sortie standard (Built-in server)
+        if( $configurationService->getConfiguration('log_stdout_enabled') ){
+            $stout = new StreamHandler('php://stdout', $stdoutLevel);
+            $logger->pushHandler($stout);
+        }
 
         return $logger;
     }

@@ -33,7 +33,6 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
 
     function hydrateWithDatas($object, $jsonData, $connectorName = null)
     {
-
         ////////////////////////////////////////////////////////////////////////
         ///
         /// Champs obligatoires
@@ -56,7 +55,7 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         }
 
         // Récupération de la répartition horaire
-        if(property_exists($jsonData, 'schelude')) {
+        if (property_exists($jsonData, 'schelude')) {
             $object->setScheduleKey($jsonData->schelude);
         }
 
@@ -64,12 +63,19 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         if (property_exists($jsonData, 'groups')) {
             $object->setLdapMemberOf($jsonData->groups);
         }
+
+        // Patch : Structure/Site
+        if (property_exists($jsonData, 'site')) {
+            $object->setLdapSiteLocation($jsonData->site);
+        }
+
         if (property_exists($jsonData, 'structure')) {
             $object->setLdapSiteLocation($jsonData->structure);
         }
+
         if (property_exists($jsonData, 'datefininscription')) {
             $date = null;
-            if( $jsonData->datefininscription ){
+            if ($jsonData->datefininscription) {
                 $date = (new \DateTime($jsonData->datefininscription))->format('Y-m-d');
             }
             $object->setLdapFinInscription($date);
@@ -77,6 +83,7 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         if (property_exists($jsonData, 'affectation')) {
             $object->setLdapAffectation($jsonData->affectation);
         }
+
         if (property_exists($jsonData, 'status')) {
             $object->setLdapStatus($jsonData->status);
         }

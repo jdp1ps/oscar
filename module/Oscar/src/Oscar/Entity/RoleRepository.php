@@ -104,6 +104,19 @@ class RoleRepository extends EntityRepository
     }
 
     /**
+     * @param array $roleIds
+     * @return Role[]
+     */
+    public function getRolesByRoleId(array $roleIds): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.roleId in (:roleids)')
+            ->setParameter('roleids', $roleIds)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Retourne la liste des rôles d'une activité sous la forme d'un tableau
      *
      * @return array
@@ -135,6 +148,11 @@ class RoleRepository extends EntityRepository
         return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY)->getQuery()->getResult();
     }
 
+    public function getRolesAvailableForPersonInActivityOrOrganization(): array
+    {
+        return $this->getRolesAtLevel(Role::LEVEL_ACTIVITY + Role::LEVEL_ORGANIZATION)->getQuery()->getResult();
+    }
+
     public function getRolesAvailableForPersonInActivityArray(): array
     {
         static $rolesActivity;
@@ -145,6 +163,18 @@ class RoleRepository extends EntityRepository
             }
         }
         return $rolesActivity;
+    }
+
+    public function getRolesAvailableForPersonInActivityOrOrganizationArray(): array
+    {
+        static $rolesActivityOrOrganization;
+        if ($rolesActivityOrOrganization === null) {
+            $rolesActivityOrOrganization = [];
+            foreach ($this->getRolesAvailableForPersonInActivityOrOrganization() as $role) {
+                $rolesActivityOrOrganization[$role->getId()] = $role->getRoleId();
+            }
+        }
+        return $rolesActivityOrOrganization;
     }
 
 
@@ -189,6 +219,7 @@ class RoleRepository extends EntityRepository
     {
         return $this->createQueryBuilder('r')
             ->andWhere('BIT_AND(r.spot, :level) > 0')
+            ->orderBy('r.roleId')
             ->setParameter('level', $level);
     }
 

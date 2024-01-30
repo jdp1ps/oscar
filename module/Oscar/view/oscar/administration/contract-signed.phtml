@@ -1,0 +1,128 @@
+<div class="container">
+    <h1>
+        <i class="icon-pencil-1"></i>
+        Signature numérique
+    </h1>
+    <div class="row">
+        <div class="col-md-6">
+            <h1>
+                <?= count($letterfiles_configuration) ?>
+                Parafeur(s)</h1>
+            <div class="alert alert-info">
+                Liste des parafeurs configurés dans l'application. Si un parafeur est manquant, merci de contacter
+                l'administrateur
+                de l'application.
+            </div>
+            <?php
+            foreach ($letterfiles_configuration as $conf): ?>
+                <div class="card">
+                    <h2 title="Code : <?= $conf['name'] ?>" class="card-title">
+                        <strong><?= $conf['label'] ?></strong>
+                        <?php
+                        if ($conf['default']): ?>
+                            <small class="text-success">
+                                ( Par défaut&nbsp;<i class="icon-ok-circled" style="color: green"></i>)
+                            </small>
+                        <?php
+                        endif; ?>
+                    </h2>
+                    <hr>
+                    Class : <code><?= $conf['class'] ?></code>
+                    <hr>
+                    <h3>Niveaux de signature pris en charge</h3>
+                    <table class="table-condensed table-bordered">
+                        <thead>
+                        <th>Code</th>
+                        <th>Intitulé</th>
+                        <th>Description</th>
+                        </thead>
+                        <?php
+                        foreach ($conf['levels'] as $key => $level):
+                            $levelInfos = $levels[$key];
+                            ?>
+                            <tr>
+                                <th>
+                                    <code>
+                                        <?= $level ?>
+                                        <small title="Code générique">(<?= $levelInfos->getKey() ?>)</small>
+                                    </code>
+                                </th>
+                                <td><?= $levelInfos->getLabel() ?></td>
+                                <td><small><?= $levelInfos->getDescription() ?></small></td>
+
+                            </tr>
+                        <?php
+                        endforeach; ?>
+                    </table>
+                    <h3>Configuration spécifique</h3>
+                    <table class="table-condensed table-bordered">
+                        <thead>
+                        <th>Clef</th>
+                        <th>Valeur</th>
+                        </thead>
+                        <?php
+                        foreach ($conf['config'] as $key => $value): ?>
+                            <tr>
+                                <th><code><?= $key ?></code></th>
+                                <td><code><?= $value ?></code></td>
+                            </tr>
+                        <?php
+                        endforeach; ?>
+                    </table>
+                </div>
+            <?php
+            endforeach; ?>
+        </div>
+        <div class="col-md-6">
+            <h2>Procédures prédéfinies</h2>
+            <div class="alert alert-info">
+                Parafeurs configurés dans l'application
+            </div>
+
+
+            <?php
+            if ($signed_contract): ?>
+                <h3>Contrats signés</h3>
+                <p>Cette procédure permet de soumettre à un parafeur les contrats de recherche</p>
+                <hr>
+                <form action="?a=signed">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Rôles des personnes à impliquer</h4>
+                            <?php
+                            foreach ($signed_contract['roles_persons'] as $id => $role): ?>
+                                <label for="roles_persons_id_<?= $id ?>" class="form-control">
+                                    <?= $role ?>
+                                    <input type="checkbox" name="roles_persons_ids[]"
+                                           value="<?= $id ?>"
+                                           id="roles_persons_id_<?= $id ?>"/>
+                                </label>
+                            <?php
+                            endforeach; ?>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Rôles des structures où rechercher les personnes à impliquer</h4>
+                            <?php
+                            foreach ($signed_contract['roles_organizations'] as $id => $role): ?>
+                                <label for="roles_organizations_id_<?= $id ?>" class="form-control">
+                                    <?= $role ?>
+                                    <input type="checkbox" name="roles_organizations_ids[]"
+                                           value="<?= $id ?>"
+                                           id="roles_organizations_id_<?= $id ?>"/>
+                                </label>
+                            <?php
+                            endforeach; ?>
+                        </div>
+                    </div>
+                </form>
+            <?php
+            endif; ?>
+
+
+            <pre>
+                <?php
+                var_dump($signed_contract['roles_persons']) ?>
+            </pre>
+        </div>
+    </div>
+</div>

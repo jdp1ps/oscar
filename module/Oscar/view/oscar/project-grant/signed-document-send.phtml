@@ -1,0 +1,22 @@
+<section class="container">
+    <h1>Envoi d'un contrat à signer</h1>
+    <?php $form->prepare(); ?>
+    <?= $this->form()->openTag($form); ?>
+
+
+    <?= $this->formControlGroup($form->get('file')); ?>
+
+    <nav class="text-center">
+        <div class="btn-group">
+
+                <a class="btn btn-danger" href="<?= $this->url('contract/show', ['id' => $activity->getId()]) ?>">
+                    <i class="icon-cancel-alt"></i>
+                    Retour à la fiche
+                </a>
+            <button type="submit" class="btn btn-success">
+                Enregistrer
+            </button>
+        </div>
+    </nav>
+    <?= $this->form()->closeTag(); ?>
+</section>

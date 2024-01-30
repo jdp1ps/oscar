@@ -214,6 +214,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getOrganizationRoleRepository()->getRolesAvailableInActivityArray();
     }
 
+    public function getAvailableRolesActivityOrOrganization() :array
+    {
+        return $this->getRoleRepository()->getRolesAvailableForPersonInActivityOrOrganizationArray();
+    }
+
+
+
     /**
      * @param $privilegeCode
      * @param $roleLevel
