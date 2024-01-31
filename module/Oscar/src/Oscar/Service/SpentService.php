@@ -561,13 +561,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     {
         static $cachePlanComptableCG;
         if ($cachePlanComptableCG == null) {
-            $out = [];
+            $cachePlanComptableCG = [];
             $plan = $this->getEntityManager()->getRepository(SpentTypeGroup::class)->findAll();
             /** @var SpentTypeGroup $l */
             foreach ($plan as $l) {
-                $out['00' . StringUtils::feedString($l->getCode())] = $l;
+                $cachePlanComptableCG['00' . StringUtils::feedString($l->getCode())] = $l;
             }
-            return $out;
         }
         return $cachePlanComptableCG;
     }
