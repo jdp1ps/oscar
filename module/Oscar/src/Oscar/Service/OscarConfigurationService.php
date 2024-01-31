@@ -961,11 +961,27 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     public function getSignedContractRolesPersons() :array {
-        return $this->getOptionalConfiguration('documents_signed_roles_persons', []);
+        return $this->getEditableConfKey('documents_signed_roles_persons', []);
     }
 
     public function getSignedContractRolesOrganizations() :array {
-        return $this->getOptionalConfiguration('documents_signed_roles_organizations', []);
+        return $this->getEditableConfKey('documents_signed_roles_organizations', []);
+    }
+
+    public function getSignedContractLetterFile() :string {
+        return $this->getEditableConfKey('documents_signed_parpheur', '');
+    }
+
+    public function getSignedContractLevel() :string {
+        return $this->getEditableConfKey('documents_signed_level', '');
+    }
+
+    public function saveSignedContrat( array $conf ):void
+    {
+        $this->saveEditableConfKey('documents_signed_roles_persons', $conf['roles_persons_ids']);
+        $this->saveEditableConfKey('documents_signed_roles_organizations', $conf['roles_organizations_ids']);
+        $this->saveEditableConfKey('documents_signed_parpheur', $conf['parpheur_select']);
+        $this->saveEditableConfKey('documents_signed_level', $conf['level_select']);
     }
 
     /**

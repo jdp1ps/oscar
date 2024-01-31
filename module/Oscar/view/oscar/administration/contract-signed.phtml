@@ -3,13 +3,24 @@
         <i class="icon-pencil-1"></i>
         Signature numérique
     </h1>
-    <div class="row">
-        <div class="col-md-6">
-            <h1>
-                <?= count($letterfiles_configuration) ?>
-                Parafeur(s)</h1>
+
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="tab active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
+           aria-controls="nav-home" aria-selected="true">
+            <i class="icon-cube"></i>
+            parapheurs
+        </a>
+        <a class="tab" id="nav-profile-tab" data-toggle="tab" href="#nav-contrat" role="tab"
+           aria-controls="nav-profile" aria-selected="false">
+            Signature des contrats
+        </a>
+    </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+            <h2>Il y'a <?= count($letterfiles_configuration) ?> parpheur(s) numérique disponible</h2>
             <div class="alert alert-info">
-                Liste des parafeurs configurés dans l'application. Si un parafeur est manquant, merci de contacter
+                Liste des parapheurs configurés dans l'application. Si un parapheur est manquant, merci de contacter
                 l'administrateur
                 de l'application.
             </div>
@@ -73,40 +84,84 @@
             <?php
             endforeach; ?>
         </div>
-        <div class="col-md-6">
-            <h2>Procédures prédéfinies</h2>
-            <div class="alert alert-info">
-                Parafeurs configurés dans l'application
-            </div>
-
-
+        <div class="tab-pane" id="nav-contrat" role="tabpanel" aria-labelledby="nav-home-tab">
+            <h2>Signature des contrats</h2>
+            <hr>
             <?php
-            if ($signed_contract): ?>
-                <h3>Contrats signés</h3>
-                <p>Cette procédure permet de soumettre à un parafeur les contrats de recherche</p>
-                <hr>
-                <form action="?a=signed">
+            if ($signed_contract == null): ?>
+                <div class="alert alert-danger">
+                    L'option de signature des contrats n'est pas activé dans les fichiers de configuration.
+                    (Fichier <code>config/autoload/local.php</code>)
+                </div>
+            <?php
+            elseif (count($letterfiles_configuration) == 0): ?>
+                <div class="alert alert-danger">
+                    Vous devez configurer au moins un parapheur numérique dans les fichiers de configuration.
+                    (Fichier <code>config/autoload/unicaen-signature.local.php</code>)
+                </div>
+            <?php
+            else: ?>
+                <p class="alert alert-info">
+                    Cette procédure permet de soumettre à un parapheur les contrats de recherche.
+                    Une fois configuré, pensez à accorder les privilèges à des rôles pour
+                    permettre l'envoi de contrat à signer depuis la fiche activité.
+                </p>
+                <form action="?a=signed" method="post">
+                    <nav style="text-align: right">
+                        <button type="submit" class="btn-success btn">Enregistrer</button>
+                    </nav>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label for="parpheur_select">Parapheur</label>
+                            <select name="parpheur_select" id="parpheur_select" class="form-control">
+                                <option value="">Selectionnez un parapheur</option>
+                                <?php
+                                foreach ($letterfiles_configuration as $conf):
+                                    $selected = $conf['name'] == $signed_contract['parafeur_select'];
+                                    ?>
+                                    <option value="<?= $conf['name'] ?>" <?= $selected ? ' selected' : '' ?>><?= $conf['label'] ?></option>
+                                <?php
+                                endforeach; ?>
+                            </select>
+
+                            <label for="level_select">Type de signature</label>
+                            <select name="level_select" id="level_select" class="form-control">
+                                <option value="">Selectionnez un type de signature</option>
+                                <?php
+                                foreach ($levels as $key => $level):
+                                    $selected = $level->getKey() == $signed_contract['level_select'];
+                                    ?>
+                                    <option value="<?= $level->getKey(
+                                    ) ?>" <?= $selected ? ' selected' : '' ?>><?= $level->getLabel() ?></option>
+                                <?php
+                                endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <h4>Rôles des personnes à impliquer</h4>
                             <?php
-                            foreach ($signed_contract['roles_persons'] as $id => $role): ?>
+                            foreach ($signed_contract['roles_persons'] as $id => $role):
+                                $checked = in_array($id, $signed_contract['documents_signed_roles_persons']);
+                                ?>
                                 <label for="roles_persons_id_<?= $id ?>" class="form-control">
                                     <?= $role ?>
                                     <input type="checkbox" name="roles_persons_ids[]"
+                                        <?= $checked ? ' checked' : '' ?>
                                            value="<?= $id ?>"
                                            id="roles_persons_id_<?= $id ?>"/>
                                 </label>
                             <?php
                             endforeach; ?>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <h4>Rôles des structures où rechercher les personnes à impliquer</h4>
                             <?php
-                            foreach ($signed_contract['roles_organizations'] as $id => $role): ?>
+                            foreach ($signed_contract['roles_organizations'] as $id => $role):
+                                $checked = in_array($id, $signed_contract['documents_signed_roles_organizations']); ?>
                                 <label for="roles_organizations_id_<?= $id ?>" class="form-control">
                                     <?= $role ?>
                                     <input type="checkbox" name="roles_organizations_ids[]"
+                                        <?= $checked ? ' checked' : '' ?>
                                            value="<?= $id ?>"
                                            id="roles_organizations_id_<?= $id ?>"/>
                                 </label>
@@ -114,15 +169,13 @@
                             endforeach; ?>
                         </div>
                     </div>
+                    <nav style="text-align: right">
+                        <button type="submit" class="btn-success btn">Enregistrer</button>
+                    </nav>
                 </form>
             <?php
-            endif; ?>
-
-
-            <pre>
-                <?php
-                var_dump($signed_contract['roles_persons']) ?>
-            </pre>
+            endif ?>
         </div>
     </div>
+
 </div>

@@ -107,6 +107,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
         /** @var SignatureService $signatureService */
         $signatureService = $this->getServiceLocator()->get(SignatureService::class);
 
+        if( $this->getRequest()->isPost() ){
+            $this->getOscarConfigurationService()->saveSignedContrat($this->getRequest()->getPost()->toArray());
+            return $this->redirect()->toRoute('administration/contract-signed');
+        }
+
         return new ViewModel([
             'signed_contract' => $this->getOscarConfigurationService()->useSignedContract() ?
                  [
@@ -114,6 +119,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     'documents_signed_roles_organizations' => $this->getOscarConfigurationService()->getSignedContractRolesOrganizations(),
                     'roles_organizations' => $this->getOscarUserContextService()->getRolesOrganisationLeader(),
                     'roles_persons' => $this->getOscarUserContextService()->getAvailableRolesActivityOrOrganization(),
+                    'parafeur_select' => $this->getOscarConfigurationService()->getSignedContractLetterFile(),
+                    'level_select' => $this->getOscarConfigurationService()->getSignedContractLevel(),
                  ] : null,
             'letterfiles_configuration' => $signatureService->getLetterfileService()
                 ->getSignatureConfigurationService()->getLetterfileConfiguration(),
