@@ -16,34 +16,82 @@ use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Person;
+use Oscar\Entity\PersonLdap;
 use Oscar\Entity\PersonRepository;
+use Oscar\Exception\OscarException;
 use UnicaenApp\Mapper\Ldap\People;
 use Zend\Ldap\Ldap;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
     private $personHydrator;
-    const LDAP_FILTER_ALL = '*';
+    private $editable;
+    private $configLdap = array(
+        "type" => "person_ldap",
+        "label" => "Person Ldap",
+        "filtrage" => null
+    );
+    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/person_ldap.yml";
+    private $configFile;
 
-    public function setEditable($foo){}
+    const LDAP_FILTER_ALL = '*';
 
     public function getDataAccess(): IDataAccessStrategy
     {
         return new HttpAuthBasicStrategy($this);
     }
 
+    public function getConfigData()
+    {
+        return $this->configLdap;
+    }
+
+    public function setConfigData($config)
+    {
+        $this->configLdap = $config;
+    }
+
+    public function getConfigFile()
+    {
+        return $this->configFile;
+    }
+
+    public function setConfigFile($file)
+    {
+        $this->configFile = $file;
+    }
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function getEditable(){
+        return $this->editable;
+    }
+
+    public function updateParameters($config)
+    {
+        $dataConfig = $config;
+        if(!is_array($config))
+            $dataConfig = $config->toArray();
+
+        $this->configLdap["filtrage"] = $dataConfig["filtrage"];
+    }
 
     function execute($force = true)
     {
-        //$dataAccessStrategy         = $this->getDataAccess();
-        $dataExtractionStrategy     = new DataExtractionStringToJsonStrategy();
-
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
+        $this->configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+
+        if($this->configLdap["filtrage"] == null){
+            $configFiltre["filtrage"] = $this->configFile['filtre_ldap'];
+            $this->updateParameters($configFiltre);
+        }
 
         $configLdap = $moduleOptions->getLdap();
         $ldap = $configLdap['connection']['default']['params'];
 
-        $dataPeopleFromLdap = new People();
+        $dataPeopleFromLdap = new PersonLdap();
         $dataPeopleFromLdap->setConfig($configLdap);
         $dataPeopleFromLdap->setLdap(new Ldap($ldap));
 
@@ -51,32 +99,41 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
         // Récupération des données
         try {
-            //$data = $dataAccessStrategy->getDataAll();
-            $data = $dataPeopleFromLdap->findAllByNameOrUsername(self::LDAP_FILTER_ALL);
+
+            $personsData = array();
+            $filtrage = $this->configLdap["filtrage"];
+            $dataFiltrage = explode(",", $filtrage);
+
+            $data = $dataPeopleFromLdap->findAll($this->configLdap["filtrage"]);
+            //$data = $dataPeopleFromLdap->findAllByAffectation($dataFiltrage);
+
+            foreach($data as $person){
+                $person['firstname'] = $person['sn'];
+                $person['lastname'] = $person['givenname'];
+                $person['codeHarpege'] = $person['supannentiteaffectationprincipale'];
+                $person['email'] = $person['edupersonprincipalname'];
+                $person['emailPrive'] = $person['edupersonprincipalname'];
+                $person['phone'] = $person['telephonenumber'];
+                $person['projectAffectations'] = $person['edupersonaffiliation'];
+                $person['activities'] = null;
+                //$person['ldapStatus'] = $person['sn'];
+                //$person['ldapSiteLocation'] = $person['sn'];
+                //$person['ldapAffectation'] = $person['sn'];
+                $person['ladapLogin'] = $person['supannaliaslogin'];
+                $personsData[] = (object) $person;
+            }
+
+
+
         } catch (\Exception $e) {
             throw new \Exception("Impossible de charger des données depuis : " . $e->getMessage());
         }
 
-        // Conversion
-        $msg = sprintf(_("Conversion des données"));
-        try {
-            $json = $dataExtractionStrategy->extract($data);
-            // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
-            if( is_object($json) && property_exists($json, 'persons') ){
-                $personsDatas = $json->persons;
-            } else {
-                $personsDatas = $json;
-            }
-        } catch (\Exception $e) {
-            $report->adderror("$msg : ERROR (" . $e->getMessage() . ")");
-            throw new \Exception("Impossible de convertir les données obtenues : " . $e->getMessage());
-        }
-
-        if( !is_array($personsDatas) ){
+        if( !is_array($data) ){
             throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
         }
 
-        $this->syncPersons($personsDatas, $this->getPersonRepository(), $report, $this->getOption('force', false));
+        $this->syncPersons($personsData, $this->getPersonRepository(), $report, $this->getOption('force', false));
 
         return $report;
     }
@@ -120,8 +177,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         $repport->addnotice(count($personsDatas). " résultat(s) reçus vont être traité.");
 
         $this->getPersonHydrator()->setPurge($this->getOptionPurge());
-        /////////////////////////////////////
-        ////// Patch 2.7 "Lewis" GIT#286 ////
+
         try {
 
             foreach( $personsDatas as $personData ){
@@ -213,7 +269,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                         $personRepository->removePersonById($idPerson);
                         $repport->addremoved("Suppression de person $idPerson : ");
                     } catch (\Exception $e) {
-                        $repport->adderror("Immpossible de suprimer la person $idPerson : " . $e->getMessage());
+                        $repport->adderror("Impossible de supprimer la person $idPerson : " . $e->getMessage());
                     }
                 }
 
