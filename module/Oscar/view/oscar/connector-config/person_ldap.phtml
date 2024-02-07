@@ -1,0 +1,26 @@
+<section class="card connector <?= $config['type'] ?>">
+    <form action="" method="post" id="<?= $config['type'] ?>">
+        <input type="hidden" name="<?= $config['type'] ?>">
+        <h2 class="card-title"><?= $config['label'] ?></h2>
+        <class="card-content">
+            <h3>Informations</h3>
+            <p class="text-highlight">
+                <p>Type : <strong><?= $config['type'] ?></strong></p>
+            </p>
+            <?php if( $config['warnings'] ): ?>
+                <?php foreach( $config['warnings'] as $warning ): ?>
+                    <div class="alert alert-danger">
+                        <?= $warning ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <h3>Paramètres</h3>
+
+            Filtrage : <input type="text" value="<?= $config['filtrage'] ?>" name="filtrage" />
+
+            <nav>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </nav>
+        </div>
+    </form>
+</section>

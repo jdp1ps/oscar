@@ -65,25 +65,31 @@ class OscarLdapPersonsSearchCommand extends OscarCommandAbstract
             $dataPeopleFromLdap->setLdap(new Ldap($ldap));
 
             //$ids = $personService->getSearchEngineStrategy()->search($search);
-            $ids = $dataPeopleFromLdap->findAllByNameOrUsername($search, $configLdap['filters']['UID_FILTER'], $ldap['accountFilterFormat'], true);
+            $person = $dataPeopleFromLdap->findOneByUid($search);
 
-            if( count($ids) ){
-                $persons = $personService->getPersonsByIds($ids);
-                $headers = ["ID", "SYNC", "Nom complet", "Prénom", "Nom", "Affectation", "Email"];
+            if($person){
+                //$persons = $personService->getPersonsByIds(array($ids));
+                $headers = ["ID", "Nom complet", "Prénom", "Nom", "Email"];
                 $data = [];
-                var_dump($data);
-                foreach ($persons as $person) {
+
+                /*$io->writeln("Id :".$data["uidnumber"]);
+                $io->writeln("Nom complet :".$data["cn"]);
+                $io->writeln("Prénom :".$data["givenname"]);
+                $io->writeln("Nom :".$data["sn"]);
+                $io->writeln("Uid :".$data["supannaliaslogin"]);
+                $io->writeln("Email :".$data["edupersonprincipalname"]);
+                $io->writeln("Affectation :".$data["edupersonprimaryaffiliation"]);*/
+
+                //foreach ($ids as $person) {
                     $data[] = [
-                        '<bold>[' . $person->getId() .']</bold>',
-                        $person->getConnectorsDatasStr(),
-                        $person->getDisplayName(),
-                        $person->getFirstname(),
-                        $person->getLastname(),
-                        $person->getLdapAffectation(),
-                        $person->getEmail()
+                        '<bold>[' . $person->getUid() .']</bold>',
+                        $person->getNomComplet(),
+                        $person->getCn(),
+                        $person->getSn(),
+                        $person->getMail()
                     ];
-//                    $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getId(), $person->getDisplayName(), $person->getEmail()));
-                }
+                    $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getUid(), $person->getNomComplet(), $person->getMail()));
+                //}
                 $io->table($headers, $data);
             } else {
                 $io->warning("Aucun résultat");

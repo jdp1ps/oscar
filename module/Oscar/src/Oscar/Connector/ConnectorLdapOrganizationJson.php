@@ -10,50 +10,76 @@ namespace Oscar\Connector;
 
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationLdap;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Factory\JsonToOrganization;
-use UnicaenApp\Mapper\Ldap\Structure;
 use Zend\Ldap\Ldap;
 
 class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 {
     private $organizationHydrator;
+    private $editable;
+    private $connectorID;
 
     const LDAP_FILTER_ALL = '*';
-    private $editable = false;
+    private $configLdap = array(
+        "type" => "organization_ldap",
+        "label" => "Organization Ldap",
+        "filtrage" => "&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research),&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=administration)"
+        //"filtrage" => "DIREVAL"
+    );
+
+    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/organization_ldap.yml";
+    private $configFile;
+
+    public function getConfigData()
+    {
+        return $this->configLdap;
+    }
+
+    public function setConfigData($config)
+    {
+        $this->configLdap = $config;
+    }
+
+    public function getConfigFile()
+    {
+        return $this->configFile;
+    }
+
+    public function setConfigFile($file)
+    {
+        $this->configFile = $file;
+    }
 
     public function setEditable($editable){
         $this->editable = $editable;
     }
 
-    public function isEditable(){
+    public function getEditable(){
         return $this->editable;
     }
 
-    function getRemoteID()
-    {
-        return "code";
+    public function setConnectorId($connectorId){
+        $this->connectorID = $connectorId;
     }
 
-    function getRemoteFieldname($oscarFieldName)
-    {
-        // TODO: Implement getRemoteFieldname() method.
+    public function getConnectorId(){
+        return $this->connectorID;
     }
 
-    function getPersonData($idConnector)
+    public function updateParameters($config)
     {
-        // TODO: Implement getPersonData() method.
-    }
+        $dataConfig = $config;
+        if(!is_array($config))
+            $dataConfig = $config->toArray();
 
-    public function getConfigData()
-    {
-        return null;
+        $this->configLdap["filtrage"] = $dataConfig["filtrage"];
     }
 
     /**
@@ -84,13 +110,20 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     {
         //$dataAccessStrategy         = new HttpAuthBasicStrategy($this);
         $dataExtractionStrategy     = new DataExtractionStringToJsonStrategy();
-
+        $this->setConnectorId('organization_ldap');
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
+
+        $this->configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+
+        if($this->configLdap["filtrage"] == null){
+            $configFiltre["filtrage"] = $this->configFile['filtre_ldap'];
+            $this->updateParameters($configFiltre);
+        }
 
         $configLdap = $moduleOptions->getLdap();
         $ldap = $configLdap['connection']['default']['params'];
 
-        $dataStructureFromLdap = new Structure();
+        $dataStructureFromLdap = new OrganizationLdap();
         $dataStructureFromLdap->setConfig($configLdap);
         $dataStructureFromLdap->setLdap(new Ldap($ldap));
 
@@ -99,13 +132,53 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         // Récupération des données
         try {
             //$data = $dataAccessStrategy->getDataAll();
-            $data = $dataStructureFromLdap->findAllByCodeStructure(null);
+            $filtrage = $this->configLdap["filtrage"];
+            $dataFiltrage = explode(",", $filtrage);
+            $data = array();
+
+            foreach($dataFiltrage as $filtre) {
+                $dataOrg = null;
+                $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
+                //$dataOrg = $dataStructureFromLdap->findOneByDn($filtre);
+
+
+                $dataProcess = array();
+                $dataProcess['uid'] = $dataOrg[0]["supannrefid"];
+                $dataProcess['name'] = $dataOrg[0]["description"];
+                $dataProcess['dateupdate'] = null;
+                $dataProcess['code'] = $dataOrg[0]["supanncodeentite"];
+                $dataProcess['labintel'] = "";
+                $dataProcess['shortname'] = $dataOrg[0]["ou"];
+                $dataProcess['longname'] = $dataOrg[0]["description"];
+                $dataProcess['phone'] = $dataOrg[0]["telephonenumber"];
+                $dataProcess['description'] = $dataOrg[0]["description"];
+                $dataProcess['email'] = "";
+                $dataProcess['siret'] = "";
+                $dataProcess['type'] = $dataOrg[0]["supanntypeentite"];
+                $dataProcess['url'] = $dataOrg[0]["labeleduri"];
+                $dataProcess['duns'] = $dataOrg[0]["telephonenumber"];
+                $dataProcess['tvaintra'] = null;
+                $dataProcess['rnsr'] = null;
+
+                $address = explode("$",$dataOrg[0]["postaladdress"]);
+                $dataProcess['address'] = array(
+                    "address1" => $address[0],
+                    "address2" => $address[1],
+                    "zipcode" => $address[2],
+                    "city" => $address[3],
+                    "country" => $address[4],
+                    "address3" => ""
+                );
+
+                $data[] = (object) $dataProcess;
+            }
+
         } catch (\Exception $e) {
             throw new \Exception("Impossible de charger des données depuis  : " . $e->getMessage());
         }
 
         // Conversion
-        try {
+        /*try {
             $json = $dataExtractionStrategy->extract($data);
             // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
             if( is_object($json) && property_exists($json, 'organizations') ){
@@ -116,14 +189,14 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         } catch (\Exception $e) {
             $report->adderror("Data get all error : " . $e->getMessage());
             throw new \Exception("Impossible de convertir les données : " . $e->getMessage());
-        }
+        }*/
 
-        if( !is_array($organizationsData) ){
+        if( !is_array($data) ){
             throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
         }
 
         // ...
-        $this->syncAll($organizationsData, $this->getOrganizationRepository(), $report, $this->getOption('force', false));
+        $this->syncAll($data, $this->getOrganizationRepository(), $report, $this->getOption('force', false));
 
         return $report;
     }
@@ -148,7 +221,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
      */
     function syncAll($organizationsData, OrganizationRepository $repository, ConnectorRepport $report, $force)
     {
-        try { 
+        try {
 
             foreach( $organizationsData as $data ){
                 try {
@@ -171,7 +244,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
                     $organization = $this->hydrateWithDatas($organization, $data);
                     if( property_exists($data, 'type') )
-                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->name));
 
                     $repository->flush($organization);
                     if( $action == 'add' ){

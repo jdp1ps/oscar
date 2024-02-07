@@ -52,7 +52,7 @@ class OscarLdapOrganizationsSearchCommand extends OscarCommandAbstract
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->title("Recherche dans les organisations");
+        $io->title("Recherche LDAP dans les organisations");
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
@@ -72,20 +72,19 @@ class OscarLdapOrganizationsSearchCommand extends OscarCommandAbstract
 
 
             //$organisations = $organisationService->search($search);
-            $organisations = $dataStructureFromLdap->findAllPathByCodeStructure($search);
+            $organisation = $dataStructureFromLdap->findOneByName("ou=".$search);
 
             /** @var Organization $organisation */
 
-            if(is_string($organisations)){
-                $io->writeln(sprintf('- <bold>[%s]</bold>', $organisations));
+            if(is_string($organisation)){
+                $io->writeln(sprintf('- <bold>[%s]</bold>', $organisation));
             } else {
-                foreach ($organisations as $organisation) {
-                    $io->writeln(sprintf('- <bold>[%s]</bold> [%s] %s (%s)',
-                        $organisation->getId(),
-                        $organisation->getShortName(),
-                        $organisation->getFullName(),
-                        $organisation->getCode()));
-                }
+                $address = explode("$",$organisation[0]['postaladdress']);
+                $io->writeln(sprintf('- <bold>[%s]</bold> [%s] - %s',
+                    $organisation[0]["description"],
+                    $organisation[0]["ou"],
+                    $address[0]." ".$address[1]." ".$address[2]." ".$address[3]
+                ));
             }
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
