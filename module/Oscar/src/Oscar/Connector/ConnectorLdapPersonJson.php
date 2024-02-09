@@ -43,6 +43,13 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
     public function getConfigData()
     {
+        $this->configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+
+        if($this->configLdap["filtrage"] == null){
+            $configFiltre["filtrage"] = $this->configFile['filtre_ldap'];
+            $this->updateParameters($configFiltre);
+        }
+
         return $this->configLdap;
     }
 
@@ -100,28 +107,33 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         // Récupération des données
         try {
 
-            $personsData = array();
+
             $filtrage = $this->configLdap["filtrage"];
             $dataFiltrage = explode(",", $filtrage);
 
-            $data = $dataPeopleFromLdap->findAll($this->configLdap["filtrage"]);
-            //$data = $dataPeopleFromLdap->findAllByAffectation($dataFiltrage);
+            foreach($dataFiltrage as $filtre){
+                $data = $dataPeopleFromLdap->findAll($filtre);
+                $personsData = array();
 
-            foreach($data as $person){
-                $person['firstname'] = $person['sn'];
-                $person['lastname'] = $person['givenname'];
-                $person['codeHarpege'] = $person['supannentiteaffectationprincipale'];
-                $person['email'] = $person['edupersonprincipalname'];
-                $person['emailPrive'] = $person['edupersonprincipalname'];
-                $person['phone'] = $person['telephonenumber'];
-                $person['projectAffectations'] = $person['edupersonaffiliation'];
-                $person['activities'] = null;
-                //$person['ldapStatus'] = $person['sn'];
-                //$person['ldapSiteLocation'] = $person['sn'];
-                //$person['ldapAffectation'] = $person['sn'];
-                $person['ladapLogin'] = $person['supannaliaslogin'];
-                $personsData[] = (object) $person;
+                foreach($data as $person){
+                    $person['firstname'] = $person['sn'];
+                    $person['lastname'] = $person['givenname'];
+                    $person['codeHarpege'] = $person['supannentiteaffectationprincipale'];
+                    $person['email'] = $person['edupersonprincipalname'];
+                    $person['emailPrive'] = $person['edupersonprincipalname'];
+                    $person['phone'] = $person['telephonenumber'];
+                    $person['projectAffectations'] = $person['edupersonaffiliation'];
+                    $person['activities'] = null;
+                    //$person['ldapStatus'] = $person['sn'];
+                    //$person['ldapSiteLocation'] = $person['sn'];
+                    //$person['ldapAffectation'] = $person['sn'];
+                    $person['ladapLogin'] = $person['supannaliaslogin'];
+                    $personsData[] = (object) $person;
+                }
+
+                $this->syncPersons($personsData, $this->getPersonRepository(), $report, $this->getOption('force', false));
             }
+
 
 
 
@@ -132,8 +144,6 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         if( !is_array($data) ){
             throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
         }
-
-        $this->syncPersons($personsData, $this->getPersonRepository(), $report, $this->getOption('force', false));
 
         return $report;
     }
