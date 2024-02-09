@@ -125,6 +125,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
         $dataStructureFromLdap = new OrganizationLdap();
         $dataStructureFromLdap->setConfig($configLdap);
+
         $dataStructureFromLdap->setLdap(new Ldap($ldap));
 
         $report = new ConnectorRepport();
@@ -139,38 +140,40 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
             foreach($dataFiltrage as $filtre) {
                 $dataOrg = null;
                 $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
+
                 //$dataOrg = $dataStructureFromLdap->findOneByDn($filtre);
 
+                foreach($dataOrg as $organization){
+                    $dataProcess = array();
+                    $dataProcess['uid'] = $organization["supannrefid"];
+                    $dataProcess['name'] = $organization["description"];
+                    $dataProcess['dateupdate'] = null;
+                    $dataProcess['code'] = $organization["supanncodeentite"];
+                    $dataProcess['labintel'] = "";
+                    $dataProcess['shortname'] = $organization["ou"];
+                    $dataProcess['longname'] = $organization["description"];
+                    $dataProcess['phone'] = $organization["telephonenumber"];
+                    $dataProcess['description'] = $organization["description"];
+                    $dataProcess['email'] = "";
+                    $dataProcess['siret'] = "";
+                    $dataProcess['type'] = $organization["supanntypeentite"];
+                    $dataProcess['url'] = $organization["labeleduri"];
+                    $dataProcess['duns'] = $organization["telephonenumber"];
+                    $dataProcess['tvaintra'] = null;
+                    $dataProcess['rnsr'] = null;
 
-                $dataProcess = array();
-                $dataProcess['uid'] = $dataOrg[0]["supannrefid"];
-                $dataProcess['name'] = $dataOrg[0]["description"];
-                $dataProcess['dateupdate'] = null;
-                $dataProcess['code'] = $dataOrg[0]["supanncodeentite"];
-                $dataProcess['labintel'] = "";
-                $dataProcess['shortname'] = $dataOrg[0]["ou"];
-                $dataProcess['longname'] = $dataOrg[0]["description"];
-                $dataProcess['phone'] = $dataOrg[0]["telephonenumber"];
-                $dataProcess['description'] = $dataOrg[0]["description"];
-                $dataProcess['email'] = "";
-                $dataProcess['siret'] = "";
-                $dataProcess['type'] = $dataOrg[0]["supanntypeentite"];
-                $dataProcess['url'] = $dataOrg[0]["labeleduri"];
-                $dataProcess['duns'] = $dataOrg[0]["telephonenumber"];
-                $dataProcess['tvaintra'] = null;
-                $dataProcess['rnsr'] = null;
+                    $address = explode("$",$organization["postaladdress"]);
+                    $dataProcess['address'] = array(
+                        "address1" => $address[0],
+                        "address2" => $address[1],
+                        "zipcode" => $address[2],
+                        "city" => $address[3],
+                        "country" => $address[4],
+                        "address3" => ""
+                    );
 
-                $address = explode("$",$dataOrg[0]["postaladdress"]);
-                $dataProcess['address'] = array(
-                    "address1" => $address[0],
-                    "address2" => $address[1],
-                    "zipcode" => $address[2],
-                    "city" => $address[3],
-                    "country" => $address[4],
-                    "address3" => ""
-                );
-
-                $data[] = (object) $dataProcess;
+                    $data[] = (object) $dataProcess;
+                }
             }
 
         } catch (\Exception $e) {
