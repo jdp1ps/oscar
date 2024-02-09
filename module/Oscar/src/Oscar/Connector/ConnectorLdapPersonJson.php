@@ -106,7 +106,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
         // Récupération des données
         try {
-
+            set_time_limit(600);
 
             $filtrage = $this->configLdap["filtrage"];
             $dataFiltrage = explode(",", $filtrage);
