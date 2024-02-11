@@ -29,7 +29,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     private $configLdap = array(
         "type" => "person_ldap",
         "label" => "Person Ldap",
-        "filtrage" => null
+        "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member),&(objectClass=inetOrgPerson)(eduPersonAffiliation=staff),&(objectClass=inetOrgPerson)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=emeritus)"
     );
     private $configPath = "/var/www/html/oscar/config/autoload/../connectors/person_ldap.yml";
     private $configFile;
