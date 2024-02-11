@@ -124,18 +124,13 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                     $person['phone'] = $person['telephonenumber'];
                     $person['projectAffectations'] = $person['edupersonaffiliation'];
                     $person['activities'] = null;
-                    //$person['ldapStatus'] = $person['sn'];
-                    //$person['ldapSiteLocation'] = $person['sn'];
-                    //$person['ldapAffectation'] = $person['sn'];
                     $person['ladapLogin'] = $person['supannaliaslogin'];
+                    $person['dateupdated'] = null;
                     $personsData[] = (object) $person;
                 }
 
                 $this->syncPersons($personsData, $this->getPersonRepository(), $report, $this->getOption('force', false));
             }
-
-
-
 
         } catch (\Exception $e) {
             throw new \Exception("Impossible de charger des données depuis : " . $e->getMessage());
