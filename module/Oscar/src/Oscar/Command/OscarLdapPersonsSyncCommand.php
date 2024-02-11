@@ -114,10 +114,8 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                         $person['phone'] = $person['telephonenumber'] != null & $person['telephonenumber'] != "" ? $person['telephonenumber'] : "" ;
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
                         $person['activities'] = null;
-                        //$person['ldapStatus'] = $person['sn'];
-                        //$person['ldapSiteLocation'] = $person['sn'];
-                        //$person['ldapAffectation'] = $person['sn'];
                         $person['ladapLogin'] = $person['supannaliaslogin'];
+                        $person['dateupdated'] = null;
                         $personsData[] = (object) $person;
                     }
 
