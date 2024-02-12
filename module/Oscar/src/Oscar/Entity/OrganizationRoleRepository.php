@@ -42,7 +42,7 @@ class OrganizationRoleRepository extends EntityRepository
     {
         $formatter = new RepositoryResultFormatter();
         $formatter->addFormat(self::FORMAT_ID_ROLE_ID, 'getRoleId');
-        return $formatter->output($this->getRolesAvailableInActivity(), self::FORMAT_ID_ROLE_ID);
+        return $formatter->output($this->getRolesAvailableInActivity(), OscarFormatterConst::FORMAT_ARRAY_ID_VALUE);
     }
 
     /**

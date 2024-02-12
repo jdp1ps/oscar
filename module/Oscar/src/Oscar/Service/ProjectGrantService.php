@@ -80,6 +80,10 @@ use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\StringUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Oscar\Validator\EOTP;
+use UnicaenSignature\Entity\Db\Signature;
+use UnicaenSignature\Entity\Db\SignatureRecipient;
+use UnicaenSignature\Service\SignatureService;
+use UnicaenSignature\Strategy\Letterfile\Esup\EsupLetterfileStrategy;
 
 
 class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfigurationService, UseEntityManager,
@@ -139,6 +143,26 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $this->notificationService = $notificationService;
     }
 
+    private SignatureService $signatureService;
+
+    /**
+     * @return SignatureService
+     */
+    public function getSignatureService(): SignatureService
+    {
+        return $this->signatureService;
+    }
+
+    /**
+     * @param SignatureService $signatureService
+     */
+    public function setSignatureService(SignatureService $signatureService): self
+    {
+        $this->signatureService = $signatureService;
+        return $this;
+    }
+
+
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,10 +207,72 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $signedRolesPersons = $this->getOscarConfigurationService()->getSignedContractRolesPersons();
         $signedRolesOrganizations = $this->getOscarConfigurationService()->getSignedContractRolesOrganizations();
 
-        foreach ($this->getPersonsDeepActivity($activity, $signedRolesPersons, $signedRolesOrganizations) as $person) {
-            var_dump($person);
+        // TODO Ajouter dans la configuration des personnes nommées
+        //$extratsPersons = $this->getPersonService()->getPersonsByIds($this->getOscarConfigurationService()->getSignedContractPersons());
+        $extrasPersons = [];
+        return array_merge(
+            $this->getPersonsDeepActivity($activity, $signedRolesPersons, $signedRolesOrganizations),
+            $extrasPersons
+        );
+    }
+
+
+
+    public function getRecipients($options){
+        echo "GET RECIPIENTS<br>\n";
+        var_dump($options);
+        $activity_id = $options['activity_id'];
+        $role_activity_id = $options['role_activity_id'];
+        $role_organisation_id = $options['role_organisation_id'];
+        $activity = $this->getActivityById($activity_id);
+
+        $recipients = [];
+        /** @var ActivityPerson $personActivity */
+        foreach ($activity->getPersonsDeep() as $personActivity) {
+            if( in_array($personActivity->getRoleObj()->getId(), $role_activity_id) ){
+                $p = $personActivity->getPerson();
+                $recipients[$p->getId()] = [
+                    'firstname' => $p->getFirstname(),
+                    'lastname' => $p->getLastname(),
+                    'email' => $p->getEmail(),
+                ];
+            }
         }
-        die("TEST");
+        return $recipients;
+    }
+
+    public function sendSignedContract(string $path_file, array $personsIds, string $label = "Exemple de signature" ):void
+    {
+        $parpheur = $this->getOscarConfigurationService()->getSignedContractLetterFile();
+        $level = $this->getOscarConfigurationService()->getSignedContractLevel();
+        /** @var EsupLetterfileStrategy $letterFile */
+        $letterFile = $this->getSignatureService()->getLetterfileService()->getLetterFileStrategy($parpheur);
+        $emails = [];
+
+        $signature = new Signature();
+        $this->getEntityManager()->persist($signature);
+        /** @var Person $p */
+        foreach ($this->getPersonService()->getPersonsByIds($personsIds) as $p){
+            $r = new SignatureRecipient();
+            $this->getEntityManager()->persist($r);
+            $r->setSignature($signature);
+            $r->setEmail($p->getEmail());
+            $r->setFirstname($p->getFirstname());
+            $r->setLastname($p->getLastname());
+            $emails[] = $r;
+        }
+        $comment = "Commentaire par défaut";
+        $signature->setLetterfileKey($parpheur)
+            ->setDocumentPath($path_file)
+            ->setLabel($label)
+            ->setDescription($comment)
+            ->setRecipients($emails)
+            ->setType($level)
+            ->setAllSignToComplete(true);
+        $this->getEntityManager()->flush($signature);
+        $this->getSignatureService()->sendSignature($signature);
+
+
     }
 
     /**
@@ -220,6 +306,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
             if (!array_key_exists($person->getId(), $out)) {
                 $out[$person->getId()] = [
+                    'id' => $person->getId(),
                     'email' => $person->getEmail(),
                     'label' => $person->getFullname(),
                     'roles_ids' => [],
@@ -267,6 +354,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
                 if (!array_key_exists($person->getId(), $out)) {
                     $out[$person->getId()] = [
+                        'id' => $person->getId(),
                         'email' => $person->getEmail(),
                         'label' => $person->getFullname(),
                         'roles_ids' => [],

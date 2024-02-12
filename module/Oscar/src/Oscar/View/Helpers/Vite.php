@@ -12,6 +12,7 @@ namespace Oscar\View\Helpers;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\ViteUtils;
 use Laminas\View\Helper\AbstractHtmlElement;
 
@@ -27,6 +28,10 @@ class Vite extends AbstractHtmlElement implements UseOscarConfigurationService
      */
     public function __construct()
     {
+
+    }
+
+    public function setServiceLocator($unused) :void {
 
     }
 

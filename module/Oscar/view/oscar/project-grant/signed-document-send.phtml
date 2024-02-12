@@ -3,9 +3,24 @@
     <?php $form->prepare(); ?>
     <?= $this->form()->openTag($form); ?>
 
+    <h3>Signataires</h3>
+    <section>
+        <?php foreach ($defaultPersons as $p): ?>
+        <label for="person_<?= $p['id'] ?>" class="form-control">
+            <input type="checkbox" name="persons[]" value="<?= $p['id'] ?>" id="person_<?= $p['id'] ?>"/>
+            <?= $p['label'] ?>
+            <small>
+                (<?= implode(', ', $p['roles_ids']) ?>)
+            </small>
+        </label>
+
+        <?php endforeach; ?>
+    </section>
 
     <?= $this->formControlGroup($form->get('file')); ?>
-
+    <pre>
+        <?php var_dump($defaultPersons); ?>
+    </pre>
     <nav class="text-center">
         <div class="btn-group">
 
