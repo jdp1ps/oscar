@@ -47,7 +47,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'ldap:persons:sync';
     private $personHydrator;
-    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/person_ldap.yml";
+    private $configPath = null;
     private $configFile;
     private $purge = false;
     private $configLdap = array(
@@ -61,6 +61,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
         $this
             ->setDescription("Synchronisation des personnes depuis LDAP")
         ;
+        $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -138,8 +139,8 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
     public function syncPersons($personsDatas, PersonRepository $personRepository, SymfonyStyle &$io, $force)
     {
         if( $this->purge ){
-            $exist = $personRepository->getUidsConnector("person_ldap");
-            $io->writeln(sprintf(_("Il y'a %s personne(s) référencées dans Oscar pour le connecteur '%s'."), count($exist), $this->getName()));
+            $exist = $personRepository->getUidsConnector('ldap');
+            $io->writeln(sprintf(_("Il y'a %s personne(s) référencées dans Oscar pour le connecteur '%s'."), count($exist), 'ldap'));
         }
 
         $io->writeln(count($personsDatas). " résultat(s) reçus vont être traité.");
@@ -164,7 +165,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 
                 try {
                     /** @var Person $personOscar */
-                    $personOscar = $personRepository->getPersonByConnectorID($this->getName(), $personData->uid);
+                    $personOscar = $personRepository->getPersonByConnectorID('ldap', $personData->uid);
                     $action = "update";
 
                 } catch( NoResultException $e ){
@@ -181,7 +182,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated
                     || $force == true )
                 {
-                    $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, $this->getName());
+                    $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, 'ldap');
                     if( $personOscar == null ){
                         $io->error("WTF $action");
                     }
@@ -205,7 +206,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                 foreach ($exist as $uid){
                     try {
                         /** @var Person $personOscarToDelete */
-                        $personOscarToDelete = $personRepository->getPersonByConnectorID($this->getName(), $uid);
+                        $personOscarToDelete = $personRepository->getPersonByConnectorID('ldap', $uid);
 
                         $activeIn = [];
 
