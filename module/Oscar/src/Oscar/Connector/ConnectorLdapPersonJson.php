@@ -29,7 +29,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     private $configLdap = array(
         "type" => "person_ldap",
         "label" => "Person Ldap",
-        "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member),&(objectClass=inetOrgPerson)(eduPersonAffiliation=staff),&(objectClass=inetOrgPerson)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=emeritus)"
+        "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)"
     );
     private $configPath = null;
     private $configFile;
@@ -99,11 +99,6 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
         $configLdap = $moduleOptions->getLdap();
         $ldap = $configLdap['connection']['default']['params'];
-
-        $dataPeopleFromLdap = new PersonLdap();
-        $dataPeopleFromLdap->setConfig($configLdap);
-        $dataPeopleFromLdap->setLdap(new Ldap($ldap));
-
         $report = new ConnectorRepport();
 
         // Récupération des données
@@ -114,20 +109,34 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
             $dataFiltrage = explode(",", $filtrage);
 
             foreach($dataFiltrage as $filtre){
+                $dataPeopleFromLdap = new PersonLdap();
+                $dataPeopleFromLdap->setConfig($configLdap);
+                $dataPeopleFromLdap->setLdap(new Ldap($ldap));
                 $data = $dataPeopleFromLdap->findAll($filtre);
                 $personsData = array();
 
                 foreach($data as $person){
                     $person['firstname'] = $person['givenname'];
                     $person['lastname'] = $person['sn'];
-                    $person['codeHarpege'] = $person['supannentiteaffectationprincipale'] != null & $person['supannentiteaffectationprincipale'] != "" ? $person['supannentiteaffectationprincipale'] : "" ;
-                    $person['email'] = isset($person['mail']) ? $person['mail']: "";
-                    $person['emailPrive'] = isset($person['mail']) ? $person['mail']: "";
+                    $person['codeHarpege'] = isset($person['supannentiteaffectationprincipale'])? $person['supannentiteaffectationprincipale'] : "" ;
+
+                    if(isset($person['mail'])){
+                        $person['email'] = $person['mail'];
+                        $person['emailPrive'] = $person['mail'];
+                    } else {
+                        if(isset($person['edupersonprincipalname'])) {
+                            $person['email'] = $person['edupersonprincipalname'];
+                            $person['emailPrive'] = $person['edupersonprincipalname'];
+                        }
+                    }
+
                     $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
                     $person['projectAffectations'] = $person['edupersonaffiliation'];
                     if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
                         $nbAffectation = count($person['supannentiteaffectation']);
                         $nbTmp = 0;
+                        $person['affectation'] = "";
+
                         foreach($person['supannentiteaffectation'] as $affectation){
                             $person['affectation'] .= $affectation;
                             $nbTmp++;
@@ -295,6 +304,9 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                         $repport->adderror("Impossible de supprimer la person $idPerson : " . $e->getMessage());
                     }
                 }
+
+                $nbPersons = count($personsDatas);
+                $repport->addnotice("$nbPersons personnes ont été ajouté(s) ou mise(s) à jour");
 
             }
         } catch (\Exception $e ){

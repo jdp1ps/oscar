@@ -53,7 +53,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
     private $configLdap = array(
         "type" => "person_ldap",
         "label" => "Person Ldap",
-        "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member),&(objectClass=inetOrgPerson)(eduPersonAffiliation=staff),&(objectClass=inetOrgPerson)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=emeritus)"
+        "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)"
     );
 
     protected function configure()
@@ -88,12 +88,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
             $configLdap = $moduleOptions->getLdap();
             $ldap = $configLdap['connection']['default']['params'];
 
-            $dataPeopleFromLdap = new PersonLdap();
-            $dataPeopleFromLdap->setConfig($configLdap);
-            $dataPeopleFromLdap->setLdap(new Ldap($ldap));
-
             $filtrage = $this->configFile['filtre_ldap'];
-            $dataFiltrage = explode(",", $filtrage);
             $data = array();
 
             try {
@@ -103,20 +98,36 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                 $dataFiltrage = explode(",", $filtrage);
 
                 foreach($dataFiltrage as $filtre){
+                    $dataPeopleFromLdap = new PersonLdap();
+                    $dataPeopleFromLdap->setConfig($configLdap);
+                    $dataPeopleFromLdap->setLdap(new Ldap($ldap));
                     $data = $dataPeopleFromLdap->findAll($filtre);
                     $personsData = array();
+                    $nbModif = 0;
 
                     foreach($data as $person){
+                        $io->writeln("Exécution d'un filtre");
                         $person['firstname'] = $person['givenname'];
                         $person['lastname'] = $person['sn'];
-                        $person['codeHarpege'] = $person['supannentiteaffectationprincipale'] != null & $person['supannentiteaffectationprincipale'] != "" ? $person['supannentiteaffectationprincipale'] : "" ;
-                        $person['email'] = isset($person['mail']) ? $person['mail']: "";
-                        $person['emailPrive'] = isset($person['mail']) ? $person['mail']: "";
+                        $person['codeHarpege'] = isset($person['supannentiteaffectationprincipale'])? $person['supannentiteaffectationprincipale'] : "" ;
+
+                        if(isset($person['mail'])){
+                            $person['email'] = $person['mail'];
+                            $person['emailPrive'] = $person['mail'];
+                        } else {
+                            if(isset($person['edupersonprincipalname'])) {
+                                $person['email'] = $person['edupersonprincipalname'];
+                                $person['emailPrive'] = $person['edupersonprincipalname'];
+                            }
+                        }
+
                         $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
                         if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
                             $nbAffectation = count($person['supannentiteaffectation']);
                             $nbTmp = 0;
+                            $person['affectation'] = "";
+
                             foreach($person['supannentiteaffectation'] as $affectation){
                                 $person['affectation'] .= $affectation;
                                 $nbTmp++;
@@ -135,9 +146,11 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                         $person['dateupdated'] = null;
                         $personsData[] = (object) $person;
                     }
-
+                    $nbModif += count($personsData);
                     $this->syncPersons($personsData, $this->getEntityManager()->getRepository(Person::class), $io, false);
                 }
+
+                $io->writeln("Ajout(s) ou mise(s) à jour : $personsData personnes");
 
             } catch (\Exception $e) {
                 $io->error("Impossible de charger des données depuis : " . $e->getMessage());
@@ -257,13 +270,15 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                 }
 
             }
+
+            $nbPersons = count($personsDatas);
+            $io->writeln("$nbPersons personnes ont été ajouté(s) ou mise(s) à jour");
+
         } catch (\Exception $e ){
             $io->error("Impossible de synchroniser les personnes : " . $e->getMessage());
         }
 
         $personRepository->flush(null);
-
-        return true;
     }
 
     public function getPersonHydrator()
