@@ -31,7 +31,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         "label" => "Person Ldap",
         "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member),&(objectClass=inetOrgPerson)(eduPersonAffiliation=staff),&(objectClass=inetOrgPerson)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=emeritus)"
     );
-    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/person_ldap.yml";
+    private $configPath = null;
     private $configFile;
 
     const LDAP_FILTER_ALL = '*';
@@ -88,7 +88,9 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     function execute($force = true)
     {
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
+        $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
         $this->configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+        $this->shortName = $this->configLdap["type"];
 
         if($this->configLdap["filtrage"] == null){
             $configFiltre["filtrage"] = $this->configFile['filtre_ldap'];
