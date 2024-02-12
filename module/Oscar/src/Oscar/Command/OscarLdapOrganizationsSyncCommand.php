@@ -97,6 +97,7 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 
                     foreach($dataOrg as $organization){
                         $dataProcess = array();
+
                         $dataProcess['uid'] = $organization["supannrefid"];
                         $dataProcess['name'] = $organization["description"];
                         $dataProcess['dateupdate'] = null;
@@ -112,17 +113,22 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                         $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
                         $dataProcess['duns'] = null;
                         $dataProcess['tvaintra'] = null;
-                        $dataProcess['rnsr'] = null;
+                        $dataProcess['rnsr'] = $organization["supannrefid"];
+                        $dataProcess['ldapsupanncodeentite'] = $organization["supanncodeentite"];
 
-                        $address = explode("$",$organization["postaladdress"]);
-                        $dataProcess['address'] = array(
-                            "address1" => $address[0],
-                            "address2" => $address[1],
-                            "zipcode" => $address[2],
-                            "city" => isset($address[3]) ? $address[3] : "",
-                            "country" => isset($address[4]) ? $address[4] : "",
-                            "address3" => ""
-                        );
+                        if(isset($organization["postaladdress"])) {
+                            $address = explode("$",$organization["postaladdress"]);
+                            $postalCodeCity = explode(" ", $address[2]);
+
+                            $dataProcess['address'] = array(
+                                "address1" => $address[0],
+                                "address2" => $address[1],
+                                "zipcode" => $postalCodeCity[0],
+                                "city" => isset($postalCodeCity[1]) ? $postalCodeCity[1] : "",
+                                "country" => isset($address[2]) ? $address[2] : "",
+                                "address3" => ""
+                            );
+                        }
 
                         $data[] = (object) $dataProcess;
                     }
@@ -141,13 +147,23 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
     function syncAll($organizationsData, OrganizationRepository $repository, SymfonyStyle $io, $force)
     {
         try {
+            $nbAjouts = 0;
+            $nbMisaJour = 0;
 
             foreach( $organizationsData as $data ){
                 try {
-                    /** @var Person $personOscar */
-                    $organization = $repository->getObjectByConnectorID('ldap', $data->uid);
+                    $iudToTake = $data->uid;
+                    if(is_array($iudToTake)){
+                        if(str_contains($iudToTake[0], "SIHAM") === false) {
+                            $iudToTake = $iudToTake[1];
+                        } else {
+                            $iudToTake = $iudToTake[0];
+                        }
+                    }
+                    $organization = $repository->getObjectByConnectorID('ldap', $iudToTake);
                     $action = "update";
                 } catch( NoResultException $e ){
+                    var_dump($e->getMessage() . " IUD ".$iudToTake);
                     $organization = $repository->newPersistantObject();
                     $action = "add";
                 }
@@ -167,8 +183,10 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 
                     $repository->flush($organization);
                     if( $action == 'add' ){
+                        $nbAjouts++;
                         $io->writeln(sprintf("%s a été ajouté.", $organization->log()));
                     } else {
+                        $nbMisaJour++;
                         $io->writeln(sprintf("%s a été mis à jour.", $organization->log()));
                     }
 
@@ -180,7 +198,8 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
             $io->writeln($e->getMessage());
         }
 
-
+        $io->writeln(sprintf("%s ajout(s) d'organisations.",$nbAjouts ));
+        $io->writeln(sprintf("%s mise(s) à jour d'organisations.",$nbMisaJour ));
         $io->writeln("FIN du traitement...");
 
         return true;

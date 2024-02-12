@@ -140,7 +140,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                 $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
 
                 foreach($dataOrg as $organization){
-                    $dataProcess = array();
                     $dataProcess['uid'] = $organization["supannrefid"];
                     $dataProcess['name'] = $organization["description"];
                     $dataProcess['dateupdate'] = null;
@@ -156,17 +155,22 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                     $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
                     $dataProcess['duns'] = null;
                     $dataProcess['tvaintra'] = null;
-                    $dataProcess['rnsr'] = null;
+                    $dataProcess['rnsr'] = $organization["supannrefid"];
+                    $dataProcess['ldapsupanncodeentite'] = $organization["supanncodeentite"];
 
-                    $address = explode("$",$organization["postaladdress"]);
-                    $dataProcess['address'] = array(
-                        "address1" => $address[0],
-                        "address2" => $address[1],
-                        "zipcode" => $address[2],
-                        "city" => isset($address[3]) ? $address[3] : "",
-                        "country" => isset($address[4]) ? $address[4] : "",
-                        "address3" => ""
-                    );
+                    if(isset($organization["postaladdress"])) {
+                        $address = explode("$",$organization["postaladdress"]);
+                        $postalCodeCity = explode(" ", $address[2]);
+
+                        $dataProcess['address'] = array(
+                            "address1" => $address[0],
+                            "address2" => $address[1],
+                            "zipcode" => $postalCodeCity[0],
+                            "city" => isset($postalCodeCity[1]) ? $postalCodeCity[1] : "",
+                            "country" => isset($address[2]) ? $address[2] : "",
+                            "address3" => ""
+                        );
+                    }
 
                     $data[] = (object) $dataProcess;
                 }
@@ -221,10 +225,20 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     function syncAll($organizationsData, OrganizationRepository $repository, ConnectorRepport $report, $force)
     {
         try {
+            $nbAjouts = 0;
+            $nbMisaJour = 0;
             foreach( $organizationsData as $data ){
                 try {
                     /** @var Person $personOscar */
-                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
+                    $iudToTake = $data->uid;
+                    if(is_array($iudToTake)){
+                        if(str_contains($iudToTake[0], "SIHAM") === false) {
+                            $iudToTake = $iudToTake[1];
+                        } else {
+                            $iudToTake = $iudToTake[0];
+                        }
+                    }
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $iudToTake);
                     $action = "update";
                 } catch( NoResultException $e ){
                     $organization = $repository->newPersistantObject();
@@ -246,8 +260,10 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
                     $repository->flush($organization);
                     if( $action == 'add' ){
+                        $nbAjouts++;
                         $report->addadded(sprintf("%s a été ajouté.", $organization->log()));
                     } else {
+                        $nbMisaJour++;
                         $report->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
                     }
 
@@ -260,6 +276,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         }
 
 
+        $report->addnotice(sprintf("%s ajout(s) d'organisations.",$nbAjouts ));
+        $report->addnotice(sprintf("%s mise(s) à jour d'organisations.",$nbMisaJour ));
         $report->addnotice("FIN du traitement...");
         return $report;
     }

@@ -118,13 +118,14 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                 $personsData = array();
 
                 foreach($data as $person){
-                    $person['firstname'] = $person['sn'];
-                    $person['lastname'] = $person['givenname'];
-                    $person['codeHarpege'] = $person['supannentiteaffectationprincipale'];
-                    $person['email'] = $person['edupersonprincipalname'];
-                    $person['emailPrive'] = $person['edupersonprincipalname'];
-                    $person['phone'] = $person['telephonenumber'];
+                    $person['firstname'] = $person['givenname'];
+                    $person['lastname'] = $person['sn'];
+                    $person['codeHarpege'] = $person['supannentiteaffectationprincipale'] != null & $person['supannentiteaffectationprincipale'] != "" ? $person['supannentiteaffectationprincipale'] : "" ;
+                    $person['email'] = isset($person['mail']) ? $person['mail']: "";
+                    $person['emailPrive'] = isset($person['mail']) ? $person['mail']: "";
+                    $person['phone'] = $person['telephonenumber'] != null & $person['telephonenumber'] != "" ? $person['telephonenumber'] : "" ;
                     $person['projectAffectations'] = $person['edupersonaffiliation'];
+                    $person['ldapaffectation'] = $person['supannentiteaffectationprincipale'];
                     $person['activities'] = null;
                     $person['ladapLogin'] = $person['supannaliaslogin'];
                     $person['dateupdated'] = null;

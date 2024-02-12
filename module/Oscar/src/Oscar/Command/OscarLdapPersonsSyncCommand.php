@@ -107,13 +107,15 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     $personsData = array();
 
                     foreach($data as $person){
-                        $person['firstname'] = $person['sn'];
-                        $person['lastname'] = $person['givenname'];
+                        var_dump($person);
+                        $person['firstname'] = $person['givenname'];
+                        $person['lastname'] = $person['sn'];
                         $person['codeHarpege'] = $person['supannentiteaffectationprincipale'] != null & $person['supannentiteaffectationprincipale'] != "" ? $person['supannentiteaffectationprincipale'] : "" ;
-                        $person['email'] = $person['edupersonprincipalname'];
-                        $person['emailPrive'] = $person['edupersonprincipalname'];
+                        $person['email'] = isset($person['mail']) ? $person['mail']: "";
+                        $person['emailPrive'] = $person['mail'];
                         $person['phone'] = $person['telephonenumber'] != null & $person['telephonenumber'] != "" ? $person['telephonenumber'] : "" ;
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
+                        $person['ldapaffectation'] = $person['supannentiteaffectationprincipale'];
                         $person['activities'] = null;
                         $person['ladapLogin'] = $person['supannaliaslogin'];
                         $person['dateupdated'] = null;
