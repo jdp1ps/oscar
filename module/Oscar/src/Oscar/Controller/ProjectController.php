@@ -153,13 +153,15 @@ class ProjectController extends AbstractOscarController
             $delimiter = "\t";
 
             fputcsv($handler, $formatter->headers(), $delimiter);
+
             foreach ($projects as $p) {
                 fputcsv($handler, $formatter->format($p), $delimiter);
             }
+
             fclose($handler);
 
             $downloader = new CSVDownloader();
-            $downloader->downloadCSV($filePath);
+            $downloader->downloadCSVToExcel($filePath);
             unlink($filePath);
             die();
         } catch (\Exception $e) {
@@ -168,9 +170,8 @@ class ProjectController extends AbstractOscarController
 
     }
 
-    public function exportAction()
-    {
-        // @todo A Supprimer
+//    public function exportAction()
+//    {
 //        $id = $this->params()->fromRoute('id', null);
 //        if (!$id) {
 //            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
@@ -200,7 +201,7 @@ class ProjectController extends AbstractOscarController
 //        }
 //        die("DONNEES");
 //        return $data;
-    }
+//    }
 
     /**
      * Fiche projet.

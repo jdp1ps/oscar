@@ -5,6 +5,11 @@
     </h1>
 
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="tab active" id="nav-process-tab" data-toggle="tab" href="#nav-process" role="tab"
+           aria-controls="nav-home" aria-selected="true">
+            <i class="icon-cog"></i>
+            Processus
+        </a>
         <a class="tab active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
            aria-controls="nav-home" aria-selected="true">
             <i class="icon-cube"></i>
@@ -17,7 +22,12 @@
     </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <div class="tab-pane active" id="nav-process" role="tabpanel" aria-labelledby="nav-process-tab">
+            <h2>Processus de signature</h2>
+            <?= $this->partial('/unicaen-signature/partials/signature-flow-config.phtml',
+                               ['signatureflows_api' => $this->url('unicaen-signature/signatureflows')]) ?>
+        </div>
+        <div class="tab-pane" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
             <h2>Il y'a <?= count($letterfiles_configuration) ?> parpheur(s) numérique disponible</h2>
             <div class="alert alert-info">
                 Liste des parapheurs configurés dans l'application. Si un parapheur est manquant, merci de contacter

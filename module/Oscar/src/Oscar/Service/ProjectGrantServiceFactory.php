@@ -11,6 +11,7 @@ namespace Oscar\Service;
 
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
+use UnicaenSignature\Service\SignatureService;
 
 class ProjectGrantServiceFactory extends AbstractOscarFactory
 {
@@ -22,6 +23,7 @@ class ProjectGrantServiceFactory extends AbstractOscarFactory
         $s->setMilestoneService($container->get(MilestoneService::class));
         $s->setNotificationService($container->get(NotificationService::class));
         $s->setGearmanJobLauncherService($container->get(GearmanJobLauncherService::class));
+        $s->setSignatureService($container->get(SignatureService::class));
         return $s;
     }
 }
