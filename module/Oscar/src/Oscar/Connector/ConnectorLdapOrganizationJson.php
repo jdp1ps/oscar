@@ -148,13 +148,13 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                     $dataProcess['labintel'] = "";
                     $dataProcess['shortname'] = $organization["ou"];
                     $dataProcess['longname'] = $organization["description"];
-                    $dataProcess['phone'] = $organization["telephonenumber"];
+                    $dataProcess['phone'] = isset($organization["telephonenumber"]) ? $organization["telephonenumber"] : null;
                     $dataProcess['description'] = $organization["description"];
                     $dataProcess['email'] = "";
                     $dataProcess['siret'] = "";
                     $dataProcess['type'] = $organization["supanntypeentite"];
-                    $dataProcess['url'] = $organization["labeleduri"];
-                    $dataProcess['duns'] = $organization["telephonenumber"];
+                    $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
+                    $dataProcess['duns'] = null;
                     $dataProcess['tvaintra'] = null;
                     $dataProcess['rnsr'] = null;
 
@@ -163,8 +163,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                         "address1" => $address[0],
                         "address2" => $address[1],
                         "zipcode" => $address[2],
-                        "city" => $address[3],
-                        "country" => $address[4],
+                        "city" => isset($address[3]) ? $address[3] : "",
+                        "country" => isset($address[4]) ? $address[4] : "",
                         "address3" => ""
                     );
 
