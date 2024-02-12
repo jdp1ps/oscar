@@ -41,7 +41,7 @@ use Zend\Ldap\Ldap;
 class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'ldap:organizations:sync';
-    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/organization_ldap.yml";
+    private $configPath = null;
     private $configFile;
     private $configLdap = array(
         "type" => "organization_ldap",
@@ -54,6 +54,8 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
         $this
             ->setDescription("Synchronisation des organisations depuis LDAP")
         ;
+
+        $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -84,21 +86,14 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
             $dataStructureFromLdap->setConfig($configLdap);
             $dataStructureFromLdap->setLdap(new Ldap($ldap));
 
-            $filtrage = $this->configFile['filtre_ldap'];
-            $dataFiltrage = explode(",", $filtrage);
-            $data = array();
-
             try {
-                //$data = $dataAccessStrategy->getDataAll();
-                $filtrage = $this->configLdap["filtrage"];
+                $filtrage = $this->configFile['filtre_ldap'];
                 $dataFiltrage = explode(",", $filtrage);
                 $data = array();
 
                 foreach($dataFiltrage as $filtre) {
                     $dataOrg = null;
                     $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
-
-                    //$dataOrg = $dataStructureFromLdap->findOneByDn($filtre);
 
                     foreach($dataOrg as $organization){
                         $dataProcess = array();
@@ -150,7 +145,7 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
             foreach( $organizationsData as $data ){
                 try {
                     /** @var Person $personOscar */
-                    $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
+                    $organization = $repository->getObjectByConnectorID('ldap', $data->uid);
                     $action = "update";
                 } catch( NoResultException $e ){
                     $organization = $repository->newPersistantObject();

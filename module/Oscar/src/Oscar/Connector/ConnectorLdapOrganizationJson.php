@@ -34,7 +34,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         //"filtrage" => "DIREVAL"
     );
 
-    private $configPath = "/var/www/html/oscar/config/autoload/../connectors/organization_ldap.yml";
+    private $configPath = null;
     private $configFile;
 
     public function getConfigData()
@@ -108,10 +108,9 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
     function execute($force = true)
     {
-        //$dataAccessStrategy         = new HttpAuthBasicStrategy($this);
-        $dataExtractionStrategy     = new DataExtractionStringToJsonStrategy();
         $this->setConnectorId('organization_ldap');
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
+        $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
 
         $this->configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
 
@@ -132,7 +131,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
         // Récupération des données
         try {
-            //$data = $dataAccessStrategy->getDataAll();
             $filtrage = $this->configLdap["filtrage"];
             $dataFiltrage = explode(",", $filtrage);
             $data = array();
@@ -140,8 +138,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
             foreach($dataFiltrage as $filtre) {
                 $dataOrg = null;
                 $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
-
-                //$dataOrg = $dataStructureFromLdap->findOneByDn($filtre);
 
                 foreach($dataOrg as $organization){
                     $dataProcess = array();
@@ -225,7 +221,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     function syncAll($organizationsData, OrganizationRepository $repository, ConnectorRepport $report, $force)
     {
         try {
-
             foreach( $organizationsData as $data ){
                 try {
                     /** @var Person $personOscar */
