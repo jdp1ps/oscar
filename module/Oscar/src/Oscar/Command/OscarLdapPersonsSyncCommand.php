@@ -107,15 +107,29 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     $personsData = array();
 
                     foreach($data as $person){
-                        var_dump($person);
                         $person['firstname'] = $person['givenname'];
                         $person['lastname'] = $person['sn'];
                         $person['codeHarpege'] = $person['supannentiteaffectationprincipale'] != null & $person['supannentiteaffectationprincipale'] != "" ? $person['supannentiteaffectationprincipale'] : "" ;
                         $person['email'] = isset($person['mail']) ? $person['mail']: "";
-                        $person['emailPrive'] = $person['mail'];
-                        $person['phone'] = $person['telephonenumber'] != null & $person['telephonenumber'] != "" ? $person['telephonenumber'] : "" ;
+                        $person['emailPrive'] = isset($person['mail']) ? $person['mail']: "";
+                        $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
-                        $person['ldapaffectation'] = $person['supannentiteaffectationprincipale'];
+                        if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
+                            $nbAffectation = count($person['supannentiteaffectation']);
+                            $nbTmp = 0;
+                            foreach($person['supannentiteaffectation'] as $affectation){
+                                $person['affectation'] .= $affectation;
+                                $nbTmp++;
+
+                                if($nbTmp < $nbAffectation){
+                                    $person['affectation'] .= ',';
+                                }
+                            }
+                        } else {
+                            if(isset($person['supannentiteaffectation']))
+                                $person['affectation'] = $person['supannentiteaffectation'];
+                        }
+
                         $person['activities'] = null;
                         $person['ladapLogin'] = $person['supannaliaslogin'];
                         $person['dateupdated'] = null;
