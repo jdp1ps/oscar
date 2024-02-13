@@ -172,9 +172,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
     public function getObjectByConnectorID($connectorName, $connectorID)
     {
-        return $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
+        $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
+        if($result == null){
+            var_dump($result);
+        }
+        return is_array($result) ? $result[0] : $result;
     }
 
     public function getOrganisationByCode( $code ){
@@ -185,6 +189,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->setParameter('code', $code);
         return $qb->getQuery()->getSingleResult();
     }
+
 
     public function newPersistantObject()
     {
@@ -205,11 +210,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      */
     public function getOrganizationByConnectorQuery( $connector, $value ){
 
+        $connectorToTake = $value;
+
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%"'.$connector.'";s:'.strlen($value).':"'.$value.'";%');
+            ->setParameter('search', '%s:'.strlen($connectorToTake).':"'.$connectorToTake.'";%');
         return $qb;
     }
 

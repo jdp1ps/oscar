@@ -140,6 +140,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                 $dataOrg = $dataStructureFromLdap->findOneByFilter($filtre);
 
                 foreach($dataOrg as $organization){
+                    $dataProcess = array();
+
                     $dataProcess['uid'] = $organization["supannrefid"];
                     $dataProcess['name'] = $organization["description"];
                     $dataProcess['dateupdate'] = null;
@@ -239,15 +241,17 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
             foreach( $organizationsData as $data ){
                 try {
                     /** @var Person $personOscar */
+                    $iud = $data->uid;
                     $iudToTake = $data->uid;
-                    if(is_array($iudToTake)){
-                        if(str_contains($iudToTake[0], "SIHAM") === false) {
-                            $iudToTake = $iudToTake[1];
+
+                    if(is_array($iud)){
+                        if(str_contains($iud[0], "SIHAM") === false) {
+                            $iudToTake = $iud[1];
                         } else {
-                            $iudToTake = $iudToTake[0];
+                            $iudToTake = $iud[0];
                         }
                     }
-                    $organization = $repository->getObjectByConnectorID($this->getName(), $iudToTake);
+                    $organization = $repository->getObjectByConnectorID('ldap', $iudToTake);
                     $action = "update";
                 } catch( NoResultException $e ){
                     $organization = $repository->newPersistantObject();
@@ -292,12 +296,12 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     }
 
     private function hydrateWithDatas( Organization $organization, $data ){
-        return $this->factory()->hydrateWithDatas($organization, $data, $this->getName());
+        return $this->factory()->hydrateWithDatas($organization, $data, "ldap");
     }
 
     function syncOrganization(Organization $organization)
     {
-        if ($organization->getConnectorID($this->getName())) {
+        if ($organization->getConnectorID('ldap')) {
             try {
                 $json = $this->getDataAccess()->getDataSingle($organization->getConnectorID($this->getName()));
                 if( is_object($json) && property_exists($json, 'organization') ){
