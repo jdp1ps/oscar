@@ -141,6 +141,7 @@ class ConnectorPersonHydrator
         $syncRoles = [];
         /** @var OrganizationPerson $organizationperson */
         foreach ($personOscar->getOrganizations() as $organizationperson) {
+            var_dump(get_class($organizationperson));
             if( $organizationperson->getOrigin() == $connectorName ){
                 $organizationCode = $organizationperson->getOrganization()->getCode();
                 if( !array_key_exists($organizationCode, $syncRoles) ){
