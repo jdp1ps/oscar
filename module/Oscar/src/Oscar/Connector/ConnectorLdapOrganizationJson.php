@@ -17,6 +17,7 @@ use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationLdap;
 use Oscar\Entity\OrganizationRepository;
+use Oscar\Exception\OscarException;
 use Oscar\Factory\JsonToOrganization;
 use Zend\Ldap\Ldap;
 
@@ -346,5 +347,26 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     public function getPathSingle($remoteId): string
     {
         return sprintf($this->getParameter('url_organization'), $remoteId);
+    }
+
+    /**
+     * Retourne le contenu depuis la source
+     *
+     * @return bool|string
+     * @throws OscarException
+     */
+    public function getFileConfigContent()
+    {
+        $file = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
+        if (!is_readable($file)) {
+            throw new OscarException(sprintf("Impossible de lire le fichier '%s'.",
+                $file));
+        }
+
+        return file_get_contents($file);
+    }
+
+    public function getFileConfig(){
+        return $this->getFileConfigContent();
     }
 }
