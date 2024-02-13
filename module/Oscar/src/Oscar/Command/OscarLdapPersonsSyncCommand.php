@@ -54,6 +54,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
         "type" => "person_ldap",
         "label" => "Person Ldap",
         "filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)"
+        //"filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)"
     );
 
     protected function configure()
@@ -98,6 +99,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                 $dataFiltrage = explode(",", $filtrage);
 
                 foreach($dataFiltrage as $filtre){
+                    $io->writeln("Exécution d'un filtre : veuillez patienter (ce script peut prendre une dizaine de minutes ... )");
                     $dataPeopleFromLdap = new PersonLdap();
                     $dataPeopleFromLdap->setConfig($configLdap);
                     $dataPeopleFromLdap->setLdap(new Ldap($ldap));
@@ -106,7 +108,6 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     $nbModif = 0;
 
                     foreach($data as $person){
-                        $io->writeln("Exécution d'un filtre");
                         $person['firstname'] = $person['givenname'];
                         $person['lastname'] = $person['sn'];
                         $person['login'] = $person['uid'];
@@ -124,12 +125,29 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 
                         $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
+                        $person['ldapsitelocation'] = isset($person['buildingName']) ? $person['buildingName']: null;
+
+                        $organizationRepository = $this->getOrganizationRepository();
+
                         if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
+
+
                             $nbAffectation = count($person['supannentiteaffectation']);
                             $nbTmp = 0;
                             $person['affectation'] = "";
+                            $person['organizations'] = array();
 
                             foreach($person['supannentiteaffectation'] as $affectation){
+                                /*var_dump($affectation);
+                                $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($affectation);
+
+                                if($dataOrg != null){
+                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $dataOrg->iud);
+                                    //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
+                                    $person['organizations'][] = $dataOrg;
+                                    $person['roles'][] = $dataOrg;
+                                }*/
+
                                 $person['affectation'] .= $affectation;
                                 $nbTmp++;
 
@@ -138,8 +156,20 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                                 }
                             }
                         } else {
-                            if(isset($person['supannentiteaffectation']))
+                            //OrganizationPerson
+                            if(isset($person['supannentiteaffectation'])) {
+                                /*$dataOrg = $organizationRepository->getOrganisationByCodeNullResult($person['supannentiteaffectation']);
+
+                                if($dataOrg != null){
+                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $affectation);
+                                    //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
+                                    $person['organizations'][] = $dataOrg;
+
+                                }
+
+                                $person['roles'][$person['supannentiteaffectation']] = $person['supannentiteaffectation'];*/
                                 $person['affectation'] = $person['supannentiteaffectation'];
+                            }
                         }
 
                         $person['activities'] = null;
@@ -298,7 +328,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
         if ($connectorName !== null) {
             $object->setConnectorID(
                 $connectorName,
-                $this->getFieldValue($jsonData, 'uid', $io)
+                $this->getFieldValue($jsonData, 'uid', null, $io)
             );
         }
 
@@ -350,6 +380,49 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
             return $allTypes[$typeLabel];
         }
         return null;
+    }
+
+    function hydrateWithDatasOrganization($object, $jsonData, $connectorName = null, SymfonyStyle $io)
+    {
+        if ($connectorName !== null) {
+            $object->setConnectorID(
+                $connectorName,
+                $this->getFieldValue($jsonData, 'uid', null,$io)
+            );
+        }
+        $object
+            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', null, $io)))
+            ->setLabintel($this->getFieldValue($jsonData, 'labintel', null, $io))
+            ->setShortName($this->getFieldValue($jsonData, 'shortname', null, $io))
+            ->setCode($this->getFieldValue($jsonData, 'code', null, $io))
+            ->setFullName($this->getFieldValue($jsonData, 'longname', null, $io))
+            ->setPhone($this->getFieldValue($jsonData, 'phone', null, $io))
+            ->setDescription($this->getFieldValue($jsonData, 'description', null, $io))
+            ->setEmail($this->getFieldValue($jsonData, 'email', null, $io))
+            ->setUrl($this->getFieldValue($jsonData, 'url', null, $io))
+            ->setSiret($this->getFieldValue($jsonData, 'siret', null, $io))
+            ->setType($this->getFieldValue($jsonData, 'type', null, $io))
+            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type', null, $io)))
+
+            // Ajout de champs
+            ->setDuns($this->getFieldValue($jsonData, 'duns', null, $io))
+            ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra', null, $io))
+            ->setRnsr($this->getFieldValue($jsonData, 'rnsr', null, $io));
+
+        if (property_exists($jsonData, 'address')) {
+            $address = $jsonData->address;
+            if (is_object($address)) {
+                $object
+                    ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
+                    ->setStreet2(property_exists($address, 'address2') ? $address->address2 : null)
+                    ->setZipCode(property_exists($address, 'zipcode') ? $address->zipcode : null)
+                    ->setCity(property_exists($address, 'city') ? $address->city : null)
+                    ->setCountry(property_exists($address, 'country') ? $address->country : null)
+                    ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
+            }
+        }
+
+        return $object;
     }
 
     protected function getFieldValue(

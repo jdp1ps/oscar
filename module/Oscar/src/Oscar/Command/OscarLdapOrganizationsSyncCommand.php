@@ -161,20 +161,10 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 
             foreach( $organizationsData as $data ){
                 try {
-                    $iud = $data->uid;
-                    $iudToTake = $data->uid;
-
-                    if(is_array($iud)){
-                        if(str_contains($iud[0], "SIHAM") === false) {
-                            $iudToTake = $iud[1];
-                        } else {
-                            $iudToTake = $iud[0];
-                        }
-                    }
-                    $organization = $repository->getObjectByConnectorID('ldap', $iudToTake);
+                    $iud = $data->code;
+                    $organization = $repository->getObjectByConnectorID('ldap', $iud);
                     $action = "update";
                 } catch( NoResultException $e ){
-                    var_dump($e->getMessage() . " IUD ".$iudToTake);
                     $organization = $repository->newPersistantObject();
                     $action = "add";
                 }
@@ -219,7 +209,7 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
         if ($connectorName !== null) {
             $object->setConnectorID(
                 $connectorName,
-                $this->getFieldValue($jsonData, 'uid', null,$io)
+                $this->getFieldValue($jsonData, 'code', null,$io)
             );
         }
         $object
