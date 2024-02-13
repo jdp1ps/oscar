@@ -240,18 +240,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
             $nbMisaJour = 0;
             foreach( $organizationsData as $data ){
                 try {
-                    /** @var Person $personOscar */
-                    $iud = $data->uid;
-                    $iudToTake = $data->uid;
-
-                    if(is_array($iud)){
-                        if(str_contains($iud[0], "SIHAM") === false) {
-                            $iudToTake = $iud[1];
-                        } else {
-                            $iudToTake = $iud[0];
-                        }
-                    }
-                    $organization = $repository->getObjectByConnectorID('ldap', $iudToTake);
+                    $iud = $data->code;
+                    $organization = $repository->getObjectByConnectorID('ldap', $iud);
                     $action = "update";
                 } catch( NoResultException $e ){
                     $organization = $repository->newPersistantObject();

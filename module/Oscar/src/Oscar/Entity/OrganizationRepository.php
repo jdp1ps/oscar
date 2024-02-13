@@ -190,6 +190,15 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         return $qb->getQuery()->getSingleResult();
     }
 
+    public function getOrganisationByCodeNullResult( $code ){
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('o')
+            ->from(Organization::class, 'o')
+            ->where('o.code = :code')
+            ->setParameter('code', $code);
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
 
     public function newPersistantObject()
     {

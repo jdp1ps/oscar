@@ -15,6 +15,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
+use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonLdap;
 use Oscar\Entity\PersonRepository;
@@ -133,12 +134,29 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
                     $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
                     $person['projectAffectations'] = $person['edupersonaffiliation'];
+                    $person['ldapsitelocation'] = isset($person['buildingName']) ? $person['buildingName']: null;
+
+                    $organizationRepository = $this->getOrganizationRepository();
+
                     if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
+
+
                         $nbAffectation = count($person['supannentiteaffectation']);
                         $nbTmp = 0;
                         $person['affectation'] = "";
+                        $person['organizations'] = array();
 
                         foreach($person['supannentiteaffectation'] as $affectation){
+                            /*var_dump($affectation);
+                            $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($affectation);
+
+                            if($dataOrg != null){
+                                //$organization = $organizationRepository->getObjectByConnectorID('ldap', $dataOrg->iud);
+                                //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
+                                $person['organizations'][] = $dataOrg;
+                                $person['roles'][] = $dataOrg;
+                            }*/
+
                             $person['affectation'] .= $affectation;
                             $nbTmp++;
 
@@ -147,8 +165,20 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                             }
                         }
                     } else {
-                        if(isset($person['supannentiteaffectation']))
+                        //OrganizationPerson
+                        if(isset($person['supannentiteaffectation'])) {
+                            /*$dataOrg = $organizationRepository->getOrganisationByCodeNullResult($person['supannentiteaffectation']);
+
+                            if($dataOrg != null){
+                                //$organization = $organizationRepository->getObjectByConnectorID('ldap', $affectation);
+                                //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
+                                $person['organizations'][] = $dataOrg;
+
+                            }
+
+                            $person['roles'][$person['supannentiteaffectation']] = $person['supannentiteaffectation'];*/
                             $person['affectation'] = $person['supannentiteaffectation'];
+                        }
                     }
 
                     $person['activities'] = null;
@@ -340,6 +370,10 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         } else {
             throw new \Exception('Impossible de synchroniser la personne ' . $person);
         }
+    }
+
+    public function getOrganizationRepository(){
+        return $this->getEntityManager()->getRepository(Organization::class);
     }
 
 
