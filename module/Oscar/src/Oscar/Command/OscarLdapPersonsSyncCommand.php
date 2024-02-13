@@ -252,9 +252,9 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 
                                     if($dataOrg != null){
                                         //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
-                                        $objOrganization =new Organization();
-                                        $objOrganization->setConnectorID('ldap', $exactCode);
-                                        $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                        //$objOrganization =new Organization();
+                                        //$objOrganization->setConnectorID('ldap', $exactCode);
+                                        //$organizationRepository->saveOrganizationPerson($personOscar,$dataOrg, $this->mappingRolePerson[$exactRole]);
                                     }
                                 }
                             }
@@ -267,11 +267,12 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 
                             if(array_key_exists($exactRole, $this->mappingRolePerson)){
                                 $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+
                                 if($dataOrg != null){
                                     //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
-                                    $objOrganization =new Organization();
-                                    $objOrganization->setConnectorID('ldap', $exactCode);
-                                    $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                    //$objOrganization =new Organization();
+                                    //$objOrganization->setConnectorID('ldap', $exactCode);
+                                    //$organizationRepository->saveOrganizationPerson($personOscar,$dataOrg, $this->mappingRolePerson[$exactRole]);
                                 }
                             }
                         }
