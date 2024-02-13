@@ -220,9 +220,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      */
     public function getObjectByConnectorID($connectorName, $connectorID)
     {
-        return $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
+        $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
+        if($result == null){
+            var_dump($result);
+        }
+        return is_array($result) ? $result[0] : $result;
     }
 
     /**
