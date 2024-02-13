@@ -109,6 +109,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                         $io->writeln("Exécution d'un filtre");
                         $person['firstname'] = $person['givenname'];
                         $person['lastname'] = $person['sn'];
+                        $person['login'] = $person['uid'];
                         $person['codeHarpege'] = isset($person['supannentiteaffectationprincipale'])? $person['supannentiteaffectationprincipale'] : "" ;
 
                         if(isset($person['mail'])){
@@ -150,7 +151,7 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     $this->syncPersons($personsData, $this->getEntityManager()->getRepository(Person::class), $io, false);
                 }
 
-                $io->writeln("Ajout(s) ou mise(s) à jour : $personsData personnes");
+                $io->writeln("Ajout(s) ou mise(s) à jour : $nbModif personnes");
 
             } catch (\Exception $e) {
                 $io->error("Impossible de charger des données depuis : " . $e->getMessage());

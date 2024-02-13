@@ -118,6 +118,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                 foreach($data as $person){
                     $person['firstname'] = $person['givenname'];
                     $person['lastname'] = $person['sn'];
+                    $person['login'] = $person['uid'];
                     $person['codeHarpege'] = isset($person['supannentiteaffectationprincipale'])? $person['supannentiteaffectationprincipale'] : "" ;
 
                     if(isset($person['mail'])){
