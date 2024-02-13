@@ -146,7 +146,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                     $dataProcess['name'] = $organization["description"];
                     $dataProcess['dateupdate'] = null;
                     $dataProcess['code'] = $organization["supanncodeentite"];
-                    $dataProcess['labintel'] = "";
                     $dataProcess['shortname'] = $organization["ou"];
                     $dataProcess['longname'] = $organization["description"];
                     $dataProcess['phone'] = isset($organization["telephonenumber"]) ? $organization["telephonenumber"] : null;
@@ -157,7 +156,33 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                     $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
                     $dataProcess['duns'] = null;
                     $dataProcess['tvaintra'] = null;
-                    $dataProcess['rnsr'] = $organization["supannrefid"];
+
+                    $dataProcess['rnsr'] = "";
+                    $dataProcess['labintel'] = "";
+
+                    if(is_array($organization["supannrefid"])){
+                        foreach($organization["supannrefid"] as $refId){
+                            if(str_contains($refId, 'CNRS')){
+                                $dataProcess['labintel'] = $refId;
+                            }
+
+                            if(str_contains($refId, 'RNSR')){
+                                $dataProcess['rnsr'] = $refId;
+                            }
+                        }
+
+                    } else {
+                        if(isset($organization["supannrefid"])){
+                            if(str_contains($organization["supannrefid"], 'CNRS')){
+                                $dataProcess['labintel'] = $refId;
+                            }
+
+                            if(str_contains($organization["supannrefid"], 'RNSR')){
+                                $dataProcess['rnsr'] = $refId;
+                            }
+                        }
+                    }
+
                     $dataProcess['ldapsupanncodeentite'] = $organization["supanncodeentite"];
 
                     if(isset($organization["postaladdress"])) {
