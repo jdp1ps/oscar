@@ -376,14 +376,25 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->getEntityManager()->getRepository(Organization::class);
     }
 
-
-    public function getPathAll(): string
+    /**
+     * Retourne le contenu depuis la source
+     *
+     * @return bool|string
+     * @throws OscarException
+     */
+    public function getFileConfigContent()
     {
-        return $this->getParameter('url_persons');
+        $file = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
+        if (!is_readable($file)) {
+            throw new OscarException(sprintf("Impossible de lire le fichier '%s'.",
+                $file));
+        }
+
+        return file_get_contents($file);
     }
 
-    public function getPathSingle($remoteId): string
-    {
-        return sprintf($this->getParameter('url_person'), $remoteId);
+    public function getFileConfig(){
+        return $this->getFileConfigContent();
     }
+
 }
