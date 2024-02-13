@@ -119,13 +119,22 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                         if(isset($organization["postaladdress"])) {
                             $address = explode("$",$organization["postaladdress"]);
                             $postalCodeCity = explode(" ", $address[2]);
+                            $makeCity = "";
 
-                            $dataProcess['address'] = array(
+                            for($i=1;$i<count($postalCodeCity);$i++){
+                                $makeCity .= $postalCodeCity[$i];
+
+                                if($i<count($postalCodeCity)-1){
+                                    $makeCity .= " ";
+                                }
+                            }
+
+                            $dataProcess['address'] = (object) array(
                                 "address1" => $address[0],
                                 "address2" => $address[1],
-                                "zipcode" => $postalCodeCity[0],
-                                "city" => isset($postalCodeCity[1]) ? $postalCodeCity[1] : "",
-                                "country" => isset($address[2]) ? $address[2] : "",
+                                "zipcode" => isset($postalCodeCity[0]) ? $postalCodeCity[0] : "",
+                                "country" => isset($address[3]) ? $address[3] : "",
+                                "city" => $makeCity,
                                 "address3" => ""
                             );
                         }
