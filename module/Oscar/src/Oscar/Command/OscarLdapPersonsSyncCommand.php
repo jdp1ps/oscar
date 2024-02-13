@@ -57,6 +57,11 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
         //"filtrage" => "&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)"
     );
 
+    private $mappingRolePerson = array(
+        //ID 21 correspond au role "Directeur de laboratoire" en base de donnée
+        "{UAI:0751717J:HARPEGE.FCSTR}530" => 21
+    );
+
     protected function configure()
     {
         $this
@@ -127,7 +132,9 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                         $person['projectAffectations'] = $person['edupersonaffiliation'];
                         $person['ldapsitelocation'] = isset($person['buildingName']) ? $person['buildingName']: null;
 
-                        $organizationRepository = $this->getOrganizationRepository();
+                        if(isset($person["supannroleentite"])){
+                            $person['supannroleentite'] = $person["supannroleentite"];
+                        }
 
                         if(isset($person['supannentiteaffectation']) && is_array($person['supannentiteaffectation'])){
 
@@ -138,16 +145,6 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                             $person['organizations'] = array();
 
                             foreach($person['supannentiteaffectation'] as $affectation){
-                                /*var_dump($affectation);
-                                $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($affectation);
-
-                                if($dataOrg != null){
-                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $dataOrg->iud);
-                                    //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
-                                    $person['organizations'][] = $dataOrg;
-                                    $person['roles'][] = $dataOrg;
-                                }*/
-
                                 $person['affectation'] .= $affectation;
                                 $nbTmp++;
 
@@ -158,16 +155,6 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                         } else {
                             //OrganizationPerson
                             if(isset($person['supannentiteaffectation'])) {
-                                /*$dataOrg = $organizationRepository->getOrganisationByCodeNullResult($person['supannentiteaffectation']);
-
-                                if($dataOrg != null){
-                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $affectation);
-                                    //$organizationData = $this->hydrateWithDatasOrganization($organization, $dataOrg, 'ldap', $io);
-                                    $person['organizations'][] = $dataOrg;
-
-                                }
-
-                                $person['roles'][$person['supannentiteaffectation']] = $person['supannentiteaffectation'];*/
                                 $person['affectation'] = $person['supannentiteaffectation'];
                             }
                         }
@@ -243,10 +230,54 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                     || $force == true )
                 {
                     $personOscar = $this->getPersonHydrator()->hydratePerson($personOscar, $personData, 'ldap');
+
                     if( $personOscar == null ){
                         $io->error("WTF $action");
                     }
 
+                    if(isset($personData->supannroleentite)){
+                        $rolesPerson = $personData->supannroleentite;
+                        $organizationRepository = $this->getOrganizationRepository();
+
+                        if(is_array($rolesPerson)){
+                            foreach($rolesPerson as $role){
+                                $substringRole = substr($role, 1, strlen($role)-2);
+                                $explodeRole = explode("][",$substringRole);
+                                $exactRole = substr($explodeRole[0],5,strlen($explodeRole[0]));
+                                $exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
+                                $exactCode = substr($explodeRole[2],5,strlen($explodeRole[2]));
+
+                                if(array_key_exists($exactRole, $this->mappingRolePerson)){
+                                    $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+
+                                    if($dataOrg != null){
+                                        //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
+                                        $objOrganization =new Organization();
+                                        $objOrganization->setConnectorID('ldap', $exactCode);
+                                        $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                    }
+                                }
+                            }
+                        } else {
+                            $substringRole = substr($rolesPerson, 1, strlen($rolesPerson)-2);
+                            $explodeRole = explode("][",$substringRole);
+                            $exactRole = substr($explodeRole[0],5,strlen($explodeRole[0]));
+                            $exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
+                            $exactCode = substr($explodeRole[2],5,strlen($explodeRole[2]));
+
+                            if(array_key_exists($exactRole, $this->mappingRolePerson)){
+                                $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+                                if($dataOrg != null){
+                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
+                                    $objOrganization =new Organization();
+                                    $objOrganization->setConnectorID('ldap', $exactCode);
+                                    $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                }
+                            }
+                        }
+
+
+                    }
                     $personRepository->flush($personOscar);
 
                     if( $action == 'add' ){
@@ -391,7 +422,6 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
             );
         }
         $object
-            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', null, $io)))
             ->setLabintel($this->getFieldValue($jsonData, 'labintel', null, $io))
             ->setShortName($this->getFieldValue($jsonData, 'shortname', null, $io))
             ->setCode($this->getFieldValue($jsonData, 'code', null, $io))
