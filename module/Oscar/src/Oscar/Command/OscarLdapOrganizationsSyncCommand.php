@@ -161,12 +161,14 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 
             foreach( $organizationsData as $data ){
                 try {
+                    $iud = $data->uid;
                     $iudToTake = $data->uid;
-                    if(is_array($iudToTake)){
-                        if(str_contains($iudToTake[0], "SIHAM") === false) {
-                            $iudToTake = $iudToTake[1];
+
+                    if(is_array($iud)){
+                        if(str_contains($iud[0], "SIHAM") === false) {
+                            $iudToTake = $iud[1];
                         } else {
-                            $iudToTake = $iudToTake[0];
+                            $iudToTake = $iud[0];
                         }
                     }
                     $organization = $repository->getObjectByConnectorID('ldap', $iudToTake);
@@ -186,10 +188,9 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                 }
                 if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
 
-                    $organization = $this->hydrateWithDatas($organization, $data, null, $io);
+                    $organization = $this->hydrateWithDatas($organization, $data, 'ldap', $io);
                     if( property_exists($data, 'type') )
                         $organization->setTypeObj($repository->getTypeObjByLabel($data->name));
-
                     $repository->flush($organization);
                     if( $action == 'add' ){
                         $nbAjouts++;
@@ -198,7 +199,6 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                         $nbMisaJour++;
                         $io->writeln(sprintf("%s a été mis à jour.", $organization->log()));
                     }
-
                 } else {
                     $io->writeln(sprintf("%s est à jour.", $organization->log()));
                 }
@@ -219,10 +219,9 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
         if ($connectorName !== null) {
             $object->setConnectorID(
                 $connectorName,
-                $this->getFieldValue($jsonData, 'uid', $io)
+                $this->getFieldValue($jsonData, 'uid', null,$io)
             );
         }
-
         $object
             ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', null, $io)))
             ->setLabintel($this->getFieldValue($jsonData, 'labintel', null, $io))
