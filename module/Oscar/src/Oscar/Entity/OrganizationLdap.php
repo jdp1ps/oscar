@@ -42,4 +42,18 @@ class OrganizationLdap extends AbstractMapper
 
         return $entry;
     }
+
+    /**
+     * Recherche une structure par son code entité Supann.
+     *
+     * @param string $codeEntite Supann code Entite
+     * @return \UnicaenApp\Entity\Ldap\Structure
+     */
+    public function findOneByCodeEntite($codeEntite)
+    {
+        $filter = sprintf($this->configParam('filters', 'FILTER_STRUCTURE_CODE_ENTITE'), $codeEntite);
+        $entry = $this->searchSimplifiedEntry($filter, $this->configParam('dn', 'STRUCTURES_BASE_DN'));
+
+        return $entry ? new LdapStructureModel($entry) : null;
+    }
 }

@@ -96,6 +96,9 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
         if (property_exists($jsonData, 'mail')) {
             $object->setEmail($jsonData->mail);
         }
+        if (property_exists($jsonData, 'organizations')) {
+            $object->setOrganizations($jsonData->organizations);
+        }
 
 
         if ($connectorName !== null) {
