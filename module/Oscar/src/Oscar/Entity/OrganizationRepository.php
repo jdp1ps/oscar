@@ -123,13 +123,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
 
 
-    public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
-        $personOrganization = new OrganizationPerson();
-        $personOrganization->setPerson($person)
+    public function saveOrganizationPerson(OrganizationPerson $organizationPerson,Person $person, Organization $organisation, $roleOscarId) {
+        //$personOrganization = new OrganizationPerson();
+        $organizationPerson->setPerson($person)
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
-        $this->getEntityManager()->persist($personOrganization);
-        $this->getEntityManager()->flush($personOrganization);
+        $this->getEntityManager()->persist($organizationPerson);
+        $this->getEntityManager()->flush($organizationPerson);
     }
 
     public function getTypeObjByLabel($label){
@@ -175,9 +175,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
-        if($result == null){
-            var_dump($result);
-        }
+
         return is_array($result) ? $result[0] : $result;
     }
 
@@ -196,6 +194,15 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->from(Organization::class, 'o')
             ->where('o.code = :code')
             ->setParameter('code', $code);
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function getOrganisationPersonByPersonNullResult( $person ){
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('o')
+            ->from(OrganizationPerson::class, 'o')
+            ->where('o.person = :person')
+            ->setParameter('person', $person);
         return $qb->getQuery()->getOneOrNullResult();
     }
 
@@ -218,14 +225,11 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @return \Doctrine\ORM\QueryBuilder
      */
     public function getOrganizationByConnectorQuery( $connector, $value ){
-
-        $connectorToTake = $value;
-
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%s:'.strlen($connectorToTake).':"'.$connectorToTake.'";%');
+            ->setParameter('search', '%s:'.strlen($value).':"'.$value.'";%');
         return $qb;
     }
 

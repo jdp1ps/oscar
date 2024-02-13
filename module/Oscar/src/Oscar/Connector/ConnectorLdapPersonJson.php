@@ -16,6 +16,7 @@ use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\DataExtractionStringToJsonStrategy;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonLdap;
 use Oscar\Entity\PersonRepository;
@@ -276,17 +277,24 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                                 $substringRole = substr($role, 1, strlen($role)-2);
                                 $explodeRole = explode("][",$substringRole);
                                 $exactRole = substr($explodeRole[0],5,strlen($explodeRole[0]));
-                                $exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
+                                //$exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
                                 $exactCode = substr($explodeRole[2],5,strlen($explodeRole[2]));
 
                                 if(array_key_exists($exactRole, $this->mappingRolePerson)){
                                     $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+                                    $dataOrgPer = $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
 
                                     if($dataOrg != null){
-                                        //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
-                                        $objOrganization =new Organization();
-                                        $objOrganization->setConnectorID('ldap', $exactCode);
-                                        $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                        if($dataOrgPer == null){
+                                            $dataOrgPer = new OrganizationPerson();
+                                        }
+
+                                        $organizationRepository->saveOrganizationPerson(
+                                            $dataOrgPer,
+                                            $personOscar,
+                                            $dataOrg,
+                                            $this->mappingRolePerson[$exactRole]
+                                        );
                                     }
                                 }
                             }
@@ -294,16 +302,24 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                             $substringRole = substr($rolesPerson, 1, strlen($rolesPerson)-2);
                             $explodeRole = explode("][",$substringRole);
                             $exactRole = substr($explodeRole[0],5,strlen($explodeRole[0]));
-                            $exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
+                            //$exactType = substr($explodeRole[1],5,strlen($explodeRole[1]));
                             $exactCode = substr($explodeRole[2],5,strlen($explodeRole[2]));
 
                             if(array_key_exists($exactRole, $this->mappingRolePerson)){
                                 $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+                                $dataOrgPer = $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
+
                                 if($dataOrg != null){
-                                    //$organization = $organizationRepository->getObjectByConnectorID('ldap', $exactCode);
-                                    $objOrganization =new Organization();
-                                    $objOrganization->setConnectorID('ldap', $exactCode);
-                                    $organizationRepository->saveOrganizationPerson($personOscar,$objOrganization, $this->mappingRolePerson[$exactRole]);
+                                    if($dataOrgPer == null){
+                                        $dataOrgPer = new OrganizationPerson();
+                                    }
+
+                                    $organizationRepository->saveOrganizationPerson(
+                                        $dataOrgPer,
+                                        $personOscar,
+                                        $dataOrg,
+                                        $this->mappingRolePerson[$exactRole]
+                                    );
                                 }
                             }
                         }

@@ -26,7 +26,7 @@ class OrganizationPerson  implements ILoggable
 
     /**
      * @var Organization
-     * @ORM\ManyToOne(targetEntity="Organization", inversedBy="Person", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Organization", inversedBy="Person")
      */
     private $organization;
 
