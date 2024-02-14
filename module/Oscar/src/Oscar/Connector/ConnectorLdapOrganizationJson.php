@@ -26,9 +26,25 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 {
     private $editable;
     private $connectorID;
+    private $configData = null;
 
     private $configPath = null;
     private $configFile;
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function setConfigData($configData){
+        $this->configData = $configData;
+    }
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function getConfigData(){
+        if(is_null($this->configData)){
+            $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
+            $this->configData = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+        }
+
+        return $this->configData;
+    }
 
     public function setEditable($editable){
         $this->editable = $editable;
