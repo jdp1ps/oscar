@@ -49,6 +49,19 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
         "filtrage" => "&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research),&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=administration)"
     );
 
+    private $arrayTypes = array(
+        "association",
+        "collectivite",
+        "composante",
+        "etablissement",
+        "groupement",
+        "inconnue",
+        "institution",
+        "laboratoire",
+        "plateau",
+        "societe",
+    );
+
     protected function configure()
     {
         $this
@@ -108,13 +121,16 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                         $dataProcess['description'] = $organization["description"];
                         $dataProcess['email'] = "";
                         $dataProcess['siret'] = "";
-                        $dataProcess['type'] = $organization["supanntypeentite"];
                         $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
                         $dataProcess['duns'] = null;
                         $dataProcess['tvaintra'] = null;
 
                         $dataProcess['rnsr'] = "";
                         $dataProcess['labintel'] = "";
+
+                        if(isset($organization["supanntypeentite"])){
+                            $dataProcess['type'] = $this->verifyTypes($organization["supanntypeentite"]);
+                        }
 
                         if(is_array($organization["supannrefid"])){
                             foreach($organization["supannrefid"] as $refId){
@@ -178,6 +194,23 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
         }
     }
 
+    function verifyTypes($supannType){
+
+        foreach($this->arrayTypes as $typesCode){
+            if($this->configFile[$typesCode."_array"] != ""){
+                $explodeTypes = explode(",", $this->configFile[$typesCode."_array"]);
+
+                foreach($explodeTypes as $codeSupann){
+                    if($codeSupann == $supannType){
+                        return $this->configFile[$typesCode."_id"];
+                    }
+                }
+            }
+        }
+
+        return $this->configFile["inconnue_id"];
+    }
+
     function syncAll($organizationsData, OrganizationRepository $repository, SymfonyStyle $io, $force)
     {
         try {
@@ -205,7 +238,7 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
 
                     $organization = $this->hydrateWithDatas($organization, $data, 'ldap', $io);
                     if( property_exists($data, 'type') )
-                        $organization->setTypeObj($repository->getTypeObjByLabel($data->name));
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
                     $repository->flush($organization);
                     if( $action == 'add' ){
                         $nbAjouts++;
