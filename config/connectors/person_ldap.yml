@@ -1,3 +1,7 @@
 #filtre LDAP pour les personnes
-filtre_ldap: '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*),&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)'
-#filtre_ldap: '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)'
+ldap_filter:
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)'
+#ldap_filter: '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)'
