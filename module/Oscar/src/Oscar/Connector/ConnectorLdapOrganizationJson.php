@@ -32,7 +32,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     private $configFile;
 
     //Fonction obligatoire pour la configuration des connecteurs
-    public function setConfigData($configData){
+    public function setConfigData($configData): void
+    {
         $this->configData = $configData;
     }
 
@@ -47,7 +48,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     }
 
     //Fonction obligatoire pour la configuration des connecteurs
-    public function setEditable($editable){
+    public function setEditable($editable): void
+    {
         $this->editable = $editable;
     }
 
@@ -56,7 +58,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         return $this->editable;
     }
 
-    public function setConnectorId($connectorId){
+    public function setConnectorId($connectorId): void
+    {
         $this->connectorID = $connectorId;
     }
 
@@ -77,7 +80,8 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     /**
      * @return OrganizationRepository
      */
-    public function getOrganizationRepository(){
+    public function getOrganizationRepository(): OrganizationRepository
+    {
         return $this->getEntityManager()->getRepository(Organization::class);
     }
 
@@ -92,7 +96,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
      * @throws LdapException
      * @throws \Exception
      */
-    function execute($force = true)
+    function execute($force = true): ConnectorRepport
     {
         $this->setConnectorId('organization_ldap');
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
@@ -144,11 +148,17 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         return new HttpAuthBasicStrategy($this);
     }
 
+    /**
+     * @throws OscarException
+     */
     public function getPathAll(): string
     {
         return $this->getParameter('url_organizations');
     }
 
+    /**
+     * @throws OscarException
+     */
     public function getPathSingle($remoteId): string
     {
         return sprintf($this->getParameter('url_organization'), $remoteId);
@@ -160,7 +170,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
      * @return bool|string
      * @throws OscarException
      */
-    public function getFileConfigContent()
+    public function getFileConfigContent():string
     {
         $file = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
         if (!is_readable($file)) {
