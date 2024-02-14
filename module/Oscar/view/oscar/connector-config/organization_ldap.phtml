@@ -1,11 +1,19 @@
 <section class="card connector <?= $config['type'] ?>">
-    <form action="" method="post" id="<?= $config['type'] ?>">
-        <input type="hidden" name="<?= $config['type'] ?>">
-        <h2 class="card-title"><?= $config['label'] ?></h2>
+    <form action="" method="post" id="organization_ldap">
+        <input type="hidden" name="organization_ldap">
+        <h2 class="card-title">Configuration du Ldap Organization</h2>
         <class="card-content">
         <h3>Informations</h3>
         <p class="text-highlight">
-        <p>Type : <strong><?= $config['type'] ?></strong></p>
+            Association : <strong><?= $config['association_array'] ?></strong><br>
+            Collectivité territoriale : <strong><?= $config['collectivite_array'] ?></strong><br>
+            Composante : <strong><?= $config['composante_array'] ?></strong><br>
+            Etablissement publique : <strong><?= $config['etablissement_array'] ?></strong><br>
+            Groupement d'intérêt économique : <strong><?= $config['groupement_array'] ?></strong><br>
+            Institution : <strong><?= $config['institution_array'] ?></strong><br>
+            Laboratoire : <strong><?= $config['laboratoire_array'] ?></strong><br>
+            Plateau technique : <strong><?= $config['plateau_array'] ?></strong><br>
+            Société : <strong><?= $config['societe_array'] ?></strong><br>
         </p>
         <?php if( $config['warnings'] ): ?>
             <?php foreach( $config['warnings'] as $warning ): ?>
@@ -14,13 +22,20 @@
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
+
         <h3>Paramètres</h3>
 
-        Filtrage : <textarea name="filtrage" rows="10" cols="80"><?= $config['filtrage'] ?></textarea>
+        Filtrage :
+        <textarea name="ldap_filter" rows="10" cols="80"><?php
+                foreach($config['ldap_filter'] as $value){
+                    echo $value;
+                }
 
-        <nav>
+            ?></textarea>
+
+        <!--<nav>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </nav>
+        </nav>-->
         </div>
     </form>
 </section>

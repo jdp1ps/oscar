@@ -255,15 +255,16 @@ class LdapExtractionStrategy
         $personRepository->flush(null);
     }
 
-    public function parseOrganizationLdap($organization){
+    public function parseOrganizationLdap($organization): array
+    {
         $dataProcess = array();
 
-        $dataProcess['uid'] = $organization["supannrefid"];
-        $dataProcess['name'] = $organization["description"];
+        $dataProcess['uid'] = isset($organization["supannrefid"])? $organization["supannrefid"] : null;
+        $dataProcess['name'] = isset($organization["description"]) ? $organization["description"] : null;
         $dataProcess['dateupdate'] = null;
-        $dataProcess['code'] = $organization["supanncodeentite"];
-        $dataProcess['shortname'] = $organization["ou"];
-        $dataProcess['longname'] = $organization["description"];
+        $dataProcess['code'] = isset($organization["supanncodeentite"]) ? $organization["supanncodeentite"] : null;
+        $dataProcess['shortname'] = isset($organization["ou"]) ? $organization["ou"] : null;
+        $dataProcess['longname'] = isset($organization["description"]) ? $organization["description"] : null;
         $dataProcess['phone'] = isset($organization["telephonenumber"]) ? $organization["telephonenumber"] : null;
         $dataProcess['description'] = $organization["description"];
         $dataProcess['email'] = "";
@@ -293,16 +294,16 @@ class LdapExtractionStrategy
         } else {
             if(isset($organization["supannrefid"])){
                 if(str_contains($organization["supannrefid"], 'CNRS')){
-                    $dataProcess['labintel'] = $refId;
+                    $dataProcess['labintel'] = $organization["supannrefid"];
                 }
 
                 if(str_contains($organization["supannrefid"], 'RNSR')){
-                    $dataProcess['rnsr'] = $refId;
+                    $dataProcess['rnsr'] = $organization["supannrefid"];
                 }
             }
         }
 
-        $dataProcess['ldapsupanncodeentite'] = $organization["supanncodeentite"];
+        $dataProcess['ldapsupanncodeentite'] = isset($organization["supanncodeentite"]) ? $organization["supanncodeentite"] : null;
 
         if(isset($organization["postaladdress"])) {
             $address = explode("$",$organization["postaladdress"]);
@@ -345,20 +346,27 @@ class LdapExtractionStrategy
                     $organization = $repository->newPersistantObject();
                     $action = "add";
                 }
+
+                $dateUpdated = null;
+
                 if( !property_exists($data, 'dateupdated') ){
                     $dateUpdated = date('Y-m-d H:i:s');
                 } else {
-                    if( $data->dateupdated == null )
+                    if( $data->dateupdated == null ) {
                         $data->dateupdated = "";
-                    else
+                    } else {
                         $dateUpdated = $data->dateupdated;
+                    }
                 }
                 if($organization->getDateUpdated() < new \DateTime($dateUpdated)){
 
                     $organization = $this->hydrateOrganization($organization, $data, $io,  'ldap');
-                    if( property_exists($data, 'type') )
+                    if(property_exists($data, 'type')) {
                         $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+                    }
+
                     $repository->flush($organization);
+
                     if( $action == 'add' ){
                         $nbAdds++;
                         $this->writeLog($io, sprintf("%s a été ajouté.", $organization->log()));
@@ -408,18 +416,17 @@ class LdapExtractionStrategy
             ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra', $logger, null))
             ->setRnsr($this->getFieldValue($jsonData, 'rnsr', $logger, null));
 
-        if(property_exists($jsonData, 'address')) {
+        if(property_exists($jsonData, 'address') && is_object($jsonData->address)){
             $address = $jsonData->address;
-            
-            if (is_object($address)) {
-                $object
-                    ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
-                    ->setStreet2(property_exists($address, 'address2') ? $address->address2 : null)
-                    ->setZipCode(property_exists($address, 'zipcode') ? $address->zipcode : null)
-                    ->setCity(property_exists($address, 'city') ? $address->city : null)
-                    ->setCountry(property_exists($address, 'country') ? $address->country : null)
-                    ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
-            }
+
+            $object
+                ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
+                ->setStreet2(property_exists($address, 'address2') ? $address->address2 : null)
+                ->setZipCode(property_exists($address, 'zipcode') ? $address->zipcode : null)
+                ->setCountry(property_exists($address, 'country') ? $address->country : null)
+                ->setCity(property_exists($address, 'city') ? $address->city : null)
+                ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
+
         }
 
         return $object;
@@ -444,6 +451,7 @@ class LdapExtractionStrategy
     {
         $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findAll();
         $allTypes = [];
+
         /** @var OrganizationType $organizationType */
         foreach ($types as $organizationType){
             $allTypes[$organizationType->getLabel()] = $organizationType;
