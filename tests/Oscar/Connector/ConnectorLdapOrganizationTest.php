@@ -31,7 +31,7 @@ class ConnectorLdapOrganizationTest extends TestCase
         $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapOrganizationJson();
 
         try {
-            $datas = $connecteurLdapPerson->getFileConfig();
+            $datas = $connecteurLdapPerson->getFileConfigContent();
             $this->assertNull($datas);
         }
         catch (\Oscar\Exception\OscarException $e ){
@@ -43,7 +43,7 @@ class ConnectorLdapOrganizationTest extends TestCase
         $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapOrganizationJson();
 
         try {
-            $datas = $connecteurLdapPerson->getFileConfig();
+            $datas = $connecteurLdapPerson->getFileConfigContent();
             $this->fail("Non-YAML file must throw exception !");
         }
         catch (\Oscar\Connector\NotYamlFileException $e ){

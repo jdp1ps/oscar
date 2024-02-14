@@ -14,11 +14,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Connector\ConnectorPersonHydrator;
 use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationLdap;
 use Oscar\Entity\OrganizationPerson;
+use Oscar\Entity\OrganizationRepository;
+use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonLdap;
-use Oscar\Entity\PersonRepository;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap;
 use Zend\ServiceManager\ServiceManager;
 
@@ -26,20 +28,52 @@ class LdapExtractionStrategy
 {
     private ConnectorPersonHydrator $hydratorPerson;
     private bool $purge = false;
+    private string $configPathOrganization;
+    private array $configFileOrganization;
     private array $mappingRolePerson = array(
         //ID 21 correspond au role "Directeur de laboratoire" en base de donnée
         "{UAI:0751717J:HARPEGE.FCSTR}530" => 21
     );
-    private ServiceManager $servicemanager;
+    private ServiceManager $serviceManager;
+
+    private $arrayTypes = array(
+        "association",
+        "collectivite",
+        "composante",
+        "etablissement",
+        "groupement",
+        "unknown",
+        "institution",
+        "laboratoire",
+        "plateau",
+        "societe",
+    );
 
     public function __construct(ServiceManager $sm)
     {
-        $this->servicemanager = $sm;
+        $this->serviceManager = $sm;
+        $this->configPathOrganization = realpath(__DIR__.'/../../') . "/../../../../config/connectors/organization_ldap.yml";
+        $this->configFileOrganization = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPathOrganization));
     }
 
+    /**
+     * @throws LdapException
+     */
     public function initiateLdapPerson($configLdap, $ldap): PersonLdap
     {
         $ldapConnector = new PersonLdap();
+        $ldapConnector->setConfig($configLdap);
+        $ldapConnector->setLdap(new Ldap($ldap));
+
+        return $ldapConnector;
+    }
+
+    /**
+     * @throws LdapException
+     */
+    public function initiateLdapOrganization($configLdap, $ldap): OrganizationLdap
+    {
+        $ldapConnector = new OrganizationLdap();
         $ldapConnector->setConfig($configLdap);
         $ldapConnector->setLdap(new Ldap($ldap));
 
@@ -221,7 +255,208 @@ class LdapExtractionStrategy
         $personRepository->flush(null);
     }
 
-    private function writeLog($objectLog, $message, $typeLog = "write"){
+    public function parseOrganizationLdap($organization){
+        $dataProcess = array();
+
+        $dataProcess['uid'] = $organization["supannrefid"];
+        $dataProcess['name'] = $organization["description"];
+        $dataProcess['dateupdate'] = null;
+        $dataProcess['code'] = $organization["supanncodeentite"];
+        $dataProcess['shortname'] = $organization["ou"];
+        $dataProcess['longname'] = $organization["description"];
+        $dataProcess['phone'] = isset($organization["telephonenumber"]) ? $organization["telephonenumber"] : null;
+        $dataProcess['description'] = $organization["description"];
+        $dataProcess['email'] = "";
+        $dataProcess['siret'] = "";
+        $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
+        $dataProcess['duns'] = null;
+        $dataProcess['tvaintra'] = null;
+
+        $dataProcess['rnsr'] = "";
+        $dataProcess['labintel'] = "";
+
+        if(isset($organization["supanntypeentite"])){
+            $dataProcess['type'] = $this->verifyTypes($organization["supanntypeentite"]);
+        }
+
+        if(is_array($organization["supannrefid"])){
+            foreach($organization["supannrefid"] as $refId){
+                if(str_contains($refId, 'CNRS')){
+                    $dataProcess['labintel'] = $refId;
+                }
+
+                if(str_contains($refId, 'RNSR')){
+                    $dataProcess['rnsr'] = $refId;
+                }
+            }
+
+        } else {
+            if(isset($organization["supannrefid"])){
+                if(str_contains($organization["supannrefid"], 'CNRS')){
+                    $dataProcess['labintel'] = $refId;
+                }
+
+                if(str_contains($organization["supannrefid"], 'RNSR')){
+                    $dataProcess['rnsr'] = $refId;
+                }
+            }
+        }
+
+        $dataProcess['ldapsupanncodeentite'] = $organization["supanncodeentite"];
+
+        if(isset($organization["postaladdress"])) {
+            $address = explode("$",$organization["postaladdress"]);
+            $postalCodeCity = explode(" ", $address[2]);
+            $makeCity = "";
+
+            for($i=1;$i<count($postalCodeCity);$i++){
+                $makeCity .= $postalCodeCity[$i];
+
+                if($i<count($postalCodeCity)-1){
+                    $makeCity .= " ";
+                }
+            }
+
+            $dataProcess['address'] = (object) array(
+                "address1" => $address[0],
+                "address2" => $address[1],
+                "zipcode" => isset($postalCodeCity[0]) ? $postalCodeCity[0] : "",
+                "country" => isset($address[3]) ? $address[3] : "",
+                "city" => $makeCity,
+                "address3" => ""
+            );
+        }
+
+        return $dataProcess;
+    }
+
+    public function syncAllOrganizations($organizationsData, OrganizationRepository $repository, object $io): bool
+    {
+        try {
+            $nbAdds = 0;
+            $nbUpdates = 0;
+
+            foreach( $organizationsData as $data ){
+                try {
+                    $iud = $data->code;
+                    $organization = $repository->getObjectByConnectorID('ldap', $iud);
+                    $action = "update";
+                } catch( NoResultException $e ){
+                    $organization = $repository->newPersistantObject();
+                    $action = "add";
+                }
+                if( !property_exists($data, 'dateupdated') ){
+                    $dateUpdated = date('Y-m-d H:i:s');
+                } else {
+                    if( $data->dateupdated == null )
+                        $data->dateupdated = "";
+                    else
+                        $dateUpdated = $data->dateupdated;
+                }
+                if($organization->getDateUpdated() < new \DateTime($dateUpdated)){
+
+                    $organization = $this->hydrateOrganization($organization, $data, $io,  'ldap');
+                    if( property_exists($data, 'type') )
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
+                    $repository->flush($organization);
+                    if( $action == 'add' ){
+                        $nbAdds++;
+                        $this->writeLog($io, sprintf("%s a été ajouté.", $organization->log()));
+                    } else {
+                        $nbUpdates++;
+                        $this->writeLog($io, sprintf("%s a été mis à jour.", $organization->log()));
+                    }
+                } else {
+                    $this->writeLog($io, sprintf("%s est à jour.", $organization->log()));
+                }
+            }
+        } catch (\Exception $e ){
+            $this->writeLog($io, $e->getMessage());
+        }
+
+        $this->writeLog($io, sprintf("%s ajout(s) d'organisations.",$nbAdds ));
+        $this->writeLog($io, sprintf("%s mise(s) à jour d'organisations.",$nbUpdates ));
+        $this->writeLog($io, "FIN du traitement...");
+
+        return true;
+    }
+
+    function hydrateOrganization($object, $jsonData, object $logger, $connectorName = null)
+    {
+        if ($connectorName !== null) {
+            $object->setConnectorID(
+                $connectorName,
+                $this->getFieldValue($jsonData, 'code', $logger, null)
+            );
+        }
+        $object
+            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', $logger, null)))
+            ->setLabintel($this->getFieldValue($jsonData, 'labintel', $logger, null))
+            ->setShortName($this->getFieldValue($jsonData, 'shortname', $logger, null))
+            ->setCode($this->getFieldValue($jsonData, 'code', $logger, null))
+            ->setFullName($this->getFieldValue($jsonData, 'longname', $logger, null))
+            ->setPhone($this->getFieldValue($jsonData, 'phone', $logger, null))
+            ->setDescription($this->getFieldValue($jsonData, 'description', $logger, null))
+            ->setEmail($this->getFieldValue($jsonData, 'email', $logger, null))
+            ->setUrl($this->getFieldValue($jsonData, 'url', $logger, null))
+            ->setSiret($this->getFieldValue($jsonData, 'siret', $logger, null))
+            ->setType($this->getFieldValue($jsonData, 'type', $logger, null))
+            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type', $logger, null)))
+
+            // Ajout de champs
+            ->setDuns($this->getFieldValue($jsonData, 'duns', $logger, null))
+            ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra', $logger, null))
+            ->setRnsr($this->getFieldValue($jsonData, 'rnsr', $logger, null));
+
+        if(property_exists($jsonData, 'address')) {
+            $address = $jsonData->address;
+            
+            if (is_object($address)) {
+                $object
+                    ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
+                    ->setStreet2(property_exists($address, 'address2') ? $address->address2 : null)
+                    ->setZipCode(property_exists($address, 'zipcode') ? $address->zipcode : null)
+                    ->setCity(property_exists($address, 'city') ? $address->city : null)
+                    ->setCountry(property_exists($address, 'country') ? $address->country : null)
+                    ->setBp(property_exists($address, 'address3') ? $address->address3 : null);
+            }
+        }
+
+        return $object;
+    }
+
+    protected function getFieldValue(
+        $object,
+        $fieldName,
+        object $logger,
+        $defaultValue = null
+    ) {
+        if (!property_exists($object, $fieldName)) {
+            $this->writeLog($logger, sprintf("La clef '%s' est manquante dans la source",
+                $fieldName));
+        }
+
+        return property_exists($object,
+            $fieldName) ? $object->$fieldName : $defaultValue;
+    }
+
+    protected function getTypeObj( string $typeLabel ) :?OrganizationType
+    {
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findAll();
+        $allTypes = [];
+        /** @var OrganizationType $organizationType */
+        foreach ($types as $organizationType){
+            $allTypes[$organizationType->getLabel()] = $organizationType;
+        }
+
+        if( is_array($allTypes) && array_key_exists($typeLabel, $allTypes) ){
+            return $allTypes[$typeLabel];
+        }
+        return null;
+    }
+
+    private function writeLog($objectLog, $message, $typeLog = "write"): void
+    {
         if(get_class($objectLog) == "Symfony\Component\Console\Style\SymfonyStyle"){
             if($typeLog == "write"){
                 $objectLog->writeln($message);
@@ -243,6 +478,23 @@ class LdapExtractionStrategy
         }
     }
 
+    function verifyTypes($typeSupann){
+
+        foreach($this->arrayTypes as $typesCode){
+            if($this->configFileOrganization[$typesCode."_array"] != ""){
+                $explodeTypes = explode(",", $this->configFileOrganization[$typesCode."_array"]);
+
+                foreach($explodeTypes as $configFileOrganization){
+                    if($configFileOrganization == $typeSupann){
+                        return $this->configFileOrganization[$typesCode."_id"];
+                    }
+                }
+            }
+        }
+
+        return $this->configFileOrganization["unknown_id"];
+    }
+
     public function getOrganizationRepository(){
         return $this->getEntityManager()->getRepository(Organization::class);
     }
@@ -259,7 +511,7 @@ class LdapExtractionStrategy
 
     private function getServiceManager(): ServiceManager
     {
-        return $this->servicemanager;
+        return $this->serviceManager;
     }
 
     public function getEntityManager(){
