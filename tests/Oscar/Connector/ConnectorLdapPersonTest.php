@@ -101,6 +101,24 @@ class ConnectorLdapPersonTest extends TestCase
         }
     }
 
+    public function testLdapFilter(){
+        $serviceManager = new Zend\ServiceManager\ServiceManager();
+        $moduleOptions = $serviceManager->get('unicaen-app_module_options');
+
+        $configLdap = $moduleOptions->getLdap();
+        $ldap = $configLdap['connection']['default']['params'];
+
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        try {
+            $connectorLdapPerson = $extractorLdap->initiateLdapPerson($configLdap, $ldap);
+            $data = $connectorLdapPerson->findAll("&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)");
+            $this->assertIsArray($data);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("L'objet renvoyé par l'annuaire LDAP n'est pas un tableau");
+        }
+    }
+
     public function testObjectPerson(){
         $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
 
