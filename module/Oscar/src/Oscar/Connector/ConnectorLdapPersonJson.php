@@ -10,15 +10,13 @@ namespace Oscar\Connector;
 
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectRepository;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
-use Zend\Json\Server\Smd\Service;
+use Zend\ServiceManager\ServiceManager;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
@@ -31,7 +29,8 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     }
 
     //Fonction obligatoire pour la configuration des connecteurs
-    public function setConfigData($configData){
+    public function setConfigData($configData): void
+    {
         $this->configData = $configData;
     }
 
@@ -46,7 +45,8 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     }
 
     //Fonction obligatoire pour la configuration des connecteurs
-    public function setEditable($editable){
+    public function setEditable($editable): void
+    {
         $this->editable = $editable;
     }
 
@@ -55,10 +55,9 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->editable;
     }
 
-    function execute($force = true)
+    function execute($force = true): ConnectorRepport
     {
-        $serviceManager = new ServiceManager();
-        $moduleOptions = $serviceManager->get('unicaen-app_module_options');
+        $moduleOptions = $this->getServiceManager()->get('unicaen-app_module_options');
         $configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
         $configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($configPath));
         $this->shortName = "person_ldap";
@@ -70,8 +69,6 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
         // Récupération des données
         try {
-            set_time_limit(600);
-
             $dataFiltered = $configFile["ldap_filter"];
             $extractorLdap = new LdapExtractionStrategy($this->getServicemanager());
 
@@ -103,7 +100,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $report;
     }
 
-    public function getPersonRepository()
+    public function getPersonRepository(): \Doctrine\ORM\EntityRepository
     {
         return $this->getEntityManager()->getRepository(Person::class);
     }
@@ -116,7 +113,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->getServiceManager()->get('Doctrine\ORM\EntityManager');
     }
 
-    public function getOrganizationRepository()
+    public function getOrganizationRepository(): \Doctrine\ORM\EntityRepository
     {
         return $this->getEntityManager()->getRepository(Organization::class);
     }
@@ -127,7 +124,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
      * @return bool|string
      * @throws OscarException
      */
-    public function getFileConfigContent()
+    public function getFileConfigContent(): string
     {
         $file = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
         if (!is_readable($file)) {
