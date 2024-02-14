@@ -12,7 +12,18 @@ class ConnectorLdapOrganizationTest extends TestCase
             $this->fail("Fichier de configuration absent, devrait lever une exception");
         }
         catch (\Oscar\Exception\OscarException $e ){
-            $this->assertEquals(true, true);
+            $this->assertTrue(true);
+        }
+    }
+
+    public function testExecute(){
+        $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapOrganizationJson();
+
+        try {
+            $connecteurLdapPerson->execute();
+            $this->assertTrue(true);
+        } catch (Exception $e) {
+            $this->fail("L'exécution du connecteur a échoué");
         }
     }
 
