@@ -1,7 +1,9 @@
 <?php
 
 use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
+use Oscar\Entity\Organization;
 use PHPUnit\Framework\TestCase;
+use Doctrine\ORM\EntityManager;
 
 class ConnectorLdapOrganizationTest extends TestCase
 {
@@ -40,7 +42,7 @@ class ConnectorLdapOrganizationTest extends TestCase
         );
 
         try {
-            $org = $extractorLdap->parseLdapOrganization($organization);
+            $org = $extractorLdap->parseOrganizationLdap($organization);
             $this->assertEquals("ACTE: Arts, créations, théories, esthétique (UR 7539)", $org['name']);
             $this->assertEquals("UR049_4", $org['code']);
             $this->assertEquals("UR 7539 - ACTE", $org['shortname']);
@@ -75,12 +77,63 @@ class ConnectorLdapOrganizationTest extends TestCase
 
         $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
 
-
         try {
             $connectorLdapOrganization = $extractorLdap->initiateLdapOrganization($configLdap, $ldap);
             $this->assertTrue(true);
         } catch (\Zend\Ldap\Exception\LdapException $e) {
             $this->fail("La connexion Ldap Organization a échoué");
+        }
+    }
+
+    public function testTypes(){
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        try {
+            $typeLabel = $extractorLdap->verifyTypes("{SUPANN}S311");
+            $this->assertEquals('Composante', $typeLabel);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La vérification du type a échoué");
+        }
+    }
+
+    public function testObjectOrganization(){
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        $organization = array(
+            ["businesscategory"] => "research",
+            ["description"] => "ACTE: Arts, créations, théories, esthétique (UR 7539)",
+            ["dn"] => "supannCodeEntite=UR049_4,ou=structures,dc=univ-paris1,dc=fr",
+            ["labeleduri"] => "https://institut-acte.pantheonsorbonne.fr/",
+            ["ou"] => "UR 7539 - ACTE",
+            ["postaladdress"] => "Centre Saint Charles$162 RUE SAINT-CHARLES$75015 PARIS\$France",
+            ["supanncodeentite"] => "UR049_4",
+            ["supanncodeentiteparent"] => "UR04",
+            ["supannrefid"] => array(
+                "{RNSR}201220422A",
+                "{APOGEE.EQR}UR049_4",
+                "{SIHAM.UO}UR049_4",
+                "{SINAPS:STRUC}UR049_4",
+            ),
+            ["supanntypeentite"] => "{SUPANN}S311",
+            ["telephonenumber"] => "+33 1 44 07 84 40"
+        );
+
+        try {
+            $organization = new Organization();
+
+            $org = $extractorLdap->parseOrganizationLdap($organization);
+            $orgObject = $extractorLdap->hydrateOrganization($organization, $org);
+            $this->assertObjectHasAttribute('shortname', $orgObject);
+            $this->assertObjectHasAttribute('code', $orgObject);
+            $this->assertObjectHasAttribute('longname', $orgObject);
+            $this->assertObjectHasAttribute('phone', $orgObject);
+            $this->assertObjectHasAttribute('description', $orgObject);
+            $this->assertObjectHasAttribute('url', $orgObject);
+            $this->assertObjectHasAttribute('type', $orgObject);
+            $this->assertObjectHasAttribute('rnsr', $orgObject);
+            $this->assertObjectHasAttribute('address', $orgObject);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La vérification du contenu de l'objet a échoué");
         }
     }
 }
