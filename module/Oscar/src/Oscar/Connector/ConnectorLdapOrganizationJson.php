@@ -46,10 +46,12 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         return $this->configData;
     }
 
+    //Fonction obligatoire pour la configuration des connecteurs
     public function setEditable($editable){
         $this->editable = $editable;
     }
 
+    //Fonction obligatoire pour la configuration des connecteurs
     public function getEditable(){
         return $this->editable;
     }
