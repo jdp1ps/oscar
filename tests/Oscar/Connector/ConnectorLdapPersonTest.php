@@ -16,6 +16,17 @@ class ConnectorLdapPersonTest extends TestCase
         }
     }
 
+    public function testExecute(){
+        $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
+
+        try {
+            $connecteurLdapPerson->execute();
+            $this->assertTrue(true);
+        } catch (Exception $e) {
+            $this->fail("L'exécution du connecteur a échoué");
+        }
+    }
+
     public function testEmptyFile(){
         $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
 
