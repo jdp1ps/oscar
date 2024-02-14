@@ -388,35 +388,35 @@ class LdapExtractionStrategy
         return true;
     }
 
-    function hydrateOrganization($object, $jsonData, object $logger, $connectorName = null)
+    function hydrateOrganization($object, $orgData, object $logger = null, $connectorName = null)
     {
         if ($connectorName !== null) {
             $object->setConnectorID(
                 $connectorName,
-                $this->getFieldValue($jsonData, 'code', $logger, null)
+                $this->getFieldValue($orgData, 'code', $logger, null)
             );
         }
         $object
-            ->setDateUpdated(new \DateTime($this->getFieldValue($jsonData, 'dateupdate', $logger, null)))
-            ->setLabintel($this->getFieldValue($jsonData, 'labintel', $logger, null))
-            ->setShortName($this->getFieldValue($jsonData, 'shortname', $logger, null))
-            ->setCode($this->getFieldValue($jsonData, 'code', $logger, null))
-            ->setFullName($this->getFieldValue($jsonData, 'longname', $logger, null))
-            ->setPhone($this->getFieldValue($jsonData, 'phone', $logger, null))
-            ->setDescription($this->getFieldValue($jsonData, 'description', $logger, null))
-            ->setEmail($this->getFieldValue($jsonData, 'email', $logger, null))
-            ->setUrl($this->getFieldValue($jsonData, 'url', $logger, null))
-            ->setSiret($this->getFieldValue($jsonData, 'siret', $logger, null))
-            ->setType($this->getFieldValue($jsonData, 'type', $logger, null))
-            ->setTypeObj($this->getTypeObj($this->getFieldValue($jsonData, 'type', $logger, null)))
+            ->setDateUpdated(new \DateTime($this->getFieldValue($orgData, 'dateupdate', $logger, null)))
+            ->setLabintel($this->getFieldValue($orgData, 'labintel', $logger, null))
+            ->setShortName($this->getFieldValue($orgData, 'shortname', $logger, null))
+            ->setCode($this->getFieldValue($orgData, 'code', $logger, null))
+            ->setFullName($this->getFieldValue($orgData, 'longname', $logger, null))
+            ->setPhone($this->getFieldValue($orgData, 'phone', $logger, null))
+            ->setDescription($this->getFieldValue($orgData, 'description', $logger, null))
+            ->setEmail($this->getFieldValue($orgData, 'email', $logger, null))
+            ->setUrl($this->getFieldValue($orgData, 'url', $logger, null))
+            ->setSiret($this->getFieldValue($orgData, 'siret', $logger, null))
+            ->setType($this->getFieldValue($orgData, 'type', $logger, null))
+            ->setTypeObj($this->getTypeObj($this->getFieldValue($orgData, 'type', $logger, null)))
 
             // Ajout de champs
-            ->setDuns($this->getFieldValue($jsonData, 'duns', $logger, null))
-            ->setTvaintra($this->getFieldValue($jsonData, 'tvaintra', $logger, null))
-            ->setRnsr($this->getFieldValue($jsonData, 'rnsr', $logger, null));
+            ->setDuns($this->getFieldValue($orgData, 'duns', $logger, null))
+            ->setTvaintra($this->getFieldValue($orgData, 'tvaintra', $logger, null))
+            ->setRnsr($this->getFieldValue($orgData, 'rnsr', $logger, null));
 
-        if(property_exists($jsonData, 'address') && is_object($jsonData->address)){
-            $address = $jsonData->address;
+        if(property_exists($orgData, 'address') && is_object($orgData->address)){
+            $address = $orgData->address;
 
             $object
                 ->setStreet1(property_exists($address, 'address1') ? $address->address1 : null)
