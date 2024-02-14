@@ -1,5 +1,6 @@
 <?php
 
+use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use PHPUnit\Framework\TestCase;
 
 class ConnectorLdapPersonTest extends TestCase
@@ -8,7 +9,7 @@ class ConnectorLdapPersonTest extends TestCase
         $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
 
         try {
-            $connecteurLdapPerson->getFileConfig();
+            $connecteurLdapPerson->getFileConfigContent();
             $this->fail("Fichier de configuration absent, devrait lever une exception");
         }
         catch (\Oscar\Exception\OscarException $e ){
@@ -16,38 +17,87 @@ class ConnectorLdapPersonTest extends TestCase
         }
     }
 
-    public function testExecute(){
-        $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
+    public function testParsePersonLdap(){
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        $person = array(
+              "buildingname" => "Maison des sciences économiques",
+              "cn" => "Nagot Isabelle",
+              "departmentnumber" => "CNU 26",
+              "displayname" => "Isabelle Nagot",
+              "dn" => "uid=nagot,ou=people,dc=univ-paris1,dc=fr",
+              "edupersonaffiliation" => array (
+                "member",
+                "teacher",
+                "faculty",
+                "researcher",
+                "employee"
+              ),
+              "edupersonorgdn" => "supannCodeEntite=UP1,ou=structures,dc=univ-paris1,dc=fr",
+              "edupersonorgunitdn" => array(
+                "ou=U27,ou=structures,o=Paris1,dc=univ-paris1,dc=fr",
+                "ou=U02C,ou=structures,o=Paris1,dc=univ-paris1,dc=fr"
+              ),
+              "edupersonprimaryaffiliation" => "teacher",
+              "edupersonprimaryorgunitdn" => "ou=U27,ou=structures,o=Paris1,dc=univ-paris1,dc=fr",
+              "edupersonprincipalname" => "nagot@univ-paris1.fr",
+              "employeetype" => "Maître de conférences",
+              "gecos" => "Isabelle Nagot",
+              "gidnumber" => "2000000",
+              "givenname" => "Isabelle",
+              "info" => "Mathématiques appliquées et Sciences sociales ",
+              "mail" => "Isabelle.Nagot@univ-paris1.fr",
+              "postaladdress" => "106 BOULEVARD DE L'HÔPITAL$75013 PARIS\$FRANCE",
+              "sn" => "Nagot",
+              "supannactivite" => "{CNU}2600",
+              "supannaliaslogin" => "nagot",
+              "supanncivilite" =>"Mme",
+              "supannentiteaffectation" => array(
+                "U27",
+                "U02C"
+              ),
+              "supannentiteaffectationprincipale" => "U27",
+              "supannetablissement" => "{UAI}0751717J",
+              "supannlisterouge" => "FALSE",
+              "supannorganisme" => "{EES}0751717J",
+              "telephonenumber" => "+33 1 44 07 82 79",
+              "uid" => "nagot",
+              "uidnumber" => "599381"
+        );
 
         try {
-            $connecteurLdapPerson->execute();
-            $this->assertTrue(true);
+            $personObj = $extractorLdap->parseLdapPerson($person);
+            $this->assertEquals('Isabelle', $personObj['firstname']);
+            $this->assertEquals('Nagot', $personObj['lastname']);
+            $this->assertEquals('uid', $personObj['login']);
+            $this->assertEquals('U27', $personObj['codeHarpege']);
+            $this->assertEquals('Isabelle.Nagot@univ-paris1.fr', $personObj['email']);
+            $this->assertEquals('Isabelle.Nagot@univ-paris1.fr', $personObj['emailPrive']);
+            $this->assertEquals('+33 1 44 07 82 79', $personObj['phone']);
+            $this->assertEquals('Maison des sciences économiques', $personObj['ldapsitelocation']);
+            $this->assertEquals('U27,U02C', $personObj['supannentiteaffectation']);
+            $this->assertEquals('nagot', $personObj['ladapLogin']);
+
         } catch (Exception $e) {
-            $this->fail("L'exécution du connecteur a échoué");
+            $this->fail("Le remplissage du tableau pour hydratation a échoué");
         }
     }
 
-    public function testEmptyFile(){
-        $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
+    public function testLdapConnexion(){
+        $serviceManager = new Zend\ServiceManager\ServiceManager();
+        $moduleOptions = $serviceManager->get('unicaen-app_module_options');
+
+        $configLdap = $moduleOptions->getLdap();
+        $ldap = $configLdap['connection']['default']['params'];
+
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
 
         try {
-            $datas = $connecteurLdapPerson->getFileConfig();
-            $this->assertNull($datas);
-        }
-        catch (\Oscar\Exception\OscarException $e ){
-            $this->fail("Les fichiers vides doivent retourner NULL");
-        }
-    }
-
-    public function testNotJsonFile(){
-        $connecteurLdapPerson = new \Oscar\Connector\ConnectorLdapPersonJson();
-
-        try {
-            $datas = $connecteurLdapPerson->getFileConfig();
-            $this->fail("Non-YAML file must throw exception !");
-        }
-        catch (\Oscar\Connector\NotYamlFileException $e ){
+            $connectorLdapPerson = $extractorLdap->initiateLdapPerson($configLdap, $ldap);
             $this->assertTrue(true);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La connexion Ldap Person a échoué");
         }
     }
 }

@@ -259,7 +259,6 @@ class LdapExtractionStrategy
     {
         $dataProcess = array();
 
-        $dataProcess['uid'] = isset($organization["supannrefid"])? $organization["supannrefid"] : null;
         $dataProcess['name'] = isset($organization["description"]) ? $organization["description"] : null;
         $dataProcess['dateupdate'] = null;
         $dataProcess['code'] = isset($organization["supanncodeentite"]) ? $organization["supanncodeentite"] : null;

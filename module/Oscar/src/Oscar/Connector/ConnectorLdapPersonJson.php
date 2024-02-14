@@ -18,6 +18,7 @@ use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
+use Zend\Json\Server\Smd\Service;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
@@ -56,7 +57,8 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
 
     function execute($force = true)
     {
-        $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
+        $serviceManager = new ServiceManager();
+        $moduleOptions = $serviceManager->get('unicaen-app_module_options');
         $configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
         $configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($configPath));
         $this->shortName = "person_ldap";
