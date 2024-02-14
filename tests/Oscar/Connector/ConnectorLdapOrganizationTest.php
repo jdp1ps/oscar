@@ -85,6 +85,24 @@ class ConnectorLdapOrganizationTest extends TestCase
         }
     }
 
+    public function testLdapFilter(){
+        $serviceManager = new Zend\ServiceManager\ServiceManager();
+        $moduleOptions = $serviceManager->get('unicaen-app_module_options');
+
+        $configLdap = $moduleOptions->getLdap();
+        $ldap = $configLdap['connection']['default']['params'];
+
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        try {
+            $connectorLdapOrganization = $extractorLdap->initiateLdapOrganization($configLdap, $ldap);
+            $data = $connectorLdapOrganization->findOneByFilter("&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research)");
+            $this->assertIsArray($data);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La connexion Ldap Organization a échoué");
+        }
+    }
+
     public function testTypes(){
         $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
 
