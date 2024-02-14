@@ -60,7 +60,6 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         $moduleOptions = $this->getServiceManager()->get('unicaen-app_module_options');
         $configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
         $configFile = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($configPath));
-        $this->shortName = "person_ldap";
 
         $configLdap = $moduleOptions->getLdap();
         $ldap = $configLdap['connection']['default']['params'];
