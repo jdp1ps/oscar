@@ -35,6 +35,19 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         //"filtrage" => "DIREVAL"
     );
 
+    private $arrayTypes = array(
+        "association",
+        "collectivite",
+        "composante",
+        "etablissement",
+        "groupement",
+        "inconnue",
+        "institution",
+        "laboratoire",
+        "plateau",
+        "societe",
+    );
+
     private $configPath = null;
     private $configFile;
 
@@ -153,13 +166,16 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                     $dataProcess['description'] = $organization["description"];
                     $dataProcess['email'] = "";
                     $dataProcess['siret'] = "";
-                    $dataProcess['type'] = $organization["supanntypeentite"];
                     $dataProcess['url'] = isset($organization["labeleduri"]) ? $organization["labeleduri"] : null;
                     $dataProcess['duns'] = null;
                     $dataProcess['tvaintra'] = null;
 
                     $dataProcess['rnsr'] = "";
                     $dataProcess['labintel'] = "";
+
+                    if(isset($organization["supanntypeentite"])){
+                        $dataProcess['type'] = $this->verifyTypes($organization["supanntypeentite"]);
+                    }
 
                     if(is_array($organization["supannrefid"])){
                         foreach($organization["supannrefid"] as $refId){
@@ -217,20 +233,6 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
             throw new \Exception("Impossible de charger des données depuis  : " . $e->getMessage());
         }
 
-        // Conversion
-        /*try {
-            $json = $dataExtractionStrategy->extract($data);
-            // Autorise la présence d'une clef 'persons' au premier niveau (facultatif)
-            if( is_object($json) && property_exists($json, 'organizations') ){
-                $organizationsData = $json->organizations;
-            } else {
-                $organizationsData = $json;
-            }
-        } catch (\Exception $e) {
-            $report->adderror("Data get all error : " . $e->getMessage());
-            throw new \Exception("Impossible de convertir les données : " . $e->getMessage());
-        }*/
-
         if( !is_array($data) ){
             throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
         }
@@ -239,6 +241,23 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
         $this->syncAll($data, $this->getOrganizationRepository(), $report, $this->getOption('force', false));
 
         return $report;
+    }
+
+    function verifyTypes($supannType){
+
+        foreach($this->arrayTypes as $typesCode){
+            if($this->configFile[$typesCode."_array"] != ""){
+                $explodeTypes = explode(",", $this->configFile[$typesCode."_array"]);
+
+                foreach($explodeTypes as $codeSupann){
+                    if($codeSupann == $supannType){
+                        return $this->configFile[$typesCode."_id"];
+                    }
+                }
+            }
+        }
+
+        return $this->configFile["inconnue_id"];
     }
 
     /**
@@ -285,7 +304,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
 
                     $organization = $this->hydrateWithDatas($organization, $data);
                     if( property_exists($data, 'type') )
-                        $organization->setTypeObj($repository->getTypeObjByLabel($data->name));
+                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
                     $repository->flush($organization);
                     if( $action == 'add' ){
