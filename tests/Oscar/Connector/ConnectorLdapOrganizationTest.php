@@ -119,10 +119,10 @@ class ConnectorLdapOrganizationTest extends TestCase
         );
 
         try {
-            $organization = new Organization();
+            $organizationObj = new Organization();
 
             $org = $extractorLdap->parseOrganizationLdap($organization);
-            $orgObject = $extractorLdap->hydrateOrganization($organization, $org);
+            $orgObject = $extractorLdap->hydrateOrganization($organizationObj, $org);
             $this->assertObjectHasAttribute('shortname', $orgObject);
             $this->assertObjectHasAttribute('code', $orgObject);
             $this->assertObjectHasAttribute('longname', $orgObject);
