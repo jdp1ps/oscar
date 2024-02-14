@@ -100,4 +100,69 @@ class ConnectorLdapPersonTest extends TestCase
             $this->fail("La connexion Ldap Person a échoué");
         }
     }
+
+    public function testObjectPerson(){
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        $person = array(
+            "buildingname" => "Maison des sciences économiques",
+            "cn" => "Nagot Isabelle",
+            "departmentnumber" => "CNU 26",
+            "displayname" => "Isabelle Nagot",
+            "dn" => "uid=nagot,ou=people,dc=univ-paris1,dc=fr",
+            "edupersonaffiliation" => array (
+                "member",
+                "teacher",
+                "faculty",
+                "researcher",
+                "employee"
+            ),
+            "edupersonorgdn" => "supannCodeEntite=UP1,ou=structures,dc=univ-paris1,dc=fr",
+            "edupersonorgunitdn" => array(
+                "ou=U27,ou=structures,o=Paris1,dc=univ-paris1,dc=fr",
+                "ou=U02C,ou=structures,o=Paris1,dc=univ-paris1,dc=fr"
+            ),
+            "edupersonprimaryaffiliation" => "teacher",
+            "edupersonprimaryorgunitdn" => "ou=U27,ou=structures,o=Paris1,dc=univ-paris1,dc=fr",
+            "edupersonprincipalname" => "nagot@univ-paris1.fr",
+            "employeetype" => "Maître de conférences",
+            "gecos" => "Isabelle Nagot",
+            "gidnumber" => "2000000",
+            "givenname" => "Isabelle",
+            "info" => "Mathématiques appliquées et Sciences sociales ",
+            "mail" => "Isabelle.Nagot@univ-paris1.fr",
+            "postaladdress" => "106 BOULEVARD DE L'HÔPITAL$75013 PARIS\$FRANCE",
+            "sn" => "Nagot",
+            "supannactivite" => "{CNU}2600",
+            "supannaliaslogin" => "nagot",
+            "supanncivilite" =>"Mme",
+            "supannentiteaffectation" => array(
+                "U27",
+                "U02C"
+            ),
+            "supannentiteaffectationprincipale" => "U27",
+            "supannetablissement" => "{UAI}0751717J",
+            "supannlisterouge" => "FALSE",
+            "supannorganisme" => "{EES}0751717J",
+            "telephonenumber" => "+33 1 44 07 82 79",
+            "uid" => "nagot",
+            "uidnumber" => "599381"
+        );
+
+        try {
+            $personData= $extractorLdap->parseLdapPerson($person);
+            $personObj = (object) $personData;
+            $this->assertObjectHasAttribute('firstname', $personObj);
+            $this->assertObjectHasAttribute('lastname', $personObj);
+            $this->assertObjectHasAttribute('codeHarpege', $personObj);
+            $this->assertObjectHasAttribute('login', $personObj);
+            $this->assertObjectHasAttribute('email', $personObj);
+            $this->assertObjectHasAttribute('phone', $personObj);
+            $this->assertObjectHasAttribute('ldapsitelocation', $personObj);
+            $this->assertObjectHasAttribute('supannentiteaffectation', $personObj);
+            $this->assertObjectHasAttribute('ladapLogin', $personObj);
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La vérification du contenu de l'objet a échoué");
+        }
+    }
 }
