@@ -21,9 +21,37 @@ use Oscar\Exception\OscarException;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
+    private $configData = null;
+    private $configPath = null;
+
     public function getDataAccess(): IDataAccessStrategy
     {
         return new HttpAuthBasicStrategy($this);
+    }
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function setConfigData($configData){
+        $this->configData = $configData;
+    }
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function getConfigData(){
+        if(is_null($this->configData)){
+            $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
+            $this->configData = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
+        }
+
+        return $this->configData;
+    }
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    //Fonction obligatoire pour la configuration des connecteurs
+    public function getEditable(){
+        return $this->editable;
     }
 
     function execute($force = true)
@@ -86,7 +114,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->getServiceManager()->get('Doctrine\ORM\EntityManager');
     }
 
-    public function getOrganizationRepository(): EntityRepository|ObjectRepository
+    public function getOrganizationRepository()
     {
         return $this->getEntityManager()->getRepository(Organization::class);
     }
