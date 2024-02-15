@@ -154,4 +154,37 @@ class ConnectorLdapOrganizationTest extends TestCase
             $this->fail("La vérification du contenu de l'objet a échoué");
         }
     }
+
+    public function testCheckFieldValue(){
+        $extractorLdap = new LdapExtractionStrategy(new \Zend\ServiceManager\ServiceManager());
+
+        $organization = array(
+            ["businesscategory"] => "research",
+            ["description"] => "ACTE: Arts, créations, théories, esthétique (UR 7539)",
+            ["dn"] => "supannCodeEntite=UR049_4,ou=structures,dc=univ-paris1,dc=fr",
+            ["labeleduri"] => "https://institut-acte.pantheonsorbonne.fr/",
+            ["ou"] => "UR 7539 - ACTE",
+            ["postaladdress"] => "Centre Saint Charles$162 RUE SAINT-CHARLES$75015 PARIS\$France",
+            ["supanncodeentite"] => "UR049_4",
+            ["supanncodeentiteparent"] => "UR04",
+            ["supannrefid"] => array(
+                "{RNSR}201220422A",
+                "{APOGEE.EQR}UR049_4",
+                "{SIHAM.UO}UR049_4",
+                "{SINAPS:STRUC}UR049_4",
+            ),
+            ["supanntypeentite"] => "{SUPANN}S311",
+            ["telephonenumber"] => "+33 1 44 07 84 40"
+        );
+
+        try {
+            $organizationObj = (object) $organization;
+
+            $orgTypeEntite = $extractorLdap->getFieldValue($organizationObj, "supanntypeentite");
+            $this->assertEquals('{SUPANN}S311', $orgTypeEntite);
+
+        } catch (\Zend\Ldap\Exception\LdapException $e) {
+            $this->fail("La vérification d'une propriété d'un objet a échoué");
+        }
+    }
 }
