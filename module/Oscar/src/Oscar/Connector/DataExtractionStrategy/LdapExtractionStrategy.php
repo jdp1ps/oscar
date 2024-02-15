@@ -431,10 +431,10 @@ class LdapExtractionStrategy
         return $object;
     }
 
-    protected function getFieldValue(
+    public function getFieldValue(
         $object,
         $fieldName,
-        object $logger,
+        object $logger = null,
         $defaultValue = null
     ) {
         if (!property_exists($object, $fieldName)) {
