@@ -98,7 +98,7 @@ class LdapExtractionStrategy
         }
 
         $person['phone'] = isset($person['telephonenumber']) ? $person['telephonenumber'] : "" ;
-        $person['projectAffectations'] = $person['edupersonaffiliation'];
+        $person['projectAffectations'] = isset($person['edupersonaffiliation']) ? $person['edupersonaffiliation'] : null;
         $person['ldapsitelocation'] = isset($person['buildingName']) ? $person['buildingName']: null;
 
         if(isset($person["supannroleentite"])){
@@ -129,7 +129,7 @@ class LdapExtractionStrategy
         }
 
         $person['activities'] = null;
-        $person['ladapLogin'] = $person['supannaliaslogin'];
+        $person['ladapLogin'] = isset($person['supannaliaslogin']) ? $person['supannaliaslogin'] : null;
         $person['dateupdated'] = null;
 
         return $person;
