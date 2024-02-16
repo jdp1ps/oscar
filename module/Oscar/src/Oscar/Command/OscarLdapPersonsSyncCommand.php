@@ -13,11 +13,9 @@ use Doctrine\ORM\EntityManager;
 use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
-use Oscar\Entity\PersonLdap;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Zend\Ldap\Ldap;
 
 class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
 {

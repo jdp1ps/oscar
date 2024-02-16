@@ -16,7 +16,6 @@ use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
-use Zend\ServiceManager\ServiceManager;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
