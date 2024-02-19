@@ -35,10 +35,6 @@ class OscarLdapOrganizationsSearchCommand extends OscarCommandAbstract
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->addOutputStyle($output);
-
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
-
         $io = new SymfonyStyle($input, $output);
 
         $io->title("Recherche LDAP dans les organisations");
@@ -53,8 +49,6 @@ class OscarLdapOrganizationsSearchCommand extends OscarCommandAbstract
             $dataStructureFromLdap->setConfig($configLdap);
             $dataStructureFromLdap->setLdap(new Ldap($ldap));
 
-
-            //$organisations = $organisationService->search($search);
             $organisation = $dataStructureFromLdap->findOneByName("ou=".$search);
 
             /** @var Organization $organisation */
