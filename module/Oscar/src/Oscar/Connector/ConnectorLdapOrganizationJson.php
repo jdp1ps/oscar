@@ -10,6 +10,7 @@ namespace Oscar\Connector;
 
 
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
@@ -40,7 +41,7 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
     //Fonction obligatoire pour la configuration des connecteurs
     public function getConfigData(){
         if(is_null($this->configData)){
-            $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/organization_ldap.yml";
+            $this->configPath = realpath(__DIR__) . "/../../../../../config/connectors/organization_ldap.yml";
             $this->configData = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
         }
 
@@ -94,9 +95,9 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
      * @throws LdapException
-     * @throws \Exception
+     * @throws Exception
      */
-    function execute($force = true): ConnectorRepport
+    public function execute($force = true): ConnectorRepport
     {
         $this->setConnectorId('organization_ldap');
         $moduleOptions = $this->getServicemanager()->get('unicaen-app_module_options');
@@ -131,13 +132,12 @@ class ConnectorLdapOrganizationJson extends AbstractConnectorOscar
                 }
             }
 
-            $extractorLdap->syncAllOrganizations($data, $this->getEntityManager()->getRepository(Organization::class), $report);
-        } catch (\Exception $e) {
-            throw new \Exception("Impossible de charger des données depuis  : " . $e->getMessage());
-        }
-
-        if( !is_array($data) ){
-            throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
+            $extractorLdap->syncAllOrganizations($data,
+                $this->getEntityManager()->getRepository(Organization::class),
+                $report
+            );
+        } catch (LdapException $e) {
+            $report->addwarning("Impossible de charger des données depuis Ldap");
         }
 
         return $report;
