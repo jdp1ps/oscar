@@ -55,7 +55,8 @@ class OscarLdapPersonsSyncCommand extends OscarCommandAbstract
                 }
 
                 foreach($dataFiltered as $filter){
-                    $io->writeln("Exécution d'un filtre : veuillez patienter (ce script peut prendre une dizaine de minutes ... )");
+                    $io->writeln("Exécution d'un filtre : veuillez patienter (ce script peut prendre"
+                        ." une dizaine de minutes ... )");
 
                     $connectorLdap = $extractorLdap->initiateLdapPerson($configLdap, $ldap);
                     $data = $connectorLdap->findAll($filter);
