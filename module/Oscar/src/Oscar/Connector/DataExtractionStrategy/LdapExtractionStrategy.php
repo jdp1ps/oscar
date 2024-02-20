@@ -20,6 +20,8 @@ use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonLdap;
+use Oscar\Entity\Role;
+use Oscar\Entity\RoleRepository;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Zend\Ldap\Exception\LdapException;
@@ -31,11 +33,9 @@ class LdapExtractionStrategy
     private ConnectorPersonHydrator $hydratorPerson;
     private bool $purge = false;
     private string $configPathOrganization;
+    private string $configPathPerson;
     private array $configFileOrganization;
-    private array $mappingRolePerson = array(
-        //ID 21 correspond au role "Directeur de laboratoire" en base de donnée
-        "{UAI:0751717J:HARPEGE.FCSTR}530" => 21
-    );
+    private array $configFilePerson;
     private ServiceManager $serviceManager;
     private $dateUpdated;
     private int $nbAdds = 0;
@@ -61,6 +61,11 @@ class LdapExtractionStrategy
             . "/../../../../../../config/connectors/organization_ldap.yml";
         $this->configFileOrganization =
             \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPathOrganization));
+
+        $this->configPathPerson = realpath(__DIR__)
+            . "/../../../../../../config/connectors/person_ldap.yml";
+        $this->configFilePerson =
+            \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPathPerson));
     }
 
     /**
@@ -516,23 +521,33 @@ class LdapExtractionStrategy
         $explodeRole = explode("][", $substringRole);
         $exactRole = substr($explodeRole[0], 5, strlen($explodeRole[0]));
         $exactCode = substr($explodeRole[2], 5, strlen($explodeRole[2]));
+        $countRole = count($this->configFilePerson["mapping_role_person"]);
+        $roleRepository = $this->serviceManager->get(EntityManager::class)->getRepository(
+            Role::class
+        );
 
-        if (array_key_exists($exactRole, $this->mappingRolePerson)) {
-            $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
-            $dataOrgPer =
-                $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
+        for($i=0;$i<$countRole;$i++) {
+            if (array_key_exists($exactRole, $this->configFilePerson["mapping_role_person"][$i])) {
+                $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
+                $dataOrgPer =
+                    $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
 
-            if ($dataOrg != null) {
-                if ($dataOrgPer == null) {
-                    $dataOrgPer = new OrganizationPerson();
+                $idRole = $roleRepository->getRoleByRoleId(
+                    $this->configFilePerson["mapping_role_person"][$i][$exactRole]
+                )->getId();
+
+                if ($dataOrg != null) {
+                    if ($dataOrgPer == null) {
+                        $dataOrgPer = new OrganizationPerson();
+                    }
+
+                    $organizationRepository->saveOrganizationPerson(
+                        $dataOrgPer,
+                        $personOscar,
+                        $dataOrg,
+                        $idRole
+                    );
                 }
-
-                $organizationRepository->saveOrganizationPerson(
-                    $dataOrgPer,
-                    $personOscar,
-                    $dataOrg,
-                    $this->mappingRolePerson[$exactRole]
-                );
             }
         }
     }
