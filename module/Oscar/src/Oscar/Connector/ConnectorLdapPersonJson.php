@@ -10,12 +10,16 @@ namespace Oscar\Connector;
 
 
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Oscar\Connector\DataAccessStrategy\HttpAuthBasicStrategy;
 use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Connector\DataExtractionStrategy\LdapExtractionStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Zend\Ldap\Exception\LdapException;
 
 class ConnectorLdapPersonJson extends AbstractConnectorOscar
 {
@@ -36,7 +40,7 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
     //Fonction obligatoire pour la configuration des connecteurs
     public function getConfigData(){
         if(is_null($this->configData)){
-            $this->configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
+            $this->configPath = realpath(__DIR__) . "/../../../../../config/connectors/person_ldap.yml";
             $this->configData = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($this->configPath));
         }
 
@@ -54,7 +58,12 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->editable;
     }
 
-    function execute($force = true): ConnectorRepport
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws LdapException
+     */
+    public function execute($force = true): ConnectorRepport
     {
         $moduleOptions = $this->getServiceManager()->get('unicaen-app_module_options');
         $configPath = realpath(__DIR__.'/../../') . "/../../../config/connectors/person_ldap.yml";
@@ -87,12 +96,8 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
                 $extractorLdap->syncPersons($personsData, $this->getPersonRepository(), $report);
             }
 
-        } catch (\Exception $e) {
-            throw new \Exception("Impossible de charger des données depuis : " . $e->getMessage());
-        }
-
-        if( !is_array($data) ){
-            throw new \Exception("LDAP n'a pas retourné un tableau de donnée");
+        } catch (LdapException $e) {
+            $report->addwarning("Impossible de charger des données depuis Ldap");
         }
 
         return $report;
@@ -103,9 +108,6 @@ class ConnectorLdapPersonJson extends AbstractConnectorOscar
         return $this->getEntityManager()->getRepository(Person::class);
     }
 
-    /**
-     * @return EntityManager
-     */
     public function getEntityManager(): EntityManager
     {
         return $this->getServiceManager()->get('Doctrine\ORM\EntityManager');

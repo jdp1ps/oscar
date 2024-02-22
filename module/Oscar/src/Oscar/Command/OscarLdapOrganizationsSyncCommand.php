@@ -64,7 +64,9 @@ class OscarLdapOrganizationsSyncCommand extends OscarCommandAbstract
                 $io->writeln("Impossible de charger des données depuis  : " . $e->getMessage());
             }
 
-            $extractorLdap->syncAllOrganizations($data, $this->getEntityManager()->getRepository(Organization::class), $io);
+            $extractorLdap->syncAllOrganizations($data,
+                $this->getEntityManager()->getRepository(Organization::class),
+                $io);
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
         }

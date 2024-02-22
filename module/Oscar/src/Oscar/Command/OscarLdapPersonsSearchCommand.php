@@ -60,7 +60,8 @@ class OscarLdapPersonsSearchCommand extends OscarCommandAbstract
                     $person->getSn(),
                     $person->getMail()
                 ];
-                $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getUid(), $person->getNomComplet(), $person->getMail()));
+                $io->writeln( sprintf('- <bold>[%s]</bold> %s (%s)', $person->getUid(),
+                    $person->getNomComplet(), $person->getMail()));
                 $io->table($headers, $data);
             } else {
                 $io->warning("Aucun résultat");
