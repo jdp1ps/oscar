@@ -2288,6 +2288,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $entity->setProject($project);
                 $entity->touch();
                 $this->getEntityManager()->flush();
+                // Update project index
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity(
+                    $entity
+                );
+                $this->getActivityService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity(
+                    $entity
+                );
                 $this->redirect()->toRoute(
                     'contract/show',
                     ['id' => $entity->getId()]

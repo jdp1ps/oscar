@@ -47,7 +47,7 @@ if (PHP_SAPI == 'cli') {
 }
 
 if( getenv('APPLICATION_ENV') == 'development' ){
-    //$config['modules'][] = 'ZendDeveloperTools';
+    $config['modules'][] = 'Laminas\DeveloperTools';
 }
 
 return $config;

@@ -383,9 +383,16 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
         try {
             $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
+            //header('Content-Disposition: attachment; filename="' . $filename . '"');
+            //header('Content-type: ' . $doc->getFileTypeMime());
+            header('Content-Type: ' . $doc->getFileTypeMime());
+            header('Content-Transfer-Encoding: Binary');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Content-type: ' . $doc->getFileTypeMime());
-            die($content);
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: '. filesize($sourceDoc));
+            readfile($sourceDoc);
         } catch (Exception $e) {
             $this->getLoggerService()->error("Téléchargement du fichier impossible : " . $e->getMessage());
             throw new OscarException("Ce fichier est indisponible sur le serveur");

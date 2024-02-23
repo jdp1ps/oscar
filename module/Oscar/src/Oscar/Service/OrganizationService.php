@@ -414,6 +414,14 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $activities;
     }
 
+    /**
+     * @param int $idOrganization
+     * @return Organization[]
+     */
+    public function getOrganizationAndParents( int $idOrganization ) :array {
+        return $this->getOrganizationRepository()->getOrganizationAndParents($idOrganization);
+    }
+
     public function getSubStructure(int $organizationId): array
     {
         $structures = [];

@@ -145,6 +145,12 @@ La configuration de la base de données ``./config/autoload/local.php`` :
 
 ```
 
+Mise à jour des privilèges : 
+
+```bash
+php bin/oscar.php check:privileges
+```
+
 Un petit *check*
 ```bash
 php bin/oscar.php check:config
@@ -156,6 +162,9 @@ Puis MAJ de la BDD si tout est OK
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 ```
 
+### Rotation des logs
+
+Les fichiers de logs sont maintenant journalier sour la forme `oscar-YYYY-MM-DD.log`, assurez vous que l'utilisateur Web a les accès en écriture dans le dossier `logs`
 
 ### Utilisateur du CRON
 
@@ -218,3 +227,13 @@ Oscar **Ripley** propose une gestion des structures arborescente. Un champ ``par
 Ce champ a été ajouté au **connecteur organization** et doit contenir le **CODE** de la structure parente (facultatif).
 
 L'objectif est de pouvoir gérer plus facilement les droits d'accès sur une modèle de structure arborescent. 
+
+## Date de fin des personnes
+
+La fiche personne propose un champ "Validité" qui permet de fixer une date de fin à une personne. Si cette dernière est renseignée, elle sera utilisé pour vérifier l'accès du compte à Oscar indépendament des informations d'authentification.
+
+Cette information peut être synchronisée depuis le connecteur Person avec le champ : `datefininscription`
+
+## Signature numérique
+
+> En cours

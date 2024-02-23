@@ -929,6 +929,10 @@ class ProjectController extends AbstractOscarController
 
         $project->touch();
         $this->getEntityManager()->flush();
+        foreach ($activities as $activity) {
+            $this->getProjectGrantService()->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
+            $this->getProjectGrantService()->getGearmanJobLauncherService()->triggerUpdateNotificationActivity($activity);
+        }
         $this->redirect()->toRoute('project/show', ['id' => $project->getId()]);
     }
 }

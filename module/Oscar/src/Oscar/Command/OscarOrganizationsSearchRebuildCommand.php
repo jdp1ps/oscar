@@ -59,9 +59,10 @@ class OscarOrganizationsSearchRebuildCommand extends OscarCommandAbstract
             $organizations = $organisationService->getOrganizations();
             $organisationService->getSearchEngineStrategy()->rebuildIndex($organizations);
             $io->success(sprintf('Index de recherche mis à jour avec %s organisations indexées', count($organizations)));
-
+            return self::SUCCESS;
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
+            return self::FAILURE;
         }
     }
 }
