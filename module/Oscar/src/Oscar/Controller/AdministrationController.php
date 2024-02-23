@@ -47,6 +47,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Http\Request;
 use Laminas\View\Model\ViewModel;
+use UnicaenSignature\Provider\SignaturePrivileges;
 use UnicaenSignature\Service\SignatureService;
 
 class AdministrationController extends AbstractOscarController implements UseProjectGrantService,
@@ -104,6 +105,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     public function contractSignedAction() :ViewModel
     {
+
+        $this->getOscarUserContextService()->check(SignaturePrivileges::SIGNATURE_ADMIN);
+
         /** @var SignatureService $signatureService */
         $signatureService = $this->getServiceLocator()->get(SignatureService::class);
 

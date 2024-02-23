@@ -639,7 +639,7 @@
                     Signature éléctronique
                 </strong>
                 <?php
-                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_PARAMETERS_MANAGE)): ?>
+                if ($this->grant()->privilege(\UnicaenSignature\Provider\SignaturePrivileges::SIGNATURE_ADMIN)): ?>
                     <a href="<?= $this->url('administration/contract-signed') ?>" class="right"><i class="icon-cog"></i><?= _(
                             "Configurer"
                         ) ?></a>
@@ -649,7 +649,7 @@
                 <?php
                 endif; ?>
             </h3>
-            <p>Description</strong></p>
+            <p>Configuration des processus de signature numérique</strong></p>
 
         </article>
 

@@ -9,6 +9,7 @@ namespace Oscar\Service;
 
 
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
+use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
