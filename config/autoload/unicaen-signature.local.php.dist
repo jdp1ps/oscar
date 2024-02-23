@@ -1,0 +1,114 @@
+<?php
+
+return [
+    /**  **/
+    'unicaen-signature' => [
+
+        ////////////////////////////////////////////////////////////
+
+        // 'vite_mode' => 'dev', // mode développement de l'UI
+
+        'documents_path' => __DIR__.'/../../data/documents/signature',
+
+//        'logger' => [
+//            'enable' => true,
+//            'level' => \Monolog\Logger::DEBUG,
+//            'file' => __DIR__.'/../../logs/signature.log',
+//            'stdout' => false
+//        ],
+
+        'current_user' => function( $sc ){
+            $person = $sc->get(\Oscar\Service\OscarUserContext::class)->getCurrentPerson();
+            if( $person) {
+                return $person->getEmail();
+            }
+            return "";
+        },
+
+        'get_recipients_methods' => [
+            [
+                'key' => 'persons_by_role',
+                'label' => 'Personnes par rôle',
+                'description' => 'Selectionne les personnes en fonction de leurs rôles',
+                'options' => [
+                    [
+                        'key' => 'role_person_id',
+                        'label' => "Rôle dans l'activité",
+                        'type' => 'checkbox',
+                        'values' => function($s){
+                            return $s->get(\Oscar\Service\OscarUserContext::class)->getAvailabledRolesPersonActivity();
+                        },
+                        'defaultValue' => []
+                    ],
+                    [
+                        'key' => 'role_organisation_id',
+                        'label' => "étendre aux structures",
+                        'type' => 'checkbox',
+                        'values' => function($s){
+                            return $s->get(\Oscar\Service\OscarUserContext::class)->getAvailabledRolesOrganizationActivity();
+                        },
+
+                        'defaultValue' => []
+                    ]
+                ],
+                'methods_on_create' => null,
+                'getRecipients' => function( $sc, $options){
+                    return $sc->get(\Oscar\Service\ProjectGrantService::class)->getRecipients($options);
+                }
+            ],
+        ],
+
+        // Configuration des parafeurs numérique
+        'letterfiles' => [
+//            [
+//                // Nom visible côté applicatif
+//                'label' => 'ESUP',
+//
+//                // Code (unique)
+//                'name' => 'esup',
+//
+//                'description' => 'Parafeur numérique ESUP',
+//
+//                // Utilisé par défaut
+//                'default' => true,
+//
+//                // Classe
+//                'class' => \UnicaenSignature\Strategy\Letterfile\Esup\EsupLetterfileStrategy::class,
+//
+//                // Niveaux de signature disponible
+//                'levels' => [
+//                    \UnicaenSignature\Utils\SignatureConstants::VISA_HIDDEN => 'hidden',
+//                    \UnicaenSignature\Utils\SignatureConstants::VISA_VISUAL => 'visa',
+//                    \UnicaenSignature\Utils\SignatureConstants::SIGN_VISUAL => 'pdfImageStamp',
+//                    \UnicaenSignature\Utils\SignatureConstants::SIGN_CERTIF => 'certSign',
+//                    \UnicaenSignature\Utils\SignatureConstants::SIGN_EIDAS => 'nexuSign',
+//                ],
+//
+//                // Configuration du parafeur
+//                'config' => [
+//                    // ESUP configuration
+//                    'url' => "https://signature-pp.unicaen.fr",
+//
+//                    // Créateur
+//                    'createdByEppn' => 'bouvry@unicaen.fr',
+//                ]
+//            ],
+//            [
+//                'label'     => 'OSCAR visa',
+//                'name'      => 'internal',
+//                'default'   => false,
+//                'class'     => \UnicaenSignature\Strategy\Letterfile\InternalVisa\InternalVisaStrategy::class,
+//                'levels'    => [
+//                    'visa_hidden' => 'visa_hidden',
+//                ],
+//                'config'    => [
+//                    'checkUserAcces' => function( $sc, $signatureRecipient){
+//                        return true;
+//                        //return $sc->get(\Oscar\Service\ProjectGrantService::class)->getRecipients($options);
+//                    }
+//                ]
+//            ]
+        ]
+    ]
+    /******/
+];
