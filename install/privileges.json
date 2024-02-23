@@ -868,5 +868,12 @@
     "code": "SIGNATURE_SYNC",
     "libelle": "Synchronisation de signature",
     "fullcode": "SIGNATURE-SIGNATURE_SYNC"
+  },
+  "SIGNATURE-SIGNATURE_ADMIN": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_ADMIN",
+    "libelle": "Configuration des processus métier",
+    "fullcode": "SIGNATURE-SIGNATURE_ADMIN"
   }
 }
