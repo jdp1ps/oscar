@@ -41,4 +41,22 @@ class ArrayUtils
             self::explodeFromString($from, $separator, $throw)
         );
     }
+
+    public static function normalizeArray( array $array, bool $removeZero = false ){
+        $out = [];
+        // todo Supprimer les '0' à gauche
+        foreach ($array as $entry) {
+            if( $entry == '0' || $entry == 0 ){
+                if( !$removeZero ) {
+                    $out[] = 0;
+                }
+            } else {
+                $int = intval($entry);
+                if( $int ){
+                    $out[] = $int;
+                }
+            }
+        }
+        return $out;
+    }
 }

@@ -150,7 +150,7 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
     error_log($msg);
 
     if($codeStr == 'ERROR'){
-        $errorDisplayed = "Une erreur est survenue...";
+        $errorDisplayed = "Erreur fatale...";
         if( DEBUG_OSCAR ){
             $errorDisplayed = $msg;
         }

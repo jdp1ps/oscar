@@ -23,4 +23,26 @@ class ArrayUtilsTest extends TestCase
         $this->expectException(OscarTypeException::class);
         $foo = ArrayUtils::explodeIntegerFromString('pas un int');
     }
+
+    public function testArrayInt(){
+        $array = ['11', '9', '8'];
+        $expected = [11,9,8];
+        $result = ArrayUtils::normalizeArray($array);
+        $this->assertEquals($expected, $result);
+
+        $array = ['0', '9', '8'];
+        $expected = [0,9,8];
+        $result = ArrayUtils::normalizeArray($array);
+        $this->assertEquals($expected, $result);
+
+        $array = ['abc', '9', '8'];
+        $expected = [9,8];
+        $result = ArrayUtils::normalizeArray($array);
+        $this->assertEquals($expected, $result);
+
+        $array = ['abc', '9', '0'];
+        $expected = [9];
+        $result = ArrayUtils::normalizeArray($array, true);
+        $this->assertEquals($expected, $result);
+    }
 }

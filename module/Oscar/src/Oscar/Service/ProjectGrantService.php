@@ -75,6 +75,7 @@ use Oscar\Traits\UsePersonService;
 use Oscar\Traits\UsePersonServiceTrait;
 use Oscar\Traits\UseProjectService;
 use Oscar\Traits\UseProjectServiceTrait;
+use Oscar\Utils\ArrayUtils;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\StringUtils;
@@ -216,33 +217,80 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         );
     }
 
-
-
-    public function getRecipients($options){
-        echo "GET RECIPIENTS<br>\n";
-        var_dump($options);
-        $activity_id = $options['activity_id'];
-        $role_activity_id = $options['role_activity_id'];
-        $role_organisation_id = $options['role_organisation_id'];
-        $activity = $this->getActivityById($activity_id);
-
-        $recipients = [];
+    /**
+     * Récupération des personnes impliquées dans une activité, inculant les structures et sous-structures.
+     *
+     * @param int $idActivity
+     * @param array|null $filterRolePerson
+     * @param array|null $filterRoleOrganization
+     * @return array
+     * @throws OscarException
+     */
+    public function getPersonsActivity(
+        int $idActivity,
+        ?array $filterRolePerson = null,
+        ?array $filterRoleOrganization = null
+    ): array {
+        $out = [];
+        $activity = $this->getActivityById($idActivity);
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
-            if( in_array($personActivity->getRoleObj()->getId(), $role_activity_id) ){
-                $p = $personActivity->getPerson();
-                $recipients[$p->getId()] = [
-                    'firstname' => $p->getFirstname(),
-                    'lastname' => $p->getLastname(),
-                    'email' => $p->getEmail(),
-                ];
+            $p = $personActivity->getPerson();
+            $r = $personActivity->getRoleObj();
+            if ($filterRolePerson == null || in_array($r->getId(), $filterRolePerson)) {
+                $out[$p->getId()] = $p;
             }
+        }
+
+        if (count($filterRoleOrganization)) {
+            /** @var ActivityOrganization $organizationActivity */
+            foreach ($activity->getOrganizationsDeep() as $organizationActivity) {
+                if ($filterRoleOrganization == null || in_array(
+                        $organizationActivity->getRoleObj()->getId(),
+                        $filterRoleOrganization
+                    )) {
+                    $org = $organizationActivity->getOrganization();
+                    $orgs = $this->getOrganizationService()->getOrganizationAndParents($org->getId());
+                    foreach ($orgs as $o) {
+                        foreach ($o->getPersons() as $personOrganization) {
+                            if ($filterRolePerson == null || in_array(
+                                    $personOrganization->getRoleObj()->getId(),
+                                    $filterRolePerson
+                                )) {
+                                $p = $personOrganization->getPerson();
+                                $out[$p->getId()] = $p;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $out;
+    }
+
+    public function getRecipients($options)
+    {
+        $activity_id = intval($options['activity_id']);
+        $role_activity_id = ArrayUtils::normalizeArray($options['role_person_id']);
+        $role_organisation_id = ArrayUtils::normalizeArray($options['role_organisation_id']);
+
+        $persons = $this->getPersonsActivity($activity_id, $role_activity_id, $role_organisation_id);
+        $recipients = [];
+        foreach ($persons as $p) {
+            $recipients[$p->getId()] = [
+                'firstname' => $p->getFirstname(),
+                'lastname' => $p->getLastname(),
+                'email' => $p->getEmail(),
+            ];
         }
         return $recipients;
     }
 
-    public function sendSignedContract(string $path_file, array $personsIds, string $label = "Exemple de signature" ):void
-    {
+    public function sendSignedContract(
+        string $path_file,
+        array $personsIds,
+        string $label = "Exemple de signature"
+    ): void {
         $parpheur = $this->getOscarConfigurationService()->getSignedContractLetterFile();
         $level = $this->getOscarConfigurationService()->getSignedContractLevel();
         /** @var EsupLetterfileStrategy $letterFile */
@@ -252,7 +300,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $signature = new Signature();
         $this->getEntityManager()->persist($signature);
         /** @var Person $p */
-        foreach ($this->getPersonService()->getPersonsByIds($personsIds) as $p){
+        foreach ($this->getPersonService()->getPersonsByIds($personsIds) as $p) {
             $r = new SignatureRecipient();
             $this->getEntityManager()->persist($r);
             $r->setSignature($signature);
@@ -271,8 +319,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->setAllSignToComplete(true);
         $this->getEntityManager()->flush($signature);
         $this->getSignatureService()->sendSignature($signature);
-
-
     }
 
     /**
@@ -296,7 +342,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         /** @var ActivityPerson $activityPerson */
         foreach ($activity->getPersonsDeep() as $activityPerson) {
-
             $person = $activityPerson->getPerson();
             $role = $activityPerson->getRoleObj();
 

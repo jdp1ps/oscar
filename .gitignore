@@ -79,6 +79,8 @@ data/documents/public/**
 !data/documents/public/.gitkeep
 data/documents/request/**
 !data/documents/request/.gitkeep
+data/documents/signature/**
+!data/documents/signature/.gitkeep
 data/generated-documents/activity/**
 !data/generated-documents/activity/bordereau.docx
 !data/generated-documents/activity/fiche.docx

@@ -295,4 +295,21 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
     }
 
 
+    /**
+     * @param int $organizationId
+     * @return Organization[]
+     */
+    public function getOrganizationAndParents( int $organizationId ): array
+    {
+        $out = [];
+        /** @var Organization $organization */
+        $organization = $this->find($organizationId);
+        $out[$organization->getId()] = $organization;
+        if( $organization->hasParent() ){
+            foreach ($organization->hasParent() as $org) {
+                $out[$org->getId()] = $org;
+            }
+        }
+        return $out;
+    }
 }

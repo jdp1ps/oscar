@@ -35,7 +35,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require-dev": {
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "laminas/laminas-developer-tools": "^2.9"
   },
   "config": {
     "github-protocols": ["https", "ssh"],

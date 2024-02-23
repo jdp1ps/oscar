@@ -10,13 +10,12 @@
 namespace Oscar;
 
 use Laminas\EventManager\Event;
-use Laminas\Ldap\Ldap;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
-use Laminas\ServiceManager\ServiceManager;
 use Oscar\Service\ContractDocumentService;
-use Oscar\Service\LoggerService;
 use UnicaenAuthentification\Event\UserAuthenticatedEvent;
+use UnicaenSignature\Event\ProcessEvent;
+use UnicaenSignature\Event\SignatureEvent;
 
 class Module
 {
@@ -45,15 +44,54 @@ class Module
      */
     public function onSignatureChange($e)
     {
-        $this->sm->get(ContractDocumentService::class)->onSignatureChange($e);
+        // $this->sm->get(ContractDocumentService::class)->onSignatureChange($e);
+    }
+
+    /**
+     * Lors de la connexion, on enregistre la Datetime de login
+     * @param $e Event
+     */
+    public function onSignatureEvent(Event $e)
+    {
+        /** @var ContractDocumentService $cdm */
+        $cdm = $this->sm->get(ContractDocumentService::class);
+
+        $cdm->getLoggerService()->info("SIGNATURE EVENT : " . $e->getName());
     }
 
     // FIX : ZendFramework 3
     public function init(ModuleManager $manager)
     {
-        $manager->getEventManager()->getSharedManager()->attach('*', 'signature:status', function ($e) {
-            $this->onSignatureChange($e);
+        $manager->getEventManager()->getSharedManager()->attach('*', 'signature-send', function ($e) {
+            $this->onSignatureEvent($e);
         });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'signature-status', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'signature-signed', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'signature-rejected', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+
+        $manager->getEventManager()->getSharedManager()->attach('*', 'authentification.ldap.fail', function ($e) {
+            $this->onUserLoginFail($e);
+        });
+
+        $manager->getEventManager()->getSharedManager()->attach('*', 'process-rejected', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'process-signed', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'process-step', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'process-start', function ($e) {
+            $this->onSignatureEvent($e);
+        });
+
         $manager->getEventManager()->getSharedManager()->attach('*', 'authentification.ldap.fail', function ($e) {
             $this->onUserLoginFail($e);
         });

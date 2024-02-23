@@ -19,11 +19,11 @@ class FileSystemUtilsTest extends TestCase
         return FileSystemUtils::getInstance()->setVerbosityDebug(false);
     }
 
-    public function testMkdirError1()
-    {
-//        $this->expectException(OscarException::class);
-//        $this->getFileSystemUtiles()->mkdir('/root/pasledroit');
-    }
+//    public function testMkdirError1()
+//    {
+////        $this->expectException(OscarException::class);
+////        $this->getFileSystemUtiles()->mkdir('/root/pasledroit');
+//    }
 
     public function testFilePutContents()
     {
