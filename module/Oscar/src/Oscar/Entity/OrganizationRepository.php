@@ -124,10 +124,16 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
 
     public function saveOrganizationPerson(OrganizationPerson $organizationPerson,Person $person, Organization $organisation, $roleOscarId) {
-        //$personOrganization = new OrganizationPerson();
         $organizationPerson->setPerson($person)
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
+        $this->getEntityManager()->persist($organizationPerson);
+        $this->getEntityManager()->flush($organizationPerson);
+    }
+
+    public function removeOrganizationPerson(OrganizationPerson $organizationPerson,Person $person) {
+        $organizationPerson->setPerson($person);
+        $this->getEntityManager()->remove($organizationPerson);
         $this->getEntityManager()->persist($organizationPerson);
         $this->getEntityManager()->flush($organizationPerson);
     }
