@@ -236,7 +236,6 @@ class LdapExtractionStrategy
 
             if($dataOrgPer != null) {
                 $organizationRepository->removeOrganizationPerson($dataOrgPer, $personOscar);
-                var_dump("coucou ". $personOscar->getId());
             }
         }
     }
