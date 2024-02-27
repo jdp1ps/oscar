@@ -188,14 +188,8 @@ class LdapExtractionStrategy
                     || $personOscar->getDateSyncLdap()->format('Y-m-d') < $personData->dateupdated)
                 {
                     $personOscar = $this->getPersonHydrate()->hydratePerson($personOscar, $personData, 'ldap');
+                    $this->hydrateRolePerson($personData, $personOscar);
 
-                    if(isset($personData->supannroleentite)){
-                        $rolesPerson = $personData->supannroleentite;
-                        $organizationRepository = $this->serviceManager->get(EntityManager::class)->getRepository(
-                            Organization::class
-                        );
-                        $this->hydrateRolePerson($organizationRepository, $rolesPerson, $personOscar);
-                    }
                     $personRepository->flush($personOscar);
 
                     $this->writePersonLog($action, $logger, $personOscar);
@@ -221,14 +215,29 @@ class LdapExtractionStrategy
         }
     }
 
-    public function hydrateRolePerson($organizationRepository, $rolesPerson, $personOscar): void
+    public function hydrateRolePerson($personData, $personOscar): void
     {
-        if(is_array($rolesPerson)){
-            foreach($rolesPerson as $role){
-                $this->parseRolesPerson($role, $organizationRepository, $personOscar);
+        $organizationRepository = $this->serviceManager->get(EntityManager::class)->getRepository(
+            Organization::class
+        );
+
+        if(isset($personData->supannroleentite)){
+            $rolesPerson = $personData->supannroleentite;
+            if (is_array($rolesPerson)) {
+                foreach ($rolesPerson as $role) {
+                    $this->parseRolesPerson($role, $organizationRepository, $personOscar);
+                }
+            } else {
+                $this->parseRolesPerson($rolesPerson, $organizationRepository, $personOscar);
             }
         } else {
-            $this->parseRolesPerson($rolesPerson, $organizationRepository, $personOscar);
+            $dataOrgPer =
+                $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
+
+            if($dataOrgPer != null) {
+                $organizationRepository->removeOrganizationPerson($dataOrgPer, $personOscar);
+                var_dump("coucou ". $personOscar->getId());
+            }
         }
     }
 
