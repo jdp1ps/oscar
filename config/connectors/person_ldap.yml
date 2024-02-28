@@ -1,0 +1,9 @@
+#filtre LDAP pour les personnes
+ldap_filter:
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=emeritus)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(supannCodePopulation={SUPANN}AGA*)'
+  - '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=staff)'
+#ldap_filter: '&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(eduPersonAffiliation=researcher)'
+mapping_role_person :
+  - "{UAI:0751717J:HARPEGE.FCSTR}530" : "Directeur de laboratoire"
