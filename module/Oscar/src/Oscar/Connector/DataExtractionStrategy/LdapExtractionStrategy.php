@@ -221,6 +221,13 @@ class LdapExtractionStrategy
             Organization::class
         );
 
+        $dataOrgPer =
+            $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
+
+        if($dataOrgPer != null) {
+            $organizationRepository->removeOrganizationPerson($dataOrgPer, $personOscar);
+        }
+
         if(isset($personData->supannroleentite)){
             $rolesPerson = $personData->supannroleentite;
             if (is_array($rolesPerson)) {
@@ -229,13 +236,6 @@ class LdapExtractionStrategy
                 }
             } else {
                 $this->parseRolesPerson($rolesPerson, $organizationRepository, $personOscar);
-            }
-        } else {
-            $dataOrgPer =
-                $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
-
-            if($dataOrgPer != null) {
-                $organizationRepository->removeOrganizationPerson($dataOrgPer, $personOscar);
             }
         }
     }
