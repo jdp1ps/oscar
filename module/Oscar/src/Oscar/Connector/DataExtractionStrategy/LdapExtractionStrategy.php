@@ -21,8 +21,6 @@ use Oscar\Entity\OrganizationType;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonLdap;
 use Oscar\Entity\Role;
-use Oscar\Entity\RoleRepository;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap;
@@ -221,21 +219,21 @@ class LdapExtractionStrategy
             Organization::class
         );
 
-        $dataOrgPer =
-            $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
-
-        if($dataOrgPer != null) {
-            $organizationRepository->removeOrganizationPerson($dataOrgPer, $personOscar);
-        }
-
         if(isset($personData->supannroleentite)){
             $rolesPerson = $personData->supannroleentite;
-            if (is_array($rolesPerson)) {
-                foreach ($rolesPerson as $role) {
-                    $this->parseRolesPerson($role, $organizationRepository, $personOscar);
+            $ldapRoleStrategy = new LdapRoleStrategy($this->serviceManager);
+            $deltaRolesPerson =
+                $ldapRoleStrategy->compareRolesPerson(
+                    $this->configFilePerson, $rolesPerson, $organizationRepository, $personOscar);
+
+            if($deltaRolesPerson != null) {
+                if (is_array($deltaRolesPerson)) {
+                    foreach ($deltaRolesPerson as $role) {
+                        $this->parseRolesPerson($role, $organizationRepository, $personOscar);
+                    }
+                } else {
+                    $this->parseRolesPerson($deltaRolesPerson, $organizationRepository, $personOscar);
                 }
-            } else {
-                $this->parseRolesPerson($rolesPerson, $organizationRepository, $personOscar);
             }
         }
     }
@@ -533,13 +531,12 @@ class LdapExtractionStrategy
         $roleRepository = $this->serviceManager->get(EntityManager::class)->getRepository(
             Role::class
         );
+        $dataOrgPer =
+            $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
 
         for($i=0;$i<$countRole;$i++) {
             if (array_key_exists($exactRole, $this->configFilePerson["mapping_role_person"][$i])) {
                 $dataOrg = $organizationRepository->getOrganisationByCodeNullResult($exactCode);
-                $dataOrgPer =
-                    $organizationRepository->getOrganisationPersonByPersonNullResult($personOscar);
-
                 $idRole = $roleRepository->getRoleByRoleId(
                     $this->configFilePerson["mapping_role_person"][$i][$exactRole]
                 )->getId();
