@@ -9,10 +9,11 @@ namespace Oscar\Entity;
 
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
+use UnicaenSignature\Entity\Db\Process;
+use UnicaenSignature\Entity\Db\SignatureFlow;
 
 /**
  * @ORM\Entity(repositoryClass="ContractDocumentRepository")
@@ -78,20 +79,37 @@ class ContractDocument extends AbstractVersionnedDocument
     private ?bool $private = false;
 
     /**
+     * Ce document est éligible à un flow de signature
+     *
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=false, options={"default":"false"})
+     */
+
+    private bool $signable = false;
+
+    /**
+     * Flow de signature
+     *
+     * @var Process|null
+     * @ORM\ManyToOne(targetEntity="UnicaenSignature\Entity\Db\Process")
+     */
+    private Process|null $process = null;
+
+    /**
      * Date de dépôt du fichier.
      *
-     * @var datetime
+     * @var \DateTime|null
      * @ORM\Column(type="date", nullable=true)
      */
-    private $dateDeposit;
+    private \DateTime|null $dateDeposit = null;
 
     /**
      * Date d'envoi du fichier.
      *
-     * @var datetime
+     * @var \DateTime|null
      * @ORM\Column(type="date", nullable=true)
      */
-    private $dateSend;
+    private \DateTime|null $dateSend = null;
 
     /**
      * @var string Emplacement (URL ou fichier physique)
@@ -207,38 +225,53 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
     /**
-     * @return datetime
+     * @return Process|null
      */
-    public function getDateDeposit()
+    public function getProcess(): ?Process
+    {
+        return $this->process;
+    }
+
+    /**
+     * @param Process|null $process
+     */
+    public function setProcess(?Process $process): self
+    {
+        $this->process = $process;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getDateDeposit(): ?\DateTime
     {
         return $this->dateDeposit;
     }
 
     /**
-     * @param datetime $dateDeposit
+     * @param \DateTime|null $dateDeposit
      */
-    public function setDateDeposit($dateDeposit)
+    public function setDateDeposit(?\DateTime $dateDeposit): self
     {
         $this->dateDeposit = $dateDeposit;
-
         return $this;
     }
 
     /**
-     * @return datetime
+     * @return \DateTime|null
      */
-    public function getDateSend()
+    public function getDateSend(): ?\DateTime
     {
         return $this->dateSend;
     }
 
     /**
-     * @param datetime $dateSend
+     * @param \DateTime|null $dateSend
      */
-    public function setDateSend($dateSend)
+    public function setDateSend(?\DateTime $dateSend): self
     {
         $this->dateSend = $dateSend;
-
         return $this;
     }
 
@@ -281,6 +314,23 @@ class ContractDocument extends AbstractVersionnedDocument
     public function setPrivate(?bool $private): self
     {
         $this->private = $private;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSignable(): ?bool
+    {
+        return $this->signable;
+    }
+
+    /**
+     * @param bool $signable
+     */
+    public function setSignable(?bool $signable): self
+    {
+        $this->signable = $signable;
         return $this;
     }
 
@@ -341,10 +391,13 @@ class ContractDocument extends AbstractVersionnedDocument
             }
         }
 
-        $fileName = $this->getFileName();
-        $basename = preg_replace('/(.*)(\.[\w]*)/', '$1', $this->getFileName());
-        if( $this->getLocation() == self::LOCATION_URL ){
-            $basename = $this->getPath();
+        $fileName = $this->getPath();
+
+        // process
+        $process = false;
+        if($this->getProcess()){
+            $process = $this->getProcess()->toArray();
+            $process_sendable = $this->getProcess()->isSendable();
         }
 
         return [
@@ -352,8 +405,9 @@ class ContractDocument extends AbstractVersionnedDocument
             'version'     => $this->getVersion(),
             'information' => $this->getInformation(),
             'fileName'    => $fileName,
+            'process'    => $process,
+            'process_sendable'    => $process_sendable,
 //            'fileName'    => $this->getFileName(),
-            'basename'    => $basename,
             'fileSize'    => $this->getFileSize(),
             'typeMime'    => $this->getFileTypeMime(),
             'dateUpload'  => $this->getDateUpdoad()->format('Y-m-d H:i:s'),

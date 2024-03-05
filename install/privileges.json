@@ -873,7 +873,14 @@
     "spot": 7,
     "category_id": 10,
     "code": "SIGNATURE_ADMIN",
-    "libelle": "Configuration des processus métier",
+    "libelle": "Accès à l'interface d'administration / gestion des signatures et processus en cours",
     "fullcode": "SIGNATURE-SIGNATURE_ADMIN"
+  },
+  "SIGNATURE-SIGNATURE_ADMIN_CONFIG": {
+    "spot": 7,
+    "category_id": 10,
+    "code": "SIGNATURE_ADMIN_CONFIG",
+    "libelle": "Configuration des processus métier",
+    "fullcode": "SIGNATURE-SIGNATURE_ADMIN_CONFIG"
   }
 }

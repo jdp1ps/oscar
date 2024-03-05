@@ -270,6 +270,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
     public function getRecipients($options)
     {
+
         $activity_id = intval($options['activity_id']);
         $role_activity_id = ArrayUtils::normalizeArray($options['role_person_id']);
         $role_organisation_id = ArrayUtils::normalizeArray($options['role_organisation_id']);
@@ -695,7 +696,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * recherche.
      *
      * @param bool $asArray
-     * @return array|object[]
+     * @return array|TypeDocument[]
      */
     public function getTypesDocuments($asArray = true)
     {

@@ -176,6 +176,8 @@ Voici la commande pour planifier vos taches CRON avec **www-data** (ou l'utilisa
 crontab -u www-data -e
 ```
 
+> A noter que si vous exécutez des commandes Oscar, le même problème peut survenir (un fichier de log créé avec les droit d'utilisateur de l'auteur de la commande). Donc pensez à vérifier l'accès au fichier de log créé. (Note: Un nouvelle version de l'installation proposera probablement la création d'un utilisateur **oscar** pour résoudre ce problème)
+
 ### Système de génération des documents
 
 La procédure de création de document (PDF) a évolué. Elle exploite maintenant un utilitaire plus performant : [wkhtmltopdf](https://wkhtmltopdf.org/), une librairie Open source (LGPLv3) dédiée à la convertion HTML > PDF

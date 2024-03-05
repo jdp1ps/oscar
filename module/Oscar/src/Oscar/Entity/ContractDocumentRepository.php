@@ -12,9 +12,12 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\QueryBuilder;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use Oscar\Exception\OscarException;
+use UnicaenSignature\Entity\Db\SignatureFlow;
+use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
 class ContractDocumentRepository extends AbstractTreeDataRepository
 {
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// ONGLETS
     /**
@@ -89,7 +92,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     public function countUntypedDocuments(): int
     {
         $infos = $this->getInfosTypes();
-        if( array_key_exists("", $infos) ){
+        if (array_key_exists("", $infos)) {
             return $infos[""];
         }
         return 0;
@@ -100,7 +103,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      *
      * @return array
      */
-    public function getInfosTypes() :array
+    public function getInfosTypes(): array
     {
         $out = [];
         $rsm = new ResultSetMapping();
@@ -131,22 +134,39 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         return $this->getEntityManager()->getRepository(TypeDocument::class)->findOneBy(['default' => true]);
     }
 
-    public function createOrUpdateTypeDocument(?int $id = null, string $label = "", string $description = "", bool $default = false ) :void {
-        if( $id == null ){
+    public function createOrUpdateTypeDocument(
+        ?int $id = null,
+        string $label = "",
+        string $description = "",
+        bool $default = false,
+        int $signatureflow_id = 0
+    ): void {
+
+
+
+        if ($id == null) {
             $type = new TypeDocument();
             $this->getEntityManager()->persist($type);
-        } else {
+        }
+        else {
             $type = $this->getType($id);
         }
 
-        if( $default === true ){
+        if ($default === true) {
             foreach ($this->getTypes() as $t) {
                 $t->setDefault(false);
             }
         }
 
+        if( $signatureflow_id ){
+            $signatureflow = $this->getEntityManager()->getRepository(SignatureFlow::class)->find($signatureflow_id);
+        } else {
+            $signatureflow = null;
+        }
+
         $type->setLabel($label)
             ->setDefault($default)
+            ->setSignatureFlow($signatureflow)
             ->setDescription($description);
 
         $this->getEntityManager()->flush();
@@ -242,7 +262,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->findOneBy(['id' => $typeDocumentId]);
     }
 
-    public function migrateUntypedDocuments( TypeDocument $typeDocument ):void
+    public function migrateUntypedDocuments(TypeDocument $typeDocument): void
     {
         $qb = $this->createQueryBuilder('d')
             ->where('d.typeDocument IS NULL');
@@ -267,7 +287,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
 
         try {
             return $query->getQuery()->getSingleResult();
-        } catch (NoResultException | TooManyRedirectsException $e) {
+        } catch (NoResultException|TooManyRedirectsException $e) {
             if ($throw) {
                 throw new OscarException(sprintf("Le document '%s' n'existe pas", $id));
             }

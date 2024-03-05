@@ -38,7 +38,7 @@ class LoggerServiceFactory implements FactoryInterface
 
 
         // Sorties des logs (fichier + PHP stdrout)
-        $stream = new RotatingFileHandler($logPath, 5, $logLevel);
+        $stream = new RotatingFileHandler($logPath, 5, $logLevel, true,0666);
 
         $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);

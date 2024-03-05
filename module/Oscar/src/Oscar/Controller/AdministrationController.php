@@ -13,7 +13,6 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
-use Oscar\Entity\ContractType;
 use Oscar\Entity\Discipline;
 use Oscar\Entity\LogActivity;
 use Oscar\Entity\OrganizationRole;
@@ -41,14 +40,13 @@ use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
 use Oscar\Traits\UseTypeDocumentService;
 use Oscar\Traits\UseTypeDocumentServiceTrait;
-use PhpOffice\PhpWord\Writer\Word2007\Part\DocumentTest;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Http\Request;
 use Laminas\View\Model\ViewModel;
 use UnicaenSignature\Provider\SignaturePrivileges;
 use UnicaenSignature\Service\SignatureService;
+use UnicaenSignature\Service\SignatureServiceAwareTrait;
+use UnicaenSignature\Utils\SignatureConstants;
 
 class AdministrationController extends AbstractOscarController implements UseProjectGrantService,
                                                                           UseTypeDocumentService,
@@ -57,7 +55,15 @@ class AdministrationController extends AbstractOscarController implements UsePro
                                                                           UseSpentService,
                                                                           UseOscarConfigurationService, UsePCRUService
 {
-    use UseProjectGrantServiceTrait, UseTypeDocumentServiceTrait, UseAdministrativeDocumentServiceTrait, UseOrganizationServiceTrait, UseOscarConfigurationServiceTrait, UsePCRUServiceTrait, UseSpentServiceTrait;
+    use
+        UseAdministrativeDocumentServiceTrait,
+        UseOrganizationServiceTrait,
+        UseOscarConfigurationServiceTrait,
+        UsePCRUServiceTrait,
+        UseProjectGrantServiceTrait,
+        SignatureServiceAwareTrait,
+        UseSpentServiceTrait,
+        UseTypeDocumentServiceTrait;
 
     private $serviceLocator;
 
@@ -103,35 +109,40 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return [];
     }
 
-    public function contractSignedAction() :ViewModel
+    public function contractSignedAction(): ViewModel
     {
-
         $this->getOscarUserContextService()->check(SignaturePrivileges::SIGNATURE_ADMIN);
 
         /** @var SignatureService $signatureService */
         $signatureService = $this->getServiceLocator()->get(SignatureService::class);
 
-        if( $this->getRequest()->isPost() ){
+        if ($this->getRequest()->isPost()) {
             $this->getOscarConfigurationService()->saveSignedContrat($this->getRequest()->getPost()->toArray());
             return $this->redirect()->toRoute('administration/contract-signed');
         }
 
         return new ViewModel([
-            'signed_contract' => $this->getOscarConfigurationService()->useSignedContract() ?
-                 [
-                    'documents_signed_roles_persons' => $this->getOscarConfigurationService()->getSignedContractRolesPersons(),
-                    'documents_signed_roles_organizations' => $this->getOscarConfigurationService()->getSignedContractRolesOrganizations(),
-                    'roles_organizations' => $this->getOscarUserContextService()->getRolesOrganisationLeader(),
-                    'roles_persons' => $this->getOscarUserContextService()->getAvailableRolesActivityOrOrganization(),
-                    'parafeur_select' => $this->getOscarConfigurationService()->getSignedContractLetterFile(),
-                    'level_select' => $this->getOscarConfigurationService()->getSignedContractLevel(),
-                 ] : null,
-            'letterfiles_configuration' => $signatureService->getLetterfileService()
-                ->getSignatureConfigurationService()->getLetterfileConfiguration(),
-            'levels' => $signatureService->getLetterfileService()
-                ->getSignatureConfigurationService()->getLevels()
-        ]);
-
+                                 'signed_contract'           => $this->getOscarConfigurationService(
+                                 )->useSignedContract() ?
+                                     [
+                                         'documents_signed_roles_persons'       => $this->getOscarConfigurationService(
+                                         )->getSignedContractRolesPersons(),
+                                         'documents_signed_roles_organizations' => $this->getOscarConfigurationService(
+                                         )->getSignedContractRolesOrganizations(),
+                                         'roles_organizations'                  => $this->getOscarUserContextService(
+                                         )->getRolesOrganisationLeader(),
+                                         'roles_persons'                        => $this->getOscarUserContextService(
+                                         )->getAvailableRolesActivityOrOrganization(),
+                                         'parafeur_select'                      => $this->getOscarConfigurationService(
+                                         )->getSignedContractLetterFile(),
+                                         'level_select'                         => $this->getOscarConfigurationService(
+                                         )->getSignedContractLevel(),
+                                     ] : null,
+                                 'letterfiles_configuration' => $signatureService->getLetterfileService()
+                                     ->getSignatureConfigurationService()->getLetterfileConfiguration(),
+                                 'levels'                    => $signatureService->getLetterfileService()
+                                     ->getSignatureConfigurationService()->getLevels()
+                             ]);
     }
 
     public function documentSectionsAction()
@@ -213,7 +224,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         $this->flashMessenger()->addWarningMessage(
                             "Rien à ajouter"
                         );
-                    } else {
+                    }
+                    else {
                         $persons = $this->getProjectGrantService()->getPersonService()->getPersonsByIds($personIds);
                         $adder = $this->getCurrentPerson();
                         $this->getProjectGrantService()->getPersonService()->addDeclarersToBlacklist(
@@ -249,9 +261,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         return [
             "useWhiteList" => $useWhitelist,
-            "whitelist" => $useWhitelist ? $this->getProjectGrantService()->getPersonService()->getDeclarersWhitelist(
-            ) : null,
-            "blacklist" => $this->getProjectGrantService()->getPersonService()->getDeclarersBlacklist()
+            "whitelist"    => $useWhitelist ? $this->getProjectGrantService()->getPersonService(
+            )->getDeclarersWhitelist() : null,
+            "blacklist"    => $this->getProjectGrantService()->getPersonService()->getDeclarersBlacklist()
         ];
     }
 
@@ -281,7 +293,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             return $this->getResponseOk($response);
         }
         return [
-            'log_file' => $this->getOscarConfigurationService()->getLoggerFilePath(),
+            'log_file'  => $this->getOscarConfigurationService()->getLoggerFilePath(),
             'log_level' => $this->getOscarConfigurationService()->getLoggerLevel(),
         ];
     }
@@ -292,7 +304,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if ($this->isAjax() || $this->params()->fromQuery('f') == 'json') {
             $datas = [
                 'accounts' => $this->getSpentService()->getUsedAccount(),
-                'masses' => $this->getOscarConfigurationService()->getMasses()
+                'masses'   => $this->getOscarConfigurationService()->getMasses()
             ];
             return $this->jsonOutput($datas);
         }
@@ -312,8 +324,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
 
         $organization_leader_role = [
-            'config' => $config,
-            'rolesInOrganization' => $rolesInOrganization,
+            'config'                    => $config,
+            'rolesInOrganization'       => $rolesInOrganization,
             'roleOrganizationPrincipal' => $rolesOrganisationPrincipal
         ];
 
@@ -391,7 +403,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         throw new OscarException(
                             "Vous ne pouvez pas appliquer le mode strict avec une expression régulière vide"
                         );
-                    } else {
+                    }
+                    else {
                         // Contrôler la regex
                         $this->getOscarConfigurationService()->setStrict($strict);
                         $this->getOscarConfigurationService()->saveEditableConfKey(
@@ -409,28 +422,36 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $pfiFixed = $this->getOscarConfigurationService()->getPfiRegex();
         return [
-            OscarConfigurationService::spents_account_filter => implode(
+            OscarConfigurationService::spents_account_filter        => implode(
                 ', ',
                 $this->getOscarConfigurationService()->getSpentAccountFilter()
             ),
-            OscarConfigurationService::activity_request_limit => $this->getOscarConfigurationService(
+            OscarConfigurationService::activity_request_limit       => $this->getOscarConfigurationService(
             )->getActivityRequestLimit(),
-            'timesheet_preview' => $this->getOscarConfigurationService()->getTimesheetPreview(),
-            'timesheet_excel' => $this->getOscarConfigurationService()->getTimesheetExcel(),
-            'allow_numerotation_custom' => $this->getOscarConfigurationService()->getNumerotationEditable(),
-            'themes' => $this->getOscarConfigurationService()->getConfiguration('themes'),
-            'theme' => $this->getOscarConfigurationService()->getTheme(),
-            'export' => [
-                'separator' => $this->getOscarConfigurationService()->getExportSeparator(),
+            'timesheet_preview'                                     => $this->getOscarConfigurationService(
+            )->getTimesheetPreview(),
+            'timesheet_excel'                                       => $this->getOscarConfigurationService(
+            )->getTimesheetExcel(),
+            'allow_numerotation_custom'                             => $this->getOscarConfigurationService(
+            )->getNumerotationEditable(),
+            'themes'                                                => $this->getOscarConfigurationService(
+            )->getConfiguration('themes'),
+            'theme'                                                 => $this->getOscarConfigurationService()->getTheme(
+            ),
+            'export'                                                => [
+                'separator'  => $this->getOscarConfigurationService()->getExportSeparator(),
                 'dateformat' => $this->getOscarConfigurationService()->getExportDateFormat()
             ],
-            'organization_leader_role' => $organization_leader_role,
+            'organization_leader_role'                              => $organization_leader_role,
             OscarConfigurationService::document_use_version_in_name => $this->getOscarConfigurationService(
             )->getDocumentUseVersionInName(),
-            OscarConfigurationService::pfi_strict => $this->getOscarConfigurationService()->isPfiStrict(),
-            OscarConfigurationService::pfi_strict_format => $pfiFixed,
-            "pfi_default_format" => $this->getOscarConfigurationService()->getConfiguration('validation.pfi'),
-            "allow_node_selection" => $this->getOscarConfigurationService()->isAllowNodeSelection(),
+            OscarConfigurationService::pfi_strict                   => $this->getOscarConfigurationService(
+            )->isPfiStrict(),
+            OscarConfigurationService::pfi_strict_format            => $pfiFixed,
+            "pfi_default_format"                                    => $this->getOscarConfigurationService(
+            )->getConfiguration('validation.pfi'),
+            "allow_node_selection"                                  => $this->getOscarConfigurationService(
+            )->isAllowNodeSelection(),
         ];
     }
 
@@ -462,7 +483,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     case 'GET':
                         return $this->jsonOutput(
                             [
-                                "referenced" => $usedKey,
+                                "referenced"   => $usedKey,
                                 "unreferenced" => $unreferenced
                             ]
                         );
@@ -482,7 +503,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     default:
                         return $this->getResponseInternalError();
                 }
-            } else {
+            }
+            else {
                 switch ($method) {
                     case 'GET':
                         $numerotation = $this->getOscarConfigurationService()->getEditableConfKey('numerotation', []);
@@ -541,8 +563,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
         return [
             "invalidActivityNumbers" => $invalidActivityNumbers,
-            "referenced" => $usedKey,
-            "unreferenced" => $unreferenced
+            "referenced"             => $usedKey,
+            "unreferenced"           => $unreferenced
         ];
     }
 
@@ -565,7 +587,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             if (!$tva) {
                                 return $this->getResponseInternalError("Impossible de charger la TVA '$id'");
                             }
-                        } else {
+                        }
+                        else {
                             return $this->getResponseBadRequest("");
                         }
                         $this->getEntityManager()->remove($tva);
@@ -592,7 +615,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             if (!$tva) {
                                 throw new OscarException("Impossible de charger la TVA '$id'");
                             }
-                        } else {
+                        }
+                        else {
                             $tva = new TVA();
                             $this->getEntityManager()->persist($tva);
                         }
@@ -789,8 +813,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $labels = [
             'person_organization' => "Affection des personnes aux organisations",
-            'organization' => "Organisations/Structures",
-            'person' => "Personnes",
+            'organization'        => "Organisations/Structures",
+            'person'              => "Personnes",
         ];
 
         $out = [];
@@ -802,8 +826,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
             foreach ($connectorsConfig as $tag => $data) {
                 if (!array_key_exists($tag, $out[$connectorType])) {
                     $out[$connectorType][$tag] = [
-                        'label' => $tag,
-                        'class' => array_key_exists('class', $data) ? $data['class'] : null,
+                        'label'  => $tag,
+                        'class'  => array_key_exists('class', $data) ? $data['class'] : null,
                         'params' => array_key_exists('params', $data) ? $data['params'] : null,
                     ];
                 }
@@ -811,7 +835,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
         return [
             'connectors' => $out,
-            'labels' => $labels
+            'labels'     => $labels
         ];
     }
 
@@ -870,7 +894,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $config = $connector->getConfigData(true);
         return [
-            'config' => $config,
+            'config'        => $config,
             'connectorType' => $connectorType,
             'connectorName' => $connectorName
         ];
@@ -913,7 +937,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $connector = $this->getConnectorService()->getConnector($connectorType . '.' . $connectorName);
             $repport = $connector->execute(true);
             return [
-                'repport' => $repport,
+                'repport'       => $repport,
                 'connectorType' => $connectorType,
                 'connectorName' => $connectorName,
             ];
@@ -972,7 +996,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if ($idRolePrivilege) {
             switch ($this->getHttpXMethod()) {
             }
-        } else {
+        }
+        else {
             switch ($this->getHttpXMethod()) {
                 case 'PATCH':
                     $this->getOscarUserContextService()->check(Privileges::DROIT_PRIVILEGE_EDITION);
@@ -1005,7 +1030,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                     if ($privilege->hasRole($role)) {
                         $privilege->removeRole($role);
-                    } else {
+                    }
+                    else {
                         $privilege->addRole($role);
                     }
 
@@ -1019,7 +1045,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                     $out = [
                         'privileges' => [],
-                        'roles' => []
+                        'roles'      => []
                     ];
 
                     /** @var Privilege $privilege */
@@ -1250,7 +1276,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 }
 
                 return $this->getResponseBadRequest();
-            } else {
+            }
+            else {
                 // Création
                 if ($this->getHttpXMethod() == "POST") {
                     $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
@@ -1264,7 +1291,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                                 $roleId
                             )
                         );
-                    } else {
+                    }
+                    else {
                         $role = new Role();
                         $this->hydrateRolewithPost($role, $request);
                         $this->getEntityManager()->persist($role);
@@ -1375,7 +1403,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getEntityManager()->flush();
                 return $this->ajaxResponse($role->toArray());
             }
-        } else {
+        }
+        else {
             $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
             $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
             if (!$role) {
@@ -1457,7 +1486,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         /** @var ContractDocumentRepository $documentRepository */
         $documentRepository = $this->getEntityManager()->getRepository(ContractDocument::class);
-
+        $this->getLoggerService()->info("typeDocumentApiAction()");
         switch ($method) {
             case 'GET' :
                 try {
@@ -1465,10 +1494,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $infos = $documentRepository->getInfosTypes();
                     $hasSearchAccess = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_INDEX);
                     $out = [
-                        'untyped_documents' => $documentRepository->countUntypedDocuments(),
-                        'documents_location' => $this->getOscarConfigurationService()->getDocumentDropLocation(),
+                        'untyped_documents'   => $documentRepository->countUntypedDocuments(),
+                        'documents_location'  => $this->getOscarConfigurationService()->getDocumentDropLocation(),
                         'documents_pcru_type' => $this->getOscarConfigurationService()->getPcruContractType(),
-                        'types' => []
+                        'signatureflows'      => $this->getSignatureService()->getSignatureFlows(SignatureConstants::FORMAT_ARRAY),
+                        'types'               => []
                     ];
 
                     foreach ($types as $t) {
@@ -1491,15 +1521,17 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 }
 
             case 'POST' :
-
+                $this->getLoggerService()->info(" > POST");
 
                 try {
                     $id = null;
                     $label = $this->params()->fromPost('label');
+                    $signatureflow_id = intval($this->params()->fromPost('signatureflow_id'));
                     $description = $this->params()->fromPost('description');
                     $default = $this->params()->fromPost('default', '');
+                    $this->getLoggerService()->info("Enregistrement de type de document '$signatureflow_id'");
 
-                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on');
+                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on', $signatureflow_id);
                 } catch (\Exception $e) {
                     return $this->jsonErrorLogged("Impossible d'ajouter le type de document", $e);
                 }
@@ -1508,6 +1540,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 break;
 
             case 'PUT' :
+                $this->getLoggerService()->info(" > PUT");
                 try {
                     $_PUT = $this->getPutDataJson();
                     $id = $_PUT->get('typedocumentid', null);
@@ -1517,7 +1550,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $label = $_PUT->get('label');
                     $description = $_PUT->get('description');
                     $default = $_PUT->get('default', '');
-                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on');
+                    $signatureflow_id = intval($_PUT->get('signatureflow_id'));
+                    $this->getLoggerService()->info(" > $id, $label, $description, $signatureflow_id");
+
+                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on', $signatureflow_id);
                     return $this->getResponseOk();
                 } catch (\Exception $e) {
                     return $this->jsonErrorLogged(_("Impossible de mettre à jour le type de document"), $e);
@@ -1540,20 +1576,20 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         $method = $this->getHttpXMethod();
         $messages = [
-            'declarersRelance1' => $this->getOscarConfigurationService()->getDeclarersRelance1(),
-            'declarersRelanceJour1' => $this->getOscarConfigurationService()->getDeclarersRelanceJour1(),
-            'declarersRelance2' => $this->getOscarConfigurationService()->getDeclarersRelance2(),
-            'declarersRelanceJour2' => $this->getOscarConfigurationService()->getDeclarersRelanceJour2(),
+            'declarersRelance1'              => $this->getOscarConfigurationService()->getDeclarersRelance1(),
+            'declarersRelanceJour1'          => $this->getOscarConfigurationService()->getDeclarersRelanceJour1(),
+            'declarersRelance2'              => $this->getOscarConfigurationService()->getDeclarersRelance2(),
+            'declarersRelanceJour2'          => $this->getOscarConfigurationService()->getDeclarersRelanceJour2(),
             'declarersRelanceConflitMessage' => $this->getOscarConfigurationService(
             )->getDeclarersRelanceConflitMessage(),
-            'declarersRelanceConflitJour' => $this->getOscarConfigurationService()->getDeclarersRelanceConflitJour(),
+            'declarersRelanceConflitJour'    => $this->getOscarConfigurationService()->getDeclarersRelanceConflitJour(),
             /**  **/
-            'validatorsRelance1' => $this->getOscarConfigurationService()->getValidatorsRelance1(),
-            'validatorsRelanceJour1' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour1(),
-            'validatorsRelance2' => $this->getOscarConfigurationService()->getValidatorsRelance2(),
-            'validatorsRelanceJour2' => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
-            'highdelayRelance' => $this->getOscarConfigurationService()->getHighDelayRelance(),
-            'highdelayRelanceJour' => $this->getOscarConfigurationService()->getHighDelayRelanceJour(),
+            'validatorsRelance1'             => $this->getOscarConfigurationService()->getValidatorsRelance1(),
+            'validatorsRelanceJour1'         => $this->getOscarConfigurationService()->getvalidatorsRelanceJour1(),
+            'validatorsRelance2'             => $this->getOscarConfigurationService()->getValidatorsRelance2(),
+            'validatorsRelanceJour2'         => $this->getOscarConfigurationService()->getvalidatorsRelanceJour2(),
+            'highdelayRelance'               => $this->getOscarConfigurationService()->getHighDelayRelance(),
+            'highdelayRelanceJour'           => $this->getOscarConfigurationService()->getHighDelayRelanceJour(),
         ];
 
         switch ($method) {
@@ -1628,7 +1664,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
 
             return [];
-        } elseif ($method == "POST") {
+        }
+        elseif ($method == "POST") {
             // Enregistrement des associations TYPE OSCAR <> TYPE PCRU
             $datas = $this->getJsonPosted();
             $idTypeActivity = $datas['oscar_id'];
@@ -1640,7 +1677,8 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getLoggerService()->error($e->getMessage());
                 return $this->getResponseInternalError($e->getMessage());
             }
-        } else {
+        }
+        else {
             return $this->getResponseBadRequest("La méthode de transmission ne fonctionne pas");
         }
     }
@@ -1672,27 +1710,30 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $response['configuration_pcru'] = [
 
                     // FTP
-                    'pcru_enabled' => $this->getOscarConfigurationService()->getPcruEnabled(),
-                    'pcru_host' => $this->getOscarConfigurationService()->getEditableConfKey(
+                    'pcru_enabled'       => $this->getOscarConfigurationService()->getPcruEnabled(),
+                    'pcru_host'          => $this->getOscarConfigurationService()->getEditableConfKey(
                         'pcru_host',
                         'PCRU-Depot.dr14.cnrs.fr'
                     ),
-                    'pcru_user' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
-                    'pcru_pass' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
-                    'pcru_ssh' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
-                    'pcru_port' => $this->getOscarConfigurationService()->getEditableConfKey('pcru_port', 31000),
+                    'pcru_user'          => $this->getOscarConfigurationService()->getEditableConfKey('pcru_user', ''),
+                    'pcru_pass'          => $this->getOscarConfigurationService()->getEditableConfKey('pcru_pass', ''),
+                    'pcru_ssh'           => $this->getOscarConfigurationService()->getEditableConfKey('pcru_ssh', ''),
+                    'pcru_port'          => $this->getOscarConfigurationService()->getEditableConfKey(
+                        'pcru_port',
+                        31000
+                    ),
 
                     // Conf
                     'pcru_incharge_role' => $this->getOscarConfigurationService()->getPcruInChargeRole(),
                     'pcru_partner_roles' => $this->getOscarConfigurationService()->getPcruPartnerRoles(),
-                    'pcru_unit_roles' => $this->getOscarConfigurationService()->getPcruUnitRoles(),
+                    'pcru_unit_roles'    => $this->getOscarConfigurationService()->getPcruUnitRoles(),
                     'pcru_contract_type' => $this->getOscarConfigurationService()->getPcruContractType(),
 
                     //
-                    'incharge_roles' => $inchargeRoles,
-                    'partner_roles' => $partnerRoles,
-                    'unit_roles' => $unitRoles,
-                    'contract_types' => $contractTypes,
+                    'incharge_roles'     => $inchargeRoles,
+                    'partner_roles'      => $partnerRoles,
+                    'unit_roles'         => $unitRoles,
+                    'contract_types'     => $contractTypes,
 
 
                 ];
@@ -1703,11 +1744,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 $this->getLoggerService()->info("Modification de la configuration PCRU");
                 $data = [
                     'pcru_enabled' => $this->params()->fromPost('pcru_enabled') == 'true' ? true : false,
-                    'pcru_host' => $this->params()->fromPost('host'),
-                    'pcru_port' => $this->params()->fromPost('port'),
-                    'pcru_user' => $this->params()->fromPost('user'),
-                    'pcru_pass' => $this->params()->fromPost('pass'),
-                    'pcru_ssh' => $this->params()->fromPost('ssh'),
+                    'pcru_host'    => $this->params()->fromPost('host'),
+                    'pcru_port'    => $this->params()->fromPost('port'),
+                    'pcru_user'    => $this->params()->fromPost('user'),
+                    'pcru_pass'    => $this->params()->fromPost('pass'),
+                    'pcru_ssh'     => $this->params()->fromPost('ssh'),
                 ];
 
                 $partnerRolesPosted = $this->params()->fromPost('pcru_partner_roles', []);
