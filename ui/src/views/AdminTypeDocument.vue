@@ -20,6 +20,14 @@
           </div>
 
           <div class="form-group">
+            <label for="signatureflow">Procédure de signature</label>
+            <select name="signatureflow" id="signatureflow" v-model="form.signatureflow_id">
+              <option value="">Aucune</option>
+              <option v-for="s in signatureflows" :value="s.id">{{ s.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="typedoc_default">
               Par défaut
               <input id='typedoc_default' type="checkbox" class="form-control" v-model="form.default" name="default"/>
@@ -63,6 +71,11 @@
                 {{ typedoc.documents_total }} document(s)
               </a>
               <em v-else>Aucun document</em>
+              <span v-if="typedoc.signatureflow_id" class="cartouche info">
+                Procédure : <strong>
+                {{ signatureFlow(typedoc.signatureflow_id).label }}
+              </strong>
+              </span>
             </span>
           </h1>
           <nav class="card-footer" v-if="manage">
@@ -90,8 +103,9 @@
           <p>
             Type de document utilisé pour les envois PCRU :<br>
             <strong>{{ documents_pcru_type }}</strong>
-
           </p>
+          <p>Procédures de signature disponibles : </p>
+          <pre>{{ signatureflows }}</pre>
         </div>
         <template v-if="untyped_documents">
           <div class="alert alert-danger">
@@ -99,19 +113,20 @@
               <i class="icon-attention-1"></i>
               Documents non-typés détéctés</h3>
             <strong>Attention</strong>, il y'a <strong>{{ untyped_documents }}</strong> documents sans type de document.
-            Ils correspondent généralement à des documents envoyés via les demandes d'activités ou envoyés dans une version plus
+            Ils correspondent généralement à des documents envoyés via les demandes d'activités ou envoyés dans une
+            version plus
             ancienne de Oscar. <br>
             Vous pouvez leurs attribuer automatiquement un type avec la procédure ci-dessous :
             <hr>
             <form action="" method="post">
               <input type="hidden" name="action" value="migrate">
               <label for="migrator">
-              Migrer vers ce type
-              <select v-model="migrate_dest" id="migrator" class="form-control" name="destination">
-                <option v-for="t in types" :value="t.id">{{ t.label }}</option>
-              </select>
+                Migrer vers ce type
+                <select v-model="migrate_dest" id="migrator" class="form-control" name="destination">
+                  <option v-for="t in types" :value="t.id">{{ t.label }}</option>
+                </select>
               </label>
-              <button type="submit" class="btn btn-success" :class="{'disabled': !migrate_dest }" >
+              <button type="submit" class="btn btn-success" :class="{'disabled': !migrate_dest }">
                 Migrer les documents non-typés
               </button>
             </form>
@@ -148,6 +163,7 @@ export default {
       untyped_documents: 0,
       documents_location: "",
       documents_pcru_type: "",
+      signatureflows: [],
       migrate_dest: null
     }
   },
@@ -157,6 +173,10 @@ export default {
     }
   },
   methods: {
+
+    signatureFlow(id) {
+      return this.signatureflows.find( s => s.id == id);
+    },
 
     formNew() {
       this.form = {
@@ -176,6 +196,7 @@ export default {
         let json = {
           'typedocumentid': this.form.id,
           'label': this.form.label,
+          'signatureflow_id': this.form.signatureflow_id,
           'description': this.form.description,
           'default': this.form.default ? 'on' : ''
         };
@@ -247,6 +268,7 @@ export default {
             this.untyped_documents = response.data.untyped_documents;
             this.documents_location = response.data.documents_location;
             this.documents_pcru_type = response.data.documents_pcru_type;
+            this.signatureflows = response.data.signatureflows;
           })
           .catch(err => flashMessage('error', "Impossible de charger les types de documents : " + err))
           .finally(() => {

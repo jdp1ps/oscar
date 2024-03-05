@@ -97,7 +97,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         if (!is_null($document)) {
             return $this->getOscarConfigurationService()->getDocumentRealpath($document);
-        } else {
+        }
+        else {
             return $this->getOscarConfigurationService()->getDocumentDropLocation();
         }
     }
@@ -167,7 +168,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 throw new OscarException("Impossible de supprimer le document : " . $exception->getMessage());
             }
             $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
-        } else {
+        }
+        else {
             return $this->getResponseUnauthorized("Vous ne pouvez pas supprimer ce document");
         }
     }
@@ -184,24 +186,23 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         /** @var Request $request */
         $request = $this->getRequest();
         if ($request->isPost()) {
-
-
             $document = $this->getContractDocumentService()->getDocument($request->getPost('documentId'));
 
-            if( !($this->getOscarUserContextService()->getAccessDocument($document)['write'] === true) ){
+            if (!($this->getOscarUserContextService()->getAccessDocument($document)['write'] === true)) {
                 return $this->getResponseUnauthorized("Vous ne pouvez pas modifier ce document");
             }
 
             // Gestion de l'onglet
             $tabDest = $document->getTabDocument();
             $tabDestId = intval($request->getPost()->get('tabDocument'));
-            if( $tabDestId ){
+            if ($tabDestId) {
                 $tabDest = $this->getContractDocumentService()->getContractTabDocument($tabDestId);
-                if( $tabDestId != $document->getTabDocument()->getId() ){
+                if ($tabDestId != $document->getTabDocument()->getId()) {
                     // On regarde si on a le droit d'accès à l'onglet
-                    if( $this->getOscarUserContextService()->getAccessTabDocument($tabDest)['write'] === true ){
+                    if ($this->getOscarUserContextService()->getAccessTabDocument($tabDest)['write'] === true) {
                         $document->setTabDocument($tabDest);
-                    } else {
+                    }
+                    else {
                         return $this->getResponseUnauthorized("Vous n'avez pas accès à l'onglet de destination");
                     }
                 }
@@ -214,14 +215,14 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
 
             // Privé
-            $privateDocument = (bool) $request->getPost('private', false);
+            $privateDocument = (bool)$request->getPost('private', false);
 
             // Personnes
             $idsPersons = (trim($request->getPost('persons')) !== "") ? explode(",", $request->getPost('persons')) : [];
 
             // Traitement
             $succesManageDocuments = $this->manageDocsInTab($document, $idsPersons, $tabDest, $type, $privateDocument);
-            if( !$succesManageDocuments ){
+            if (!$succesManageDocuments) {
                 return $this->getResponseBadRequest("Impossible de modifier le document");
             }
 
@@ -242,108 +243,84 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         $datas = [
             'informations' => '',
-            'type' => 0,
-            'error' => '',
+            'type'         => 0,
+            'error'        => '',
         ];
+
         $idActivity = $this->params()->fromRoute('idactivity');
         $activity = $this->getActivityService()->getActivityById($idActivity);
         $idTab = $this->params()->fromRoute('idtab') === "private" ? null : $this->params()->fromRoute('idtab');
+        $private = $this->params()->fromPost('private') === "1" ? true : false;
+        $idType = intval($this->params()->fromPost('type'));
+        $url = boolval($this->params()->fromPost('url'));
+        $dateDeposit = $this->params()->fromPost('dateDeposit');
+        $persons = $this->params()->fromPost('persons');
+        if ($dateDeposit) {
+            $dateDeposit = new \DateTime($dateDeposit);
+        } else {
+            $dateDeposit = null;
+        }
+        $dateSend = $this->params()->fromPost('dateSend');
+        if ($dateSend) {
+            $dateSend = new \DateTime($dateSend);
+        } else {
+            $dateSend = null;
+        }
+        $informations = trim($this->params()->fromPost('informations'));
+        $privatePersons = [];
 
-        if ($idTab === 'private' && !$this->getOscarUserContextService()->hasPrivileges(
+        $this->getLoggerService()->debug(
+            "ContractDocumentController.upload(
+            idActivity:$idActivity, 
+            idTab:$idTab, 
+            idType:$idType, 
+            persons:$persons, 
+            informations:$informations, 
+            dateDeposit:" . ($dateDeposit ? $dateDeposit->format('Y-m-d') : 'N.A.') . ", 
+            dateSend:" . ($dateSend ? $dateSend->format('Y-m-d') : 'N.A.') . ", 
+            private: $private)"
+        );
+
+        // Document privé
+        if ($private) {
+            if (!$this->getOscarUserContextService()->hasPrivileges(
                 Privileges::ACTIVITY_DOCUMENT_MANAGE,
                 $activity
             )) {
-            return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
-        } else {
-            $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
-            if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
-                return $this->getResponseUnauthorized(
-                    "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
-                );
+                return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
+            }
+            foreach (implode(',', $persons) as $personId) {
+                $personId = intval($personId);
+                if ($personId) {
+                    $privatePersons[] = $personId;
+                }
             }
         }
 
-        if( $this->getRequest()->getPost('url') ){
-            $this->getLoggerService()->info(print_r($_POST, true));
-            try {
-                $document = new ContractDocument();
-                $document
-                    ->setVersion(1)
-                    ->setDateUpdoad(new \DateTime())
-                    ->setFileName($this->getRequest()->getPost('label_url'))
-                    ->setPath($this->getRequest()->getPost('url'))
-                    ->setLocation(ContractDocument::LOCATION_URL)
-                    ->setFileSize(0)
-                    ->setFileTypeMime("")
-                    ->setInformation($this->getRequest()->getPost('informations'))
-                    ->setPerson($this->getCurrentPerson())
-                    ->setTabDocument($this->getContractDocumentService()->getContractTabDocument(
-                        $this->getRequest()->getPost('tab')
-                    ))
-                    ->setTypeDocument($this->getContractDocumentService()->getContractDocumentType(
-                        $this->getRequest()->getPost('type')
-                    ))
-                    ->setGrant($activity)
-                    ->setDateDeposit(new \DateTime())
-                    ->setDateSend(new \DateTime());
-
-                $this->getEntityManager()->persist($document);
-                $this->getEntityManager()->flush($document);
-                return $this->jsonOutput(['message' => 'ok']);
-            } catch (Exception $e) {
-                return $this->getResponseInternalError($e->getMessage());
-            }
+        // Récupération des informations
+        $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
+        if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
+            return $this->getResponseUnauthorized(
+                "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
+            );
         }
 
         try {
-            // Get ID doc pour remplacement ou ajout
-            $docId = $this->params()->fromRoute('id', null);
-            // Les injections de service nécessaires pour le service de traitement upload
-            $documentService = $this->getVersionnedDocumentService();
-            $oscarUserContext = $this->getOscarUserContext();
-            $notificationService = $this->getNotificationService();
-            $activityLogService = $this->getActivityLogService();
-            $oscarConfigurationService = $this->getOscarConfigurationService();
-            /** $serviceUpload instanciation */
-            $serviceUpload = new ServiceContextUpload
-            (
-                $this->getRequest(),
-                $docId,
-                $documentService,
-                $datas,
-                $idActivity,
+            $this->getContractDocumentService()->uploadContractDocument(
+                $_FILES['file'],
                 $activity,
-                $oscarUserContext,
-                $notificationService,
-                $activityLogService,
-                $oscarConfigurationService
+                $tabDocument,
+                $this->getContractDocumentService()->getContractDocumentType($idType),
+                $this->getCurrentPerson(),
+                $privatePersons,
+                $dateDeposit,
+                $dateSend,
+                $informations,
+                $url
             );
-            $processUpload = $serviceUpload->processUpload();
-            // IF TRUE =-> POSTS
-            if (true === $processUpload) {
-                switch ($serviceUpload->getStrategy()->getEtat()) {
-                    case true:
-                        // Infos juste pour xdebug
-                        $infos = $serviceUpload->getStrategy()->getDatas();
-                        if ($infos['error']) {
-                            $datas['error'] = $infos['error'];
-                            return $this->getResponseInternalError($infos['error']);
-                        } else {
-                            $this->redirect()->toRoute(
-                                'contract/show',
-                                ['id' => $serviceUpload->getStrategy()->getDatas()['activityId']]
-                            );
-                        }
-                        break;
-                    default:
-                        throw new Exception(
-                            "Erreur arrivé dans le cas par défaut switch case ? -> Méthode : " . __METHOD__ . " Fichier : " . __FILE__ . " Ligne : " . __LINE__
-                        );
-                        break;
-                }
-            } else {
-                throw new Exception("Accès interdit en dehors de la soumission de données");
-            }
+            return new JsonModel([
+                'response' => 'ok'
+                                 ]);
         } catch (Exception $e) {
             // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
             $this->getLoggerService()->error($e->getMessage());
@@ -362,7 +339,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         /** @var ContractDocument $doc */
         $doc = $this->getContractDocumentService()->getDocument($idDoc);
 
-        if( !$this->getOscarUserContextService()->contractDocumentRead($doc) ){
+        if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
             return $this->getResponseUnauthorized("Vous n'avez pas accès à ce document");
         }
 
@@ -374,13 +351,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $idDoc
         );
 
-        $filename = $doc->getFileName();
-
-        // Utilisation du numéro de version ?
-        if ($this->getOscarConfigurationService()->getDocumentUseVersionInName() === true) {
-            $version = $doc->getVersion();
-            $filename = preg_replace('/(.*)(\.\w*)/', '$1-version-' . $version . '$2', $filename);
-        }
         try {
             $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
             //header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -391,7 +361,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             header('Expires: 0');
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
-            header('Content-Length: '. filesize($sourceDoc));
+            header('Content-Length: ' . filesize($sourceDoc));
             readfile($sourceDoc);
         } catch (Exception $e) {
             $this->getLoggerService()->error("Téléchargement du fichier impossible : " . $e->getMessage());
@@ -421,10 +391,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $pathDocumentsConfig = $this->getOscarConfigurationService()->getDocumentDropLocation();
 
         // 1 : On va chercher toutes les versions d'un même document
-        $documents = $this->getContractDocumentService()->getContractDocumentRepository()->getDocumentsForFilenameAndActivity(
+        $documents = $this->getContractDocumentService()->getContractDocumentRepository(
+        )->getDocumentsForFilenameAndActivity(
             $document
         );
-
 
 
         $destinationFolder = null;

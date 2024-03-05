@@ -8,6 +8,7 @@
 namespace Oscar\Service;
 
 
+use Cocur\Slugify\Slugify;
 use Jacksay\PhpFileExtension\Dictonary\ArchiveDictonary;
 use Jacksay\PhpFileExtension\Dictonary\DocumentDictionary;
 use Jacksay\PhpFileExtension\Dictonary\ImageDictonary;
@@ -18,14 +19,13 @@ use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Laminas\EventManager\Event;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
-use Oscar\Entity\ContractType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
+use Oscar\Entity\PersonRepository;
 use Oscar\Entity\TabDocument;
-use Oscar\Entity\TabsDocumentsRepository;
 use Oscar\Entity\TypeDocument;
 use Oscar\Exception\OscarException;
-use Oscar\Provider\Privileges;
+use Oscar\Strategy\Upload\FileUploadStandard;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -35,15 +35,14 @@ use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\FileSystemUtils;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenSignature\Service\ProcessServiceAwareTrait;
+use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
 class ContractDocumentService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
                                          UseActivityLogService
 {
-    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait, UseActivityLogServiceTrait;
+    use UseOscarConfigurationServiceTrait, UseEntityManagerTrait, UseLoggerServiceTrait,
+        UseActivityLogServiceTrait, SignatureServiceAwareTrait, ProcessServiceAwareTrait;
 
     /**
      * @param Activity $grant
@@ -89,6 +88,123 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                 ->addExtension('text/csv', 'csv', 'Comma Separated Values');
         }
         return $manager;
+    }
+
+    /**
+     * @param array $file
+     * @param Activity $activity
+     * @param TabDocument $tabDocument
+     * @param TypeDocument $typeDocument
+     * @param Person|null $sender
+     * @param array $privatePersons
+     * @param \DateTime|null $dateDeposit
+     * @param \DateTime|null $dateSend
+     * @param string $description
+     * @param bool $url
+     * @return void
+     * @throws OscarException
+     * @throws \Doctrine\ORM\Exception\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function uploadContractDocument(
+        array $file,
+        Activity $activity,
+        TabDocument $tabDocument,
+        TypeDocument $typeDocument,
+        ?Person $sender,
+        array $privatePersons,
+        \DateTime|null $dateDeposit,
+        \DateTime|null $dateSend,
+        string $description,
+        bool $url,
+    ) :void
+    {
+        $destination = $this->getOscarConfigurationService()->getDocumentDropLocation();
+        $mimes = $this->getOscarConfigurationService()->getDocumentExtensions();
+
+        try {
+            $originalFilename = $file['name'];
+            $type = $file['type'];
+
+            $slugify = new Slugify();
+            $renamed = sprintf(
+                "oscar-%s-%s-%s-%s",
+                $activity->getId(),
+                1,
+                substr(uniqid("", true),0,4),
+                $slugify->slugify($originalFilename)
+            );
+            $this->getLoggerService()->info("Upload du fichier '$originalFilename' vers '$destination/$renamed [$type]");
+
+            // upload
+            $uploader = new FileUploadStandard();
+            $uploader->setDestination($destination)
+                ->setFilename($renamed)
+                ->setMimesAllowed($mimes);
+            $uploader->updoad($file);
+            $this->getLoggerService()->info("Upload ok");
+        } catch (\Exception $e) {
+            $this->getLoggerService()->critical("UPLOAD ERROR : " . $e->getMessage());
+            throw new OscarException('UPLOAD ERROR : Impossible de téléverser votre fichier');
+        }
+
+        // Création du document
+        $document = new ContractDocument();
+        $this->getEntityManager()->persist($document);
+
+
+        if($privatePersons){
+            $this->getLoggerService()->debug("Traitement des accès privés");
+            try {
+                /** @var PersonRepository $personRepository */
+                $personRepository = $this->getEntityManager()->getRepository(Person::class);
+                $persons = $personRepository->getPersonsByIds($privatePersons);
+                foreach ($persons as $p) {
+                    $this->getLoggerService()->debug(" - Ajout de '$p'");
+                    $document->addPerson($p);
+                }
+                $document->setPrivate(true);
+            }catch (\Exception $exception){
+                $this->getLoggerService()->critical("Create activity document error : " . $exception->getMessage());
+                throw new OscarException("Error lors du chargement des personnes");
+            }
+        }
+
+        $document
+            ->setVersion(1)
+            ->setDateUpdoad(new \DateTime())
+            ->setFileName($uploader->getFilename())
+            ->setPath($uploader->getUploadName())
+            ->setLocation(ContractDocument::LOCATION_LOCAL_FILE)
+            ->setFileSize(0)
+            ->setFileTypeMime("")
+            ->setPerson($sender)
+            ->setTabDocument($tabDocument)
+            ->setTypeDocument($typeDocument)
+            ->setGrant($activity)
+            ->setInformation($description)
+            ->setDateDeposit($dateDeposit)
+            ->setDateSend($dateSend);
+
+        if( $typeDocument->getSignatureFlow() ){
+
+            $uploadPath = $uploader->getUploadPath();
+            // Création du processus
+            $this->getLoggerService()->debug("Traitement du processus de signature pour '$uploadPath'");
+            $signatureFlow = $typeDocument->getSignatureFlow();
+            $process = $this->getProcessService()->createUnconfiguredProcess($uploadPath, $signatureFlow->getId());
+
+            $datas = $this->getSignatureService()->createSignatureFlowDatasById("", $signatureFlow->getId(), ['activity_id' => $activity->getId()]);
+            $this->getLoggerService()->debug("Données " . json_encode($datas['signatureflow'],JSON_PRETTY_PRINT));
+            $this->getProcessService()->configureProcess($process, $datas['signatureflow']);
+            $document->setProcess($process);
+        }
+
+        $this->getLoggerService()->debug("Sauvegarde " . print_r($document->toJson(), true));
+
+
+
+        $this->getEntityManager()->flush();
     }
 
     /**

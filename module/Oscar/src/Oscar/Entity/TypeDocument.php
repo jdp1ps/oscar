@@ -8,6 +8,7 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use UnicaenSignature\Entity\Db\SignatureFlow;
 
 /**
  * Class TypeDocument
@@ -42,6 +43,12 @@ class TypeDocument implements ITrackable
      */
     private bool $default = false;
 
+    /**
+     * @var
+     * @ORM\ManyToOne(targetEntity="UnicaenSignature\Entity\Db\SignatureFlow")
+     */
+    private null|SignatureFlow $signatureFlow;
+
 
     /**
      * @return bool
@@ -57,6 +64,23 @@ class TypeDocument implements ITrackable
     public function isDefault(): bool
     {
         return $this->getDefault();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSignatureFlow(): ?SignatureFlow
+    {
+        return $this->signatureFlow;
+    }
+
+    /**
+     * @param mixed $signatureFlow
+     */
+    public function setSignatureFlow(?SignatureFlow $signatureFlow): self
+    {
+        $this->signatureFlow = $signatureFlow;
+        return $this;
     }
 
     /**
@@ -127,7 +151,6 @@ class TypeDocument implements ITrackable
         return $this->getLabel();
     }
 
-
     function toJson()
     {
         return [
@@ -137,13 +160,13 @@ class TypeDocument implements ITrackable
         ];
     }
 
-
     function toArray()
     {
         return array(
             'id' => $this->getId(),
             'label' => $this->getLabel(),
             'description' => $this->getDescription(),
+            'signatureflow_id' => $this->getSignatureFlow() ? $this->getSignatureFlow()->getId() : null,
             'default' => $this->isDefault()
         );
     }

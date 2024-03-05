@@ -23,6 +23,7 @@ export default defineConfig({
       // make sure to externalize deps that shouldn't be bundled
       // into your library
       input: {
+        activitydocuments: resolve(__dirname, 'src/ActivityDocuments.js'),
         activityspentdetails: resolve(__dirname, 'src/ActivitySpentDetails.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),

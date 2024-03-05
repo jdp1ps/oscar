@@ -26,6 +26,7 @@ use Oscar\Service\ProjectService;
 use Oscar\Service\SpentService;
 use Oscar\Service\TimesheetService;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use UnicaenSignature\Service\SignatureService;
 
 class ProjectGrantControllerFactory implements FactoryInterface
 {
@@ -50,6 +51,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setSpentService($container->get(SpentService::class));
         $c->setContractDocumentService($container->get(ContractDocumentService::class));
         $c->setDocumentFormatterService($container->get(DocumentFormatterService::class));
+        $c->setSignatureService($container->get(SignatureService::class));
         $c->setServiceContainer($container);
         return $c;
     }

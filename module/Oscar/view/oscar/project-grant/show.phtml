@@ -342,74 +342,58 @@
             $manage = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_MANAGE, $entity);
             /** ######## SECTION GESTION DES DOCUMENTS ########## */
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOCUMENT_SHOW, $entity)): ?>
+
                 <section id="documents" class="has-btn">
                     <h2><i class="icon-book"></i> Documents</h2>
-                    <nav>
-                        <?php
-                        $generatedDocumentsJson = [];
-                        foreach ($generatedDocuments as $key => $infos) {
-                            $generatedDocumentsJson[] = [
-                                    'url' => $this->url('contract/generatedocument', ['id' => $entity->getId(), 'doc' => $key ]),
-                                    'label' =>  $infos['label']
-                                ];
-                        }
-                        ?>
-                    </nav>
                     <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CONTRACT_SHOW, $entity)): ?>
-                    <section class="card">
-                        <h4>Contrat signé numériquement</h4>
-                        <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_CONTRACT_SEND, $entity)): ?>
-                            <a href="<?php echo $this->url('contract/process-document-signed-send', ['id'=>$entity->getId() ]) ?>"
-                               class="btn btn-info">
-                                <i class="icon-paper-plane"></i>
-                                Soumettre un contrat pour signature
-                            </a>
-                        <?php endif; ?>
-                    </section>
                     <?php endif; ?>
-                    <div id="docv2"></div>
+                    <div id="activitydocuments"
+                            data-url-upload-new-doc="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>"
+                            data-url-url-documentd-type="<?= $this->url('contractdocument/document-change-type') ?>"
+                            data-url="<?= $this->url('contract/documents-json',['id' => $entity->getId()]) ?>">doc</div>
+                        <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
                     <script>
-                        requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
-                            Vue.use(VueResource);
-
-                            Vue.filter('dateFull', function (date) {
-                                var m = moment(date);
-                                return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
-                            });
-
-                            Vue.filter('dateFullSort', function (date) {
-                                var m = moment(date);
-                                return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
-                            });
-
-                            Vue.filter('filesize', function (octets) {
-                                var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
-                                if (octets == 0) return '0 Octet';
-                                var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
-                                return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                            });
-                            //Vue.config.devtools = true;
-                            new Vue({
-                                el: "#docv2",
-                                render(h) {
-                                    return h(DocumentsActivity, {
-                                        props: {
-                                            url: '<?= $this->url(
-                                                'contract/documents-json',
-                                                ['id' => $entity->getId()]
-                                            ) ?>',
-                                            urlUploadNewDoc:'<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>',
-                                            urlDocumentType: '<?= $this->url(
-                                                'contractdocument/document-change-type'
-                                            ) ?>',
-                                            computedDocuments: <?= json_encode($generatedDocumentsJson) ?>,
-                                            documentTypes: <?= $documentTypes ?>,
-                                            moment: moment
-                                        }
-                                    });
-                                }
-                            });
-                        });
+                        //requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
+                        //    Vue.use(VueResource);
+                        //
+                        //    Vue.filter('dateFull', function (date) {
+                        //        var m = moment(date);
+                        //        return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
+                        //    });
+                        //
+                        //    Vue.filter('dateFullSort', function (date) {
+                        //        var m = moment(date);
+                        //        return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
+                        //    });
+                        //
+                        //    Vue.filter('filesize', function (octets) {
+                        //        var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
+                        //        if (octets == 0) return '0 Octet';
+                        //        var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
+                        //        return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                        //    });
+                        //    //Vue.config.devtools = true;
+                        //    new Vue({
+                        //        el: "#docv2",
+                        //        render(h) {
+                        //            return h(DocumentsActivity, {
+                        //                props: {
+                        //                    url: '<?//= $this->url(
+                        //                        'contract/documents-json',
+                        //                        ['id' => $entity->getId()]
+                        //                    ) ?>//',
+                        //                    urlUploadNewDoc:'<?//= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>//',
+                        //                    urlDocumentType: '<?//= $this->url(
+                        //                        'contractdocument/document-change-type'
+                        //                    ) ?>//',
+                        //                    computedDocuments: <?//= json_encode($generatedDocumentsJson) ?>//,
+                        //                    documentTypes: <?//= $documentTypes ?>//,
+                        //                    moment: moment
+                        //                }
+                        //            });
+                        //        }
+                        //    });
+                        //});
                     </script>
                 </section>
             <?php
@@ -916,13 +900,10 @@
         })
 
         document.querySelector('#cloneBtn').addEventListener('click', function (e) {
-            console.log(activityClone.$children[0]);
-            console.log(activityClone.$children[0].$data);
-            console.log(activityClone.$children[0].$data.displayed);
             e.preventDefault();
             activityClone.$children[0].$data.displayed = true;
-//            activityClone.$.default.displayed = true;
         });
     });
 </script>
+<?php $this->signatureUi()->addJs('src/signature.scss') ?>
 

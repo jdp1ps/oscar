@@ -15,8 +15,24 @@
       "_vendor2.js"
     ]
   },
+  "src/ActivityDocuments.css": {
+    "file": "assets/ActivityDocuments-de109b9e.css",
+    "src": "src/ActivityDocuments.css"
+  },
+  "src/ActivityDocuments.js": {
+    "css": [
+      "assets/ActivityDocuments-de109b9e.css"
+    ],
+    "file": "assets/activitydocuments-f3e981c8.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivityDocuments.js"
+  },
   "src/ActivitySpentDetails.js": {
-    "file": "assets/activityspentdetails-4ad3212d.js",
+    "file": "assets/activityspentdetails-e9584913.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -26,7 +42,7 @@
     "src": "src/ActivitySpentDetails.js"
   },
   "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-17aceb6c.js",
+    "file": "assets/activityspentsynthesis-e829b613.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -36,7 +52,7 @@
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-c113392b.js",
+    "file": "assets/activityworkpackage-98d1d1b0.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js"
@@ -45,7 +61,7 @@
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-176f324a.js",
+    "file": "assets/admintypedocument-cda90bd2.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js",
@@ -62,7 +78,7 @@
     "css": [
       "assets/DeclarersList-87a946a0.css"
     ],
-    "file": "assets/declarerslist-9d77481d.js",
+    "file": "assets/declarerslist-69ebc070.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js"
@@ -78,7 +94,7 @@
     "css": [
       "assets/OrganizationFiche-058e2475.css"
     ],
-    "file": "assets/organizationfiche-431971c0.js",
+    "file": "assets/organizationfiche-a41855e0.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js"
@@ -94,7 +110,7 @@
     "css": [
       "assets/OrganizationSubOrganizations-fcc43dc1.css"
     ],
-    "file": "assets/organizationsuborganizations-2d63da53.js",
+    "file": "assets/organizationsuborganizations-89faeef8.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",

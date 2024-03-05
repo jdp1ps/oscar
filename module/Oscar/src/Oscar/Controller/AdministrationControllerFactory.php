@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Service\ConnectorService;
+use UnicaenSignature\Service\SignatureService;
 
 class AdministrationControllerFactory extends AbstractOscarFactory
 {
@@ -20,6 +21,7 @@ class AdministrationControllerFactory extends AbstractOscarFactory
         $c = new AdministrationController();
         $c->setServiceLocator($container);
         $c->setConnectorService($container->get(ConnectorService::class));
+        $c->setSignatureService($container->get(SignatureService::class));
         $this->init($c, $container);
         return $c;
     }

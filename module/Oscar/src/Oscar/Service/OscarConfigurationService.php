@@ -882,6 +882,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $documentDropLocation;
     }
 
+    public function getDocumentExtensions(): array|null
+    {
+        return $this->getOptionalConfiguration('documents_extensions', null);
+
+    }
+
     /**
      * Retourne le chemin absolue du stockage des documents privés (Activités de recherche)
      *
@@ -935,7 +941,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     public function getDocumentRealpath(ContractDocument $document): string
     {
         $basePath = $this->getDocumentDropLocation();
-        return $basePath . DIRECTORY_SEPARATOR . $document->generatePath();
+        return $basePath . DIRECTORY_SEPARATOR . $document->getPath();
     }
 
     //////////////////////////////////////////////////////////////////////// CONTRATS SIGNES
