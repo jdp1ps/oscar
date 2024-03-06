@@ -253,6 +253,19 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     }
 
     /**
+     * @param int $processId
+     * @return ContractDocument
+     */
+    public function getDocumentByProcessId(int $processId) :ContractDocument
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.process = :process')
+            ->setParameter('process', $processId)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    /**
      * @param int $typeDocumentId
      * @return TypeDocument|null
      */

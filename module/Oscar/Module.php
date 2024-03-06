@@ -59,6 +59,13 @@ class Module
         $cdm->getLoggerService()->info("SIGNATURE EVENT : " . $e->getName());
     }
 
+    public function onProcessSigned( Event $e )
+    {
+        /** @var ContractDocumentService $cdm */
+        $cdm = $this->sm->get(ContractDocumentService::class);
+        $cdm->processSigned($e->getParams());
+    }
+
     // FIX : ZendFramework 3
     public function init(ModuleManager $manager)
     {
@@ -83,7 +90,7 @@ class Module
             $this->onSignatureEvent($e);
         });
         $manager->getEventManager()->getSharedManager()->attach('*', 'process-signed', function ($e) {
-            $this->onSignatureEvent($e);
+            $this->onProcessSigned($e);
         });
         $manager->getEventManager()->getSharedManager()->attach('*', 'process-step', function ($e) {
             $this->onSignatureEvent($e);
