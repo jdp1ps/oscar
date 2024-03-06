@@ -7,6 +7,7 @@ class FileUploadStandard
     private string $filename;
     private string $destination;
     private string $extension;
+    private string $mime;
 
     /**
      * @var string[]
@@ -93,6 +94,14 @@ class FileUploadStandard
     /**
      * @return string
      */
+    public function getMime(): string
+    {
+        return $this->mime;
+    }
+
+    /**
+     * @return string
+     */
     public function getUploadName(): string
     {
         return $this->getFilename() . '.' . $this->getExtension();
@@ -104,6 +113,7 @@ class FileUploadStandard
         if ($filedatas['error'] == 0) {
             $format = $filedatas['type'];
             $name_original = $filedatas['name'];
+            $this->mime = $filedatas['type'];
 
             // Extension par défaut
             $re = '/.*\.(\w*)$/m';

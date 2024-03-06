@@ -10,7 +10,7 @@ $config = array(
         'Laminas\InputFilter',
         'Laminas\Log',
         'Laminas\Mail',
-        'Unicaen\Console',
+        //'Unicaen\Console',
         'Laminas\Mvc\I18n',
         'Laminas\Mvc\Plugin\FlashMessenger',
         'Laminas\Mvc\Plugin\Prg',

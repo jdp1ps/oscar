@@ -65,7 +65,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $idSignature = $evt->getParam('id', null);
         if ($idSignature) {
             $this->getLoggerService()->info("UPDATE triggered 'signature:status' on '$idSignature'");
-        } else {
+        }
+        else {
             $this->getLoggerService()->error("Can't trigger 'signature:status', no ID given");
         }
     }
@@ -117,8 +118,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         \DateTime|null $dateSend,
         string $description,
         bool $url,
-    ) :void
-    {
+    ): void {
         $destination = $this->getOscarConfigurationService()->getDocumentDropLocation();
         $mimes = $this->getOscarConfigurationService()->getDocumentExtensions();
 
@@ -131,10 +131,12 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                 "oscar-%s-%s-%s-%s",
                 $activity->getId(),
                 1,
-                substr(uniqid("", true),0,4),
+                substr(uniqid("", true), 0, 4),
                 $slugify->slugify($originalFilename)
             );
-            $this->getLoggerService()->info("Upload du fichier '$originalFilename' vers '$destination/$renamed [$type]");
+            $this->getLoggerService()->info(
+                "Upload du fichier '$originalFilename' vers '$destination/$renamed [$type]"
+            );
 
             // upload
             $uploader = new FileUploadStandard();
@@ -153,7 +155,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $this->getEntityManager()->persist($document);
 
 
-        if($privatePersons){
+        if ($privatePersons) {
             $this->getLoggerService()->debug("Traitement des accès privés");
             try {
                 /** @var PersonRepository $personRepository */
@@ -164,20 +166,26 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                     $document->addPerson($p);
                 }
                 $document->setPrivate(true);
-            }catch (\Exception $exception){
+            } catch (\Exception $exception) {
                 $this->getLoggerService()->critical("Create activity document error : " . $exception->getMessage());
                 throw new OscarException("Error lors du chargement des personnes");
             }
         }
 
+        $filePath = $uploader->getUploadPath();
+        $fileSize = filesize($filePath);
+        $fileName = $uploader->getUploadName();
+        $fileMime = $uploader->getMime();
+
+
         $document
             ->setVersion(1)
             ->setDateUpdoad(new \DateTime())
-            ->setFileName($uploader->getFilename())
-            ->setPath($uploader->getUploadName())
+            ->setFileName($fileName)
+            ->setPath($fileName)
             ->setLocation(ContractDocument::LOCATION_LOCAL_FILE)
-            ->setFileSize(0)
-            ->setFileTypeMime("")
+            ->setFileTypeMime($fileMime)
+            ->setFileSize($fileSize)
             ->setPerson($sender)
             ->setTabDocument($tabDocument)
             ->setTypeDocument($typeDocument)
@@ -186,25 +194,38 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             ->setDateDeposit($dateDeposit)
             ->setDateSend($dateSend);
 
-        if( $typeDocument->getSignatureFlow() ){
+        $this->getEntityManager()->flush();
 
+        if ($typeDocument->getSignatureFlow()) {
             $uploadPath = $uploader->getUploadPath();
+            // déplacement du fichier
+            $destination = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation()
+                . DIRECTORY_SEPARATOR
+                . $fileName;
+            $this->getLoggerService()->critical("copy '$uploadPath' vers '$destination'");
+            if (!copy($uploadPath, $destination)) {
+                $this->getLoggerService()->critical("Impossible de déplacer '$uploadPath' ver '$destination'");
+                throw new OscarException("Un problème est survenu lors de la création de la procédure de signature");
+            }
+
+
             // Création du processus
             $this->getLoggerService()->debug("Traitement du processus de signature pour '$uploadPath'");
             $signatureFlow = $typeDocument->getSignatureFlow();
-            $process = $this->getProcessService()->createUnconfiguredProcess($uploadPath, $signatureFlow->getId());
+            $process = $this->getProcessService()->createUnconfiguredProcess($fileName, $signatureFlow->getId());
 
-            $datas = $this->getSignatureService()->createSignatureFlowDatasById("", $signatureFlow->getId(), ['activity_id' => $activity->getId()]);
-            $this->getLoggerService()->debug("Données " . json_encode($datas['signatureflow'],JSON_PRETTY_PRINT));
+            $datas = $this->getSignatureService()->createSignatureFlowDatasById(
+                "",
+                $signatureFlow->getId(),
+                ['activity_id' => $activity->getId()]
+            );
+            $this->getLoggerService()->debug("Données " . json_encode($datas['signatureflow'], JSON_PRETTY_PRINT));
             $this->getProcessService()->configureProcess($process, $datas['signatureflow']);
             $document->setProcess($process);
+            $this->getEntityManager()->flush();
+
+            $this->getProcessService()->trigger($process, true);
         }
-
-        $this->getLoggerService()->debug("Sauvegarde " . print_r($document->toJson(), true));
-
-
-
-        $this->getEntityManager()->flush();
     }
 
     /**
@@ -272,7 +293,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         }
 
         foreach ($documents as $document) {
-            $documentPath = $documentLocation . DIRECTORY_SEPARATOR . $document->generatePath();
+            $documentPath = $documentLocation . DIRECTORY_SEPARATOR . $document->getPath();
 
             // Suppression du fichier
             try {
@@ -283,6 +304,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                 );
             }
 
+            $process = $document->getProcess();
+
             // Suppression de l'enregistrement
             try {
                 $this->getEntityManager()->remove($document);
@@ -291,6 +314,18 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                     "Suppression de l'enregistrement DB du document impossible (remove) : " . $exception->getMessage()
                 );
                 throw $exception;
+            }
+
+            // Suppression de l'enregistrement
+            if( $process ){
+                try {
+                    $this->getProcessService()->deleteProcess($process);
+                } catch (\Exception $exception) {
+                    $this->getLoggerService()->error(
+                        "Suppression du processus '$process' associé au document impossible : " . $exception->getMessage()
+                    );
+                    throw $exception;
+                }
             }
 
             try {
@@ -327,7 +362,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $exists = $this->getEntityManager()->getRepository(ContractDocument::class)->findBy(
             [
                 'fileName' => $doc->getFileName(),
-                'grant' => $doc->getGrant(),
+                'grant'    => $doc->getGrant(),
             ]
         );
         $doc->setVersion(count($exists) + 1);
@@ -339,7 +374,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $this->getEntityManager()->persist($doc);
             $this->getEntityManager()->flush($doc);
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -400,5 +436,25 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     public function getDocument(int $id, bool $throw = false)
     {
         return $this->getContractDocumentRepository()->getDocument($id, $throw);
+    }
+
+    public function processSigned(array $params) :void {
+        $process = $this->getProcessService()->getProcessById($params['id']);
+        $document = $this->getContractDocumentRepository()->getDocumentByProcessId($process->getId());
+
+        $doc_content = $this->getProcessService()->getProcessDocumentDatas($process)['datas'];
+        if( $doc_content) {
+            $destination = $this->getDropLocation()
+                . DIRECTORY_SEPARATOR
+                . $document->getPath();
+            if( !file_put_contents($destination, $doc_content) ) {
+                $this->getLoggerService()->critical("Impossible d'envoyer les données dans le fichier");
+                throw new OscarException("Impossible d'envoyer les données dans le fichier");
+            }
+
+        } else {
+            $this->getLoggerService()->critical("Le fichier du process est vide/indisponible");
+            throw new OscarException("Le fichier du process est vide/indisponible");
+        }
     }
 }

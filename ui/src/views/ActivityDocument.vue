@@ -15,6 +15,40 @@
       </button>
     </div>
   </div>
+  <div class="overlay" v-if="processDetails">
+    <div class="overlay-content" style="max-width: 50%">
+      <h2>
+        <small><i class="icon-edit"></i>
+          Procédure</small> <br><strong>{{ processDetails.label }}</strong> <br>
+        <span class="signature-status-101">
+          {{ processDetails.status_text }} -
+          <em>étape {{ processDetails.current_step }} / {{ processDetails.total_steps }}</em>
+        </span>
+        <span class="overlay-closer" @click="handlerProcessDetailsOff">X</span>
+      </h2>
+      <section class="signature" :class="'signature-status-'+s.status" v-for="s in processDetails.steps">
+        <h4>
+          <small>étape {{ s.order }} : </small>
+          <strong>{{ s.label }}</strong>
+          <span class="status"> ({{ s.status_text }})</span>
+        </h4>
+        <ul class="metas">
+          <li class="meta">Parapheur <strong>{{ s.letterfile }}</strong> </li>
+          <li class="meta">Niveau <strong>{{ s.level }}</strong> </li>
+        </ul>
+        <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">
+          <strong class="fullname">{{ r.fullname }}</strong>
+          <em class="email">{{ r.email }}</em>
+          <span class="status">
+            <span class="status-text">{{ r.status_text }}</span>
+          </span>
+        </article>
+      </section>
+      <button class="btn btn-default" @click="handlerProcessDetailsOff">
+        <i class="icon-cancel-outline"></i> Fermer
+      </button>
+    </div>
+  </div>
   <section style="position: relative; min-height: 100px">
     <div class="overlay" v-if="deleteData">
       <div class="overlay-content">
@@ -276,7 +310,6 @@
             <i class="icon-download"></i>
             Téléverser un document
           </button>
-          URL : {{ urlUploadNewDoc }}
         </nav>
         <hr>
         <article class="card xs" v-for="doc in tab.documents" :key="doc.id" :class="{'private-document': doc.private }">
@@ -299,17 +332,15 @@
           <p>
             {{ doc.information }}
           </p>
-          <hr>
-          <section v-if="doc.process && doc.process.status != 200">
-            <h4>Procédure de signature <strong>{{ doc.process.label }} ({{ doc.process.status_text }})</strong></h4>
-            <section class="step" :class="'signature-status-'+s.status" v-for="s in doc.process.steps">
-              <h3>{{ s.label }} ({{ s.status_text }})</h3>
-              <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">
-                {{ r.fullname }}
-              </article>
-            </section>
-          </section>
           <div class="card-content">
+          <section v-if="doc.process && doc.process.status != 200" class="alert alert-info">
+            Procédure de signature <em>{{ doc.process.label }}</em> -
+            <strong>{{ doc.process.status_text }}</strong> -
+            <span>étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span> -
+            <button class="btn btn-xs btn-info" @click="handlerProcessDetailsOn(doc.process)">
+              Détails
+            </button>
+          </section>
               <div v-if="doc.versions.length">
                 <div class="exploder">
                   Versions précédentes :
@@ -438,6 +469,9 @@ export default {
       remoterState: null,
       displayComputed: false,
 
+      // Details
+      processDetails: null,
+
       mode_url: false,
       typesDocuments: [],
 
@@ -508,6 +542,24 @@ export default {
   },
 
   methods: {
+
+    /**
+     * Affichage des détails d'une procédure de signature
+     * @param process
+     */
+    handlerProcessDetailsOn( process ){
+      this.processDetails = process;
+    },
+
+    /**
+     * Masquer les détails d'une procédure de signature
+     * @param process
+     */
+    handlerProcessDetailsOff(){
+      this.processDetails = null;
+    },
+
+
     activeTab(tabId) {
       // Affectation valeur du tab dans lequel on se trouve
       this.tabId = tabId;
