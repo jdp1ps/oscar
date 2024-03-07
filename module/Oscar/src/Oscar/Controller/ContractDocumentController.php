@@ -241,13 +241,25 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function uploadAction()
     {
-        $datas = [
-            'informations' => '',
-            'type'         => 0,
-            'error'        => '',
-        ];
-
+        $action = $this->params()->fromPost('action');
         $idActivity = $this->params()->fromRoute('idactivity');
+
+        if( $action == 'edit' ){
+            $json = $this->params()->fromPost('data');
+            $documentDatas = json_decode($json, true);
+            $this->getLoggerService()->debug(json_encode($documentDatas, JSON_PRETTY_PRINT));
+            $activity = $this->getActivityService()->getActivityById($idActivity);
+            // TODO : check des droits d'accès
+            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
+            if( !$document->getTypeDocument()->getSignatureFlow() ){
+                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
+            }
+            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
+            $this->getEntityManager()->flush();
+
+            return new JsonModel(['message' => 'ok']);
+        }
+
         $activity = $this->getActivityService()->getActivityById($idActivity);
         $idTab = $this->params()->fromRoute('idtab') === "private" ? null : $this->params()->fromRoute('idtab');
         $private = $this->params()->fromPost('private') === "1" ? true : false;
@@ -268,18 +280,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
         $informations = trim($this->params()->fromPost('informations'));
         $privatePersons = [];
-
-        $this->getLoggerService()->debug(
-            "ContractDocumentController.upload(
-            idActivity:$idActivity, 
-            idTab:$idTab, 
-            idType:$idType, 
-            persons:$persons, 
-            informations:$informations, 
-            dateDeposit:" . ($dateDeposit ? $dateDeposit->format('Y-m-d') : 'N.A.') . ", 
-            dateSend:" . ($dateSend ? $dateSend->format('Y-m-d') : 'N.A.') . ", 
-            private: $private)"
-        );
 
         // Document privé
         if ($private) {
@@ -322,7 +322,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 'response' => 'ok'
                                  ]);
         } catch (Exception $e) {
-            // TODO traiter exception voir avec Jack ce qu'il souhaite/préfère ou pratique habituelle du traitement des exceptions dans Oscar ?
             $this->getLoggerService()->error($e->getMessage());
             return $this->getResponseInternalError($e->getMessage());
         }

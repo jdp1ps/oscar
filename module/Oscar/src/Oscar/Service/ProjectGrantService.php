@@ -700,7 +700,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      */
     public function getTypesDocuments($asArray = true)
     {
-        $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findAll();
+        $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findBy([], ['label' => 'ASC']);
         if ($asArray) {
             $documentTypes = [];
             /** @var TypeDocument $type */

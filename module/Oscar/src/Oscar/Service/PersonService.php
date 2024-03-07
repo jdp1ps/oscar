@@ -130,6 +130,27 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $this->getSearchEngineStrategy()->resetIndex();
     }
 
+    public function searchPersonsActivityById(
+        int $activityId ,
+        string $search = "",
+        string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT ) :array
+    {
+        $personIds = $this->getPersonRepository()->getPersonsIdsForActivitiesids([$activityId]);
+        $searchIds = $this->searchIds($search);
+        if( $searchIds ){
+            $ids = array_intersect($personIds, $searchIds);
+        } else {
+            $ids = $personIds;
+        }
+
+        $persons = $this->getPersonRepository()->getPersonsByIds($ids);
+        $return = [];
+        foreach ($persons as $p) {
+            $return[] = $p->toArray();
+        }
+        return $return;
+    }
+
     /**
      * Reconstruction de l'index de recherche
      * @return mixed

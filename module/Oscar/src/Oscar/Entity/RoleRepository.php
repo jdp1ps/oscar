@@ -312,7 +312,7 @@ class RoleRepository extends EntityRepository
         if (!$query->execute(['idPerson' => $idPerson])) {
             throw new OscarException("Impossible de charger les rôles de $person dans les activités");
         }
-        $idsRoles = $query->fetchAll();
+        $idsRoles = $query->executeQuery()->fetchAllAssociative();
 
         $results = $this->createQueryBuilder('r')
             ->where('r.id IN(:ids)')
@@ -340,7 +340,7 @@ class RoleRepository extends EntityRepository
         if (!$query->execute(['idPerson' => $idPerson])) {
             throw new OscarException("Impossible de charger les rôles de $person dans les organisations");
         }
-        $idsRoles = $query->fetchAll();
+        $idsRoles = $query->executeQuery()->fetchAllAssociative();
 
         $results = $this->createQueryBuilder('r')
             ->where('r.id IN(:ids)')
