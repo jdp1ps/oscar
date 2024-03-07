@@ -29,6 +29,7 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -142,7 +143,7 @@ class PersonController extends AbstractOscarController
 
             if (!array_key_exists($organizationId, $rolesOrganisation)) {
                 $rolesOrganisation[$organizationId] = [
-                    'id' => $organizationId,
+                    'id'    => $organizationId,
                     'label' => $organization,
                     'roles' => [],
                 ];
@@ -151,10 +152,10 @@ class PersonController extends AbstractOscarController
         }
 
         return [
-            'person' => $person,
-            'application' => $rolesApplication,
+            'person'        => $person,
+            'application'   => $rolesApplication,
             'organizations' => $rolesOrganisation,
-            'privileges' => $privileges
+            'privileges'    => $privileges
         ];
     }
 
@@ -170,8 +171,8 @@ class PersonController extends AbstractOscarController
         $page = $this->params()->fromQuery('p', 1);
         $params = [
             'filter_roles' => [],
-            'order_by' => 'lastname',
-            'leader' => null
+            'order_by'     => 'lastname',
+            'leader'       => null
         ];
 
         $idCoWorkers = [];
@@ -195,18 +196,19 @@ class PersonController extends AbstractOscarController
         $extended = $this->params()->fromQuery('extended', 0);
         if ($extended) {
             $datas = $this->getPersonService()->searchPersonnel($q, $page, $params);
-        } else {
+        }
+        else {
             $datas = $this->getPersonService()->getPersonsSearchPaged($q, $page, $params);
         }
 
         $output = [
-            'total' => count($datas),
-            'search' => $q,
-            'persons' => [],
-            'extended' => $extended,
-            'page' => $page,
+            'total'        => count($datas),
+            'search'       => $q,
+            'persons'      => [],
+            'extended'     => $extended,
+            'page'         => $page,
             'resultbypage' => 50,
-            'coworkers' => [],
+            'coworkers'    => [],
             'subordinates' => [],
         ];
 
@@ -261,7 +263,7 @@ class PersonController extends AbstractOscarController
         $id = $this->params()->fromRoute('id');
         $person = $this->getPersonService()->getPerson($id);
         return [
-            'person' => $person,
+            'person'        => $person,
             'notifications' => $this->getPersonService()->getNotificationService()->getAllNotificationsPerson(
                 $person->getId()
             )
@@ -288,20 +290,40 @@ class PersonController extends AbstractOscarController
         $allow = false;
         $justXHR = true;
 
+        $search = $this->params()->fromQuery('q', '');
+
 
         // On test les accès
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)) {
             $allow = true;
             $justXHR = false;
-        } else {
-            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
-                [
-                    Privileges::ACTIVITY_INDEX,
-                    Privileges::ACTIVITY_PERSON_MANAGE,
-                    Privileges::PROJECT_PERSON_MANAGE,
-                    Privileges::ORGANIZATION_EDIT
-                ]
-            );
+        }
+        else {
+            $context = $this->getRequest()->getQuery("context");
+            $context_param = $this->getRequest()->getQuery("context_param");
+            if ($context) {
+                switch ($context) {
+                    case 'activity';
+                    $persons = $this->getPersonService()->searchPersonsActivityById(
+                        intval($context_param),
+                        $search,
+                        OscarFormatterConst::FORMAT_ARRAY_OBJECT);
+                        return new JsonModel($persons);
+                        break;
+
+                }
+
+            }
+            else {
+                $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
+                    [
+                        Privileges::ACTIVITY_INDEX,
+                        Privileges::ACTIVITY_PERSON_MANAGE,
+                        Privileges::PROJECT_PERSON_MANAGE,
+                        Privileges::ORGANIZATION_EDIT
+                    ]
+                );
+            }
         }
 
         if (!$allow) {
@@ -310,7 +332,8 @@ class PersonController extends AbstractOscarController
             );
             if ($justXHR) {
                 return $this->getResponseUnauthorized();
-            } else {
+            }
+            else {
                 throw new UnAuthorizedException();
             }
         }
@@ -325,7 +348,6 @@ class PersonController extends AbstractOscarController
         // Donnèes GET
         $page = (int)$this->params()->fromQuery('page', 1);
         $filteractive = (int)$this->params()->fromQuery('filteractive', 0);
-        $search = $this->params()->fromQuery('q', '');
         $filterRoles = $this->params()->fromQuery('filter_roles', []);
         $orderBy = $this->params()->fromQuery('orderby', 'lastname');
         $leader = $this->params()->fromQuery('leader', '');
@@ -346,9 +368,9 @@ class PersonController extends AbstractOscarController
 
         // Liste des critères de trie disponibles
         $orders = [
-            'lastname' => 'Nom de famille',
-            'firstname' => 'Prénom',
-            'email' => 'Email',
+            'lastname'    => 'Nom de famille',
+            'firstname'   => 'Prénom',
+            'email'       => 'Email',
             'dateCreated' => 'Date de création',
             'dateUpdated' => 'Date de mise à jour'
         ];
@@ -363,10 +385,10 @@ class PersonController extends AbstractOscarController
                 $page,
                 [
                     'filter_roles' => $filterRoles,
-                    'order_by' => $orderBy,
-                    'leader' => $leader,
-                    'declarers' => $declarers,
-                    'np1' => $np1,
+                    'order_by'     => $orderBy,
+                    'leader'       => $leader,
+                    'declarers'    => $declarers,
+                    'np1'          => $np1,
                     'filteractive' => $filteractive
                 ],
                 $limit
@@ -452,19 +474,19 @@ class PersonController extends AbstractOscarController
         $dbroles = $this->getPersonService()->getRolesByAuthentification();
 
         return array(
-            'dbroles' => $dbroles,
-            'roles' => $roles,
-            'search' => $search,
-            'persons' => $datas,
-            'error' => $error,
-            'filter_roles' => $filterRoles,
-            'orderBy' => $orderBy,
-            'orders' => $orders,
-            'filteractive' => $filteractive,
+            'dbroles'       => $dbroles,
+            'roles'         => $roles,
+            'search'        => $search,
+            'persons'       => $datas,
+            'error'         => $error,
+            'filter_roles'  => $filterRoles,
+            'orderBy'       => $orderBy,
+            'orders'        => $orders,
+            'filteractive'  => $filteractive,
             'filtersActive' => $filtersActive,
-            'leader' => $leader,
-            'declarers' => $declarers,
-            'np1' => $np1,
+            'leader'        => $leader,
+            'declarers'     => $declarers,
+            'np1'           => $np1,
         );
     }
 
@@ -559,7 +581,8 @@ class PersonController extends AbstractOscarController
     {
         if (array_key_exists($key, $array)) {
             return $array[$key];
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -575,9 +598,9 @@ class PersonController extends AbstractOscarController
         $dbroles = $this->getPersonService()->getRolesByAuthentification();
 
         return [
-            'dbroles' => $dbroles,
+            'dbroles'     => $dbroles,
             'ldapFilters' => $this->getEntityManager()->getRepository(Person::class)->getRolesLdapUsed(),
-            'persons' => new UnicaenDoctrinePaginator($persons, $page)
+            'persons'     => new UnicaenDoctrinePaginator($persons, $page)
         ];
     }
 
@@ -588,7 +611,8 @@ class PersonController extends AbstractOscarController
         if ($person) {
             $this->getPersonService()->synchronize($person);
             return $this->redirect()->toRoute('person/show', ['id' => $person->getId()]);
-        } else {
+        }
+        else {
             return $this->getResponseNotFound('Personne introuvable');
         }
     }
@@ -605,7 +629,6 @@ class PersonController extends AbstractOscarController
         $period = $this->params()->fromQuery('period', date('Y-m'));
 
         if ($this->isAjax() || $format == 'json') {
-
             $method = $this->getHttpXMethod();
             switch ($method) {
                 case "GET":
@@ -613,7 +636,8 @@ class PersonController extends AbstractOscarController
                     if ($declarerId) {
                         // Détails pour le déclarant
                         return $this->getResponseNotImplemented("Fonctionnalité à venir");
-                    } else {
+                    }
+                    else {
                         $output = $this->baseJsonResponse();
                         $period = DateTimeUtils::extractPeriodDatasFromString(
                             $this->params()->fromQuery('period', date('Y-m'))
@@ -755,10 +779,12 @@ class PersonController extends AbstractOscarController
                                 $person->setCustomSettingsObj($custom);
                                 $this->getEntityManager()->flush($person);
                                 $this->getLoggerService()->info(print_r($custom, true));
-                            } elseif ($daysLength != null) {
+                            }
+                            elseif ($daysLength != null) {
                                 $this->getUserParametersService()->performChangeSchedule($daysLength, $person);
                                 return $this->getResponseOk("Heures enregistrées");
-                            } else {
+                            }
+                            else {
                                 if (!array_key_exists($model, $models)) {
                                     return $this->getResponseBadRequest("Modèle inconnu");
                                 }
@@ -849,7 +875,8 @@ class PersonController extends AbstractOscarController
                         default:
                             throw new OscarException("Opération inconnue");
                     }
-                } else {
+                }
+                else {
                     return $this->getResponseUnauthorized(
                         "Vous n'avez pas le droit de déléguer la déclaration d'une personne à une autre."
                     );
@@ -877,7 +904,8 @@ class PersonController extends AbstractOscarController
                     if ($mode == 'replace') {
                         $this->getPersonService()->refererentReplaceBy($newReferent, $referent);
                         return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
-                    } else {
+                    }
+                    else {
                         $this->getPersonService()->refererentAddFromReferent($newReferent, $referent);
                         return $this->redirect()->toRoute('person/show', ['id' => $newReferent->getId()]);
                     }
@@ -952,29 +980,31 @@ class PersonController extends AbstractOscarController
         $timesheetService = $this->getTimesheetService();
 
         return [
-            'schedule' => $timesheetService->getDayLengthPerson($person),
-            'entity' => $person,
-            'ldapRoles' => $roles,
+            'schedule'         => $timesheetService->getDayLengthPerson($person),
+            'entity'           => $person,
+            'ldapRoles'        => $roles,
             'scheduleEditable' => $this->getOscarUserContextService()->hasPrivileges(
                 Privileges::PERSON_MANAGE_SCHEDULE
             ),
-            'referents' => $referents,
-            'hasTimesheets' => $hasTimesheets,
+            'referents'        => $referents,
+            'hasTimesheets'    => $hasTimesheets,
             'manageHierarchie' => $manageHierarchie,
             'manageUsurpation' => $manageUsurpation,
             'declarationsToDo' => $declarations,
-            'subordinates' => $subordinates,
-            'validations' => $validations,
+            'subordinates'     => $subordinates,
+            'validations'      => $validations,
             'authentification' => $auth,
-            'auth' => $auth,
-            'allowTimesheet' => $allowTimesheet,
-            'projects' => new UnicaenDoctrinePaginator(
+            'auth'             => $auth,
+            'allowTimesheet'   => $allowTimesheet,
+            'projects'         => new UnicaenDoctrinePaginator(
                 $this->getProjectService()->getProjectUser($person->getId()),
                 $page
             ),
-            'activities' => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
-            'traces' => $traces,
-            'connectors' => array_keys($this->getOscarConfigurationService()->getConfiguration('connectors.person'))
+            'activities'       => $this->getProjectGrantService()->personActivitiesWithoutProject($person->getId()),
+            'traces'           => $traces,
+            'connectors'       => array_keys(
+                $this->getOscarConfigurationService()->getConfiguration('connectors.person')
+            )
         ];
     }
 
@@ -1155,7 +1185,7 @@ class PersonController extends AbstractOscarController
         $view = new ViewModel(
             [
                 'entity' => $person,
-                'id' => $id,
+                'id'     => $id,
             ]
         );
 
@@ -1208,9 +1238,9 @@ class PersonController extends AbstractOscarController
         $view = new ViewModel(
             [
                 'connectors' => $personConnector,
-                'person' => $person,
-                'id' => $id,
-                'form' => $form
+                'person'     => $person,
+                'id'         => $id,
+                'form'       => $form
             ]
         );
 
@@ -1253,8 +1283,8 @@ class PersonController extends AbstractOscarController
         $view = new ViewModel(
             [
                 'person' => $person,
-                'id' => null,
-                'form' => $form
+                'id'     => null,
+                'form'   => $form
             ]
         );
 

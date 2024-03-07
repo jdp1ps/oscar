@@ -3,7 +3,7 @@
   <div class="overlay" v-if="error">
     <div class="overlay-content" style="max-width: 50%">
       <h2>
-        Erreur
+        Erreur documents
         <span class="overlay-closer" @click="error = null">X</span>
       </h2>
       <p class="alert-danger alert">
@@ -15,6 +15,7 @@
       </button>
     </div>
   </div>
+
   <div class="overlay" v-if="processDetails">
     <div class="overlay-content" style="max-width: 50%">
       <h2>
@@ -49,6 +50,7 @@
       </button>
     </div>
   </div>
+
   <section style="position: relative; min-height: 100px">
     <div class="overlay" v-if="deleteData">
       <div class="overlay-content">
@@ -67,6 +69,76 @@
         <a class="btn btn-success" :href="deleteData.urlDelete">
           <i class="icon-valid"></i> Confirmer
         </a>
+      </div>
+    </div>
+
+    <div class="overlay" v-if="editedDocument">
+      <div class="overlay-content">
+        <h2>
+          <small><i class="icon-doc"></i> Modification du document : </small><br>
+          {{ editedDocument.fileName }}
+          <span class="overlay-closer" @click="editedDocument = null">X</span>
+        </h2>
+        <div class="row">
+          <div class="col-md-6">
+            <div>
+              <label for="typedocument">Type de document</label>
+              <div class="alert alert-warning" v-if="editedDocument.process">
+                Vous ne pouvez pas modifier le type d'un document engagé dans un processus de signature.
+              </div>
+              <div v-else>
+                <select class="form-control" name="type" id="typedocument" v-model="editedDocument.category.id">
+                  <option :value="t.id"
+                          v-for="(t, id) in typesDocuments" :key="t.id" :disabled="t.flow">{{ t.label }} {{ t.flow && editedDocument.id ? '(signature)':'' }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <!-- PRIVE, SI PRIVE AJOUT PERSONNES MODIFICATION DE DOCUMENT -->
+            <div class="row">
+                <span v-if="editedDocument.private === false">
+                <label for="tabdocument">Onglet document</label>
+                <div>
+                  <select name="tabdocument" id="tabdocument" v-model="editedDocument.tabDocument.id" class="form-control">
+                    <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                  </select>
+                </div>
+              </span>
+              <div class="col-md-6">
+                <label for="private">Document privé</label>
+              </div>
+              <div class="col-md-6">
+                <input type="checkbox" name="private" id="privateModifDoc" class="form-control"
+                       v-model="editedDocument.private">
+              </div>
+            </div>
+            <span v-if="editedDocument.private === true">
+                 <label>Choix des personnes ayant accès à ce document</label>
+                <h3>Ce document sera classé automatiquement dans l'onglet privé</h3>
+                  <person-auto-completer @change="handlerSelectPersons"></person-auto-completer>
+                  <span v-for="p in editedDocument.persons" :key="p.id" class="cartouche">
+                    <i class="icon-cube"></i>
+                    <span>{{ p.personName }}</span>
+                    <span class="addon">
+                      {{ p.affectation }}
+                    </span>
+                    <i v-if="p.personId !== idCurrentPerson" @click="handlerDeletePerson(p)" class="icon-trash icon-clickable"></i>
+                  </span>
+              </span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            {{ editedDocument }}
+            <button class="btn btn-danger" @click="editedDocument = null">
+              <i class="icon-cancel-alt"></i> Annuler
+            </button>
+            <a class="btn btn-success" href="#" @click.prevent="applyEdit()">
+              <i class="icon-valid"></i> Enregistrer
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -469,6 +541,8 @@ export default {
       remoterState: null,
       displayComputed: false,
 
+      editedDocument:null,
+
       // Details
       processDetails: null,
 
@@ -587,29 +661,30 @@ export default {
 
     // Modification d'un document
     handlerEdit(document) {
-      console.log(JSON.parse(JSON.stringify(document)));
-      let valueTabDocument = document.tabDocument;
-      if (valueTabDocument === null || valueTabDocument === undefined || valueTabDocument.trim === ''){
-        valueTabDocument = PRIVATE;
-      }else{
-        valueTabDocument = valueTabDocument.id;
-      }
-      this.persons = [];
-      document.persons.forEach( (p) =>{
-        this.persons.push(p);
-      });
-      this.editData = {
-        'documentype_id': document.category.id,
-        'basename': document.basename,
-        'document': document,
-        'tabDocument_id': valueTabDocument,
-        'private': document.private
-      };
+      this.editedDocument = document;
+      // let valueTabDocument = document.tabDocument;
+      // if (valueTabDocument === null || valueTabDocument === undefined || valueTabDocument.trim === ''){
+      //   valueTabDocument = PRIVATE;
+      // }else{
+      //   valueTabDocument = valueTabDocument.id;
+      // }
+      // this.persons = [];
+      // document.persons.forEach( (p) =>{
+      //   this.persons.push(p);
+      // });
+      // this.editData = {
+      //   'documentype_id': document.category.id,
+      //   'basename': document.basename,
+      //   'document': document,
+      //   'tabDocument_id': valueTabDocument,
+      //   'private': document.private
+      // };
     },
 
     // Event Change sur composant "person-auto-completer",
     // pour hydrater tableau de la liste des personnes pour document privé
     handlerSelectPersons(person) {
+      console.log("handlerSelectPersons", person);
       if( person.id ){
         let personSelected = {
           "personName": person.displayname,
@@ -624,7 +699,12 @@ export default {
           }
         });
         if (false === isPresent) {
-          this.persons.push(personSelected);
+          if( this.editedDocument ){
+            if( !this.editedDocument.persons ) this.editedDocument.persons = [];
+            this.editedDocument.persons.push(personSelected);
+          } else {
+            this.persons.push(personSelected);
+          }
         }
       }
     },
@@ -774,6 +854,25 @@ export default {
       )
     },
 
+    applyEdit() {
+
+
+      let formData = new FormData();
+      formData.append('data', JSON.stringify(this.editedDocument));
+      formData.append('action', 'edit');
+
+      axios.post(this.editedDocument.urlReupload, formData).then(ok => {
+        console.log("SUCCESS", ok);
+        this.editedDocument = null;
+        this.fetch();
+      }, ko => {
+        console.log("ERROR", ko);
+        this.error = ko;
+
+
+      })
+    },
+
     // Modification du type de document / changement onglet, privé ou pas, personnes ou pas
     performEdit() {
       // Fenêtre messages d'erreurs avant soumission Form
@@ -835,7 +934,6 @@ export default {
 
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
-      console.log("handlerSuccess(", success);
       try {
         this.idCurrentPerson = success.data.idCurrentPerson;
         let documents = Array.isArray(success.data.tabsWithDocuments) ? {} : success.data.tabsWithDocuments;
@@ -898,6 +996,8 @@ export default {
       console.log("fetch()" + this.url);
       axios.get(this.url).then(ok => {
         this.handlerSuccess(ok)
+      }, ko => {
+        this.error = ko;
       });
       // Object JS Ajax
       // oscarRemoteData

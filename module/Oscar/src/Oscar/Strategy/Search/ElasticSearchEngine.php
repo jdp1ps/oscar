@@ -154,7 +154,7 @@ abstract class ElasticSearchEngine
         $ids = [];
         if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
-                $ids[] = $hit["_id"];
+                $ids[] = intval($hit["_id"]);
             }
         }
 
