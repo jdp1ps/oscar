@@ -243,30 +243,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         $action = $this->params()->fromPost('action');
         $idActivity = $this->params()->fromRoute('idactivity');
+        $json = $this->params()->fromPost('data');
+        $documentDatas = json_decode($json, true);
+        $this->getLoggerService()->debug(json_encode($documentDatas));
 
-        if( $action == 'edit' ){
-            $json = $this->params()->fromPost('data');
-            $documentDatas = json_decode($json, true);
-            $this->getLoggerService()->debug(json_encode($documentDatas, JSON_PRETTY_PRINT));
-            $activity = $this->getActivityService()->getActivityById($idActivity);
-            // TODO : check des droits d'accès
-            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
-            if( !$document->getTypeDocument()->getSignatureFlow() ){
-                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
-            }
-            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
-            $this->getEntityManager()->flush();
-
-            return new JsonModel(['message' => 'ok']);
-        }
-
-        $activity = $this->getActivityService()->getActivityById($idActivity);
-        $idTab = $this->params()->fromRoute('idtab') === "private" ? null : $this->params()->fromRoute('idtab');
-        $private = $this->params()->fromPost('private') === "1" ? true : false;
-        $idType = intval($this->params()->fromPost('type'));
-        $url = boolval($this->params()->fromPost('url'));
-        $dateDeposit = $this->params()->fromPost('dateDeposit');
-        $persons = $this->params()->fromPost('persons');
+        $dateDeposit = $documentDatas['dateDeposit'];
         if ($dateDeposit) {
             $dateDeposit = new \DateTime($dateDeposit);
         } else {
@@ -278,7 +259,38 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         } else {
             $dateSend = null;
         }
-        $informations = trim($this->params()->fromPost('informations'));
+        $informations = $documentDatas['informations'];
+
+        $this->getLoggerService()->debug(
+            " > " .
+            'DateDeposit: ' . ($dateDeposit ? $dateDeposit->format('Y-m-d') : "nop") .
+            ' - DateSend: ' . ($dateSend ? $dateSend->format('Y-m-d') : "nop") .
+            ' - Informations: ' . $informations
+
+        );
+
+        if( $action == 'edit' ){
+            $activity = $this->getActivityService()->getActivityById($idActivity);
+            // TODO : check des droits d'accès
+            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
+            if( !$document->getTypeDocument()->getSignatureFlow() ){
+                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
+            }
+            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
+            $document->setDateDeposit($dateDeposit);
+            $document->setDateSend($dateSend);
+            $document->setInformation($informations);
+            $this->getEntityManager()->flush();
+
+            return new JsonModel(['message' => 'ok']);
+        }
+
+        $activity = $this->getActivityService()->getActivityById($idActivity);
+        $idTab = $documentDatas['tabDocument']['id'];
+        $private = $documentDatas['tabDocument']['private'];
+        $idType = $documentDatas['category']['id'];
+        $url = $documentDatas['location'] == 'url';
+        $persons = $documentDatas['persons'];
         $privatePersons = [];
 
         // Document privé
@@ -289,7 +301,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             )) {
                 return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
             }
-            foreach (implode(',', $persons) as $personId) {
+            foreach ($persons as $personId) {
                 $personId = intval($personId);
                 if ($personId) {
                     $privatePersons[] = $personId;

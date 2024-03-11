@@ -296,4 +296,26 @@ return array(
 
 ## Signature numérique
 
+
+### Installation
+Créer le lien symbolique pour les *assets* visuels.
+
+```
+cd public/unicaen
+ln -s ../../vendor/unicaen/signature/public/dist signature
+```
+
+### Dossier de dépôt des documents
+
+Créer et donner les droits d'accès en écriture au dossier des signatures : 
+
+### Configuration des parapheurs
+
+```
+cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php
+```
+
+Se rendre dans l'administration des privilèges pour accorder les droits d'accès en fonction des rôles.
+
+
 > En cours
