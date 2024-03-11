@@ -1,6 +1,5 @@
 <template>
   <div @mouseenter="handlerShow" @mouseleave="handlerHide">
-
     <div class="input-group">
       <input type="text" class="form-control" v-model="renderValue"/>
 <!--      <span class="input-group-btn">-->
@@ -87,7 +86,7 @@ export default {
   },
   props: {
     // Valeur par défaut
-    value: {
+    modelValue: {
       default: null
     },
 
@@ -133,7 +132,7 @@ export default {
       pickerDayRef: moment().format(),
       pickerYearRef: moment().format('YYYY'),
       pickerMonthRef: moment().month(),
-      realValue: this.value,
+      realValue: this.modelValue,
       manualChange: ""
     }
   },
