@@ -147,7 +147,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $this->getLoggerService()->info("Upload ok");
         } catch (\Exception $e) {
             $this->getLoggerService()->critical("UPLOAD ERROR : " . $e->getMessage());
-            throw new OscarException('UPLOAD ERROR : Impossible de téléverser votre fichier');
+            throw new OscarException('Impossible de téléverser votre fichier : ' . $e->getMessage());
         }
 
         // Création du document

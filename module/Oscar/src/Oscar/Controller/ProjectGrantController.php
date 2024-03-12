@@ -80,6 +80,8 @@ use Laminas\Mvc\Console\View\Renderer;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Laminas\View\Renderer\PhpRenderer;
+use UnicaenSignature\Provider\SignaturePrivileges;
+use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
 /**
@@ -1609,13 +1611,26 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         /** @var ContractDocument $doc */
         foreach ($entity->getDocuments() as $doc) {
             if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
-                $this->getLoggerService()->debug("Non lisible");
                 continue;
+            }
+            $process = $doc->getProcess();
+            $manageProcess = false;
+            if ($this->getOscarUserContextService()->hasPrivileges(SignaturePrivileges::SIGNATURE_ADMIN)) {
+                if ($doc->getProcess()) {
+                    $manageProcess = $this->url()->fromRoute(
+                        'contractdocument/process',
+                        ['id' => $doc->getId()]
+                    );
+                }
+                else {
+                    $manageProcess = null;
+                }
             }
 
             $manage = $this->getOscarUserContextService()->contractDocumentWrite($doc);
 
             $docAdded = $doc->toJson();
+            $docAdded['manage_process'] = $manageProcess;
             if (is_null($doc->getTabDocument())) {
                 if ($doc->isPrivate() === true) {
                     // Droits sur les documents privés utilisateur courant associé ou non au document
@@ -1626,6 +1641,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             $isPresent = true;
                         }
                     }
+
                     if (true === $isPresent) {
                         $docAdded['urlDelete'] = $this->url()->fromRoute(
                             'contractdocument/delete',
@@ -1709,8 +1725,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if ($typeDocument->getSignatureFlow()) {
                 $signatureFlow = $typeDocument->getSignatureFlow();
                 if (!array_key_exists($signatureFlow->getId(), $signatureFlowParams)) {
-                    $signatureFlowParams[$signatureFlow->getId()] = $this->getSignatureService()->createSignatureFlowDatasById(
-                            '',
+                    $signatureFlowParams[$signatureFlow->getId()] = $this->getSignatureService(
+                    )->createSignatureFlowDatasById(
+                        '',
                         $signatureFlow->getId(),
                         ['activity_id' => $entity->getId()]
                     );

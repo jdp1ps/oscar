@@ -24,7 +24,7 @@
 
 
         <article class="card xs" v-for="document in documentsPacked">
-            <div class="card-title">
+            <h3 class="card-title">
                 <i class="picto icon-doc" :class="'doc' + document.extension"></i>
 
                 <template v-if="document.editmode">
@@ -39,7 +39,7 @@
 
                 <strong>{{document.fileName}}</strong>
                 <small class="text-light" :title="document.fileSize + ' octet(s)'">&nbsp;({{document.fileSize | filesize}})</small>
-            </div>
+            </h3>
             <p>
                 {{ document.information }}
             </p>

@@ -241,11 +241,31 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function uploadAction()
     {
+        // Récupération des données envoyées
         $action = $this->params()->fromPost('action');
         $idActivity = $this->params()->fromRoute('idactivity');
+        $activity = $this->getActivityService()->getActivityById($idActivity);
         $json = $this->params()->fromPost('data');
         $documentDatas = json_decode($json, true);
-        $this->getLoggerService()->debug(json_encode($documentDatas));
+        $documentId = $documentDatas['id'];
+
+        $this->getLoggerService()->info("[document:$action] from " . strval($this->getCurrentPerson()));
+
+        // Check des droits
+        $document = null;
+        if( $documentId > 0 ){
+            try {
+                $document = $this->getContractDocumentService()->getDocument($documentId, true);
+            } catch (Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                return $this->jsonError($e->getMessage());
+            }
+            if( !$this->getOscarUserContextService()->getAccessDocument($document) ){
+                return $this->jsonError("Vous n'avez pas les droits pour gérer ce document");
+            }
+        }
+        $idTab = $documentDatas['tabDocument']['id'];
+
 
         $dateDeposit = $documentDatas['dateDeposit'];
         if ($dateDeposit) {
@@ -253,40 +273,14 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         } else {
             $dateDeposit = null;
         }
-        $dateSend = $this->params()->fromPost('dateSend');
+        $dateSend = $documentDatas['dateSend'];
         if ($dateSend) {
             $dateSend = new \DateTime($dateSend);
         } else {
             $dateSend = null;
         }
-        $informations = $documentDatas['informations'];
+        $information = $documentDatas['information'];
 
-        $this->getLoggerService()->debug(
-            " > " .
-            'DateDeposit: ' . ($dateDeposit ? $dateDeposit->format('Y-m-d') : "nop") .
-            ' - DateSend: ' . ($dateSend ? $dateSend->format('Y-m-d') : "nop") .
-            ' - Informations: ' . $informations
-
-        );
-
-        if( $action == 'edit' ){
-            $activity = $this->getActivityService()->getActivityById($idActivity);
-            // TODO : check des droits d'accès
-            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
-            if( !$document->getTypeDocument()->getSignatureFlow() ){
-                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
-            }
-            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
-            $document->setDateDeposit($dateDeposit);
-            $document->setDateSend($dateSend);
-            $document->setInformation($informations);
-            $this->getEntityManager()->flush();
-
-            return new JsonModel(['message' => 'ok']);
-        }
-
-        $activity = $this->getActivityService()->getActivityById($idActivity);
-        $idTab = $documentDatas['tabDocument']['id'];
         $private = $documentDatas['tabDocument']['private'];
         $idType = $documentDatas['category']['id'];
         $url = $documentDatas['location'] == 'url';
@@ -309,6 +303,27 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
         }
 
+
+        if( $action == 'version' ){
+
+        }
+
+        if( $action == 'edit' ){
+            $activity = $this->getActivityService()->getActivityById($idActivity);
+            // TODO : check des droits d'accès
+            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
+            if( !$document->getTypeDocument()->getSignatureFlow() ){
+                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
+            }
+            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
+            $document->setDateDeposit($dateDeposit);
+            $document->setDateSend($dateSend);
+            $document->setInformation($information);
+            $this->getEntityManager()->flush();
+
+            return new JsonModel(['message' => 'ok']);
+        }
+
         // Récupération des informations
         $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
         if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
@@ -327,7 +342,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $privatePersons,
                 $dateDeposit,
                 $dateSend,
-                $informations,
+                $information,
                 $url
             );
             return new JsonModel([
@@ -440,6 +455,19 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         return true;
     }
 
+    public function processAction() {
+        try {
+            $docId = $this->params()->fromRoute('id');
+            $doc = $this->getContractDocumentService()->getDocument($docId, true);
+            if( $doc->getProcess() && $doc->getProcess()->isInProgress() ){
+                $this->getContractDocumentService()->getProcessService()->trigger($doc->getProcess());
+            }
+            return $this->jsonOutput(['response' => 'ok']);
+        } catch (Exception $e) {
+            return $this->jsonError($e->getMessage());
+        }
+    }
+
     /**
      * Création du répertoire si celui-ci n'existe pas
      *
@@ -451,10 +479,5 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         if (!is_dir($folder)) {
             mkdir($folder);
         }
-    }
-
-    public function showAction()
-    {
-        return $this->getResponseNotImplemented();
     }
 }

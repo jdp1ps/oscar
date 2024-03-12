@@ -255,7 +255,12 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     protected function jsonErrorLogged( string $error , \Exception $exception ) :Response
     {
         $this->getLoggerService()->error(sprintf("ERROR '%s' : %s", $error, $exception->getMessage()));
-        return $this->getResponseInternalError($error);
+        return $this->jsonError($error);
+    }
+
+    protected function jsonError( string $msg ) :Response
+    {
+        return $this->getResponseInternalError($msg);
     }
 
     protected function getPutDataJson() :Parameters
