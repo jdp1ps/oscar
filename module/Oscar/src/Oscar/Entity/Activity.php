@@ -31,26 +31,26 @@ class Activity implements ResourceInterface
         static $statusSelect;
         if ($statusSelect === null) {
             $statusSelect = [
-                self::STATUS_ERROR_STATUS => 'Conflit : pas de statut',
-                self::STATUS_ACCEPTED => 'Accepté',
-                self::STATUS_ACCEPTED_2 => 'Accepté en phase 2',
-                self::STATUS_ACTIVE => 'Actif',
-                self::STATUS_PROGRESS => 'Brouillon',
-                self::STATUS_FENCED => 'Clôturé',
-                self::STATUS_DEPOSIT => 'Déposée',
-                self::STATUS_ABORDED => 'Dossier abandonné',
-                self::STATUS_TERMINATED => 'En cours de clôture',
+                self::STATUS_ERROR_STATUS     => 'Conflit : pas de statut',
+                self::STATUS_ACCEPTED         => 'Accepté',
+                self::STATUS_ACCEPTED_2       => 'Accepté en phase 2',
+                self::STATUS_ACTIVE           => 'Actif',
+                self::STATUS_PROGRESS         => 'Brouillon',
+                self::STATUS_FENCED           => 'Clôturé',
+                self::STATUS_DEPOSIT          => 'Déposée',
+                self::STATUS_ABORDED          => 'Dossier abandonné',
+                self::STATUS_TERMINATED       => 'En cours de clôture',
                 self::STATUS_PENDING_ACCEPTED => 'En cours de conventionnement',
-                self::STATUS_IDENTIFY => 'Identifiée',
-                self::STATUS_JUSTIFY => 'Justifiée',
-                self::STATUS_DISPUTE => 'Litige',
-                self::STATUS_REFUSED => 'Refusé',
-                self::STATUS_REFUSED_2 => 'Refusé en phase 2',
-                self::STATUS_REORIENTED => 'Réorienté',
-                self::STATUS_TERMINATED => 'Résilié',
-                self::STATUS_CLOSED => 'Terminé',
-                self::STATUS_TRANSFERED => 'Transféré',
-                self::STATUS_MONTAGE => 'Montage',
+                self::STATUS_IDENTIFY         => 'Identifiée',
+                self::STATUS_JUSTIFY          => 'Justifiée',
+                self::STATUS_DISPUTE          => 'Litige',
+                self::STATUS_REFUSED          => 'Refusé',
+                self::STATUS_REFUSED_2        => 'Refusé en phase 2',
+                self::STATUS_REORIENTED       => 'Réorienté',
+                self::STATUS_TERMINATED       => 'Résilié',
+                self::STATUS_CLOSED           => 'Terminé',
+                self::STATUS_TRANSFERED       => 'Transféré',
+                self::STATUS_MONTAGE          => 'Montage',
             ];
         }
         return $statusSelect;
@@ -126,11 +126,11 @@ class Activity implements ResourceInterface
         static $timesheetFormatSelect;
         if ($timesheetFormatSelect === null) {
             $timesheetFormatSelect = [
-                self::TIMESHEET_FORMAT_NONE => 'Aucun',
+                self::TIMESHEET_FORMAT_NONE           => 'Aucun',
                 self::TIMESHEET_FORMAT_HOURS_BY_MONTH => 'Heures par mois',
-                self::TIMESHEET_FORMAT_HOURS_BY_WEEK => 'Heures par semaine',
-                self::TIMESHEET_FORMAT_HOURS_BY_DAY => 'Heures par jour',
-                self::TIMESHEET_FORMAT_FREE => 'Heures détaillées',
+                self::TIMESHEET_FORMAT_HOURS_BY_WEEK  => 'Heures par semaine',
+                self::TIMESHEET_FORMAT_HOURS_BY_DAY   => 'Heures par jour',
+                self::TIMESHEET_FORMAT_FREE           => 'Heures détaillées',
             ];
         }
 
@@ -439,6 +439,7 @@ class Activity implements ResourceInterface
      *
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="ContractDocument", mappedBy="grant", cascade={"remove"})
+     * @ORM\OrderBy({"dateUpdoad" = "DESC"})
      */
     private $documents;
 
@@ -504,9 +505,10 @@ class Activity implements ResourceInterface
 
     public function getPercentSpent()
     {
-        if( $this->getAmount() ){
+        if ($this->getAmount()) {
             return 100 / $this->getAmount() * abs($this->getTotalSpent());
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -613,21 +615,22 @@ class Activity implements ResourceInterface
         $currency = '';
         $data = '';
 
-        if( $diplayCurrency ){
-            $currency = ''.$this->getCurrency()->getSymbol();
+        if ($diplayCurrency) {
+            $currency = '' . $this->getCurrency()->getSymbol();
         }
 
         if (($partH = $this->getFraisDeGestion())) {
             if (strpos($partH, '%')) {
-                if( $displayPercentInfo ){
+                if ($displayPercentInfo) {
                     $percent = sprintf(' (%s)', $partH);
                 }
                 $data = $this->getAmount() / 100 * floatval($partH);
-            } else {
+            }
+            else {
                 $data = $partH;
             }
 
-            return number_format($data, 2, ',', '').$currency.$percent;
+            return number_format($data, 2, ',', '') . $currency . $percent;
         }
         return $this->fraisDeGestion;
     }
@@ -663,25 +666,25 @@ class Activity implements ResourceInterface
         $currency = '';
         $data = '';
 
-        if( $diplayCurrency ){
-            $currency = ''.$this->getCurrency()->getSymbol();
+        if ($diplayCurrency) {
+            $currency = '' . $this->getCurrency()->getSymbol();
         }
 
         if (($partH = $this->getFraisDeGestionPartUnite())) {
             if (strpos($partH, '%')) {
-                if( $displayPercentInfo ){
+                if ($displayPercentInfo) {
                     $percent = sprintf(' (%s)', $partH);
                 }
                 $data = $this->getAmount() / 100 * floatval($partH);
-            } else {
+            }
+            else {
                 $data = $partH;
             }
 
-            return number_format($data, 2, ',', '').$currency.$percent;
+            return number_format($data, 2, ',', '') . $currency . $percent;
         }
         return $this->fraisDeGestionPartUnite;
     }
-
 
 
     public function getFraisDeGestionPartHebergeurDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
@@ -690,21 +693,22 @@ class Activity implements ResourceInterface
         $currency = '';
         $data = '';
 
-        if( $diplayCurrency ){
-            $currency = ''.$this->getCurrency()->getSymbol();
+        if ($diplayCurrency) {
+            $currency = '' . $this->getCurrency()->getSymbol();
         }
 
         if (($partH = $this->getFraisDeGestionPartHebergeur())) {
             if (strpos($partH, '%')) {
-                if( $displayPercentInfo ){
+                if ($displayPercentInfo) {
                     $percent = sprintf(' (%s)', $partH);
                 }
                 $data = $this->getAmount() / 100 * floatval($partH);
-            } else {
+            }
+            else {
                 $data = $partH;
             }
 
-            return number_format($data, 2, ',', '').$currency.$percent;
+            return number_format($data, 2, ',', '') . $currency . $percent;
         }
         return $this->fraisDeGestionPartHebergeur;
     }
@@ -740,7 +744,8 @@ class Activity implements ResourceInterface
             $missings = [];
             if (!$this->getProject()) {
                 $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
-            } elseif (!$this->getAcronym()) {
+            }
+            elseif (!$this->getAcronym()) {
                 $missings[] = _("Le projet de l'activité doit avoir un acronyme");
             }
 
@@ -1180,7 +1185,8 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateOpened()) {
             return $this->getDateOpened()->format($format);
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -1463,7 +1469,7 @@ class Activity implements ResourceInterface
     {
         $out = [
             'warnings' => null,
-            'periods' => [],
+            'periods'  => [],
         ];
         if (!$this->getDateStart() || !$this->getDateEnd()) {
             $out['warnings'] = "Les dates de début et de fin de l'activité doivent être renseignée";
@@ -1717,15 +1723,15 @@ class Activity implements ResourceInterface
         /** @var ActivityPerson $activityPerson */
         foreach ($this->getPersonsDeep() as $activityPerson) {
             $json[] = [
-                'id' => $activityPerson->getId(),
-                'end' => $activityPerson->getDateEnd(),
-                'start' => $activityPerson->getDateStart(),
-                'enrolled' => $activityPerson->getPerson()->getId(),
+                'id'            => $activityPerson->getId(),
+                'end'           => $activityPerson->getDateEnd(),
+                'start'         => $activityPerson->getDateStart(),
+                'enrolled'      => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->__toString(),
-                'enroller' => $activityPerson->getEnroller()->getId(),
+                'enroller'      => $activityPerson->getEnroller()->getId(),
                 'enrollerLabel' => $activityPerson->getEnroller()->__toString(),
-                'role' => $activityPerson->getRole(),
-                'roleLabel' => $activityPerson->getRole(),
+                'role'          => $activityPerson->getRole(),
+                'roleLabel'     => $activityPerson->getRole(),
             ];
         }
         return $json;
@@ -1764,9 +1770,9 @@ class Activity implements ResourceInterface
         return $partners;
     }
 
-    protected function deepParent(Organization $organization, &$out = []) :array
+    protected function deepParent(Organization $organization, &$out = []): array
     {
-        if( $organization->getParent() ){
+        if ($organization->getParent()) {
             $out[] = $organization->getParent();
             $out = $this->deepParent($organization->getParent());
         }
@@ -1835,7 +1841,8 @@ class Activity implements ResourceInterface
             if ($person == $activityPerson->getPerson()) {
                 if ($role !== null && $activityPerson->getRoleObj() !== $role) {
                     continue;
-                } else {
+                }
+                else {
                     $found = true;
                 }
             }
@@ -1901,7 +1908,8 @@ class Activity implements ResourceInterface
         }
         if (isset($this->_cachePersonsByRole[$role])) {
             return $this->_cachePersonsByRole[$role];
-        } else {
+        }
+        else {
             return [];
         }
     }
@@ -1983,7 +1991,8 @@ class Activity implements ResourceInterface
         }
         if (isset($this->_cacheOrganizationsByRole[$role])) {
             return $this->_cacheOrganizationsByRole[$role];
-        } else {
+        }
+        else {
             return [];
         }
     }
@@ -2236,9 +2245,9 @@ class Activity implements ResourceInterface
                 }
             }
             $this->_cachedTodoDone = [
-                'todo' => $todo,
+                'todo'       => $todo,
                 'tovalidate' => $tovalidate,
-                'done' => $done
+                'done'       => $done
             ];
             if ($todo > 0) {
                 $percent = 100 / $todo * $done;
@@ -2278,7 +2287,8 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateStart()) {
             return $this->getDateStart()->format($format);
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -2293,7 +2303,8 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateEnd()) {
             return $this->getDateEnd()->format($format);
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -2306,7 +2317,8 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateSigned()) {
             return $this->getDateSigned()->format($format);
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -2433,7 +2445,8 @@ class Activity implements ResourceInterface
                 $versementsEffectues[] = $amount;
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
                 $versementsEffectuesDate[] = $date;
-            } else {
+            }
+            else {
                 if ($payment->getDatePredicted()) {
                     $date = $payment->getDatePredicted()->format('d/m/Y');
                     $versementsPrevus[] = $amount;
@@ -2461,32 +2474,42 @@ class Activity implements ResourceInterface
     public function csv($dateFormat = 'Y-m-d')
     {
         return array(
-            'ID' => $this->getId(),
-            'ID Projet' => $this->getProject() ? $this->getProject()->getId() : 'N.D',
-            'Acronyme' => $this->getAcronym(),
-            'Projet' => $this->getProject() ? $this->getProject()->getLabel() : '',
-            'Intitulé' => $this->getLabel(),
-            'N°Financier' => $this->getCodeEOTP(),
-            'Date du N°Financier' => $this->getDateOpened() ? $this->getDateOpened()->format($dateFormat) : '',
-            'Montant' => number_format($this->getAmount(), 2, ',', ''), //.$this->getCurrency()->getSymbol(),
-            'numéro SAIC' => $this->getCentaureNumConvention(),
-            'numéro oscar' => $this->getOscarNum(),
-            'Type' => $this->getActivityType() ? (string)$this->getActivityType() : '',
-            'Statut' => Activity::getStatusLabel(),
-            'Début' => $this->getDateStart() ? $this->getDateStart()->format($dateFormat) : '',
-            'Fin' => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
-            'Date de signature' => $this->getDateSigned() ? $this->getDateSigned()->format($dateFormat) : '',
-            'versement effectué' => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
-            'versement prévu' => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
-            'écart de paiement' => number_format($this->getEcartPaiement(), 2, ',', ''),
-            'justificatif écart de paiement' => $this->getJustificatifEcartPaiement(),
-            'Frais de gestion' => $this->getFraisDeGestionDisplay(),
+            'ID'                                => $this->getId(),
+            'ID Projet'                         => $this->getProject() ? $this->getProject()->getId() : 'N.D',
+            'Acronyme'                          => $this->getAcronym(),
+            'Projet'                            => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'Intitulé'                          => $this->getLabel(),
+            'N°Financier'                       => $this->getCodeEOTP(),
+            'Date du N°Financier'               => $this->getDateOpened() ? $this->getDateOpened()->format(
+                $dateFormat
+            ) : '',
+            'Montant'                           => number_format($this->getAmount(), 2, ',', ''),
+            //.$this->getCurrency()->getSymbol(),
+            'numéro SAIC'                       => $this->getCentaureNumConvention(),
+            'numéro oscar'                      => $this->getOscarNum(),
+            'Type'                              => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'Statut'                            => Activity::getStatusLabel(),
+            'Début'                             => $this->getDateStart() ? $this->getDateStart()->format(
+                $dateFormat
+            ) : '',
+            'Fin'                               => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
+            'Date de signature'                 => $this->getDateSigned() ? $this->getDateSigned()->format(
+                $dateFormat
+            ) : '',
+            'versement effectué'                => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
+            'versement prévu'                   => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
+            'écart de paiement'                 => number_format($this->getEcartPaiement(), 2, ',', ''),
+            'justificatif écart de paiement'    => $this->getJustificatifEcartPaiement(),
+            'Frais de gestion'                  => $this->getFraisDeGestionDisplay(),
             'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeurDisplay(true, false),
-            'Frais de gestion (part unité)' => $this->getFraisDeGestionPartUniteDisplay(true, false),
-            'incidence financière' => $this->getIncidenceFinanciere(),
-            'Assiette subventionnable' => $this->getAssietteSubventionnable(),
-            'Note' => $this->getNoteFinanciere(),
-            'Disciplines' => $this->getDisciplines() ? implode(", ", $this->getDisciplinesArray()) : ""
+            'Frais de gestion (part unité)'     => $this->getFraisDeGestionPartUniteDisplay(true, false),
+            'incidence financière'              => $this->getIncidenceFinanciere(),
+            'Assiette subventionnable'          => $this->getAssietteSubventionnable(),
+            'Note'                              => $this->getNoteFinanciere(),
+            'Disciplines'                       => $this->getDisciplines() ? implode(
+                ", ",
+                $this->getDisciplinesArray()
+            ) : ""
         );
     }
 
@@ -2647,21 +2670,21 @@ class Activity implements ResourceInterface
     public function toArray($withAssoc = false)
     {
         $out = array(
-            'id' => $this->getId(),
-            'projectacronym' => $this->getProject() ? $this->getProject()->getAcronym() : '',
-            'project' => $this->getProject() ? $this->getProject()->getLabel() : '',
-            'label' => $this->getLabel(),
-            'PFI' => $this->getCodeEOTP(),
-            'dateInit' => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
-            'amount' => $this->getAmount(),
-            'numero' => $this->getCentaureNumConvention(),
-            'numOscar' => $this->getOscarNum(),
-            'typeOscar' => $this->getActivityType() ? (string)$this->getActivityType() : '',
-            'statut' => Activity::getStatusLabel(),
-            'dateStart' => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
-            'dateEnd' => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
-            'dateSigned' => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
-            'dateUpdated' => $this->getDateUpdated() ? $this->getDateUpdated()->format('Y-m-d') : '',
+            'id'              => $this->getId(),
+            'projectacronym'  => $this->getProject() ? $this->getProject()->getAcronym() : '',
+            'project'         => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'label'           => $this->getLabel(),
+            'PFI'             => $this->getCodeEOTP(),
+            'dateInit'        => $this->getDateOpened() ? $this->getDateOpened()->format('Y-m-d') : '',
+            'amount'          => $this->getAmount(),
+            'numero'          => $this->getCentaureNumConvention(),
+            'numOscar'        => $this->getOscarNum(),
+            'typeOscar'       => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'statut'          => Activity::getStatusLabel(),
+            'dateStart'       => $this->getDateStart() ? $this->getDateStart()->format('Y-m-d') : '',
+            'dateEnd'         => $this->getDateEnd() ? $this->getDateEnd()->format('Y-m-d') : '',
+            'dateSigned'      => $this->getDateSigned() ? $this->getDateSigned()->format('Y-m-d') : '',
+            'dateUpdated'     => $this->getDateUpdated() ? $this->getDateUpdated()->format('Y-m-d') : '',
             'paymentReceived' => $this->getTotalPaymentReceived(),
             'paymentProvided' => $this->getTotalPaymentProvided(),
         );
@@ -2703,9 +2726,9 @@ class Activity implements ResourceInterface
     public function toJson()
     {
         return [
-            'id' => $this->getId(),
-            'text' => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
-            'num' => $this->getOscarNum(),
+            'id'    => $this->getId(),
+            'text'  => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
+            'num'   => $this->getOscarNum(),
             'label' => $this->getLabel(),
         ];
     }
@@ -2840,7 +2863,8 @@ class Activity implements ResourceInterface
             $this->_noTimesheetReason = [];
             if (!$this->getProject()) {
                 $reasons[] = "L'activité n'a pas de projet";
-            } elseif (!$this->getProject()->getAcronym()) {
+            }
+            elseif (!$this->getProject()->getAcronym()) {
                 $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
             }
 

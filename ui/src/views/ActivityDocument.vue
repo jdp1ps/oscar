@@ -1,6 +1,6 @@
 <template>
-  <!-- MODAL DE SUPPRESSION DE DOCUMENT -->
-  <div class="overlay" v-if="error">
+  <!-- ERREUR -->
+  <div class="overlay" v-if="error" style="z-index: 101">
     <div class="overlay-content" style="max-width: 50%">
       <h2>
         Erreur documents
@@ -15,6 +15,7 @@
       </button>
     </div>
   </div>
+
 
   <div class="overlay" v-if="processDetails">
     <div class="overlay-content" style="max-width: 50%">
@@ -45,9 +46,11 @@
           </span>
         </article>
       </section>
+      <div class="buttons-bar">
       <button class="btn btn-default" @click="handlerProcessDetailsOff">
         <i class="icon-cancel-outline"></i> Fermer
       </button>
+      </div>
     </div>
   </div>
 
@@ -76,25 +79,29 @@
       <div class="overlay-content">
         <h2>
           <small>
-            <span></span>
             <i class="icon-doc"></i>
-            Téléversement d'un document :
+            <span v-if="mode == 'new'">Téléversement d'un document</span>
+            <span v-if="mode == 'edit'">Modification des informations</span>
+            <span v-if="mode == 'version'">Nouvelle version</span>
           </small><br>
           <span v-if="editedDocument.id > 0">
-            Modification du document <strong>{{ editedDocument.fileName }}</strong>
+            <strong>{{ editedDocument.fileName }}</strong>
           </span>
           <span v-else>
             Nouveau document dans <strong>{{ editedDocument.tabDocument.label }}</strong>
           </span>
+          <span>
+            ({{ mode }})
+          </span>
           <span class="overlay-closer" @click="editedDocument = null">X</span>
         </h2>
-        {{ editedDocument }}
+        <pre style="font-size: .7em">{{ editedDocument }}</pre>
         <div class="row">
           <div class="col-md-6" v-if="mode != 'edit'">
             <label for="file">Fichier</label>
             <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6" v-if="mode != 'version'">
             <div>
               <label for="typedocument">Type de document</label>
               <div class="alert alert-warning" v-if="editedDocument.process">
@@ -125,18 +132,32 @@
               </div>
             </div>
           </div>
+
+          <div class="col-md-6" v-if="mode != 'version'">
+            <label for="tabdocument">Onglet</label>
+            <div>
+              <select name="tabdocument" id="tabdocument" v-model="editedDocument.tabDocument.id"
+                      class="form-control">
+                <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+              </select>
+            </div>
+          </div>
+
           <div class="col-md-6">
             <label for="dateDeposit">Date de dépôt</label>
             <date-picker v-model="editedDocument.dateDeposit" id="dateDeposit"/>
           </div>
+
           <div class="col-md-6">
             <label for="dateSend">Date d'envoi</label>
             <date-picker v-model="editedDocument.dateSend" id="dateSend"/>
           </div>
+
           <div class="col-md-12">
-            <label for="informations">Informations</label>
-            <textarea v-model="editedDocument.informations" id="informations" class="form-control"></textarea>
+            <label for="information">Informations</label>
+            <textarea v-model="editedDocument.information" id="information" class="form-control"></textarea>
           </div>
+
           <div class="col-md-6" v-if="mode == 'change'">
             <!-- PRIVE, SI PRIVE AJOUT PERSONNES MODIFICATION DE DOCUMENT -->
             <div class="row">
@@ -175,12 +196,14 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <button class="btn btn-danger" @click="editedDocument = null">
-              <i class="icon-cancel-alt"></i> Annuler
-            </button>
-            <a class="btn btn-success" href="#" @click.prevent="applyEdit()">
-              <i class="icon-valid"></i> Enregistrer
-            </a>
+            <nav class="buttons-bar">
+              <button class="btn btn-danger" @click="editedDocument = null">
+                <i class="icon-cancel-alt"></i> Annuler
+              </button>
+              <a class="btn btn-success" href="#" @click.prevent="applyEdit()">
+                <i class="icon-valid"></i> Enregistrer
+              </a>
+            </nav>
           </div>
         </div>
       </div>
@@ -422,23 +445,30 @@
       </div>
       <div class="tab-content" v-for="tab in packedDocuments" v-show="selectedTabId === tab.id">
         <nav v-if="tab.manage" class="text-right">
-          <button v-on:click="handlerUploadNewDoc(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
+          <button v-on:click="handlerNew(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
             <i class="icon-download"></i>
             Téléverser un document
           </button>
         </nav>
         <hr>
         <article class="card xs" v-for="doc in tab.documents" :key="doc.id" :class="{'private-document': doc.private }">
-          <div class="">
+          <div class="card-title">
             <i class="picto icon-anchor-outline" v-if="doc.location == 'link'"></i>
             <i class="picto icon-doc" :class="'doc' + doc.extension" v-else></i>
             <small class="text-light">{{ doc.category.label }} ~ </small>
             <strong>{{doc.fileName}}</strong>
             <small class="text-light" :title="doc.fileSize + ' octet(s)'" v-if="doc.location != 'url'">&nbsp;
-              ({{doc.fileSize | filesize}}) - Version {{ doc.version }}
+              Version {{ doc.version }}
             </small>
           </div>
-          {{ doc.informations }} - {{ doc.dateSend }} - {{ doc.dateDeposit }}
+          <small>
+            <i class="icon-briefcase"></i> Taille <strong>{{ $filters.filesize(doc.fileSize) }}</strong>
+            <i class="icon-calendar"></i> Envoyé <strong>{{ $filters.timeAgo(doc.dateSend) }}</strong>
+            <i class="icon-calendar"></i> Déposé <strong>{{ $filters.dateFull(doc.dateDeposit) }}</strong>
+            <i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong>
+            <i class="icon-user"></i> par <strong>{{ doc.uploader.displayname }}</strong>
+          </small>
+          <p>{{ doc.informations }}</p>
           <section v-if="doc.private">
             <i class="icon-lock"/>
             Ce document est privé, accessible par :
@@ -446,16 +476,17 @@
                   {{ p.personName }}
                 </span>
           </section>
-          <p>
-            {{ doc.information }}
-          </p>
-          <div class="card-content">
+           <div class="card-content">
             <section v-if="doc.process && doc.process.status != 200" class="alert alert-info">
               Procédure de signature <em>{{ doc.process.label }}</em> -
               <strong>{{ doc.process.status_text }}</strong> -
               <span>étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span> -
               <button class="btn btn-xs btn-info" @click="handlerProcessDetailsOn(doc.process)">
                 Détails
+              </button>
+              <button v-if="doc.manage_process" class="btn btn-default" @click="handlerProcessReload(doc)">
+                <i class="icon-rewind-outline"></i>
+                Actualiser
               </button>
             </section>
             <div v-if="doc.versions.length">
@@ -677,6 +708,14 @@ export default {
 
   methods: {
 
+    renderDate(date){
+      if(!date){
+        return "non précisé"
+      }else{
+        return moment(date).fromNow()
+      }
+    },
+
     /**
      * Affichage des détails d'une procédure de signature
      * @param process
@@ -687,22 +726,36 @@ export default {
 
     /**
      * Masquer les détails d'une procédure de signature
+     *
      * @param process
      */
     handlerProcessDetailsOff() {
       this.processDetails = null;
     },
 
-
+    /**
+     * Changement d'onglet
+     *
+     * @param tabId
+     */
     activeTab(tabId) {
       // Affectation valeur du tab dans lequel on se trouve
       this.tabId = tabId;
     },
-    // Suppression Doc
+
+    /**
+     * Suppression de document (écran de confirmation)
+     *
+     * @param document
+     */
     deleteDocument(document) {
       this.deleteData = document;
     },
-    // TODO ordre des docs revoir avec Jack
+
+    /**
+     * TODO
+     * @param field
+     */
     order: function (field) {
       if (this.sortField == field) {
         this.sortDirection *= -1;
@@ -719,16 +772,22 @@ export default {
       return compare === this.sortField ? "active" : "";
     },
 
-    // Modification d'un document
+    /**
+     * Modification d'un document
+     *
+     * @param document
+     */
     handlerEdit(document) {
       this.editedDocument = document;
       this.mode = 'edit';
     },
 
-    // Event Change sur composant "person-auto-completer",
-    // pour hydrater tableau de la liste des personnes pour document privé
+    /**
+     * Selection d'une personne à ajouter pour l'accès privé.
+     *
+     * @param person
+     */
     handlerSelectPersons(person) {
-      console.log("handlerSelectPersons", person);
       if (person.id) {
         let personSelected = {
           "personName": person.displayname,
@@ -753,7 +812,11 @@ export default {
       }
     },
 
-    // Suppression de la personne dans le tableau des personnes
+    /**
+     * Suppression de la personne du mode privé
+     *
+     * @param person
+     */
     handlerDeletePerson(person) {
       this.persons.splice(this.persons.indexOf(person), 1);
     },
@@ -764,7 +827,7 @@ export default {
      Important surtout dans le scénario de l'ouverture modal avec modification datas et fermeture de la modal,
      réouverture de cette modal sans avoir soumis la première fois
      */
-    handlerUploadNewDoc(tabId) {
+    handlerNew(tabId) {
       this.mode = 'new';
       this.editedDocument = {
         "id": -1,
@@ -792,53 +855,21 @@ export default {
       };
     },
 
-
+    /**
+     * Nouvelle version du document.
+     *
+     * @param document
+     */
     handlerNewVersion(document) {
-      console.log(JSON.parse(JSON.stringify(document)));
-      this.editedDocument = document;
       this.mode = 'version';
+      this.editedDocument = document;
     },
 
     /**
-     Déclenche ouverture Modal Upload nouvelle version document initialise datas/reset et affectation de base différentes
+     * Upload d'un fichier (on conserve le fichier)
      *
-     * @param tabId
-     * @param urlReupload
+     * @param event
      */
-    handlerUploadNewVersionDoc(tabId, urlReupload, typeId) {
-      //console.log ("JE PASSE PAR NOUVELLE VERSION DE DOCUMENT : handlerUploadNewVersionDoc(tabId, urlReupload)");
-      this.uploadDoc = true;
-      //Hydratation de l'url de soumission complétée (propre à cet objet)
-      this.uploadNewDocData.baseUrlUpload = urlReupload;
-      this.selectedIdTypeDocument = typeId;
-
-      //Datas communes sous traite à une méthode commune (méthode "privée" nb : pas possible en JS)
-      this.initUploadDatas(tabId, typeId);
-    },
-
-    // FAIT OFFICE DE METHODE PSEUDO PRIVEE TRAITEMENT SIMILAIRE (nouveau doc, nouvelle version de doc)
-    initUploadDatas(tabId, typeId = null) {
-      this.dateDeposit = '';
-      this.dateSend = '';
-      let privateTab = false;
-      if (tabId === PRIVATE) {
-        privateTab = true;
-      }
-      this.privateDocument = privateTab;
-      this.selectedIdTypeDocument = typeId;
-      this.informationsDocument = '';
-      this.fileUrl = this.uploadNewDocData.url = '';
-      this.fileUrlLabel = '';
-      this.persons = [];
-      // initialise objet de base
-      this.uploadNewDocData.init = true;
-      // Affectation valeur par défaut champ fichier lié au contexte de l'onglet choisi (tab)
-      this.fileToDownload = null;
-      // Tab choisis pour upload document (TabId est égal id onglet)
-      this.uploadNewDocData.tab = tabId;
-    },
-
-    // Event onChange sur le champ INPUT FILE
     uploadFile(event) {
       if (event.target.files.length === 0) {
         return;
@@ -846,82 +877,41 @@ export default {
       this.fileToDownload = event.target.files[0];
     },
 
-    // Méthode Upload soumission formulaire téléversement nouveau Document ("submit button")
-    performUpload() {
-      // Match datas de l'objet pour le formulaire Upload
-      this.uploadNewDocData.dateDeposit = this.dateDeposit;
-      this.uploadNewDocData.dateSend = this.dateSend;
-      this.uploadNewDocData.private = (this.privateDocument === true) ? "1" : "0";
-      this.uploadNewDocData.type = this.selectedIdTypeDocument;
-      this.uploadNewDocData.informations = this.informationsDocument;
-
-      let idsPersons = [];
-      if (this.persons.length !== 0) {
-        this.persons.forEach(function (p) {
-          idsPersons.push(p.personId);
-        });
-      }
-      this.uploadNewDocData.persons = idsPersons;
-
-      // Téléversement Nouveau Document Formulaire JS
-      const fd = new FormData();
-      // Hydratation formulaire (clef/valeurs) de base
-      for (let key in this.uploadNewDocData) {
-        let value = this.uploadNewDocData[key];
-        fd.append(key, value);
-      }
-
-      if (this.mode_url) {
-        fd.append('url', this.fileUrl);
-        fd.append('label_url', this.fileUrlLabel);
-      } else {
-        // Document file
-        if (this.fileToDownload !== null) {
-          fd.append('file', this.fileToDownload, this.fileToDownload.name);
-        } else {
-          this.errorMessages.push("Aucun fichier sélectionner a téléverser !");
-        }
-      }
-
-      if (this.uploadNewDocData.type === null) {
-        this.errorMessages.push("Vous devez qualifier le type de votre document !");
-      }
-      if (this.errorMessages.length !== 0) {
-        return;
-      }
-      this.uploadDoc = null;
-      this.persons = [];
-
-      console.log(this.uploadNewDocData.baseUrlUpload);
-      axios.post(this.uploadNewDocData.baseUrlUpload, fd).then(
-          ok => {
-            console.log("SUCCESS ", ok);
-            this.fetch();
-          },
-          ko => {
-            console.log("ERROR ", ko);
-            this.error = ko.response.data;
-          }
-      )
+    handlerProcessReload( doc ){
+      console.log(doc.manage_process);
+      let formData = new FormData();
+      axios.post(doc.manage_process, formData).then(ok=> {
+        this.fetch();
+      }, ko => {
+        console.log("ERROR", ko);
+        this.error = ko.response && ko.response.data ? ko.response.data : ko;
+      })
     },
+
 
     applyEdit() {
       let formData = new FormData();
       let url = "";
       formData.append('data', JSON.stringify(this.editedDocument));
 
-      if( this.mode == 'new') {
+      if( this.mode == 'version' ){
+        formData.append('action', 'version');
+        url = this.editedDocument.urlReupload;
+      } else if( this.mode == 'new') {
         formData.append('action', 'new');
         url = this.urlUploadNewDoc;
+      } else if ( this.mode == 'edit') {
+        formData.append('action', 'edit');
+        url = this.editedDocument.urlReupload;
+      }
+
+      if( this.mode != 'edit' ){
         if (this.fileToDownload !== null) {
           formData.append('file', this.fileToDownload, this.fileToDownload.name);
         } else {
-          this.errorMessages.push("Aucun fichier sélectionner a téléverser !");
+          this.error = "Aucun fichier sélectionner a téléverser !";
+          return;
         }
-      }
-      if( this.mode == 'edit') {
-        formData.append('action', 'edit');
-        url = this.editedDocument.urlReupload;
       }
 
       axios.post(url, formData).then(ok => {
@@ -930,7 +920,7 @@ export default {
         this.fetch();
       }, ko => {
         console.log("ERROR", ko);
-        this.error = ko;
+        this.error = ko.response && ko.response.data ? ko.response.data : ko;
       })
     },
 
@@ -982,15 +972,6 @@ export default {
       formData.append('tabDocument', newTabDoc);
       formData.append('private', privateBool);
       formData.append('persons', persons);
-      // Objet JS Appel Ajax
-
-      // axios.post(this.url)
-      // oscarRemoteData
-      //     .setPendingMessage("Modification du type de document")
-      //     .setErrorMessage("Impossible de modifier le type de document")
-      //     .performPost(this.urlDocumentType, formData, (response) => {
-      //       this.fetch();
-      //     });
     },
 
     getTabById(tabId) {
@@ -1004,6 +985,9 @@ export default {
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
       try {
+        if( !success.data.idCurrentPerson ) {
+          throw "Impossible de charger les documents, vérifiez que vous êtes toujours connecté";
+        }
         this.idCurrentPerson = success.data.idCurrentPerson;
         let documents = Array.isArray(success.data.tabsWithDocuments) ? {} : success.data.tabsWithDocuments;
         let defaultTab = null;
@@ -1043,7 +1027,7 @@ export default {
           }
         }
       } catch (err) {
-        console.log("Erreur de traitement ", err)
+        this.error = err;
       }
     },
 
@@ -1063,8 +1047,12 @@ export default {
     fetch() {
       console.log("fetch()" + this.url);
       axios.get(this.url).then(ok => {
+        console.log("OK");
+        console.log(ok);
         this.handlerSuccess(ok)
       }, ko => {
+        console.log('KO');
+        console.log(ko);
         this.error = ko;
       });
       // Object JS Ajax

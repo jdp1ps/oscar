@@ -5,756 +5,756 @@
 ################################################################################
 # PUBLIQUE
 home:
-    type: literal
-    options:
-        route: /
-        defaults:
-            controller: Public
-            action: index
+  type: literal
+  options:
+    route: /
+    defaults:
+      controller: Public
+      action: index
 
 requestactivity:
-    type: literal
-    options:
-        route: /request-activity
-        defaults:
-            controller: Activity
-            action: requestFor
+  type: literal
+  options:
+    route: /request-activity
+    defaults:
+      controller: Activity
+      action: requestFor
 
 
 changelog:
-    type: literal
-    options:
-        route: /changelog
-        defaults:
-            controller: Public
-            action: changelog
+  type: literal
+  options:
+    route: /changelog
+    defaults:
+      controller: Public
+      action: changelog
 
 gitlog:
-    type: literal
-    options:
-        route: /gitlog
-        defaults:
-            controller: Public
-            action: gitlog
+  type: literal
+  options:
+    route: /gitlog
+    defaults:
+      controller: Public
+      action: gitlog
 
 
 ################################################################################
 # ACCÈS aux DONNÉES
 api:
-    type: literal
-    options:
-        route: /api
+  type: literal
+  options:
+    route: /api
+    defaults:
+      controller: Api
+  may_terminate: true
+  child_routes:
+    manage-acces:
+      type: segment
+      options:
+        route: /manage-access
         defaults:
-            controller: Api
-    may_terminate: true
-    child_routes:
-        manage-acces:
-            type: segment
-            options:
-                route: /manage-access
-                defaults:
-                    action: adminManageAccess
+          action: adminManageAccess
 
-        # Déclarations d'une personne pour une activité
-        help:
-            type: segment
-            options:
-                route: /help
-                defaults:
-                    action: help
+    # Déclarations d'une personne pour une activité
+    help:
+      type: segment
+      options:
+        route: /help
+        defaults:
+          action: help
 
-        # Référenciel PCRU
-        referenciel-pcru-polecompetitivite:
-            type: segment
-            options:
-                route: /referenciel/pcru/pole-competitivite
-                defaults:
-                    action: referencielPcruPoleCompetitivite
+    # Référenciel PCRU
+    referenciel-pcru-polecompetitivite:
+      type: segment
+      options:
+        route: /referenciel/pcru/pole-competitivite
+        defaults:
+          action: referencielPcruPoleCompetitivite
 
-        organizations:
-            type: segment
-            options:
-                route: /organizations
-                defaults:
-                    action: organizations
+    organizations:
+      type: segment
+      options:
+        route: /organizations
+        defaults:
+          action: organizations
 
-        organization:
-            type: segment
-            options:
-                route: /organizations/:id
-                defaults:
-                    action: organization
+    organization:
+      type: segment
+      options:
+        route: /organizations/:id
+        defaults:
+          action: organization
 
-        persons:
-            type: segment
-            options:
-                route: /persons
-                defaults:
-                    action: persons
+    persons:
+      type: segment
+      options:
+        route: /persons
+        defaults:
+          action: persons
 
-        person:
-            type: segment
-            options:
-                route: /persons/:id
-                defaults:
-                    action: person
+    person:
+      type: segment
+      options:
+        route: /persons/:id
+        defaults:
+          action: person
 
-        activity:
-            type: segment
-            options:
-                route: /activity
-                defaults:
-                    action: activity
+    activity:
+      type: segment
+      options:
+        route: /activity
+        defaults:
+          action: activity
 
-        typeactivity:
-            type: segment
-            options:
-                route: /activity-type
-                defaults:
-                    action: activityType
+    typeactivity:
+      type: segment
+      options:
+        route: /activity-type
+        defaults:
+          action: activityType
 
-        typeactivitypcru:
-            type: segment
-            options:
-                route: /activity-type-pcru
-                defaults:
-                    action: activityTypePcru
+    typeactivitypcru:
+      type: segment
+      options:
+        route: /activity-type-pcru
+        defaults:
+          action: activityTypePcru
 
 ################################################################################
 # NOTIFICATIONS
 notification:
-    type: literal
-    options:
-            route: /notification
-            defaults:
-                controller: Notification
-                action: index
-    may_terminate: true
+  type: literal
+  options:
+    route: /notification
+    defaults:
+      controller: Notification
+      action: index
+  may_terminate: true
 
-    child_routes:
-        # Déclarations d'une personne pour une activité
-        test:
-            type: segment
-            options:
-                route: /test
-                defaults:
-                    action: test
-        person:
-            type: segment
-            options:
-                route: /notifyperson/:idperson
-                defaults:
-                    action: notifyPerson
-        history:
-            type: segment
-            options:
-                route: /history
-                defaults:
-                    action: history
+  child_routes:
+    # Déclarations d'une personne pour une activité
+    test:
+      type: segment
+      options:
+        route: /test
+        defaults:
+          action: test
+    person:
+      type: segment
+      options:
+        route: /notifyperson/:idperson
+        defaults:
+          action: notifyPerson
+    history:
+      type: segment
+      options:
+        route: /history
+        defaults:
+          action: history
 
 # TIMESHEET
 timesheet:
-    type: literal
-    options:
-        # Liste des projets
-        route: /feuille-de-temps
+  type: literal
+  options:
+    # Liste des projets
+    route: /feuille-de-temps
+    defaults:
+      controller: Timesheet
+  may_terminate: false
+
+  child_routes:
+    highdelay:
+      type: segment
+      options:
+        route: /highdelay
         defaults:
-            controller: Timesheet
-    may_terminate: false
+          action: highDelay
 
-    child_routes:
-        highdelay:
-            type: segment
-            options:
-                route: /highdelay
-                defaults:
-                    action: highDelay
+    synthesisactivity:
+      type: segment
+      options:
+        route: /synthesisactivity
+        defaults:
+          action: synthesisActivityPeriod
+    synthesisactivitybounds:
+      type: segment
+      options:
+        route: /synthese-activite-periode/:id
+        defaults:
+          action: synthesisActivityPeriodsBounds
 
-        synthesisactivity:
-            type: segment
-            options:
-                route: /synthesisactivity
-                defaults:
-                    action: synthesisActivityPeriod
-        synthesisactivitybounds:
-            type: segment
-            options:
-                route: /synthese-activite-periode/:id
-                defaults:
-                    action: synthesisActivityPeriodsBounds
+    synthesis:
+      type: segment
+      options:
+        route: /synthesis
+        defaults:
+          action: synthesisAll
 
-        synthesis:
-            type: segment
-            options:
-                route: /synthesis
-                defaults:
-                    action: synthesisAll
+    export_activity_dates:
+      type: segment
+      options:
+        route: /synthesis-activity-dates
+        defaults:
+          action: exportActivityDates
 
-        export_activity_dates:
-            type: segment
-            options:
-                route: /synthesis-activity-dates
-                defaults:
-                    action: exportActivityDates
+    resolve:
+      type: segment
+      options:
+        route: /resolve-invalid-labels
+        defaults:
+          action: resolveInvalidLabels
 
-        resolve:
-            type: segment
-            options:
-                route: /resolve-invalid-labels
-                defaults:
-                    action: resolveInvalidLabels
+    syntheseactivity:
+      type: segment
+      options:
+        route: /synthese-activity/:id
+        defaults:
+          action: syntheseActivity
 
-        syntheseactivity:
-            type: segment
-            options:
-                route: /synthese-activity/:id
-                defaults:
-                    action: syntheseActivity
+    activity:
+      type: segment
+      options:
+        route: /resume-activity/:id
+        defaults:
+          action: resumeActivity
+    resume:
+      type: segment
+      options:
+        route: /resume
+        defaults:
+          action: resume
 
-        activity:
-            type: segment
-            options:
-                route: /resume-activity/:id
-                defaults:
-                    action: resumeActivity
-        resume:
-            type: segment
-            options:
-                route: /resume
-                defaults:
-                    action: resume
+    declarations:
+      type: segment
+      options:
+        route: /declarations
+        defaults:
+          action: declarations
 
-        declarations:
-            type: segment
-            options:
-                route: /declarations
-                defaults:
-                    action: declarations
+    import_ical:
+      type: segment
+      options:
+        route: /import-ical
+        defaults:
+          action: importIcal
+    declarant:
+      type: segment
+      options:
+        route: /declarant
+        defaults:
+          action: declarant
 
-        import_ical:
-            type: segment
-            options:
-                route: /import-ical
-                defaults:
-                    action: importIcal
-        declarant:
-            type: segment
-            options:
-                route: /declarant
-                defaults:
-                    action: declarant
+    checkperiod:
+      type: segment
+      options:
+        route: /checkperiod
+        defaults:
+          action: checkperiod
 
-        checkperiod:
-            type: segment
-            options:
-                route: /checkperiod
-                defaults:
-                    action: checkperiod
+    declarantapi:
+      type: segment
+      options:
+        route: /declarant-api
+        defaults:
+          action: declarantAPI
+    excel:
+      type: segment
+      options:
+        route: /excel
+        defaults:
+          action: excel
+    # Déclarations d'une personne pour une activité
+    declarers:
+      type: segment
+      options:
+        route: /declarers
+        defaults:
+          action: declarers
 
-        declarantapi:
-            type: segment
-            options:
-                route: /declarant-api
-                defaults:
-                    action: declarantAPI
-        excel:
-            type: segment
-            options:
-                route: /excel
-                defaults:
-                    action: excel
-        # Déclarations d'une personne pour une activité
-        declarers:
-            type: segment
-            options:
-                route: /declarers
-                defaults:
-                    action: declarers
+    recall-declarer:
+      type: segment
+      options:
+        route: /recall-declarer
+        defaults:
+          action: recallDeclarer
 
-        recall-declarer:
-            type: segment
-            options:
-                route: /recall-declarer
-                defaults:
-                    action: recallDeclarer
+    organization:
+      type: segment
+      options:
+        route: /organizations
+        defaults:
+          action: organizationLeader
+    # Déclarations d'une personne pour une activité
+    declaration:
+      type: segment
+      options:
+        route: /declaration
+        defaults:
+          action: declaration
 
-        organization:
-            type: segment
-            options:
-                route: /organizations
-                defaults:
-                    action: organizationLeader
-        # Déclarations d'une personne pour une activité
-        declaration:
-            type: segment
-            options:
-                route: /declaration
-                defaults:
-                    action: declaration
+    usurpation:
+      type: segment
+      options:
+        route: /usurpation/:idperson/:idactivity
+        defaults:
+          action: usurpation
+    api:
+      type: segment
+      options:
+        route: /api
+        defaults:
+          action: declaration
 
-        usurpation:
-            type: segment
-            options:
-                route: /usurpation/:idperson/:idactivity
-                defaults:
-                    action: usurpation
-        api:
-            type: segment
-            options:
-                route: /api
-                defaults:
-                    action: declaration
+    # Déclarations d'une personne pour une activité
+    declaration2:
+      type: segment
+      options:
+        route: /declaration-horaire/:idactivity
+        defaults:
+          action: declaration2 # Déclarations d'une personne pour une activité
+    validation:
+      type: segment
+      options:
+        route: /validation-horaire/:idactivity
+        defaults:
+          action: validateTimesheet
+    validations:
+      type: segment
+      options:
+        route: /validations
+        defaults:
+          action: validations
 
-        # Déclarations d'une personne pour une activité
-        declaration2:
-            type: segment
-            options:
-                route: /declaration-horaire/:idactivity
-                defaults:
-                    action: declaration2 # Déclarations d'une personne pour une activité
-        validation:
-            type: segment
-            options:
-                route: /validation-horaire/:idactivity
-                defaults:
-                    action: validateTimesheet
-        validations:
-            type: segment
-            options:
-                route: /validations
-                defaults:
-                    action: validations
+    validations2:
+      type: segment
+      options:
+        route: /validations2
+        defaults:
+          action: validations2
 
-        validations2:
-            type: segment
-            options:
-                route: /validations2
-                defaults:
-                    action: validations2
+    validationhwpperson:
+      type: segment
+      options:
+        route: /validation/hwp/:idperson
+        defaults:
+          action: validationHWPPerson
 
-        validationhwpperson:
-            type: segment
-            options:
-                route: /validation/hwp/:idperson
-                defaults:
-                    action: validationHWPPerson
+    validatepersonperiod:
+      type: segment
+      options:
+        route: /validation/person/:idperson
+        defaults:
+          action: validatePersonPeriod
 
-        validatepersonperiod:
-            type: segment
-            options:
-                route: /validation/person/:idperson
-                defaults:
-                    action: validatePersonPeriod
+    validationactivity:
+      type: segment
+      options:
+        route: /validation/activity/:idactivity
+        defaults:
+          action: validationActivity
 
-        validationactivity:
-            type: segment
-            options:
-                route: /validation/activity/:idactivity
-                defaults:
-                    action: validationActivity
+    validationactivity2:
+      type: segment
+      options:
+        route: /validation/activity2/:idactivity
+        defaults:
+          action: validationActivity2
 
-        validationactivity2:
-            type: segment
-            options:
-                route: /validation/activity2/:idactivity
-                defaults:
-                    action: validationActivity2
+    # Déclarations d'une personne pour une activité
+    activityperson:
+      type: segment
+      options:
+        route: /activite-personne/:idactivity/:idperson
+        defaults:
+          action: indexPersonActivity
 
-        # Déclarations d'une personne pour une activité
-        activityperson:
-            type: segment
-            options:
-                route: /activite-personne/:idactivity/:idperson
-                defaults:
-                    action: indexPersonActivity
+    #        # Déclarations d'une activité (plusieurs personnes)
+    #        activity:
+    #            type: segment
+    #            options:
+    #                route: /activite/:idactivity
+    #                defaults:
+    #                    action: indexActivity
 
-#        # Déclarations d'une activité (plusieurs personnes)
-#        activity:
-#            type: segment
-#            options:
-#                route: /activite/:idactivity
-#                defaults:
-#                    action: indexActivity
-
-        # Déclarations d'une personne
-        person:
-            type: segment
-            options:
-                route: /personne/:idperson
-                defaults:
-                    action: indexPerson
-        # Enregistrement des heures
-        sauvegarde:
-            type: segment
-            options:
-                route: /sauvegarde/:idactivity/:idperson
-                defaults:
-                    action: sauvegarde
+    # Déclarations d'une personne
+    person:
+      type: segment
+      options:
+        route: /personne/:idperson
+        defaults:
+          action: indexPerson
+    # Enregistrement des heures
+    sauvegarde:
+      type: segment
+      options:
+        route: /sauvegarde/:idactivity/:idperson
+        defaults:
+          action: sauvegarde
 ################################################################################
 # WORK PACKAGE
 workpackage:
-    type: literal
-    options:
-        # Liste des projets
-        route: /lot-de-travail
+  type: literal
+  options:
+    # Liste des projets
+    route: /lot-de-travail
+    defaults:
+      controller: WorkPackage
+  may_terminate: true
+  child_routes:
+    # Nouveau lot de travail
+    rest:
+      type: segment
+      options:
+        route: /rest/:idactivity
         defaults:
-            controller: WorkPackage
-    may_terminate: true
-    child_routes:
-        # Nouveau lot de travail
-        rest:
-            type: segment
-            options:
-                route: /rest/:idactivity
-                defaults:
-                    action: rest
+          action: rest
 
-        # Nouveau lot de travail
-        new:
-            type: segment
-            options:
-                route: /nouveau/:idactivity
-                defaults:
-                    action: new
-        # Nouveau lot de travail
-        edit:
-            type: segment
-            options:
-                route: /modifier/:id
-                defaults:
-                    action: edit
-        # Suppression
-        delete:
-            type: segment
-            options:
-                route: /supprimer/:id
-                defaults:
-                    action: delete
+    # Nouveau lot de travail
+    new:
+      type: segment
+      options:
+        route: /nouveau/:idactivity
+        defaults:
+          action: new
+    # Nouveau lot de travail
+    edit:
+      type: segment
+      options:
+        route: /modifier/:id
+        defaults:
+          action: edit
+    # Suppression
+    delete:
+      type: segment
+      options:
+        route: /supprimer/:id
+        defaults:
+          action: delete
 
 ################################################################################
 # GESTION des PROJETS
 project:
-    type: literal
-    options:
-        # Liste des projets
-        route: /project
+  type: literal
+  options:
+    # Liste des projets
+    route: /project
+    defaults:
+      controller: Project
+      action: index
+  may_terminate: true
+  child_routes:
+
+    ### Projets de l'utilisateur connecté
+    structure:
+      type: literal
+      options:
+        route: /structure
         defaults:
-            controller: Project
-            action: index
-    may_terminate: true
-    child_routes:
+          controller: Activity
+          action: activitiesOrganizations
 
-        ### Projets de l'utilisateur connecté
-        structure:
-            type: literal
-            options:
-                route: /structure
-                defaults:
-                    controller: Activity
-                    action: activitiesOrganizations
+    ### Projets de l'utilisateur connecté
+    mine:
+      type: literal
+      options:
+        route: /tableau-de-bord
+        defaults:
+          action: currentUserProjects
 
-        ### Projets de l'utilisateur connecté
-        mine:
-            type: literal
-            options:
-                route: /tableau-de-bord
-                defaults:
-                    action: currentUserProjects
+    ### Projets sans activités
+    empty:
+      type: literal
+      options:
+        route: /si-seul
+        defaults:
+          action: empty
+    ### Fiche du projet :id
+    export:
+      type: segment
+      options:
+        route: '/export/:id'
+        defaults:
+          action: export
+      may_terminate: true
 
-        ### Projets sans activités
-        empty:
-            type: literal
-            options:
-                route: /si-seul
-                defaults:
-                    action: empty
-        ### Fiche du projet :id
-        export:
-            type: segment
-            options:
-                route: '/export/:id'
-                defaults:
-                    action: export
-            may_terminate: true
+    ### Exporter des PROJETS
+    export-many:
+      type: segment
+      options:
+        route: '/export-projects'
+        defaults:
+          action: exportMany
+      may_terminate: true
 
-        ### Exporter des PROJETS
-        export-many:
-            type: segment
-            options:
-                route: '/export-projects'
-                defaults:
-                    action: exportMany
-            may_terminate: true
-
-        ### Fiche du projet :id
-        show:
-            type: segment
-            options:
-                route: '/show/:id'
-                defaults:
-                    action: show
-            may_terminate: true
+    ### Fiche du projet :id
+    show:
+      type: segment
+      options:
+        route: '/show/:id'
+        defaults:
+          action: show
+      may_terminate: true
 
 
-        ### Edition des informations
-        edit:
-            type: segment
-            options:
-                route: '/edit/:id'
-                defaults:
-                    action: edit
-         ### Edition des informations
-        delete:
-            type: segment
-            options:
-                route: '/supprimer/:id'
-                defaults:
-                    action: delete
+    ### Edition des informations
+    edit:
+      type: segment
+      options:
+        route: '/edit/:id'
+        defaults:
+          action: edit
+      ### Edition des informations
+    delete:
+      type: segment
+      options:
+        route: '/supprimer/:id'
+        defaults:
+          action: delete
 
-        # Liste des membres
-        edit-members:
-            type: segment
-            options:
-                route: '/edit-members/:id'
-                defaults:
-                    action: managemember
+    # Liste des membres
+    edit-members:
+      type: segment
+      options:
+        route: '/edit-members/:id'
+        defaults:
+          action: managemember
 
-        # Liste des partenaires
-        edit-partners:
-            type: segment
-            options:
-                route: '/edit-partners/:id'
-                defaults:
-                    action: managePartners
+    # Liste des partenaires
+    edit-partners:
+      type: segment
+      options:
+        route: '/edit-partners/:id'
+        defaults:
+          action: managePartners
 
-        ### Factorisation des partenaires
-        simplify-partners:
-            type: segment
-            options:
-                route: '/simplify-partners/:id'
-                defaults:
-                    action: simplifyPartners
+    ### Factorisation des partenaires
+    simplify-partners:
+      type: segment
+      options:
+        route: '/simplify-partners/:id'
+        defaults:
+          action: simplifyPartners
 
-        ### Factorisation des partenaires
-        simplify-members:
-            type: segment
-            options:
-                route: '/simplify-members/:id'
-                defaults:
-                    action: simplifyMembers
+    ### Factorisation des partenaires
+    simplify-members:
+      type: segment
+      options:
+        route: '/simplify-members/:id'
+        defaults:
+          action: simplifyMembers
 
-        ### Factorisation des partenaires
-        fusion:
-            type: segment
-            options:
-                route: '/fusion/:mainId/:fusionnedId'
-                defaults:
-                    action: fusion
+    ### Factorisation des partenaires
+    fusion:
+      type: segment
+      options:
+        route: '/fusion/:mainId/:fusionnedId'
+        defaults:
+          action: fusion
 
-        # Édition des contracts
-        edit-contracts:
-            type: segment
-            options:
-                route: '/edit-contracts/:id'
-                defaults:
-                    action: edit
+    # Édition des contracts
+    edit-contracts:
+      type: segment
+      options:
+        route: '/edit-contracts/:id'
+        defaults:
+          action: edit
 
-        # Édition des contracts
-        add-activities:
-            type: segment
-            options:
-                route: '/deplacer-activites/:id'
-                defaults:
-                    action: addActivities
+    # Édition des contracts
+    add-activities:
+      type: segment
+      options:
+        route: '/deplacer-activites/:id'
+        defaults:
+          action: addActivities
 
-        # Nouveau
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
+    # Nouveau
+    new:
+      type: segment
+      options:
+        route: /new
+        defaults:
+          action: new
 
-        # Recherche un projet
-        search:
-            type: segment
-            options:
-                route: /search
-                defaults:
-                    action: search
+    # Recherche un projet
+    search:
+      type: segment
+      options:
+        route: /search
+        defaults:
+          action: search
 
-        persons:
-            type: segment
-            options:
-                route: /persons/:idproject
-                defaults:
-                    action: persons
+    persons:
+      type: segment
+      options:
+        route: /persons/:idproject
+        defaults:
+          action: persons
 
-        organizations:
-            type: segment
-            options:
-                route: /organizations/:idproject
-                defaults:
-                    action: organizations
+    organizations:
+      type: segment
+      options:
+        route: /organizations/:idproject
+        defaults:
+          action: organizations
 
 ################################################################################
 # GESTION des PERSONNES
 person:
-    type: literal
-    options:
-        route: /person
+  type: literal
+  options:
+    route: /person
+    defaults:
+      controller: Person
+      action: index
+  may_terminate: true
+  child_routes:
+    personnel:
+      type: segment
+      options:
+        route: '/personnel'
         defaults:
-            controller: Person
-            action: index
-    may_terminate: true
-    child_routes:
-        personnel:
-            type: segment
-            options:
-                route: '/personnel'
-                defaults:
-                    action: personnel
-        synchronize:
-            type: segment
-            options:
-                route: '/synchronization/:id'
-                defaults:
-                    action: synchronize
-        show:
-            type: segment
-            options:
-                route: '/show/:id'
-                defaults:
-                    action: show
+          action: personnel
+    synchronize:
+      type: segment
+      options:
+        route: '/synchronization/:id'
+        defaults:
+          action: synchronize
+    show:
+      type: segment
+      options:
+        route: '/show/:id'
+        defaults:
+          action: show
 
-        delete:
-            type: segment
-            options:
-                route: '/delete/:id'
-                defaults:
-                    action: delete
+    delete:
+      type: segment
+      options:
+        route: '/delete/:id'
+        defaults:
+          action: delete
 
-        access:
-            type: segment
-            options:
-                route: '/access/:id'
-                defaults:
-                    action: access
+    access:
+      type: segment
+      options:
+        route: '/access/:id'
+        defaults:
+          action: access
 
-        affectation:
-            type: segment
-            options:
-                route: '/affectation/:id'
-                defaults:
-                    action: affectation
+    affectation:
+      type: segment
+      options:
+        route: '/affectation/:id'
+        defaults:
+          action: affectation
 
-        notification:
-            type: segment
-            options:
-                route: '/notification/:id'
-                defaults:
-                    action: notificationPerson
+    notification:
+      type: segment
+      options:
+        route: '/notification/:id'
+        defaults:
+          action: notificationPerson
 
-        notification_generate:
-            type: segment
-            options:
-                route: '/notification-generate/:id'
-                defaults:
-                    action: notificationPersonGenerate
-        boss:
-            type: segment
-            options:
-                route: '/les-chefs'
-                defaults:
-                    action: boss
+    notification_generate:
+      type: segment
+      options:
+        route: '/notification-generate/:id'
+        defaults:
+          action: notificationPersonGenerate
+    boss:
+      type: segment
+      options:
+        route: '/les-chefs'
+        defaults:
+          action: boss
 
-        syncLdap:
-            type: segment
-            options:
-                route: '/syncLdap/:id'
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: syncLdap
-        syncHarpege:
-            type: segment
-            options:
-                route: '/synchro-harpege[/:id]'
-                defaults:
-                    action: syncHarpege
-        syncLDAP:
-            type: segment
-            options:
-                route: '/synchro-ldap[/:id]'
-                defaults:
-                    action: syncLdap2
-        search:
-            type: literal
-            options:
-                route: '/search'
-                defaults:
-                    action: search
-        merge:
-            type: literal
-            options:
-                route: '/merge'
-                defaults:
-                    action: merge
-        edit:
-            type: segment
-            options:
-                route: '/edit/:id'
-                defaults:
-                    action: edit
+    syncLdap:
+      type: segment
+      options:
+        route: '/syncLdap/:id'
+        constraints:
+          id: '[0-9]+'
+        defaults:
+          action: syncLdap
+    syncHarpege:
+      type: segment
+      options:
+        route: '/synchro-harpege[/:id]'
+        defaults:
+          action: syncHarpege
+    syncLDAP:
+      type: segment
+      options:
+        route: '/synchro-ldap[/:id]'
+        defaults:
+          action: syncLdap2
+    search:
+      type: literal
+      options:
+        route: '/search'
+        defaults:
+          action: search
+    merge:
+      type: literal
+      options:
+        route: '/merge'
+        defaults:
+          action: merge
+    edit:
+      type: segment
+      options:
+        route: '/edit/:id'
+        defaults:
+          action: edit
 
-        organizationrole:
-            type: segment
-            options:
-                route: '/organizationrole/:id'
-                defaults:
-                    action: organizationRole
-        new:
-            type: literal
-            options:
-                route: /new
-                defaults:
-                    action: new
+    organizationrole:
+      type: segment
+      options:
+        route: '/organizationrole/:id'
+        defaults:
+          action: organizationRole
+    new:
+      type: literal
+      options:
+        route: /new
+        defaults:
+          action: new
 
-        declarers:
-            type: literal
-            options:
-                route: /declarers
-                defaults:
-                    action: declarers
+    declarers:
+      type: literal
+      options:
+        route: /declarers
+        defaults:
+          action: declarers
 
 
 
 ################################################################################
 # GESTION des MEMBRES d'un PROJET
 member:
-    type: segment
-    options:
-        # Liste des membres du projet :id
-        route: /member/:id
+  type: segment
+  options:
+    # Liste des membres du projet :id
+    route: /member/:id
+    defaults:
+      controller: Member
+      action: index
+  may_terminate: true
+  child_routes:
+    manage:
+      type: literal
+      options:
+        # Ajout d'un rôle
+        route: /manage
         defaults:
-            controller: Member
-            action: index
-    may_terminate: true
-    child_routes:
-        manage:
-            type: literal
-            options:
-                # Ajout d'un rôle
-                route: /manage
-                defaults:
-                    action: manage
-        delete:
-            type: segment
-            options:
-                # Suppression d'un rôle
-                route: /delete/:memberid
-                defaults:
-                    action: delete
+          action: manage
+    delete:
+      type: segment
+      options:
+        # Suppression d'un rôle
+        route: /delete/:memberid
+        defaults:
+          action: delete
 
 
 
@@ -764,1291 +764,1298 @@ member:
 ################################################################################
 # GESTION des ORGANISATIONS
 organization:
-    type: literal
-    options:
-        route: /organization
-        may_terminate: true
-        defaults:
-            controller: Organization
-            action: index
+  type: literal
+  options:
+    route: /organization
     may_terminate: true
-    child_routes:
-        fiche:
-            type: segment
-            options:
-                route: '/fiche/:id'
-                defaults:
-                    action: fiche
-            may_terminate: true
+    defaults:
+      controller: Organization
+      action: index
+  may_terminate: true
+  child_routes:
+    fiche:
+      type: segment
+      options:
+        route: '/fiche/:id'
+        defaults:
+          action: fiche
+      may_terminate: true
 
-        show:
-            type: segment
-            options:
-                route: '/show/:id'
-                defaults:
-                    action: show
-            may_terminate: true
-        search:
-            type: segment
-            options:
-                route: '/search'
-                defaults:
-                    action: search
-        export:
-             type: segment
-             options:
-                 route: '/export'
-                 defaults:
-                     action: exportCsv
-        merge:
-            type: segment
-            options:
-                route: '/merge'
-                defaults:
-                    action: merge
-        edit:
-            type: segment
-            options:
-                route: '/edit/:id'
-                defaults:
-                    action: edit
+    show:
+      type: segment
+      options:
+        route: '/show/:id'
+        defaults:
+          action: show
+      may_terminate: true
+    search:
+      type: segment
+      options:
+        route: '/search'
+        defaults:
+          action: search
+    export:
+      type: segment
+      options:
+        route: '/export'
+        defaults:
+          action: exportCsv
+    merge:
+      type: segment
+      options:
+        route: '/merge'
+        defaults:
+          action: merge
+    edit:
+      type: segment
+      options:
+        route: '/edit/:id'
+        defaults:
+          action: edit
 
-        suborganization:
-            type: segment
-            options:
-                route: '/suborganization/:idorganization'
-                defaults:
-                    action: suborganization
+    suborganization:
+      type: segment
+      options:
+        route: '/suborganization/:idorganization'
+        defaults:
+          action: suborganization
 
-        delete:
-            type: segment
-            options:
-                route: '/delete/:id'
-                defaults:
-                    action: delete
-        close:
-            type: segment
-            options:
-                route: '/end/:id'
-                defaults:
-                    action: close
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
-        fusion:
-            type: segment
-            options:
-                route: /fusion
-                defaults:
-                    action: fusion
+    delete:
+      type: segment
+      options:
+        route: '/delete/:id'
+        defaults:
+          action: delete
+    close:
+      type: segment
+      options:
+        route: '/end/:id'
+        defaults:
+          action: close
+    new:
+      type: segment
+      options:
+        route: /new
+        defaults:
+          action: new
+    fusion:
+      type: segment
+      options:
+        route: /fusion
+        defaults:
+          action: fusion
 
-        scission:
-            type: segment
-            options:
-                route: /scission
-                defaults:
-                    action: scission
-        ldap:
-            type: segment
-            options:
-                route: /ldap
-                defaults:
-                    action: syncLdap
+    scission:
+      type: segment
+      options:
+        route: /scission
+        defaults:
+          action: scission
+    ldap:
+      type: segment
+      options:
+        route: /ldap
+        defaults:
+          action: syncLdap
 
 generate:
-    type: literal
-    options:
-        route: /generate
-        defaults:
-            controller: Activity
-            action: generate
-    may_terminate: true
+  type: literal
+  options:
+    route: /generate
+    defaults:
+      controller: Activity
+      action: generate
+  may_terminate: true
 
 test:
-    type: literal
-    options:
-        route: /test
-        defaults:
-            controller: Public
-            action: test
-    may_terminate: true
+  type: literal
+  options:
+    route: /test
+    defaults:
+      controller: Public
+      action: test
+  may_terminate: true
 
 spent:
-    type: literal
-    options:
-        route: /depenses
-        defaults:
-            controller: Depense
+  type: literal
+  options:
+    route: /depenses
+    defaults:
+      controller: Depense
 
-    may_terminate: false
-    child_routes:
-        compte-affectation:
-            type: segment
-            options:
-                route: /api/affectation
-                defaults:
-                    action: compteAffectation
-        activity-api:
-            type: segment
-            options:
-                route: /api/activity/:id
-                defaults:
-                    action: activityApi
+  may_terminate: false
+  child_routes:
+    compte-affectation:
+      type: segment
+      options:
+        route: /api/affectation
+        defaults:
+          action: compteAffectation
+    activity-api:
+      type: segment
+      options:
+        route: /api/activity/:id
+        defaults:
+          action: activityApi
 
 ################################################################################
 # GESTION des CONTRACTS
 contract:
-    type: literal
-    options:
-        route: /activites-de-recherche
+  type: literal
+  options:
+    route: /activites-de-recherche
+    defaults:
+      controller: Activity
+
+  may_terminate: false
+  child_routes:
+
+    process-document-signed-send:
+      type: segment
+      options:
+        route: /signed-document-send/:id
         defaults:
-            controller: Activity
+          action: signedDocumentSend
+    debug:
+      type: segment
+      options:
+        route: /debug
+        defaults:
+          action: debug
+    timesheet:
+      type: segment
+      options:
+        route: /feuille-de-temps/:id
+        defaults:
+          action: timesheet
 
-    may_terminate: false
-    child_routes:
+    sdfjkhsdfjk:
+      type: segment
+      options:
+        route: /foo
+        defaults:
+          action: searchActivity
 
-        process-document-signed-send:
-            type: segment
-            options:
-                route: /signed-document-send/:id
-                defaults:
-                    action: signedDocumentSend
-        debug:
-            type: segment
-            options:
-                route: /debug
-                defaults:
-                    action: debug
-        timesheet:
-            type: segment
-            options:
-                route: /feuille-de-temps/:id
-                defaults:
-                    action: timesheet
+    personaccess:
+      type: segment
+      options:
+        route: /acces/:id
+        defaults:
+          action: personsAccessDeep
 
-        sdfjkhsdfjk:
-            type: segment
-            options:
-                route: /foo
-                defaults:
-                    action: searchActivity
+    advancedsearch:
+      type: segment
+      options:
+        route: /advancedsearch
+        defaults:
+          action: advancedSearch
 
-        personaccess:
-            type: segment
-            options:
-                route: /acces/:id
-                defaults:
-                    action: personsAccessDeep
+    api:
+      type: segment
+      options:
+        route: /api
+        defaults:
+          action: api
 
-        advancedsearch:
-            type: segment
-            options:
-                route: /advancedsearch
-                defaults:
-                    action: advancedSearch
+    apiui:
+      type: segment
+      options:
+        route: /api-ui
+        defaults:
+          action: apiUi
 
-        api:
-            type: segment
-            options:
-                route: /api
-                defaults:
-                    action: api
+    pcru-list:
+      type: segment
+      options:
+        route: /transmission-pcru
+        defaults:
+          action: pcruList
 
-        apiui:
-            type: segment
-            options:
-                route: /api-ui
-                defaults:
-                    action: apiUi
-
-        pcru-list:
-            type: segment
-            options:
-                route: /transmission-pcru
-                defaults:
-                    action: pcruList
-
-        gant:
-            type: segment
-            options:
-                route: /gant
-                defaults:
-                    action: gant
+    gant:
+      type: segment
+      options:
+        route: /gant
+        defaults:
+          action: gant
 
 
-        orphans:
-            type: segment
-            options:
-                route: /orphans
-                defaults:
-                    action: orphans
-        moveToProject:
-            type: segment
-            options:
-                route: /modifier-projet/:id
-                defaults:
-                    action: changeProject
-        show:
-            type: segment
-            options:
-                route: /fiche-detaillee/:id
-                defaults:
-                    action: show
+    orphans:
+      type: segment
+      options:
+        route: /orphans
+        defaults:
+          action: orphans
+    moveToProject:
+      type: segment
+      options:
+        route: /modifier-projet/:id
+        defaults:
+          action: changeProject
+    show:
+      type: segment
+      options:
+        route: /fiche-detaillee/:id
+        defaults:
+          action: show
 
-        pcru-infos:
-            type: segment
-            options:
-                route: /pcru-infos/:id
-                defaults:
-                    action: pcruInfos
+    pcru-infos:
+      type: segment
+      options:
+        route: /pcru-infos/:id
+        defaults:
+          action: pcruInfos
 
-        estimated-spent:
-            type: segment
-            options:
-                route: /depenses-previsionnelles/:id
-                defaults:
-                    action: estimatedSpent
+    estimated-spent:
+      type: segment
+      options:
+        route: /depenses-previsionnelles/:id
+        defaults:
+          action: estimatedSpent
 
-        estimated-spent-export:
-            type: segment
-            options:
-                route: /depenses-previsionnelles-export/:id
-                defaults:
-                    action: estimatedSpentExport
+    estimated-spent-export:
+      type: segment
+      options:
+        route: /depenses-previsionnelles-export/:id
+        defaults:
+          action: estimatedSpentExport
 
-        list-spent:
-            type: segment
-            options:
-                route: /depenses/:id
-                defaults:
-                    action: spentList
+    list-spent:
+      type: segment
+      options:
+        route: /depenses/:id
+        defaults:
+          action: spentList
 
-        pcru:
-            type: segment
-            options:
-                route: /pcru/:id
-                defaults:
-                    action: pcru
+    pcru:
+      type: segment
+      options:
+        route: /pcru/:id
+        defaults:
+          action: pcru
 
-        spent-synthesis:
-            type: segment
-            options:
-                route: /synthese-depenses/:id
-                defaults:
-                    action: spentSynthesisActivity
+    spent-synthesis:
+      type: segment
+      options:
+        route: /synthese-depenses/:id
+        defaults:
+          action: spentSynthesisActivity
 
-        requestadmin:
-            type: literal
-            options:
-                route: /admin-request
-                defaults:
-                    action: adminDemande
+    requestadmin:
+      type: literal
+      options:
+        route: /admin-request
+        defaults:
+          action: adminDemande
 
-        exportjson:
-            type: segment
-            options:
-                route: /export-json[/:id]
-                defaults:
-                    action: exportJSON
+    exportjson:
+      type: segment
+      options:
+        route: /export-json[/:id]
+        defaults:
+          action: exportJSON
 
-        json:
-            type: segment
-            options:
-                route: /json/:id
-                defaults:
-                    action: jsonApi
+    json:
+      type: segment
+      options:
+        route: /json/:id
+        defaults:
+          action: jsonApi
 
-        generatedocument:
-            type: segment
-            options:
-                route: /generer-document/:id/:doc
-                defaults:
-                    action: generatedDocument
+    generatedocument:
+      type: segment
+      options:
+        route: /generer-document/:id/:doc
+        defaults:
+          action: generatedDocument
 
-        show2:
-            type: segment
-            options:
-                route: /fiche/:id[/:do]
-                defaults:
-                    action: show2
+    show2:
+      type: segment
+      options:
+        route: /fiche/:id[/:do]
+        defaults:
+          action: show2
 
-        notifications:
-            type: segment
-            options:
-                route: /notifications/:id
-                defaults:
-                    action: notifications
+    notifications:
+      type: segment
+      options:
+        route: /notifications/:id
+        defaults:
+          action: notifications
 
-        documents-json:
-            type: segment
-            options:
-                route: /documents-json/:id
-                defaults:
-                    action: documentsJson
+    documents-json:
+      type: segment
+      options:
+        route: /documents-json/:id
+        defaults:
+          action: documentsJson
 
-        visualisation:
-            type: segment
-            options:
-                route: /visualization/:id
-                defaults:
-                    action: visualization
+    visualisation:
+      type: segment
+      options:
+        route: /visualization/:id
+        defaults:
+          action: visualization
 
-        persons:
-            type: segment
-            options:
-                route: /persons/:id
-                defaults:
-                    action: persons
-
-
-        organizations:
-            type: segment
-            options:
-                route: /organizations/:id
-                defaults:
-                    action: organizations
-
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                defaults:
-                    action: edit
-        delete:
-            type: segment
-            options:
-                route: /delete/:id
-                defaults:
-                    action: delete
-        duplicate:
-            type: segment
-            options:
-                route: /duplicate/:id
-                defaults:
-                    action: duplicate
-
-        createProject:
-            type: segment
-            options:
-                route: /makeproject/:id
-                defaults:
-                    action: makeProject
-        generatenotifications:
-            type: segment
-            options:
-                route: /generer-notifications/:id
-                defaults:
-                    action: generateNotifications
-        csv:
-            type: segment
-            options:
-                route: /csv
-                defaults:
-                    action: csv
-        csvpayments:
-            type: segment
-            options:
-                route: /csv-payements
-                defaults:
-                    action: csvPayments
-
-        new:
-            type: segment
-            options:
-                route: /creer[/:projectid]
-                defaults:
-                    action: new
+    persons:
+      type: segment
+      options:
+        route: /persons/:id
+        defaults:
+          action: persons
 
 
-        newstructure:
-            type: segment
-            options:
-                route: /creer-structure/:organizationid
-                defaults:
-                    action: newInStructure
+    organizations:
+      type: segment
+      options:
+        route: /organizations/:id
+        defaults:
+          action: organizations
 
-        almoststart:
-            type: literal
-            options:
-                route: /avenir
-                defaults:
-                    action: almostStart
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        defaults:
+          action: edit
+    delete:
+      type: segment
+      options:
+        route: /delete/:id
+        defaults:
+          action: delete
+    duplicate:
+      type: segment
+      options:
+        route: /duplicate/:id
+        defaults:
+          action: duplicate
 
-        almostdone:
-            type: literal
-            options:
-                route: /bientot-termine
-                defaults:
-                    action: almostDone
+    createProject:
+      type: segment
+      options:
+        route: /makeproject/:id
+        defaults:
+          action: makeProject
+    generatenotifications:
+      type: segment
+      options:
+        route: /generer-notifications/:id
+        defaults:
+          action: generateNotifications
+    csv:
+      type: segment
+      options:
+        route: /csv
+        defaults:
+          action: csv
+    csvpayments:
+      type: segment
+      options:
+        route: /csv-payements
+        defaults:
+          action: csvPayments
+
+    new:
+      type: segment
+      options:
+        route: /creer[/:projectid]
+        defaults:
+          action: new
+
+
+    newstructure:
+      type: segment
+      options:
+        route: /creer-structure/:organizationid
+        defaults:
+          action: newInStructure
+
+    almoststart:
+      type: literal
+      options:
+        route: /avenir
+        defaults:
+          action: almostStart
+
+    almostdone:
+      type: literal
+      options:
+        route: /bientot-termine
+        defaults:
+          action: almostDone
 
 doc:
-    type: segment
-    options:
-        route: /aide[/:doc]
-        defaults:
-            controller: Public
-            action: documentation
+  type: segment
+  options:
+    route: /aide[/:doc]
+    defaults:
+      controller: Public
+      action: documentation
 
 user_parameters:
-    type: segment
-    options:
-        route: /parameters
-        defaults:
-            controller: Public
-            action: parameters
+  type: segment
+  options:
+    route: /parameters
+    defaults:
+      controller: Public
+      action: parameters
 
 vitejs_example:
-    type: segment
-    options:
-        route: /dev-vitejs
-        defaults:
-            controller: Public
-            action: devVitejs
+  type: segment
+  options:
+    route: /dev-vitejs
+    defaults:
+      controller: Public
+      action: devVitejs
 
 ################################################################################
 # GESTION des DOCUMENTS (administratifs)
 administrativedocument:
-    type: literal
-    options:
-        route: /documents-administratifs
-        defaults:
-            controller: AdministrativeDocument
-            action: index
-    may_terminate: true
+  type: literal
+  options:
+    route: /documents-administratifs
+    defaults:
+      controller: AdministrativeDocument
+      action: index
+  may_terminate: true
 
-    child_routes:
-        upload:
-            type: segment
-            options:
-                route: /televerser
-                defaults:
-                    action: upload
-        download:
-            type: segment
-            options:
-                route: /telecharger/:id
-                defaults:
-                    action: download
-        delete:
-            type: segment
-            options:
-                route: /supprimer/:id
-                defaults:
-                    action: delete
+  child_routes:
+    upload:
+      type: segment
+      options:
+        route: /televerser
+        defaults:
+          action: upload
+    download:
+      type: segment
+      options:
+        route: /telecharger/:id
+        defaults:
+          action: download
+    delete:
+      type: segment
+      options:
+        route: /supprimer/:id
+        defaults:
+          action: delete
 
 ################################################################################
 # GESTION des DOCUMENTS (des contrats)
 contractdocument:
-    type: literal
-    options:
-        route: /documents-des-contracts
+  type: literal
+  options:
+    route: /documents-des-contracts
+    defaults:
+      controller: ContractDocument
+      action: index
+  may_terminate: true
+  child_routes:
+    document-change-type:
+      type: segment
+      options:
+        route: /document-change-type
         defaults:
-            controller: ContractDocument
-            action: index
-    may_terminate: true
-    child_routes:
-        document-change-type:
-            type: segment
-            options:
-                route: /document-change-type
-                defaults:
-                    action: changeType
-        upload:
-            type: segment
-            options:
-                route: /televerser/:idactivity[/:idtab][/:id]
-                defaults:
-                    action: upload
-        download:
-            type: segment
-            options:
-                route: /telecharger/:id
-                defaults:
-                    action: download
-        delete:
-            type: segment
-            options:
-                route: /atomiser/:id
-                defaults:
-                    action: delete
+          action: changeType
+    upload:
+      type: segment
+      options:
+        route: /televerser/:idactivity[/:idtab][/:id]
+        defaults:
+          action: upload
+    download:
+      type: segment
+      options:
+        route: /telecharger/:id
+        defaults:
+          action: download
+
+    process:
+      type: segment
+      options:
+        route: /process/:id
+        defaults:
+          action: process
+    delete:
+      type: segment
+      options:
+        route: /atomiser/:id
+        defaults:
+          action: delete
 
 ################################################################################
 ### Relation : Organization<>Activité de recherche
 organizationactivity:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /organizationactivity
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /organizationactivity
+    defaults:
+      controller: Enroll
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new/:idenroller[/:idenrolled]
         defaults:
-            controller: Enroll
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new/:idenroller[/:idenrolled]
-                defaults:
-                    action: organizationActivityNew
-        delete:
-            type: segment
-            options:
-                route: /delete/:idenroll
-                defaults:
-                    action: activityOrganizationDelete
-        edit:
-            type: segment
-            options:
-                route: /edit/:idenroll
-                defaults:
-                    action: activityOrganizationEdit
+          action: organizationActivityNew
+    delete:
+      type: segment
+      options:
+        route: /delete/:idenroll
+        defaults:
+          action: activityOrganizationDelete
+    edit:
+      type: segment
+      options:
+        route: /edit/:idenroll
+        defaults:
+          action: activityOrganizationEdit
 
 # Person <> Organisation
 organizationperson:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /organizationperson
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /organizationperson
+    defaults:
+      controller: Enroll
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new/:idenroller[/:idenrolled]
         defaults:
-            controller: Enroll
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new/:idenroller[/:idenrolled]
-                defaults:
-                    action: organizationPersonNew
-        neworganization:
-            type: segment
-            options:
-                route: /neworganisation/:idenrolled
-                defaults:
-                    action: organizationPersonNew
-        delete:
-            type: segment
-            options:
-                route: /delete/:idenroll
-                defaults:
-                    action: organizationPersonDelete
-        close:
-            type: segment
-            options:
-                route: /close/:idenroll
-                defaults:
-                    action: organizationPersonClose
+          action: organizationPersonNew
+    neworganization:
+      type: segment
+      options:
+        route: /neworganisation/:idenrolled
+        defaults:
+          action: organizationPersonNew
+    delete:
+      type: segment
+      options:
+        route: /delete/:idenroll
+        defaults:
+          action: organizationPersonDelete
+    close:
+      type: segment
+      options:
+        route: /close/:idenroll
+        defaults:
+          action: organizationPersonClose
 
-        edit:
-            type: segment
-            options:
-                route: /edit/:idenroll
-                defaults:
-                    action: organizationPersonEdit
+    edit:
+      type: segment
+      options:
+        route: /edit/:idenroll
+        defaults:
+          action: organizationPersonEdit
 
 ################################################################################
 ### Relation : Personne<>Activité de recherche
 
 personactivity:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /personnactivity
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /personnactivity
+    defaults:
+      controller: Enroll
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new/:idenroller[/:idenrolled]
         defaults:
-            controller: Enroll
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new/:idenroller[/:idenrolled]
-                defaults:
-                    action: personActivityNew
-        delete:
-            type: segment
-            options:
-                route: /delete/:idenroll
-                defaults:
-                    action: personActivityDelete
-        edit:
-            type: segment
-            options:
-                route: /edit/:idenroll
-                defaults:
-                    action: personActivityEdit
+          action: personActivityNew
+    delete:
+      type: segment
+      options:
+        route: /delete/:idenroll
+        defaults:
+          action: personActivityDelete
+    edit:
+      type: segment
+      options:
+        route: /edit/:idenroll
+        defaults:
+          action: personActivityEdit
 
 
 ################################################################################
 ### Relation : Personne<>Projet
 
 personproject:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /personproject
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /personproject
+    defaults:
+      controller: Enroll
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new/:idenroller[/:idenrolled]
         defaults:
-            controller: Enroll
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new/:idenroller[/:idenrolled]
-                defaults:
-                    action: personProjectNew
-        delete:
-            type: segment
-            options:
-                route: /delete/:idenroll
-                defaults:
-                    action: personProjectDelete
-        edit:
-            type: segment
-            options:
-                route: /edit/:idenroll
-                defaults:
-                    action: personProjectEdit
+          action: personProjectNew
+    delete:
+      type: segment
+      options:
+        route: /delete/:idenroll
+        defaults:
+          action: personProjectDelete
+    edit:
+      type: segment
+      options:
+        route: /edit/:idenroll
+        defaults:
+          action: personProjectEdit
 
 ################################################################################
 ### Relation : Organization<>Projet
 
 organizationproject:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /organizationproject
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /organizationproject
+    defaults:
+      controller: Enroll
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new/:idenroller[/:idenrolled]
         defaults:
-            controller: Enroll
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new/:idenroller[/:idenrolled]
-                defaults:
-                    action: organizationProjectNew
-        delete:
-            type: segment
-            options:
-                route: /delete/:idenroll
-                defaults:
-                    action: organizationProjectDelete
-        edit:
-            type: segment
-            options:
-                route: /edit/:idenroll
-                defaults:
-                    action: organizationProjectEdit
+          action: organizationProjectNew
+    delete:
+      type: segment
+      options:
+        route: /delete/:idenroll
+        defaults:
+          action: organizationProjectDelete
+    edit:
+      type: segment
+      options:
+        route: /edit/:idenroll
+        defaults:
+          action: organizationProjectEdit
 ################################################################################
 ### DateType
 datetype:
-    type: segment
-    options:
-        route: /date-type
+  type: segment
+  options:
+    route: /date-type
+    defaults:
+      controller: DateType
+      action: index
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new
         defaults:
-            controller: DateType
-            action: index
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
-        delete:
-            type: segment
-            options:
-                route: /delete/:id
-                defaults:
-                    action: delete
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                defaults:
-                    action: edit
+          action: new
+    delete:
+      type: segment
+      options:
+        route: /delete/:id
+        defaults:
+          action: delete
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        defaults:
+          action: edit
 ################################################################################
 ### TabDocument
 tabdocument:
-    type: segment
-    options:
-        route: /tab-document
+  type: segment
+  options:
+    route: /tab-document
+    defaults:
+      controller: TabDocument
+      action: index
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new
         defaults:
-            controller: TabDocument
-            action: index
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
-        delete:
-            type: segment
-            options:
-                route: /delete/:id
-                defaults:
-                    action: delete
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                defaults:
-                    action: edit
+          action: new
+    delete:
+      type: segment
+      options:
+        route: /delete/:id
+        defaults:
+          action: delete
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        defaults:
+          action: edit
 
-        migrate:
-            type: segment
-            options:
-                route: /migrate
-                defaults:
-                    action: migrateDocuments
+    migrate:
+      type: segment
+      options:
+        route: /migrate
+        defaults:
+          action: migrateDocuments
 
 ################################################################################
 ### ActivityDate
 milestones:
-    type: segment
-    options:
-        route: /jalons
+  type: segment
+  options:
+    route: /jalons
+    defaults:
+      controller: ActivityDate
+      action: index
+  may_terminate: true
+  child_routes:
+    activity:
+      type: segment
+      options:
+        route: /:idactivity
         defaults:
-            controller: ActivityDate
-            action: index
-    may_terminate: true
-    child_routes:
-        activity:
-            type: segment
-            options:
-                route: /:idactivity
-                defaults:
-                    action: activity
+          action: activity
 
 activitydate:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /activity-date/:idactivity
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /activity-date/:idactivity
+    defaults:
+      controller: ActivityDate
+      action: index
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new
         defaults:
-            controller: ActivityDate
-            action: index
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new
-                defaults:
-                    action: new
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: change
-        delete:
-            type: segment
-            verb: delete
-            options:
-                route: /:id
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: change
+          action: new
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        constraints:
+          id: '[0-9]+'
+        defaults:
+          action: change
+    delete:
+      type: segment
+      verb: delete
+      options:
+        route: /:id
+        constraints:
+          id: '[0-9]+'
+        defaults:
+          action: change
 
 ################################################################################
 ### ActivityType
 payment:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /versements
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /versements
+    defaults:
+      controller: ActivityPayment
+      action: index
+  may_terminate: true
+  child_routes:
+    income:
+      type: segment
+      options:
+        route: /a-venir
         defaults:
-            controller: ActivityPayment
-            action: index
-    may_terminate: true
-    child_routes:
-        income:
-            type: segment
-            options:
-                route: /a-venir
-                defaults:
-                    action: income
-        late:
-            type: segment
-            options:
-                route: /en-retard
-                defaults:
-                    action: late
-        difference:
-            type: segment
-            options:
-                route: /ecart-de-paiement
-                defaults:
-                    action: difference
+          action: income
+    late:
+      type: segment
+      options:
+        route: /en-retard
+        defaults:
+          action: late
+    difference:
+      type: segment
+      options:
+        route: /ecart-de-paiement
+        defaults:
+          action: difference
 
 
 activitypayment_rest:
-    type: segment
-    may_terminate: true
-    options:
-        # Liste pour l'activité :id
-        route: /versements-activite/rest/:idactivity
+  type: segment
+  may_terminate: true
+  options:
+    # Liste pour l'activité :id
+    route: /versements-activite/rest/:idactivity
+    defaults:
+      controller: ActivityPayment
+      action: indexRest
+  child_routes:
+    rest:
+      type: segment
+      options:
+        route: /:id
+        constraints:
+          id: '[0-9]+'
         defaults:
-            controller: ActivityPayment
-            action: indexRest
-    child_routes:
-        rest:
-            type: segment
-            options:
-                route: /:id
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: rest
+          action: rest
 activitypayment:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /versements-des-activites/:idactivity
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /versements-des-activites/:idactivity
+    defaults:
+      controller: ActivityPayment
+      action: index
+  may_terminate: true
+  child_routes:
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        constraints:
+          id: '[0-9]+'
         defaults:
-            controller: ActivityPayment
-            action: index
-    may_terminate: true
-    child_routes:
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: change
-        delete:
-            type: segment
-            verb: delete
-            options:
-                route: /:id
-                constraints:
-                    id: '[0-9]+'
-                defaults:
-                    action: change
+          action: change
+    delete:
+      type: segment
+      verb: delete
+      options:
+        route: /:id
+        constraints:
+          id: '[0-9]+'
+        defaults:
+          action: change
 
 ################################################################################
 ### ActivityType
 activitytype:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /activity-type
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /activity-type
+    defaults:
+      controller: ActivityType
+      action: index
+  may_terminate: true
+  child_routes:
+    new:
+      type: segment
+      options:
+        route: /new[/:idparent]
         defaults:
-            controller: ActivityType
-            action: index
-    may_terminate: true
-    child_routes:
-        new:
-            type: segment
-            options:
-                route: /new[/:idparent]
-                defaults:
-                    action: new
-        delete:
-            type: segment
-            options:
-                route: /delete/:id
-                defaults:
-                    action: delete
-        edit:
-            type: segment
-            options:
-                route: /edit/:id
-                defaults:
-                    action: edit
-        merge:
-            type: segment
-            options:
-                route: /merge/:id
-                defaults:
-                    action: merge
-        movein:
-            type: segment
-            options:
-                route: /move/:what/:how/:where
-                defaults:
-                    action: move
+          action: new
+    delete:
+      type: segment
+      options:
+        route: /delete/:id
+        defaults:
+          action: delete
+    edit:
+      type: segment
+      options:
+        route: /edit/:id
+        defaults:
+          action: edit
+    merge:
+      type: segment
+      options:
+        route: /merge/:id
+        defaults:
+          action: merge
+    movein:
+      type: segment
+      options:
+        route: /move/:what/:how/:where
+        defaults:
+          action: move
 
 
 depense:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /depenses
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /depenses
+    defaults:
+      controller: Depense
+  child_routes:
+
+    activity:
+      type: segment
+      may_terminate: true
+      options:
+        route: /activity/:idactivity
         defaults:
-            controller: Depense
-    child_routes:
+          action: activity
 
-        activity:
-            type: segment
-            may_terminate: true
-            options:
-                route: /activity/:idactivity
-                defaults:
-                    action: activity
-
-        manage:
-            type: segment
-            may_terminate: true
-            options:
-                route: /manage-type
-                defaults:
-                    action: manageSpendTypeGroup
+    manage:
+      type: segment
+      may_terminate: true
+      options:
+        route: /manage-type
+        defaults:
+          action: manageSpendTypeGroup
 
 
 
 
 connector:
-    type: segment
-    options:
-            # Liste pour le projet :id
-            route: /connecteur
-            defaults:
-                controller: Connector
-    child_routes:
-        person:
-            type: segment
-            may_terminate: true
-            options:
-                route: /person
-                defaults:
-                    action: person
-        organization:
-            type: segment
-            may_terminate: true
-            options:
-                route: /organization[/]
-                defaults:
-                    action: organization
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /connecteur
+    defaults:
+      controller: Connector
+  child_routes:
+    person:
+      type: segment
+      may_terminate: true
+      options:
+        route: /person
+        defaults:
+          action: person
+    organization:
+      type: segment
+      may_terminate: true
+      options:
+        route: /organization[/]
+        defaults:
+          action: organization
 
 administration:
-    type: segment
-    options:
-        # Liste pour le projet :id
-        route: /administration
+  type: segment
+  options:
+    # Liste pour le projet :id
+    route: /administration
+    defaults:
+      controller: Administration
+      action: index
+  may_terminate: true
+
+
+  child_routes:
+    # Gestion et chargement du référenciel des pays
+    logs:
+      type: segment
+      may_terminate: true
+      options:
+        route: /logs
         defaults:
-            controller: Administration
-            action: index
-    may_terminate: true
+          action: logs
 
+    # Gestion et chargement du référenciel des pays
+    contract-signed:
+      type: segment
+      may_terminate: true
+      options:
+        route: /contract-signed
+        defaults:
+          action: contractSigned
 
-    child_routes:
-        # Gestion et chargement du référenciel des pays
+    # Gestion et chargement du référenciel des pays
+    listdeclarers:
+      type: segment
+      may_terminate: true
+      options:
+        route: /filter-declarers-recalls
+        defaults:
+          action: declarersList
+
+    # Gestion et chargement du référenciel des pays
+    countries:
+      type: segment
+      may_terminate: true
+      options:
+        route: /pays-iso-3166
+        defaults:
+          action: paysIso3166
+
+    gestionprivilege:
+      type: segment
+      may_terminate: true
+      options:
+        route: /privileges2
+        defaults:
+          action: privileges2
+    oscarworker:
+      type: segment
+      may_terminate: true
+      options:
+        route: /status-oscarworker
+        defaults:
+          action: oscarWorkerStatus
+
+    documents-sections:
+      type: segment
+      may_terminate: true
+      options:
+        route: /documents-sections
+        defaults:
+          action: documentSections
+
+    contrat-type-pcru:
+      type: segment
+      may_terminate: true
+      options:
+        route: /contrat-type-pcru
+        defaults:
+          action: contratTypePcru
+
+    testconfig:
+      type: segment
+      may_terminate: true
+      options:
+        route: /testconfig
+        defaults:
+          action: testconfig
+
+    plan-comptable-loader:
+      type: segment
+      may_terminate: true
+      options:
+        route: /maj-plan-comptable
+        defaults:
+          action: planComptableLoaded
+
+    access:
+      type: segment
+      may_terminate: true
+      options:
+        route: /access
+        defaults:
+          action: access
+
+    accueil:
+      type: segment
+      may_terminate: true
+      options:
+        route: /accueil
+        defaults:
+          action: accueil
+    parameters:
+      type: segment
+      may_terminate: true
+      options:
+        route: /parameters
+        defaults:
+          action: parameters
+
+    numerotation:
+      type: segment
+      may_terminate: true
+      options:
+        route: /numerotation
+        defaults:
+          action: numerotation
+
+    connectors_home:
+      type: segment
+      may_terminate: true
+      options:
+        route: /connectors
+        defaults:
+          action: connectorsHome
+
+    # Affiche la configuration d'un connecteur
+    connectors:
+      type: segment
+      may_terminate: true
+      options:
+        route: /connectors-config
+        defaults:
+          action: connectorsConfig
+
+    # Lance la procédure de test d'un connecteur
+    connector_test:
+      type: segment
+      may_terminate: true
+      options:
+        route: /connector-test/:connector
+        defaults:
+          action: connectorTest
+
+    # Lance la procédure de test d'un connecteur
+    connector_execute:
+      type: segment
+      may_terminate: true
+      options:
+        route: /connector-execute/:connectortype/:connectorname
+        defaults:
+          action: connectorExecute
+
+    # Lance la procédure de test d'un connecteur
+    connector_configure:
+      type: segment
+      may_terminate: true
+      options:
+        route: /connector-configure/:connectortype/:connectorname
+        defaults:
+          action: connectorConfigure
+
+    # Lance la procédure de test d'un connecteur
+    activity_index:
+      type: segment
+      may_terminate: true
+      options:
+        route: /activity-index/build
+        defaults:
+          action: activityIndexBuild
+
+    discipline:
+      type: segment
+      may_terminate: true
+      options:
+        route: /discipline
+        defaults:
+          action: discipline
+    tva:
+      type: segment
+      may_terminate: true
+      options:
+        route: /tva
+        defaults:
+          action: tva
+
+    accounts:
+      type: segment
+      may_terminate: true
+      options:
+        route: /comptes
+        defaults:
+          action: accounts
+
+    privileges:
+      type: segment
+      may_terminate: true
+      options:
+        route: /api/privileges[/][/:idroleprivilege[/]]
+        defaults:
+          controller: Administration
+          action: accessAPI
+    roles:
+      type: segment
+      may_terminate: true
+      options:
+        route: /api/roles[/:idrole]
+        defaults:
+          controller: Administration
+          action: roleAPI
+    users:
+      type: segment
+      options:
+        route: /users
+        defaults:
+          action: users
+      may_terminate: true
+      child_routes:
         logs:
-            type: segment
-            may_terminate: true
-            options:
-                route: /logs
-                defaults:
-                    action: logs
-
-        # Gestion et chargement du référenciel des pays
-        contract-signed:
-            type: segment
-            may_terminate: true
-            options:
-                route: /contract-signed
-                defaults:
-                    action: contractSigned
-
-        # Gestion et chargement du référenciel des pays
-        listdeclarers:
-            type: segment
-            may_terminate: true
-            options:
-                route: /filter-declarers-recalls
-                defaults:
-                    action: declarersList
-
-        # Gestion et chargement du référenciel des pays
-        countries:
-            type: segment
-            may_terminate: true
-            options:
-                route: /pays-iso-3166
-                defaults:
-                    action: paysIso3166
-
-        gestionprivilege:
-            type: segment
-            may_terminate: true
-            options:
-                route: /privileges2
-                defaults:
-                    action: privileges2
-        oscarworker:
-            type: segment
-            may_terminate: true
-            options:
-                route: /status-oscarworker
-                defaults:
-                    action: oscarWorkerStatus
-
-        documents-sections:
-            type: segment
-            may_terminate: true
-            options:
-                route: /documents-sections
-                defaults:
-                    action: documentSections
-
-        contrat-type-pcru:
-            type: segment
-            may_terminate: true
-            options:
-                route: /contrat-type-pcru
-                defaults:
-                    action: contratTypePcru
-
-        testconfig:
-            type: segment
-            may_terminate: true
-            options:
-                route: /testconfig
-                defaults:
-                    action: testconfig
-
-        plan-comptable-loader:
-            type: segment
-            may_terminate: true
-            options:
-                route: /maj-plan-comptable
-                defaults:
-                    action: planComptableLoaded
-
-        access:
-            type: segment
-            may_terminate: true
-            options:
-                route: /access
-                defaults:
-                    action: access
-
-        accueil:
-            type: segment
-            may_terminate: true
-            options:
-                route: /accueil
-                defaults:
-                    action: accueil
-        parameters:
-            type: segment
-            may_terminate: true
-            options:
-                route: /parameters
-                defaults:
-                    action: parameters
-
-        numerotation:
-            type: segment
-            may_terminate: true
-            options:
-                route: /numerotation
-                defaults:
-                    action: numerotation
-
-        connectors_home:
-            type: segment
-            may_terminate: true
-            options:
-                route: /connectors
-                defaults:
-                    action: connectorsHome
-
-        # Affiche la configuration d'un connecteur
-        connectors:
-            type: segment
-            may_terminate: true
-            options:
-                route: /connectors-config
-                defaults:
-                    action: connectorsConfig
-
-        # Lance la procédure de test d'un connecteur
-        connector_test:
-            type: segment
-            may_terminate: true
-            options:
-                route: /connector-test/:connector
-                defaults:
-                    action: connectorTest
-
-        # Lance la procédure de test d'un connecteur
-        connector_execute:
-            type: segment
-            may_terminate: true
-            options:
-                route: /connector-execute/:connectortype/:connectorname
-                defaults:
-                    action: connectorExecute
-
-        # Lance la procédure de test d'un connecteur
-        connector_configure:
-            type: segment
-            may_terminate: true
-            options:
-                route: /connector-configure/:connectortype/:connectorname
-                defaults:
-                    action: connectorConfigure
-
-        # Lance la procédure de test d'un connecteur
-        activity_index:
-            type: segment
-            may_terminate: true
-            options:
-                route: /activity-index/build
-                defaults:
-                    action: activityIndexBuild
-
-        discipline:
-            type: segment
-            may_terminate: true
-            options:
-                route: /discipline
-                defaults:
-                    action: discipline
-        tva:
-            type: segment
-            may_terminate: true
-            options:
-                route: /tva
-                defaults:
-                    action: tva
-
-        accounts:
-            type: segment
-            may_terminate: true
-            options:
-                route: /comptes
-                defaults:
-                    action: accounts
-
-        privileges:
-            type: segment
-            may_terminate: true
-            options:
-                route: /api/privileges[/][/:idroleprivilege[/]]
-                defaults:
-                    controller: Administration
-                    action: accessAPI
+          type: segment
+          may_terminate: true
+          options:
+            route: /logs/[:userid]
+            defaults:
+              controller: Administration
+              action: userLogs
         roles:
-            type: segment
-            may_terminate: true
-            options:
-                route: /api/roles[/:idrole]
-                defaults:
-                    controller: Administration
-                    action: roleAPI
-        users:
-            type: segment
-            options:
-                route: /users
-                defaults:
-                    action: users
-            may_terminate: true
-            child_routes:
-                logs:
-                    type: segment
-                    may_terminate: true
-                    options:
-                        route: /logs/[:userid]
-                        defaults:
-                            controller: Administration
-                            action: userLogs
-                roles:
-                    type: segment
-                    may_terminate: true
-                    options:
-                        route: /roles
-                        defaults:
-                            controller: Administration
-                            action: userRoles
+          type: segment
+          may_terminate: true
+          options:
+            route: /roles
+            defaults:
+              controller: Administration
+              action: userRoles
 
-        # Rôles des organisations
-        organizationrole:
-            type: segment
-            options:
-                route: /organizationrole
-                defaults:
-                    action: organizationRole
-            may_terminate: true
-            child_routes:
-                api:
-                    type: segment
-                    may_terminate: true
-                    options:
-                        route: /api[/[:roleid]]
-                        defaults:
-                            action: organizationRoleApi
+    # Rôles des organisations
+    organizationrole:
+      type: segment
+      options:
+        route: /organizationrole
+        defaults:
+          action: organizationRole
+      may_terminate: true
+      child_routes:
+        api:
+          type: segment
+          may_terminate: true
+          options:
+            route: /api[/[:roleid]]
+            defaults:
+              action: organizationRoleApi
 
-        # Types d'organisation
-        organizationtype:
-            type: segment
-            options:
-                route: /organizationtype[/:id]
-                defaults:
-                    action: organizationType
-            may_terminate: true
+    # Types d'organisation
+    organizationtype:
+      type: segment
+      options:
+        route: /organizationtype[/:id]
+        defaults:
+          action: organizationType
+      may_terminate: true
 
-        # Types de document
-        typedocument:
-             type: segment
-             options:
-                 route: /typedocument
-                 defaults:
-                   action: typeDocument
-             may_terminate: true
-             child_routes:
-                 api:
-                     type: segment
-                     may_terminate: true
-                     options:
-                         route: /api[/[:typedocumentid]]
-                         defaults:
-                           action: typeDocumentApi
+    # Types de document
+    typedocument:
+      type: segment
+      options:
+        route: /typedocument
+        defaults:
+          action: typeDocument
+      may_terminate: true
+      child_routes:
+        api:
+          type: segment
+          may_terminate: true
+          options:
+            route: /api[/[:typedocumentid]]
+            defaults:
+              action: typeDocumentApi
 
-        # Types d'organisation
-        messages:
-            type: segment
-            options:
-                route: /messages
-                defaults:
-                    action: messages
-            may_terminate: true
+    # Types d'organisation
+    messages:
+      type: segment
+      options:
+        route: /messages
+        defaults:
+          action: messages
+      may_terminate: true
 
-        # Types d'organisation
-        pcru:
-            type: segment
-            options:
-                route: /pcru
-                defaults:
-                    action: pcru
-            may_terminate: true
+    # Types d'organisation
+    pcru:
+      type: segment
+      options:
+        route: /pcru
+        defaults:
+          action: pcru
+      may_terminate: true
 
-        # PCRU / CNRS - Pôles de compétivité
-        poles-competitivite:
-            type: segment
-            options:
-                route: /poles-competitivite
-                defaults:
-                    action: polesCompetitivite
-            may_terminate: tr
+    # PCRU / CNRS - Pôles de compétivité
+    poles-competitivite:
+      type: segment
+      options:
+        route: /poles-competitivite
+        defaults:
+          action: polesCompetitivite
+      may_terminate: tr
 
-        # PCRU / CNRS - Sources de financement
-        sources-financement:
-            type: segment
-            options:
-                route: /sources-financement
-                defaults:
-                    action: sourcesFinancement
-            may_terminate: true
+    # PCRU / CNRS - Sources de financement
+    sources-financement:
+      type: segment
+      options:
+        route: /sources-financement
+        defaults:
+          action: sourcesFinancement
+      may_terminate: true

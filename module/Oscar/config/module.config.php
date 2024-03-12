@@ -252,7 +252,7 @@ return array(
                 // DOCUMENTS
                 [
                     'controller' => 'ContractDocument', // --- Upload
-                    'action' => ['upload', 'delete', 'changeType', 'index', 'show', 'download'],
+                    'action' => ['upload', 'delete', 'changeType', 'index', 'show', 'download', 'process'],
                     'roles' => ['user']
                 ],
 
