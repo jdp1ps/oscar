@@ -95,7 +95,7 @@
           </span>
           <span class="overlay-closer" @click="editedDocument = null">X</span>
         </h2>
-        <pre style="font-size: .7em">{{ editedDocument }}</pre>
+<!--        <pre style="font-size: .7em">{{ editedDocument }}</pre>-->
         <div class="row">
           <div class="col-md-6" v-if="mode != 'edit'">
             <label for="file">Fichier</label>
