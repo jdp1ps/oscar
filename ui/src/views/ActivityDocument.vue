@@ -16,7 +16,7 @@
     </div>
   </div>
 
-
+  <!-- Détails du processus -->
   <div class="overlay" v-if="processDetails">
     <div class="overlay-content" style="max-width: 50%">
       <h2>
@@ -54,6 +54,7 @@
     </div>
   </div>
 
+  <!-- Modal de suppression -->
   <section style="position: relative; min-height: 100px">
     <div class="overlay" v-if="deleteData">
       <div class="overlay-content">
@@ -75,6 +76,7 @@
       </div>
     </div>
 
+    <!-- Formulaire Modification/Version/Nouveau -->
     <div class="overlay" v-if="editedDocument">
       <div class="overlay-content">
         <h2>
@@ -97,12 +99,39 @@
         </h2>
 <!--        <pre style="font-size: .7em">{{ editedDocument }}</pre>-->
         <div class="row">
-          <div class="col-md-6" v-if="mode != 'edit'">
-            <label for="file">Fichier</label>
-            <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
-          </div>
-          <div class="col-md-6" v-if="mode != 'version'">
+
+          <div class="col-md-6">
+
+            <div v-if="mode != 'edit'">
+              <label for="file">Fichier</label>
+              <input @change="uploadFile" type="file" class="form-control" name="file" id="file"/>
+            </div>
+
             <div>
+              <label for="dateDeposit">Date de dépôt</label>
+              <date-picker v-model="editedDocument.dateDeposit" id="dateDeposit"/>
+            </div>
+
+            <div>
+              <label for="dateSend">Date d'envoi</label>
+              <date-picker v-model="editedDocument.dateSend" id="dateSend"/>
+            </div>
+
+          </div>
+
+          <div class="col-md-6">
+
+            <div v-if="mode != 'version'">
+              <label for="tabdocument">Onglet</label>
+              <div>
+                <select name="tabdocument" id="tabdocument" v-model="editedDocument.tabDocument.id"
+                        class="form-control">
+                  <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div v-if="mode != 'version'">
               <label for="typedocument">Type de document</label>
               <div class="alert alert-warning" v-if="editedDocument.process">
                 Vous ne pouvez pas modifier le type d'un document engagé dans un processus de signature.
@@ -115,13 +144,18 @@
                   </option>
                 </select>
                 <section v-if="currentFlow">
-                  <h3>Procédure de signature <strong>{{ currentFlow.label }}</strong>: </h3>
-                    <article v-for="step in currentFlow.steps">
+                  <h3><small>Procédure de signature</small><br>
+                    <strong>{{ currentFlow.label }}</strong></h3>
+                     <article v-for="step in currentFlow.steps" class="step" :class="step.missing_recipients ? 'error' : 'ok'">
+                       <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
                       <ul class="metas">
                         <li class="meta">Parapheur: <strong>{{ step.letterfile_label }}</strong></li>
                         <li class="meta">Type: <strong>{{ step.level_label }}</strong></li>
                         <li class="meta">Tous signent: <strong>{{ step.allSignToComplete ? 'Oui' : 'non' }}</strong></li>
                       </ul>
+                      <div class="alert alert-danger" v-if="step.missing_recipients">
+                        Il manque des destinataires pour cette procédure.
+                      </div>
                       <div class="recipient" v-for="r in step.recipients">
                         <strong class="email">{{ r.email }}</strong>
                         <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
@@ -131,26 +165,7 @@
                 </section>
               </div>
             </div>
-          </div>
 
-          <div class="col-md-6" v-if="mode != 'version'">
-            <label for="tabdocument">Onglet</label>
-            <div>
-              <select name="tabdocument" id="tabdocument" v-model="editedDocument.tabDocument.id"
-                      class="form-control">
-                <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <label for="dateDeposit">Date de dépôt</label>
-            <date-picker v-model="editedDocument.dateDeposit" id="dateDeposit"/>
-          </div>
-
-          <div class="col-md-6">
-            <label for="dateSend">Date d'envoi</label>
-            <date-picker v-model="editedDocument.dateSend" id="dateSend"/>
           </div>
 
           <div class="col-md-12">
@@ -468,7 +483,7 @@
             <i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong>
             <i class="icon-user"></i> par <strong>{{ doc.uploader.displayname }}</strong>
           </small>
-          <p>{{ doc.informations }}</p>
+          <p>{{ doc.information }}</p>
           <section v-if="doc.private">
             <i class="icon-lock"/>
             Ce document est privé, accessible par :
@@ -477,15 +492,20 @@
                 </span>
           </section>
            <div class="card-content">
-            <section v-if="doc.process && doc.process.status != 200" class="alert alert-info">
-              Procédure de signature <em>{{ doc.process.label }}</em> -
+            <section v-if="doc.process" class="alert"
+                     :class="{'alert-success':doc.process.status == 201,
+                              'alert-danger':doc.process.status >= 400,
+                              'alert-info':doc.process.status < 200
+            }">
+              <i class="icon-hammer"></i>
+              Procédure de signature <em>{{ doc.process.label }}</em> - {{ doc.process.status }}
               <strong>{{ doc.process.status_text }}</strong> -
               <span>étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span> -
               <button class="btn btn-xs btn-info" @click="handlerProcessDetailsOn(doc.process)">
                 Détails
               </button>
-              <button v-if="doc.manage_process" class="btn btn-default" @click="handlerProcessReload(doc)">
-                <i class="icon-rewind-outline"></i>
+              <button v-if="doc.manage_process" class="btn btn-default btn-xs" @click="handlerProcessReload(doc)">
+                <i class="icon-cw-outline"></i>
                 Actualiser
               </button>
             </section>
@@ -529,7 +549,7 @@
               </button>
               -->
               <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"
-                      v-if="tab.manage && doc.location != 'url'">
+                      v-if="tab.manage && doc.location != 'url' && !doc.process">
                 <i class="icon-download-outline"></i>
                 Nouvelle Version
               </button>
@@ -1078,19 +1098,29 @@ export default {
   padding: 1em;
 }
 
+.card .alert {
+  padding: 0 .5em;
+  margin: .1em;
+}
+
 .step {
   flex: 1;
-  padding: 1em;
+  padding: .25em 1em 1em;
   text-align: left;
-  border: thin solid #aaa;
+  border: 1px solid #aaa;
+  border-left: 4px solid #aaa;
+  margin: .5em;
+}
+.step.error {
+  border-color: #990000;
+}
+.step.ok {
+  /*border-color: #339900;*/
 }
 
-.step:first-child {
-  border-radius: .5em 0 0 0;
-}
-
-.step:last-child {
-  border-radius: 0 .5em 0 0;
+.step .alert {
+  margin: 0;
+  padding: .25em 1em;
 }
 
 .current {
