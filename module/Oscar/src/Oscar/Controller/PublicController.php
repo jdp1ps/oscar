@@ -22,13 +22,15 @@ use Oscar\Traits\UseUserParametersService;
 use Oscar\Traits\UseUserParametersServiceTrait;
 use Laminas\EventManager\Event;
 use Laminas\View\Model\ViewModel;
+use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
 /**
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-class PublicController extends AbstractOscarController implements UseTimesheetService, UsePersonService, UseUserParametersService
+class PublicController extends AbstractOscarController implements UseTimesheetService, UsePersonService,
+                                                                  UseUserParametersService
 {
-    use UseTimesheetServiceTrait, UsePersonServiceTrait, UseUserParametersServiceTrait;
+    use UseTimesheetServiceTrait, UsePersonServiceTrait, UseUserParametersServiceTrait, SignatureServiceAwareTrait;
 
     /** @var ActivityRequestService */
     public $activityRequestService;
@@ -58,13 +60,19 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
      * PublicController constructor.
      * @param $timesheetService
      */
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    public function gitlogAction(){
-        exec('git log --pretty=format:"<span class="hash">%h</span><span class="author">%an</span><time>%ai</time><span class="message">%s</span>"', $log);
+    public function gitlogAction()
+    {
+        exec(
+            'git log --pretty=format:"<span class="hash">%h</span><span class="author">%an</span><time>%ai</time><span class="message">%s</span>"',
+            $log
+        );
         return ['log' => $log];
     }
 
@@ -74,8 +82,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $auth = $this->getOscarUserContextService()->getAuthentification();
 
 
-
-        if( !$this->getCurrentPerson() ){
+        if (!$this->getCurrentPerson()) {
             throw new OscarException("Votre compte n'est associé à aucune fiche Personne dans Oscar");
         }
 
@@ -86,49 +93,63 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
 
         // Traitment des horaires
-        if( $this->isAjax() && $this->params()->fromQuery('a') == 'schedule' ){
-
+        if ($this->isAjax() && $this->params()->fromQuery('a') == 'schedule') {
             /** @var TimesheetService $timesheetService */
             $timesheetService = $this->getTimesheetService();
 
-            if( $method == 'GET' ){
+            if ($method == 'GET') {
                 $datas = $timesheetService->getDayLengthPerson($this->getCurrentPerson());
                 return $this->ajaxResponse($datas);
             }
-            elseif ($method == 'POST'){
-
+            elseif ($method == 'POST') {
                 $schedule = $this->params()->fromPost('days');
                 try {
-                    $this->getUserParametersService()->performChangeSchedule($schedule, $this->getCurrentPerson(), false);
+                    $this->getUserParametersService()->performChangeSchedule(
+                        $schedule,
+                        $this->getCurrentPerson(),
+                        false
+                    );
                     return $this->getResponseOk();
-                } catch ( OscarException $e ){
-                    return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier la répartition horaire'), $e->getMessage()));
+                } catch (OscarException $e) {
+                    return $this->getResponseInternalError(
+                        sprintf('%s : %s', _('Impossible de modifier la répartition horaire'), $e->getMessage())
+                    );
                 }
             }
-
         }
 
-        if( $this->getHttpXMethod() == "POST" ){
+        if ($this->getHttpXMethod() == "POST") {
             $action = $this->params()->fromPost('action');
 
             switch ($action) {
-
                 // Modification du mode de déclaration
                 case 'declaration-mode' :
                     try {
-                        $this->getUserParametersService()->performChangeDeclarationMode($this->params()->fromPost('declarationsHours'));
+                        $this->getUserParametersService()->performChangeDeclarationMode(
+                            $this->params()->fromPost('declarationsHours')
+                        );
                         return $this->getResponseOk();
-                    } catch ( OscarException $e ){
-                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage()));
+                    } catch (OscarException $e) {
+                        return $this->getResponseInternalError(
+                            sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage())
+                        );
                     }
                     break;
 
                 case 'frequency' :
                     try {
-                        $this->getUserParametersService()->performChangeFrequency($this->params()->fromPost('frequency', null));
+                        $this->getUserParametersService()->performChangeFrequency(
+                            $this->params()->fromPost('frequency', null)
+                        );
                         return $this->getResponseOk();
-                    } catch ( OscarException $e ){
-                        return $this->getResponseInternalError(sprintf('%s : %s', _('Impossible de modifier la fréquence des notifications'), $e->getMessage()));
+                    } catch (OscarException $e) {
+                        return $this->getResponseInternalError(
+                            sprintf(
+                                '%s : %s',
+                                _('Impossible de modifier la fréquence des notifications'),
+                                $e->getMessage()
+                            )
+                        );
                     }
                     break;
 
@@ -145,19 +166,22 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $timesheetService = $this->getTimesheetService();
 
         $declarationsHours = $timesheetService->isDeclarationsHoursPerson($this->getCurrentPerson());
-        $declarationsHoursOverwriteByAuth = $this->getOscarConfigurationService()->getConfiguration('declarationsHoursOverwriteByAuth');
+        $declarationsHoursOverwriteByAuth = $this->getOscarConfigurationService()->getConfiguration(
+            'declarationsHoursOverwriteByAuth'
+        );
 
         return [
-            'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
-            'managers' => $this->getPersonService()->getManagers( $this->getCurrentPerson()),
-            'subordonates' => $this->getPersonService()->getSubordinates( $this->getCurrentPerson()),
-            'scheduleEditable' => $this->getUserParametersService()->scheduleEditable(),
-            'declarationsConfiguration' => null, //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
-            'person' => $this->getCurrentPerson(),
-            'declarationsHours' => $declarationsHours,
+            'subordinates'                     => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'managers'                         => $this->getPersonService()->getManagers($this->getCurrentPerson()),
+            'subordonates'                     => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'scheduleEditable'                 => $this->getUserParametersService()->scheduleEditable(),
+            'declarationsConfiguration'        => null,
+            //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
+            'person'                           => $this->getCurrentPerson(),
+            'declarationsHours'                => $declarationsHours,
             'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
-            'parameters' => $auth->getSettings(),
-            'forceSend' => $forceSend
+            'parameters'                       => $auth->getSettings(),
+            'forceSend'                        => $forceSend
         ];
     }
 
@@ -166,14 +190,14 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $accessResolverService = $this->getAccessResolverService();
         $actions = $accessResolverService->getActions();
         return [
-            'actions'   => $actions,
-            'roles'     => ActivityPerson::getRoles(),
+            'actions' => $actions,
+            'roles'   => ActivityPerson::getRoles(),
         ];
     }
 
     public function testAction()
     {
-        if( DEBUG_OSCAR ){
+        if (DEBUG_OSCAR) {
             $json = $this->getPersonService()->getProjectGrantService()->getActivityTypes(true);
             return [
                 "json" => $json,
@@ -197,7 +221,21 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $isRequestValidator = false;
         $requestValidations = false;
         $periodsRejected = [];
+        $documentsWait = [];
+
+
         if ($person) {
+            try {
+                $documentsWait = $this->getSignatureService()->getSignaturesRecipientsByEmailWaiting(
+                    $person->getEmail(),
+                    'internal'
+                );
+                foreach ($documentsWait as $d) {
+                    $this->getLoggerService()->debug($d);
+                }
+            } catch (\Exception $e) {
+            }
+
 
             $timeSheetService = $this->getTimesheetService();
 
@@ -206,7 +244,9 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 $isValidator = $timeSheetService->isValidator($person);
                 $validations = $timeSheetService->getValidationToDoPerson($person);
             } catch (\Exception $e) {
-                $this->getLoggerService()->error("Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage());
+                $this->getLoggerService()->error(
+                    "Impossible de charger les déclarations en conflit pour $person : " . $e->getMessage()
+                );
             }
 
             $serviceDemandeActivite = $this->getActivityRequestService();
@@ -216,20 +256,25 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 $requests = null;
 
                 // Accès globale
-                if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE) ){
+                if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE)) {
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft();
                 }
-                elseif ( count($organizations = $this->getOscarUserContextService()->getOrganizationsWithPrivilege(Privileges::ACTIVITY_REQUEST_MANAGE)) > 0 ){
+                elseif (count(
+                        $organizations = $this->getOscarUserContextService()->getOrganizationsWithPrivilege(
+                            Privileges::ACTIVITY_REQUEST_MANAGE
+                        )
+                    ) > 0) {
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft($organizations);
                 }
 
-                if( $requests !== null ){
+                if ($requests !== null) {
                     $isRequestValidator = true;
                     $requestValidations = count($requests);
                 }
-
-           } catch (\Exception $e) {
-                $this->getLoggerService()->error("Impossible de charger les demandes d'activité pour $person : " . $e->getMessage());
+            } catch (\Exception $e) {
+                $this->getLoggerService()->error(
+                    "Impossible de charger les demandes d'activité pour $person : " . $e->getMessage()
+                );
             }
         }
 
@@ -237,10 +282,11 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         return [
             'isRequestValidator' => $isRequestValidator,
             'requestValidations' => $requestValidations,
-            'validations' => $validations,
-            'isValidator' => $isValidator,
-            'periodsRejected' => $periodsRejected,
-            'user' => $person
+            'validations'        => $validations,
+            'isValidator'        => $isValidator,
+            'periodsRejected'    => $periodsRejected,
+            'documentsWait'      => $documentsWait,
+            'user'               => $person
         ];
     }
 
@@ -248,13 +294,13 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     {
         $parser = new \Parsedown();
         return [
-            'content'   => $parser->text(file_get_contents(getcwd().'/changelog-public.md'))
+            'content' => $parser->text(file_get_contents(getcwd() . '/changelog-public.md'))
         ];
     }
-    
+
     protected function getSuperView($message)
     {
-        $view = new ViewModel(['message'=>$message]);
+        $view = new ViewModel(['message' => $message]);
         $view->setTemplate('/none');
         return $view;
     }
@@ -263,12 +309,12 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     {
         return $this->getSuperView('For All');
     }
-    
+
     public function forUserAction()
     {
         return $this->getSuperView('For User');
     }
-    
+
     public function forAdminAction()
     {
         return $this->getSuperView('For Admin');
@@ -278,11 +324,12 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     {
         $this->getEventManager()->trigger(new Event('foo', 'bar'));
         $doc = $this->params()->fromRoute('doc');
-        if( $doc ){
+        if ($doc) {
             return [
                 'contenu' => "super doc"
             ];
-        } else {
+        }
+        else {
             return [
                 'contenu' => 'foo'
             ];

@@ -253,30 +253,38 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
         // Check des droits
         $document = null;
-        if( $documentId > 0 ){
+        if ($documentId > 0) {
             try {
                 $document = $this->getContractDocumentService()->getDocument($documentId, true);
             } catch (Exception $e) {
                 $this->getLoggerService()->error($e->getMessage());
                 return $this->jsonError($e->getMessage());
             }
-            if( !$this->getOscarUserContextService()->getAccessDocument($document) ){
+            if (!$this->getOscarUserContextService()->getAccessDocument($document)) {
                 return $this->jsonError("Vous n'avez pas les droits pour gérer ce document");
             }
         }
-        $idTab = $documentDatas['tabDocument']['id'];
 
+        $idTab = $documentDatas['tabDocument']['id'];
+        $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
+        if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
+            return $this->getResponseUnauthorized(
+                "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
+            );
+        }
 
         $dateDeposit = $documentDatas['dateDeposit'];
         if ($dateDeposit) {
             $dateDeposit = new \DateTime($dateDeposit);
-        } else {
+        }
+        else {
             $dateDeposit = null;
         }
         $dateSend = $documentDatas['dateSend'];
         if ($dateSend) {
             $dateSend = new \DateTime($dateSend);
-        } else {
+        }
+        else {
             $dateSend = null;
         }
         $information = $documentDatas['information'];
@@ -286,6 +294,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $url = $documentDatas['location'] == 'url';
         $persons = $documentDatas['persons'];
         $privatePersons = [];
+
 
         // Document privé
         if ($private) {
@@ -304,32 +313,47 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
 
 
-        if( $action == 'version' ){
-
+        if ($action == 'version') {
+            try {
+                $this->getContractDocumentService()->uploadContractDocument(
+                    $_FILES['file'],
+                    $activity,
+                    $tabDocument,
+                    $this->getContractDocumentService()->getContractDocumentType($idType),
+                    $this->getCurrentPerson(),
+                    $privatePersons,
+                    $dateDeposit,
+                    $dateSend,
+                    $information,
+                    $url
+                );
+                return new JsonModel([
+                                         'response' => 'ok'
+                                     ]);
+            } catch (Exception $e) {
+                $this->getLoggerService()->error($e->getMessage());
+                return $this->getResponseInternalError($e->getMessage());
+            }
         }
 
-        if( $action == 'edit' ){
+        if ($action == 'edit') {
             $activity = $this->getActivityService()->getActivityById($idActivity);
             // TODO : check des droits d'accès
             $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
-            if( !$document->getTypeDocument()->getSignatureFlow() ){
-                $document->setTypeDocument($this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id']));
+            if (!$document->getTypeDocument()->getSignatureFlow()) {
+                $document->setTypeDocument(
+                    $this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id'])
+                );
             }
-            $document->setTabDocument($this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id']));
+            $document->setTabDocument(
+                $this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id'])
+            );
             $document->setDateDeposit($dateDeposit);
             $document->setDateSend($dateSend);
             $document->setInformation($information);
             $this->getEntityManager()->flush();
 
             return new JsonModel(['message' => 'ok']);
-        }
-
-        // Récupération des informations
-        $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
-        if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
-            return $this->getResponseUnauthorized(
-                "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
-            );
         }
 
         try {
@@ -346,7 +370,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $url
             );
             return new JsonModel([
-                'response' => 'ok'
+                                     'response' => 'ok'
                                  ]);
         } catch (Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
@@ -355,6 +379,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
+     * Téléchargement d'un document.
+     *
      * @return void
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -455,11 +481,16 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         return true;
     }
 
-    public function processAction() {
+    /**
+     * @return \Laminas\Http\Response|JsonModel
+     */
+    public function processAction()
+    {
         try {
             $docId = $this->params()->fromRoute('id');
             $doc = $this->getContractDocumentService()->getDocument($docId, true);
-            if( $doc->getProcess() && $doc->getProcess()->isInProgress() ){
+            // TODO check access
+            if ($doc->getProcess() && $doc->getProcess()->isInProgress()) {
                 $this->getContractDocumentService()->getProcessService()->trigger($doc->getProcess());
             }
             return $this->jsonOutput(['response' => 'ok']);

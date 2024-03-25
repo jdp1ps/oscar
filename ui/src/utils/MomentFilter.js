@@ -64,13 +64,13 @@ moment.locale("fr",
     });
 
 export default {
-    timeAgo(date, nullDisplay = 'Non définit') {
+    timeAgo(date, nullDisplay = 'Non définie') {
         return date ? moment(date).fromNow() : nullDisplay;
     },
-    date(date, nullDisplay = 'Non définit') {
+    date(date, nullDisplay = 'Non définie') {
         return date ? "le " + moment(date).format("D MMMM YYYY") : nullDisplay;
     },
-    dateFull(date, nullDisplay = 'Non définit') {
+    dateFull(date, nullDisplay = 'Non définie') {
         return date ? (this.date(date) + " (" + this.timeAgo(date) + ")") : nullDisplay;
     }
 }

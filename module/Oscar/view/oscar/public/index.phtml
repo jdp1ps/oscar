@@ -144,6 +144,13 @@
 
                             <?php endif; ?>
 
+                            <?php if( $documentsWait ): ?>
+                            <a href="<?= $this->url('unicaen-signature/my-documents') ?>" class="btn btn-primary">
+                                Documents à viser
+                                <span class="label label-danger"><?= count($documentsWait) ?></span>
+                            </a>
+                            <?php endif; ?>
+
                             <?php if( $isRequestValidator ): ?>
                                 <a href="<?= $this->url('contract/requestadmin') ?>" class="btn <?= $requestValidations > 0 ? 'btn-primary' : 'btn-default' ?>">
                                     <i class="icon-cube"></i>

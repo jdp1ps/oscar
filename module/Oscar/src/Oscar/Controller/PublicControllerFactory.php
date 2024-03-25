@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
 use Oscar\Service\ActivityRequestService;
+use UnicaenSignature\Service\SignatureService;
 
 class PublicControllerFactory extends AbstractOscarFactory
 {
@@ -20,6 +21,7 @@ class PublicControllerFactory extends AbstractOscarFactory
         $c = new PublicController();
         $this->init($c, $container);
         $c->setActivityRequestService($container->get(ActivityRequestService::class));
+        $c->setSignatureService($container->get(SignatureService::class));
         return $c;
     }
 

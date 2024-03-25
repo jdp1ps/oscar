@@ -89,7 +89,7 @@ class AdministrativeDocumentController extends AbstractOscarController implement
 
     public function getAdministrativeDocumentPacked(){
         $query = $this->getEntityManager()->getRepository(AdministrativeDocument::class)->createQueryBuilder('d')
-            ->leftJoin('d.section', s)
+            ->leftJoin('d.section', 's')
             ->leftJoin('d.person', 'o')
             ->orderBy('d.fileName', 'ASC')
             ->addOrderBy('d.version', 'DESC')
