@@ -121,3 +121,27 @@ ldd /usr/lib/php/20180731/oci8.so
 	libclntshcore.so.19.1 => /opt/oracle/instantclient_19_3/libclntshcore.so.19.1 (0x00007f27139c8000)
 ```
 
+### pecl install : warning: implicit declaration of function ‘Z_PARAM_ZVAL_DEREF_EX’...
+
+Si la commande pecl install oci8-2.2.0 echoue avec l'erreur :
+
+```
+/tmp/pear/temp/oci8/oci8_interface.c:1476:17: warning: implicit declaration of function ‘Z_PARAM_ZVAL_DEREF_EX’; did you mean ‘Z_PARAM_ZVAL_EX’? [-Wimplicit-function-declaration]
+ 1476 |                 Z_PARAM_ZVAL_DEREF_EX(array, 0, 1)
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+      |                 Z_PARAM_ZVAL_EX
+/tmp/pear/temp/oci8/oci8_interface.c:1476:51: error: expected ‘;’ before ‘_optional’
+ 1476 |                 Z_PARAM_ZVAL_DEREF_EX(array, 0, 1)
+      |                                                   ^
+      |                                                   ;
+make: *** [Makefile:202 : oci8_interface.lo] Erreur 1
+ERROR: `make' failed
+```
+
+Vérifiez que les commandes `phpize` et `php-config` on bien étaient mise à jour
+
+```bash
+sudo update-alternatives --set phpize /usr/bin/phpize7.4
+sudo update-alternatives --set php-config /usr/bin/php-config7.4
+```
+

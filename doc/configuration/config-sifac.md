@@ -2,7 +2,7 @@
 
 Oscar permet de synchroniser depuis le SI(Système d'Information) **les dépenses** effectuées dans le cadre des activités de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC.
 
-> Vous pouvez gérer les accès à cette fonctionnalités depuis la gestion des privilèges.
+> Vous pouvez gérer les accès à cette fonctionnalité depuis la gestion des privilèges.
 
 ## SIFAC
 
@@ -52,16 +52,26 @@ Vous pourrez ensuite vous rendre dans l'interface d'administration pour charger 
 
 Puis, Vous pourrez ensuite compléter ce plan et spécifier les codes à utiliser ou pas ainsi que leur attribution dans les différentes masses configurées préalablement. 
 
-![Type de dépense et configuration des masses](./images/config-type-depenses.png)
+![Type de dépense et configuration des masses](../images/config-type-depenses.png)
 
 Ce plan sera utilisé par la suite pour renseigner les dépenses prévisionnelles.
 
+### Gestion des masses utilisée
+
+Dans la partie **Administration > Types de dépenses > Gérer les masses des comptes utilisés**, un écran permet de visualiser les comptes dont l'utilisation est effective (Des lignes comptables ont été chargées pour des activités)
+
+![Type de dépense et configuration des masses](../images/config-gestion-masses-utilisees.png)
+
+Cet écran permet : 
+ - En cliquant sur le numéro de compte (à gauche) d'afficher les activités qui ont des dépenses liées à ce compte
+ - De modifier la masse associées à un compte
+ - D'identifier les comptes non-affectés à une masse budgétaire (les lignes rouges)
 
 ### Connector SIFAC (OCI)
 
 Le premier connecteur disponible est une connection directe à la base de donnée.
 
-SIFAC utilise une base de donnée ORACLE, il faudra donc installer les drivers OCI8 pour PHP pour permettre la connection à la base de données SIFAC. [Installer le drivers OCI8 pour PHP7](./install-oracle-pp.md).
+SIFAC utilise une base de donnée ORACLE, il faudra donc installer les drivers OCI8 pour PHP pour permettre la connection à la base de données SIFAC. [Installer le drivers OCI8 pour PHP](../install-oracle.md).
 
 
 ### Configuration de l'accès à la base de données SIFAC
