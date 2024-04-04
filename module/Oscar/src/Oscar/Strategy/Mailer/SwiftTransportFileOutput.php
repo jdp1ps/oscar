@@ -8,6 +8,7 @@
 namespace Oscar\Strategy\Mailer;
 
 
+use Oscar\Exception\OscarException;
 use Swift_Events_EventListener;
 use Swift_Mime_SimpleMessage;
 
@@ -51,6 +52,9 @@ class SwiftTransportFileOutput implements \Swift_Transport
         $filename = $message->getDate()->format('Y-m-d_H:i:s') .'_' . $recipient . '.eml';
 
         $w = fopen(realpath($this->path).'/'.$filename, 'w');
+        if( !$w ){
+            throw new OscarException("Impossible d'écrire le fichier mail");
+        }
         fwrite($w, $message->toString());
         fclose($w);
     }
