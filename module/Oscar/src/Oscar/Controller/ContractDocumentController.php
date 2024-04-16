@@ -357,6 +357,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
 
         try {
+            $flow = $this->params()->fromPost('flow');
+            $flowDt = null;
+            if($flow != 'false'){
+                $flowDt = json_decode($flow, true);
+            }
             $this->getContractDocumentService()->uploadContractDocument(
                 $_FILES['file'],
                 $activity,
@@ -367,14 +372,15 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $dateDeposit,
                 $dateSend,
                 $information,
-                $url
+                $url,
+                $flowDt
             );
             return new JsonModel([
                                      'response' => 'ok'
                                  ]);
         } catch (Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
-            return $this->getResponseInternalError($e->getMessage());
+            return $this->jsonError($e->getMessage());
         }
     }
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aeddd4d97d8fcf770dddf40fee8d2218",
+    "content-hash": "bb20e6f901ccf1a3907b16b4f69c5758",
     "packages": [
         {
             "name": "apereo/phpcas",
@@ -8891,11 +8891,11 @@
         },
         {
             "name": "unicaen/signature",
-            "version": "0.0.7",
+            "version": "0.0.9",
             "source": {
                 "type": "git",
                 "url": "https://git.unicaen.fr/lib/unicaen/signature.git",
-                "reference": "58947952c90a461d93c03b968fd9223dcacaa0c9"
+                "reference": "6cadef41bdd6422b93a246232b9d5f6e61c21883"
             },
             "require": {
                 "fightbulc/moment": "^1.30"
@@ -8911,7 +8911,7 @@
                 ]
             },
             "description": "Module de signature électronique",
-            "time": "2024-04-04T10:07:59+00:00"
+            "time": "2024-04-12T16:25:22+00:00"
         },
         {
             "name": "unicaen/utilisateur",
