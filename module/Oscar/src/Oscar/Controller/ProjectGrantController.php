@@ -3011,7 +3011,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $idsExport = array_map('current', $qbIds->getQuery()->getResult());
 
                     $qbIds = $qb->select('DISTINCT pr.id');
-                    $ids = array_map('current', $qbIds->getQuery()->getResult());
+                    $idsProjects = array_map('current', $qbIds->getQuery()->getResult());
                 } else {
                     $qbIds = $qb->select('DISTINCT c.id');
                     $ids = array_map('current', $qbIds->getQuery()->getResult());
@@ -3037,9 +3037,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             $projectsIds = [];
             if ($projectview == 'on') {
-                foreach ($activities as $p) {
-                    $projectsIds[] = $p->getId();
-                }
+                $projectsIds = $idsProjects;
             }
 
 

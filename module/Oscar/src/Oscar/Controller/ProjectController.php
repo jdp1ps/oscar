@@ -165,15 +165,13 @@ class ProjectController extends AbstractOscarController
             $delimiter = "\t";
 
             fputcsv($handler, $formatter->headers(), $delimiter);
-
             foreach ($projects as $p) {
                 fputcsv($handler, $formatter->format($p), $delimiter);
             }
-
             fclose($handler);
 
             $downloader = new CSVDownloader();
-            $downloader->downloadCSVToExcel($filePath);
+            $downloader->downloadCSV($filePath);
             unlink($filePath);
             die();
         } catch (\Exception $e) {

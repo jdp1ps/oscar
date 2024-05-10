@@ -143,8 +143,8 @@ class ProjectToArrayFormatter implements IProjectFormater
                 $pfi[] = $activity->getCodeEOTP();
             }
 
-            if ($activity->getType()) {
-                $types[] = $activity->getType();
+            if ($activity->getActivityType()) {
+                $types[] = $activity->getActivityType()->getLabel();
             }
 
             $status[] = $activity->getStatusLabel();
@@ -221,7 +221,7 @@ class ProjectToArrayFormatter implements IProjectFormater
         $output['amount'] = $amount;
         $output['pfi'] = implode(', ', $pfi);
         $output['oscarNum'] = implode(', ', $oscarNum);
-        $output['type'] = implode(', ', $types);
+        $output['types'] = implode(', ', array_unique($types));
         $output['status'] = implode(', ', $status);
         $output['start'] = implode(', ', $start);
         $output['end'] = implode(', ', $end);
@@ -273,7 +273,7 @@ class ProjectToArrayFormatter implements IProjectFormater
                 'amount' => "Montant",
                 'pfi' => "N°Financier",
                 'oscarNum' => "N° Oscar",
-                'type' => "Types",
+                'types' => "Types",
                 'status' => "Statuts",
                 'start' => "Débuts",
                 'end' => "Fins",
