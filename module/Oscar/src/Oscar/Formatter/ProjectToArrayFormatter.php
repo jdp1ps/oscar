@@ -14,6 +14,7 @@ class ProjectToArrayFormatter implements IProjectFormater
     private array $rolesOrganization = [];
     private array $milestoneTypes = [];
     private array $numerotations = [];
+    private string $dateFormat;
     private Slugify $slugger;
 
     const PREFIX_PERSON_ROLE = 'person';
@@ -54,13 +55,15 @@ class ProjectToArrayFormatter implements IProjectFormater
         array $rolesPerson,
         array $rolesOrganization,
         array $milestoneTypes,
-        array $numerotations
+        array $numerotations,
+        string $dateFormat = 'Y-m-d'
     ): void {
         $this->rolesPerson = $rolesPerson;
         $this->rolesOrganization = $rolesOrganization;
         $this->milestoneTypes = $milestoneTypes;
         $this->numerotations = $numerotations;
         $this->slugger = new Slugify();
+        $this->dateFormat = $dateFormat;
     }
 
     public function format(Project $project): array
@@ -150,9 +153,9 @@ class ProjectToArrayFormatter implements IProjectFormater
             $status[] = $activity->getStatusLabel();
 
             // Dates
-            $startValue = $activity->getDateStartStr();
-            $endValue = $activity->getDateEndStr();
-            $signedValue = $activity->getDateSignedStr();
+            $startValue = $activity->getDateStartStr($this->dateFormat);
+            $endValue = $activity->getDateEndStr($this->dateFormat);
+            $signedValue = $activity->getDateSignedStr($this->dateFormat);
 
             if ($startValue && ($output['absStart'] > $startValue || $output['absStart'] == "")) {
                 $output['absStart'] = $startValue;
@@ -202,7 +205,7 @@ class ProjectToArrayFormatter implements IProjectFormater
             /** @var ActivityDate $m */
             foreach ($activity->getMilestones() as $m) {
                 $type = $m->getType()->getLabel();
-                $d = $m->getDateStartStr();
+                $d = $m->getDateStartStr($this->dateFormat);
 
                 if ($d) {
                     $milestones[$type][] = $d;

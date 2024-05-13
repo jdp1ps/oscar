@@ -182,35 +182,36 @@ class ProjectController extends AbstractOscarController
 
     public function exportAction()
     {
-        $id = $this->params()->fromRoute('id', null);
-        if (!$id) {
-            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
-        }
-        try {
-            $project = $this->getProjectService()->getProject($id);
-            $formatter = new ProjectToArrayFormatter();
-
-            $rolesPerson = $this->getOscarUserContextService()->getAvailabledRolesPersonActivity();
-            $rolesOrganizations = $this->getOscarUserContextService()->getAvailabledRolesOrganizationActivity();
-            $milestones = $this->getProjectGrantService()->getMilestoneService()->getMilestoneTypeFlat();
-
-            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
-            $data = $formatter->format($project);
-
-            echo '<table border="1">';
-            foreach ($data as $key=>$value) {
-                echo "<tr>";
-                echo "<th>".$key."</th>";
-                echo "<td>".$value."</td>";
-                echo "</tr>";
-            }
-            echo "</table>";
-            die();
-        } catch (\Exception $e) {
-            throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
-        }
-        die("DONNEES");
-        return $data;
+        // @todo A Supprimer
+//        $id = $this->params()->fromRoute('id', null);
+//        if (!$id) {
+//            throw new OscarException(sprintf("Impossible de charger le projet, paramètre ID manquant."));
+//        }
+//        try {
+//            $project = $this->getProjectService()->getProject($id);
+//            $formatter = new ProjectToArrayFormatter();
+//
+//            $rolesPerson = $this->getOscarUserContextService()->getAvailabledRolesPersonActivity();
+//            $rolesOrganizations = $this->getOscarUserContextService()->getAvailabledRolesOrganizationActivity();
+//            $milestones = $this->getProjectGrantService()->getMilestoneService()->getMilestoneTypeFlat();
+//
+//            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones);
+//            $data = $formatter->format($project);
+//
+//            echo '<table border="1">';
+//            foreach ($data as $key=>$value) {
+//                echo "<tr>";
+//                echo "<th>".$key."</th>";
+//                echo "<td>".$value."</td>";
+//                echo "</tr>";
+//            }
+//            echo "</table>";
+//            die();
+//        } catch (\Exception $e) {
+//            throw new OscarException(sprintf("Impossible de charger le projet(%s)", $id));
+//        }
+//        die("DONNEES");
+//        return $data;
     }
 
     /**
