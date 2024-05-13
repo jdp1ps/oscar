@@ -1165,6 +1165,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /** Export les données en CSV. */
     public function csvAction()
     {
+
         /** @var Request $request */
         $request = $this->getRequest();
 
