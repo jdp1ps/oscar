@@ -123,13 +123,30 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
 
 
-    public function saveOrganizationPerson(OrganizationPerson $organizationPerson,Person $person, Organization $organisation, $roleOscarId) {
-        //$personOrganization = new OrganizationPerson();
+    public function saveOrganizationPerson(
+        OrganizationPerson $organizationPerson,Person $person, Organization $organisation, $roleOscarId) {
         $organizationPerson->setPerson($person)
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
         $this->getEntityManager()->persist($organizationPerson);
         $this->getEntityManager()->flush($organizationPerson);
+    }
+
+    public function removeOrganizationPerson(OrganizationPerson $organizationPerson,Person $person, $roleOscarId) {
+        $organizationPerson->setPerson($person)
+            ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
+        $this->getEntityManager()->remove($organizationPerson);
+        $this->getEntityManager()->persist($organizationPerson);
+        $this->getEntityManager()->flush($organizationPerson);
+    }
+
+    public function getOrganizationPerson(Person $person) {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('o')
+            ->from(OrganizationPerson::class, 'o')
+            ->where('o.person = :person')
+            ->setParameter('person', $person);
+        return $qb->getQuery()->getResult();
     }
 
     public function getTypeObjByLabel($label){
@@ -205,7 +222,6 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->setParameter('person', $person);
         return $qb->getQuery()->getOneOrNullResult();
     }
-
 
     public function newPersistantObject()
     {
