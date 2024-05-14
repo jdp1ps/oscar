@@ -20,7 +20,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param int $organizationId
      * @return Organization
      */
-    public function getOrganisationById(int $organizationId):Organization
+    public function getOrganisationById(int $organizationId): Organization
     {
         return $this->findOneBy(['id' => $organizationId]);
     }
@@ -31,7 +31,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param int $organizationParentId
      * @return Organization[]
      */
-    public function getSubOrganizations( int $organizationParentId ) :array
+    public function getSubOrganizations(int $organizationParentId): array
     {
         $qb = $this->createQueryBuilder('o')
             ->where('o.parent = :organizationParentId')
@@ -47,7 +47,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param mixed $date True = Date du jour, False = ignoré, Datetime = à la date donnée
      * @return Organization[]
      */
-    public function getOrganizationsPerson( int $personId, bool $principal = false, $date = false ) :array
+    public function getOrganizationsPerson(int $personId, bool $principal = false, $date = false): array
     {
         $qb = $this->createQueryBuilder('o')
             ->innerJoin('o.persons', 'op')
@@ -76,8 +76,8 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param bool $principale
      * @return array
      */
-    public function getOrganizationsIdsForPerson( $personId, $principale=true ){
-
+    public function getOrganizationsIdsForPerson($personId, $principale = true)
+    {
         $parameters = [
             'personId' => $personId
         ];
@@ -88,7 +88,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->innerJoin('op.roleObj', 'opr')
             ->where('op.person = :personId');
 
-        if( $principale === true ){
+        if ($principale === true) {
             $parameters['principale'] = true;
             $query->andWhere('opr.principal = :principale');
         }
@@ -104,7 +104,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param array $countries
      * @return array
      */
-    public function getIdWithCountries( array $countries ):array
+    public function getIdWithCountries(array $countries): array
     {
         $parameters = [
             'countries' => $countries
@@ -127,7 +127,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param array $typesIDs
      * @return array
      */
-    public function getIdWithTypes( array $typesIDs ):array
+    public function getIdWithTypes(array $typesIDs): array
     {
         $parameters = [
             'types' => $typesIDs
@@ -145,8 +145,8 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
     }
 
 
-
-    public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
+    public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId)
+    {
         $personOrganization = new OrganizationPerson();
         $this->getEntityManager()->persist($personOrganization);
         $personOrganization->setPerson($person)
@@ -155,7 +155,8 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->flush($personOrganization);
     }
 
-    public function getTypeObjByLabel($label){
+    public function getTypeObjByLabel($label)
+    {
         return $this->getEntityManager()->getRepository(OrganizationType::class)->findOneBy(['label' => $label]);
     }
 
@@ -163,7 +164,8 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param $fullName
      * @return Organization
      */
-    public function createFromFullName( $fullName ){
+    public function createFromFullName($fullName)
+    {
         $organisation = new Organization();
         $this->getEntityManager()->persist($organisation);
         $datas = (new DataExtractorOrganization())->extract($fullName);
@@ -174,23 +176,23 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         return $organisation;
     }
 
-    public function getOrganisationByNameOrCreate( $fullName ){
+    public function getOrganisationByNameOrCreate($fullName)
+    {
         try {
             $qb = $this->getEntityManager()->createQueryBuilder();
             $qb->select('o')
                 ->from(Organization::class, 'o')
                 ->where('o.shortName = :name OR o.fullName = :name')
-                ->setParameter('name',  $fullName );
-           $organizations = $qb->getQuery()->getResult();
-           if( count($organizations) == 0 ){
-               return $this->createFromFullname($fullName);
-           }
-           return $organizations[0];
-        } catch (\Exception $e){
+                ->setParameter('name', $fullName);
+            $organizations = $qb->getQuery()->getResult();
+            if (count($organizations) == 0) {
+                return $this->createFromFullname($fullName);
+            }
+            return $organizations[0];
+        } catch (\Exception $e) {
             echo "Can't create or get Org $fullName \n";
             return null;
         }
-
     }
 
     /**
@@ -210,13 +212,28 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @throws NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getOrganisationByCode( string $code ){
+    public function getOrganisationByCode(string $code): Organization
+    {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.code = :code')
             ->setParameter('code', $code);
         return $qb->getQuery()->getSingleResult();
+    }
+
+    /**
+     * @param array $codes
+     * @return Organization[]
+     */
+    public function getOrganisationsByCodes(array $codes): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('o')
+            ->from(Organization::class, 'o')
+            ->where('o.code IN(:codes)')
+            ->setParameter('codes', $codes);
+        return $qb->getQuery()->getResult();
     }
 
     public function newPersistantObject()
@@ -236,13 +253,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param $value
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getOrganizationByConnectorQuery( $connector, $value ){
-
+    public function getOrganizationByConnectorQuery($connector, $value)
+    {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%"'.$connector.'";s:'.strlen($value).':"'.$value.'";%');
+            ->setParameter('search', '%"' . $connector . '";s:' . strlen($value) . ':"' . $value . '";%');
         return $qb;
     }
 
@@ -252,15 +269,14 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @throws NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getOrganizationByCodePCRU( $code ) :?Organization
+    public function getOrganizationByCodePCRU($code): ?Organization
     {
         $qb = $this->getEntityManager()->createQueryBuilder('o')
             ->select('o')
             ->from(Organization::class, 'o')
             ->where('o.siret = :code OR o.duns = :code OR o.tvaintra = :code')
             ->getQuery()
-            ->setParameter('code', $code)
-        ;
+            ->setParameter('code', $code);
         try {
             return $qb->getSingleResult();
         } catch (\Exception $e) {
@@ -271,24 +287,23 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
     /**
      * @return array
      */
-    public function getOrganizationsWithRnsr() :array
+    public function getOrganizationsWithRnsr(): array
     {
         $qb = $this->getEntityManager()->createQueryBuilder('o')
             ->select('o')
             ->from(Organization::class, 'o')
             ->where("o.rnsr IS NOT NULL AND o.rnsr != ''")
-            ->getQuery()
-        ;
+            ->getQuery();
 
         return $qb->getResult();
     }
 
-    public function getTypesKeyLabel() :array
+    public function getTypesKeyLabel(): array
     {
         $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findAll();
         $out = [];
         /** @var OrganizationType $organizationType */
-        foreach ($types as $organizationType){
+        foreach ($types as $organizationType) {
             $out[$organizationType->getLabel()] = $organizationType;
         }
         return $out;
@@ -299,13 +314,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param int $organizationId
      * @return Organization[]
      */
-    public function getOrganizationAndParents( int $organizationId ): array
+    public function getOrganizationAndParents(int $organizationId): array
     {
         $out = [];
         /** @var Organization $organization */
         $organization = $this->find($organizationId);
         $out[$organization->getId()] = $organization;
-        if( $organization->hasParent() ){
+        if ($organization->hasParent()) {
             foreach ($organization->hasParent() as $org) {
                 $out[$org->getId()] = $org;
             }

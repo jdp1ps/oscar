@@ -20,6 +20,13 @@ interface OscarFormatterConst
     //  ]
     const FORMAT_ARRAY_ID_VALUE = 'format_array_id_value';
 
+    // Liste de valeur Pour le module signature
+    // [
+    //   ["firstname" => Prénom, "lastname" => Nom, "email" => courriel],
+    //   ["firstname" => Prénom, "lastname" => Nom, "email" => courriel],
+    //  ]
+    const FORMAT_RECIPIENTS = 'format_recipients';
+
     // Liste d'objet
     // [
     //  ["id" => "IDA", "label" => "Valeur A"],

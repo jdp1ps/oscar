@@ -49,6 +49,10 @@
             <span class="status-text">{{ r.status_text }}</span>
           </span>
         </article>
+        <strong>Observateurs : </strong>
+        <span v-for="o in s.observers">
+          <small>{{ o.firstname }}</small> <span>{{ o.lastname }}</span>
+        </span>
       </section>
 
       <div class="buttons-bar">
@@ -145,33 +149,8 @@
                     {{ t.label }} {{ t.flow && editedDocument.id ? '(signature)':'' }}
                   </option>
                 </select>
-                <section v-if="currentFlow">
-                  <h3>
-                    <small>Procédure de signature</small><br>
-                    <strong>{{ currentFlow.label }}</strong>
-                  </h3>
-
-                  <article v-for="step in currentFlow.steps" class="step"
-                           :class="step.missing_recipients ? 'error' : 'ok'">
-                    <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
-                    <ul class="metas">
-                      <li class="meta">Parapheur: <strong>{{ step.letterfile_label }}</strong></li>
-                      <li class="meta">Type: <strong>{{ step.level_label }}</strong></li>
-                      <li class="meta">Tous signent: <strong>{{ step.allSignToComplete ? 'Oui' : 'non' }}</strong></li>
-                    </ul>
-                    <div class="alert alert-danger" v-if="step.missing_recipients">
-                      Il manque des destinataires pour cette procédure.
-                    </div>
-                    <div class="recipient" v-for="r in step.recipients">
-                      <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
-                      <strong class="email">{{ r.email }}</strong>
-                      <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
-                    </div>
-                  </article>
-                </section>
               </div>
             </div>
-
           </div>
 
           <div class="col-md-12">
@@ -216,6 +195,46 @@
               </span>
           </div>
         </div>
+        <section v-if="currentFlow">
+          <h3>
+            <small>Procédure de signature</small><br>
+            <strong>{{ currentFlow.label }}</strong>
+          </h3>
+
+          <article v-for="step in currentFlow.steps" class="step"
+                   :class="step.missing_recipients ? 'error' : 'ok'">
+            <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
+            <ul class="metas">
+              <li class="meta">Parapheur: <strong>{{ step.letterfile_label }}</strong></li>
+              <li class="meta">Type: <strong>{{ step.level_label }}</strong></li>
+              <li class="meta">Tous signent: <strong>{{ step.allSignToComplete ? 'Oui' : 'non' }}</strong></li>
+            </ul>
+            <div class="alert alert-danger" v-if="step.missing_recipients">
+              Il manque des destinataires pour cette procédure.
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Destinataires</h5>
+                <div class="recipient" v-for="r in step.recipients">
+                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
+                  <strong class="email">{{ r.email }}</strong>
+                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5>Observateurs</h5>
+                <div class="recipient" v-for="r in step.observers" v-if="step.observers.length">
+                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
+                  <strong class="email">{{ r.email }}</strong>
+                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
+                </div>
+                <div class="alert alert-info" v-else>
+                  Pas d'observateur pour cette étape
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
         <div class="row">
           <div class="col-md-12">
             <nav class="buttons-bar">

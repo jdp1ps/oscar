@@ -618,7 +618,7 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
     /**
-     * @return ArrayCollection
+     * @return OrganizationPerson[]
      */
     public function getPersons($includeInactive = true)
     {

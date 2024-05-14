@@ -28,6 +28,8 @@ use Oscar\Entity\ValidationPeriod;
 use Oscar\Exception\OscarException;
 use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Strategy\Search\IPersonISearchStrategy;
+use Oscar\Provider\Privileges;
+use Oscar\Strategy\Search\PersonSearchStrategy;
 use Oscar\Traits\UseActivityLogService;
 use Oscar\Traits\UseActivityLogServiceTrait;
 use Oscar\Traits\UseEntityManager;
@@ -129,15 +131,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     public function searchPersonsActivityById(
-        int $activityId ,
+        int $activityId,
         string $search = "",
-        string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT ) :array
-    {
+        string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT
+    ): array {
         $personIds = $this->getPersonRepository()->getPersonsIdsForActivitiesids([$activityId]);
         $searchIds = $this->searchIds($search);
-        if( $searchIds ){
+        if ($searchIds) {
             $ids = array_intersect($personIds, $searchIds);
-        } else {
+        }
+        else {
             $ids = $personIds;
         }
 
@@ -284,6 +287,48 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
     }
 
     /**
+     * Retourne la liste des personnes d'une structure via le code structure.
+     *
+     * @param array $codes
+     * @return Person[]
+     */
+    public function getPersonsInOrganizationsByCodes(array $codes, string $format = OscarFormatterConst::FORMAT_ARRAY_OBJECT): array
+    {
+        $persons = [];
+        foreach ($this->getOrganizationRepository()->getOrganisationsByCodes($codes) as $o ){
+            foreach ($o->getPersons() as $p) {
+                $persons[$p->getPerson()->getId()] = $p->getPerson();
+            }
+        }
+        return $this->formatPersonsCollection($persons, $format);
+    }
+
+    /**
+     * @param Person[] $persons
+     * @param string $format
+     * @return array
+     */
+    public function formatPersonsCollection( array $persons, string $format ) :array {
+        if( $format == OscarFormatterConst::FORMAT_ARRAY_OBJECT ){
+            return $persons;
+        }
+        switch ($format) {
+            case OscarFormatterConst::FORMAT_RECIPIENTS :
+                $out = [];
+                foreach ($persons as $p){
+                    $out[] = [
+                        'firstname' => $p->getFirstname(),
+                        'lastname' => $p->getLastname(),
+                        'email' => $p->getEmail(),
+                    ];
+                }
+                return $out;
+            default:
+                throw new OscarException("Le format '$format' n'est pas encore implémenté");
+        }
+    }
+
+    /**
      * Cloture le role d'une personne sur une organisation.
      *
      * @param Person $person
@@ -305,7 +350,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             ) {
                 if ($hardRemove == true) {
                     $this->personOrganizationRemove($personOrganization);
-                } else {
+                }
+                else {
                     $this->getOrganizationService()->closeOrganizationPerson($personOrganization, new \DateTime());
                 }
             }
@@ -501,11 +547,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $apply = $itemActive && $roleActive;
             if (!array_key_exists($itemId, $output)) {
                 $output[$itemId] = [
-                    'label' => $itemLabel,
-                    'active' => $itemActive,
+                    'label'      => $itemLabel,
+                    'active'     => $itemActive,
                     'roleActive' => $roleActive,
-                    'apply' => false,
-                    'roles' => []
+                    'apply'      => false,
+                    'roles'      => []
                 ];
             }
             if ($apply) {
@@ -573,9 +619,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         foreach ($person->getValidatorActivitiesPrj() as $activity) {
             if (!array_key_exists($activity->getId(), $output['validations']['prj'])) {
                 $output['validations']['prj'][$activity->getId()] = [
-                    'id' => $activity->getId(),
-                    'label' => (string)$activity,
-                    'apply' => $activity->isActive(),
+                    'id'     => $activity->getId(),
+                    'label'  => (string)$activity,
+                    'apply'  => $activity->isActive(),
                     'active' => $activity->isActive()
                 ];
             }
@@ -586,9 +632,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         foreach ($person->getValidatorActivitiesSci() as $activity) {
             if (!array_key_exists($activity->getId(), $output['validations']['sci'])) {
                 $output['validations']['sci'][$activity->getId()] = [
-                    'id' => $activity->getId(),
-                    'label' => (string)$activity,
-                    'apply' => $activity->isActive(),
+                    'id'     => $activity->getId(),
+                    'label'  => (string)$activity,
+                    'apply'  => $activity->isActive(),
                     'active' => $activity->isActive()
                 ];
             }
@@ -599,9 +645,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         foreach ($person->getValidatorActivitiesAdm() as $activity) {
             if (!array_key_exists($activity->getId(), $output['validations']['adm'])) {
                 $output['validations']['adm'][$activity->getId()] = [
-                    'id' => $activity->getId(),
-                    'label' => (string)$activity,
-                    'apply' => $activity->isActive(),
+                    'id'     => $activity->getId(),
+                    'label'  => (string)$activity,
+                    'apply'  => $activity->isActive(),
                     'active' => $activity->isActive()
                 ];
             }
@@ -618,11 +664,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 continue;
             }
             $output['referents'][$referent->getReferent()->getId()] = [
-                'id' => $referent->getReferent()->getId(),
-                'label' => (string)$referent->getReferent(),
-                'mail' => $referent->getReferent()->getEmail(),
+                'id'      => $referent->getReferent()->getId(),
+                'label'   => (string)$referent->getReferent(),
+                'mail'    => $referent->getReferent()->getEmail(),
                 'mailmd5' => md5($referent->getReferent()->getEmail()),
-                'apply' => true
+                'apply'   => true
             ];
         }
 
@@ -631,11 +677,11 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 continue;
             }
             $output['subordinates'][$subordinate->getPerson()->getId()] = [
-                'id' => $subordinate->getPerson()->getId(),
-                'label' => (string)$subordinate->getPerson(),
-                'mail' => $subordinate->getPerson()->getEmail(),
+                'id'      => $subordinate->getPerson()->getId(),
+                'label'   => (string)$subordinate->getPerson(),
+                'mail'    => $subordinate->getPerson()->getEmail(),
                 'mailmd5' => md5($subordinate->getPerson()->getEmail()),
-                'apply' => true
+                'apply'   => true
             ];
         }
 
@@ -694,7 +740,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $added = $this->getPersonById($addedReferentId, true);
                 if (in_array($added->getId(), $referentsIds)) {
                     $this->getLoggerService()->warning(sprintf("%s est déjà référent pour '%s'", $added, $subordinate));
-                } else {
+                }
+                else {
                     $this->getLoggerService()->info(sprintf("ajout de %s référent pour '%s'", $added, $subordinate));
                     $referentAdd = new Referent();
                     $referentAdd->setReferent($added)->setPerson($subordinate);
@@ -715,7 +762,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $this->getLoggerService()->warning(
                         sprintf("%s n'est déjà plus référent pour '%s'", $removed, $subordinate)
                     );
-                } else {
+                }
+                else {
                     $this->getLoggerService()->info(
                         sprintf("suppression de %s référent pour '%s'", $removed, $subordinate)
                     );
@@ -979,7 +1027,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $logger->info($msg);
                 $io->writeln($msg);
             };
-        } else {
+        }
+        else {
             $log = function ($msg) use ($logger) {
                 $logger->info($msg);
             };
@@ -1044,7 +1093,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 if (in_array($cron, $settings['frequency'])) {
                     $log(sprintf(" + >>> Envoi de mail pour %s", $text));
                     $this->mailNotificationsPerson($person);
-                } else {
+                }
+                else {
                     $log(sprintf(' - %s n\'est pas inscrite à ce crénaux', $text));
                 }
             } catch (\Exception $e) {
@@ -1055,56 +1105,125 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     public function mailNotificationsPerson($person, $debug = true)
     {
-        /** @var ConfigurationParser $configOscar */
+        $this->getLoggerService()->debug("Calcule du mail pour '$person'");
+
         $configOscar = $this->getOscarConfigurationService();
 
-        $conf = $this->getOscarConfigurationService()->getConfigArray();
-        $appName = $conf['unicaen-app']['app_infos']['nom'];
+        // Passage en FR
+        Moment::setLocale('fr_FR');
 
-        if ($debug) {
-            $log = function ($msg) {
-                $this->getLoggerService()->debug($msg);
-            };
-        } else {
-            $log = function () {
-            };
-        }
-
-        $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
-        $notifications = $datas['notifications'];
-
-        if (count($notifications) == 0) {
-            $log(sprintf(" - Pas de notifications non-lues pour %s", $person));
-            return;
-        }
-
+        // Pour générer les URLs dans les messages
         $url = $this->getServiceContainer()
             ->get('ViewHelperManager')
             ->get('url');
 
-        $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
+        // Récupération du nom de l'application
+        $conf = $this->getOscarConfigurationService()->getConfigArray();
+        $appName = $conf['unicaen-app']['app_infos']['nom'];
 
-        $content = "Bonjour $person, <br>\n";
-        $content .= "Vous avez des notifications non-lues sur $appName : \n";
-        $content .= "<ul>\n";
+        // Pour le DEBUG
+        if ($debug) {
+            $log = function ($msg) {
+                $this->getLoggerService()->debug($msg);
+            };
+        }
+        else {
+            $log = function () {
+            };
+        }
 
-        Moment::setLocale('fr_FR');
+        /////////////////////////// NOTIFICATIONS NON-LUES
+        $datas = $this->getNotificationService()->getNotificationsPerson($person->getId(), true);
+        $notifications = $datas['notifications'];
 
-        foreach ($notifications as $n) {
-            $moment = new Moment($n['dateEffective']);
-            $formatted = $moment->format('l d F Y');
-            $since = $moment->from('now')->getRelative();
+        /////////////////////////// PAYMENTS en RETARD
+        $paymentsUndone = $this->getProjectGrantService()->getUndonePayementsForPerson($person);
 
-            $message = $n['message'];
-            if (preg_match($reg, $n['message'], $matches)) {
+        /////////////////////////// JALONS NON-FAIT
+        $milestonesUndone = $this->getProjectGrantService()->getUndoneMilestonesForPerson($person);
+
+
+        /////////////////////////// PAYEMENTS NON-FAIT
+
+
+        $sending = false;
+
+        $milestonesUndone_content = "";
+        $notificationsUnread_content = "";
+        $payments_content = "";
+
+        if (count($paymentsUndone) > 0) {
+            $sending = true;
+            $payments_content = "<p>Payements en retard : </p><ul>";
+            foreach ($paymentsUndone as $payment) {
+                $moment = new Moment($payment->getDatePredictedStr());
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
                 $link = $configOscar->getConfiguration("urlAbsolute") . $url(
                         'contract/show',
-                        array('id' => $matches[2])
+                        array('id' => $payment->getActivity()->getId())
                     );
-                $message = preg_replace($reg, '$1 <a href="' . $link . '">$3</a> $4', $n['message']);
+                $activity = (string)$payment->getActivity();
+                $payments_content .= "<li><strong>$formatted ($since)</strong> " .
+                    (string)$payment
+                    . " dans <a href='$link'>$activity</a> </li>";
             }
-            $content .= "<li><strong>" . $formatted . " (" . $since . ") : </strong> " . $message . "</li>\n";
+            $payments_content .= "</ul>";
         }
+
+        if (count($milestonesUndone) > 0) {
+            $sending = true;
+            $milestonesUndone_content = "<p>Jalons à faire : </p><ul>";
+            foreach ($milestonesUndone as $milestone) {
+                $moment = new Moment($milestone->getDateStartStr());
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
+                $link = $configOscar->getConfiguration("urlAbsolute") . $url(
+                        'contract/show',
+                        array('id' => $milestone->getActivity()->getId())
+                    );
+                $activity = (string)$milestone->getActivity();
+                $milestonesUndone_content .= "<li><strong>$formatted ($since)</strong> " .
+                    $milestone->getComment()
+                    . " dans <a href='$link'>$activity</a> </li>";
+            }
+            $milestonesUndone_content .= "</ul>";
+        }
+
+        if (count($notifications) > 0) {
+            $sending = true;
+            $reg = '/(.*)\[Activity:([0-9]*):(.*)\](.*)/';
+            $notificationsUnread_content = "<p>Notifications non-lues : </p><ul>";
+            foreach ($notifications as $n) {
+                $moment = new Moment($n['dateEffective']);
+                $formatted = $moment->format('l d F Y');
+                $since = $moment->from('now')->getRelative();
+
+                $message = $n['message'];
+                if (preg_match($reg, $n['message'], $matches)) {
+                    $link = $configOscar->getConfiguration("urlAbsolute") . $url(
+                            'contract/show',
+                            array('id' => $matches[2])
+                        );
+                    $message = preg_replace($reg, '$1 <a href="' . $link . '">$3</a> $4', $n['message']);
+                }
+                $notificationsUnread_content .= "<li><strong>" . $formatted . " (" . $since . ") : </strong> " . $message . "</li>\n";
+            }
+        }
+
+
+        if ($sending === false) {
+            $log(sprintf(" - Pas de mail pour %s", $person));
+            return;
+        }
+
+        $content = "Bonjour $person, <br>\n";
+        $content .= "<p>Il y'a des actions en attentes sur <strong>$appName</strong></p>";
+        $content .= $milestonesUndone_content;
+        $content .= $payments_content;
+        $content .= $notificationsUnread_content;
 
         //  TODO vérifier que ça fonctionne
         /** @var MailingService $mailer */
@@ -1245,16 +1364,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             /** @var ActivityOrganization $organization */
             foreach ($activity->getOrganizationsDeep() as $organization) {
                 if ($organization->isPrincipal()) {
-
-                    // Récupération des organizations
-                    $organizationTree = $this->getOrganizationService()
-                        ->getAncestorsIds($organization->getOrganization()->getId());
-                    foreach ($this->getOrganizationService()->getOrganizationsByIds($organizationTree) as $org) {
-                        /** @var OrganizationPerson $personOrganization */
-                        foreach ($org->getPersons(false) as $personOrganization) {
-                            $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
-                            )->getId();
-                        }
+                    /** @var OrganizationPerson $personOrganization */
+                    foreach ($organization->getOrganization()->getPersons(false) as $personOrganization) {
+                        $persons[$personOrganization->getRoleObj()->getId()] [] = $personOrganization->getPerson(
+                        )->getId();
                     }
                 }
             }
@@ -1281,10 +1394,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             /** @var Person $validator */
             foreach ($validation->getCurrentValidators() as $validator) {
                 $output[$validator->getId()] = [
-                    'id' => $validator->getId(),
+                    'id'       => $validator->getId(),
                     'fullname' => $validator->getFullname(),
-                    'email' => $validator->getEmail(),
-                    'current' => "foo"
+                    'email'    => $validator->getEmail(),
+                    'current'  => "foo"
                 ];
             }
         }
@@ -1329,7 +1442,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             foreach ($validatorsOthersPerson as $v) {
                 $validatorsOthers[$v->getReferent()->getId()] = [
                     'fullname' => $v->getReferent()->getFullname(),
-                    'email' => $v->getReferent()->getEmail()
+                    'email'    => $v->getReferent()->getEmail()
                 ];
             }
 
@@ -1341,21 +1454,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
 
             $output[$personId] = [
-                'person_id' => $personId,
-                'fullname' => $personName,
-                'emailmd5' => $person->getMd5Email(),
-                'url_show' => $urlShow,
-                'email' => $personEmail,
-                'np1' => $validatorsOthers,
-                'total_periods' => count($personPeriods),
-                'total_declarations' => count($repport),
-                'valid' => false,
-                'send' => true,
-                'notif' => true,
-                'require_alert_declarer' => count($repport) < count($personPeriods),
+                'person_id'               => $personId,
+                'fullname'                => $personName,
+                'emailmd5'                => $person->getMd5Email(),
+                'url_show'                => $urlShow,
+                'email'                   => $personEmail,
+                'np1'                     => $validatorsOthers,
+                'total_periods'           => count($personPeriods),
+                'total_declarations'      => count($repport),
+                'valid'                   => false,
+                'send'                    => true,
+                'notif'                   => true,
+                'require_alert_declarer'  => count($repport) < count($personPeriods),
                 'require_alert_validator' => false,
-                'periods' => [],
-                'infos' => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
+                'periods'                 => [],
+                'infos'                   => count($repport) == 0 ? 'Aucune déclaration' : 'Déclarations faite(s)'
             ];
 
             foreach ($personPeriods as $pp => $periodDetails) {
@@ -1391,19 +1504,19 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                         foreach ($activity->getValidatorsPrj() as $val) {
                             $activityValidators['prj'][$val->getId()] = [
                                 'fullname' => (string)$val,
-                                'email' => $val->getEmail()
+                                'email'    => $val->getEmail()
                             ];
                         }
                         foreach ($activity->getValidatorsSci() as $val) {
                             $activityValidators['sci'][$val->getId()] = [
                                 'fullname' => (string)$val,
-                                'email' => $val->getEmail()
+                                'email'    => $val->getEmail()
                             ];
                         }
                         foreach ($activity->getValidatorsAdm() as $val) {
                             $activityValidators['adm'][$val->getId()] = [
                                 'fullname' => (string)$val,
-                                'email' => $val->getEmail()
+                                'email'    => $val->getEmail()
                             ];
                         }
                         $personActivities[$activityId]['validators'] = $activityValidators;
@@ -1412,7 +1525,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
                 if ($send === false) {
                     $output[$personId]['send'] = false;
-                } else {
+                }
+                else {
                     $validators = $this->getValidatorsIdsPersonPeriod($personId, $pp);
                     foreach ($validators as $idValidator => $validatorFullName) {
                         $validatorsPerson[$idValidator] = $validatorFullName;
@@ -1430,13 +1544,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 // état de la période
                 $value = null;
                 $periodInfos = [
-                    'valid' => false,
-                    'valid_prj' => false,
-                    'valid_sci' => false,
-                    'valid_adm' => false,
-                    'send' => false,
-                    'conflict' => false,
-                    'step' => $step,
+                    'valid'      => false,
+                    'valid_prj'  => false,
+                    'valid_sci'  => false,
+                    'valid_adm'  => false,
+                    'send'       => false,
+                    'conflict'   => false,
+                    'step'       => $step,
                     'validators' => $validators,
                     'activities' => $periodDetails['activities']
                 ];
@@ -1504,14 +1618,14 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
             // TODO Ajouter la détection des conflits
             $output[$highdelay['period']] = [
-                'period' => $period,
-                'valid' => $valid,
-                'send' => $send,
-                'reject' => $reject,
+                'period'    => $period,
+                'valid'     => $valid,
+                'send'      => $send,
+                'reject'    => $reject,
                 'valid_prj' => $prj == $nbr,
                 'valid_sci' => $sci == $nbr,
                 'valid_adm' => $adm == $nbr,
-                'step' => $step
+                'step'      => $step
             ];
         }
         return $output;
@@ -1539,7 +1653,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             if ($normalize == true) {
                 $query->where('LOWER(p.ladapLogin) = :login')
                     ->setParameter('login', strtolower($login));
-            } else {
+            }
+            else {
                 $query->where('p.ladapLogin = :login')
                     ->setParameter('login', $login);
             }
@@ -1876,7 +1991,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $output = [];
         foreach ($ids as $id) {
             $output[$id] = [
-                'person' => $this->getPersonById($id),
+                'person'  => $this->getPersonById($id),
                 'periods' => []
             ];
         }
@@ -1917,7 +2032,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $ids = $this->getDeclarersIds();
             if (array_key_exists('ids', $filters)) {
                 $filters['ids'] = array_intersect($filters['ids'], $ids);
-            } else {
+            }
+            else {
                 $filters['ids'] = $ids;
             }
         }
@@ -1927,7 +2043,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $ids = $this->getNp1Ids();
             if (array_key_exists('ids', $filters)) {
                 $filters['ids'] = array_intersect($filters['ids'], $ids);
-            } else {
+            }
+            else {
                 $filters['ids'] = $ids;
             }
         }
@@ -1944,15 +2061,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $query->addOrderBy('p.' . $filters['order_by'], 'ASC');
         }
 
-        if ($filters['filteractive'] == 3 ) {
+        if ($filters['filteractive'] == 3) {
             $where = "p.ldapFinInscription IS NOT NULL";
             $query->where($where);
         }
 
-        if ($filters['filteractive'] == 1 || $filters['filteractive'] == 2 ) {
+        if ($filters['filteractive'] == 1 || $filters['filteractive'] == 2) {
             $now = date('Y-m-d');
             $where = "p.ldapFinInscription IS NULL OR (p.ldapFinInscription IS NOT NULL AND p.ldapFinInscription > '$now')";
-            if( $filters['filteractive'] == 2 ){
+            if ($filters['filteractive'] == 2) {
                 $where = "NOT($where)";
             }
             $query->where($where);
@@ -1985,14 +2102,16 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
                 if (array_key_exists('ids', $filters)) {
                     $filters['ids'] = array_intersect($filters['ids'], $ids);
-                } else {
+                }
+                else {
                     $filters['ids'] = $ids;
                 }
             } catch (\Exception $e) {
+                $msg = "Méthode de recherche des personnes non-disponible";
                 $this->getLoggerService()->error(
-                    sprintf("Méthode de recherche des personnes non-disponible : %s", $e->getMessage())
+                    $msg . " : " . $e->getMessage()
                 );
-                throw new OscarException("Méthode de recherche des personnes non-disponible : %s", $e->getMessage());
+                throw new OscarException($msg);
             }
         }
 
@@ -2543,7 +2662,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
             $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexActivity($activity);
             $this->getGearmanJobLauncherService()->triggerUpdateSearchIndexPerson($person);
-        } else {
+        }
+        else {
             $this->getLoggerService()->debug(
                 sprintf(
                     "%s(%s) n'a pas été ajouté dans %s, car est déjà présent",
@@ -2600,9 +2720,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         $person = $activityPerson->getPerson();
         $activity = $activityPerson->getActivity();
 
-        if( $activityPerson->getRoleObj() ){
+        if ($activityPerson->getRoleObj()) {
             $updateNotification = $activityPerson->getRoleObj()->isPrincipal() != $newRole->isPrincipal();
-        } else {
+        }
+        else {
             $updateNotification = $newRole->isPrincipal();
         }
         $activityPerson->setRoleObj($newRole);

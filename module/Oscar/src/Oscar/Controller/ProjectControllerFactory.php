@@ -12,6 +12,7 @@ namespace Oscar\Controller;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Oscar\Service\ActivityLogService;
+use Oscar\Service\LoggerService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
@@ -23,6 +24,7 @@ class ProjectControllerFactory implements FactoryInterface
     {
         $c = new ProjectController();
         $c->setProjectService($container->get(ProjectService::class));
+        $c->setLoggerService($container->get("Logger"));
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setActivityLogService($container->get(ActivityLogService::class));

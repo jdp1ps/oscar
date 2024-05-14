@@ -124,9 +124,11 @@ class ProjectToArrayFormatter implements IProjectFormater
         }
         foreach ($project->getOrganisationsDeep() as $organizationProject) {
             $organization = (string)$organizationProject->getOrganization();
-            $role = $organizationProject->getRoleObj()->getRoleId();
-            if (array_key_exists($role, $organizations) && !in_array($organization, $organizations[$role])) {
-                $organizations[$role][] = $organization;
+            if( $organizationProject->getRoleObj() ){
+                $role = $organizationProject->getRoleObj()->getRoleId();
+                if (array_key_exists($role, $organizations) && !in_array($organization, $organizations[$role])) {
+                    $organizations[$role][] = $organization;
+                }
             }
         }
 

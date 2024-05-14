@@ -270,10 +270,21 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
     public function getRecipients($options)
     {
-
+        if(!array_key_exists('activity_id', $options)){
+            return [];
+        }
         $activity_id = intval($options['activity_id']);
+
+        if(!array_key_exists('role_person_id', $options)){
+            return [];
+        }
         $role_activity_id = ArrayUtils::normalizeArray($options['role_person_id']);
-        $role_organisation_id = ArrayUtils::normalizeArray($options['role_organisation_id']);
+
+        if(!array_key_exists('role_person_id', $options)){
+            $role_organisation_id = [];
+        } else {
+            $role_organisation_id = ArrayUtils::normalizeArray($options['role_organisation_id']);
+        }
 
         $persons = $this->getPersonsActivity($activity_id, $role_activity_id, $role_organisation_id);
         $recipients = [];
