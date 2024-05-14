@@ -167,6 +167,18 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                             throw new OscarException(sprintf("L'étape '%s' n'a pas de destinataires", $step['label']));
                         }
                         $step['recipients'] = $recipients;
+
+                        $observers = [];
+                        foreach ($config['observers'] as $observer) {
+                            $this->getLoggerService()->debug(
+                                sprintf("Destinataire %s : %s", $observer['email'], $observer['selected'] ? 'OUI' : 'non')
+                            );
+                            if ($observer['selected']) {
+                                $observers[] = $observer;
+                            }
+                        }
+
+                        $step['observers'] = $observers;
                     }
                     else {
                         $this->getLoggerService()->warning('Aucune configuration reçu pour cette étape');

@@ -1219,6 +1219,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /** Export les données en CSV. */
     public function csvAction()
     {
+
+        die("CSV");
         /** @var Request $request */
         $request = $this->getRequest();
 
@@ -1744,67 +1746,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         return new JsonModel($out);
     }
-
-    /**
-     * Signature des contrats de recherche.
-     *
-     * @return ViewModel
-     * @throws OscarException
-     */
-    public function signedDocumentSendAction(): ViewModel
-    {
-        if ($this->getOscarConfigurationService()->useSignedContract()) {
-            $activity = $this->getProjectGrantService()->getActivityById($this->params()->fromRoute('id'));
-            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_CONTRACT_SEND, $activity);
-            $defaultPersons = $this->getProjectGrantService()->getSignedProcessDefaultPersons($activity);
-            $form = new SignedDocumentForm();
-            if ($this->getRequest()->isPost()) {
-                /**
-                 * 'documents_process' => [
-                 * 'signed' => [
-                 * 'label' => 'Soumettre un contrat pour signature',
-                 * 'name' => 'contrat_a_signer_%s',
-                 * 'tmp_dir' => '/tmp/',
-                 * 'roles' => ['Responsable scientifique', 'Directeur'],
-                 * 'document_type' => 'Contrat signé',
-                 * 'document_tab' => 'Contrat signé',
-                 * 'letterfile' => 'esup',
-                 * 'process' => null
-                 * ]
-                 * ],
-                 */
-                $path_tmp = $this->getOscarConfigurationService()->getConfiguration('documents_process.signed.tmp_dir');
-                $file_name = uniqid(
-                    sprintf(
-                        $this->getOscarConfigurationService()->getConfiguration('documents_process.signed.name'),
-                        $activity->getOscarNum()
-                    ) . '_'
-                );
-                $location = $path_tmp . $file_name;
-                echo "$path_tmp<br>";
-                echo "$file_name<br>";
-                echo "$location";
-                var_dump($this->getRequest()->getPost());
-                $files = $this->getRequest()->getFiles()->toArray();
-                $personsIds = $this->getRequest()->getPost()->toArray()['persons'];
-                var_dump($personsIds);
-
-                if (move_uploaded_file($files['file']['tmp_name'], $location)) {
-                    $this->getProjectGrantService()->sendSignedContract($location, $personsIds);
-                }
-                die("Traitement");
-            }
-            return new ViewModel([
-                                     'activity'       => $activity,
-                                     'form'           => $form,
-                                     'defaultPersons' => $defaultPersons
-                                 ]);
-        }
-        else {
-            throw new OscarException("La signature de contrat n'est pas configurée");
-        }
-    }
-
 
     /**
      * @return array
@@ -3314,7 +3255,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $idsExport = array_map('current', $qbIds->getQuery()->getResult());
 
                     $qbIds = $qb->select('DISTINCT pr.id');
-                    $ids = array_map('current', $qbIds->getQuery()->getResult());
+                    $projectsIds = array_map('current', $qbIds->getQuery()->getResult());
+
                 }
                 else {
                     $qbIds = $qb->select('DISTINCT c.id');
@@ -3340,12 +3282,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
-            $projectsIds = [];
-            if ($projectview == 'on') {
-                foreach ($activities as $p) {
-                    $projectsIds[] = $p->getId();
-                }
-            }
+//            $projectsIds = [];
+//            if ($projectview == 'on') {
+//                foreach ($activities as $p) {
+//                    $projectsIds[] = $p->getId();
+//                }
+//            }
 
 
             if ($this->getRequest()->isXmlHttpRequest()) {
