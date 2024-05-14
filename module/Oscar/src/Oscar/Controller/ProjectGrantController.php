@@ -1220,7 +1220,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function csvAction()
     {
 
-        die("CSV");
         /** @var Request $request */
         $request = $this->getRequest();
 
@@ -1241,8 +1240,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (!$paramID) {
                 return $this->getResponseBadRequest();
             }
-        }
-        else {
+        } else {
             return $this->getResponseUnauthorized();
         };
 
@@ -1558,7 +1556,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function documentsJsonAction()
     {
-        // Params (id activité)
         $id = $this->params()->fromRoute('id');
         $ui = $this->params()->fromQuery('ui');
 
@@ -1842,7 +1839,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             "lines" => [],
             'total' => 0.0
         ];
-
 
         foreach ($years as $year) {
             $totaux['years'][$year] = 0.0;
@@ -3255,10 +3251,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $idsExport = array_map('current', $qbIds->getQuery()->getResult());
 
                     $qbIds = $qb->select('DISTINCT pr.id');
-                    $projectsIds = array_map('current', $qbIds->getQuery()->getResult());
-
-                }
-                else {
+                    $idsProjects = array_map('current', $qbIds->getQuery()->getResult());
+                } else {
                     $qbIds = $qb->select('DISTINCT c.id');
                     $ids = array_map('current', $qbIds->getQuery()->getResult());
                     $idsExport = $ids;
@@ -3282,12 +3276,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
-//            $projectsIds = [];
-//            if ($projectview == 'on') {
-//                foreach ($activities as $p) {
-//                    $projectsIds[] = $p->getId();
-//                }
-//            }
+            $projectsIds = [];
+            if ($projectview == 'on') {
+                $projectsIds = $idsProjects;
+            }
 
 
             if ($this->getRequest()->isXmlHttpRequest()) {

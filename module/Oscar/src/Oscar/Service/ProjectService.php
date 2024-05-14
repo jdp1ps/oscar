@@ -320,7 +320,8 @@ class ProjectService implements UseServiceContainer
                 ->getMilestoneTypeFlat();
 
             $numerotations = $this->getProjectGrantService()->getOscarConfigurationService()->getNumerotationKeys();
-            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones, $numerotations);
+            $dateFormat = $this->getProjectGrantService()->getOscarConfigurationService()->getExportDateFormat();
+            $formatter->configure($rolesPerson, $rolesOrganizations, $milestones, $numerotations, $dateFormat);
             return $formatter;
         }
         throw new OscarException(sprintf(_("Formatteur de projet '%s' inconnue"), $format));

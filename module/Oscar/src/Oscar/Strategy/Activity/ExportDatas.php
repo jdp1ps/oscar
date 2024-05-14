@@ -33,16 +33,22 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
 {
     use UseOscarConfigurationServiceTrait, UseProjectGrantServiceTrait, UseEntityManagerTrait, UseOscarUserContextServiceTrait;
 
+    private ?string $rewriteDateFormat = null;
 
     /**
      * ExportDatas constructor.
      */
-    public function __construct( ProjectGrantService $pgs, OscarUserContext $ouc)
+    public function __construct( ProjectGrantService $pgs, OscarUserContext $ouc, ?string $rewriteDateFormat = null)
     {
         $this->setProjectGrantService($pgs);
         $this->setOscarConfigurationService($pgs->getOscarConfigurationService());
         $this->setEntityManager($pgs->getEntityManager());
         $this->setOscarUserContextService($ouc);
+        if( $rewriteDateFormat === null ){
+            $this->rewriteDateFormat = $this->getOscarConfigurationService()->getExportDateFormat();
+        } else {
+            $this->rewriteDateFormat = $rewriteDateFormat;
+        }
     }
 
     public function output( $paramID, $fields = null, $perimeter = null ){
@@ -51,7 +57,7 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
         $separator = $this->getOscarConfigurationService()->getExportSeparator();
 
         // Format des dates
-        $dateFormat = 'Y-m-d'; // $this->getOscarConfigurationService()->getExportDateFormat();
+        $dateFormat = $this->rewriteDateFormat;
 
         $parameters = [];
 
@@ -227,9 +233,7 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
 
                     $jalonKey = $mil->getType()->getLabel();
 
-                    $jalonsCurrent[$jalonKey][] = $mil->getDateStart() ?
-                        $mil->getDateStart()->format($dateFormat) :
-                        '';
+                    $jalonsCurrent[$jalonKey][] = $mil->getDateStartStr($dateFormat);
 
                     if( array_key_exists($jalonKey, $jalonsFaitCurrent) ){
                         // Calcule de l'état du jalon
