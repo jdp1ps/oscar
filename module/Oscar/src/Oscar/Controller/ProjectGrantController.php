@@ -12,6 +12,8 @@ use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
+use Exception;
+use Laminas\Http\Response;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
@@ -453,7 +455,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
 
                         return $this->jsonOutput($datas);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
                     break;
@@ -502,7 +504,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         }
 
                         return $this->getResponseOk();
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         return $this->getResponseInternalError($e->getMessage());
                     }
             }
@@ -742,7 +744,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 return [
                                     'success' => "Votre demande a bien été envoyée"
                                 ];
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
                                 $this->getLoggerService()->error(
                                     "Impossible d'enregistrer la demande d'activité : " . $e->getMessage()
                                 );
@@ -861,7 +863,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $templateProcessor->setValue('versementPrevuDate#' . ($i + 1), $versementsPrevusDate[$i]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->getLoggerService()->warning("Le template $doc ne contient pas de variable $key");
         }
 
@@ -883,7 +885,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     // ACTIONS
     ////////////////////////////////////////////////////////////////////////////
     /**
-     * @return \Laminas\Http\Response
+     * @return Response
      */
     public function editAction()
     {
@@ -941,7 +943,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * @return \Laminas\Http\Response
+     * @return Response
      */
     public function duplicateAction()
     {
@@ -963,7 +965,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'contract/edit',
                 ['id' => $duplicated->getId()]
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
             throw new OscarException($e->getMessage());
         }
@@ -1063,9 +1065,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
-     * @return \Laminas\Http\Response
+     * Suppression d'une activité de recherche
+     *
+     * @return Response
      */
-    public function deleteAction()
+    public function deleteAction(): Response
     {
         try {
             $activity = $this->getActivityFromRoute();
@@ -1092,7 +1096,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             // On supprime les créneaux
             try {
                 $this->getTimesheetService()->removeTimesheetActivity($activity);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new OscarException(
                     "Impossible de supprimer les créneaux pour cette activité : " . $e->getMessage()
                 );
@@ -1122,7 +1126,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             try {
                 $this->getActivityService()->searchDelete($activity->getId());
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
 
             $this->getEntityManager()->remove($activity);
@@ -1139,7 +1143,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     ['id' => $activity->getProject()->getId()]
                 );
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -1516,7 +1520,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 // Mise à jour de l'index de recherche
                 try {
                     $this->getActivityService()->jobSearchUpdate($projectGrant);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->getLoggerService()->error($e->getMessage());
                 }
 
@@ -1899,7 +1903,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'depenses-previsionnelles-' . $entity->getOscarNum(),
                 DocumentFormatterService::PDF_ORIENTATION_PORTRAIT
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new OscarException(
                 "Impossible de générer le document d'estimation des dépenses : " . $e->getMessage()
             );
@@ -2053,7 +2057,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
             try {
                 $this->getEntityManager()->flush();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return $this->getResponseInternalError(
                     "Impossible d'enregistrer le budget prévisionnel : " . $e->getMessage()
                 );
@@ -2074,8 +2078,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Retourne les données de synthèse des dépenses d'une activité de recherche.
      *
-     * @return \Laminas\Http\Response|JsonModel
-     * @throws \Exception
+     * @return Response|JsonModel
+     * @throws Exception
      */
     public function spentSynthesisActivityAction()
     {
@@ -2116,7 +2120,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                 try {
                     $this->getSpentService()->updateAffectation($postedAffectations);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
                 return $this->getResponseOk("Affectation des comptes terminée");
@@ -2140,7 +2144,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ),
                 'basic'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
         }
 
@@ -2209,7 +2213,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $involvedPersons[] = $p->toJson();
                 }
                 $involvedPersonsJSON = json_encode($involvedPersons);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->getLoggerService()->error($e->getMessage());
             }
         }
@@ -2282,7 +2286,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $this->getOscarUserContextService()->check(Privileges::DEPENSE_SYNC, $activity);
             try {
                 $msg = $this->getSpentService()->syncSpentsByEOTP($activity->getCodeEOTP());
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = "Impossible de mettre à jour les dépenses : " . $e->getMessage();
             }
         }
@@ -2310,7 +2314,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if ($request->isPost()) {
                 try {
                     $project = $this->getProjectService()->getProject($request->getPost('project_id'));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
 
                 if ($entity->getProject()) {
@@ -2337,7 +2341,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             return $view;
         }
         else {
-            throw new \Exception(sprintf("L'activité n'existe pas"));
+            throw new Exception(sprintf("L'activité n'existe pas"));
         }
     }
 
@@ -2618,7 +2622,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return $this->organizationsPerimeter;
     }
 
-    public function activitiesOrganizationsAction()
+    /**
+     * @return array|ViewModel
+     * @throws OscarException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function activitiesOrganizationsAction(): array|ViewModel
     {
         $this->organizationsPerimeter = $this->getOscarUserContextService()->getOrganisationsPersonPrincipal(
             $this->getOscarUserContextService()->getCurrentPerson(),
@@ -2635,14 +2645,14 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * @return array
      */
-    public function searchActivityAction()
+    public function searchActivityAction(): array|ViewModel
     {
         $search = $this->params()->fromQuery('q', "");
         $options = [];
 
         try {
             $activities = $this->getProjectGrantService()->searchActivities($search, $options);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->getResponseBadRequest($e->getMessage());
         }
 
@@ -2659,7 +2669,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * @param \Doctrine\ORM\QueryBuilder $qb
      * @return ViewModel
-     * @throws \Exception
+     * @throws Exception
      */
     public function applyAdvancedSearch($qb)
     {
@@ -2975,7 +2985,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                             )[$value2] : '';
                             $ids = $this->getActivityService()->getActivityRepository()
                                 ->getIdsForPersonWithRole($person->getId(), $value2 ? $value2 : 0);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;
@@ -2986,7 +2996,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         try {
                             $compteGeneralList = $accountsInfos->getCompteGeneralListByAccountIds($value1);
                             $ids = $this->getSpentService()->getIdsActivitiesForAccounts($compteGeneralList);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             die("SOUCIS");
                         }
                         break;
@@ -2997,7 +3007,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                         try {
                             $ids = $this->getSpentService()->getIdsActivitiesForCompteGeneral($value1);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             throw new OscarException($e->getMessage());
                         }
                         break;
@@ -3015,7 +3025,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                             $ids = $this->getActivityService()
                                 ->getActivitiesIdsWithTypeDocument($value1, $reverse);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             throw new OscarException($e->getMessage());
                         }
                         break;
@@ -3024,7 +3034,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $value1 = $crit['val1'] = explode(',', $params[1]);
                         try {
                             $ids = $this->getActivityService()->getActivitiesWithNumerotation($value1);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             throw new OscarException($e->getMessage());
                         }
                         break;
@@ -3045,7 +3055,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 $organization = $this->getOrganizationService()->getOrganization($value1);
                                 $organizations[$organization->getId()] = $organization;
                                 $crit['val1Label'] = (string)$organization;
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
                             }
                         }
 
@@ -3054,7 +3064,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                                 $organizationId,
                                 $roleId
                             );
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $crit['error'] = $e->getMessage();
                         }
 
@@ -3334,7 +3344,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             );
             $view->setTemplate('oscar/project-grant/advanced-search.phtml');
             return $view;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -3342,12 +3352,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Nouveau système de recherche des activités.
      *
-     * @return array
+     * @return array|ViewModel
+     * @throws Exception
      */
-    public function advancedSearchAction()
+    public function advancedSearchAction(): array|ViewModel
     {
         // Requêtes de base
-
         $projectview = $this->params()->fromQuery('projectview', '');
 
 
@@ -3516,7 +3526,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $where = $this->getRequest()->getQuery()->get('w');
                 try {
                     $this->getTimesheetService()->removeValidatorActivity($person_id, $activity->getId(), $where);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
             }
@@ -3528,7 +3538,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $where = $this->getRequest()->getPost()->get('where');
                 try {
                     $this->getTimesheetService()->addValidatorActivity($person_id, $activity->getId(), $where);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return $this->getResponseInternalError($e->getMessage());
                 }
             }
@@ -3569,7 +3579,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * Gestion/récapitulatif des informations PCRU
      *
-     * @return array|\Laminas\Http\Response
+     * @return array|Response
      * @throws OscarException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException

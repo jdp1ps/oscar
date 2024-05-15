@@ -82,22 +82,7 @@ $this->headScript();
                     <?php endif; ?>
                 </div>
 
-                <?php /* if( $this->isAllowed('search')): ?>
-                <form action="<?= $this->url('project_search') ?>" method="get" class="navbar-form navbar-left" role="search">
-                    <div class="input-group">
-                        <input placeholder="Rechercher dans les projets&hellip;" type="search"
-                               class="form-control"  name="q"
-                               value="<?= isset($search) ? htmlentities($search) : '' ?>"/>
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-primary">Rechercher</button>
-                        </span>
-                    </div>
-                </form>
-                <?php endif; */ ?>
-
-
                 <div class="navbar-collapse bs-navbar-collapse collapse">
-
                     <ul class="nav navbar-nav">
                     <?php if( $this->grant()->connected() ): ?>
                         <li class="dropdown">
@@ -122,8 +107,6 @@ $this->headScript();
                                     <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i class="icon-book"></i> <?= $this->translate('Signatures en cours') ?></a>
                                 </li>
 
-
-
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
                                     <li><a href="<?= $this->url('requestactivity') ?>"><i class="icon-cube"></i> <?= $this->translate("Demande d'activité") ?></a></li>
                                 <?php endif; ?>
@@ -146,6 +129,21 @@ $this->headScript();
                     <?php include __DIR__ . '/../partials/menu-project-activity.phtml' ?>
                     <?php include __DIR__ . '/../partials/menu-administration.phtml' ?>
 
+                        <?php if($this->usurpation()->isEnabled()): ?>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown" role="button"
+                               aria-expanded="false">
+                                <i class="icon-wristwatch"></i> <?= $this->translate('Usurpation') ?><span
+                                        class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <?php echo $this->usurpation()->renderAsTextfield(); ?>
+                                </li>
+                            </ul>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                     <?php if( $this->grant()->connected() ): ?>
                         <p class="navbar-text navbar-right" id="notifications-area" ></p>
@@ -155,8 +153,6 @@ $this->headScript();
                             <i class="icon-cog"></i></a> |
 
                         <?php echo $this->appConnection(); ?>
-                        <?php /*echo $this->userUsurpation(); ?>
-                        <?php echo $this->userInfo(); */?>
                     </p>
                 </div><!--/.nav-collapse -->
             </div>
