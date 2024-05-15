@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use UnicaenPrivilege\Entity\Db\PrivilegeInterface;
+use UnicaenUtilisateur\Entity\Db\AbstractRole;
 use UnicaenUtilisateur\Entity\Db\RoleInterface;
 use UnicaenUtilisateur\Entity\Db\UserInterface;
 
@@ -23,7 +24,7 @@ use UnicaenUtilisateur\Entity\Db\UserInterface;
  * @ORM\Table(name="user_role")
  * @ORM\Entity(repositoryClass="RoleRepository")
  */
-class Role implements HierarchicalRoleInterface, RoleInterface
+class Role extends AbstractRole implements HierarchicalRoleInterface
 {
     const LEVEL_ACTIVITY = 1;
     const LEVEL_ORGANIZATION = 2;
@@ -47,7 +48,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
 
 
     /**
-     * @return Collection|TabsDocumentsRoles[]
+     * @return Collection
      */
     public function getTabsDocumentsRoles(): Collection
     {
@@ -80,7 +81,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * Retourne l'instance rôle en conversion tableau clefs, valeurs
      * @return array
      */
-    public function asArray()
+    public function asArray(): array
     {
         return [
             'id' => $this->getId(),
@@ -92,7 +93,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
         ];
     }
 
-    public function toJson()
+    public function toJson(): array
     {
         return $this->asArray();
     }
@@ -101,7 +102,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * @param $level
      * @return string
      */
-    public static function getLevelLabel($level)
+    public static function getLevelLabel($level): string
     {
         return self::getLevelLabels()[$level];
     }
@@ -130,13 +131,13 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    protected ?int $id;
 
     /**
      * @var string
      * @ORM\Column(name="role_id", type="string", length=255, unique=true, nullable=false)
      */
-    protected $roleId;
+    protected ?string $roleId;
 
 
     /**
@@ -149,13 +150,13 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * @var Role
      * @ORM\ManyToOne(targetEntity="Role")
      */
-    protected $parent;
+    protected ?RoleInterface $parent;
 
     /**
      * @var string
      * @ORM\Column(name="ldap_filter", type="string", length=255, unique=true, nullable=true)
      */
-    protected $ldapFilter;
+    protected ?string $ldapFilter;
 
     /**
      * Fixe le niveau d'application (BIT).
@@ -171,7 +172,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * @var string
      * @ORM\Column(name="description", type="string", nullable=true)
      */
-    protected $description = "";
+    protected ?string $description = "";
 
     /**
      * Est un rôle principal (Généralement responsable)
@@ -181,17 +182,25 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      */
     protected $principal = false;
 
+    /**
+     * Est un rôle principal (Généralement responsable)
+     *
+     * @var boolean
+     * @ORM\Column(name="displayed", type="boolean", nullable=false, options={"default"=true})
+     */
+    protected bool $displayed = false;
+
 
     /**
      * @ORM\ManyToMany(targetEntity="Privilege", mappedBy="role", fetch="EAGER")
      */
-    protected $privileges;
+    protected Collection $privileges;
 
     /**
      * @var boolean
      * @ORM\Column(name="accessible_exterieur", type="boolean", nullable=false, options={"default" : true})
      */
-    protected $accessibleExterieur = true;
+    protected bool $accessibleExterieur = true;
 
     /**
      * @ORM\ManyToMany(targetEntity="DateType", mappedBy="roles", fetch="EAGER")
@@ -204,7 +213,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     /**
      * @return mixed
      */
-    public function getPrivileges()
+    public function getPrivileges(): Collection
     {
         return $this->privileges;
     }
@@ -232,7 +241,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      * @param $privilege
      * @throws \Exception
      */
-    public function hasPrivilege($privilege)
+    public function hasPrivilege($privilege): bool
     {
         /** @var Privilege $privilege */
         foreach ($this->getPrivileges() as $p) {
@@ -244,7 +253,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     }
 
     /**
-     * Retourne la liste des priviligèges du rôle sour la forme d'une liste de
+     * Retourne la liste des privileges du rôle sour la forme d'une liste de
      * chaîne de caractère.
      *
      * @throws \Exception
@@ -271,7 +280,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
      *
      * @param int $id
      *
-     * @return self
+     * @return void
      */
     public function setId($id) :void
     {
@@ -279,7 +288,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getDescription() :?string
     {
@@ -287,7 +296,7 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      */
     public function setDescription(?string $description) :void
     {
@@ -343,9 +352,9 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     /**
      * Set the role id.
      *
-     * @param string $roleId
+     * @param string|null $roleId
      *
-     * @return self
+     * @return void
      */
     public function setRoleId(?string $roleId) :void
     {
@@ -549,16 +558,6 @@ class Role implements HierarchicalRoleInterface, RoleInterface
         // TODO: Implement setDefault() method.
     }
 
-    public function isAuto(): bool
-    {
-        // TODO: Implement isAuto() method.
-    }
-
-    public function setAuto(bool $auto): void
-    {
-        // TODO: Implement setAuto() method.
-    }
-
     public function removeUser(UserInterface $user): void
     {
         $this->getUsers()->removeElement($user);
@@ -575,4 +574,13 @@ class Role implements HierarchicalRoleInterface, RoleInterface
     }
 
 
+    public function isDisplayed(): bool
+    {
+        return $this->displayed;
+    }
+
+    public function setDisplayed(bool $accessibleExterieur): void
+    {
+        $this->displayed = $accessibleExterieur;
+    }
 }

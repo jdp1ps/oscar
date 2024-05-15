@@ -614,20 +614,20 @@ return array(
     // Aide de vue (Helper)
     'view_helpers' => [
         'invokables' => [
-            'pager' => UnicaenDoctrinePaginatorHelper::class,
-            'dater' => DateRenderer::class,
-            'unAllowed' => \Oscar\View\Helpers\UnAllowed::class,
-            'hasAccess' => \Oscar\View\Helpers\Access::class,
-            'duration' => \Oscar\View\Helpers\Duration::class,
-            'moment' => \Oscar\View\Helpers\Moment::class,
             'activity' => \Oscar\View\Helpers\ActivityHtml::class,
-            'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,
-            'fileSize' => \Oscar\View\Helpers\Filesize::class,
-            'userUI' => \Oscar\View\Helpers\UserUIHelper::class,
-            'Currency' => \Oscar\View\Helpers\Currency::class,
+            'dater' => DateRenderer::class,
             'currency' => \Oscar\View\Helpers\Currency::class,
+            'Currency' => \Oscar\View\Helpers\Currency::class,
+            'duration' => \Oscar\View\Helpers\Duration::class,
+            'fileSize' => \Oscar\View\Helpers\Filesize::class,
+            'hasAccess' => \Oscar\View\Helpers\Access::class,
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
+            'moment' => \Oscar\View\Helpers\Moment::class,
+            'pager' => UnicaenDoctrinePaginatorHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
+            'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,
+            'unAllowed' => \Oscar\View\Helpers\UnAllowed::class,
+            'userUI' => \Oscar\View\Helpers\UserUIHelper::class,
         ],
         'factories' => [
             'activityTypeHlp' => \Oscar\View\Helpers\ActivityTypeHelperFactory::class,
@@ -636,6 +636,7 @@ return array(
             'hasRole' => \Oscar\View\Helpers\HasRoleFactory::class,
             'link' => \Oscar\View\Helpers\LinksFactory::class,
             'options' => \Oscar\View\Helpers\OptionsFactory::class,
+            'usurpation' => \Oscar\View\Factories\UsurpationHelperFactory::class,
         ],
         'abstract_factories' => [
             'HasPrivilege' => \Oscar\Factory\ViewHelperInvokatorFactory::class,

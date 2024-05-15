@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 use BjyAuthorize\Provider\Role\ProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use UnicaenUtilisateur\Entity\Db\AbstractUser;
 use UnicaenUtilisateur\Entity\Db\RoleInterface;
 use UnicaenUtilisateur\Entity\Db\UserInterface;
 
@@ -20,7 +21,7 @@ use UnicaenUtilisateur\Entity\Db\UserInterface;
  * @ORM\Table(name="authentification")
  * @ORM\Entity(repositoryClass="Oscar\Entity\AuthentificationRepository")
  */
-class Authentification implements UserInterface, ProviderInterface
+class Authentification extends AbstractUser
 {
     /**
      * @var int
@@ -177,30 +178,6 @@ class Authentification implements UserInterface, ProviderInterface
         $this->dateLogin = $dateLogin;
 
         return $this;
-    }
-
-
-
-    /**
-     * Get username.
-     *
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * Set username.
-     *
-     * @param string $username
-     *
-     * @return void
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
     }
 
     /**
