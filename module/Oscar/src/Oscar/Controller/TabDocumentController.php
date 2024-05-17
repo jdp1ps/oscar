@@ -13,6 +13,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Export\ExportException;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\Role;
 use Oscar\Entity\TabDocument;
 use Oscar\Entity\TabsDocumentsRolesRepository;
@@ -109,11 +110,13 @@ class TabDocumentController extends AbstractOscarController implements UseContra
         /** @var TabsDocumentsRolesRepository $tabDocumentRepository */
         $tabDocumentRepository = $this->getEntityManager()->getRepository(TabDocument::class);
 
+        /** @var ContractDocumentRepository $documentRepository */
+        $documentRepository = $this->getEntityManager()->getRepository(ContractDocument::class);
+
         /** @var TabDocument $tabDocument */
         $tabDocument = $tabDocumentRepository->find($id);
 
-        /** @var ContractDocument[] $documents */
-        $documents = $tabDocumentRepository->getDocumentsForTabId($tabDocument->getId());
+        $documents = $documentRepository->getDocumentsForTabId($tabDocument->getId());
 
         try {
             // Supprime les relations entre le tabDocument et les TabsDocumentsRoles

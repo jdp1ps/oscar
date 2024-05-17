@@ -81,7 +81,7 @@ abstract class ElasticSearchEngine
 
             $params['body'][] = $this->getIndexableDatas($item);
 
-            // On envoi par paquet de 1000
+            // On envoie par paquet de 1000
             if ($i % 1000 == 0) {
                 $responses = $this->getClient()->bulk($params);
 

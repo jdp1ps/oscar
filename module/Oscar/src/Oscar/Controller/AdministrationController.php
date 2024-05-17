@@ -755,12 +755,24 @@ class AdministrationController extends AbstractOscarController implements UsePro
     }
 
 
-    public function activityIndexBuildAction()
+    /**
+     * Reconstruction de l'index de recherche.
+     *
+     * @return array
+     * @throws OscarException
+     */
+    public function activityIndexBuildAction(): array
     {
-        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
-        return [
-            'repport' => $this->getProjectGrantService()->searchIndex_rebuild()
-        ];
+        try {
+            $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SEARCH_BUILD);
+            return [
+
+            ];
+        } catch (\Exception $e){
+            $this->getLoggerService()->critical($e->getMessage());
+            throw new OscarException("Erreur lors de la construction de l'index de recherche");
+        }
+
     }
 
     public function organizationTypeAction()

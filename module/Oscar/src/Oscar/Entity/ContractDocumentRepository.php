@@ -7,13 +7,12 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\QueryBuilder;
-use GuzzleHttp\Exception\TooManyRedirectsException;
 use Oscar\Exception\OscarException;
 use UnicaenSignature\Entity\Db\SignatureFlow;
-use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
 class ContractDocumentRepository extends AbstractTreeDataRepository
 {
@@ -43,6 +42,22 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     public function getDefaultTabDocument(): ?TabDocument
     {
         return $this->getEntityManager()->getRepository(TabDocument::class)->findOneBy(['default' => true]);
+    }
+
+    /**
+     * @param int $tabDocumentId
+     * @return ContractDocument[]
+     */
+    public function getDocumentsForTabId(int $tabDocumentId ) :array
+    {
+        $query = $this->createQueryBuilder('c')
+            ->where('c.tabDocument = :tabDocument')
+            ->setParameters(
+                [
+                    'tabDocument' => $tabDocumentId
+                ]
+            );
+        return $query->getQuery()->getResult();
     }
 
 
@@ -175,6 +190,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     /**
      * Retourne la liste des types de documents sous la forme ID => Label
      *
+     * @param bool $countDocUntab
      * @return array
      */
     public function getTypesSelectable(bool $countDocUntab = false): array
@@ -224,8 +240,6 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      *
      * @param int $fromTypeDocumentId
      * @param int $toTabDocumentId
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function migrateUntabledDocument(int $fromTypeDocumentId, int $toTabDocumentId): void
     {
@@ -255,6 +269,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     /**
      * @param int $processId
      * @return ContractDocument
+     * @throws NoResultException|NonUniqueResultException
      */
     public function getDocumentByProcessId(int $processId) :ContractDocument
     {
@@ -275,6 +290,10 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->findOneBy(['id' => $typeDocumentId]);
     }
 
+    /**
+     * @param TypeDocument $typeDocument
+     * @return void
+     */
     public function migrateUntypedDocuments(TypeDocument $typeDocument): void
     {
         $qb = $this->createQueryBuilder('d')
@@ -290,7 +309,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      * @param int $id
      * @param bool $throw
      * @return ContractDocument|null
-     * @throws OscarException
+     * @throws OscarException|NonUniqueResultException
      */
     public function getDocument(int $id, bool $throw = false): ?ContractDocument
     {
@@ -300,7 +319,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
 
         try {
             return $query->getQuery()->getSingleResult();
-        } catch (NoResultException|TooManyRedirectsException $e) {
+        } catch (NoResultException) {
             if ($throw) {
                 throw new OscarException(sprintf("Le document '%s' n'existe pas", $id));
             }
@@ -309,7 +328,23 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     }
 
     /**
-     * @return \Doctrine\ORM\QueryBuilder
+     * Retourne les documents du projet.
+     *
+     * @param int $projectId
+     * @return array
+     */
+    public function getProjectDocuments(int $projectId) :array {
+        $query = $this->baseQuery();
+        $query->orderBy('d.dateUpdoad', 'DESC')
+            ->setParameters(['id' => $projectId])
+            ->getQuery()->getResult();
+        return $query->getQuery()->getResult();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return QueryBuilder
      */
     protected function baseQuery(): QueryBuilder
     {
