@@ -11,11 +11,17 @@ namespace Oscar\Service;
 
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use UnicaenSignature\Service\SignatureService;
 
 class ProjectGrantServiceFactory extends AbstractOscarFactory
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): ProjectGrantService
     {
         $s = new ProjectGrantService();
         $this->init($s, $container);
