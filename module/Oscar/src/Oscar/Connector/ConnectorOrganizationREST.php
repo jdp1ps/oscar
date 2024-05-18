@@ -113,7 +113,7 @@ class ConnectorOrganizationREST extends AbstractConnector
         $this->getLogger()->info("Synchronisation des structures");
         $repport = new ConnectorRepport();
 
-        $url = $this->getParameter('url_organizations', '');
+        $url = $this->getParameter('url_organizations', 'no-url');
         $repport->addnotice("URL : $url");
 
         try {
