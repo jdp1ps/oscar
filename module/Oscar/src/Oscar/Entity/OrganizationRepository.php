@@ -123,30 +123,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
 
 
-    public function saveOrganizationPerson(
-        OrganizationPerson $organizationPerson,Person $person, Organization $organisation, $roleOscarId) {
-        $organizationPerson->setPerson($person)
+    public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId) {
+        $personOrganization = new OrganizationPerson();
+        $this->getEntityManager()->persist($personOrganization);
+        $personOrganization->setPerson($person)
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
-        $this->getEntityManager()->persist($organizationPerson);
-        $this->getEntityManager()->flush($organizationPerson);
-    }
-
-    public function removeOrganizationPerson(OrganizationPerson $organizationPerson,Person $person, $roleOscarId) {
-        $organizationPerson->setPerson($person)
-            ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
-        $this->getEntityManager()->remove($organizationPerson);
-        $this->getEntityManager()->persist($organizationPerson);
-        $this->getEntityManager()->flush($organizationPerson);
-    }
-
-    public function getOrganizationPerson(Person $person) {
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb->select('o')
-            ->from(OrganizationPerson::class, 'o')
-            ->where('o.person = :person')
-            ->setParameter('person', $person);
-        return $qb->getQuery()->getResult();
+        $this->getEntityManager()->flush($personOrganization);
     }
 
     public function getTypeObjByLabel($label){
@@ -189,11 +172,9 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
     public function getObjectByConnectorID($connectorName, $connectorID)
     {
-        $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
+        return $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
-
-        return is_array($result) ? $result[0] : $result;
     }
 
     public function getOrganisationByCode( $code ){
@@ -203,24 +184,6 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             ->where('o.code = :code')
             ->setParameter('code', $code);
         return $qb->getQuery()->getSingleResult();
-    }
-
-    public function getOrganisationByCodeNullResult( $code ){
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb->select('o')
-            ->from(Organization::class, 'o')
-            ->where('o.code = :code')
-            ->setParameter('code', $code);
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-    public function getOrganisationPersonByPersonNullResult( $person ){
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb->select('o')
-            ->from(OrganizationPerson::class, 'o')
-            ->where('o.person = :person')
-            ->setParameter('person', $person);
-        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function newPersistantObject()
@@ -241,11 +204,12 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @return \Doctrine\ORM\QueryBuilder
      */
     public function getOrganizationByConnectorQuery( $connector, $value ){
+
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%s:'.strlen($value).':"'.$value.'";%');
+            ->setParameter('search', '%"'.$connector.'";s:'.strlen($value).':"'.$value.'";%');
         return $qb;
     }
 
