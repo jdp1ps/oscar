@@ -56,18 +56,14 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
      */
     public function hydrateWithDatas($object, $ldapData, $connectorName = null)
     {
+        $code = $this->getFieldValue($ldapData, 'supanncodeentite');
         if ($connectorName !== null) {
             $object->setConnectorID(
                 $connectorName,
-                $this->getFieldValue($ldapData, 'supanncodeentite')
+                $code
             );
         }
         $shortName = $this->getFieldValue($ldapData, 'ou');
-        if (preg_match('/^([A-Z]+\s*\d*)\s*-?\s*/', $shortName, $matches)) {
-            $code = $matches[1];
-        } else {
-            throw new \Exception("Invalid short name: $shortName");
-        }
         if (property_exists($ldapData, 'modifytimestamp')) {
             $rawdateupdated = $this->getFieldValue($ldapData, 'modifytimestamp', null);
             $dateupdated = \DateTime::createFromFormat(
@@ -79,30 +75,37 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
             $dateupdated = new \DateTime();
         }
 
+        $uri = $this->getFieldValue($ldapData, 'eduOrgHomePageURI');
+        if (null === $uri) {
+            $uri = $this->getFieldValue($ldapData, 'labeleduri');
+        }
+        $fullName = $this->getFieldValue($ldapData, 'eduOrgLegalName');
+        if (null === $fullName) {
+            $fullName = $this->getFieldValue($ldapData, 'description');
+        }
+        $description = $this->getFieldValue($ldapData, 'info');
+        if (null === $description) {
+            $description = $this->getFieldValue($ldapData, 'description');
+        }
         $object
             ->setDateUpdated($dateupdated)
             ->setShortName($shortName)
             ->setCode($code)
-            ->setFullName($this->getFieldValue($ldapData, 'description'))
+            ->setFullName($fullName)
             ->setPhone($this->getFieldValue($ldapData, 'telephonenumber'))
-            ->setDescription($this->getFieldValue($ldapData, 'description'))
-            //TODO org email ?
-            ->setEmail($this->getFieldValue($ldapData, 'email'))
-            ->setUrl($this->getFieldValue($ldapData, 'labeleduri'))
-            //TODO org Siret ?
-            ->setSiret($this->getFieldValue($ldapData, 'siret'))
+            ->setDescription($description)
+            ->setEmail($this->getFieldValue($ldapData, 'mail'))
+            ->setUrl($uri)
             ->setDuns($this->getFieldValue($ldapData, 'duns'))
             ->setTvaintra($this->getFieldValue($ldapData, 'tvaintra'));
         $ldapType = $this->getFieldValue($ldapData, 'supanntypeentite');
         $this->assignOrgTypes($ldapType, $object);
-        // if there is now type, throw an exception
         if (null === $object->getType()) {
             throw new \Exception("Invalid type: $ldapType");
         }
 
         $this->extractIdentifiers($ldapData, $object);
 
-        // adresse example : Centre Meudon$1 PLACE ARISTIDE BRIAND$92190 MEUDON$FRANCE
         $address = $this->getFieldValue($ldapData, 'postaladdress');
         $addressFields = explode('$', $address);
         if (count($addressFields) == 3) {
@@ -111,7 +114,6 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         }
         if (count($addressFields) == 4) {
             $zipCity = explode(' ', $addressFields[2], 2);
-            //check that zip code is a number
             if (is_numeric($zipCity[0])) {
                 $object
                     ->setStreet1($addressFields[0])
@@ -125,7 +127,6 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         } else {
             throw new \Exception("Invalid address: $addressFields");
         }
-
         return $object;
     }
 
@@ -150,7 +151,7 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
      * @param Organization $object
      * @throws \Oscar\Exception\OscarException
      */
-    private function extractIdentifiers(stdClass $ldapData, Organization $object)
+    private function extractIdentifiers(\stdClass $ldapData, Organization $object)
     {
         $supannRefid = $this->getFieldValue($ldapData, 'supannrefid', []);
         if (!is_array($supannRefid)) {
@@ -161,6 +162,8 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
                 $object->setRnsr($matches[1]);
             } elseif (preg_match('/^{CNRS}(.*)$/', $refid, $matches)) {
                 $object->setLabintel($matches[1]);
+            } elseif (preg_match('/^{SIRET}(.*)$/', $refid, $matches)) {
+                $object->setSiret($matches[1]);
             }
         }
     }

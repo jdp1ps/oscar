@@ -7,7 +7,6 @@
 namespace Oscar\Connector\Access;
 
 use Oscar\Connector\IConnector;
-use Oscar\Mapper\Ldap\OrganizationLdap;
 use UnicaenApp\Mapper\Ldap\AbstractMapper;
 use UnicaenApp\Options\ModuleOptions;
 use Zend\Ldap\Ldap;
@@ -15,10 +14,10 @@ use Zend\Ldap\Ldap;
 /**
  * Accès aux données via le client LDAP
  *
- * Class ConnectorAccessCurlHttp
+ * Class AbstractLdapAccessConnector
  * @package Oscar\Connector\Access
  */
-class ConnectorAccessLdap implements IConnectorAccess
+abstract class AbstractLdapAccessConnector implements IConnectorAccess
 {
 
     /** @var IConnector */
@@ -56,7 +55,17 @@ class ConnectorAccessLdap implements IConnectorAccess
     {
         $mapper = $this->getLdapMapper();
         $data = $mapper->findByCode($remoteId);
-        return $this->castToObjects($data);
+        if (count($data) > 1) {
+            throw new \Exception(
+                "L'annuaire LDAP a retourné plusieurs entités pour l'identifiant " . $remoteId
+            );
+        }
+        if (empty($data)) {
+            throw new \Exception(
+                "L'annuaire LDAP n'a pas retourné d'entité pour l'identifiant " . $remoteId
+            );
+        }
+        return $this->ensureUid($this->convertDates($this->castToObjects($data)))[0];
     }
 
     public function getDataAll($params = null)
@@ -65,7 +74,7 @@ class ConnectorAccessLdap implements IConnectorAccess
         foreach ($this->connector->getFilters() as $filter) {
             $data = array_merge($data, $this->getDatas($filter));
         }
-        return $this->castToObjects($data);
+        return $this->ensureUid($this->convertDates($this->castToObjects($data)));
     }
 
     public function setOptions($options)
@@ -81,7 +90,7 @@ class ConnectorAccessLdap implements IConnectorAccess
 
     private function getLdapMapper(): AbstractMapper
     {
-        $ldapConnectorClass = OrganizationLdap::class;
+        $ldapConnectorClass = $this->getMapperClass();
         $configLdap = $this->options->getLdap();
         $ldap = $configLdap['connection']['default']['params'];
         $ldapConnector = new $ldapConnectorClass;
@@ -100,4 +109,54 @@ class ConnectorAccessLdap implements IConnectorAccess
             return (object)$entry;
         }, $data);
     }
+
+    /**
+     * @param array $data
+     * @return object[]
+     */
+    public function convertDates(array $data): array
+    {
+        return array_map(function ($entry) {
+            $entry->dateupdated = $this->convertTimeStamp($entry->modifytimestamp);
+            return $entry;
+        }, $data);
+    }
+
+    /**
+     * @param array $data
+     * @return object[]
+     */
+    public function ensureUid(array $data): array
+    {
+        return array_map(function ($entry) {
+            if(!property_exists($entry, 'uid')) {
+                $entry->uid = $entry->supanncodeentite;
+            }
+            return $entry;
+        }, $data);
+    }
+
+    /**
+     * Convertit un timestamp LDAP en objet DateTime
+     *
+     * @param string|null $timestamp
+     * @return \DateTime
+     */
+    public function convertTimeStamp(string $timestamp = null): \DateTime
+    {
+        $date = \DateTime::createFromFormat('YmdHis',
+            substr($timestamp, 0, 14),
+            new \DateTimeZone('UTC')
+        );
+
+        if (!isset($date) || !$date instanceof \DateTime) {
+            $date = new \DateTime();
+        }
+        return $date;
+    }
+
+    /**
+     * @return string
+     */
+    abstract protected function getMapperClass(): string;
 }

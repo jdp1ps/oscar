@@ -113,7 +113,7 @@ class ConnectorOrganizationREST extends AbstractConnector
         $this->getLogger()->info("Synchronisation des structures");
         $repport = new ConnectorRepport();
 
-        $url = $this->getParameter('url_organizations');
+        $url = $this->getParameter('url_organizations', '');
         $repport->addnotice("URL : $url");
 
         try {
@@ -139,7 +139,7 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
 
                 try {
-                    /** @var Person $personOscar */
+                    /** @var Organization $organization */
                     $organization = $repository->getObjectByConnectorID($this->getName(), $organisationId);
                     $action = "update";
                 } catch( NoResultException $e ){
@@ -158,6 +158,9 @@ class ConnectorOrganizationREST extends AbstractConnector
                     $dateupdated = date('Y-m-d H:i:s');
                 } else {
                     $dateupdated = $data->dateupdated;
+                    if($dateupdated instanceof \DateTime){
+                        $dateupdated = $dateupdated->format('Y-m-d H:i:s');
+                    }
                 }
 
                 if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
