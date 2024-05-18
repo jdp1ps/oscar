@@ -84,7 +84,7 @@ class ConnectorOrganizationREST extends AbstractConnector
     {
         $repport = new ConnectorRepport();
 
-        $url = $this->getParameter('url_organizations', '');
+        $url = $this->getParameter('url_organizations', 'no-url');
         $repport->addnotice("URL : $url");
 
         /////////////////////////////////////
