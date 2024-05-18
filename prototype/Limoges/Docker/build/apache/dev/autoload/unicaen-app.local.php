@@ -46,6 +46,7 @@ $settings = array(
             'FILTER_STRUCTURE_DN'		            => '(%s)',
             'FILTER_STRUCTURE_CODE_ENTITE'	        => '(supannCodeEntite=%s)',
             'FILTER_STRUCTURE_CODE_ENTITE_PARENT'   => '(supannCodeEntiteParent=%s)',
+            'FILTER_PERSON_AFFILIATION'             => '(&(objectClass=inetOrgPerson)(eduPersonAffiliation=member)(%s))',
         ],
         /****/
     ),

@@ -3,26 +3,41 @@
  * @author Joachim Dornbusch<joachim.dornbusch@univ-paris1.fr>
  * @date: 2024-05-17
  */
+
 namespace Oscar\Mapper\Ldap;
 
 use UnicaenApp\Mapper\Ldap\AbstractMapper;
 
 /**
- * Classe regroupant les opérations de recherche de structure dans l'annuaire LDAP.
+ * Classe regroupant les opérations de recherche de structures dans l'annuaire LDAP pour l'import
  *
- * @author Unicaen
  */
 class OrganizationLdap extends AbstractMapper
 {
     /**
-     * Retourne la liste des attributs LDAP remontés dans les résultats de recherches.
+     * Retourne la liste des attributs LDAP demandés au LDAP pour les personnes
      * NB: l'attribut 'dn' est forcément inclus.
      *
      * @return array e.g. array("mail", "sn", "cn")
      */
     public function getAttributes()
     {
-        return ['*'];
+        return [
+            'businesscategory',
+            'description',
+            'labeleduri',
+            'modifytimestamp',
+            'ou',
+            'info',
+            'mail',
+            'postaladdress',
+            'supanncodeentite',
+            'supannrefid',
+            'supanntypeentite',
+            'telephonenumber',
+            'eduOrgHomePageURI',
+            'eduOrgLegalName'
+        ];
     }
 
     /**
