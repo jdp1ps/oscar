@@ -1,0 +1,25 @@
+#filtre LDAP pour les structures
+ldap_filter:
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research)'
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=administration)'
+
+association_id: 'Association'
+association_array: ''
+collectivite_id: 'Collectivité territoriale'
+collectivite_array: ''
+composante_id: 'Composante'
+composante_array: '{SUPANN}S311,{SUPANN}S252,{SUPANN}S205,{SUPANN}S204,{SUPANN}S201,{SUPANN}S200'
+etablissement_id: 'Établissement publique'
+etablissement_array: '{SUPANN}S108,{SUPANN}S107,{SUPANN}S106,{SUPANN}S105,{SUPANN}S104,{SUPANN}S103,{SUPANN}S102,{SUPANN}S101'
+groupement_id: "Groupement d'intérêt économique"
+groupement_array: ''
+unknown_id: 'Inconnue'
+unknown_array: ''
+institution_id: 'Institution'
+institution_array: ''
+laboratoire_id: 'Laboratoire'
+laboratoire_array: '{SUPANN}S312,{SUPANN}S310,{SUPANN}S203'
+plateau_id: 'Plateau technique'
+plateau_array: '{SUPANN}S340'
+societe_id: 'Société'
+societe_array: ''

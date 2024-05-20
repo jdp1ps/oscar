@@ -1,78 +1,41 @@
 <section class="card connector <?= $config['type'] ?>">
-    <form action="" method="post">
-        <input type="hidden" type="<?= $config['type'] ?>">
-        <h2 class="card-title"><?= $config['label'] ?></h2>
-        <div class="card-content">
-            <h3>Informations</h3>
-            <p class="text-highlight">
-                Type : <strong><?= $config['type'] ?></strong><br>
-                Classe : <strong><?= $config['class'] ?></strong>
-            </p>
-            <?php if( $config['warnings'] ): ?>
-                <?php foreach( $config['warnings'] as $warning ): ?>
-                    <div class="alert alert-danger">
-                        <?= $warning ?>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-            <h3>Paramètres</h3>
-            <p>Fichier : <strong><?= $config['file'] ?></strong></p>
-            <pre>
-
-            </pre>
-            <?php foreach( $config['params'] as $param => $data ): ?>
-                <h4><i class="icon-cog"></i><?= $param ?></h4>
-                <p class="help"><?= $data['description'] ?></p>
-                <?php if( $data['type'] == 'text' ): ?>
-                <input type="text" value="<?= $data['value'] ?>" name="<?= $config['type'] ?>[<?= $param ?>]"/>
-                <?php elseif( $data['type'] == 'keykey' ): ?>
-                    <?php $id = uniqid('val_') ?>
-
-                    <section class="config-keykey" id="<?= $id ?>">
-                        <div v-for="value,key in keykey">
-                            {{ key }} = <input :name="'<?= $config['type'] ?>[<?= $param ?>]['+key+']'"
-                                               v-model="value" @input="handlerInput(key, $event)"/>
-                            <a href="#" @click.prevent="handlerRemoveKey(key)">Supprimer</a>
-                        </div>
-                    <button @click="handlerAddKey" type="button">Ajouter une correspondance</button>
-                    </section>
-                <script>
-                    require(['vue', 'bootbox'], function(Vue, Bootbox){
-                        new Vue({
-                            el: "#<?= $id ?>",
-                            data: {
-                                keykey: <?= $data['value'] ? json_encode($data['value']) : '{}' ?>
-                            },
-                            methods: {
-                                handlerInput: function(key, e){
-                                    this.keykey[key] = e.target.value;
-//                                  console.log(key, e.target.value);
-                                },
-                                handlerRemoveKey: function( key ){
-                                    var newKeyKey = {};
-                                    for (var property in this.keykey) {
-                                        if (property != key && this.keykey.hasOwnProperty(property)) {
-                                            newKeyKey[property] = this.keykey[property];
-                                        }
-                                    }
-                                    this.keykey = newKeyKey;
-                                },
-                                handlerAddKey: function(){
-                                    Bootbox.prompt("Entrez la clef", function(key){
-                                        if( key ){
-                                            this.$set(this.keykey, key, "");
-                                        }
-                                    }.bind(this));
-                                }
-                            }
-                        });
-                    })
-                </script>
-                <?php endif; ?>
+    <form action="" method="post" id="organization_ldap">
+        <input type="hidden" name="organization_ldap">
+        <h2 class="card-title">Configuration du Ldap Organization</h2>
+        <class="card-content">
+        <h3>Informations</h3>
+        <p class="text-highlight">
+            Association : <strong><?= $config['association_array'] ?></strong><br>
+            Collectivité territoriale : <strong><?= $config['collectivite_array'] ?></strong><br>
+            Composante : <strong><?= $config['composante_array'] ?></strong><br>
+            Etablissement publique : <strong><?= $config['etablissement_array'] ?></strong><br>
+            Groupement d'intérêt économique : <strong><?= $config['groupement_array'] ?></strong><br>
+            Institution : <strong><?= $config['institution_array'] ?></strong><br>
+            Laboratoire : <strong><?= $config['laboratoire_array'] ?></strong><br>
+            Plateau technique : <strong><?= $config['plateau_array'] ?></strong><br>
+            Société : <strong><?= $config['societe_array'] ?></strong><br>
+        </p>
+        <?php if( $config['warnings'] ): ?>
+            <?php foreach( $config['warnings'] as $warning ): ?>
+                <div class="alert alert-danger">
+                    <?= $warning ?>
+                </div>
             <?php endforeach; ?>
-            <nav>
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
-            </nav>
+        <?php endif; ?>
+
+        <h3>Paramètres</h3>
+
+        Filtrage :
+        <textarea name="ldap_filter" rows="10" cols="80"><?php
+                foreach($config['ldap_filter'] as $value){
+                    echo $value;
+                }
+
+            ?></textarea>
+
+        <!--<nav>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </nav>-->
         </div>
     </form>
 </section>
