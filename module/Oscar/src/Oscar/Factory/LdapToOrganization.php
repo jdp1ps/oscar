@@ -33,21 +33,9 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         }
         return null;
     }
-
-    /**
-     * @param $jsonData stdClass objet contenant les données
-     * @param $connectorName
-     * @return Organization
-     */
     public function getInstance($jsonData, $connectorName = null)
     {
-        $organization = new Organization();
-
-        return $this->hydrateWithDatas(
-            $organization,
-            $jsonData,
-            $connectorName
-        );
+        // just to fullfill the interface
     }
 
     /**
@@ -95,9 +83,7 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
             ->setPhone($this->getFieldValue($ldapData, 'telephonenumber'))
             ->setDescription($description)
             ->setEmail($this->getFieldValue($ldapData, 'mail'))
-            ->setUrl($uri)
-            ->setDuns($this->getFieldValue($ldapData, 'duns'))
-            ->setTvaintra($this->getFieldValue($ldapData, 'tvaintra'));
+            ->setUrl($uri);
         $ldapType = $this->getFieldValue($ldapData, 'supanntypeentite');
         $this->assignOrgTypes($ldapType, $object);
         if (null === $object->getType()) {
