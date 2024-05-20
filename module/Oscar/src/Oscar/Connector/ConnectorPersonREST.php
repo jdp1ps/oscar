@@ -9,11 +9,8 @@ namespace Oscar\Connector;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
-use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
-use Oscar\Exception\ConnectorException;
 
 class ConnectorPersonREST extends AbstractConnector
 {
@@ -31,7 +28,7 @@ class ConnectorPersonREST extends AbstractConnector
     private $options;
 
     /** @var  ConnectorPersonHydrator */
-    private $personHydrator = null;
+    protected $personHydrator = null;
 
     public function setEditable($editable){
         $this->editable = $editable;
@@ -56,11 +53,16 @@ class ConnectorPersonREST extends AbstractConnector
         // TODO: Implement getPersonData() method.
     }
 
-    public function execute( $force = false)
+    public function execute($force = false)
     {
         $personRepository = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
 
         return $this->syncPersons($personRepository, $force);
+    }
+
+    protected function getHydratorClass()
+    {
+        return ConnectorPersonHydrator::class;
     }
 
     /**
@@ -68,10 +70,12 @@ class ConnectorPersonREST extends AbstractConnector
      */
     public function getPersonHydrator()
     {
-        if( $this->personHydrator === null ){
-            $this->personHydrator = new ConnectorPersonHydrator(
+        $connectorClass = $this->getHydratorClass();
+        if ($this->personHydrator === null) {
+            $this->personHydrator = new $connectorClass(
                 $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
             );
+            $this->customizeHydrator($this->personHydrator);
             $this->personHydrator->setPurge($this->getOptionPurge());
         }
         return $this->personHydrator;

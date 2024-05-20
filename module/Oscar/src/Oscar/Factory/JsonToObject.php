@@ -30,8 +30,8 @@ abstract class JsonToObject
     }
 
     /**
-     * @param $object L'objet contenant les données
-     * @param $fieldName Le nom de la propriété
+     * @param $object \stdClass L'objet contenant les données
+     * @param $fieldName string Le nom de la propriété
      * @param null $defaultValue La valeur par défaut
      * @return La valeur trouvée
      * @throws OscarException

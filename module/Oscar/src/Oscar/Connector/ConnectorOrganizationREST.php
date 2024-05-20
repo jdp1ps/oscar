@@ -1,10 +1,9 @@
 <?php
+
 namespace Oscar\Connector;
 
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\Access\ConnectorAccessCurlHttp;
-use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
-use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
+use Oscar\Connector\Access\IConnectorAccess;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
@@ -55,7 +54,7 @@ class ConnectorOrganizationREST extends AbstractConnector
     }
 
 
-    public function execute( $force = false)
+    public function execute($force = false)
     {
         $personRepository = $this->getRepository();
 
@@ -85,7 +84,7 @@ class ConnectorOrganizationREST extends AbstractConnector
     {
         $repport = new ConnectorRepport();
 
-        $url = $this->getParameter('url_organizations');
+        $url = $this->getParameter('url_organizations', 'no-url');
         $repport->addnotice("URL : $url");
 
         /////////////////////////////////////
@@ -107,7 +106,7 @@ class ConnectorOrganizationREST extends AbstractConnector
 
             foreach( $jsonDatas as $data ){
                 try {
-                    /** @var Person $personOscar */
+                    /** @var Organization $organization */
                     $organization = $repository->getObjectByConnectorID($this->getName(), $data->uid);
                     $action = "update";
                 } catch( NoResultException $e ){
@@ -118,25 +117,31 @@ class ConnectorOrganizationREST extends AbstractConnector
                     $dateupdated = date('Y-m-d H:i:s');
                 } else {
                     $dateupdated = $data->dateupdated;
-                }
-                if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
-
-                    $organization = $this->hydrateWithDatas($organization, $data);
-                    if( property_exists($data, 'type') )
-                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
-
-                    $repository->flush($organization);
-                    if( $action == 'add' ){
-                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
-                    } else {
-                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                    if($dateupdated instanceof \DateTime){
+                        $dateupdated = $dateupdated->format('Y-m-d H:i:s');
                     }
+                }
+                if ($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true) {
+                    try {
+                        $organization = $this->hydrateWithDatas($organization, $data);
+                        if( property_exists($data, 'type') )
+                            $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
+                        $repository->flush($organization);
+                        if ($action == 'add') {
+                            $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                        } else {
+                            $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                        }
+                    } catch (\Exception $e) {
+                        $repport->adderror(sprintf("Erreur lors de la synchronisation de %s : %s",
+                            $organization->log(), $e->getMessage()));
+                    }
                 } else {
                     $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
                 }
             }
-        } catch (\Exception $e ){
+        } catch (\Exception $e) {
             $repport->adderror($e->getMessage());
             throw $e;
         }
@@ -146,7 +151,8 @@ class ConnectorOrganizationREST extends AbstractConnector
         return $repport;
     }
 
-    private function hydrateWithDatas( Organization $organization, $data ){
+    private function hydrateWithDatas(Organization $organization, $data)
+    {
         return $this->factory()->hydrateWithDatas($organization, $data, $this->getName());
     }
 
@@ -156,10 +162,10 @@ class ConnectorOrganizationREST extends AbstractConnector
             $organizationIdRemote = $organization->getConnectorID($this->getName());
             try {
                 $organizationData = $this->getAccessStrategy()->getDataSingle($organizationIdRemote);
-                if( property_exists($organizationData, 'person') ){
+                if (property_exists($organizationData, 'person')) {
                     $organizationData = $organizationData->person;
                 }
-                if( property_exists($organizationData, 'organization') ){
+                if (property_exists($organizationData, 'organization')) {
                     $organizationData = $organizationData->organization;
                 }
                 return $this->hydrateWithDatas($organization, $organizationData);
