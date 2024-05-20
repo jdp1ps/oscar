@@ -9,7 +9,9 @@ Il propose des utilitaires en ligne de commande pour **importer des données** d
 
 Les connectors permettent de *brancher* Oscar sur des sources de données et d'automatiser la maintenance de ces données.
 
-Les connectors dans la version 2.0 d'Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé. Pour importer des données directement depuis une base de données Oracle sans passer par un service REST, voir [connectors-db.md](connectors-db.md).
+### Via une API web
+
+Les connectors dans la version 2.0 d'Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
 
 Oscar possède la possibilité de se connecter via une connexion ssl en relation avec un certificat .p12 avec mdp, il faudra cependant le préparer en le scindant en deux fichiers (certificat et clef)
 
@@ -17,10 +19,17 @@ Une note pour scinder ce type de certificat sous environnement linux via openssl
 
 Il est possible de développer ces propres services si les informations sont réparties de façon plus spécifique dans le SI.
 
+### Directement depuis l'annuaire LDAP
+
+Les connectors sont également en capacités de collecter directement les données depuis un annuaire LDAP. Ils utilisent pour cela la même configuration que celle qui est utilisées en phase d'authentification.
+
+Les connecteurs sont configurés par défaut pour un établissement dont l'annuaire LDAP implémente la norme LDAP Supann. Mais des fichiers YAML de configuration permettent de supporter des implémentations un peu divergentes.
 
 ## Configuration
 
 Les connecteurs (*persons* ou *organizations*) sont déclarés dans le fichier de configuration `config/autoload/local.php` : 
+
+### Exemple pour l'API web
 
 ```php
 <?php
@@ -32,7 +41,7 @@ return array(
             'organization' => [
                 'rest' => [
                     'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
-                    'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+                    'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
                     'editable'  => false
                 ]
             ],
@@ -41,7 +50,7 @@ return array(
             'person' => [
                  'rest' => [
                     'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-                    'params'    => APP_DIR . '/config/connectors/organization_rest.yml',
+                    'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
                     'editable'  => false
                 ]
             ]
@@ -49,6 +58,37 @@ return array(
     ]
 );
 ```
+
+### Exemple pour l'annuaire LDAP
+
+```php
+<?php
+// /config/autoload/local.php
+return array(
+    'oscar' => [
+        'connectors' => [
+            // Connection au tiers d'où seront obtenu les structures
+            'organization' => [
+                'ldap' => [
+                    'class' => \Oscar\Connector\ConnectorOrganizationLDAP::class,
+                    'params' => realpath(__DIR__) . '/../connectors/organization_ldap.yml',
+                    'editable' => false
+                ]
+            ],
+            'person' => [
+                'ldap' => [
+                    'class' => \Oscar\Connector\ConnectorPersonLDAP::class,
+                    'params' => realpath(__DIR__) . '/../connectors/person_ldap.yml',
+                    'editable' => false
+                ]
+            ]
+        ],
+    ]
+);
+```
+
+### Exemple sans connecteur
+
 Si votre copie de Oscar n'utilise pas les connectors pour synchroniser des données, vous devez renseigner les différents connectors avec des tableaux vides : 
 
 ```php
@@ -74,7 +114,8 @@ Les connecteurs sont configurés dans des fichier *YAML* qui vont permettre de c
  - HTTP Basic Auth HTTP
  - HTTP certificat SSL
  - HTTP Token
-
+ - Commande locale
+ - LDAP
 
 #### HTTP basic
 
@@ -191,6 +232,54 @@ access_strategy: Oscar\Connector\Access\ConnectorLocalCommand
 
 > Plus d'information sur Oscar bridge : https://git.unicaen.fr/certic/oscar-bridge
 
+#### LDAP
+
+Si votre instance d'Oscar est configurée pour se connecter directement à un annuaire LDAP, vous devez renseigner les paramètres LDAP dans les fichiers de configuration `person_ldap.yml` et `organization_ldap.yml` :
+
+```yml
+#config/connectors/person_ldap.yml
+access_strategy: 'Oscar\Connector\Access\PersonConnectorAccessLdap'
+person_ldap_filters:
+  # catégories de personnes à récupérer
+  - 'eduPersonAffiliation=researcher'
+  - 'eduPersonAffiliation=emeritus'
+  - 'supannCodePopulation={SUPANN}AGA*'
+  - 'eduPersonAffiliation=staff'
+mapping_role_person :
+  # mapping entre les roles définis dans Oscar et les codes LDAP
+  - "{SUPANN}S312" : "Directeur de laboratoire"
+```
+
+```yml
+#config/connectors/organization_ldap.yml
+#filtre LDAP pour les structures
+access_strategy: 'Oscar\Connector\Access\OrganizationConnectorAccessLdap'
+organisation_ldap_filters:
+  # catégories d'organisations à récupérer
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research)'
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=administration)'
+organisation_types:
+  # mapping entre les types d'organisations définis dans Oscar et les codes LDAP
+  - name: 'Association'
+    codes: [ ]
+  - name: 'Collectivité territoriale'
+    codes: [ ]
+  - name: 'Composante'
+    codes: [ '{SUPANN}S311','{SUPANN}S252','{SUPANN}S205','{SUPANN}S204','{SUPANN}S201','{SUPANN}S200' ]
+  - name: 'Établissement publique'
+    codes: [ '{SUPANN}S108','{SUPANN}S107','{SUPANN}S106','{SUPANN}S105','{SUPANN}S104','{SUPANN}S103','{SUPANN}S102','{SUPANN}S101' ]
+  - name: "Groupement d'intérêt économique"
+    codes: [ ]
+  - name: 'Inconnue'
+    codes: [ ]
+  - name: 'Institution'
+    codes: [ ]
+  - name: 'Laboratoire'
+    codes: [ '{SUPANN}S312','{SUPANN}S310','{SUPANN}S203' ]
+  - name: 'Plateau technique'
+    codes: [ '{SUPANN}S340' ]
+```
+
 #### Tester la configuration du connecteur
 
 Vous pouvez utiliser la commande `php bin/oscar.php check:config` pour vérifier que votre connecteur est correctement configuré (la commande va executer une requête d'accès HTTP automatiquement sur l'URL "liste").
@@ -214,7 +303,7 @@ return array(
       'person' => [
         'rest' => [
           'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-          'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+          'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
           'editable'  => false
         ]
       ]
@@ -223,8 +312,31 @@ return array(
 );
 ```
 
+La configuration suivante dans le fichier `/config/autoload/local.php` permet d'activer le connecteur LDAP pour les personnes.
+
+```php
+// /config/autoload/local.php
+<?php
+return array(
+ // ...
+  'oscar' => [
+    'connectors' => [
+      'person' => [
+        'ldap' => [
+          'class'     => \Oscar\Connector\ConnectorPersonLDAP::class,
+          'params'    => realpath(__DIR__) . '/../connectors/person_ldap.yml',
+          'editable'  => false
+        ]
+      ]
+    ]
+  ]
+);
+```
 
 #### Format des données
+
+- **Pour le connecteur REST**
+
 Les URL correspondent à l'API REST qui devra retourner un JSON standard, pour la liste un tableau d'objet, pour l'accès unitaire un objet simple sous la forme :
 
 **Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `persons` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
@@ -374,7 +486,17 @@ ou
 }
 ```
 
+- **Pour le connecteur LDAP**
+
+Les données attendues sont dans la norme LDAP Supann.
+Des exemples de données sont visibles dans les données de test :
+
+- tests/Oscar/Factory/LdapToOrganizationTest.php pour les organisations
+- tests/Oscar/Factory/LdapToPersonTest.php pour les personnes
+
 ### Clef ROLES
+
+- **Pour le connecteur REST**
 
 Cette clef permet d'affecter automatiquement une personne (**Person**) à une organisation (**Organization**) avec un ou plusieurs rôles.
 
@@ -396,16 +518,35 @@ La liste des rôles est disponible en base de données dans la table **user_role
 
 ![Gestion des droits](images/ui-droits.png)
 
+- **Pour le connecteur LDAP**
 
-### La clef GROUPS
+La clé rôle n'existe pas dans les données LDAP entrante : elle est reconstruite depuis le champ `supannroleentite` en s'appuyant
+sur la table `mapping_role_person` du fichier `person_ldap.yml`.
 
-Cette clef est liée à la gestion des rôles. En effet, un rôle peut être défini avec un filtre *Ldap*. Dans l'exemple ci dessous, les rôles **utilisateur** et **responsable financier** ont des filtres LDAP.
+```yaml
+mapping_role_person :
+  - "{SUPANN}S312" : "Directeur de laboratoire"
+```
+
+Dans cet exemple, si le champ `supannroleentite` contient la valeur `{SUPANN}S312` en lien avec une structure, la personne se vera attribuer le rôle "Directeur de laboratoire".
+
+### Assignation automatique des rôles selon l'entité d'affection LDAP
+
+- **Pour le connecteur REST**
+
+Le connecteur REST charge les entités d'affectation depuis la clés "groups" afin de permettre la gestion automatique des rôles. En effet, un rôle peut être défini avec un filtre *Ldap*. Dans l'exemple ci dessous, les rôles **utilisateur** et **responsable financier** ont des filtres LDAP.
 
 ![Rôle avec des filtres LDAP](images/ui-role-ldap.png)
 
 Si un utilisateur se connecte à Oscar, et qu'il appartient a un rôle correspondant côté LDAP(généralement, le champ **memberOf** dans un LDAP supann), il va endosser automatiquement dans oscar ce rôle **sur la totalité de l'application** (toutes les activités).
 
+- **Pour le connecteur LDAP**
+
+La valeur est directement copiée depuis [edupersonorgunitdn](https://services.renater.fr/documentation/supann/supann2021/recommandations/attributs/edupersonorgunitdn) 
+
 ## Connector ORGANIZATIONS
+
+- **Pour le connecteur REST**
 
 De la même façon, 2 URL peuvent être utilisées pour synchroniser les données des structures. Voici le modèle attendu :
 
@@ -479,11 +620,21 @@ Son fonctionnement est détaillé ici : [Importer des activités dans Oscar](./a
 
 Une fois les connecteurs configurés, vous pouvez lancer la synchronisation des données depuis l'interface ou utiliser (recommandé) l'utilitaire en ligne de commande en éxecutant la commande :
 
+- **Pour les connecteurs REST**
+
 ```bash
+php bin/oscar.php organizations:sync rest
 php bin/oscar.php persons:sync rest
 ```
 
 Cela va éxecuter la synchronisation des personnes en utilisant le connecteur REST.
+
+- **Pour les connecteurs LDAP**
+
+```bash
+php bin/oscar.php organizations:sync ldap
+php bin/oscar.php persons:sync ldap
+```
 
 ## Connection avec certificat
 
@@ -542,9 +693,10 @@ file_certificat_pass: VOTREPASSCERTIFICAT
 
 #### Rappel
 
-Classe : `module/Oscar/Connector/ConnectorPersonREST`
+Classe (REST) : `module/Oscar/Connector/ConnectorPersonREST`
+Classe (LDAP) : `module/Oscar/Connector/ConnectorPersonLDAP`
 
-La configuration du connecteur est spécifier dans le fichier de configuration `config/autoload/local.php`, elle précise la classe utilisée pour réaliser la synchronisation des personnes, ainsi que le fichier de configuration Yaml associé/  
+La configuration du connecteur est spécifiée dans le fichier de configuration `config/autoload/local.php`, elle précise la classe utilisée pour réaliser la synchronisation des personnes, ainsi que le fichier de configuration Yaml associé/  
 
 ```php
 // /config/autoload/local.php
@@ -557,8 +709,9 @@ return array(
         'rest' => [
           // C'est ICI que l'on indique la classe chargée réaliser la synchronisation
           'class'     => \Oscar\Connector\ConnectorPersonREST::class,
+          // ou : 'class'     => \Oscar\Connector\ConnectorPersonLDAP::class,
 
-          'params'    => APP_DIR . '/config/connectors/person_rest.yml',
+          'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
           'editable'  => false
         ]
       ]
@@ -567,7 +720,7 @@ return array(
 );
 ```
 
-Par défaut, le fichier YAML contient 2 URLs, l'une pour la synchronisation complète, l'autre pour la synchonisation unitaire.
+Pour le connecteur REST, par défaut, le fichier YAML contient 2 URLs, l'une pour la synchronisation complète, l'autre pour la synchonisation unitaire.
 
 ```yaml
 # Emplacement du service REST fournissant la liste des personnes
