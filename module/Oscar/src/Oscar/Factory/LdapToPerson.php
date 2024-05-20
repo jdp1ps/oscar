@@ -46,7 +46,7 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
             ->setLadapLogin($this->getFieldValue($ldapData, 'supannaliaslogin'))
             ->setCodeHarpege($codeAffectation)
             ->setEmail($this->getFieldValue($ldapData, 'mail'))
-            ->setLdapSiteLocation($this->getFieldValue($ldapData, 'buildingName'))
+            ->setLdapSiteLocation($this->getFieldValue($ldapData, 'buildingname'))
             ->setDateSyncLdap(new \DateTime());
 
         $object->setLdapMemberOf($this->getFieldValue($ldapData, 'edupersonorgunitdn', []));
@@ -62,14 +62,8 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
                 $object->setLdapAffectation($codeAffectation);
             }
         }
-        if (property_exists($ldapData, 'status')) {
-            $object->setLdapStatus($ldapData->status);
-        }
         if (property_exists($ldapData, 'telephonenumber')) {
             $object->setPhone($ldapData->telephonenumber);
-        }
-        if (property_exists($ldapData, 'inm')) {
-            $object->setHarpegeINM($ldapData->inm);
         }
         $rolesEntites = $this->getFieldValue($ldapData, 'supannroleentite', []);
         if (!is_array($rolesEntites)) {
@@ -99,7 +93,6 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
             if (!array_key_exists($affectation, $ldapData->roles)) {
                 $ldapData->roles[$affectation] = [];
             }
-            $ldapData->roles[$affectation][] = 'Membre';
             if(null=== $organizationAffectation){
                 try {
                     $organizationAffectation = $this->organizationRepository->getOrganisationByCode($affectation);
