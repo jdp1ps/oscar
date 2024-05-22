@@ -1,8 +1,8 @@
 #filtre LDAP pour les structures
 access_strategy: 'Oscar\Connector\Access\OrganizationConnectorAccessLdap'
 organisation_ldap_filters:
-  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research)'
-  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=administration)'
+  # toutes strutures où une personne est susceptible d'être affectée
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(!(businessCategory=organization))'
 organisation_types:
   - name: 'Association'
     codes: [ ]

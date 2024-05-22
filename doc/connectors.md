@@ -642,9 +642,10 @@ Forme attendue :
 ``` 
 - **Pour le connecteur LDAP**
 
-Les données attendues sont dans la norme LDAP Supann.
+Les données attendues sont dans la norme LDAP Supann 2021 mais les annuaires en versions précédentes sont supportés
+dans la limite du possible.
 
-Le code structure utilisé pour le mapping avec les donénes des personnes est le champ `supannCodeEntite` .
+Le code structure utilisé pour le mapping avec les données des personnes est le champ `supannCodeEntite` .
 
 
 ## Importer des activités (Installation initiale)

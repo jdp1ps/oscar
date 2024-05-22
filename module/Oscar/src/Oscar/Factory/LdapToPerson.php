@@ -43,13 +43,14 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
         $codeAffectation = $this->getFieldValue($ldapData, 'supannentiteaffectationprincipale');
         $object->setFirstname($this->getFieldValue($ldapData, 'givenname'))
             ->setLastname($this->getFieldValue($ldapData, 'sn'))
-            ->setLadapLogin($this->getFieldValue($ldapData, 'supannaliaslogin'))
-            ->setCodeHarpege($codeAffectation)
+            ->setLadapLogin($this->getFieldValue($ldapData, 'uid'))
+            ->setCodeHarpege($this->getFieldValue($ldapData, 'supannempid'))
             ->setEmail($this->getFieldValue($ldapData, 'mail'))
+            ->setPhone($this->getFieldValue($ldapData, 'telephonenumber'))
             ->setLdapSiteLocation($this->getFieldValue($ldapData, 'buildingname'))
             ->setDateSyncLdap(new \DateTime());
 
-        $object->setLdapMemberOf($this->getFieldValue($ldapData, 'edupersonorgunitdn', []));
+        $object->setLdapMemberOf($this->getFieldValue($ldapData, 'memberof', []));
         $organizationAffectation = null;
         if (null !== $codeAffectation) {
             try {
@@ -61,9 +62,6 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
             } catch (\Exception $e) {
                 $object->setLdapAffectation($codeAffectation);
             }
-        }
-        if (property_exists($ldapData, 'telephonenumber')) {
-            $object->setPhone($ldapData->telephonenumber);
         }
         $rolesEntites = $this->getFieldValue($ldapData, 'supannroleentite', []);
         if (!is_array($rolesEntites)) {
