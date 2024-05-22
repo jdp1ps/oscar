@@ -19,7 +19,7 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
 {
     public function __construct(array $types, array $typeMappings)
     {
-        parent::__construct(['supanncodeentite', 'code', 'ou', 'supanntypeentite']);
+        parent::__construct(['ou', 'supanncodeentite', 'supanntypeentite']);
         $this->types = $types;
         $this->typeMappings = $typeMappings;
     }
@@ -63,13 +63,13 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
             $dateupdated = new \DateTime();
         }
 
-        $uri = $this->getFieldValue($ldapData, 'eduOrgHomePageURI');
+        $uri = $this->getFieldValue($ldapData, 'eduorghomepageuri'); // Refeds EduOrg attribute
         if (null === $uri) {
-            $uri = $this->getFieldValue($ldapData, 'labeleduri');
+            $uri = $this->getFieldValue($ldapData, 'labeleduri'); // Supann attribute
         }
-        $fullName = $this->getFieldValue($ldapData, 'eduOrgLegalName');
+        $fullName = $this->getFieldValue($ldapData, 'eduorglegalname'); // Refeds EduOrg attribute
         if (null === $fullName) {
-            $fullName = $this->getFieldValue($ldapData, 'description');
+            $fullName = $this->getFieldValue($ldapData, 'description'); // Supann attribute
         }
         $description = $this->getFieldValue($ldapData, 'info');
         if (null === $description) {
@@ -93,6 +93,7 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         $this->extractIdentifiers($ldapData, $object);
 
         $address = $this->getFieldValue($ldapData, 'postaladdress');
+        //TODO handle missing address
         $addressFields = explode('$', $address);
         if (count($addressFields) == 3) {
             // adresse sur une ligne pas de nom d'institution, seulement la rue

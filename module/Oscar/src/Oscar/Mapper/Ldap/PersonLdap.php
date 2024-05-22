@@ -24,11 +24,12 @@ class PersonLdap extends AbstractMapper
     public function getAttributes()
     {
         return [
-            'buildingname',//OK
+            'buildingname',
             'dn',
             'edupersonaffiliation',
             'edupersonorgunitdn',
             'givenname',
+            'eduorghomepageuri',
             'labeleduri',
             'mail',
             'modifytimestamp',
@@ -37,9 +38,13 @@ class PersonLdap extends AbstractMapper
             'supannaliaslogin',
             'supannentiteaffectation',
             'supannentiteaffectationprincipale',
+            'supannempid',
             'supannroleentite',
             'uid',
             'telephonenumber',
+            'eduorglegalname',
+            'description',
+            'memberof',
         ];
     }
 
