@@ -155,29 +155,29 @@ return array(
         ],
 
          // Système de recherche
-        'strategy' => [
-            'activity' => [
-                'search_engine' => [
-                    // Elasticsearch
-                    'class' => \Oscar\Strategy\Search\ActivityElasticSearch::class,
-                    'params' => [['localhost:9200']]
-                ]
-            ],
-            'person' => [
-                'search_engine' => [
-                    // Elasticsearch
-                    'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
-                    'params' => [['localhost:9200']]
-                ]
-            ],
-            'organization' => [
-                'search_engine' => [
-                    // Elasticsearch
-                    'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
-                    'params' => [['localhost:9200']]
-                ]
-            ]
-        ],
+       'strategy' => [
+           'activity' => [
+               'search_engine' => [
+                   // Elasticsearch
+                   'class' => \Oscar\Strategy\Search\ElasticActivitySearch::class,
+                   'params' => [["$param_elastic_host:9200"]]
+               ]
+           ],
+           'person' => [
+               'search_engine' => [
+                   // Elasticsearch
+                   'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
+                   'params' => [["$param_elastic_host:9200"]]
+               ]
+           ],
+           'organization' => [
+               'search_engine' => [
+                   // Elasticsearch
+                   'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
+                   'params' => [["$param_elastic_host:9200"]]
+               ]
+           ]
+       ],
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -218,11 +218,15 @@ return array(
                 'sifac' => [
                     'class'     => \Oscar\Connector\ConnectorSpentSifacOCI::class,
                     'params'    => [
+                        // Identifiant/Mot de passe/adresse serveur
                         'username'  => 'sifac_user',
                         'password'  => 'sifac_password',
                         'SID'  => 'F13',
                         'port'      => 1527,
                         'hostname'  =>'sifac.domain.ext',
+
+                        // Requête + clause d'optimisation
+                        'optimize_clause' => ' AND STUNR > %s',
                         'spent_query' => \Oscar\Connector\ConnectorSpentSifacOCI::SPENT_QUERY
                     ]
                 ]

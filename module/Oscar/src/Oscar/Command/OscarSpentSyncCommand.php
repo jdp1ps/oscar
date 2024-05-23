@@ -13,6 +13,7 @@ use Oscar\Connector\ConnectorSpentSifacOCI;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\SpentService;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,8 +29,7 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
         $this
             ->setDescription("Permet d'obtenir les dépenses")
             ->setHelp("")
-            ->addArgument('pfi', InputArgument::OPTIONAL, "PFI à synchroniser")
-        ;
+            ->addArgument('pfi', InputArgument::OPTIONAL, "PFI à synchroniser");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -48,26 +48,27 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
 
         $pfi = $input->getArgument('pfi');
 
-        if($pfi){
+        if ($pfi) {
             $io->writeln("PFI : $pfi");
-        } else  {
+        }
+        else {
             $q = new Question("Synchroniser toutes les dépenses ?");
             $io->askQuestion($q);
             $io->error("Pas encore disponible");
-            return;
+            return Command::FAILURE;
         }
 
         try {
             $connectorConfig = $oscarConfig->getConfiguration('connectors.spent');
 
             $keysConfig = array_keys($connectorConfig);
-            if( count($keysConfig) == 0 ){
+            if (count($keysConfig) == 0) {
                 $io->error("Pas de synchronisation des dépenses configuré");
-                return;
+                return Command::FAILURE;
             }
             elseif (count($keysConfig) > 1) {
                 $io->error("Oscar ne prends en charge qu'une source de synchronisation pour les dépenses.");
-                return;
+                return Command::FAILURE;
             }
             else {
                 $conf = $connectorConfig[$keysConfig[0]];
@@ -75,15 +76,17 @@ class OscarSpentSyncCommand extends OscarCommandAbstract
                 $factory = new \ReflectionClass($class);
 
                 /** @var ConnectorSpentSifacOCI $instance */
-                $instance = $factory->newInstanceArgs([$this->getServicemanager()->get(SpentService::class), $conf['params']]);
+                $instance = $factory->newInstanceArgs(
+                    [$this->getServicemanager()->get(SpentService::class), $conf['params']]
+                );
 
-                $result = $instance->sync($pfi, $io);
+                $result = $instance->sync($pfi, true);
                 $io->write($result);
+                return Command::SUCCESS;
             }
-
-        } catch (\Exception $e ){
-            $io->error("Impossible de synchroniser les dépenses : " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return;
+        } catch (\Exception $e) {
+            $io->error("Impossible de synchroniser les dépenses : " . $e->getMessage());
+            return Command::FAILURE;
         }
     }
 }
