@@ -93,6 +93,11 @@ class ConnectorOrganizationREST extends AbstractConnector
         return $factory;
     }
 
+    protected function getLogger()
+    {
+        return $this->getOrganizationService()->getLoggerService();
+    }
+
     /**
      * @param OrganizationRepository $repository
      * @param bool $force
@@ -101,6 +106,7 @@ class ConnectorOrganizationREST extends AbstractConnector
      */
     function syncAll(OrganizationRepository $repository, bool $force = false)
     {
+        $this->getLogger()->info("Synchronisation des structures");
         $repport = new ConnectorRepport();
 
         $url = $this->getParameter('url_organizations');
@@ -125,7 +131,6 @@ class ConnectorOrganizationREST extends AbstractConnector
 
             foreach( $jsonDatas as $data ){
                 $organisationId = $data->uid;
-                echo "############################## $organisationId\n";
 
                 try {
                     /** @var Person $personOscar */
@@ -152,30 +157,34 @@ class ConnectorOrganizationREST extends AbstractConnector
                     $repository->flush($organization);
 
                     if( $organization->hasUpdatedParentInCycle() ){
-                        echo "MAJ parent process\n";
-                        $newParentCode = $organization->getUpdatedParentInCycle();
-                        if( $newParentCode ){
-                            echo " = Nouveau parent\n";
-                            $parent = $this->getOrganizationService()->getOrganizationRepository()->getOrganisationByCode($newParentCode)->getId();
-                            $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
-                        } else {
-                            echo " = Plus de parent\n";
-                            $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
+                        try {
+                            $newParentCode = $organization->getUpdatedParentInCycle();
+                            $this->getLogger()->debug("Mise à jour du parent");
+                            if( $newParentCode ){
+                                $this->getLogger()->debug(" > Nouveau parent");
+                                $parent = $this->getOrganizationService()->getOrganizationRepository()->getOrganisationByCode($newParentCode)->getId();
+                                $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
+                            } else {
+                                $this->getLogger()->debug(" > Suppression du parent");
+                                $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
 
+                            }
+                            $repository->flush($organization);
+                        } catch (\Exception $e) {
+                            $this->getLogger()->error("Erreur : " . $e->getMessage());
                         }
-                        $repository->flush($organization);
                     } else {
-                        echo " = Pas de changement\n";
+                        $this->getLogger()->debug("Parent : Aucun changement");
                     }
 
                     if( $action == 'add' ){
-                        $repport->addadded(sprintf("%s a été ajouté.", $organization->log()));
+                        $this->getLogger()->debug("Organisation '$organisationId' ajoutée");
                     } else {
-                        $repport->addupdated(sprintf("%s a été mis à jour.", $organization->log()));
+                        $this->getLogger()->debug("Organisation '$organisationId' mise à jour");
                     }
 
                 } else {
-                    $repport->addnotice(sprintf("%s est à jour.", $organization->log()));
+                    $this->getLogger()->debug("Rien à faire pour '$organisationId'");
                 }
             }
         } catch (\Exception $e ){
