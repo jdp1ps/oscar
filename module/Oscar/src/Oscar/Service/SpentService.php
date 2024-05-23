@@ -7,6 +7,10 @@
 
 namespace Oscar\Service;
 
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityRepository;
@@ -24,14 +28,17 @@ use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\AccountInfoUtil;
 use Oscar\Utils\StringUtils;
 use Laminas\Log\Logger;
-use Laminas\ServiceManager\ServiceLocatorAwareInterface;
-use Laminas\ServiceManager\ServiceLocatorAwareTrait;
+
 
 class SpentService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager
 {
     use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
 
 
+    /**
+     * @return array
+     * @throws NotSupported
+     */
     public function getAllArray()
     {
         $array = [];
@@ -42,6 +49,11 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $array;
     }
 
+    /**
+     * @param $id
+     * @return object|null
+     * @throws NotSupported
+     */
     public function getSpentTypeById($id)
     {
         return $this->getSpentTypeRepository()->find($id);
@@ -141,7 +153,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     /**
      * @return SpentTypeGroup[]
      */
-    public function getSpentTypesIndexCode()
+    public function getSpentTypesIndexCode(): array
     {
         $spents = [];
         /** @var SpentTypeGroup $spent */
@@ -151,7 +163,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $spents;
     }
 
-    public function createSpentTypeGroup($datas)
+    public function createSpentTypeGroup($datas): SpentTypeGroup
     {
         $this->checkDatas($datas);
 
@@ -522,8 +534,11 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $this->getEntityManager()->flush($spentTypeGroup);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * @return SpentTypeGroupRepository
+     * @throws NotSupported
      */
     public function getSpentTypeRepository()
     {
@@ -832,6 +847,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param $pfi
      * @param false $curationNB
      * @return array
+     * @throws Exception
      */
     public function getSynthesisDatasPFI($pfis, $curationNB = false, string $mode = 'advanced' ) :array
     {
@@ -840,7 +856,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $spents = array_merge($spents, $this->getSpentsByPFI($pfi, self::SPENT_BOTH));
         }
 
-        // Récupération des Masses comptable configurées dans config
+        // Récupération des Masses configurées dans la configuration
         $masses = $this->getOscarConfigurationService()->getMasses();
 
         return [
@@ -848,181 +864,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             'masses' => $masses,
             'synthesis' => $this->getSpentDatasSynthesisBySpents($spents)
         ];
-
-
-//
-//
-//        // Structuration du tableau de retour
-//        $out = [];
-//
-//        $out['N.B'] = 0.0;
-//        $out['entries'] = count($spents);
-//        $out['total'] = 0.0;
-//
-//        $predicted_aggregator = [];
-//
-//
-//        // Dépenses "prévues"
-//        $out['predicted'] = [
-//            'N.B' => []
-//        ];
-//        $out['predicted_count'] = count($predicted);
-//        $out['predicted_total'] = 0.0;
-//        $out['predicted_totals'] = [
-//            'N.B' => 0.0
-//        ];
-//
-//        // Dépenses "effectives"
-//        $out['effective'] = [
-//            'N.B' => []
-//        ];
-//        $out['effective_count'] = count($effectives);
-//        $out['effective_total'] = 0.0;
-//        $out['effective_totals'] = [
-//            'N.B' => 0.0
-//        ];
-//
-//        $out['totals'] = [
-//            'N.B' => 0.0
-//        ];
-//        $out['recettes'] = [
-//            'total'     => 0.0,
-//        ];
-//
-//        if( $curationNB ){
-//            $out['curations'] = [];
-//        }
-//
-//        foreach ($masses as $key => $label) {
-//            $out[$key] = 0.0;
-//            $out['totals'][$key] = 0.0;
-//
-//            $out['predicted'][$key] = [];
-//            $out['predicted_totals'][$key] = 0.0;
-//
-//            $out['effective'][$key] = [];
-//            $out['effective_totals'][$key] = 0.0;
-//        }
-//
-//        // On commence par traiter les données effectives
-//        $idsEffectiveDone = [];
-//        // Aggrégation des données
-//        /** @var SpentLine $spent */
-//        foreach ($effectives as $spent) {
-//
-//            $compte = $spent->getCompteGeneral();
-//            $compteInfos = $this->getCompte($compte);
-//            $annexe = $compteInfos['annexe'];
-//            $montant = floatval($spent->getMontant());
-//            //$out['details'][] = $spent->toArray();
-//            $idSifac = $spent->getNumSifac();
-//            $idsEffectiveDone[] = $idSifac;
-//
-//            if( $annexe == '' || $annexe == null ){
-//                $annexe = $compteInfos['masse_inherit'];
-//            }
-//
-//            if( $annexe == '0' ){
-//                continue;
-//            }
-//
-//            if( $annexe == '1' ){
-//                $out['recettes']['total'] += $montant;
-//                //$out['recettes']['details'][] = $spent->toArray();
-//                continue;
-//            }
-//
-//            if ($annexe == '') {
-//                if( $curationNB ){
-//                    $exist = $compte == $compteInfos['code'];
-//                    if( !array_key_exists($compte, $out['curations']) ){
-//                        $out['curations'][$compte] = [
-//                            'compte' => $compte,
-//                            'compteInfos' => $compteInfos,
-//                            'label' => $compteInfos['label'],
-//                            'montant' => 0.0,
-//                            'totalEntries' => 0,
-//                            'exist' => $exist ? 'true' : 'false'
-//                        ];
-//                    }
-//                    $out['curations'][$compte]['montant'] += $montant;
-//                    $out['curations'][$compte]['totalEntries']++;
-//                }
-//                $annexe = 'N.B';
-////                if (!in_array($compte, $out['details'][$annexe]))
-////                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
-//            }
-//
-//
-//
-//            $out[$annexe] += $montant;
-//            $out['total'] += $montant;
-//            $out['totals'][$annexe] += $montant;
-//
-//            $out['effective_total'] += $montant;
-//            $out['effective_totals'][$annexe] += $montant;
-//        }
-//
-//        // Puis les données prévues en évacuant les lignes déjà présentes dans les données effectives
-//        //        /** @var SpentLine $spent */
-//        foreach ($predicted as $spent) {
-//
-//            $idSifac = $spent->getNumSifac();
-//            if( in_array($idSifac, $idsEffectiveDone) ){
-//                continue;
-//            }
-//            $compte = $spent->getCompteGeneral();
-//            $compteInfos = $this->getCompte($compte);
-//            $annexe = $compteInfos['annexe'];
-//            $montant = floatval($spent->getMontant());
-//            //$out['details'][] = $spent->toArray();
-//
-//            if( $annexe == '' || $annexe == null ){
-//                $annexe = $compteInfos['masse_inherit'];
-//            }
-//
-//            if( $annexe == '0' ){
-//                continue;
-//            }
-//
-//            if( $annexe == '1' ){
-//                $out['recettes']['total'] += $montant;
-//                //$out['recettes']['details'][] = $spent->toArray();
-//                continue;
-//            }
-//
-//            if ($annexe == '') {
-//                if( $curationNB ){
-//                    $exist = $compte == $compteInfos['code'];
-//                    if( !array_key_exists($compte, $out['curations']) ){
-//                        $out['curations'][$compte] = [
-//                            'compte' => $compte,
-//                            'compteInfos' => $compteInfos,
-//                            'label' => $compteInfos['label'],
-//                            'montant' => 0.0,
-//                            'totalEntries' => 0,
-//                            'exist' => $exist ? 'true' : 'false'
-//                        ];
-//                    }
-//                    $out['curations'][$compte]['montant'] += $montant;
-//                    $out['curations'][$compte]['totalEntries']++;
-//                }
-//                $annexe = 'N.B';
-//                if (!in_array($compte, $out['details'][$annexe]))
-//                    $out['details'][$annexe][] = $compte . ' (' . $compteInfos['label'] . ')';
-//            }
-//
-//
-//
-//            $out[$annexe] += $montant;
-//            $out['total'] += $montant;
-//            $out['totals'][$annexe] += $montant;
-//
-//            $out['predicted_total'] += $montant;
-//            $out['predicted_totals'][$annexe] += $montant;
-//        }
-
-        return $out;
     }
 
     public function getSpentsTypes()
@@ -1034,11 +875,25 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $qb->getQuery()->getArrayResult();
     }
 
-    public function syncSpentsByEOTP($eotp)
+    /**
+     * Synchronisation des dépenses via le PFI.
+     *
+     * @param string|null $eotp
+     * @return mixed
+     * @throws OscarException
+     * @throws Exception
+     * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function syncSpentsByEOTP(?string $eotp, bool $optimized = false)
     {
         if (!$eotp) {
+            $this->getLoggerService()->error("Aucun PFI fourni");
             throw new OscarException("Pas d'EOTP");
         }
+
+        $this->getLoggerService()->info("Mise à jour des dépenses pour '$eotp'");
 
         // TODO (optimiser ça avec une requête native propre)
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findBy([
@@ -1046,6 +901,15 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         ]);
 
         if (count($activities) > 0) {
+
+            // synchro
+            try {
+                $this->getConnector()->sync($eotp);
+            } catch (\Exception $e) {
+                throw $e;
+            }
+
+            // Récup
             $spents = $this->getSpentsByPFI($eotp, self::SPENT_EFFECTIVE);
             $total = 0.0;
             /** @var SpentLine $spent */
@@ -1060,9 +924,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             }
 
             $this->getEntityManager()->flush($activities);
+        } else {
+            $this->getLoggerService()->warning("Aucune activité trouvé pour '$eotp'");
         }
-
-        return $this->getConnector()->sync($eotp);
     }
 
     protected function reduceZero($str)
@@ -1147,6 +1011,16 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             ->where('s.pfi = :pfi')
             ->setParameter('pfi', $pfi);
         return array_column($qb->getQuery()->getArrayResult(), 'syncId');
+    }
+
+    public function getLastSyncId(string $pfi)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder('s')
+            ->select('MAX(s.syncId)')
+            ->from(SpentLine::class, 's')
+            ->where('s.pfi = :pfi')
+            ->setParameter('pfi', $pfi);
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     const SPENT_EFFECTIVE = 1;
@@ -1481,8 +1355,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $keysConfig = array_keys($connectorConfig);
 
         if (count($keysConfig) == 0) {
+            $this->getLoggerService()->critical("Aucun connector configuré pour les dépenses");
             throw new OscarException("Pas de synchronisation des dépenses configuré");
         } elseif (count($keysConfig) > 1) {
+            $this->getLoggerService()->critical("Erreur : Plusieurs connector configuré pour les dépenses");
             throw new OscarException("Oscar ne prends en charge qu'une source de synchronisation pour les dépenses.");
         } else {
 

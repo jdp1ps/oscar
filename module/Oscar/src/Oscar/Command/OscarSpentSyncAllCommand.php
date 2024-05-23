@@ -13,6 +13,7 @@ use Oscar\Connector\ConnectorSpentSifacOCI;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\SpentService;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -49,11 +50,11 @@ class OscarSpentSyncAllCommand extends OscarCommandAbstract
             $keysConfig = array_keys($connectorConfig);
             if( count($keysConfig) == 0 ){
                 $io->error("Pas de synchronisation des dépenses configuré");
-                return;
+                return Command::FAILURE;
             }
             elseif (count($keysConfig) > 1) {
                 $io->error("Oscar ne prends en charge qu'une source de synchronisation pour les dépenses.");
-                return;
+                return Command::FAILURE;
             }
             else {
                 $conf = $connectorConfig[$keysConfig[0]];
@@ -63,13 +64,13 @@ class OscarSpentSyncAllCommand extends OscarCommandAbstract
                 /** @var ConnectorSpentSifacOCI $instance */
                 $instance = $factory->newInstanceArgs([$this->getServicemanager()->get(SpentService::class), $conf['params']]);
 
-                $result = $instance->syncAll($io);
-                $io->write($result);
+                $result = $instance->syncAll();
+                return Command::SUCCESS;
             }
 
         } catch (\Exception $e ){
             $io->error("Impossible de synchroniser les dépenses : " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return;
+            return Command::FAILURE;
         }
     }
 }
