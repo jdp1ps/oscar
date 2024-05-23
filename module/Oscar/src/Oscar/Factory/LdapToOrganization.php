@@ -9,6 +9,7 @@ namespace Oscar\Factory;
 
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationType;
+use Oscar\Exception\OscarException;
 
 /**
  * Class LdapToOrganization
@@ -17,14 +18,34 @@ use Oscar\Entity\OrganizationType;
  */
 class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
 {
-    public function __construct(array $types, array $typeMappings)
+    /**
+     * @var array Oscar organization types
+     */
+    private array $types;
+
+    /**
+     * @var array ldap type to Oscar type mapping
+     */
+    private array $typeMappings;
+
+    /**
+     * @var string class name of the address parser
+     */
+    private string $addressParser;
+
+    /**
+     * @param array $types Oscar organization types
+     * @param array $typeMappings ldap type to Oscar type mapping
+     * @param string $addressParser class name of the address parser
+     */
+    public function __construct(array $types, array $typeMappings, string $addressParser)
     {
         parent::__construct(['ou', 'supanncodeentite', 'supanntypeentite']);
         $this->types = $types;
         $this->typeMappings = $typeMappings;
-    }
+        $this->addressParser = $addressParser;
 
-    private ?array $types;
+    }
 
     protected function getTypeObj(string $typeLabel): ?OrganizationType
     {
@@ -33,6 +54,7 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         }
         return null;
     }
+
     public function getInstance($jsonData, $connectorName = null)
     {
         // just to fullfill the interface
@@ -93,26 +115,24 @@ class LdapToOrganization extends JsonToObject implements IJsonToOrganisation
         $this->extractIdentifiers($ldapData, $object);
 
         $address = $this->getFieldValue($ldapData, 'postaladdress');
-        //TODO handle missing address
-        $addressFields = explode('$', $address);
-        if (count($addressFields) == 3) {
-            // adresse sur une ligne pas de nom d'institution, seulement la rue
-            array_splice($addressFields, 1, 0, '');
-        }
-        if (count($addressFields) == 4) {
-            $zipCity = explode(' ', $addressFields[2], 2);
-            if (is_numeric($zipCity[0])) {
-                $object
-                    ->setStreet1($addressFields[0])
-                    ->setStreet2($addressFields[1])
-                    ->setZipCode($zipCity[0])
-                    ->setCity($zipCity[1])
-                    ->setCountry($addressFields[3]);
-            } else {
-                throw new \Exception("Invalid zip code: $zipCity[0]");
+        if (null !== $address) {
+            try {
+                $addressParser = new $this->addressParser();
+                //stdClass
+                /** @var \stdClass $address */
+                $address = $addressParser->parse($address, $object);
+                // if adresse is not false, assign fields to object
+                if ($address) {
+                    $object->setStreet1($address->street1)
+                        ->setStreet2($address->street2)
+                        ->setStreet3($address->street3)
+                        ->setZipCode($address->zipCode)
+                        ->setCity($address->city)
+                        ->setCountry($address->country);
+                }
+            } catch (OscarException $e) {
+                throw new \Exception("Invalid address: $address");
             }
-        } else {
-            throw new \Exception("Invalid address: $addressFields");
         }
         return $object;
     }

@@ -60,7 +60,7 @@ class LdapToOrganizationTest extends TestCase
             ],
         ];
 
-        $this->factory = new LdapToOrganization($types, $typeMappings);
+        $this->factory = new LdapToOrganization($types, $typeMappings, 'Oscar\Connector\Parser\LdapAddressParser');
     }
 
 

@@ -21,7 +21,8 @@ class ConnectorOrganizationLDAP extends ConnectorOrganizationREST
         if ($factory === null) {
             $types = $this->getRepository()->getTypesKeyLabel();
             $typeMappings = $this->getParameter("organisation_types");
-            $factory = new LdapToOrganization($types, $typeMappings);
+            $addressParser = $this->getParameter("address_parser");
+            $factory = new LdapToOrganization($types, $typeMappings, $addressParser);
         }
         return $factory;
     }
