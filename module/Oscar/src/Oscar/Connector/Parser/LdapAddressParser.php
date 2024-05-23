@@ -6,32 +6,28 @@ class LdapAddressParser
 {
     public function parse(string $address): \stdClass
     {
-        $object = (object) [
+        $object = (object)[
             'street1' => null,
             'street2' => null,
             'street3' => null,
             'zipCode' => null,
             'city' => null,
-            'country' => null,
+            'country' => null
         ];
         $addressFields = explode('$', $address);
 
-        // Vérifier et extraire le pays si présent
-        if (!empty($addressFields) && !preg_match('/\d/', end($addressFields))) {
+        if (!empty($addressFields) && !preg_match('/^\d\w{4}/', end($addressFields))) {
             $object->country = array_pop($addressFields);
         }
 
-        // Vérifier et extraire le code postal et la ville
         if (!empty($addressFields)) {
-            $zipCity = explode(' ', array_pop($addressFields), 2);
-            if (preg_match('/^\d{4,5}$/', $zipCity[0])) {
-                $object->zipCode = $zipCity[0];
-                $object->city = $zipCity[1];
+            $zipCityField = array_pop($addressFields);
+            if (preg_match('/(\d{4,5})/', $zipCityField, $matches)) {
+                $object->zipCode = $matches[0];
+                $object->city = trim(str_replace($matches[0], '', $zipCityField));
             } else {
-                throw new \Exception("Invalid zip code: {$zipCity[0]}");
+                throw new \Exception("Invalid address: $address");
             }
-        } else {
-            throw new \Exception("Invalid address: $address");
         }
 
         if (!empty($addressFields)) {
@@ -51,3 +47,5 @@ class LdapAddressParser
         return $object;
     }
 }
+
+
