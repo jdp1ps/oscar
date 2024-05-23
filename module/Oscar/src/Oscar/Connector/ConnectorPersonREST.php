@@ -110,14 +110,13 @@ class ConnectorPersonREST extends AbstractConnector
 
         try {
             $json = $access->getDataAll();
-            $this->log("data gain : " . count($json));
-            $personsDatas = null;
 
             if (is_object($json) && property_exists($json, 'persons')) {
                 $personsDatas = $json->persons;
             } else {
                 $personsDatas = $json;
             }
+            $this->log("data gain : " . count($personsDatas));
 
             if (!is_array($personsDatas)) {
                 throw new \Exception("L'API n'a pas retourné un tableau de donnée");
