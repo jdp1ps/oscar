@@ -254,6 +254,7 @@ mapping_role_person :
 #config/connectors/organization_ldap.yml
 #filtre LDAP pour les structures
 access_strategy: 'Oscar\Connector\Access\OrganizationConnectorAccessLdap'
+address_parser: 'Oscar\Connector\Parser\LdapAddressParser'
 organisation_ldap_filters:
   # catégories d'organisations à récupérer
   - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(businessCategory=research)'
