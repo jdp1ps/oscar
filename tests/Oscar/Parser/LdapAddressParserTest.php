@@ -1,8 +1,7 @@
 <?php
 
-namespace Oscar\Parser;
+namespace Oscar\Connector\Parser;
 
-use Oscar\Connector\Parser\LdapAddressParser;
 use PHPUnit\Framework\TestCase;
 
 class LdapAddressParserTest extends TestCase
@@ -51,20 +50,44 @@ class LdapAddressParserTest extends TestCase
 
     public function testParseAddressWithInvalidZipCode()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid zip code');
-
         $address = 'Centre Meudon$1 PLACE ARISTIDE BRIAND$MEUDON$France';
+        // expect exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid address');
         $this->parser->parse($address);
     }
 
     public function testParseAddressWithInsufficientFields()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid zip code: 1');
+        $this->expectExceptionMessage('Invalid address');
 
         $address = 'Centre Meudon$1 PLACE ARISTIDE BRIAND';
         $this->parser->parse($address);
+    }
+
+    public function testParseInternationalAddress()
+    {
+        $address = 'Some Institution$123 Example Street$12345 Example City$USA';
+        $result = $this->parser->parse($address);
+
+        $this->assertEquals('Some Institution', $result->street1);
+        $this->assertEquals('123 Example Street', $result->street2);
+        $this->assertEquals('12345', $result->zipCode);
+        $this->assertEquals('Example City', $result->city);
+        $this->assertEquals('USA', $result->country);
+    }
+
+    public function testParseInternationalAddressCityZipFormat()
+    {
+        $address = 'Another Institution$456 Another St$CityName 54321$Germany';
+        $result = $this->parser->parse($address);
+
+        $this->assertEquals('Another Institution', $result->street1);
+        $this->assertEquals('456 Another St', $result->street2);
+        $this->assertEquals('54321', $result->zipCode);
+        $this->assertEquals('CityName', $result->city);
+        $this->assertEquals('Germany', $result->country);
     }
 }
 
