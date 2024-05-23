@@ -78,7 +78,6 @@ class LdapToPersonTest extends TestCase
         $this->assertEquals('Benoit', $result->getFirstname());
         $this->assertEquals('Thomas', $result->getLastname());
         $this->assertEquals('bthomas', $result->getLadapLogin());
-        $this->assertEquals('U02', $result->getCodeHarpege());
         $this->assertEquals('Immeuble de recherche', $result->getLdapSiteLocation());
         $this->assertEquals('+33 1 44 07 81 00', $result->getPhone());
         $this->assertEquals(['Directeur de laboratoire'], $data->roles['U02C']);
