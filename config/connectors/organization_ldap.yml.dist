@@ -1,5 +1,6 @@
 #filtre LDAP pour les structures
 access_strategy: 'Oscar\Connector\Access\OrganizationConnectorAccessLdap'
+address_parser: 'Oscar\Connector\Parser\LdapAddressParser'
 organisation_ldap_filters:
   # toutes strutures où une personne est susceptible d'être affectée
   - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(!(businessCategory=organization))'
