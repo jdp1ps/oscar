@@ -347,7 +347,7 @@ class Organization implements ResourceInterface, IConnectedObject
      * @ORM\ManyToOne(targetEntity="Organization", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true)
      */
-    private ?Organization $parent;
+    private ?Organization $parent = null;
 
 
     /**
@@ -388,8 +388,6 @@ class Organization implements ResourceInterface, IConnectedObject
         if ($this->getParent() && $this->getParent()->getCode()) {
             $currentParentCode = $this->getParent()->getCode();
         }
-
-        echo " --> $currentParentCode => $newParent\n";
 
         if ($currentParentCode != $newParent) {
             $this->flag_newParentCycleUpdated = true;
