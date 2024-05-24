@@ -181,7 +181,7 @@ $markText = function( $text, $search ){
                 <?php if(count($entity->getPersons())): ?>
                     <div>
                     <?php foreach( $entity->getPersons() as $person ): ?>
-                        <span class="cartouche light" title="<?=  $person->getRole() ?>">
+                        <span class="cartouche light <?= $person->isOutOfDate() ? ' off' : '' ?>" title="<?=  $person->getRole() ?>">
                             <i class="icon-user"></i>
                             <span class="addon">
                                 <?= $person->getPerson()->getDisplayName() ?>

@@ -13976,6 +13976,10 @@ article.wp h3 {
   text-shadow: none;
 }
 
+.cartouche.off, .cartouche.off .addon {
+  text-decoration: line-through;
+}
+
 .cartouche .addon .addon-module {
   border-right: none;
 }
