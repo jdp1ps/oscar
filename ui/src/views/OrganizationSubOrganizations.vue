@@ -33,9 +33,9 @@
       <h2 class="card-title">
         <code class="organization-code code">{{ o.code }}</code>
         <strong  class="organization-shortname">{{ o.shortname }}</strong>
-        <div class="card-title-subsection">
+        <span class="card-title-subsection">
           <i  class="organization-longname">{{ o.longname }}</i>
-        </div>
+        </span>
       </h2>
       <section class="card-content" v-if="o.persons.length != 0">
         <h4>
@@ -182,16 +182,9 @@ export default {
 
 <style lang="scss">
 .suborganizations {
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  flex-flow: wrap;
-  flex: 1;
   .suborganization {
-    max-width: 30%;
-    min-width: 150px;
-    position: relative;
     margin: .3em;
+    width: 100%;
   }
 }
 
@@ -201,7 +194,8 @@ export default {
   }
 }
 
-.card-title {
+.card.suborganization .card-title {
+  display: block;
   .code {
     flex-grow: 0;
     font-size: .8em;
@@ -209,10 +203,15 @@ export default {
     padding: 0 .5em;
     text-shadow: 1px -1px 0 rgba(255,255,255,.3);
     //line-height: 1em;
-    border-radius: 4px;
+    border-radius: 0px;
+    margin-right: .3em;
+  }
+  .organization-shortname {
+    display: inline-block;
     margin-right: .3em;
   }
   .card-title-subsection {
+    display: inline-block;
     font-size: .7em;
     color: #314752;
   }
