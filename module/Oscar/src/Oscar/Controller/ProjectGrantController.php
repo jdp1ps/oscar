@@ -2716,21 +2716,21 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
             // Type de recherche supportée
             $filtersType = [
-                'ap'  => "Impliquant la personne",
-                'sp'  => "N'impliquant pas la personne",
-                'pm'  => "Impliquant une de ces personnes",
-                'ao'  => "Impliquant l'organisation",
-                'so'  => "N'impliquant pas l'organisation",
-                'om'  => "Impliquant une des organisations",
-                'as'  => 'Ayant le statut',
-                'ss'  => 'N\'ayant pas le statut',
+                'ap'  => "Personne - (avec rôle) impliqué",
+                'sp'  => "Personne - NON impliquée",
+                'pm'  => "Personnes (plusieurs) - impliquées",
+                'ao'  => "Organisation (avec rôle) - impliquée",
+                'so'  => "Organisation - NON impliquée",
+                'om'  => "Organisations (plusieurs) - impliquées",
+                'as'  => 'Statut - AVEC',
+                'ss'  => 'Statut - SANS',
                 'cnt' => "Pays (d'une organisation)",
                 'tnt' => "Type d'organisation",
-                'af'  => 'Ayant comme incidence financière',
-                'sf'  => 'N\'ayant pas comme incidence financière',
+                'af'  => 'Incidence financière - AVEC',
+                'sf'  => "Incidence financière (n'est pas)",
                 'mp'  => 'Montant prévu',
-                'at'  => 'est de type',
-                'st'  => 'n\'est pas de type',
+                'at'  => 'Type - est de type',
+                'st'  => 'Type - n\'est pas de type',
                 'td'  => 'Ayant ce type de document',
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
@@ -2976,16 +2976,46 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'ap' :
                     case 'sp' :
                         try {
-//                            var_dump($value2); die();
-                            $personsId[] = $value1;
-                            $person = $this->getPersonService()->getPerson($value1);
-                            $persons[$person->getId()] = $person;
-                            $crit['val1Label'] = $person->getDisplayName();
-                            $crit['val2Label'] = $value2 > 0 ? $this->getOscarUserContextService()->getAllRoleIdPerson(
-                            )[$value2] : '';
-                            $ids = $this->getActivityService()->getActivityRepository()
-                                ->getIdsForPersonWithRole($person->getId(), $value2 ? $value2 : 0);
+                            if( !$value1 && !$value2 ){
+                                $crit['error'] = "Aucun critère pour ce filtre";
+                            } else {
+
+                                $personIds = [];
+                                $roleId = 0;
+                                $role = null;
+
+                                // Personne
+                                if( $value1 ){
+                                    try {
+                                        $person = $this->getPersonService()->getPerson($value1);
+                                        $personIds = [$person->getId()];
+                                        $persons[$person->getId()] = $person;
+                                        $crit['val1Label'] = $person->getDisplayName();
+                                    } catch (Exception $e){
+                                        $this->getLoggerService()->error("Erreur filtre 'sur la personne/role, impossible de charger la personne '$value1'' : " . $e->getMessage());
+                                        $crit['error'] = "Impossible de trouver la personne";
+                                    }
+                                }
+                                if( $value2 ){
+                                    try {
+                                        $roles = $this->getOscarUserContextService()->getAllRoleIdPerson();
+                                        if( array_key_exists($value2, $roles) ){
+                                            $roleId = $value2;
+                                            $role = $roles[$value2];
+                                            $crit['val2Label'] = $role;
+                                        }
+                                    } catch (Exception $e){
+                                        $this->getLoggerService()->error("Erreur filtre 'sur la personne/role, impossible de charger le rôle '$value2'' : " . $e->getMessage());
+                                        $crit['error'] = "Impossible de trouver le rôle";
+                                    }
+                                }
+
+                                $ids = $this->getActivityService()->getActivityRepository()
+                                    ->getIdsForPersonAndOrWithRole($personIds, $roleId);
+
+                            }
                         } catch (Exception $e) {
+                            $this->getLoggerService()->error("Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage());
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;

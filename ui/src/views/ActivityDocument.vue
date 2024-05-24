@@ -338,9 +338,8 @@
                               'alert-info':doc.process.status < 200
             }">
               <i class="icon-hammer"></i>
-              Procédure de signature <em>{{ doc.process.label }}</em> - {{ doc.process.status }}
-              <strong>{{ doc.process.status_text }}</strong> -
-              <span>étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span> -
+              Procédure de signature <strong>{{ doc.process.label }}</strong> (<em>{{ doc.process.status_text }}</em>
+              <span> - étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span>)
               <button class="btn btn-xs btn-info" @click="handlerProcessDetailsOn(doc.process)">
                 Détails
               </button>
