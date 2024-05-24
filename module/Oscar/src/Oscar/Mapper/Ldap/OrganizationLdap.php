@@ -49,7 +49,25 @@ class OrganizationLdap extends AbstractMapper
     public function findByCategoryFilter($categoryFilter): array
     {
         $filter = sprintf($this->configParam('filters', 'FILTER_STRUCTURE_DN'), $categoryFilter);
+        //FIXME Trying to access array offset on value of type bool
+        // https://github.com/laminas/laminas-ldap/issues/6
         return $this->searchSimplifiedEntries($filter, $this->configParam('dn', 'STRUCTURES_BASE_DN'));
+    }
+
+    /**
+     * Uniquement pour les tests check:config
+     *
+     * @return array
+     */
+    public function searchFirstEntry() : array
+    {
+        $entries = $this->getLdap()->searchEntries('(supannCodeEntite=*)',
+            $this->configParam('dn', 'STRUCTURES_BASE_DN'),
+            1, [], null, false, 1);
+        foreach ($entries as $i => $entry) {
+            $entries[$i] = self::simplifiedEntry($entry);
+        }
+        return $entries;
     }
 
     /**

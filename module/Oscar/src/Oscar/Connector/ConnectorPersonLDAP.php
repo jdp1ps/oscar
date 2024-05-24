@@ -32,4 +32,17 @@ class ConnectorPersonLDAP extends ConnectorPersonREST
         return $this->getParameter('person_ldap_filters');
     }
 
+    /**
+     * Uniquement pour les tests check:config
+     *
+     * @return bool
+     */
+    public function checkAccess(): bool
+    {
+        $datas = $this->getAccessStrategy()->getFirstData();
+        if ($datas) {
+            return true;
+        }
+        return false;
+    }
 }

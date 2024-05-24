@@ -57,7 +57,26 @@ class PersonLdap extends AbstractMapper
     public function findByCategoryFilter($categoryFilter): array
     {
         $filter = sprintf($this->configParam('filters', 'FILTER_PERSON_AFFILIATION'), $categoryFilter);
+        //FIXME Trying to access array offset on value of type bool
+        // https://github.com/laminas/laminas-ldap/issues/6
         return $this->searchSimplifiedEntries($filter, $this->configParam('dn', 'UTILISATEURS_BASE_DN'));
+    }
+
+    /**
+     * Uniquement pour les tests check:config
+     *
+     * @return array
+     */
+    public function searchFirstEntry(): array
+    {
+        $filter = sprintf($this->configParam('filters', 'FILTER_PERSON_AFFILIATION'), "uid=*");
+        $entries = $this->getLdap()->searchEntries($filter,
+            $this->configParam('dn', 'UTILISATEURS_BASE_DN'),
+            1, [], null, false, 1);
+        foreach ($entries as $i => $entry) {
+            $entries[$i] = self::simplifiedEntry($entry);
+        }
+        return $entries;
     }
 
     /**

@@ -27,7 +27,7 @@ abstract class AbstractLdapAccessConnector implements IConnectorAccess
     private $options;
 
     /** @var array */
-    private $filters;
+    protected $filters;
 
 
     /**
@@ -44,6 +44,17 @@ abstract class AbstractLdapAccessConnector implements IConnectorAccess
     {
         $mapper = $this->getLdapMapper();
         return $mapper->findByCategoryFilter($filter);
+    }
+
+    /**
+     * Uniquement pour les tests check:config
+     *
+     * @return array
+     */
+    public function getFirstData(): array
+    {
+        $mapper = $this->getLdapMapper();
+        return $mapper->searchFirstEntry();
     }
 
     public function getConnector(): IConnector
