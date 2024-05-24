@@ -42,4 +42,18 @@ class ConnectorOrganizationLDAP extends ConnectorOrganizationREST
         $access->setOptions($this->getServicemanager()->get('unicaen-app_module_options'));
 
     }
+
+    /**
+     * Uniquement pour les tests check:config
+     *
+     * @return bool
+     */
+    public function checkAccess(): bool
+    {
+        $datas = $this->getAccessStrategy()->getFirstData();
+        if ($datas) {
+            return true;
+        }
+        return false;
+    }
 }
