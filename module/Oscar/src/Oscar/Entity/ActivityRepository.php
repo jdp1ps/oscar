@@ -492,6 +492,52 @@ class ActivityRepository extends EntityRepository
      *
      * @return array
      */
+    public function getIdsForPersonAndOrWithRole(array $idPersons, int $idRole): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.persons', 'act_per')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.members', 'prj_pers');
+
+        // PERSONNES et ROLE
+        $parameters = [];
+
+        if(count($idPersons) > 0 && $idRole>0){
+            $parameters['person'] = $idPersons;
+            $qb->andWhere('(act_per.person IN(:person) AND act_per.roleObj = :role) OR (prj_pers.person IN(:person) AND prj_pers.roleObj = :role)');
+            $parameters['role'] = $idRole;
+            $parameters['person'] = $idPersons;
+        }
+        elseif (count($idPersons)>0){
+            $qb->andWhere('act_per.person IN(:person) OR prj_pers.person IN(:person)');
+            $parameters['person'] = $idPersons;
+        }
+        elseif ($idRole>0){
+            $qb->andWhere('act_per.roleObj = :role OR prj_pers.roleObj = :role');
+            $parameters['role'] = $idRole;
+        }
+        else {
+            throw new OscarException("Critère de requête incomplet");
+        }
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->setParameters($parameters)
+                ->getResult()
+        );
+    }
+
+    /**
+     * Retourne la liste des IDS des activités où la personne est impliquée (avec le role).
+     *
+     * @param int $idPerson ID de la personne (Person)
+     * @param int $idRole Si -1, ignoré
+     *
+     * @return array
+     */
     public function getIdsForPersonWithRole(int $idPerson, int $idRole): array
     {
         $qb = $this->createQueryBuilder('a')
