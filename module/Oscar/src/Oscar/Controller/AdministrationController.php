@@ -1206,11 +1206,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
             $ldapfilter = null;
         }
 
-        $role->setRoleId($roleId)
-            ->setLdapFilter($ldapfilter)
-            ->setDescription($request->getPost('description'))
-            ->setSpot($request->getPost('spot'))
-            ->setPrincipal($request->getPost('principal'));
+        $role->setRoleId($roleId);
+        $role->setLdapFilter($ldapfilter);
+        $role->setDescription($request->getPost('description'));
+        $role->setSpot($request->getPost('spot'));
+        $role->setPrincipal($request->getPost('principal'));
     }
 
     /**
@@ -1253,6 +1253,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 switch ($this->getHttpXMethod()) {
                     // Mise à jour
                     case "PUT" :
+                        // var_dump($role);
                         $this->hydrateRolewithPost($role, $request);
                         /** @var Role $otherRole */
                         $otherRole = $this->getEntityManager()->getRepository(Role::class)->findOneBy(
@@ -1292,6 +1293,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             else {
                 // Création
                 if ($this->getHttpXMethod() == "POST") {
+
                     $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
                     $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(
                         ['roleId' => $request->getPost('roleId')]
