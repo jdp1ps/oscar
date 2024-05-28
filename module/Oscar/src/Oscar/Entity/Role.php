@@ -401,7 +401,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
     public function getLdapFilter() :?string
     {
 
-        return ""; //$this->ldapFilter;
+        return $this->ldapFilter;
     }
 
     /**
