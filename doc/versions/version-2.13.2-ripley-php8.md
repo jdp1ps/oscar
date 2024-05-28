@@ -6,11 +6,25 @@
 
 Interruption du service. 
 
-```
+```bash
 service apache2 stop
+service oscarworker stop
 ```
 
-Backup de la base. Mise à jour du système. Interruption des taches CRON. 
+Interruption des taches CRON. 
+```bash
+# Suspention des crons sous www-data
+crontab -u www-data -e
+
+# Ou avec l'utilisateur utilisé pour l'installation initiale
+crontab -e
+```
+
+
+Backup de la base. 
+
+Mise à jour du système. 
+
 
 ### Installation de PHP 8.2
 
@@ -52,6 +66,10 @@ apt install \
   php8.2-zip
 ```
 
+```bash
+# Mode Apache/PHP 8.2
+apt install libapache2-mod-php8.2
+```
 Configuration de `php8` comme PHP par défaut.
 
 ```bash
@@ -156,10 +174,17 @@ Un petit *check*
 php bin/oscar.php check:config
 ```
 
+> Le WORKER ne répondera pas, c'est normal
+
 Puis MAJ de la BDD si tout est OK
 
 ```bash
 php vendor/bin/doctrine-module orm:schema-tool:update --force
+```
+
+```bash
+# Relance du worker
+service oscarworker start
 ```
 
 ### Rotation des logs
