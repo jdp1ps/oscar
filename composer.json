@@ -31,7 +31,7 @@
     "guzzlehttp/guzzle": "^7.0",
     "phpoffice/phpspreadsheet": "^1.29",
     "phpoffice/phpword": "^1.1",
-    "unicaen/signature": "^0.0.10",
+    "unicaen/signature": "^0.0.11",
     "ext-gettext": "*"
   },
   "minimum-stability": "dev",
