@@ -244,19 +244,21 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $output;
     }
 
-    public function getPersonAffectationDetails(Person $person, bool $principal = true): array
+    public function getPersonAffectationDetails(?Person $person, bool $principal = true): array
     {
         $output = [];
-        /** @var OrganizationPerson $personOrganization */
-        foreach ($person->getOrganizations() as $personOrganization) {
-            if ($principal === true && !$personOrganization->isPrincipal()) {
-                continue;
+        if( $person ){
+            /** @var OrganizationPerson $personOrganization */
+            foreach ($person->getOrganizations() as $personOrganization) {
+                if ($principal === true && !$personOrganization->isPrincipal()) {
+                    continue;
+                }
+                $this->buildPersonAffectationDetailsDeep(
+                    $personOrganization->getRoleObj(),
+                    $personOrganization->getOrganization(),
+                    $output
+                );
             }
-            $this->buildPersonAffectationDetailsDeep(
-                $personOrganization->getRoleObj(),
-                $personOrganization->getOrganization(),
-                $output
-            );
         }
         return $output;
     }
