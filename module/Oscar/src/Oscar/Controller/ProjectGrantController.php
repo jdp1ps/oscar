@@ -2851,8 +2851,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     if ($this->getOscarConfigurationService()->isPfiStrict()
                         && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                         $parameters['search'] = $search;
-                        $qb->andWhere('c.codeEOTP = :search');
-                        $qb->andWhere('c.codeEOTP = :search');
+                        $qb->andWhere('LOWER(c.codeEOTP) = LOWER(:search)');
                     }
                     elseif (preg_match('/(.*)=(.*)/', $search, $result)) {
                         $key = $result[1];
