@@ -7,6 +7,7 @@ let elemDatas = document.querySelector("#activitydocuments");
 const app = createApp(ActivityDocument, {
     "url": elemDatas.dataset.url,
     "urlUploadNewDoc": elemDatas.dataset.urlUploadNewDoc,
+    "urlSignDocument": elemDatas.dataset.urlSignDocument,
     "manage": elemDatas.dataset.manage
 })
 

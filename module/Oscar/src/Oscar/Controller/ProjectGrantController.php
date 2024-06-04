@@ -1223,8 +1223,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /** Export les données en CSV. */
     public function csvAction()
     {
-
-        die("CSV");
         /** @var Request $request */
         $request = $this->getRequest();
 
@@ -1562,7 +1560,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function documentsJsonAction()
     {
-        // Params (id activité)
         $id = $this->params()->fromRoute('id');
         $ui = $this->params()->fromQuery('ui');
 
@@ -1579,6 +1576,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $rolesAppli = $this->getOscarUserContextService()->getBaseRoleId();
         $rolesMerged = array_merge($roles, $rolesAppli);
 
+        $allowSign = $this->getOscarUserContextService()->hasPrivileges(SignaturePrivileges::SIGNATURE_CREATE, $entity);
+
         if ($this->getOscarUserContextService()->getAccessActivityDocument($entity)['read'] != true) {
             return $this->getResponseUnauthorized();
         }
@@ -1591,7 +1590,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $tabId = $tabDocument->getId();
                 $arrayTabs[$tabId] = $tabDocument->toJson();
                 $arrayTabs[$tabId]["documents"] = [];
-                $arrayTabs[$tabId]['manage'] = $access['write'] === true;
+                $arrayTabs[$tabId]['manage'] = $access['write'] == true;
             }
         }
 
@@ -1634,9 +1633,13 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             }
 
             $manage = $this->getOscarUserContextService()->contractDocumentWrite($doc);
+            $processTriggerable = ($doc->getProcess() == null && $allowSign);
 
             $docAdded = $doc->toJson();
             $docAdded['manage_process'] = $manageProcess;
+            $docAdded['process_triggerable'] = $processTriggerable;
+
+
             if (is_null($doc->getTabDocument())) {
                 if ($doc->isPrivate() === true) {
                     // Droits sur les documents privés utilisateur courant associé ou non au document
@@ -1725,24 +1728,30 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $signatureFlowParams = [];
         $typesDocumentsDatas = $this->getActivityService()->getTypesDocuments(false);
 
-        foreach ($this->getActivityService()->getTypesDocuments(false) as $typeDocument) {
+        // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
+        $processDatas = [];
+        foreach ($this->getSignatureService()->getSignatureFlows() as $flow) {
+            $this->getLoggerService()->debug(
+                "Chargement du flow " . $flow['label'] . " pour l'activité " . $entity->getLabel()
+            );
+            $flowId = $flow['id'];
+            $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
+                "",
+                $flowId,
+                ['activity_id' => $entity->getId()]
+            );
+
+            $processDatas[] = $signatureFlowDatas['signatureflow'];
+        }
+
+        // Types de document
+        foreach ($typesDocumentsDatas as $typeDocument) {
             $typeDatas = $typeDocument->toArray();
             $typeDatas['flow'] = false;
-            if ($typeDocument->getSignatureFlow()) {
-                $signatureFlow = $typeDocument->getSignatureFlow();
-                if (!array_key_exists($signatureFlow->getId(), $signatureFlowParams)) {
-                    $signatureFlowParams[$signatureFlow->getId()] = $this->getSignatureService(
-                    )->createSignatureFlowDatasById(
-                        '',
-                        $signatureFlow->getId(),
-                        ['activity_id' => $entity->getId()]
-                    );
-                }
-                $typeDatas['flow'] = $signatureFlowParams[$signatureFlow->getId()];
-            }
             $typesDocuments[] = $typeDatas;
         }
 
+        $out['process_datas'] = $processDatas;
         $out['tabsWithDocuments'] = $arrayTabs;
         $out['typesDocuments'] = $typesDocuments;
         $out['idCurrentPerson'] = $this->getCurrentPerson()->getId();
@@ -1846,7 +1855,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             "lines" => [],
             'total' => 0.0
         ];
-
 
         foreach ($years as $year) {
             $totaux['years'][$year] = 0.0;
@@ -2853,6 +2861,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         $parameters['search'] = $search;
                         $qb->andWhere('LOWER(c.codeEOTP) = LOWER(:search)');
                     }
+
+                    // Motif clef=valeur
                     elseif (preg_match('/(.*)=(.*)/', $search, $result)) {
                         $key = $result[1];
                         $value = $result[2];
@@ -2864,7 +2874,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         if (preg_match("/^[0-9]{4}SAIC.*/mi", $search)) {
                             $parameters['search'] = $search . '%';
                             $qb->andWhere('c.centaureNumConvention LIKE :search');
-                        } // La saisie est un numéro OSCAR©
+                        }
+
+                        // La saisie est un numéro OSCAR©
                         elseif (preg_match("/^[0-9]{4}" . $oscarNumSeparator . ".*/mi", $search)) {
                             $parameters['search'] = $search . '%';
                             $qb->andWhere('c.oscarNum LIKE :search');
@@ -2872,15 +2884,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                         else {
                             try {
                                 $filterIds = $this->getActivityService()->search($search);
-                            } catch (\Zend_Search_Lucene_Exception $e) {
+                            } catch (Exception $e) {
                                 if (stripos($e->getMessage(), 'non-wildcard') > 0) {
+                                    $this->getLoggerService()->error($e->getMessage());
                                     $error = "Les motifs de recherche doivent commencer par au moins 3 caractères non-wildcard.";
                                 }
                                 else {
-                                    $error = "Motif de recherche incorrecte : " . $e->getMessage();
+                                    $this->getLoggerService()->critical($e->getMessage());
+                                    $error = "Erreur Elasticsearch (" . $e->getCode() . "): " . $e->getMessage();
                                 }
                                 $filterIds = [];
                             } catch (BadRequest400Exception $e) {
+                                $this->getLoggerService()->error($e->getMessage());
                                 $error = "Expression de recherche incorrecte";
                             }
                             if ($projectview == 'on') {
@@ -2979,46 +2994,53 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     case 'ap' :
                     case 'sp' :
                         try {
-                            if( !$value1 && !$value2 ){
+                            if (!$value1 && !$value2) {
                                 $crit['error'] = "Aucun critère pour ce filtre";
-                            } else {
-
+                            }
+                            else {
                                 $personIds = [];
                                 $roleId = 0;
                                 $role = null;
 
                                 // Personne
-                                if( $value1 ){
+                                if ($value1) {
                                     try {
                                         $person = $this->getPersonService()->getPerson($value1);
                                         $personIds = [$person->getId()];
                                         $persons[$person->getId()] = $person;
                                         $crit['val1Label'] = $person->getDisplayName();
-                                    } catch (Exception $e){
-                                        $this->getLoggerService()->error("Erreur filtre 'sur la personne/role, impossible de charger la personne '$value1'' : " . $e->getMessage());
+                                    } catch (Exception $e) {
+                                        $this->getLoggerService()->error(
+                                            "Erreur filtre 'sur la personne/role, impossible de charger la personne '$value1'' : " . $e->getMessage(
+                                            )
+                                        );
                                         $crit['error'] = "Impossible de trouver la personne";
                                     }
                                 }
-                                if( $value2 ){
+                                if ($value2) {
                                     try {
                                         $roles = $this->getOscarUserContextService()->getAllRoleIdPerson();
-                                        if( array_key_exists($value2, $roles) ){
+                                        if (array_key_exists($value2, $roles)) {
                                             $roleId = $value2;
                                             $role = $roles[$value2];
                                             $crit['val2Label'] = $role;
                                         }
-                                    } catch (Exception $e){
-                                        $this->getLoggerService()->error("Erreur filtre 'sur la personne/role, impossible de charger le rôle '$value2'' : " . $e->getMessage());
+                                    } catch (Exception $e) {
+                                        $this->getLoggerService()->error(
+                                            "Erreur filtre 'sur la personne/role, impossible de charger le rôle '$value2'' : " . $e->getMessage(
+                                            )
+                                        );
                                         $crit['error'] = "Impossible de trouver le rôle";
                                     }
                                 }
 
                                 $ids = $this->getActivityService()->getActivityRepository()
                                     ->getIdsForPersonAndOrWithRole($personIds, $roleId);
-
                             }
                         } catch (Exception $e) {
-                            $this->getLoggerService()->error("Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage());
+                            $this->getLoggerService()->error(
+                                "Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage()
+                            );
                             $crit['error'] = "Impossible de filtrer sur la personne";
                         }
                         break;
@@ -3294,8 +3316,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     $idsExport = array_map('current', $qbIds->getQuery()->getResult());
 
                     $qbIds = $qb->select('DISTINCT pr.id');
-                    $projectsIds = array_map('current', $qbIds->getQuery()->getResult());
-
+                    $idsProjects = array_map('current', $qbIds->getQuery()->getResult());
                 }
                 else {
                     $qbIds = $qb->select('DISTINCT c.id');
@@ -3321,12 +3342,10 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 $activities = new UnicaenDoctrinePaginator($qb, $page);
             }
 
-//            $projectsIds = [];
-//            if ($projectview == 'on') {
-//                foreach ($activities as $p) {
-//                    $projectsIds[] = $p->getId();
-//                }
-//            }
+            $projectsIds = [];
+            if ($projectview == 'on') {
+                $projectsIds = $idsProjects;
+            }
 
 
             if ($this->getRequest()->isXmlHttpRequest()) {

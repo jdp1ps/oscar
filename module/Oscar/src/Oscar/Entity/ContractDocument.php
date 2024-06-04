@@ -373,7 +373,7 @@ class ContractDocument extends AbstractVersionnedDocument
      * @param $options
      * @return array
      */
-    public function toJson($options = false)
+    public function toJson(bool $options = false) :array
     {
         $defaultOptions = [
             'urlDelete'   => false,
@@ -412,7 +412,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'typeMime'    => $this->getFileTypeMime(),
             'dateUpload'  => $this->getDateUpdoad()->format('Y-m-d H:i:s'),
             'dateDeposit' => $this->getDateDeposit() ? $this->getDateDeposit()->format('Y-m-d') : null,
-            'dateSend'    => $this->getDateSend() ? $this->getDateSend()->format('Y-m-d') : null,
+            'dateSend'    => $this->getDateSend()?->format('Y-m-d'),
             'extension'   => $this->getExtension(),
             'category'    => $this->getTypeDocument() ? $this->getTypeDocument()->toJson() : null,
             'tabDocument' => $this->getTabDocument() ? $this->getTabDocument()->toJson() : null,

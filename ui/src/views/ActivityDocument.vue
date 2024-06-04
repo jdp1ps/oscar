@@ -195,13 +195,44 @@
               </span>
           </div>
         </div>
-        <section v-if="currentFlow">
+
+        <div class="row">
+          <div class="col-md-12">
+            <nav class="buttons-bar">
+              <button class="btn btn-danger" @click="editedDocument = null">
+                <i class="icon-cancel-alt"></i> Annuler
+              </button>
+              <a class="btn btn-success" href="#" @click.prevent="applyEdit()">
+                <i class="icon-valid"></i> Enregistrer
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE ERRORMESSAGES -->
+    <div class="overlay" v-if="signDocument">
+      <div class="overlay-content">
+        <h2>
+          <span class="overlay-closer" @click="signDocument = null">X</span>
+        </h2>
+
+        <nav>
+          Selectionnez un procédure de signature
+          <span v-for="p in signProcess" class="btn btn-lg btn-default"
+                :class="{'btn-success':selectedSignProcess && selectedSignProcess.id == p.id}" @click="handlerSelectProcess(p)">
+            <strong>{{ p.label }}</strong><br>
+            <em>{{ p.description }}&nbsp;</em>
+          </span>
+        </nav>
+
+        <section v-if="selectedSignProcess">
           <h3>
             <small>Procédure de signature</small><br>
-            <strong>{{ currentFlow.label }}</strong>
+            <strong>{{ selectedSignProcess.label }}</strong>
           </h3>
-
-          <article v-for="step in currentFlow.steps" class="step"
+          <article v-for="step in selectedSignProcess.steps" class="step"
                    :class="step.missing_recipients ? 'error' : 'ok'">
             <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
             <ul class="metas">
@@ -235,18 +266,20 @@
             </div>
           </article>
         </section>
-        <div class="row">
-          <div class="col-md-12">
-            <nav class="buttons-bar">
-              <button class="btn btn-danger" @click="editedDocument = null">
-                <i class="icon-cancel-alt"></i> Annuler
-              </button>
-              <a class="btn btn-success" href="#" @click.prevent="applyEdit()">
-                <i class="icon-valid"></i> Enregistrer
-              </a>
-            </nav>
-          </div>
+
+        <div class="alert alert-danger" v-if="signProcessError">
+          Signature non-disponible : <strong>{{ signProcessError }}</strong>
         </div>
+
+        <nav class="buttons-bar">
+          <button class="btn btn-default" @click="signDocument = null">
+            <i class="icon-cancel-alt"></i> Annuler
+          </button>
+          <button class="btn btn-success" @click="handlerPerformSignDocument(signDocument, selectedSignProcess)"
+                  :class="{'disabled': handlerPerformSignDocumentDisabled(signDocument, selectedSignProcess)}">
+            <i class="icon-cancel-alt"></i> Valider
+          </button>
+        </nav>
       </div>
     </div>
 
@@ -377,6 +410,11 @@
                 Accéder au lien
               </a>
               <a class="btn btn-default btn-xs"
+                 href="#" v-if="doc.process_triggerable" @click="handlerSignDocument(doc)">
+                <i class="icon-bank"></i>
+                Signer ce document
+              </a>
+              <a class="btn btn-default btn-xs"
                  :href="doc.urlDownload" v-if="doc.urlDownload && doc.location != 'url'">
                 <i class="icon-upload-outline"></i>
                 Télécharger
@@ -422,6 +460,7 @@ export default {
 
   props: {
     urlUploadNewDoc: {required: true},
+    urlSignDocument: {required: false},
     url: {required: true}
   },
 
@@ -472,6 +511,11 @@ export default {
       editable: true,
       remoterState: null,
       displayComputed: false,
+      signDocument: null,
+
+      signProcess: null,
+      selectedSignProcess: null,
+      signProcessError: "",
 
       editedDocument: null,
       mode: null,
@@ -561,6 +605,68 @@ export default {
 
   methods: {
 
+    /**
+     * Permet de calculer si le bouton "Valider" en actif ou pas.
+     *
+     * @param document
+     * @param signedProcess
+     * @returns {boolean}
+     */
+    handlerPerformSignDocumentDisabled(document, signedProcess) {
+      if (!signedProcess) return true;
+      if (signedProcess.missing_recipients) return true;
+      for (let i = 0; i < signedProcess.steps.length; i++) {
+        let step = signedProcess.steps[i];
+        let editable = step.editable;
+        let count = 0;
+        for (let j = 0; j < step.recipients.length; j++) {
+          let recipient = step.recipients[j];
+          if( editable ){
+            if (recipient.selected == true) {
+              count++;
+            }
+          } else {
+            count++;
+          }
+
+        }
+        if (count == 0) {
+
+          // { "id": 50, "label": "Visa Responsable Scientifique", "description": "", "order": 1, "letterfilename": "internal", "letterfile_label": "OSCAR visa", "level": "visa_hidden", "level_label": "Visa caché", "level_in_letterfile": "visa_hidden", "allSignToComplete": false, "editable": true, "missing_recipients": false, "dynamicRecipients": true, "recipients": [ { "firstname": "STEPHANE", "lastname": "BOUVRY", "email": "stephane.bouvry@unicaen.fr", "selected": false } ], "observers": [ { "firstname": "STEPHANE", "lastname": "BOUVRY", "email": "stephane.bouvry@unicaen.fr", "selected": true }, { "firstname": "ARNAUD", "lastname": "DARET", "email": "arnaud.daret@unicaen.fr", "selected": true } ] }
+
+          this.signProcessError = "L'étape " + step.order + " \""+ step.label +"\" n'a pas de destinataire.";
+          return true;
+        }
+      }
+
+      this.signProcessError = "";
+      return false;
+    },
+
+    handlerSelectProcess(process) {
+      this.signProcessError = "";
+      this.selectedSignProcess = process;
+    },
+
+    handlerPerformSignDocument(document, signedProcess) {
+      let formData = new FormData();
+      let url = this.urlSignDocument;
+
+      formData.append('document_id', document.id);
+      formData.append('flow_datas', JSON.stringify(signedProcess));
+
+      axios.post(url, formData).then(ok => {
+        console.log("SUCCESS", ok);
+        this.signDocument = null;
+        this.selectedSignProcess = null;
+        this.fetch();
+      }, ko => {
+        console.log("ERROR", ko);
+        this.error = ko.response.data ? ko.response.data : ko.message;
+      })
+      return false;
+    },
+
     renderDate(date) {
       if (!date) {
         return "non précisé"
@@ -603,6 +709,10 @@ export default {
      */
     deleteDocument(document) {
       this.deleteData = document;
+    },
+
+    handlerSignDocument(document) {
+      this.signDocument = document;
     },
 
     /**
@@ -731,7 +841,6 @@ export default {
     },
 
     handlerProcessReload(doc) {
-      console.log(doc.manage_process);
       let formData = new FormData();
       axios.post(doc.manage_process, formData).then(ok => {
         this.fetch();
@@ -752,7 +861,7 @@ export default {
         url = this.editedDocument.urlReupload;
       } else if (this.mode == 'new') {
         formData.append('action', 'new');
-        formData.append('flow', JSON.stringify(this.currentFlow));
+        formData.append('flow', ''); //JSON.stringify(this.currentFlow));
         url = this.urlUploadNewDoc;
       } else if (this.mode == 'edit') {
         formData.append('action', 'edit');
@@ -866,6 +975,7 @@ export default {
           });
           this.tabsWithDocuments = documents;
           this.computedDocuments = success.data.computedDocuments;
+          this.signProcess = success.data.process_datas;
           this.typesDocuments = success.data.typesDocuments;
           if (this.selectedTabId == null) {
             this.selectedTabId = selectedTab ? selectedTab : defaultTab;

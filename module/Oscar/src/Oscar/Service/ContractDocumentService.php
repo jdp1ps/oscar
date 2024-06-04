@@ -35,6 +35,7 @@ use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\FileSystemUtils;
+use UnicaenSignature\Entity\Db\Signature;
 use UnicaenSignature\Service\ProcessServiceAwareTrait;
 use UnicaenSignature\Service\SignatureServiceAwareTrait;
 
@@ -91,6 +92,122 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         return $manager;
     }
 
+    public function applySignature(int $documentId, int $flowId, array $flowDt): void
+    {
+        try {
+            $signatureFlow = $this->getSignatureService()->getSignatureFlowById($flowId);
+            $document = $this->getDocument($documentId);
+            $activity = $document->getActivity();
+        } catch (\Exception $e) {
+            $msg = "Impossible de charger le processus de signature, données incomplète : " . $e->getMessage();
+            $this->getLoggerService()->critical($msg);
+            throw new OscarException($msg);
+        }
+
+        $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
+            "",
+            $signatureFlow->getId(),
+            ['activity_id' => $activity->getId()]
+        )['signatureflow'];
+
+        $sortedFlowDatas = [];
+        if ($flowDt) {
+            foreach ($flowDt['steps'] as $step) {
+                $sortedFlowDatas[$step['id']] = $step;
+            }
+        }
+
+        // Configuration du Flow
+        foreach ($signatureFlowDatas['steps'] as &$step) {
+            if ($step['editable']) {
+                // Customisation des destinataires
+                $this->getLoggerService()->info(
+                    sprintf("Traitement de l'étape [%s]%s", $step['id'], $step['label'])
+                );
+                if (array_key_exists($step['id'], $sortedFlowDatas)) {
+                    $config = $sortedFlowDatas[$step['id']];
+                    $this->getLoggerService()->debug(
+                        sprintf(
+                            "Configuration de l'étape [%s]%s > %s",
+                            $step['id'],
+                            $step['label'],
+                            print_r($config, true)
+                        )
+                    );
+                    $recipients = [];
+                    foreach ($config['recipients'] as $recipient) {
+                        $this->getLoggerService()->debug(
+                            sprintf(
+                                "Destinataire %s : %s",
+                                $recipient['email'],
+                                $recipient['selected'] ? 'OUI' : 'non'
+                            )
+                        );
+                        if ($recipient['selected']) {
+                            $recipients[] = $recipient;
+                        }
+                    }
+                    if (count($recipients) == 0) {
+                        throw new OscarException(sprintf("L'étape '%s' n'a pas de destinataires", $step['label']));
+                    }
+                    $step['recipients'] = $recipients;
+
+                    $observers = [];
+                    foreach ($config['observers'] as $observer) {
+                        $this->getLoggerService()->debug(
+                            sprintf(
+                                "Destinataire %s : %s",
+                                $observer['email'],
+                                $observer['selected'] ? 'OUI' : 'non'
+                            )
+                        );
+                        if ($observer['selected']) {
+                            $observers[] = $observer;
+                        }
+                    }
+
+                    $step['observers'] = $observers;
+                }
+                else {
+                    $this->getLoggerService()->warning('Aucune configuration reçu pour cette étape');
+                }
+            }
+            else {
+                $this->getLoggerService()->debug(
+                    sprintf("L'étape [%s]%s n'est pas éditable", $step['id'], $step['label'])
+                );
+            }
+        }
+
+        if ($signatureFlowDatas['missing_recipients']) {
+            throw new OscarException("Ils manquent des destinataires pour déclencher le processus de signature");
+        }
+
+        // Emplacement du document
+        $uploadPath = $this->getOscarConfigurationService()->getDocumentRealpath($document);
+        $fileName = $document->getFileName();
+
+
+        // déplacement du fichier
+        $destination = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation()
+            . DIRECTORY_SEPARATOR
+            . $fileName;
+        $this->getLoggerService()->info("copy '$uploadPath' vers '$destination'");
+        if (!copy($uploadPath, $destination)) {
+            $this->getLoggerService()->critical("Impossible de déplacer '$uploadPath' ver '$destination'");
+            throw new OscarException(
+                "Un problème est survenu lors de la création de la procédure de signature, inpossible de copier le document"
+            );
+        }
+        // Création du processus
+        $this->getLoggerService()->debug("Traitement du processus de signature pour '$uploadPath'");
+        $process = $this->getProcessService()->createUnconfiguredProcess($fileName, $signatureFlow->getId());
+        $this->getProcessService()->configureProcess($process, $signatureFlowDatas);
+        $document->setProcess($process);
+        $this->getEntityManager()->flush();
+        $this->getProcessService()->trigger($process, true);
+    }
+
     /**
      * @param array $file
      * @param Activity $activity
@@ -124,9 +241,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $mimes = $this->getOscarConfigurationService()->getDocumentExtensions();
         $signatureFlowDatas = null;
 
-        $this->getLoggerService()->debug("DUMP: " . print_r(json_encode($flowDt, JSON_PRETTY_PRINT), true));
-
-        if ($typeDocument->getSignatureFlow()) {
+        if ($flowDt) {
             $signatureFlow = $typeDocument->getSignatureFlow();
 
             $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
@@ -152,12 +267,21 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                     if (array_key_exists($step['id'], $sortedFlowDatas)) {
                         $config = $sortedFlowDatas[$step['id']];
                         $this->getLoggerService()->debug(
-                            sprintf("Configuration de l'étape [%s]%s > %s", $step['id'], $step['label'], print_r($config, true))
+                            sprintf(
+                                "Configuration de l'étape [%s]%s > %s",
+                                $step['id'],
+                                $step['label'],
+                                print_r($config, true)
+                            )
                         );
                         $recipients = [];
                         foreach ($config['recipients'] as $recipient) {
                             $this->getLoggerService()->debug(
-                                sprintf("Destinataire %s : %s", $recipient['email'], $recipient['selected'] ? 'OUI' : 'non')
+                                sprintf(
+                                    "Destinataire %s : %s",
+                                    $recipient['email'],
+                                    $recipient['selected'] ? 'OUI' : 'non'
+                                )
                             );
                             if ($recipient['selected']) {
                                 $recipients[] = $recipient;
@@ -171,7 +295,11 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
                         $observers = [];
                         foreach ($config['observers'] as $observer) {
                             $this->getLoggerService()->debug(
-                                sprintf("Destinataire %s : %s", $observer['email'], $observer['selected'] ? 'OUI' : 'non')
+                                sprintf(
+                                    "Destinataire %s : %s",
+                                    $observer['email'],
+                                    $observer['selected'] ? 'OUI' : 'non'
+                                )
                             );
                             if ($observer['selected']) {
                                 $observers[] = $observer;
@@ -270,7 +398,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
         $this->getEntityManager()->flush();
 
-        if ($typeDocument->getSignatureFlow()) {
+        if ($flowDt) {
             $uploadPath = $uploader->getUploadPath();
 
             // déplacement du fichier

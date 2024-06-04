@@ -349,9 +349,10 @@
                     <?php endif; ?>
                     <div id="activitydocuments"
                             data-url-upload-new-doc="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>"
+                            data-url-sign-document="<?= $this->url('contractdocument/signdocument') ?>"
                             data-url-url-documentd-type="<?= $this->url('contractdocument/document-change-type') ?>"
                             data-url="<?= $this->url('contract/documents-json',['id' => $entity->getId()]) ?>">doc</div>
-                        <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
+                        <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?><?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
                     <script>
                         //requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
                         //    Vue.use(VueResource);
