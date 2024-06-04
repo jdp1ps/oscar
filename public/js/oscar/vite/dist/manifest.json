@@ -16,14 +16,14 @@
     ]
   },
   "src/ActivityDocuments.css": {
-    "file": "assets/ActivityDocuments-d8553e11.css",
+    "file": "assets/ActivityDocuments-1f321088.css",
     "src": "src/ActivityDocuments.css"
   },
   "src/ActivityDocuments.js": {
     "css": [
-      "assets/ActivityDocuments-d8553e11.css"
+      "assets/ActivityDocuments-1f321088.css"
     ],
-    "file": "assets/activitydocuments-08b010c2.js",
+    "file": "assets/activitydocuments-809cdf14.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js"
@@ -118,5 +118,17 @@
     ],
     "isEntry": true,
     "src": "src/OrganizationSubOrganizations.js"
+  },
+  "src/oscar-css.css": {
+    "file": "assets/oscar-css-2bea9010.css",
+    "src": "src/oscar-css.css"
+  },
+  "src/oscar-css.js": {
+    "css": [
+      "assets/oscar-css-2bea9010.css"
+    ],
+    "file": "assets/oscarcss-0d5a7764.js",
+    "isEntry": true,
+    "src": "src/oscar-css.js"
   }
 }

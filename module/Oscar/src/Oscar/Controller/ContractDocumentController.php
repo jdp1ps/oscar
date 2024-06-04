@@ -1,16 +1,9 @@
 <?php
-/**
- * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
- * @date: 26/10/15 09:32
- * @copyright Certic (c) 2015
- */
-
 namespace Oscar\Controller;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Exception;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
@@ -21,18 +14,14 @@ use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
-use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
-use Oscar\Strategy\Upload\conventionSignee;
-use Oscar\Strategy\Upload\ServiceContextUpload;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\FileSystemUtils;
 use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
 use Laminas\Http\Request;
-use Laminas\Json\Server\Exception\HttpException;
 use Laminas\View\Model\JsonModel;
 
 
@@ -45,70 +34,50 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     use UseServiceContainerTrait;
 
-    /**
-     * @return ProjectGrantService
-     */
-    public function getActivityService()
-    {
-        return $this->getServiceContainer()->get(ProjectGrantService::class);
-    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES ACCESS
 
     /**
-     * @return OscarUserContext
+     * @return ProjectGrantService
+     * @throws OscarException
      */
-    public function getOscarUserContext()
+    public function getActivityService(): ProjectGrantService
     {
-        return $this->getOscarUserContextService();
+        return $this->getService($this->getServiceContainer(), ProjectGrantService::class);
     }
 
     /**
      * @return ContainerInterface
      */
-    public function getServiceLocator()
+    public function getServiceLocator(): ContainerInterface
     {
         return $this->getServiceContainer();
     }
 
     /**
-     * @return mixed
-     */
-    public function getNotificationService()
-    {
-        return $this->getServiceContainer()->get(NotificationService::class);
-    }
-
-    public function getActivityLogService(): ActivityLogService
-    {
-        return $this->getServiceContainer()->get(ActivityLogService::class);
-    }
-
-
-    private $versionnedDocumentService;
-
-    /**
-     * Retourne l'emplacement où sont stoqués les documents depuis le fichier
-     * de configuration local.php
-     *
-     * @param ContractDocument|null $document
-     * @return mixed|string
+     * @return NotificationService
      * @throws OscarException
      */
-    protected function getDropLocation(ContractDocument $document = null)
+    public function getNotificationService(): NotificationService
     {
-        if (!is_null($document)) {
-            return $this->getOscarConfigurationService()->getDocumentRealpath($document);
-        }
-        else {
-            return $this->getOscarConfigurationService()->getDocumentDropLocation();
-        }
+        return $this->getService($this->getServiceContainer(), NotificationService::class);
+    }
+
+    /**
+     * @return ActivityLogService
+     * @throws OscarException
+     */
+    public function getActivityLogService(): ActivityLogService
+    {
+        return $this->getService($this->getServiceContainer(), ActivityLogService::class);
     }
 
     /**
      * @return ContractDocumentService
+     * @throws OscarException
      */
     protected function getContractDocumentService()
     {
-        return $this->getServiceContainer()->get(ContractDocumentService::class);
+        return $this->getService($this->getServiceContainer(),ContractDocumentService::class);
     }
 
     /**
@@ -117,7 +86,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @annotations Retourne le service pour gérer les documents
      */
 
-    protected function getVersionnedDocumentService()
+    private ?VersionnedDocumentService $versionnedDocumentService = null;
+
+    /**
+     * @throws OscarException
+     */
+    protected function getVersionnedDocumentService() :VersionnedDocumentService
     {
         if (null === $this->versionnedDocumentService) {
             $this->versionnedDocumentService = new VersionnedDocumentService(
@@ -128,6 +102,28 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
         return $this->versionnedDocumentService;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////// USEFULL INFOS
+    /**
+     * Retourne l'emplacement où sont stoqués les documents depuis le fichier
+     * de configuration local.php
+     *
+     * @param ContractDocument|null $document
+     * @throws OscarException
+     */
+    protected function getDropLocation(ContractDocument $document = null) :string
+    {
+        if (!is_null($document)) {
+            return $this->getOscarConfigurationService()->getDocumentRealpath($document);
+        }
+        else {
+            return $this->getOscarConfigurationService()->getDocumentDropLocation();
+        }
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////
 
 
@@ -312,7 +308,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
         }
 
-
         if ($action == 'version') {
             try {
                 $this->getContractDocumentService()->uploadContractDocument(
@@ -360,7 +355,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $flow = $this->params()->fromPost('flow');
             $flowDt = null;
             if($flow != 'false'){
-                $flowDt = json_decode($flow, true);
+                // DISABLED
+                // $flowDt = json_decode($flow, true);
             }
             $this->getContractDocumentService()->uploadContractDocument(
                 $_FILES['file'],
@@ -381,6 +377,41 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         } catch (Exception $e) {
             $this->getLoggerService()->error($e->getMessage());
             return $this->jsonError($e->getMessage());
+        }
+    }
+
+    public function signDocumentAction() {
+        try {
+            // DOCUMENT et FLOWDT
+            try {
+                $document_id = $this->params()->fromPost('document_id', null);
+                if( $document_id == null || $document_id <= 0 ){
+                    throw new OscarException("ID de document non transmis");
+                }
+                $document = $this->getContractDocumentService()->getDocument($document_id);
+            } catch (Exception $e){
+                throw new OscarException("Impossible de trouver le document");
+            }
+            $activity = $this->getActivityService()->getActivityById($document->getActivity()->getId());
+
+            // FLOW
+
+            $flowDtPosted = $this->params()->fromPost('flow_datas', null);
+            if( $flowDtPosted == null ){
+                throw new OscarException("Aucune donnée de signature envoyée");
+            }
+            $flowDt = json_decode($flowDtPosted, true);
+
+            if( !$flowDt ){
+                throw new OscarException("Les données de signature envoyées sont invalides");
+            }
+
+            $this->getContractDocumentService()->applySignature($document->getId(), $flowDt['id'], $flowDt);
+
+            return new JsonModel(['response' => 'ok']);
+        } catch (Exception $e) {
+            $this->getLoggerService()->critical("Erreur signature : " . $e->getMessage());
+            return $this->jsonError("Un problème est survenu lors de la soumission pour signature : " . $e->getMessage());
         }
     }
 

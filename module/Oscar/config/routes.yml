@@ -1256,6 +1256,12 @@ contractdocument:
         route: /document-change-type
         defaults:
           action: changeType
+    signdocument:
+      type: segment
+      options:
+        route: /signature-document
+        defaults:
+          action: signDocument
     upload:
       type: segment
       options:

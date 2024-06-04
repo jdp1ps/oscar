@@ -17,8 +17,15 @@ $showDelete = isset($showDelete) && $showDelete === true ? true : false;
         <?php if( !$document->islink() ): ?>
         <small class="text-light">&nbsp;(<?= $this->fileSize($document->getFileSize()) ?>)</small>
         <?php endif; ?>
+
     </div>
     <div class="card-content">
+        <?php if( $document->getProcess() ): ?>
+        <div class="cartouche primary">
+            <i class="icon-edit"></i>
+            Signature : <strong class="addon"><?php echo $document->getProcess()->getStatusText() ?></strong>
+        </div>
+        <?php endif; ?>
         <p class="text-highlight" style="display: none">
             Fichier <strong><?= $document->getExtension() ?></strong> version <?= $document->getVersion()?>, téléversé le <time><?= $this->moment($document->getDateUpdoad())->full() ?></time>
             par <?= $this->link()->person($document->getPerson()) ?>

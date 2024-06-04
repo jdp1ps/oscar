@@ -938,6 +938,11 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         return $documentTabLocation[$name];
     }
 
+    /**
+     * @param ContractDocument $document
+     * @return string
+     * @throws OscarException
+     */
     public function getDocumentRealpath(ContractDocument $document): string
     {
         $basePath = $this->getDocumentDropLocation();

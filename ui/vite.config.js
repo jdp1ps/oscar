@@ -31,6 +31,7 @@ export default defineConfig({
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
+        oscarcss: resolve(__dirname, 'src/oscar-css.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {

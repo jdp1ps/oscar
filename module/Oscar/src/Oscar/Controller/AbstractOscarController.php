@@ -22,6 +22,9 @@ use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Traits\UseOscarUserContextService;
 use Oscar\Traits\UseOscarUserContextServiceTrait;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Yaml\Parser;
 use UnicaenAuth\Service\UserContext;
 use Laminas\Http\Request;
@@ -41,6 +44,17 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     use UseOscarConfigurationServiceTrait, UseOscarUserContextServiceTrait, UseLoggerServiceTrait, UseEntityManagerTrait, UseActivityLogServiceTrait;
 
 
+    /**
+     * @throws OscarException
+     */
+    protected function getService(ContainerInterface $container, string $id){
+        try {
+            return $container->get($id);
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+            $this->getLoggerService()->critical("Service Not Found '$id' : " . $e->getMessage());
+            throw new OscarException("Erreur de service critique '$id'");
+        }
+    }
     /**
      * Retourne le format de la requête sous la forme d'une chaîne.
      * NB:  Pour le moment, sert uniquement à detecter le format JSON.
