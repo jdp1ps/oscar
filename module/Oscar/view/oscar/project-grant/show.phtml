@@ -352,50 +352,7 @@
                             data-url-sign-document="<?= $this->url('contractdocument/signdocument') ?>"
                             data-url-url-documentd-type="<?= $this->url('contractdocument/document-change-type') ?>"
                             data-url="<?= $this->url('contract/documents-json',['id' => $entity->getId()]) ?>">doc</div>
-                        <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?><?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
-                    <script>
-                        //requirejs(['vue', 'vue-resource', 'moment', 'activitydocument'], function (Vue, VueResource, moment, DocumentsActivity) {
-                        //    Vue.use(VueResource);
-                        //
-                        //    Vue.filter('dateFull', function (date) {
-                        //        var m = moment(date);
-                        //        return "le " + m.format('dddd D MMMM YYYY') + ', ' + moment(date).fromNow();
-                        //    });
-                        //
-                        //    Vue.filter('dateFullSort', function (date) {
-                        //        var m = moment(date);
-                        //        return m.format('D MMMM YYYY') + ', ' + moment(date).fromNow();
-                        //    });
-                        //
-                        //    Vue.filter('filesize', function (octets) {
-                        //        var sizes = ['Octets', 'KB', 'MB', 'GB', 'TB'];
-                        //        if (octets == 0) return '0 Octet';
-                        //        var i = parseInt(Math.floor(Math.log(octets) / Math.log(1024)));
-                        //        return Math.round(octets / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                        //    });
-                        //    //Vue.config.devtools = true;
-                        //    new Vue({
-                        //        el: "#docv2",
-                        //        render(h) {
-                        //            return h(DocumentsActivity, {
-                        //                props: {
-                        //                    url: '<?//= $this->url(
-                        //                        'contract/documents-json',
-                        //                        ['id' => $entity->getId()]
-                        //                    ) ?>//',
-                        //                    urlUploadNewDoc:'<?//= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>//',
-                        //                    urlDocumentType: '<?//= $this->url(
-                        //                        'contractdocument/document-change-type'
-                        //                    ) ?>//',
-                        //                    computedDocuments: <?//= json_encode($generatedDocumentsJson) ?>//,
-                        //                    documentTypes: <?//= $documentTypes ?>//,
-                        //                    moment: moment
-                        //                }
-                        //            });
-                        //        }
-                        //    });
-                        //});
-                    </script>
+                        <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
                 </section>
             <?php
             endif; ?>

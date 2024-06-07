@@ -83,6 +83,18 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         return $query->getQuery()->getResult();
     }
 
+    public function getDocumentsWithProcessByPerson(string $person_email)
+    {
+        $query = $this->createQueryBuilder('d')
+            ->innerJoin('d.process', 'p')
+            ->innerJoin('p.steps', 'st')
+            ->innerJoin('st.signature', 's')
+            ->innerJoin('s.observers', 'o')
+            ->where("o.email = :email");
+        $query->setParameter('email', $person_email);
+        return $query->getQuery()->getResult();
+    }
+
     /**
      * @return ContractDocument[]
      */
