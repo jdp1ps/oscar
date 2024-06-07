@@ -94,14 +94,14 @@
     "src": "src/DeclarersList.js"
   },
   "src/DocumentsObserved.css": {
-    "file": "assets/DocumentsObserved-738cc61e.css",
+    "file": "assets/DocumentsObserved-8958000f.css",
     "src": "src/DocumentsObserved.css"
   },
   "src/DocumentsObserved.js": {
     "css": [
-      "assets/DocumentsObserved-738cc61e.css"
+      "assets/DocumentsObserved-8958000f.css"
     ],
-    "file": "assets/documentsobserved-871aea1c.js",
+    "file": "assets/documentsobserved-f51322d9.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
