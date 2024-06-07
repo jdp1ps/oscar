@@ -103,7 +103,6 @@
               <small v-if="doc.activity.project_id">
                 (<i class="icon-cubes"></i>{{ doc.activity.project_acronym }})
               </small>
-              {{ doc.activity}}
             </span>
 
           </section>
