@@ -1,1 +1,1 @@
-const n={money(u){for(var o=u.toFixed(2),e="",a=!1,s=0,e=[],r=o.length-1;r>=0;r--){var t=o[r];t=="."?(e.push(","),a=!0):(e.push(t),a==!0&&t!="-"&&r>0&&(s++,s%3==0&&e.push(" ")))}return e.reverse().join("")}};export{n as M};
+const s=(t,r)=>{const o=t.__vccOpts||t;for(const[c,e]of r)o[c]=e;return o};export{s as _};

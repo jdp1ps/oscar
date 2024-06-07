@@ -1281,6 +1281,14 @@ contractdocument:
         route: /process/:id
         defaults:
           action: process
+
+    documents-observed:
+      type: segment
+      options:
+        route: /documents-observed
+        defaults:
+          action: documentsObserved
+
     delete:
       type: segment
       options:

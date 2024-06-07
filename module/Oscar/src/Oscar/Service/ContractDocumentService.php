@@ -73,6 +73,16 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     }
 
     /**
+     * Liste des documents qu'une personne "observe".
+     *
+     * @param Person $person
+     * @return ContractDocument[]
+     */
+    public function getDocumentsWithSignProcessForUser(Person $person) :array {
+        return $this->getContractDocumentRepository()->getDocumentsWithProcessByPerson($person->getEmail());
+    }
+
+    /**
      * @return PhpFileExtension
      */
     protected function getExtensionManager()

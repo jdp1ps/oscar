@@ -406,6 +406,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'information' => $this->getInformation(),
             'fileName'    => $fileName,
             'process'    => $process,
+            'activity'    => $this->getActivity()->toJson(),
             'process_sendable'    => $process_sendable,
 //            'fileName'    => $this->getFileName(),
             'fileSize'    => $this->getFileSize(),

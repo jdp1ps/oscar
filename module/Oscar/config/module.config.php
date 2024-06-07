@@ -252,7 +252,17 @@ return array(
                 // DOCUMENTS
                 [
                     'controller' => 'ContractDocument', // --- Upload
-                    'action' => ['upload', 'delete', 'changeType', 'index', 'show', 'download', 'process', 'signDocument'],
+                    'action' => [
+                        'changeType',
+                        'delete',
+                        'documentsObserved',
+                        'download',
+                        'index',
+                        'signDocument',
+                        'process',
+                        'show',
+                        'upload',
+                    ],
                     'roles' => ['user']
                 ],
 
@@ -536,6 +546,7 @@ return array(
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             \Oscar\Service\DocumentFormatterService::class => \Oscar\Service\DocumentFormatterServiceFactory::class,
             \Oscar\Service\GearmanJobLauncherService::class => \Oscar\Service\GearmanJobLauncherServiceFactory::class,
+            \Oscar\Service\JsonFormatterService::class => \Oscar\Service\JsonFormatterServiceFactory::class,
             'Logger' => \Oscar\Service\LoggerServiceFactory::class,
             \Oscar\Service\MailingService::class => \Oscar\Service\MailingServiceFactory::class,
             \Oscar\Service\MaintenanceService::class => \Oscar\Service\MaintenanceServiceFactory::class,

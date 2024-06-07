@@ -11,6 +11,7 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
+use Oscar\Service\JsonFormatterService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Laminas\ServiceManager\Factory\FactoryInterface;
@@ -25,6 +26,7 @@ class ContractDocumentControllerFactory implements FactoryInterface
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setServiceContainer($container);
+        $c->setJsonFormatterService($container->get(JsonFormatterService::class));
         return $c;
     }
 }

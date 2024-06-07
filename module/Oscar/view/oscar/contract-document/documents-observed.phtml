@@ -1,0 +1,17 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h1><i class="icon-pencil"></i>Document en cours de signature</h1>
+            <div class="alert alert-info">
+                Les documents affichès ici sont en cours de signature. Vous êtes identifié comme <strong>observateur</strong> sur une des étapes. En cliquant sur <strong>détails</strong>, vous pouvez suivre les étapes du circuit de signature.
+            </div>
+            <div id="documents"
+                 data-url="<?= $this->url('contractdocument/documents-observed') ?>?f=json">&nbsp;</div>
+            <?= $this->Vite()->addJs('src/DocumentsObserved.js'); ?>
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+
+</div>

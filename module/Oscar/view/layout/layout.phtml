@@ -93,6 +93,9 @@ $this->headScript();
                                     class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu">
+
+                                <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Mes recherches</li>
+
                                 <li><a href="<?= $this->url('project/mine') ?>"><i class="icon-cubes"></i> <?= $this->translate('Mes projets') ?></a></li>
                                 <?php if( $this->grant()->isBoss() ): ?>
                                 <li><a href="<?= $this->url('project/structure') ?>"><i class="icon-building-filled"></i> <?= $this->translate('Mes structures') ?></a></li>
@@ -100,11 +103,13 @@ $this->headScript();
                                 <?php if( $this->grant()->hasPersonnelAccess() ): ?>
                                     <li><a href="<?= $this->url('person/personnel') ?>"><i class="icon-group"></i> <?= $this->translate('Personnel') ?></a></li>
                                 <?php endif; ?>
+
                                 <li>
-                                    <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
+                                    <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i class="icon-edit"></i> <?= $this->translate('Mes visas de document') ?></a>
                                 </li>
+
                                 <li>
-                                    <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i class="icon-book"></i> <?= $this->translate('Signatures en cours') ?></a>
+                                    <a href="<?= $this->url('contractdocument/documents-observed') ?>"><i class="icon-eye"></i> <?= $this->translate('Suivi des circuits de signature') ?></a>
                                 </li>
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
@@ -120,6 +125,11 @@ $this->headScript();
                                 <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
                                     <li><a href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a></li>
                                 <?php endif; ?>
+
+                                <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Divers</li>
+                                <li>
+                                    <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
+                                </li>
                             </ul>
                         </li>
                     <?php endif; ?>

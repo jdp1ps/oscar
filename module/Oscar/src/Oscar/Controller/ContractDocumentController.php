@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Controller;
 
 use Doctrine\ORM\NonUniqueResultException;
@@ -16,6 +17,8 @@ use Oscar\Service\ContractDocumentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
+use Oscar\Traits\UseJsonFormatterService;
+use Oscar\Traits\UseJsonFormatterServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\FileSystemUtils;
@@ -29,10 +32,10 @@ use Laminas\View\Model\JsonModel;
  * Class ContractDocumentController
  * @package Oscar\Controller
  */
-class ContractDocumentController extends AbstractOscarController implements UseServiceContainer
+class ContractDocumentController extends AbstractOscarController implements UseServiceContainer, UseJsonFormatterService
 {
 
-    use UseServiceContainerTrait;
+    use UseServiceContainerTrait, UseJsonFormatterServiceTrait;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES ACCESS
 
@@ -77,7 +80,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     protected function getContractDocumentService()
     {
-        return $this->getService($this->getServiceContainer(),ContractDocumentService::class);
+        return $this->getService($this->getServiceContainer(), ContractDocumentService::class);
     }
 
     /**
@@ -91,7 +94,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     /**
      * @throws OscarException
      */
-    protected function getVersionnedDocumentService() :VersionnedDocumentService
+    protected function getVersionnedDocumentService(): VersionnedDocumentService
     {
         if (null === $this->versionnedDocumentService) {
             $this->versionnedDocumentService = new VersionnedDocumentService(
@@ -113,7 +116,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @param ContractDocument|null $document
      * @throws OscarException
      */
-    protected function getDropLocation(ContractDocument $document = null) :string
+    protected function getDropLocation(ContractDocument $document = null): string
     {
         if (!is_null($document)) {
             return $this->getOscarConfigurationService()->getDocumentRealpath($document);
@@ -131,7 +134,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @return UnicaenDoctrinePaginator[]
      * @throws Exception
      */
-    public function indexAction()
+    public function indexAction() :array
     {
         $documents = $this->getVersionnedDocumentService()->getDocuments();
         $page = $this->params()->fromQuery('page', 1);
@@ -354,7 +357,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         try {
             $flow = $this->params()->fromPost('flow');
             $flowDt = null;
-            if($flow != 'false'){
+            if ($flow != 'false') {
                 // DISABLED
                 // $flowDt = json_decode($flow, true);
             }
@@ -380,16 +383,43 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
     }
 
-    public function signDocumentAction() {
+    /**
+     * Liste des documents suivis (présent en tant qu'observateur d'un processus de signature)
+     *
+     * @return void
+     */
+    public function documentsObservedAction()
+    {
+        $this->getLoggerService()->debug("documentsObservedAction()");
+        $this->getJsonFormatterService()->setUrlHelper($this->url());
+        $person = $this->getCurrentPerson();
+        if ($this->isAjax() || $this->params()->fromQuery('f', null) == 'json') {
+            $this->getLoggerService()->debug("Chargement des documents observés");
+            try {
+                $documents = $this->getContractDocumentService()->getDocumentsWithSignProcessForUser($person);
+                $output = $this->baseJsonResponse();
+                $output['documents'] = $this->getJsonFormatterService()->contractDocuments($documents);
+                return $this->jsonOutput($output);
+            } catch (Exception $e) {
+                $msg = "Impossible d'afficher le suivi des signatures";
+                $this->getLoggerService()->error($msg . " : " . $e->getMessage());
+                return $this->jsonError($msg);
+            }
+        }
+        return [];
+    }
+
+    public function signDocumentAction()
+    {
         try {
             // DOCUMENT et FLOWDT
             try {
                 $document_id = $this->params()->fromPost('document_id', null);
-                if( $document_id == null || $document_id <= 0 ){
+                if ($document_id == null || $document_id <= 0) {
                     throw new OscarException("ID de document non transmis");
                 }
                 $document = $this->getContractDocumentService()->getDocument($document_id);
-            } catch (Exception $e){
+            } catch (Exception $e) {
                 throw new OscarException("Impossible de trouver le document");
             }
             $activity = $this->getActivityService()->getActivityById($document->getActivity()->getId());
@@ -397,12 +427,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             // FLOW
 
             $flowDtPosted = $this->params()->fromPost('flow_datas', null);
-            if( $flowDtPosted == null ){
+            if ($flowDtPosted == null) {
                 throw new OscarException("Aucune donnée de signature envoyée");
             }
             $flowDt = json_decode($flowDtPosted, true);
 
-            if( !$flowDt ){
+            if (!$flowDt) {
                 throw new OscarException("Les données de signature envoyées sont invalides");
             }
 
@@ -411,7 +441,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             return new JsonModel(['response' => 'ok']);
         } catch (Exception $e) {
             $this->getLoggerService()->critical("Erreur signature : " . $e->getMessage());
-            return $this->jsonError("Un problème est survenu lors de la soumission pour signature : " . $e->getMessage());
+            return $this->jsonError(
+                "Un problème est survenu lors de la soumission pour signature : " . $e->getMessage()
+            );
         }
     }
 

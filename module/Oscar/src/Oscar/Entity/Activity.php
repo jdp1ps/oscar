@@ -2730,6 +2730,8 @@ class Activity implements ResourceInterface
             'text'  => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
             'num'   => $this->getOscarNum(),
             'label' => $this->getLabel(),
+            'project_acronym' => $this->getProject() ? $this->getProject()->getAcronym() : "",
+            'project_label' => $this->getProject() ? $this->getProject()->getLabel() : "",
         ];
     }
 

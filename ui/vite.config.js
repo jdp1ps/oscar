@@ -29,6 +29,7 @@ export default defineConfig({
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
+        documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),
