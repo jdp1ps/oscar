@@ -52,6 +52,7 @@ class OrganizationRoleRepository extends EntityRepository
     {
         return $this->createQueryBuilder('r')
             ->select('r')
+            ->orderBy('r.label', 'ASC')
             ->getQuery()
             ->getResult();
     }

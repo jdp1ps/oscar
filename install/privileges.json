@@ -241,6 +241,14 @@
     "libelle": "Peut g\u00e9rer les documents (Ajouter)",
     "fullcode": "ACTIVITY-DOCUMENT_MANAGE"
   },
+  "ACTIVITY-DOCUMENT_DELETEDSIGNED": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-DOCUMENT_SHOW",
+    "code": "DOCUMENT_DELETEDSIGNED",
+    "libelle": "Peut supprimer un document signé",
+    "fullcode": "ACTIVITY-DOCUMENT_DELETEDSIGNED"
+  },
 
   "ACTIVITY-DUPLICATE": {
     "category_id": 2,

@@ -351,7 +351,7 @@
                             data-url-upload-new-doc="<?= $this->url('contractdocument/upload', ['idactivity' => $entity->getId()]) ?>"
                             data-url-sign-document="<?= $this->url('contractdocument/signdocument') ?>"
                             data-url-url-documentd-type="<?= $this->url('contractdocument/document-change-type') ?>"
-                            data-url="<?= $this->url('contract/documents-json',['id' => $entity->getId()]) ?>">doc</div>
+                            data-url="<?= $this->url('contractdocument/activity',['activity_id' => $entity->getId()]) ?>">doc</div>
                         <?= $this->Vite()->addJs('src/ActivityDocuments.js'); ?>
                 </section>
             <?php
@@ -857,10 +857,13 @@
             console.log('test déclenché');
         })
 
-        document.querySelector('#cloneBtn').addEventListener('click', function (e) {
-            e.preventDefault();
-            activityClone.$children[0].$data.displayed = true;
-        });
+        let cloneBtn = document.querySelector('#cloneBtn');
+        if(cloneBtn) {
+            cloneBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                activityClone.$children[0].$data.displayed = true;
+            });
+        }
     });
 </script>
 <?php $this->signatureUi()->addJs('src/signature.scss') ?>

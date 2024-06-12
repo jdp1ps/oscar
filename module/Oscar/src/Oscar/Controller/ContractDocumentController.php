@@ -6,6 +6,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
 use Oscar\Entity\TabDocument;
@@ -14,6 +15,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityLogService;
 use Oscar\Service\ContractDocumentService;
+use Oscar\Service\JsonFormatterService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
@@ -26,6 +28,8 @@ use Oscar\Utils\UnicaenDoctrinePaginator;
 use Psr\Container\ContainerInterface;
 use Laminas\Http\Request;
 use Laminas\View\Model\JsonModel;
+use UnicaenSignature\Provider\SignaturePrivileges;
+use UnicaenSignature\Utils\SignatureConstants;
 
 
 /**
@@ -134,7 +138,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * @return UnicaenDoctrinePaginator[]
      * @throws Exception
      */
-    public function indexAction() :array
+    public function indexAction(): array
     {
         $documents = $this->getVersionnedDocumentService()->getDocuments();
         $page = $this->params()->fromQuery('page', 1);
@@ -230,6 +234,65 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         throw new \HttpException();
     }
 
+    /**
+     * @param string $field_name
+     * @return ContractDocument
+     * @throws OscarException
+     */
+    protected function getDocumentFromPostedId(string $field_name = 'document_id'): ContractDocument
+    {
+        $documentId = intval($this->params()->fromPost($field_name, 0));
+        if (!$documentId) {
+            $msg = "Paramètre d'identifiant de document non trouvé";
+            $this->getLoggerService()->warning($msg);
+            throw new OscarException($msg);
+        }
+        return $this->getContractDocumentService()->getDocument($documentId);
+    }
+
+    /**
+     * @param string $field_name
+     * @return ContractDocument
+     * @throws OscarException
+     */
+    protected function getDocumentFromRouteId(string $field_name = 'document_id'): ContractDocument
+    {
+        $documentId = intval($this->params()->fromRoute($field_name, 0));
+        if (!$documentId) {
+            $msg = "Paramètre d'identifiant de document non trouvé";
+            $this->getLoggerService()->warning($msg);
+            throw new OscarException($msg);
+        }
+        return $this->getContractDocumentService()->getDocument($documentId);
+    }
+
+    /**
+     * @param string $field_name
+     * @return ContractDocument
+     * @throws OscarException
+     */
+    protected function getActivityFromRouteId(string $field_name = 'idactivity'): Activity
+    {
+        $activityId = intval($this->params()->fromRoute($field_name, 0));
+        if (!$activityId) {
+            $msg = "Paramètre d'identifiant d'activité non trouvé";
+            $this->getLoggerService()->warning($msg);
+            throw new OscarException($msg);
+        }
+        return $this->getContractDocumentService()->getActivity($activityId);
+    }
+
+    public function editAction()
+    {
+        $document = $this->getDocumentFromRouteId();
+        return $this->saveDocument('edit', $document, $document->getActivity());
+    }
+
+    public function reuploadAction()
+    {
+        $document = $this->getDocumentFromRouteId();
+        return $this->saveDocument('version', $document, $document->getActivity());
+    }
 
     /**
      * Upload de document sur une activité
@@ -240,79 +303,120 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      */
     public function uploadAction()
     {
-        // Récupération des données envoyées
-        $action = $this->params()->fromPost('action');
-        $idActivity = $this->params()->fromRoute('idactivity');
-        $activity = $this->getActivityService()->getActivityById($idActivity);
-        $json = $this->params()->fromPost('data');
-        $documentDatas = json_decode($json, true);
-        $documentId = $documentDatas['id'];
-
-        $this->getLoggerService()->info("[document:$action] from " . strval($this->getCurrentPerson()));
-
-        // Check des droits
-        $document = null;
-        if ($documentId > 0) {
-            try {
-                $document = $this->getContractDocumentService()->getDocument($documentId, true);
-            } catch (Exception $e) {
-                $this->getLoggerService()->error($e->getMessage());
-                return $this->jsonError($e->getMessage());
-            }
-            if (!$this->getOscarUserContextService()->getAccessDocument($document)) {
-                return $this->jsonError("Vous n'avez pas les droits pour gérer ce document");
-            }
-        }
-
-        $idTab = $documentDatas['tabDocument']['id'];
-        $tabDocument = $this->getContractDocumentService()->getContractTabDocument($idTab);
-        if (!$this->getOscarUserContextService()->getAccessTabDocument($tabDocument)) {
-            return $this->getResponseUnauthorized(
-                "Vous n'avez pas les authorisations pour téléverser un document dans cet onglet"
-            );
-        }
-
-        $dateDeposit = $documentDatas['dateDeposit'];
-        if ($dateDeposit) {
-            $dateDeposit = new \DateTime($dateDeposit);
-        }
-        else {
-            $dateDeposit = null;
-        }
-        $dateSend = $documentDatas['dateSend'];
-        if ($dateSend) {
-            $dateSend = new \DateTime($dateSend);
-        }
-        else {
-            $dateSend = null;
-        }
-        $information = $documentDatas['information'];
-
-        $private = $documentDatas['tabDocument']['private'];
-        $idType = $documentDatas['category']['id'];
-        $url = $documentDatas['location'] == 'url';
-        $persons = $documentDatas['persons'];
-        $privatePersons = [];
+        $activity = $this->getActivityFromRouteId();
+        return $this->saveDocument('new', null, $activity);
+    }
 
 
-        // Document privé
-        if ($private) {
-            if (!$this->getOscarUserContextService()->hasPrivileges(
-                Privileges::ACTIVITY_DOCUMENT_MANAGE,
-                $activity
-            )) {
-                return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
-            }
-            foreach ($persons as $personId) {
-                $personId = intval($personId);
-                if ($personId) {
-                    $privatePersons[] = $personId;
+    protected function saveDocument(string $action, ?ContractDocument $document, Activity $activity)
+    {
+        $this->getLoggerService()->debug("saveDocument");
+        try {
+            // Récupération des données envoyées
+            $json = $this->params()->fromPost('data');
+            $documentDatas = json_decode($json, true);
+
+
+            if ($action == 'new') {
+                $rolesInActivity = $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
+                    $this->getCurrentPerson(),
+                    $activity
+                );
+                $tabDocument = $this->getContractDocumentService()->getContractTabDocument(
+                    $documentDatas['tabDocument']['id']
+                );
+                $accessTab = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesInActivity);
+                if (!$accessTab['write']) {
+                    throw new OscarException("Vous ne pouvez pas uploader dans cet onglet");
                 }
             }
-        }
+            else {
+                $tabDocument = $document->getTabDocument();
+                $activity = $document->getActivity();
+                if (!$this->getOscarUserContextService()->getAccessDocument($document)) {
+                    return $this->jsonError("Vous n'avez pas les droits pour gérer ce document");
+                }
+            }
 
-        if ($action == 'version') {
+            $this->getLoggerService()->info("[document:$action] from " . strval($this->getCurrentPerson()));
+
+            $dateDeposit = $documentDatas['dateDeposit'];
+            if ($dateDeposit) {
+                $dateDeposit = new \DateTime($dateDeposit);
+            }
+            else {
+                $dateDeposit = null;
+            }
+            $dateSend = $documentDatas['dateSend'];
+            if ($dateSend) {
+                $dateSend = new \DateTime($dateSend);
+            }
+            else {
+                $dateSend = null;
+            }
+            $information = $documentDatas['information'];
+
+            $private = $documentDatas['tabDocument']['private'];
+            $idType = $documentDatas['category']['id'];
+            $url = $documentDatas['location'] == 'url';
+            $persons = $documentDatas['persons'];
+            $privatePersons = [];
+
+
+            // Document privé
+            if ($private) {
+                if (!$this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_DOCUMENT_MANAGE,
+                    $activity
+                )) {
+                    return $this->getResponseUnauthorized("Vous ne pouvez pas téléverser un document privé");
+                }
+                foreach ($persons as $personId) {
+                    $personId = intval($personId);
+                    if ($personId) {
+                        $privatePersons[] = $personId;
+                    }
+                }
+            }
+
+            if ($action == 'version') {
+                try {
+                    $this->getContractDocumentService()->uploadContractDocumentNewVersion(
+                        $_FILES['file'],
+                        $document,
+                        $dateDeposit,
+                        $dateSend,
+                        $information,$this->getCurrentPerson()
+                    );
+
+                    return new JsonModel([
+                                             'response' => 'ok'
+                                         ]);
+                } catch (Exception $e) {
+                    $this->getLoggerService()->error($e->getMessage());
+                    return $this->getResponseInternalError($e->getMessage());
+                }
+            }
+
+            if ($action == 'edit') {
+                $document->setTypeDocument(
+                    $this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id'])
+                );
+
+                $document->setTabDocument(
+                    $this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id'])
+                );
+                $document->setDateDeposit($dateDeposit);
+                $document->setDateSend($dateSend);
+                $document->setInformation($information);
+                $this->getEntityManager()->flush();
+
+                return new JsonModel(['message' => 'ok']);
+            }
+
             try {
+                $flowDt = null;
+
                 $this->getContractDocumentService()->uploadContractDocument(
                     $_FILES['file'],
                     $activity,
@@ -323,64 +427,186 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     $dateDeposit,
                     $dateSend,
                     $information,
-                    $url
+                    $url,
+                    'new'
                 );
                 return new JsonModel([
                                          'response' => 'ok'
                                      ]);
             } catch (Exception $e) {
                 $this->getLoggerService()->error($e->getMessage());
-                return $this->getResponseInternalError($e->getMessage());
+                return $this->jsonError($e->getMessage());
+            }
+            return $this->jsonError("Non-implémenté");
+        } catch (Exception $exception) {
+            return $this->jsonError($exception->getMessage());
+        }
+    }
+
+    public function activityAction()
+    {
+        $id = $this->params()->fromRoute('activity_id');
+//        $ui = $this->params()->fromQuery('ui');
+//
+        /** @var Activity $entity */
+        $activity = $this->getActivityService()->getActivityById($id, true);
+
+        $out = $this->baseJsonResponse();
+
+        // ID des tabs (onglets pour ranger les documents)
+        $arrayTabs = [];
+        $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
+
+        $rolesMerged = $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
+            $this->getCurrentPerson(),
+            $activity
+        );
+
+        if ($this->getOscarUserContextService()->getAccessActivityDocument($activity)['read'] != true) {
+            return $this->getResponseUnauthorized();
+        }
+
+        /** @var TabDocument $tabDocument */
+        foreach ($entitiesTabs as $tabDocument) {
+            // Traitement final attendu sur les rôles
+            $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
+            if ($access['read']) {
+                $tabId = $tabDocument->getId();
+                $arrayTabs[$tabId] = $tabDocument->toJson();
+                $arrayTabs[$tabId]["documents"] = [];
+                $arrayTabs[$tabId]['manage'] = $access['write'] == true;
             }
         }
 
-        if ($action == 'edit') {
-            $activity = $this->getActivityService()->getActivityById($idActivity);
-            // TODO : check des droits d'accès
-            $document = $this->getContractDocumentService()->getDocument($documentDatas['id']);
-            if (!$document->getTypeDocument()->getSignatureFlow()) {
-                $document->setTypeDocument(
-                    $this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id'])
-                );
+        //Onglet non classé
+        $unclassifiedTab = [
+            "id"        => "unclassified",
+            "label"     => "Non-classés",
+            "manage"    => false,
+            "documents" => []
+        ];
+
+        $allowPrivate = true;
+        //Onglet privé
+        $privateTab = [
+            "id"        => "private",
+            "label"     => "Documents privés",
+            "documents" => [],
+            "manage"    => $allowPrivate
+        ];
+
+        $currentPerson = $this->getCurrentPerson();
+        /** @var JsonFormatterService $jsonFormatterService */
+        $jsonFormatterService = $this->getServiceLocator()->get(JsonFormatterService::class);
+        $jsonFormatterService->setUrlHelper($this->url());
+        //Docs reliés à une activité
+        /** @var ContractDocument $doc */
+        foreach ($activity->getDocuments() as $doc) {
+            if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
+                continue;
             }
-            $document->setTabDocument(
-                $this->getContractDocumentService()->getContractTabDocument($documentDatas['tabDocument']['id'])
+
+            $docAdded = $jsonFormatterService->contractDocument($doc, true);
+
+            if (is_null($doc->getTabDocument())) {
+                if ($doc->isPrivate() === true) {
+                    // Droits sur les documents privés utilisateur courant associé ou non au document
+                    $personsDoc = $doc->getPersons();
+                    $isPresent = false;
+                    foreach ($personsDoc as $person) {
+                        if ($person === $currentPerson) {
+                            $isPresent = true;
+                        }
+                    }
+
+                    if (true === $isPresent) {
+                        $docAdded['urlDelete'] = $this->url()->fromRoute(
+                            'contractdocument/delete',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlDownload'] = $this->url()->fromRoute(
+                            'contractdocument/download',
+                            ['id' => $doc->getId()]
+                        );
+                        $docAdded['urlReupload'] = $this->url()->fromRoute(
+                            'contractdocument/upload',
+                            [
+                                'idactivity' => $activity->getId(),
+                                'idtab'      => 'private',
+                                'id'         => $doc->getId()
+                            ]
+                        );
+                        $docAdded['urlPerson'] = false;
+                    }
+                    $privateTab ["documents"] [] = $docAdded;
+                }
+                else {
+                    $unclassifiedTab ["documents"] [] = $docAdded;
+                }
+            }
+            else {
+                if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
+                    continue;
+                }
+
+                $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
+            }
+        } // End boucle
+
+        if ($privateTab && $privateTab['documents']) {
+            $arrayTabs['private'] = $privateTab;
+        }
+
+        $generatedDocuments = $this->getOscarConfigurationService()->getConfiguration(
+            'generated-documents.activity'
+        );
+        $generatedDocumentsJson = [];
+        foreach ($generatedDocuments as $key => $infos) {
+            $generatedDocumentsJson[] = [
+                'url'   => $this->url()->fromRoute(
+                    'contract/generatedocument',
+                    ['id' => $activity->getId(), 'doc' => $key]
+                ),
+                'label' => $infos['label']
+            ];
+        }
+
+        $typesDocuments = [];
+        $signatureFlowParams = [];
+        $typesDocumentsDatas = $this->getActivityService()->getTypesDocuments(false);
+
+        // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
+        $processDatas = [];
+        $signatureService = $this->getContractDocumentService()->getSignatureService();
+
+        foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
+            $this->getLoggerService()->debug(
+                "Chargement du flow " . $flow['label'] . " pour l'activité " . $activity->getLabel()
             );
-            $document->setDateDeposit($dateDeposit);
-            $document->setDateSend($dateSend);
-            $document->setInformation($information);
-            $this->getEntityManager()->flush();
-
-            return new JsonModel(['message' => 'ok']);
-        }
-
-        try {
-            $flow = $this->params()->fromPost('flow');
-            $flowDt = null;
-            if ($flow != 'false') {
-                // DISABLED
-                // $flowDt = json_decode($flow, true);
-            }
-            $this->getContractDocumentService()->uploadContractDocument(
-                $_FILES['file'],
-                $activity,
-                $tabDocument,
-                $this->getContractDocumentService()->getContractDocumentType($idType),
-                $this->getCurrentPerson(),
-                $privatePersons,
-                $dateDeposit,
-                $dateSend,
-                $information,
-                $url,
-                $flowDt
+            $flowId = $flow['id'];
+            $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
+                "",
+                $flowId,
+                ['activity_id' => $activity->getId()]
             );
-            return new JsonModel([
-                                     'response' => 'ok'
-                                 ]);
-        } catch (Exception $e) {
-            $this->getLoggerService()->error($e->getMessage());
-            return $this->jsonError($e->getMessage());
+
+            $processDatas[] = $signatureFlowDatas['signatureflow'];
         }
+
+        // Types de document
+        foreach ($typesDocumentsDatas as $typeDocument) {
+            $typeDatas = $typeDocument->toArray();
+            $typeDatas['flow'] = false;
+            $typesDocuments[] = $typeDatas;
+        }
+
+        $out['process_datas'] = $processDatas;
+        $out['tabsWithDocuments'] = $arrayTabs;
+        $out['typesDocuments'] = $typesDocuments;
+        $out['idCurrentPerson'] = $this->getCurrentPerson()->getId();
+        $out['computedDocuments'] = $generatedDocumentsJson;
+
+        return new JsonModel($out);
     }
 
     /**
@@ -407,6 +633,37 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
         }
         return [];
+    }
+
+    public function processDeleteAction()
+    {
+        try {
+            $document = $this->getDocumentFromRouteId();
+            $this->getContractDocumentService()->deleteProcess($document);
+            return $this->jsonOutput(['response' => 'ok']);
+        } catch (Exception $e) {
+            return $this->jsonError($e->getMessage());
+        }
+    }
+
+    public function processCreateAction()
+    {
+        try {
+            $document = $this->getDocumentFromRouteId();
+            $flowDatas = json_decode($this->params()->fromPost('flow_datas'), true);
+            if (!$flowDatas) {
+                throw new OscarException("Impossible de traiter les données de signature");
+            }
+            $this->getContractDocumentService()->applySignature($document->getId(), $flowDatas['id'], $flowDatas);
+
+            return new JsonModel(['response' => 'ok']);
+        } catch (Exception $e) {
+            return $this->jsonError($e->getMessage());
+        }
+    }
+
+    public function processUpdateAction()
+    {
     }
 
     public function signDocumentAction()

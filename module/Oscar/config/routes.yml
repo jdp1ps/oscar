@@ -910,6 +910,13 @@ contract:
   may_terminate: false
   child_routes:
 
+    my-role:
+      type: segment
+      options:
+        route: /my-role/:activity_id
+        defaults:
+          action: myRole
+
     process-document-signed-send:
       type: segment
       options:
@@ -1248,26 +1255,24 @@ contractdocument:
     defaults:
       controller: ContractDocument
       action: index
+
   may_terminate: true
+
   child_routes:
+    activity:
+      type: segment
+      options:
+        route: /activity/:activity_id
+        defaults:
+          action: activity
+
     document-change-type:
       type: segment
       options:
         route: /document-change-type
         defaults:
           action: changeType
-    signdocument:
-      type: segment
-      options:
-        route: /signature-document
-        defaults:
-          action: signDocument
-    upload:
-      type: segment
-      options:
-        route: /televerser/:idactivity[/:idtab][/:id]
-        defaults:
-          action: upload
+
     download:
       type: segment
       options:
@@ -1275,12 +1280,61 @@ contractdocument:
         defaults:
           action: download
 
+    upload:
+      type: segment
+      options:
+        route: /upload/:idactivity
+        defaults:
+          action: upload
+
+    reupload:
+      type: segment
+      options:
+        route: /reupload/:document_id
+        defaults:
+          action: reupload
+
+    signdocument:
+      type: segment
+      options:
+        route: /signature-document
+        defaults:
+          action: signDocument
+
+    edit:
+      type: segment
+      options:
+        route: /edit/:document_id
+        defaults:
+          action: edit
+
     process:
       type: segment
       options:
         route: /process/:id
         defaults:
           action: process
+
+    process-create:
+      type: segment
+      options:
+        route: /process/create/:document_id
+        defaults:
+          action: processCreate
+
+    process-delete:
+      type: segment
+      options:
+        route: /process/delete/:document_id
+        defaults:
+          action: processDelete
+
+    process-update:
+      type: segment
+      options:
+        route: /process/update/:document_id
+        defaults:
+          action: processUpdate
 
     documents-observed:
       type: segment

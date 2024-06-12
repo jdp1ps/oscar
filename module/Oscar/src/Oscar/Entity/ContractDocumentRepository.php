@@ -64,6 +64,18 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// DOCUMENTS
 
+    public function getLastDocumentId() :int {
+        $query = $this->createQueryBuilder('c');
+        $query->orderBy('c.id', 'DESC');
+        $query->setMaxResults(1);
+        $result = $query->getQuery()->getOneOrNullResult();
+        if($result == null){
+            return 1;
+        }else{
+            return $result->getId()+1;
+        }
+    }
+
     /**
      * Retourne toutes les versions d'un même document.
      *

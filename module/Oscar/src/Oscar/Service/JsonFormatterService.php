@@ -48,75 +48,136 @@ class JsonFormatterService implements UseOscarConfigurationService, UseEntityMan
 
     public function contractDocument(ContractDocument $doc, bool $showUrls = true): array
     {
-        // Processus du document
+        $activity = $doc->getActivity();
         $process = $doc->getProcess();
-        $urlProcessUpdate = null;
 
+        $download_url = null;
+        $delete_url = null;
+        $reupload_url = null;
+        $edit_url = null;
+
+        $allowRead = $this->getOscarUserContextService()->contractDocumentRead($doc);
+        $allowManage = $this->getOscarUserContextService()->contractDocumentWrite($doc);
+        $allowDownload = $allowRead;
+        $allowReUpload = $allowManage;
+        $allowDelete = $allowManage;
+        $allowEdit = $allowManage;
+
+        $infoDelete = "";
+
+
+        $process_update_url = null;
+        $process_delete_url = null;
+
+        $allowProcessCreate = false;
+        $allowProcessDelete = false;
+        $allowProcessUpdate = false;
+
+        $infoProcess = "";
+
+        // Il y a un processus en cours
         if ($process) {
-            $allowSign = $this->getOscarUserContextService()->hasPrivileges(
+            $allowReUpload = false;
+
+            $allowProcessUpdate = $this->getOscarUserContextService()->hasPrivileges(
+                SignaturePrivileges::SIGNATURE_SYNC,
+                $activity
+            );
+
+            if ($process->isFinished()) {
+                $allowProcessUpdate = false;
+                $allowProcessDelete = $allowDelete = $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_DOCUMENT_DELETEDSIGNED,
+                    $activity
+                );
+            }
+            else {
+                $allowDelete = $allowProcessDelete = $this->getOscarUserContextService()->hasPrivileges(
+                    SignaturePrivileges::SIGNATURE_ADMIN,
+                    $activity
+                );
+            }
+
+            if ($allowProcessDelete) {
+                $process_delete_url = 'url/de/supression';
+                //$this->getUrlHelper()->fromRoute('contractdocument/process',['id' => $doc->getId()]
+            }
+
+
+            if ($allowProcessUpdate) {
+                $process_update_url = $this->getUrlHelper()->fromRoute(
+                    'contractdocument/process',
+                    ['id' => $doc->getId()]
+                );
+            }
+        }
+        else {
+            $allowProcessCreate = $this->getOscarUserContextService()->hasPrivileges(
                 SignaturePrivileges::SIGNATURE_CREATE,
                 $doc->getActivity()
             );
-            $manageProcess = false;
-            if ($this->getOscarUserContextService()->hasPrivileges(SignaturePrivileges::SIGNATURE_ADMIN)) {
-                if ($doc->getProcess()) {
-                    $urlProcessUpdate = $this->getUrlHelper()->fromRoute(
-                        'contractdocument/process',
-                        ['id' => $doc->getId()]
-                    );
-                }
-            }
         }
-        $processTriggerable = ($doc->getProcess() == null && $allowSign);
 
-        // Liens
-        $manage = $this->getOscarUserContextService()->contractDocumentWrite($doc);
-        $read = $this->getOscarUserContextService()->contractDocumentRead($doc);
-
-        $urlDownload = null;
-        $urlDelete = null;
-        $urlReupload = null;
+        // Accès aux fonctionnalités du document.
         $docAdded = $doc->toJson();
 
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $doc->getActivity())) {
             $docAdded['activity'] = $this->activitySimple($doc->getActivity(), $showUrls);
         }
 
-        if ($read) {
-            $urlDownload = $this->getUrlHelper()->fromRoute('contractdocument/download', ['id' => $doc->getId()]);
+        if ($allowRead) {
+            $download_url = $this->getUrlHelper()->fromRoute('contractdocument/download', ['id' => $doc->getId()]);
         }
 
-        if ($manage) {
-            $urlDelete = $this->getUrlHelper()->fromRoute('contractdocument/delete', ['id' => $doc->getId()]);
-            $urlReupload = $this->getUrlHelper()->fromRoute('contractdocument/upload', [
-                'id'         => $doc->getId(),
-                'idtab'      => $doc->getTabDocument()->getId(),
-                'idactivity' => $doc->getActivity()->getId()
+        if ($allowDelete) {
+            $delete_url = $this->getUrlHelper()->fromRoute('contractdocument/delete', ['id' => $doc->getId()]);
+        }
+
+        if ($allowEdit) {
+            $edit_url = $this->getUrlHelper()->fromRoute('contractdocument/edit', ['document_id' => $doc->getId()]);
+        }
+
+        if($allowProcessCreate){
+            $process_create_url = $this->getUrlHelper()->fromRoute('contractdocument/process-create', ['document_id' => $doc->getId()]);
+        }
+
+        if($allowProcessDelete){
+            $process_delete_url = $this->getUrlHelper()->fromRoute('contractdocument/process-delete', ['document_id' => $doc->getId()]);
+        }
+
+        if($allowReUpload){
+            $reupload_url = $this->getUrlHelper()->fromRoute('contractdocument/reupload', [
+                'document_id'         => $doc->getId()
             ]);
         }
         $docAdded['uploader'] = $this->personSimple($doc->getPerson(), true);
-        $docAdded['manage_process'] = $manageProcess;
-        $docAdded['process_triggerable'] = $processTriggerable;
-        $docAdded['urlDownload'] = $urlDownload;
-        $docAdded['urlReupload'] = $urlReupload;
-        $docAdded['urlDelete'] = $urlDelete;
+        $docAdded['manage_process'] = $allowProcessUpdate;
+        $docAdded['process_triggerable'] = $allowProcessCreate;
+        $docAdded['urlProcessDelete'] = $process_delete_url;
+        $docAdded['urlProcessCreate'] = $process_create_url;
+        $docAdded['urlProcessUpdate'] = $process_update_url;
+        $docAdded['urlDownload'] = $download_url;
+        $docAdded['urlReupload'] = $reupload_url;
+        $docAdded['urlDelete'] = $delete_url;
+        $docAdded['urlEdit'] = $edit_url;
 
         return $docAdded;
     }
 
-    public function activitySimple(Activity $activity, bool $urlShow = false) :array {
+    public function activitySimple(Activity $activity, bool $urlShow = false): array
+    {
         $output = [
-            'id' => $activity->getId(),
-            'label' => $activity->getLabel(),
-            'num' => $activity->getOscarNum(),
+            'id'              => $activity->getId(),
+            'label'           => $activity->getLabel(),
+            'num'             => $activity->getOscarNum(),
             'project_acronym' => $activity->getProject()?->getAcronym(),
-            'project_id' => $activity->getProject()?->getId(),
-            'project_label' => $activity->getProject()?->getLabel(),
+            'project_id'      => $activity->getProject()?->getId(),
+            'project_label'   => $activity->getProject()?->getLabel(),
         ];
 
         $url_show = null;
 
-        if( $urlShow ){
+        if ($urlShow) {
             $url_show = $this->getUrlHelper()->fromRoute('contract/show', ['id' => $activity->getId()]);
         }
         $output['url_show'] = $url_show;

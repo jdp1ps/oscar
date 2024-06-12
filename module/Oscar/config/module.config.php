@@ -170,6 +170,7 @@ return array(
                         "pcruList",
                         "apiUi",
                         "timesheet",
+                        "myRole"
                     ],
 
                     'roles' => ['user'],
@@ -253,13 +254,19 @@ return array(
                 [
                     'controller' => 'ContractDocument', // --- Upload
                     'action' => [
+                        'activity',
                         'changeType',
                         'delete',
                         'documentsObserved',
                         'download',
+                        'edit',
                         'index',
                         'signDocument',
                         'process',
+                        'processCreate',
+                        'processDelete',
+                        'processRefresh',
+                        'reupload',
                         'show',
                         'upload',
                     ],

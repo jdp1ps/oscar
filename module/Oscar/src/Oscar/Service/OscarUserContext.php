@@ -996,6 +996,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $_ROLES_ORGANIZATION_LEADER;
     }
 
+    public function getRolesPersonInActivityDeep(Person $person, Activity $activity)
+    {
+        $roles = $this->getRolesPersonInActivity($person, $activity);
+        $rolesAppli = $this->getBaseRoleId();
+        return array_merge($roles, $rolesAppli);
+    }
+
     public function getRolesPersonInActivity(Person $person, Activity $activity)
     {
         static $tmpRolesActivities;
@@ -1343,6 +1350,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if ($roles === null) {
             $roles = $this->getBaseRoleId();
+
         }
         if ($tmpAccessByRoles === null) {
             $tmpAccessByRoles = [];
