@@ -10,12 +10,24 @@ return [
 
         'documents_path' => __DIR__.'/../../data/documents/signature',
 
-//        'logger' => [
-//            'enable' => true,
-//            'level' => \Monolog\Logger::DEBUG,
-//            'file' => __DIR__.'/../../logs/signature.log',
-//            'stdout' => false
-//        ],
+        'logger'         => [
+            ///////////////////////////////////////
+            // Activation d'un logger autonome
+            'enable'          => true, // Actif
+            'level'           => \Monolog\Logger::DEBUG, // Niveau de log
+            'file'            => __DIR__ . '/../../logs/signature.log', // Fichier d'écriture
+            'file_permission' => 0666,
+
+            ///////////////////////////////////////
+            /// Sortie standard (pour le développement le built-in serveur)
+            'stdout'          => false,
+
+            ///////////////////////////////////////
+            /// Logger complémentaire (celui de l'application utilisant le module)
+            /// -> implementation de LoggerInterface (ex: Monolog)
+            // 'customLogger' => null
+            'customLogger'    => 'Logger' // customLogger (LoggerInterface)
+        ],
 
         'current_user' => function( $sc ){
             $person = $sc->get(\Oscar\Service\OscarUserContext::class)->getCurrentPerson();

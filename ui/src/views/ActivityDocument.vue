@@ -338,104 +338,14 @@
             Téléverser un document
           </button>
         </nav>
-        <hr>
-        <article class="card xs" v-for="doc in tab.documents" :key="doc.id" :class="{'private-document': doc.private }">
-          <div class="card-title">
-            <i class="picto icon-anchor-outline" v-if="doc.location == 'link'"></i>
-            <i class="picto icon-doc" :class="'doc' + doc.extension" v-else></i>
-            <small class="text-light">{{ doc.category.label }} ~ </small>
-            <strong>{{doc.fileName}}</strong>
-            <small class="text-light" :title="doc.fileSize + ' octet(s)'" v-if="doc.location != 'url'">&nbsp;
-              Version {{ doc.version }}
-            </small>
-          </div>
-          <small>
-            <i class="icon-briefcase"></i> Taille <strong>{{ $filters.filesize(doc.fileSize) }}</strong>
-            <i class="icon-calendar"></i> Envoyé <strong>{{ $filters.timeAgo(doc.dateSend) }}</strong>
-            <i class="icon-calendar"></i> Déposé <strong>{{ $filters.dateFull(doc.dateDeposit) }}</strong>
-            <i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong>
-            <i class="icon-user"></i> par <strong>{{ doc.uploader.displayname }}</strong>
-          </small>
-          <p>{{ doc.information }}</p>
-          <section v-if="doc.private">
-            <i class="icon-lock"/>
-            Ce document est privé, accessible par :
-            <span class="cartouche" v-for="p in doc.persons">
-                  {{ p.personName }}
-                </span>
-          </section>
-          <div class="card-content">
-            <section v-if="doc.process" class="alert"
-                     :class="{'alert-success':doc.process.status == 201,
-                              'alert-danger':doc.process.status >= 400,
-                              'alert-info':doc.process.status < 200
-            }">
-              <i class="icon-hammer"></i>
-              Procédure de signature <strong>{{ doc.process.label }}</strong> (<em>{{ doc.process.status_text }}</em>
-              <span> - étape {{ doc.process.current_step }} / {{ doc.process.total_steps }}</span>)
-              <button class="btn btn-xs btn-info" @click="handlerProcessDetailsOn(doc.process)">
-                Détails
-              </button>
-              <button v-if="doc.manage_process" class="btn btn-default btn-xs" @click="handlerProcessReload(doc)">
-                <i class="icon-cw-outline"></i>
-                Actualiser
-              </button>
-            </section>
-            <div v-if="doc.versions.length">
-              <div class="exploder">
-                Versions précédentes :
-              </div>
-              <article v-for="sub in doc.versions" class="subdoc text-highlight">
-                <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
-                <strong>{{ sub.fileName }}</strong>
-                version <em>{{ sub.version }} </em>,
-                téléchargé le
-                <time>{{ sub.dateUpload | dateFullSort }}</time>
-                <span v-if="sub.uploader">
-                        par <strong>{{ sub.uploader.displayname }}</strong>
-                        </span>
-
-                <a :href="sub.urlDownload">
-                  <i class="icon-download-outline"></i>
-                  Télécharger cette version
-                </a>
-              </article>
-            </div>
-
-            <nav class="text-right show-over">
-              <a class="btn btn-default btn-xs"
-                 :href="doc.basename"
-                 v-if="doc.location == 'url'" target="_blank">
-                <i class="icon-link-ext"></i>
-                Accéder au lien
-              </a>
-              <a class="btn btn-default btn-xs"
-                 href="#" v-if="doc.process_triggerable" @click="handlerSignDocument(doc)">
-                <i class="icon-bank"></i>
-                Signer ce document
-              </a>
-              <a class="btn btn-default btn-xs"
-                 :href="doc.urlDownload" v-if="doc.urlDownload && doc.location != 'url'">
-                <i class="icon-upload-outline"></i>
-                Télécharger
-              </a>
-              <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"
-                      v-if="tab.manage && doc.location != 'url' && !doc.process">
-                <i class="icon-download-outline"></i>
-                Nouvelle Version
-              </button>
-              <a class="btn btn-default btn-xs" @click.prevent="deleteDocument(doc)" v-if="tab.manage">
-                <i class="icon-trash"></i>
-                Supprimer
-              </a>
-              <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)"
-                 v-if="tab.manage && doc.location != 'url'">
-                <i class="icon-pencil"></i>
-                Modifier
-              </a>
-            </nav>
-          </div>
-        </article>
+        <document-list
+            :documents="tab.documents"
+            :tabs="tabsWithDocuments"
+            :types="typesDocuments"
+            :sign-process="signProcess"
+            :display-activity="false"
+            @fetch="fetch"
+        />
       </div>
     </section>
   </section>
@@ -447,6 +357,7 @@ import Datepicker from '../components/Datepicker.vue';
 import PersonAutoCompleter from '../components/PersonAutoCompleter.vue';
 import moment from 'moment';
 import 'moment/locale/fr';
+import DocumentsList from "./DocumentsList.vue";
 
 // Traitement spécifique de l'onglet Privé
 const PRIVATE = "private";
@@ -454,6 +365,7 @@ const PRIVATE = "private";
 export default {
 
   components: {
+    "document-list": DocumentsList,
     "date-picker": Datepicker,
     "person-auto-completer": PersonAutoCompleter
   },
@@ -631,9 +543,6 @@ export default {
 
         }
         if (count == 0) {
-
-          // { "id": 50, "label": "Visa Responsable Scientifique", "description": "", "order": 1, "letterfilename": "internal", "letterfile_label": "OSCAR visa", "level": "visa_hidden", "level_label": "Visa caché", "level_in_letterfile": "visa_hidden", "allSignToComplete": false, "editable": true, "missing_recipients": false, "dynamicRecipients": true, "recipients": [ { "firstname": "STEPHANE", "lastname": "BOUVRY", "email": "stephane.bouvry@unicaen.fr", "selected": false } ], "observers": [ { "firstname": "STEPHANE", "lastname": "BOUVRY", "email": "stephane.bouvry@unicaen.fr", "selected": true }, { "firstname": "ARNAUD", "lastname": "DARET", "email": "arnaud.daret@unicaen.fr", "selected": true } ] }
-
           this.signProcessError = "L'étape " + step.order + " \""+ step.label +"\" n'a pas de destinataire.";
           return true;
         }
@@ -1013,21 +922,13 @@ export default {
 
     // Recup datas Docs
     fetch() {
-      console.log("fetch()" + this.url);
       axios.get(this.url).then(ok => {
-        console.log("OK");
-        console.log(ok);
         this.handlerSuccess(ok)
       }, ko => {
         console.log('KO');
         console.log(ko);
         this.error = ko;
       });
-      // Object JS Ajax
-      // oscarRemoteData
-      //     .setPendingMessage("Chargement des documents")
-      //     .setErrorMessage("Impossible de charger les documents")
-      //     .performGet(this.url, this.handlerSuccess);
     }
   },
 

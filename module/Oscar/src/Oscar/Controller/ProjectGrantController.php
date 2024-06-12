@@ -1385,6 +1385,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return $view;
     }
 
+    public function myRoleAction() {
+        $activity = $this->getActivityFromRoute('activity_id');
+
+        $out = [
+          "id" => $activity->getId(),
+          "activity" => "$activity",
+          "roles" => $this->getOscarUserContextService()->getRolesPersonInActivityDeep($this->getCurrentPerson(), $activity)
+        ];
+        return $this->jsonOutput($out);
+    }
+
     /**
      * Nouvelle activité de recherche.
      *

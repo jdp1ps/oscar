@@ -1,11 +1,19 @@
 {
+  "DocumentsList.css": {
+    "file": "assets/DocumentsList-acc50f83.css",
+    "src": "DocumentsList.css"
+  },
   "_vendor.js": {
     "file": "vendor.js"
   },
   "_vendor2.js": {
+    "css": [
+      "assets/DocumentsList-acc50f83.css"
+    ],
     "file": "vendor2.js",
     "imports": [
-      "_vendor.js"
+      "_vendor.js",
+      "_vendor3.js"
     ]
   },
   "_vendor3.js": {
@@ -22,14 +30,14 @@
     ]
   },
   "src/ActivityDocuments.css": {
-    "file": "assets/ActivityDocuments-1f321088.css",
+    "file": "assets/ActivityDocuments-a082cfa6.css",
     "src": "src/ActivityDocuments.css"
   },
   "src/ActivityDocuments.js": {
     "css": [
-      "assets/ActivityDocuments-1f321088.css"
+      "assets/ActivityDocuments-a082cfa6.css"
     ],
-    "file": "assets/activitydocuments-adc4367f.js",
+    "file": "assets/activitydocuments-bef0d694.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -39,7 +47,7 @@
     "src": "src/ActivityDocuments.js"
   },
   "src/ActivitySpentDetails.js": {
-    "file": "assets/activityspentdetails-73e65b1e.js",
+    "file": "assets/activityspentdetails-ebcdda28.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js",
@@ -49,7 +57,7 @@
     "src": "src/ActivitySpentDetails.js"
   },
   "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-0b2154bb.js",
+    "file": "assets/activityspentsynthesis-8be5b6b5.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js",
@@ -59,7 +67,7 @@
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-6788d8e8.js",
+    "file": "assets/activityworkpackage-a1ac4e8c.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js"
@@ -68,7 +76,7 @@
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-a24ff935.js",
+    "file": "assets/admintypedocument-87b6f463.js",
     "imports": [
       "_vendor.js",
       "_vendor5.js",
@@ -85,7 +93,7 @@
     "css": [
       "assets/DeclarersList-87a946a0.css"
     ],
-    "file": "assets/declarerslist-f6eb501c.js",
+    "file": "assets/declarerslist-02d9e9a1.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js"
@@ -93,15 +101,8 @@
     "isEntry": true,
     "src": "src/DeclarersList.js"
   },
-  "src/DocumentsObserved.css": {
-    "file": "assets/DocumentsObserved-8958000f.css",
-    "src": "src/DocumentsObserved.css"
-  },
   "src/DocumentsObserved.js": {
-    "css": [
-      "assets/DocumentsObserved-8958000f.css"
-    ],
-    "file": "assets/documentsobserved-f51322d9.js",
+    "file": "assets/documentsobserved-68f8192f.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -118,7 +119,7 @@
     "css": [
       "assets/OrganizationFiche-058e2475.css"
     ],
-    "file": "assets/organizationfiche-6c6d83e2.js",
+    "file": "assets/organizationfiche-a23ddc24.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js"
@@ -134,7 +135,7 @@
     "css": [
       "assets/OrganizationSubOrganizations-b532b187.css"
     ],
-    "file": "assets/organizationsuborganizations-ad4320df.js",
+    "file": "assets/organizationsuborganizations-46020a80.js",
     "imports": [
       "_vendor.js",
       "_vendor3.js",

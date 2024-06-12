@@ -404,7 +404,7 @@ class ContractDocument extends AbstractVersionnedDocument
             'id'          => $this->getId(),
             'version'     => $this->getVersion(),
             'information' => $this->getInformation(),
-            'fileName'    => $fileName,
+            'fileName'    => $this->getFileName(),
             'process'    => $process,
             'activity'    => $this->getActivity()->toJson(),
             'process_sendable'    => $process_sendable,
