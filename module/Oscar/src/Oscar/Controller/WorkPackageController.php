@@ -53,7 +53,7 @@ class WorkPackageController extends AbstractOscarController
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($idactivity);
 
         if( !$activity ){
-            return $this->getResponseBadRequest("Cette activité l'existe pas / plus");
+            return $this->getResponseBadRequest("Cette activité n'existe pas / plus");
         }
 
         $persons = [];
@@ -68,7 +68,7 @@ class WorkPackageController extends AbstractOscarController
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
 
-            $datas = $this->getRequest()->getPost();
+            $datas = $this->getRequest()->getPost()->toArray();
 
 
             if( array_key_exists('workpackageid', $datas) ){
@@ -118,7 +118,7 @@ class WorkPackageController extends AbstractOscarController
 
         ///////////////////////////////////: AJOUT d'un déclarant
         if( $method == 'PUT' ){
-            $data = $this->getRequest()->getPost();
+            $data = $this->getRequest()->getPost()->toArray();
 
 //            parse_str(file_get_contents('php://input'), $_PUT);
 //
