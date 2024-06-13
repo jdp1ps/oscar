@@ -30,12 +30,12 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
     }
 
 
-    public function add(Organization $organization) :callable|array
+    public function add(Organization $organization): callable|array
     {
-        $this->addItem($organization);
+        return $this->addItem($organization);
     }
 
-    public function getIndexableDatas(mixed $organization) :array
+    public function getIndexableDatas(mixed $organization): array
     {
         $projects = [];
         $activities = [];
@@ -68,65 +68,21 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
         }
 
         return [
-            'id' => $organization->getId(),
-            'code' => $organization->getCode() ? $organization->getCode() : "",
-            'shortname' => $organization->getShortName(),
-            'fullname' => $organization->getFullName(),
-            'email' => $organization->getEmail(),
-            'city' => $organization->getCity(),
-            'country' => $organization->getCountry(),
-            'zipcode' => $organization->getZipCode(),
+            'id'          => $organization->getId(),
+            'code'        => $organization->getCode() ? $organization->getCode() : "",
+            'shortname'   => $organization->getShortName(),
+            'fullname'    => $organization->getFullName(),
+            'email'       => $organization->getEmail(),
+            'city'        => $organization->getCity(),
+            'country'     => $organization->getCountry(),
+            'zipcode'     => $organization->getZipCode(),
             'description' => $organization->getDescription(),
-            'siret' => $organization->getSiret(),
-            'persons' => $persons,
-            'activities' => $activities,
-            'connectors' => $connectors
+            'siret'       => $organization->getSiret(),
+            'persons'     => $persons,
+            'activities'  => $activities,
+            'connectors'  => $connectors
         ];
     }
-
-//    public function search($search)
-//    {
-//        $params = [
-//            'index' => $this->getIndex(),
-//            'type' => $this->getType(),
-//            'body' => [
-//                'size' => 10000,
-//                "query" => [
-//                    'multi_match' => [
-//                        'fields' => [
-//                            'code^7',
-//                            'shortname^9',
-//                            'fullname^5',
-//                            'description',
-//                            'email',
-//                            'city',
-//                            'siret',
-//                            'country',
-//                            'connectors',
-//                            'zipcode',
-//                            'persons',
-//                            'activities'
-//                        ],
-//                        "fuzziness"=> "auto",
-//                        'query' => $search,
-//
-//                    ]
-//                ]
-//            ]
-//        ];
-//
-//        $response = $this->getClient()->search($params);
-//        $ids = [];
-//
-//        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
-//            foreach ($response['hits']['hits'] as $hit) {
-//                $ids[] = $hit["_id"];
-//            }
-//        }
-//
-//        return $ids;
-//    }
-
 
     public function getFieldsSearchedWeighted(): array
     {
