@@ -2245,7 +2245,7 @@ class TimesheetController extends AbstractOscarController
                         throw new OscarException('A refactorer !');
                     } else {
                         $action = $this->getRequest()->getPost()['do'];
-                        $events = json_decode($this->getRequest()->getPost()['events'], true);
+                        $events = json_decode($this->getRequest()->getPost()->toArray()['events'], true);
                         $timesheets = $this->processAction(
                             $action,
                             $events,
