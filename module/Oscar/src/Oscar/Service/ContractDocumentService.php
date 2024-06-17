@@ -9,6 +9,8 @@ namespace Oscar\Service;
 
 
 use Cocur\Slugify\Slugify;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Jacksay\PhpFileExtension\Dictonary\ArchiveDictonary;
 use Jacksay\PhpFileExtension\Dictonary\DocumentDictionary;
 use Jacksay\PhpFileExtension\Dictonary\ImageDictonary;
@@ -19,6 +21,7 @@ use Jacksay\PhpFileExtension\Strategy\MimeProvider;
 use Laminas\EventManager\Event;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
+use Oscar\Entity\LogActivity;
 use Oscar\Entity\Person;
 use Oscar\Entity\Activity;
 use Oscar\Entity\PersonRepository;
@@ -35,9 +38,10 @@ use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
 use Oscar\Utils\FileSystemUtils;
-use UnicaenSignature\Entity\Db\Signature;
+use RuntimeException;
 use UnicaenSignature\Service\ProcessServiceAwareTrait;
 use UnicaenSignature\Service\SignatureServiceAwareTrait;
+use UnicaenSignature\Utils\SignatureException;
 
 class ContractDocumentService implements UseOscarConfigurationService, UseEntityManager, UseLoggerService,
                                          UseActivityLogService
@@ -54,10 +58,11 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
      */
     public function newDocument(Activity $grant, Person $person, $FileName, $information, $centaureId = null)
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 
-    public function getActivity(int $activityId) {
+    public function getActivity(int $activityId)
+    {
         try {
             return $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
         } catch (\Exception $exception) {
@@ -94,7 +99,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     /**
      * @return PhpFileExtension
      */
-    protected function getExtensionManager()
+    protected function getExtensionManager(): PhpFileExtension
     {
         static $manager;
         if ($manager === null) {
@@ -111,6 +116,12 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         return $manager;
     }
 
+    /**
+     * @throws OscarException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws SignatureException
+     */
     public function applySignature(int $documentId, int $flowId, array $flowDt): void
     {
         try {
@@ -123,10 +134,30 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             throw new OscarException($msg);
         }
 
+        $contextShort = sprintf(
+            "Activité %s, '%s' (Projet %s)",
+            $activity->getOscarNum(),
+            $activity->getLabel(),
+            $activity->getAcronym()
+        );
+
+        $contextLong = sprintf(
+            "Document %s (%s) dans l'activité Oscar %s : '%s' (Projet %s)",
+            $document->getFileName(),
+            $document->getTypeDocument()->getLabel(),
+            $activity->getOscarNum(),
+            $activity->getLabel(),
+            $activity->getAcronym()
+        );
+
         $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
             "",
             $signatureFlow->getId(),
-            ['activity_id' => $activity->getId()]
+            [
+                'activity_id' => $activity->getId(),
+                'context_subject' => $contextShort,
+                'context_body' => $contextLong,
+            ]
         )['signatureflow'];
 
         $sortedFlowDatas = [];
@@ -225,9 +256,15 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $document->setProcess($process);
         $this->getEntityManager()->flush();
         $this->getProcessService()->trigger($process, true);
+        $this->getActivityLogService()->addUserInfo(
+            "a déclenché un circuit de signature pour '$document'",
+            LogActivity::CONTEXT_ACTIVITY,
+            $activity->getId()
+        );
     }
 
-    protected function getNextDocId():int{
+    protected function getNextDocId(): int
+    {
         return $this->getContractDocumentRepository()->getLastDocumentId();
     }
 
@@ -266,7 +303,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
         try {
             $originalFilename = $file['name'];
-            $renameOriginal = "$nextId-".$originalFilename;
+            $renameOriginal = "$nextId-" . $originalFilename;
             $type = $file['type'];
 
             $slugify = new Slugify();
@@ -321,7 +358,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $fileName = $uploader->getUploadName();
         $fileMime = $uploader->getMime();
 
-
         $document
             ->setVersion(1)
             ->setDateUpdoad(new \DateTime())
@@ -370,7 +406,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $renamed = sprintf(
                 "oscar-%s-%s-%s-%s",
                 $activity->getId(),
-                $document->getVersion()+1,
+                $document->getVersion() + 1,
                 $nextId,
                 $slugify->slugify($originalFilename)
             );
@@ -429,7 +465,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             ->setPerson($sender)
             ->setTabDocument($document->getTabDocument())
             ->setTypeDocument($document->getTypeDocument())
-            ->setVersion($document->getVersion()+1)
+            ->setVersion($document->getVersion() + 1)
             ->setGrant($activity)
             ->setInformation($description)
             ->setDateDeposit($dateDeposit)
@@ -496,7 +532,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $this->getLoggerService()->debug(
             " - Le documents et ces versions implique " . count($documents) . " document(s)"
         );
-
 
         if (count($documents) == 0) {
             throw new OscarException("Ce document n'existe plus");
@@ -649,23 +684,43 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         return $this->getContractDocumentRepository()->getDocument($id, $throw);
     }
 
+    /**
+     * Suppression d'un processus de signature sur le document.
+     *
+     * @param ContractDocument $contractDocument
+     * @return void
+     * @throws OscarException
+     */
     public function deleteProcess(ContractDocument $contractDocument): void
     {
         $this->getLoggerService()->info("Suppression du processus pour le document '$contractDocument'");
         try {
-            if( !$contractDocument->getProcess() ){
+            if (!$contractDocument->getProcess()) {
                 throw new OscarException("Ce document n'a pas de processus");
             }
             $process = $contractDocument->getProcess();
             $contractDocument->setProcess(null);
             $this->getEntityManager()->flush($contractDocument);
             $this->getProcessService()->deleteProcess($process);
-        } catch (\Exception $exception){
+            $this->getActivityLogService()->addUserInfo(
+                "a annulé le circuit de signature pour '$contractDocument'",
+                LogActivity::CONTEXT_ACTIVITY,
+                $contractDocument->getActivity()->getId()
+            );
+        } catch (\Exception $exception) {
             $this->getLoggerService()->critical($exception->getMessage());
             throw new OscarException("Impossible de supprimer le processus : " . $exception->getMessage());
         }
     }
 
+    /**
+     * @param array $params
+     * @return void
+     * @throws OscarException
+     * @throws SignatureException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function processSigned(array $params): void
     {
         $process = $this->getProcessService()->getProcessById($params['id']);
