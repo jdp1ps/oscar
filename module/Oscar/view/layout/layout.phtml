@@ -104,6 +104,7 @@ $this->headScript();
                                     <li><a href="<?= $this->url('person/personnel') ?>"><i class="icon-group"></i> <?= $this->translate('Personnel') ?></a></li>
                                 <?php endif; ?>
 
+                                <?php if( $this->grant()->hasSignaturePersonalAccess()): ?>
                                 <li>
                                     <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i class="icon-edit"></i> <?= $this->translate('Mes visas de document') ?></a>
                                 </li>
@@ -111,6 +112,7 @@ $this->headScript();
                                 <li>
                                     <a href="<?= $this->url('contractdocument/documents-observed') ?>"><i class="icon-eye"></i> <?= $this->translate('Suivi des circuits de signature') ?></a>
                                 </li>
+                                <?php endif; ?>
 
                                 <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
                                     <li><a href="<?= $this->url('requestactivity') ?>"><i class="icon-cube"></i> <?= $this->translate("Demande d'activité") ?></a></li>

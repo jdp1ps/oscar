@@ -1639,4 +1639,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
         return $output;
     }
+
+    public function hasSignaturePersonalAccess() :bool
+    {
+        return $this->getOscarConfigurationService()->signatureEnabled();
+    }
 }

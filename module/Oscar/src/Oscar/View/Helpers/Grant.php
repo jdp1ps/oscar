@@ -55,6 +55,11 @@ class Grant extends AbstractHtmlElement implements UseOscarUserContextService
         return $this->getOscarUserContextService()->getAccessDocument($contractDocument)['read'] === true;
     }
 
+    public function hasSignaturePersonalAccess():bool
+    {
+        return $this->getOscarUserContextService()->hasSignaturePersonalAccess();
+    }
+
     /**
      * @deprecated
      * @return string

@@ -950,5 +950,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     //////////////////////////////////////////////////////////////////////// CONTRATS SIGNES
-    
+    public function signatureEnabled() :bool
+    {
+        return $this->getServiceLocator()->get('Config')['unicaen-signature']['enabled'] == true;
+    }
 }
