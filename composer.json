@@ -32,7 +32,8 @@
     "phpoffice/phpspreadsheet": "^1.29",
     "phpoffice/phpword": "^1.1",
     "unicaen/signature": "^0.0.13",
-    "ext-gettext": "*"
+    "ext-gettext": "*",
+    "ext-fileinfo": "*"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

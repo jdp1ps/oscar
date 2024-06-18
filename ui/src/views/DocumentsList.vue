@@ -259,6 +259,7 @@
         <ul class="metas">
           <li class="meta">Parapheur <strong>{{ s.letterfile }}</strong></li>
           <li class="meta">Niveau <strong>{{ s.level }}</strong></li>
+          <li class="meta">Tous les destinataires signent <strong>{{ s.allSignToComplete ? 'Oui' : 'Non' }}</strong></li>
         </ul>
 
         <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">

@@ -635,10 +635,17 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         return [];
     }
 
+    /**
+     * Annulation d'un processus de signature.
+     *
+     * @return \Laminas\Http\Response|JsonModel
+     */
     public function processDeleteAction()
     {
         try {
             $document = $this->getDocumentFromRouteId();
+            $activity = $document->getActivity();
+            $this->getOscarUserContextService()->check(SignaturePrivileges::SIGNATURE_DELETE, $activity);
             $this->getContractDocumentService()->deleteProcess($document);
             return $this->jsonOutput(['response' => 'ok']);
         } catch (Exception $e) {
@@ -646,10 +653,17 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
     }
 
+    /**
+     * Déclenchement d'un processus de signature.
+     *
+     * @return \Laminas\Http\Response|JsonModel
+     */
     public function processCreateAction()
     {
         try {
             $document = $this->getDocumentFromRouteId();
+            $activity = $document->getActivity();
+            $this->getOscarUserContextService()->check(SignaturePrivileges::SIGNATURE_CREATE, $activity);
             $flowDatas = json_decode($this->params()->fromPost('flow_datas'), true);
             if (!$flowDatas) {
                 throw new OscarException("Impossible de traiter les données de signature");

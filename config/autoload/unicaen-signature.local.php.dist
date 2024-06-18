@@ -6,6 +6,8 @@ return [
     /**  **/
     'unicaen-signature' => [
 
+        'enabled' => false,
+
         /////////////////////////////////////////////////////////////////////////////////
         // DEVELOPPEMENT
         'vite_mode'              => 'prod', // mode développement de l'UI

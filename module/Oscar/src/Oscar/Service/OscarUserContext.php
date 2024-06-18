@@ -228,39 +228,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return array|void
      * @throws OscarException
      */
-    /**
-     * Retourne les IDS des rôles ayant le privilège donné.
-     *
-     * @param $privilegeCode
-     * @param $roleLevel
-     * @return int[]
-     * @throws OscarException
-     */
-    public function getRolesIdsWithPrivileges($privilegeCode, $roleLevel = 0) :array
-    {
-        $ids = [];
-        foreach ($this->getRolesWithPrivileges($privilegeCode, $roleLevel) as $privilege) {
-            $ids[] = $privilege->getId();
-        }
-        return $ids;
-    }
-
-    /**
-     * Retourne les Role ayant le privilège donné.
-     *
-     * @param $privilegeCode
-     * @param $roleLevel
-     * @return Role[]
-     * @throws OscarException
-     */
     public function getRolesWithPrivileges($privilegeCode, $roleLevel = 0)
     {
-        static $roles_privileges;
-
-        if( $roles_privileges == null ){
-            $roles_privileges = [];
-        }
-
+        static $roles_privileges = [];
         if (!array_key_exists($privilegeCode, $roles_privileges)) {
             try {
                 /** @var Privilege $privilege */
@@ -273,7 +243,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     }
                 }
             } catch (\Exception $e) {
-                $this->getLoggerService()->critical("Impossible de charger le privilège '$privilegeCode'");
                 throw new OscarException(
                     sprintf('Impossible de charger le privilège %s : %s', $privilegeCode, $e->getMessage())
                 );
@@ -1570,7 +1539,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 }
                 return in_array($privilege, $privileges);
             }
-            // $this->getLoggerService()->info("hasPrivilege $privilege PAS DE RESSOURCE");
         } catch (\Exception $e) {
         }
 
@@ -1670,5 +1638,10 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $output[$privilege->getId()] = $p;
         }
         return $output;
+    }
+
+    public function hasSignaturePersonalAccess() :bool
+    {
+        return $this->getOscarConfigurationService()->signatureEnabled();
     }
 }

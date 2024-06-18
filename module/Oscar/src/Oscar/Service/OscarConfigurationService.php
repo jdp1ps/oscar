@@ -950,59 +950,8 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     //////////////////////////////////////////////////////////////////////// CONTRATS SIGNES
-
-    /**
-     * @return bool
-     */
-    public function useSignedContract() :bool
+    public function signatureEnabled() :bool
     {
-        return is_array($this->getSignedContractConfiguration());
+        return $this->getServiceLocator()->get('Config')['unicaen-signature']['enabled'] == true;
     }
-
-    /**
-     * @return array|null
-     */
-    public function getSignedContractConfiguration() : ?array
-    {
-        try {
-            return $this->getConfiguration('documents_process.signed');
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    public function getSignedContractRolesPersons() :array {
-        return $this->getEditableConfKey('documents_signed_roles_persons', []);
-    }
-
-    public function getSignedContractRolesOrganizations() :array {
-        return $this->getEditableConfKey('documents_signed_roles_organizations', []);
-    }
-
-    public function getSignedContractLetterFile() :string {
-        return $this->getEditableConfKey('documents_signed_parpheur', '');
-    }
-
-    public function getSignedContractLevel() :string {
-        return $this->getEditableConfKey('documents_signed_level', '');
-    }
-
-    public function saveSignedContrat( array $conf ):void
-    {
-        $this->saveEditableConfKey('documents_signed_roles_persons', $conf['roles_persons_ids']);
-        $this->saveEditableConfKey('documents_signed_roles_organizations', $conf['roles_organizations_ids']);
-        $this->saveEditableConfKey('documents_signed_parpheur', $conf['parpheur_select']);
-        $this->saveEditableConfKey('documents_signed_level', $conf['level_select']);
-    }
-
-    /**
-     * @return array
-     * @throws OscarException
-     */
-    protected function getDocumentProcess() :array
-    {
-        return $this->getConfiguration('documents_process');
-    }
-
-
 }

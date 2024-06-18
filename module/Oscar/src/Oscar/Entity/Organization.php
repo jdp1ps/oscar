@@ -12,9 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Connector\IConnectedObject;
-use Oscar\Exception\OscarException;
 use Oscar\Utils\StringUtils;
-
 
 /**
  * Class Organization
@@ -675,26 +673,23 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
 
-    /**
-     * @deprecated
-     */
     public function hasResponsable(Person $person)
     {
-        throw new OscarException("méthode 'hasResponsable' dépréciée");
-//        $responsables = [ProjectMember::ROLE_RESPONSABLE];
-//        /** @var OrganizationPerson $member */
-//        foreach ($this->getPersons() as $member) {
-//            if ($member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables)) {
-//                return true;
-//            }
-//        }
-//        return false;
+        $responsables = [ProjectMember::ROLE_RESPONSABLE];
+        /** @var OrganizationPerson $member */
+        foreach ($this->getPersons() as $member) {
+            if ($member->getPerson()->getId() == $person->getId() && in_array($member->getRole(), $responsables)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function touch()
     {
         $this->setDateUpdated(new \DateTime());
     }
+
 
     /**
      * @return string

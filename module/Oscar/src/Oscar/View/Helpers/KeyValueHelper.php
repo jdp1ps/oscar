@@ -19,14 +19,13 @@ class KeyValueHelper extends FormElement
     }
 
 
-    public static function getTemplateLine(string $name, string $key, string $value, bool $deletable = false): string
-    {
+    public static function getTemplateLine($name, $key, $value, $deletable = false){
         $tpl = '
             <div class="keyvalue-line card">
-                <strong class="keyvalue-key">' . $key . '</strong> 
-                <input type="text" name="' . $name . '[' . $key . ']" value="' . $value . '" class="keyvalue-value" />';
+                <strong class="keyvalue-key">'.$key.'</strong> 
+                <input type="text" name="'.$name.'['.$key.']" value="'.$value.'" class="keyvalue-value" />';
 
-        if ($deletable) {
+        if( $deletable == true ){
             $tpl .= '<button class="btn btn-xs btn-default btn-delete">
                     <i class="icon-trash"></i>
                     <span>Supprimer</span>
@@ -37,50 +36,47 @@ class KeyValueHelper extends FormElement
         return $tpl;
     }
 
-    public function render(ElementInterface $element): string
-    {
-        $name = $element->getAttribute('name');
-        $value = $element->getValue();
+        public function render(ElementInterface $element): string
+        {
+            $name = $element->getAttribute('name');
+            $value = $element->getValue();
 
-        if (!is_array($value)) {
-            $value = [];
-        }
+            if( !is_array($value) )
+                $value = [];
 
-        $out = '<div class="keyvalue-widget" data-template="' . htmlentities(
-                self::getTemplateLine($name, '{{key}}', '{{value}}')
-            ) . '">';
-        if ($element->getLabel()) {
-            $out .= '<label>' . $element->getLabel() . '</label>';
-        }
+            $out = '<div class="keyvalue-widget" data-template="'.htmlentities(self::getTemplateLine($name, '{{key}}', '{{value}}')).'">';
+            if( $element->getLabel() )
+                $out .= '<label>' . $element->getLabel() . '</label>';
 
-        $out .= '<div class="keyvalue-lines">';
-        $specificKeys = $element->getValue() ? array_keys($element->getValue()) : [];
+            $out .= '<div class="keyvalue-lines">';
+            $value = $element->getValue();
 
-        $keys = array_merge($specificKeys, $element->keys);
-        $keys = array_unique($keys);
 
-        foreach ($keys as $key) {
-            $val = "";
-            $deletable = !in_array($key, $element->keys);
-            if (array_key_exists($key, $value)) {
-                $val = $value[$key];
+            $specificKeys = $element->getValue() ? array_keys($element->getValue()) : [];
+
+            $keys = array_merge($specificKeys, $element->keys);
+            $keys = array_unique($keys);
+
+            foreach ($keys as $key) {
+                $val = "";
+                $deletable = !in_array($key, $element->keys);
+                if(array_key_exists($key, $value)){
+                    $val = $value[$key];
+                }
+                $out .= self::getTemplateLine($name, $key, $val, $deletable);
             }
-            $out .= self::getTemplateLine($name, $key, $val, $deletable);
-        }
-        $uniqid = uniqid('keys_');
-        $out = "<div id=\"$uniqid\">&nbsp;</div>
+            $uniqid = uniqid('keys_');
+            $out = "<div id=\"$uniqid\">&nbsp;</div>
 <script>
 require(['vue', 'Keyvalue'], function(Vue, Keyvalue){
     new Vue({
         el: '#$uniqid',
-        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: " . json_encode(
-                $keys
-            ) . ", name: '" . $name . "', editable: " . ($element->editable ? 'true' : 'false') . "}}) }
+        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: ". json_encode($keys).", name: '".$name."', editable: ". ($element->editable ? 'true' : 'false') ."}}) }
     })    
 });
 </script>
 ";
 
-        return $out;
-    }
+            return $out;
+        }
 }

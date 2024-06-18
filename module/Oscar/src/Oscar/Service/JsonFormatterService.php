@@ -98,12 +98,6 @@ class JsonFormatterService implements UseOscarConfigurationService, UseEntityMan
                 );
             }
 
-            if ($allowProcessDelete) {
-                $process_delete_url = 'url/de/supression';
-                //$this->getUrlHelper()->fromRoute('contractdocument/process',['id' => $doc->getId()]
-            }
-
-
             if ($allowProcessUpdate) {
                 $process_update_url = $this->getUrlHelper()->fromRoute(
                     'contractdocument/process',
