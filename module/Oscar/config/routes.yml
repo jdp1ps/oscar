@@ -1828,15 +1828,6 @@ administration:
           action: logs
 
     # Gestion et chargement du référenciel des pays
-    contract-signed:
-      type: segment
-      may_terminate: true
-      options:
-        route: /contract-signed
-        defaults:
-          action: contractSigned
-
-    # Gestion et chargement du référenciel des pays
     listdeclarers:
       type: segment
       may_terminate: true

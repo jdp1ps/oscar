@@ -109,42 +109,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return [];
     }
 
-    public function contractSignedAction(): ViewModel
-    {
-        $this->getOscarUserContextService()->check(SignaturePrivileges::SIGNATURE_ADMIN);
-
-        /** @var SignatureService $signatureService */
-        $signatureService = $this->getServiceLocator()->get(SignatureService::class);
-
-        if ($this->getRequest()->isPost()) {
-            $this->getOscarConfigurationService()->saveSignedContrat($this->getRequest()->getPost()->toArray());
-            return $this->redirect()->toRoute('administration/contract-signed');
-        }
-
-        return new ViewModel([
-                                 'signed_contract'           => $this->getOscarConfigurationService(
-                                 )->useSignedContract() ?
-                                     [
-                                         'documents_signed_roles_persons'       => $this->getOscarConfigurationService(
-                                         )->getSignedContractRolesPersons(),
-                                         'documents_signed_roles_organizations' => $this->getOscarConfigurationService(
-                                         )->getSignedContractRolesOrganizations(),
-                                         'roles_organizations'                  => $this->getOscarUserContextService(
-                                         )->getRolesOrganisationLeader(),
-                                         'roles_persons'                        => $this->getOscarUserContextService(
-                                         )->getAvailableRolesActivityOrOrganization(),
-                                         'parafeur_select'                      => $this->getOscarConfigurationService(
-                                         )->getSignedContractLetterFile(),
-                                         'level_select'                         => $this->getOscarConfigurationService(
-                                         )->getSignedContractLevel(),
-                                     ] : null,
-                                 'letterfiles_configuration' => $signatureService->getLetterfileService()
-                                     ->getSignatureConfigurationService()->getLetterfileConfiguration(),
-                                 'levels'                    => $signatureService->getLetterfileService()
-                                     ->getSignatureConfigurationService()->getLevels()
-                             ]);
-    }
-
     public function documentSectionsAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DOCPUBSEC_MANAGE);
