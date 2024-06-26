@@ -67,24 +67,6 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             'name' => 'id'
         ]);
 
-//        if( $this->organizations ){
-//            foreach ($this->organizations as $organization) {
-//                // Status
-//                $this->add([
-//                    'name'   => 'organization[' . $organization->getId() .']',
-//                    'label' => (string)$organization,
-//                    'options' => [
-//                        'label' => 'Rôle de ' . (string)$organization,
-//                        'value_options' => $this->organizationRoles
-//                    ],
-//                    'attributes' => [
-//                        'class' => 'form-control'
-//                    ],
-//                    'type'=>'Select'
-//                ]);
-//            }
-//        }
-
         // LABEL
         $label = _("Intitulé de l'activité");
         $this->add([

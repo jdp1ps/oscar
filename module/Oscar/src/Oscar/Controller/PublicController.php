@@ -5,6 +5,7 @@ namespace Oscar\Controller;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ActivityRepository;
+use Oscar\Entity\ActivityType;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
@@ -198,11 +199,17 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
     public function testAction()
     {
         if (DEBUG_OSCAR) {
-            $json = $this->getPersonService()->getProjectGrantService()->getActivityTypes(true);
-            return [
-                "json" => $json,
-                "tree" => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
-            ];
+//            $createRoot = new ActivityType();
+//            $this->getEntityManager()->persist($createRoot);
+//            $createRoot->setLft(1);
+//            $createRoot->setRgt(2);
+//            $createRoot->setLabel('ROOT');
+//
+//            $this->getLoggerService()->info("-----------------------------------------------------------");
+//            $this->getLoggerService()->info("Création du Noeud ROOT : " . $createRoot->trac());
+//
+//            $this->getEntityManager()->flush($createRoot);
+
         }
         die("DEV ONLY");
     }

@@ -12,11 +12,14 @@
     <p class="alert alert-info">
         Vous pouvez réorganiser les types d'activités en utilisant les <em>glisser/déposer</em>
     </p>
-
+    <?php
+    $lft = [];
+    $rgt = [];
+    ?>
     <section class="tree" style="position: relative">
     <?php $level = 0; $opened = [];
     foreach( $entities as $entity ):
-        if( $entity->getLabel() === 'ROOT' ) { continue; } ?>
+        if( $entity->getLabel() === 'ROOT' ) {  continue; } ?>
     <?php
     foreach( $opened as $index=>$open ){
         if( $open < $entity->getLft() ){
@@ -48,6 +51,11 @@
                 <?= $distribution[$entity->getId()] ?>
             </span>
         <?php endif; ?>
+
+            <!--<div class="bornes">
+            <small class="borne-lft"><?php echo $entity->getLft() ?></small>
+            <small class="borne-rgt"><?php echo $entity->getRgt() ?></small>
+            </div>-->
 
         <nav class="btn-group" aria-label="Administration" role="group">
 
@@ -197,6 +205,22 @@
 </script>
 
 <style>
+    .bornes{
+        display: flex;
+        align-items: center;
+    }
+    .bornes .borne-lft, .bornes .borne-rgt  {
+        flex: 1;
+        flex-wrap: wrap;
+        color: white;
+        padding: .25em;
+    }
+    .bornes .borne-lft {
+        background: #990000;
+    }
+    .bornes .borne-rgt {
+        background: #0a58ca;
+    }
     .tree {
         font-weight: 900;
         font-size: 1.6em;

@@ -12,16 +12,20 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityType;
+use Oscar\Exception\OscarException;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
+use Oscar\Traits\UseLoggerService;
+use Oscar\Traits\UseLoggerServiceTrait;
 use UnicaenApp\Service\EntityManagerAwareInterface;
 use UnicaenApp\Service\EntityManagerAwareTrait;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
 use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
+use UnicaenSignature\Service\LoggerServiceAwareTrait;
 
-class ActivityTypeService implements UseEntityManager
+class ActivityTypeService implements UseEntityManager, UseLoggerService
 {
-    use UseEntityManagerTrait;
+    use UseEntityManagerTrait, UseLoggerServiceTrait;
 
     /**
      * @param $id
@@ -59,15 +63,13 @@ class ActivityTypeService implements UseEntityManager
             $qb = $this->getBaseQuery()
                 ->where('t.lft >= :lft AND t.rgt <= :rgt')
                 ->setParameters([
-                    'lft' => $t->getLft(),
-                    'rgt' => $t->getRgt(),
-                ]);
+                                    'lft' => $t->getLft(),
+                                    'rgt' => $t->getRgt(),
+                                ]);
             foreach ($qb->getQuery()->getResult() as $type) {
                 $ids[] = $type->getId();
             }
-
         } catch (\Exception $e) {
-
         }
         return $ids;
     }
@@ -80,7 +82,7 @@ class ActivityTypeService implements UseEntityManager
      */
     public function getActivityFullText($activityType)
     {
-        if( $activityType == null ){
+        if ($activityType == null) {
             return "";
         }
 
@@ -88,18 +90,17 @@ class ActivityTypeService implements UseEntityManager
 
         if (count($typeChain) <= 1) {
             return "";
-        } else {
+        }
+        else {
             return implode(" > ", array_slice($typeChain, 1));
         }
     }
 
     /**
-     * @param $id
-     * @return ActivityType
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param $activityType
+     * @return array
      */
-    public function getActivityTypeChain($activityType)
+    public function getActivityTypeChain($activityType): array
     {
         if ($activityType === null) {
             return [];
@@ -107,40 +108,35 @@ class ActivityTypeService implements UseEntityManager
         $chain = $this->getBaseQuery()
             ->where('t.lft <= :lft AND t.rgt >= :rgt')
             ->setParameters([
-                'lft' => $activityType->getLft(),
-                'rgt' => $activityType->getRgt(),
-            ])
+                                'lft' => $activityType->getLft(),
+                                'rgt' => $activityType->getRgt(),
+                            ])
             ->getQuery()
             ->getResult();
 
         return $chain;
     }
 
-    public function getActivityTypeChainFormatted($activityType) :string
+    public function getActivityTypeChainFormatted($activityType): string
     {
         $output = [];
-        if ( $activityType ){
+        if ($activityType) {
             $chain = $this->getActivityTypeChain($activityType);
             /** @var ActivityType $node */
             foreach ($chain as $node) {
-                if( $node->getLabel() == 'ROOT' ){
+                if ($node->getLabel() == 'ROOT') {
                     continue;
                 }
                 $output[] = $node->getLabel();
             }
         }
 
-        if( count($output) == 0 ){
+        if (count($output) == 0) {
             return "Pas de type";
-        } else {
+        }
+        else {
             return implode(" > ", $output);
         }
-    }
-
-    public function getActivityTypesPcru()
-    {
-        //$activity
-        return [];
     }
 
     /**
@@ -170,7 +166,8 @@ class ActivityTypeService implements UseEntityManager
                 while ($close > 0) {
                     if ($open[count($open) - 1] < $activityType->getLft()) {
                         array_pop($open);
-                    } else {
+                    }
+                    else {
                         $prefix .= " - - ";
                     }
                     $close--;
@@ -183,14 +180,16 @@ class ActivityTypeService implements UseEntityManager
             }
 
             return $array;
-        } else {
+        }
+        else {
             return $datas;
         }
     }
 
 
-    protected function getTreeArray(&$index, $datas, &$children){
-        if( !array_key_exists($index, $datas) ){
+    protected function getTreeArray(&$index, $datas, &$children)
+    {
+        if (!array_key_exists($index, $datas)) {
             return;
         }
 
@@ -198,15 +197,18 @@ class ActivityTypeService implements UseEntityManager
         $activityType = $datas[$index];
 
         $out = [
-            'id' => $activityType->getId(),
-            'label' => $activityType->getLabel(),
+            'id'       => $activityType->getId(),
+            'label'    => $activityType->getLabel(),
             'children' => []
         ];
 
         $index++;
 
-        if( $activityType->getLft()+1 < $activityType->getRgt() ){
-            for(; $datas[$index] && $datas[$index]->getLft() > $activityType->getLft() && $datas[$index]->getRgt()-1 <= $activityType->getRgt() ;){
+        if ($activityType->getLft() + 1 < $activityType->getRgt()) {
+            for (
+            ; $datas[$index] && $datas[$index]->getLft() > $activityType->getLft() && $datas[$index]->getRgt(
+            ) - 1 <= $activityType->getRgt();
+            ) {
                 $this->getTreeArray($index, $datas, $out['children']);
             }
         }
@@ -219,7 +221,7 @@ class ActivityTypeService implements UseEntityManager
      * @param false $asArray
      * @return array
      */
-    public function getActivityTypesTree( $asArray = false )
+    public function getActivityTypesTree($asArray = false)
     {
         $datas = $this->getBaseQuery()
             ->getQuery()
@@ -232,7 +234,7 @@ class ActivityTypeService implements UseEntityManager
         return $out;
     }
 
-    public function deleteNode(ActivityType $activityType, $deleteEntity = true)
+    public function deleteNode(ActivityType $activityType, $deleteEntity = true): void
     {
         $lft = $activityType->getLft();
         $rgt = $activityType->getRgt();
@@ -248,33 +250,14 @@ class ActivityTypeService implements UseEntityManager
 
         // Mise à jour des bornes
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET rgt = rgt - :decalage WHERE rgt > :rgt', new ResultSetMapping()
+            'UPDATE activitytype SET rgt = rgt - :decalage WHERE rgt > :rgt',
+            new ResultSetMapping()
         )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET lft = lft - :decalage WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET lft = lft - :decalage WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
-    }
-
-    public function getActivityTypeByCentaureId($centaureId)
-    {
-        try {
-            return $this->getEntityManager()->getRepository(ActivityType::class)->createQueryBuilder('t')
-                ->where("t.centaureId = :single")
-                ->orWhere("t.centaureId LIKE :in ")
-                ->orWhere("t.centaureId LIKE :start")
-                ->orWhere("t.centaureId LIKE :end")
-                ->setParameters([
-                    'in' => '%|' . $centaureId . '|%',
-                    'start' => $centaureId . '|%',
-                    'end' => '%|' . $centaureId,
-                    'single' => $centaureId,
-                ])
-                ->getQuery()
-                ->getSingleResult();
-        } catch (\Exception $e) {
-            return null;
-        }
     }
 
     /**
@@ -283,7 +266,7 @@ class ActivityTypeService implements UseEntityManager
      *
      * @return array
      */
-    public function distribution()
+    public function distribution(): array
     {
         $query = $this->getEntityManager()->createQueryBuilder()
             ->select('COUNT(a.id) as nbr_activities', 't.id AS type_id')
@@ -303,8 +286,9 @@ class ActivityTypeService implements UseEntityManager
     /**
      * Inserte en tant qu'enfant direct (en dernier)
      * @param null $node
+     * @throws \Exception
      */
-    public function insertIn(ActivityType $activityType, $node = null)
+    public function insertIn(ActivityType $activityType, $node = null): void
     {
         if ($node === null) {
             $node = $this->getRoot();
@@ -317,11 +301,13 @@ class ActivityTypeService implements UseEntityManager
 
         // Mise à jour des bornes
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET lft = lft+2 WHERE lft > :lft', new ResultSetMapping()
+            'UPDATE activitytype SET lft = lft+2 WHERE lft > :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $lft]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET rgt = rgt+2 WHERE rgt >= :rgt', new ResultSetMapping()
+            'UPDATE activitytype SET rgt = rgt+2 WHERE rgt >= :rgt',
+            new ResultSetMapping()
         )->execute(['rgt' => $lft]);
 
         $activityType->setLft($lft)->setRgt($rgt);
@@ -363,11 +349,13 @@ class ActivityTypeService implements UseEntityManager
 
         // Mise à jour des bornes dans l'arbre
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft > :lft', new ResultSetMapping()
+            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft > :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         // Mise à jour de la branche déplacée
@@ -375,12 +363,13 @@ class ActivityTypeService implements UseEntityManager
         $decalage = $moved->getLft() - $newLeft;
         foreach ($brancheDeplacee as $n) {
             $this->getEntityManager()->createNativeQuery(
-                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id', new ResultSetMapping()
+                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id',
+                new ResultSetMapping()
             )->execute([
-                'lft' => $n->getLft() - $decalage,
-                'rgt' => $n->getRgt() - $decalage,
-                'id' => $n->getId()
-            ]);
+                           'lft' => $n->getLft() - $decalage,
+                           'rgt' => $n->getRgt() - $decalage,
+                           'id'  => $n->getId()
+                       ]);
         }
     }
 
@@ -410,11 +399,13 @@ class ActivityTypeService implements UseEntityManager
 
         // Mise à jour des bornes dans l'arbre
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         // Mise à jour de la branche déplacée
@@ -422,12 +413,13 @@ class ActivityTypeService implements UseEntityManager
         $decalage = $moved->getLft() - $newLeft;
         foreach ($brancheDeplacee as $n) {
             $this->getEntityManager()->createNativeQuery(
-                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id', new ResultSetMapping()
+                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id',
+                new ResultSetMapping()
             )->execute([
-                'lft' => $n->getLft() - $decalage,
-                'rgt' => $n->getRgt() - $decalage,
-                'id' => $n->getId()
-            ]);
+                           'lft' => $n->getLft() - $decalage,
+                           'rgt' => $n->getRgt() - $decalage,
+                           'id'  => $n->getId()
+                       ]);
         }
     }
 
@@ -457,11 +449,13 @@ class ActivityTypeService implements UseEntityManager
 
         // Mise à jour des bornes dans l'arbre
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET lft = lft + :insertSize WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft', new ResultSetMapping()
+            'UPDATE activitytype SET rgt = rgt + :insertSize WHERE rgt >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $newLeft, 'insertSize' => $size]);
 
         // Mise à jour de la branche déplacée
@@ -469,40 +463,313 @@ class ActivityTypeService implements UseEntityManager
         $decalage = $moved->getLft() - $newLeft;
         foreach ($brancheDeplacee as $n) {
             $this->getEntityManager()->createNativeQuery(
-                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id', new ResultSetMapping()
+                'UPDATE activitytype SET lft = :lft, rgt = :rgt WHERE id = :id',
+                new ResultSetMapping()
             )->execute([
-                'lft' => $n->getLft() - $decalage,
-                'rgt' => $n->getRgt() - $decalage,
-                'id' => $n->getId()
-            ]);
+                           'lft' => $n->getLft() - $decalage,
+                           'rgt' => $n->getRgt() - $decalage,
+                           'id'  => $n->getId()
+                       ]);
         }
     }
 
     /**
      * @return ActivityType
+     * @throws OscarException
      */
     private function getRoot()
     {
         $nodes = $this->getBaseQuery()
-            ->where('t.lft = 1')
+            ->where('t.label = :label')
+            ->setParameter('label', 'ROOT')
             ->getQuery()
             ->getResult();
 
         if (count($nodes) == 1) {
             return $nodes[0];
-        } else if (count($nodes) == 0) {
-            $root = new ActivityType();
-            $root->setLft(1)
-                ->setRgt(2)
-                ->setNature('ROOT')
-                ->setDescription('Automatic root, may never displayed')
-                ->setLabel('ROOT');
-            $this->getEntityManager()->persist($root);
-            $this->getEntityManager()->flush($root);
-            return $root;
-        } else {
-            throw new \Exception("Incohérence de l'arbre, veuillez contacter l'administrateur pour déclencher un recalcule de la hérarchie");
         }
+        else {
+            if (count($nodes) == 0) {
+                try {
+                    // ZONE 51 ----
+                    $createRoot = new ActivityType();
+                    $this->getEntityManager()->persist($createRoot);
+
+                    // SANS EFFET
+                    $createRoot->setLft(1);
+                    $createRoot->setRgt(2);
+                    $createRoot->setLabel('ROOT');
+                    $createRoot->setDescription('');
+                    $this->getEntityManager()->flush();
+
+                    return $createRoot;
+                } catch (\Exception $e) {
+                    $this->getLoggerService()->critical("Impossible de créer le noeud ROOT : " . $e->getMessage());
+                    throw new OscarException("Impossible d'initialiser l'arbre des types d'activité");
+                }
+            }
+            else {
+                $this->getLoggerService()->critical("Hiérarchie des types d'activité corrompue !");
+                throw new \Exception(
+                    "Incohérence de l'arbre, veuillez contacter l'administrateur pour déclencher un recalcule de la hérarchie : "
+                    . $e->getMessage()
+                );
+            }
+        }
+    }
+
+    public function verify(bool $cure = false): array
+    {
+        $output = [];
+        $errors = [];
+        $details = [];
+
+        // On commence par récupérer le noeud root et voir si il est
+        // à sa place (position 1)
+        $root = $this->getRoot();
+
+        $rootId = $root->getId();
+        if ($root->getLft() != 1) {
+            $errors[] = "Le noeud ROOT n'est pas à la racine !";
+        }
+
+
+        // Recherche des bornes
+        $min = $this->getEntityManager()->getRepository(ActivityType::class)->createQueryBuilder('t')
+            ->orderBy('t.lft', 'ASC')
+            ->getQuery()
+            ->setMaxResults(1)
+            ->getSingleResult();
+
+        $max = $this->getEntityManager()->getRepository(ActivityType::class)->createQueryBuilder('t')
+            ->orderBy("t.rgt", "DESC")
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleResult();
+
+        if ($min->getId() != $rootId) {
+            $errors[] = "Le premier noeud n'est pas le noeud ROOT !";
+        }
+
+        $types = $this->getActivityTypes();
+        if (count($types) <= 1) {
+            die("Aucun type configuré");
+        }
+
+        $expectedOpen = [1];
+        $expectedClause = [count($types) * 2];
+        $index = 0;
+
+        $openTracker = 0;
+        $openGap = 0;
+
+        $first = $types[0];
+        $borneEnd = count($types) * 2;
+
+        if ($first->getLft() != 1) {
+            $errors[] = "Le noeud racine a une incohérence de borne ouvrante";
+        }
+        $expectedMaxRgt = (count($types)) * 2;
+        if ($first->getRgt() != $expectedMaxRgt) {
+            $first->setRgt($expectedMaxRgt);
+            $errors[] = "Le noeud racine a une incohérence de borne fermante (" . $first->getRgt(). " attendu $expectedMaxRgt)";
+        }
+
+        $nextClause = [];
+
+        $tree = [
+
+        ];
+
+        $lastOpen = [];
+        $depth = 3;
+        $gap = 0;
+        $rootReRooted = false;
+
+        // On met ROOT en premier
+        if ($types[0] !== $root) {
+            $errors[] = "Le noeud ROOT n'est pas en premier, ces bornes ont été recalculées à partir des autres bornes";
+            $minPos = $min->getLft() - 1;
+            $maxPos = $max->getRgt() + 1;
+            $root->setLft($minPos);
+            $root->setRgt($maxPos);
+
+            $newTypes = [$root];
+            foreach ($types as $t) {
+                if ($t != $root) {
+                    $newTypes[] = $t;
+                }
+            }
+            $types = $newTypes;
+        }
+
+        foreach ($types as $type) {
+            $openTracker++;
+            $curentNode = $openTracker;
+
+            $tree[$openTracker] = [
+                "type"       => $type,
+                "label"      => $type->getLabel(),
+                "open"       => $openTracker,
+                "info"       => "",
+                "end"        => 0,
+                "close"      => null,
+                "depth"      => $depth,
+                'patched'    => false,
+                "openBefore" => json_encode($nextClause) . "/" . json_encode($lastOpen)
+            ];
+            // echo " - " . str_pad(substr($type, 0, 10), 10, ' ') . "\t\t";
+
+            if( $type == $root && $type->getRgt() != $expectedMaxRgt ){
+                $tree[$openTracker]['close'] = $expectedMaxRgt;
+            }
+
+            if ($openTracker != $type->getLft()) {
+                $gap = $openTracker - $type->getLft();
+                $tree[$curentNode]['info'] .= "[!D$gap]";
+            }
+
+            $trac = $type->trac();
+            $open = $type->getLft() + $gap;
+            $clause = $type->getRgt() + $gap;
+
+            if ($open != $openTracker + $openGap) {
+                $openGap = $open - $openTracker;
+                $errors[] = "Le noeud $trac a une borne ouvrante décalée";
+            }
+
+            // echo "[$openTracker\t-";
+            if( $clause - $open == 1 ){
+            } elseif ($clause - $open > 1 ){
+                $sumbornes = ($clause - $open - 1);
+                if ($sumbornes % 2 != 0) {
+                    $nbr = $sumbornes/2;
+                    $errors[] = "Nombre de noeud incohérent dans $trac ($nbr)";
+                    $tree[$curentNode]['info'] .= "[!NN]";
+                }
+            } else {
+                $errors[] = "Borne inversée ou incohérente $trac";
+            }
+
+            if ($clause > $open + 1) {
+                // echo "\n --- [N] ";
+                $tree[$curentNode]['info'] .= '[N]';
+                $lastOpen[] = $curentNode;
+                $nextClause[] = $clause;
+                $depth += 3;
+            }
+            else {
+                $openTracker++;
+                // echo "$openTracker] ";
+                $tree[$curentNode]['info'] .= '[F]';
+                $tree[$curentNode]['close'] .= $openTracker;
+            }
+            while ($nextClause && $nextClause[count($nextClause) - 1] <= $openTracker + 1) {
+                $openTracker++;
+                $lastOpenId = array_pop($lastOpen);
+                $clauseValue = array_pop($nextClause);
+                $tree[$lastOpenId]['close'] = $openTracker;
+                $tree[$curentNode]['info'] .= '[X]';
+                // echo " $openTracker>>";
+                $depth -= 3;
+            }
+        }
+
+        for($i=count($lastOpen)-1; $i >= 0; $i--) {
+            $openTracker++;
+            $closeId = $lastOpen[$i];
+            $tree[$closeId]['close'] = $openTracker;
+            $tree[$closeId]['info'] .= '[Cm]';
+        }
+
+        $err = false;
+        $unique = [];
+        foreach ($tree as $i => $t) {
+            if ($i === 0) {
+                continue;
+            }
+
+            $open = $t['open'];
+            $close = $t['close'];
+
+            if( array_key_exists($open, $unique) ){
+                $errors[] = "La borne '$open' dans " . $t['type'] . ' utilisée dans ' . $unique[$open];
+            } else {
+                $unique[$open] = sprintf('%s [%s,%s]', $t['type']->getLabel(), $t['open'], $t["close"]);
+            }
+            if( array_key_exists($close, $unique) ){
+                $errors[] = "La borne '$close'(c) dans " . $t['type'] . ' utilisée dans ' . $unique[$close];
+            } else {
+                $unique[$close] = sprintf('%s [%s,%s]', $t['type']->getLabel(), $t['open'], $t["close"]);
+            }
+
+            $ok = ($t['type']->getLft() == $open && $t['type']->getRgt() == $close);
+            if (!$ok) {
+                $errors[] = "Bornes décalées pour '" . $t['label'] . "' => " . sprintf('(%s,%s)', $open, $close);
+                $err = true;
+            }
+        }
+
+        if ($err || $errors) {
+            $needfix = true;
+            if($cure) {
+                foreach ($tree as $i => $t) {
+                    if ($i === 0) {
+                        continue;
+                    }
+                    $patched = false;
+                    $type = $t['type'];
+
+                    if( !$t['close'] || !$t['open'] ){
+                        $errors[] = "Impossible de recalculer une borne dans " . $type->trac();
+                        continue;
+//                        throw new OscarException("Problème lors du recalcule des bornes : " . print_r($t, true));
+                    }
+
+                    if( $type->getLft() != $t['open'] ){
+                        $type->setLft($t['open']);
+                        $patched = true;
+                    }
+                    if( $type->getRgt() != $t['close'] ){
+                        $type->setRgt($t['close']);
+                        $patched = true;
+                    }
+                    $t['patched'] = $patched;
+                }
+                try {
+                    $this->getEntityManager()->flush();
+                } catch (\Exception $e) {
+                    die("Erreur fatale : " . $e->getMessage());
+                }
+            }
+        }
+        else {
+            $needfix = false;
+        }
+
+        foreach ($tree as $i => $t) {
+            if ($i === 0) {
+                continue;
+            }
+
+            $ok = ($t['type']->getLft() == $t['open'] && $t['type']->getRgt() == $t['close']);
+
+            $details[] = [
+                'id'       => $t['type']->getId(),
+                'status'   => $ok ? true : false,
+                'label'    => str_pad("", $t['depth'], '.')
+                    . str_pad(substr($t['label'], 0, 80 - $t['depth']), 80 - $t['depth'], '-'),
+                'expected' => sprintf(" (%s,%s)", $t['open'], $t['close']),
+                'infos'    => $t['info'],
+                'opens'    => $t['openBefore']
+            ];
+        }
+
+        return [
+            'needfix' => $needfix,
+            'errors'  => $errors,
+            'details' => $details
+        ];
     }
 
     /**

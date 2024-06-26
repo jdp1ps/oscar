@@ -1259,6 +1259,14 @@ contractdocument:
   may_terminate: true
 
   child_routes:
+
+    search:
+      type: segment
+      options:
+        route: /search
+        defaults:
+          action: search
+
     activity:
       type: segment
       options:
@@ -1634,7 +1642,7 @@ activitydate:
           action: change
 
 ################################################################################
-### ActivityType
+### Versements
 payment:
   type: segment
   options:
@@ -1753,7 +1761,12 @@ activitytype:
         route: /move/:what/:how/:where
         defaults:
           action: move
-
+    verify:
+      type: segment
+      options:
+        route: /verify
+        defaults:
+          action: verify
 
 depense:
   type: segment

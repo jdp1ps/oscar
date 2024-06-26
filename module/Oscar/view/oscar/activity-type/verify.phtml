@@ -1,0 +1,56 @@
+
+<div class="container">
+    <h1>Verification des types d'activités</h1>
+    <?php
+    if ($needfix): ?>
+        <div class="alert alert-danger">
+            Vous pouvez tenter de corriger le problèmes
+            <form action="" method="POST">
+                <button type="submit" class="btn-lg btn-default" name="cure" value="on">
+                    Réparer les types
+                </button>
+            </form>
+        </div>
+    <?php
+    endif; ?>
+
+    <table class="table table-condensed table-bordered table-borderless table-dark">
+        <thead>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Label</th>
+        <th>Valeur recalculée</th>
+        <th>Infos</th>
+        <th>Ouverture</th>
+        </thead>
+        <tbody>
+        <?php
+        foreach ($lines as $line): ?>
+            <tr>
+                <td><?= $line['id'] ?></td>
+                <td><?= $line['status'] ? '<i class="icon-valid"></i>' : '<i class="icon-attention-1"></i>' ?></td>
+                <td><code><?= $line['label'] ?></code></td>
+                <td><?= $line['expected'] ?></td>
+                <td><?= $line['infos'] ?></td>
+                <td><?= $line['opens'] ?></td>
+            </tr>
+        <?php
+        endforeach; ?>
+        </tbody>
+    </table>
+
+    <?php
+    if (count($errors)): ?>
+        <div class="alert alert-danger">
+            <ul>
+                <?php
+                foreach ($errors as $error): ?>
+                    <li><?php
+                        echo $error ?></li>
+                <?php
+                endforeach; ?>
+            </ul>
+        </div>
+    <?php
+    endif; ?>
+</div>

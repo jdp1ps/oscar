@@ -44,6 +44,8 @@ class KeyValueHelper extends FormElement
             if( !is_array($value) )
                 $value = [];
 
+
+
             $out = '<div class="keyvalue-widget" data-template="'.htmlentities(self::getTemplateLine($name, '{{key}}', '{{value}}')).'">';
             if( $element->getLabel() )
                 $out .= '<label>' . $element->getLabel() . '</label>';
@@ -56,6 +58,10 @@ class KeyValueHelper extends FormElement
 
             $keys = array_merge($specificKeys, $element->keys);
             $keys = array_unique($keys);
+
+            if( !$value ){
+                $value = [];
+            }
 
             foreach ($keys as $key) {
                 $val = "";

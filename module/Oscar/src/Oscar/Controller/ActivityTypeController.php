@@ -27,18 +27,17 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
         return [
             'distribution' => $this->getActivityTypeService()->distribution(),
-            'entities' => $this->getActivityTypeService()->getActivityTypes()
+            'entities'     => $this->getActivityTypeService()->getActivityTypes()
         ];
     }
 
     public function mergeAction()
     {
-
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_ACTIVITYTYPE_MANAGE);
 
         /** @var ActivityType $destination */
         $destination = $this->getActivityTypeService()->getActivityType($this->params()->fromRoute('id'));
-        if( !$destination ){
+        if (!$destination) {
             throw new OscarException("Impossible de charger le type d'activité");
         }
 
@@ -48,14 +47,15 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
 
         $reducted = [];
         foreach ($merged as $id) {
-            if($id == $destination->getId())
+            if ($id == $destination->getId()) {
                 continue;
+            }
 
             $reducted[] = $id;
         }
         $merged = $reducted;
 
-        if( !$merged ){
+        if (!$merged) {
             throw new OscarException("Vous devez selectionner plusieurs types à fusionner");
         }
 
@@ -75,7 +75,7 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
             ->getResult();
 
         /** @var Activity $activity */
-        foreach( $activities as $activity ){
+        foreach ($activities as $activity) {
             echo "Mise à jour du type pour $activity\n<br>";
             $activity->setActivityType($destination);
         }
@@ -85,15 +85,16 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $newCode = $destination->getCentaureId();
 
         /** @var ActivityType $type */
-        foreach( $mergedEntities as $type ){
+        foreach ($mergedEntities as $type) {
             $this->getEntityManager()->refresh($type);
             echo "Suppression de  $type\n<br>";
 
             // Ajout du code centaure à la destination
-            if( $newCode == '' ){
+            if ($newCode == '') {
                 $newCode = $type->getCentaureId();
-            } else {
-                if( $type->getCentaureId() ) {
+            }
+            else {
+                if ($type->getCentaureId()) {
                     $newCode .= '|' . $type->getCentaureId();
                 }
             }
@@ -117,14 +118,15 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $request = $this->getRequest();
 
         $parentId = intval($this->params()->fromRoute('idparent', 0));
-        if( $parentId > 0 ){
+        if ($parentId > 0) {
             $parent = $this->getActivityTypeService()->getActivityType($parentId);
-        } else {
+        }
+        else {
             $parent = null;
         }
 
         // Traitement des données envoyées
-        if( $request->isPost() ){
+        if ($request->isPost()) {
             $label = $this->params()->fromPost('label');
             $description = $this->params()->fromPost('description');
             $nature = $this->params()->fromPost('nature');
@@ -138,12 +140,39 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
             $this->redirect()->toRoute('activitytype');
         }
         $view = new ViewModel([
-            'entity' => $activityType,
-            'form' => $form,
-            'parent' => $parent,
-        ]);
+                                  'entity' => $activityType,
+                                  'form'   => $form,
+                                  'parent' => $parent,
+                              ]);
         $view->setTemplate('oscar/activity-type/form.phtml');
         return $view;
+    }
+
+    public function verifyAction()
+    {
+        $cure = false;
+        if ($this->params()->fromPost('cure') == 'on') {
+            $cure = true;
+        }
+
+        $lines = [];
+        $errors = [];
+        $needfix = false;
+
+        try {
+            $repport = $this->getActivityTypeService()->verify($cure);
+            $lines = $repport['details'];
+            $errors = $repport['errors'];
+            $needfix = $repport['needfix'];
+        } catch (\Exception $e) {
+            $errors = [$e->getMessage()];
+        }
+        return [
+            'lines'   => $lines,
+            'needfix' => $needfix,
+            'errors'  => $errors,
+            'types'   => $this->getActivityTypeService()->verify()
+        ];
     }
 
     public function editAction()
@@ -152,18 +181,18 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $form = new ActivityTypeForm();
         $form->bind($activityType);
 
-        if( $this->getRequest()->isPost() ){
+        if ($this->getRequest()->isPost()) {
             $form->setData($this->getRequest()->getPost());
-            if( $form->isValid() ) {
+            if ($form->isValid()) {
                 $this->getEntityManager()->flush($form->getObject());
             }
         }
 
         $view = new ViewModel([
-            'entity' => $activityType,
-            'form' => $form,
-            'parent' => null,
-        ]);
+                                  'entity' => $activityType,
+                                  'form'   => $form,
+                                  'parent' => null,
+                              ]);
 
         $view->setTemplate('oscar/activity-type/form.phtml');
         return $view;
@@ -175,7 +204,7 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $nodeMoved = $activityService->getActivityType($this->params()->fromRoute('what'));
         $nodeDestination = $activityService->getActivityType($this->params()->fromRoute('where'));
         $movement = $this->params()->fromRoute('how');
-        switch($movement){
+        switch ($movement) {
             case 'in':
                 $activityService->moveIn($nodeMoved, $nodeDestination);
                 break;
@@ -197,7 +226,6 @@ class ActivityTypeController extends AbstractOscarController implements UseActiv
         $activity = $this->getCurrentActivityType();
         $this->getActivityTypeService()->deleteNode($activity);
         $this->redirect()->toRoute('activitytype');
-
     }
 
     /**

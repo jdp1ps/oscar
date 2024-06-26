@@ -116,6 +116,13 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         return $manager;
     }
 
+
+    public function getPersonDocumentIds(Person $person) :array {
+        $ids = [];
+
+        return $ids;
+    }
+
     /**
      * @throws OscarException
      * @throws ORMException

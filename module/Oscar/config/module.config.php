@@ -239,7 +239,7 @@ return array(
                 // --- Type d'activités - { controller: ActivityType, action: [new, delete, edit, index, move, merge], roles: [user] }
                 [
                     'controller' => 'ActivityType',
-                    'action' => ['new', 'delete', 'edit', 'index', 'move', 'merge'],
+                    'action' => ['new', 'delete', 'edit', 'index', 'move', 'merge', 'verify'],
                     'privileges' => \Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN,
                 ],
 
@@ -267,6 +267,7 @@ return array(
                         'processDelete',
                         'processRefresh',
                         'reupload',
+                        'search',
                         'show',
                         'upload',
                     ],
@@ -549,6 +550,7 @@ return array(
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
             \Oscar\Service\ActivityTypeService::class => \Oscar\Service\ActivityTypeServiceFactory::class,
             \Oscar\Service\AdministrativeDocumentService::class => \Oscar\Service\AdministrativeDocumentServiceFactory::class,
+            \Oscar\Service\BackupService::class => \Oscar\Service\BackupServiceFactory::class,
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             \Oscar\Service\DocumentFormatterService::class => \Oscar\Service\DocumentFormatterServiceFactory::class,

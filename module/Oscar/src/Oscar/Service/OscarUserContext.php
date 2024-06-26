@@ -1644,4 +1644,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         return $this->getOscarConfigurationService()->signatureEnabled();
     }
+
+    public function getCurrentRolesApplication() :array {
+        var_dump($this->getBaseRoleId());
+        die();
+    }
 }

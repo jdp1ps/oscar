@@ -70,15 +70,13 @@ class ActivityType implements ITrackable
      * @var integer
      * @ORM\Column(type="integer")
      */
-    protected $lft;
+    private int $lft = 1;
 
     /**
      * @var integer
      * @ORM\Column(type="integer")
      */
-    protected $rgt;
-
-
+    private int $rgt = 2;
 
 
     /**
@@ -90,15 +88,13 @@ class ActivityType implements ITrackable
     /**
      * @return integer
      */
-    public function getLft()
+    public function getLft() :int
     {
         return $this->lft;
     }
 
-    /**
-     * @param mixed $lft
-     */
-    public function setLft($lft)
+
+    public function setLft(int $lft)
     {
         $this->lft = $lft;
         return $this;
@@ -107,18 +103,14 @@ class ActivityType implements ITrackable
     /**
      * @return mixed
      */
-    public function getRgt()
+    public function getRgt() :int
     {
         return $this->rgt;
     }
 
-    /**
-     * @param mixed $rgt
-     */
-    public function setRgt($rgt)
+    public function setRgt(int $rgt)
     {
         $this->rgt = $rgt;
-
         return $this;
     }
 
@@ -206,7 +198,8 @@ class ActivityType implements ITrackable
         return $this->getLabel();
     }
 
-    function trac(){
+    function trac()
+    {
         return sprintf("%s:%s (%s,%s)", $this->getId(), $this->getLabel(), $this->getLft(), $this->getRgt());
     }
 

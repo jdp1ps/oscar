@@ -112,6 +112,18 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public function searchAction() {
+        $format = $this->getRequest()->getQuery('f', 'ui');
+        if( $format == 'json' ){
+            $search = $this->getRequest()->getQuery('s', '');
+            $person_app_roles = $this->getOscarUserContextService()->getCurrentRolesApplication();
+            var_dump($person_app_roles);
+//            $documents_ids = $this->getContractDocumentService()->getPersonDocumentIds($this->getCurrentPerson());
+            die("FORMAT");
+        }
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////// USEFULL INFOS
     /**
      * Retourne l'emplacement où sont stoqués les documents depuis le fichier
