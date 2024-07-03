@@ -30,6 +30,7 @@ export default defineConfig({
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),
+        documentsindex: resolve(__dirname, 'src/DocumentsIndex.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),

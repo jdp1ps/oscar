@@ -144,7 +144,7 @@ class JsonFormatterService implements UseOscarConfigurationService, UseEntityMan
                 'document_id'         => $doc->getId()
             ]);
         }
-        $docAdded['uploader'] = $this->personSimple($doc->getPerson(), true);
+        $docAdded['uploader'] = $doc->getPerson() ? $this->personSimple($doc->getPerson(), true) : null;
         $docAdded['manage_process'] = $allowProcessUpdate;
         $docAdded['process_triggerable'] = $allowProcessCreate;
         $docAdded['urlProcessDelete'] = $process_delete_url;

@@ -7,6 +7,7 @@
 
 namespace Oscar\Entity;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -48,7 +49,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      * @param int $tabDocumentId
      * @return ContractDocument[]
      */
-    public function getDocumentsForTabId(int $tabDocumentId ) :array
+    public function getDocumentsForTabId(int $tabDocumentId): array
     {
         $query = $this->createQueryBuilder('c')
             ->where('c.tabDocument = :tabDocument')
@@ -64,15 +65,17 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// DOCUMENTS
 
-    public function getLastDocumentId() :int {
+    public function getLastDocumentId(): int
+    {
         $query = $this->createQueryBuilder('c');
         $query->orderBy('c.id', 'DESC');
         $query->setMaxResults(1);
         $result = $query->getQuery()->getOneOrNullResult();
-        if($result == null){
+        if ($result == null) {
             return 1;
-        }else{
-            return $result->getId()+1;
+        }
+        else {
+            return $result->getId() + 1;
         }
     }
 
@@ -88,7 +91,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->where('c.fileName = :fileName AND c.grant = :activityId')
             ->setParameters(
                 [
-                    'fileName' => $contractDocument->getFileName(),
+                    'fileName'   => $contractDocument->getFileName(),
                     'activityId' => $contractDocument->getActivity()
                 ]
             );
@@ -180,9 +183,6 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         bool $default = false,
         int $signatureflow_id = 0
     ): void {
-
-
-
         if ($id == null) {
             $type = new TypeDocument();
             $this->getEntityManager()->persist($type);
@@ -197,9 +197,10 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             }
         }
 
-        if( $signatureflow_id ){
+        if ($signatureflow_id) {
             $signatureflow = $this->getEntityManager()->getRepository(SignatureFlow::class)->find($signatureflow_id);
-        } else {
+        }
+        else {
             $signatureflow = null;
         }
 
@@ -295,7 +296,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      * @return ContractDocument
      * @throws NoResultException|NonUniqueResultException
      */
-    public function getDocumentByProcessId(int $processId) :ContractDocument
+    public function getDocumentByProcessId(int $processId): ContractDocument
     {
         return $this->createQueryBuilder('c')
             ->where('c.process = :process')
@@ -357,7 +358,8 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
      * @param int $projectId
      * @return array
      */
-    public function getProjectDocuments(int $projectId) :array {
+    public function getProjectDocuments(int $projectId): array
+    {
         $query = $this->baseQuery();
         $query->orderBy('d.dateUpdoad', 'DESC')
             ->setParameters(['id' => $projectId])
@@ -377,5 +379,72 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->from(ContractDocument::class, 'd')
             ->leftJoin('d.person', 'p')
             ->leftJoin('d.grant', 'g');
+    }
+
+    public function getDocumentsGrouped(int $page = 1, int $limit = 10, ?array $filters = null): array
+    {
+        $queryByFileName = $this->getEntityManager()->createQueryBuilder()
+            ->from(ContractDocument::class, 'd');
+
+        $filtersValues = [];
+
+        if ($filters) {
+            if (array_key_exists('type', $filters) && $filters['type'] !== null) {
+                $queryByFileName->andWhere('d.typeDocument = :type');
+                $filtersValues['type'] = $filters['type'];
+            }
+            if (array_key_exists('sign', $filters) && $filters['sign'] !== null) {
+                $queryByFileName->andWhere(
+                    $filters['sign'] ?
+                        'd.process IS NOT NULL' :
+                        'd.process IS NULL'
+                );
+            }
+            //
+            if (array_key_exists('activity_ids', $filters) && $filters['activity_ids'] !== null) {
+                $queryByFileName->andWhere('d.grant IN(:activity_ids)');
+                $filtersValues['activity_ids'] = $filters['activity_ids'];
+            }
+            $queryByFileName->setParameters($filtersValues);
+        }
+
+        try {
+            $total = $queryByFileName->select('COUNT(DISTINCT d.fileName)')
+                ->getQuery()
+                ->getResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+        } catch (\Exception $e) {
+            throw new OscarException("Impossible de charger le nombre de document : " . $e->getMessage());
+        }
+
+//        var_dump($queryByFileName->getQuery()->getDQL());
+//        var_dump($total);
+//        die();
+
+        $filenames = $queryByFileName
+            ->select('DISTINCT d.fileName')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $documents = $this->getEntityManager()->createQueryBuilder()
+            ->select('d, p, g')
+            ->from(ContractDocument::class, 'd')
+            ->leftJoin('d.person', 'p')
+            ->leftJoin('d.grant', 'g')
+            ->where('d.fileName in(:filenames)')
+            ->setParameter('filenames', $filenames)
+            ->orderBy('d.dateUpdoad', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return [
+            'page'               => $page,
+            'total_pages'        => ceil($total / $limit),
+            'total_current_page' => count($documents),
+            'total'              => $total,
+            'nbr'                => $limit,
+            'documents'          => $documents,
+        ];
     }
 }

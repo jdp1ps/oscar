@@ -965,9 +965,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $_ROLES_ORGANIZATION_LEADER;
     }
 
-    public function getRolesPersonInActivityDeep(Person $person, Activity $activity)
+    public function getRolesPersonInActivityDeep(?Person $person, Activity $activity)
     {
-        $roles = $this->getRolesPersonInActivity($person, $activity);
+        if( $person ){
+            $roles = $this->getRolesPersonInActivity($person, $activity);
+        } else {
+            $roles = [];
+        }
         $rolesAppli = $this->getBaseRoleId();
         return array_merge($roles, $rolesAppli);
     }
@@ -1171,11 +1175,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @param Activity $activity
      * @return mixed
      */
-    public function getRolesInActivity(Person $person, Activity $activity)
+    public function getRolesInActivity(?Person $person, Activity $activity)
     {
         static $tmpActivities = [];
-        $key = $person->getId() . '-' . $activity->getId();
+        if( !$person ){
+            return [];
+        }
 
+        $key = $person->getId() . '-' . $activity->getId();
 
         if (!isset($tmpActivities[$key])) {
             try {
@@ -1317,7 +1324,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         static $tmpAccessTabDocuments, $tmpAccessByRoles;
 
-        if ($roles === null) {
+         if ($roles === null) {
             $roles = $this->getBaseRoleId();
 
         }
@@ -1326,6 +1333,11 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
 
         if ($tmpAccessTabDocuments === null) {
+            $tabDocuments = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
+            if(!$tabDocuments){
+                $this->getLoggerService()->critical("Aucun onglet de document configuré");
+                throw new OscarException("Aucun onglet de document configuré");
+            }
             /** @var TabDocument $t */
             foreach ($this->getEntityManager()->getRepository(TabDocument::class)->findAll() as $t) {
                 $tmpAccessTabDocuments[$t->getId()] = $t->getRolesAccess();
@@ -1396,7 +1408,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if (!array_key_exists($contractDocument->getId(), $tmpContractDocuments)) {
             // Document privé
-            if ($contractDocument->isPrivate() && $contractDocument->getPersons()->contains(
+            if ($contractDocument->isPrivate() && $this->getCurrentPerson() && $contractDocument->getPersons()->contains(
                     $this->getCurrentPerson()
                 )) {
                 $read = true;
@@ -1460,10 +1472,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $read = false;
             $write = false;
             if ($this->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity)) {
-                $roles = array_merge(
-                    $this->getBaseRoleId(),
-                    $this->getRolesInActivity($this->getCurrentPerson(), $activity)
-                );
+                $roles = $this->getCurrentRolesApplication();
+
+                if( $this->getCurrentPerson() ){
+                    $roles = array_merge(
+                        $roles,
+                        $this->getRolesInActivity($this->getCurrentPerson(), $activity)
+                    );
+                }
                 $rules = $this->getAccessTabDocument(null, $roles);
                 $read = $rules['read'];
                 $write = $rules['write'];
@@ -1646,7 +1662,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     public function getCurrentRolesApplication() :array {
-        var_dump($this->getBaseRoleId());
-        die();
+        return $this->getBaseRoleId();
     }
 }

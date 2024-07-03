@@ -1,6 +1,6 @@
 {
   "DocumentsList.css": {
-    "file": "assets/DocumentsList-2636affb.css",
+    "file": "assets/DocumentsList-31851af6.css",
     "src": "DocumentsList.css"
   },
   "_vendor.js": {
@@ -8,7 +8,7 @@
   },
   "_vendor2.js": {
     "css": [
-      "assets/DocumentsList-2636affb.css"
+      "assets/DocumentsList-31851af6.css"
     ],
     "file": "vendor2.js",
     "imports": [
@@ -30,14 +30,14 @@
     ]
   },
   "src/ActivityDocuments.css": {
-    "file": "assets/ActivityDocuments-a082cfa6.css",
+    "file": "assets/ActivityDocuments-300d22ed.css",
     "src": "src/ActivityDocuments.css"
   },
   "src/ActivityDocuments.js": {
     "css": [
-      "assets/ActivityDocuments-a082cfa6.css"
+      "assets/ActivityDocuments-300d22ed.css"
     ],
-    "file": "assets/activitydocuments-bef0d694.js",
+    "file": "assets/activitydocuments-fb0eecef.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -100,6 +100,16 @@
     ],
     "isEntry": true,
     "src": "src/DeclarersList.js"
+  },
+  "src/DocumentsIndex.js": {
+    "file": "assets/documentsindex-fd7dd161.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor2.js",
+      "_vendor3.js"
+    ],
+    "isEntry": true,
+    "src": "src/DocumentsIndex.js"
   },
   "src/DocumentsObserved.js": {
     "file": "assets/documentsobserved-68f8192f.js",

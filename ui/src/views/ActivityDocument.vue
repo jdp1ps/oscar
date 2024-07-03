@@ -323,6 +323,7 @@
               (Document généré automatiquement)
             </small>
           </div>
+
           <nav class="text-right show-over">
             <a class="btn btn-default btn-xs" :href="doc.url">
               <i class="icon-upload-outline"></i>
@@ -857,7 +858,7 @@ export default {
     // Méthode appelée lors de l'appel via la méthode fetch démarrage du module
     handlerSuccess(success) {
       try {
-        if (!success.data.idCurrentPerson) {
+        if (!success.data) {
           throw "Impossible de charger les documents, vérifiez que vous êtes toujours connecté";
         }
         this.idCurrentPerson = success.data.idCurrentPerson;
@@ -925,9 +926,7 @@ export default {
       axios.get(this.url).then(ok => {
         this.handlerSuccess(ok)
       }, ko => {
-        console.log('KO');
-        console.log(ko);
-        this.error = ko;
+        this.error = ko.response.data ? ko.response.data : ko;
       });
     }
   },

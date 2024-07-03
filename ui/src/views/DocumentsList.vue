@@ -298,7 +298,7 @@
       <i class="icon-calendar"></i> Envoyé <strong>{{ $filters.timeAgo(doc.dateSend) }}</strong>
       <i class="icon-calendar"></i> Déposé <strong>{{ $filters.dateFull(doc.dateDeposit) }}</strong>
       <i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong>
-      <i class="icon-user"></i> par <strong>{{ doc.uploader.displayname }}</strong>
+      <i class="icon-user"></i> par <strong v-if="doc.uploader">{{ doc.uploader.displayname }}</strong><em v-else>Inconnu</em>
     </small>
     <p>{{ doc.information }}</p>
     <section v-if="doc.private">
@@ -377,7 +377,7 @@
         </a>
 
         <a class="btn btn-default btn-xs"
-           href="#" v-if="doc.process_triggerable" @click.prevent="handlerProcessInit(doc)">
+           href="#" v-if="doc.process_triggerable && displayButtonSign" @click.prevent="handlerProcessInit(doc)">
           <i class="icon-bank"></i>
           Signer ce document
         </a>
@@ -427,6 +427,7 @@ export default {
     signProcess: {default: null},
     tabs: {default: []},
     types: {default: []},
+    displayButtonSign: {default: true}
   },
 
   data() {

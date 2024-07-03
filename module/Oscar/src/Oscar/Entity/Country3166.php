@@ -55,8 +55,6 @@ class Country3166
         return [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
-            'symbol' => $this->getSymbol(),
-            'rate' => $this->getRate(),
         ];
     }
 

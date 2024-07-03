@@ -14,17 +14,16 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
 
-class OscarBackupCommand extends OscarCommandAbstract
+class OscarRestoreCommand extends OscarCommandAbstract
 {
-    protected static $defaultName = 'backup';
+    protected static $defaultName = 'restore';
 
     protected function configure()
     {
         $this
-            ->setDescription("Génération de données JSON")
+            ->setDescription("Restauration des données")
             ->addOption('datas', 'd', InputOption::VALUE_REQUIRED, 'Données à exporter')
-            ->addOption('directory', 'o', InputOption::VALUE_REQUIRED, 'Dossier où seront créé les fichiers de backup')
-            ->addOption('clean', 'c', InputOption::VALUE_NONE, 'Vide le dosser de backup avant');
+            ->addOption('directory', 'o', InputOption::VALUE_REQUIRED, 'Dossier où seront créé les fichiers de backup');
     }
 
     protected function getBackupService(): BackupService
@@ -45,33 +44,28 @@ class OscarBackupCommand extends OscarCommandAbstract
 
         if ($directory) {
             $save_location = Path::normalize($directory);
-            $io->writeln("Sauvegarde dans '$save_location'");
+            $io->writeln("Restoration depuis '$save_location'");
             // On regarde si le dossier existe
             if (!$filesystem->exists($save_location)) {
-                $io->writeln("Création du dossier '$directory'");
-                $filesystem->mkdir($save_location);
+                $io->error("Le dossier '$save_location' n'existe pas");
                 return self::INVALID;
             }
             else {
-                if ($override) {
-                    $finder = new Finder();
-                    $io->writeln("Clean directory '$save_location'");
-                    try {
-                        foreach ($finder->files()->in($save_location)->files() as $file) {
-                            $io->writeln("Remove '$file'");
-                            $filesystem->remove($file);
-                        }
-                    } catch (\Exception $e) {
-                        $io->error("Impossible de vider le dossier '$directory' : " . $e->getMessage());
+                $finder = new Finder();
+                $io->writeln("Clean directory '$save_location'");
+                try {
+                    foreach ($finder->files()->in($save_location)->files() as $file) {
+                        $io->writeln("Read '$file'");
                     }
+                    return self::SUCCESS;
+                } catch (\Exception $e) {
+                    $io->error("Impossible de vider le réstaurer '$directory' : " . $e->getMessage());
+                    return self::FAILURE;
                 }
             }
         }
 
-        $expected = [
-            BackupService::ACTIVITY_TYPES => "Types d'activité",
-            BackupService::PERSONS        => "Personnes",
-        ];
+        $expected = BackupService::getAvailables(true);
 
         if (!$datas) {
             $io->title("Système de BACKUP");

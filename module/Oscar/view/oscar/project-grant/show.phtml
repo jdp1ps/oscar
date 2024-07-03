@@ -286,7 +286,8 @@
                                         var criteria = this.filter;
                                         ret = this.persons.filter(p => p.displayname.indexOf(criteria) >= 0 || p.affectation.indexOf(criteria) >= 0);
                                     }
-                                    return ret.sort((a, b) => a.displayname.localeCompare(b.displayname));
+
+                                    return ret ? ret.sort((a, b) => a.displayname.localeCompare(b.displayname)) : [];
 
                                 }
                             }

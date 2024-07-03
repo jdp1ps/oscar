@@ -12,10 +12,12 @@ $showDelete = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_DOC
         <i class="icon-book"></i>
         Documents téléversés
     </h1>
-<?php
+
+    <div id="documents" data-url="?f=json"></div>
+    <?= $this->Vite()->addJs('src/DocumentsIndex.js'); ?>
+<?php /*
 $year = null;
 $month = null;
-/** @var \Oscar\Entity\ContractDocument $document */
 foreach( $documents as $document ):
     $cYear = $document->getDateUpdoad()->format('Y');
     $cMonth = $document->getDateUpdoad()->format('m');
@@ -41,3 +43,4 @@ foreach( $documents as $document ):
 <?php endforeach; ?>
 <?= $this->pager($documents) ?>
 </section>
+?>*/ ?>

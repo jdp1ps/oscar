@@ -2,6 +2,16 @@
 
 > Attention, version BETA sur la branche **"ripley-laminas-php8"**
 
+## Mise à jour et patch
+
+Pour les mises à jour et patch à venir, pensez à mettre à jour, en plus des sources, les lirairies tiers : 
+
+```bash
+git fetch
+git pull
+composer install
+```
+
 ## Avant Mise à jour
 
 Interruption du service. 

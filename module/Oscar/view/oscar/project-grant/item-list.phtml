@@ -180,7 +180,7 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
         <?php
         //hasDocumentAccess
         $documents = [];
-        foreach ($activity->getDocuments() as $document) {
+        foreach ($activity->getDocumentsGrouped() as $document) {
             if( $this->grant()->hasDocumentAccess($document) ){
                 $documents[] = $document;
             }

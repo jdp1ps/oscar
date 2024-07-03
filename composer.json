@@ -31,9 +31,11 @@
     "guzzlehttp/guzzle": "^7.0",
     "phpoffice/phpspreadsheet": "^1.29",
     "phpoffice/phpword": "^1.1",
-    "unicaen/signature": "^0.0.13",
+    "unicaen/signature": "^0.0.15",
     "ext-gettext": "*",
-    "ext-fileinfo": "*"
+    "ext-fileinfo": "*",
+    "symfony/filesystem": "^7.1",
+    "symfony/finder": "^7.1"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

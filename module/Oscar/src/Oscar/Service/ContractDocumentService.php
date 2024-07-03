@@ -748,4 +748,28 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             throw new OscarException("Le fichier du process est vide/indisponible");
         }
     }
+
+    /**
+     * @return ContractDocument[]
+     */
+    public function getDocuments() :array
+    {
+        return $this->getContractDocumentRepository()->getAllDocuments();
+    }
+
+    public function getDocumentsArray()
+    {
+        $documents = $this->getDocuments();
+        $out = [];
+        foreach ($documents as $document) {
+            $out[] = $document->toJson();
+        }
+        return $out;
+
+    }
+
+    public function getDocumentsGrouped(int $page = 1, int $nbr = 10, ?array $filters = null)
+    {
+        return $this->getContractDocumentRepository()->getDocumentsGrouped($page, $nbr, $filters);
+    }
 }

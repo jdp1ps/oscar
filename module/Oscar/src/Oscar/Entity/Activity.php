@@ -2027,6 +2027,22 @@ class Activity implements ResourceInterface
         return $this->documents;
     }
 
+    public function getDocumentsGrouped() :array {
+        $out = [];
+        /** @var ContractDocument $document */
+        foreach ($this->getDocuments() as $document) {
+            $key = $document->getFileName();
+            if( !array_key_exists($key, $out) ){
+                $out[$key] = $document;
+            } else {
+                if( $out[$key]->getVersion() < $document->getVersion() ) {
+                    $out[$key] = $document;
+                }
+            }
+        }
+        return $out;
+    }
+
     /**
      * @return string
      */
