@@ -47,6 +47,29 @@ class ActivityRepository extends EntityRepository
     /**
      * @return QueryBuilder
      */
+    /**
+     * Retourne les activités avec des jalons en retard.
+     * @return array
+     */
+    public function getActivitiesWithUndoneMilestones( string $dateRef = "") :array
+    {
+        if( !$dateRef ){
+            $dateRef = date('Y-m-d');
+        }
+
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->innerJoin('a.milestones', 'm')
+            ->innerJoin('m.type', 't')
+            ->where('t.finishable = true AND m.dateStart < :dateRef AND (m.finished IS NULL OR m.finished < 100)');
+
+        $pameters = [
+            'dateRef' => $dateRef
+        ];
+        $queryBuilder->setParameters($pameters);
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+
     protected function baseQueryWithOrganizationOf(): QueryBuilder
     {
         return $this->createQueryBuilder('c')

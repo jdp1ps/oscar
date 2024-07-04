@@ -220,17 +220,39 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getRoleRepository()->getRolesAvailableForPersonInActivityOrOrganizationArray();
     }
 
-
-
     /**
+     * Retourne les IDS des rôles ayant le privilège donné.
+     *
      * @param $privilegeCode
      * @param $roleLevel
-     * @return array|void
+     * @return int[]
+     * @throws OscarException
+     */
+    public function getRolesIdsWithPrivileges($privilegeCode, $roleLevel = 0) :array
+    {
+        $ids = [];
+        foreach ($this->getRolesWithPrivileges($privilegeCode, $roleLevel) as $privilege) {
+            $ids[] = $privilege->getId();
+        }
+        return $ids;
+    }
+
+    /**
+     * Retourne les Role ayant le privilège donné.
+     *
+     * @param $privilegeCode
+     * @param $roleLevel
+     * @return Role[]
      * @throws OscarException
      */
     public function getRolesWithPrivileges($privilegeCode, $roleLevel = 0)
     {
-        static $roles_privileges = [];
+        static $roles_privileges;
+
+        if( $roles_privileges == null ){
+            $roles_privileges = [];
+        }
+
         if (!array_key_exists($privilegeCode, $roles_privileges)) {
             try {
                 /** @var Privilege $privilege */
@@ -243,6 +265,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     }
                 }
             } catch (\Exception $e) {
+                $this->getLoggerService()->critical("Impossible de charger le privilège '$privilegeCode'");
                 throw new OscarException(
                     sprintf('Impossible de charger le privilège %s : %s', $privilegeCode, $e->getMessage())
                 );
@@ -965,13 +988,9 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $_ROLES_ORGANIZATION_LEADER;
     }
 
-    public function getRolesPersonInActivityDeep(?Person $person, Activity $activity)
+    public function getRolesPersonInActivityDeep(Person $person, Activity $activity)
     {
-        if( $person ){
-            $roles = $this->getRolesPersonInActivity($person, $activity);
-        } else {
-            $roles = [];
-        }
+        $roles = $this->getRolesPersonInActivity($person, $activity);
         $rolesAppli = $this->getBaseRoleId();
         return array_merge($roles, $rolesAppli);
     }
@@ -1175,14 +1194,11 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @param Activity $activity
      * @return mixed
      */
-    public function getRolesInActivity(?Person $person, Activity $activity)
+    public function getRolesInActivity(Person $person, Activity $activity)
     {
         static $tmpActivities = [];
-        if( !$person ){
-            return [];
-        }
-
         $key = $person->getId() . '-' . $activity->getId();
+
 
         if (!isset($tmpActivities[$key])) {
             try {
@@ -1324,7 +1340,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         static $tmpAccessTabDocuments, $tmpAccessByRoles;
 
-         if ($roles === null) {
+        if ($roles === null) {
             $roles = $this->getBaseRoleId();
 
         }
@@ -1333,11 +1349,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         }
 
         if ($tmpAccessTabDocuments === null) {
-            $tabDocuments = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
-            if(!$tabDocuments){
-                $this->getLoggerService()->critical("Aucun onglet de document configuré");
-                throw new OscarException("Aucun onglet de document configuré");
-            }
             /** @var TabDocument $t */
             foreach ($this->getEntityManager()->getRepository(TabDocument::class)->findAll() as $t) {
                 $tmpAccessTabDocuments[$t->getId()] = $t->getRolesAccess();
@@ -1408,7 +1419,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if (!array_key_exists($contractDocument->getId(), $tmpContractDocuments)) {
             // Document privé
-            if ($contractDocument->isPrivate() && $this->getCurrentPerson() && $contractDocument->getPersons()->contains(
+            if ($contractDocument->isPrivate() && $contractDocument->getPersons()->contains(
                     $this->getCurrentPerson()
                 )) {
                 $read = true;
@@ -1472,14 +1483,10 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $read = false;
             $write = false;
             if ($this->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity)) {
-                $roles = $this->getCurrentRolesApplication();
-
-                if( $this->getCurrentPerson() ){
-                    $roles = array_merge(
-                        $roles,
-                        $this->getRolesInActivity($this->getCurrentPerson(), $activity)
-                    );
-                }
+                $roles = array_merge(
+                    $this->getBaseRoleId(),
+                    $this->getRolesInActivity($this->getCurrentPerson(), $activity)
+                );
                 $rules = $this->getAccessTabDocument(null, $roles);
                 $read = $rules['read'];
                 $write = $rules['write'];

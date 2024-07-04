@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Connector\IConnectedObject;
+use Oscar\Exception\OscarException;
 use Oscar\Utils\StringUtils;
 
 /**
@@ -673,6 +674,9 @@ class Organization implements ResourceInterface, IConnectedObject
     }
 
 
+    /**
+     * @deprecated
+     */
     public function hasResponsable(Person $person)
     {
         $responsables = [ProjectMember::ROLE_RESPONSABLE];

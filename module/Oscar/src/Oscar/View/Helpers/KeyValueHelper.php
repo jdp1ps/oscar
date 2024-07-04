@@ -36,53 +36,47 @@ class KeyValueHelper extends FormElement
         return $tpl;
     }
 
-        public function render(ElementInterface $element): string
-        {
-            $name = $element->getAttribute('name');
-            $value = $element->getValue();
+    public function render(ElementInterface $element): string
+    {
+        $name = $element->getAttribute('name');
+        $value = $element->getValue();
 
-            if( !is_array($value) )
-                $value = [];
-
-
+        if (!is_array($value)) {
+            $value = [];
+        }
 
             $out = '<div class="keyvalue-widget" data-template="'.htmlentities(self::getTemplateLine($name, '{{key}}', '{{value}}')).'">';
             if( $element->getLabel() )
                 $out .= '<label>' . $element->getLabel() . '</label>';
 
-            $out .= '<div class="keyvalue-lines">';
-            $value = $element->getValue();
+        $out .= '<div class="keyvalue-lines">';
+        $specificKeys = $element->getValue() ? array_keys($element->getValue()) : [];
 
+        $keys = array_merge($specificKeys, $element->keys);
+        $keys = array_unique($keys);
 
-            $specificKeys = $element->getValue() ? array_keys($element->getValue()) : [];
-
-            $keys = array_merge($specificKeys, $element->keys);
-            $keys = array_unique($keys);
-
-            if( !$value ){
-                $value = [];
+        foreach ($keys as $key) {
+            $val = "";
+            $deletable = !in_array($key, $element->keys);
+            if (array_key_exists($key, $value)) {
+                $val = $value[$key];
             }
-
-            foreach ($keys as $key) {
-                $val = "";
-                $deletable = !in_array($key, $element->keys);
-                if(array_key_exists($key, $value)){
-                    $val = $value[$key];
-                }
-                $out .= self::getTemplateLine($name, $key, $val, $deletable);
-            }
-            $uniqid = uniqid('keys_');
-            $out = "<div id=\"$uniqid\">&nbsp;</div>
+            $out .= self::getTemplateLine($name, $key, $val, $deletable);
+        }
+        $uniqid = uniqid('keys_');
+        $out = "<div id=\"$uniqid\">&nbsp;</div>
 <script>
 require(['vue', 'Keyvalue'], function(Vue, Keyvalue){
     new Vue({
         el: '#$uniqid',
-        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: ". json_encode($keys).", name: '".$name."', editable: ". ($element->editable ? 'true' : 'false') ."}}) }
+        render(h) { return h(Keyvalue.default, { props: { value: " . json_encode($value) . ", keys: " . json_encode(
+                $keys
+            ) . ", name: '" . $name . "', editable: " . ($element->editable ? 'true' : 'false') . "}}) }
     })    
 });
 </script>
 ";
 
-            return $out;
-        }
+        return $out;
+    }
 }
