@@ -21,10 +21,12 @@
         <?= $this->formControlGroup($form->get('dateEnd')); ?>
         <?= $this->formHidden($form->get('secure')); ?>
         <nav class="btn-group">
-            <a class="btn btn-default button-back"  href="<?= backlink ?>">
+            <?php if( isset($backlink)): ?>
+            <a class="btn btn-default button-back"  href="<?= $backlink ?>">
                 <i class="icon-angle-left"></i>
                 Retour
             </a>
+            <?php endif; ?>
             <?php /*<a class="btn btn-default" href="javascript:history.back()">
                 <i class="icon-angle-left"></i>
                 Retour

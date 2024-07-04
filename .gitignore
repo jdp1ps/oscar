@@ -87,6 +87,8 @@ data/generated-documents/activity/**
 !data/generated-documents/activity/sample.docx
 data/documents/signature/**
 !data/documents/signature/.gitkeep
+install/init/**
+!install/init/.gitkeep
 
 # Gabarits
 data/templates/timesheet_activity_synthesis.html.php

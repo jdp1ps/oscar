@@ -78,7 +78,7 @@ class OscarCheckDatasCommand extends OscarAdvancedCommandAbstract
         }
 
 
-        return 1;
+        return self::SUCCESS;
     }
 
     /**

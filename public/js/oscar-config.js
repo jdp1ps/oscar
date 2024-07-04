@@ -107,7 +107,7 @@ requirejs.config({
         "activityspentsynthesis": "oscar/dist/ActivitySpentSynthesis",
         "rolesadminui": "oscar/dist/RolesAdminUI",
         "periodfieldsimple": "oscar/dist/PeriodFieldSimple",
-        "activitydocument": "oscar/dist/ActivityDocument.umd.min",
+        "activitydocument": "oscar/dist/ActivityDocument.umd",
         "administrationpcru": "oscar/dist/AdministrationPcru.umd",
         "administrationpcrupc": "oscar/dist/AdministrationPcruPoleCompetitivite.umd.min",
         "rnsrfield": "oscar/dist/RNSRField.umd.min",
@@ -124,6 +124,7 @@ requirejs.config({
         "TimesheetMonth" : "oscar/dist/TimesheetMonth.umd.min",
         "ValidationUI": "oscar/dist/ValidationUI.umd.min",
         "AccountList": "oscar/dist/AccountList.umd.min",
+        "TestOrganisationSelector": "oscar/dist/TestOrganisationSelector.umd.min",
         "NumberMigrate": "oscar/dist/NumberMigrate.umd.min",
 
         // TEST

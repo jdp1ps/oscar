@@ -22,7 +22,7 @@ require __DIR__ . '/../vendor/autoload.php';
 $conf = require 'config/application.config.php';
 
 // App
-$app = Zend\Mvc\Application::init(require 'config/application.config.php');
+$app =\Laminas\Mvc\Application::init(require 'config/application.config.php');
 
 /** @var \Oscar\Service\OscarConfigurationService $oscarConfigurationService */
 $oscarConfigurationService = $app->getServiceManager()->get(\Oscar\Service\OscarConfigurationService::class);

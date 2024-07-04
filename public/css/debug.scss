@@ -6,6 +6,8 @@
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
+// v.202303
+
 $brand-primary: #6e2458 !default;
 $brand-complementary: #834f1c !default;
 $bg-image: 'bg-debug.jpg' !default;
@@ -34,6 +36,7 @@ $grid-float-breakpoint: 1024px;
 $colorGreyMedium: #999;
 $colorGreyDark: #555;
 $colorGreyBlack: #222;
+
 
 @import "_common.scss";
 

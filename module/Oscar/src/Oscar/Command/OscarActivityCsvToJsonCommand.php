@@ -75,7 +75,7 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
     }
 
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -104,7 +104,7 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
             if( !$optConfig || !$optFichier ){
                 $io->error("Les options --fichier <SOURCE CSV> et --config <FICHIER PHP> sont requises");
-                return 0;
+                return self::FAILURE;
             }
 
             $sourceFilePath = $this->getReadablePath($input->getOption('fichier'));
@@ -128,13 +128,16 @@ class OscarActivityCsvToJsonCommand extends OscarCommandAbstract
 
             if( $error ){
                 $io->error($error);
+                return self::FAILURE;
             } else {
                 echo $json;
             }
 
         } catch (\Exception $e) {
             $io->error($e->getMessage());
+            return self::FAILURE;
         }
+        return self::SUCCESS;
         /****/
     }
 }

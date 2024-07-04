@@ -25,12 +25,11 @@ class OscarAuthAddCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Ajouter un utilisateur en mode interactif")
-            ->setHelp("")
-            //->addArgument('sort', InputArgument::OPTIONAL, "Champ à utiliser pour le trie")
+            ->setHelp("")//->addArgument('sort', InputArgument::OPTIONAL, "Champ à utiliser pour le trie")
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->addOutputStyle($output);
 
@@ -48,12 +47,12 @@ class OscarAuthAddCommand extends OscarCommandAbstract
 
         try {
             $exist = $oscarUserContextService->getAuthentificationByLogin($identifiant, false);
-            if( $exist ){
+            if ($exist) {
                 throw new \Exception("Un utilisateur utilise déjà cet identifiant !");
             }
-        } catch ( \Exception $e ){
-            $output->writeln("<error>Problème d'identifiant : ". $e->getMessage().".</error>");
-            return;
+        } catch (\Exception $e) {
+            $output->writeln("<error>Problème d'identifiant : " . $e->getMessage() . ".</error>");
+            return self::FAILURE;
         }
 
         // -------------------------------------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ class OscarAuthAddCommand extends OscarCommandAbstract
         $question = new ConfirmationQuestion("Créer l'utilisateur (y|N) ?", false);
 
         if (!$helper->ask($input, $output, $question)) {
-            return;
+            return self::FAILURE;
         }
 
         try {
@@ -98,11 +97,11 @@ class OscarAuthAddCommand extends OscarCommandAbstract
             $oscarUserContextService->getEntityManager()->persist($auth);
             $oscarUserContextService->getEntityManager()->flush();
             $output->writeln("<success>L'utilisateur $identifiant a bien été créé</success>");
-        } catch (\Exception $e ){
+            return self::SUCCESS;
+        } catch (\Exception $e) {
             $output->writeln("<error>Impossible de créé $identifiant : " . $e->getMessage());
+            return self::FAILURE;
         }
-
-
         /****/
     }
 }

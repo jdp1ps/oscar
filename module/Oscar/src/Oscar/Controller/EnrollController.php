@@ -221,7 +221,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                 'labelEnrolled' => "Personne",
                 'enroller' => $organization,
                 'enrolled' => null,
-                'backlink' => $this->url('organization/show', ['id' => $organization->getId()])
+                'backlink' => $this->url()->fromRoute('organization/show', ['id' => $organization->getId()])
             )
         );
 
