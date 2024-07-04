@@ -761,6 +761,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             } elseif ($role->getParent()) {
                 return $recursiveCheck($role->getParent(), $roleId);
             }
+            return false;
         };
 
         /** @var HierarchicalRoleInterface $role */

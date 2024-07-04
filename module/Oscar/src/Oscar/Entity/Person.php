@@ -24,34 +24,29 @@ class Person implements ResourceInterface
     use TraitTrackable;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $firstname;
+    protected ?string $firstname;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $lastname;
+    protected ?string $lastname;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $codeHarpege;
+    protected ?string $codeHarpege;
 
     /**
-     * @var string
      * @ORM\Column(type="simple_array", nullable=true)
      */
-    protected $centaureId;
+    protected ?array $centaureId;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $codeLdap;
+    protected ?string $codeLdap;
 
     /**
      * @var string
@@ -60,70 +55,63 @@ class Person implements ResourceInterface
     protected $connectors;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $email;
+    protected ?string $email;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $emailPrive;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $ldapStatus;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $emailPrive;
+    protected ?string $ldapSiteLocation;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $ldapStatus;
+    protected ?string $ldapAffectation;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected $ldapSiteLocation;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected $ldapAffectation;
-
-    /**
-     * @var string
      * @ORM\Column(type="boolean", nullable=true)
      */
-    protected $ldapDisabled;
+    protected ?bool $ldapDisabled;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $ldapFinInscription;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $ldapFinInscription;
+    protected ?string $ladapLogin;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $ladapLogin;
+    protected ?string $phone;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected $phone;
-
-    /**
-     * @var \DateTime
      * @ORM\Column(type="datetime", nullable=true)
      */
-    protected $dateSyncLdap;
+    protected ?\DateTime $dateSyncLdap;
 
     /**
      * @var
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $harpegeINM;
+    protected ?string $harpegeINM;
 
     /**
      * Liste des affectations.
@@ -216,7 +204,8 @@ class Person implements ResourceInterface
      */
     protected $documents;
 
-    function __construct()    {
+    function __construct()
+    {
         $this->projectAffectations = new ArrayCollection();
         $this->activities = new ArrayCollection();
         $this->organizations = new ArrayCollection();
@@ -235,19 +224,23 @@ class Person implements ResourceInterface
     /**
      * Return TRUE si l'objet a un connector.
      */
-    public function isConnected( $connectors = null){
-        foreach ($this->getConnectors() as $connector=>$value ){
-            if( $connectors != null && !in_array($connector, $connectors) ) continue;
-            if( $value ){
+    public function isConnected($connectors = null)
+    {
+        foreach ($this->getConnectors() as $connector => $value) {
+            if ($connectors != null && !in_array($connector, $connectors)) {
+                continue;
+            }
+            if ($value) {
                 return true;
             }
         }
         return false;
     }
 
-    public function getConnectorsDatasStr(){
+    public function getConnectorsDatasStr()
+    {
         $out = [];
-        foreach ($this->getConnectors() as $connector=>$value ){
+        foreach ($this->getConnectors() as $connector => $value) {
             $out[] = sprintf("%s=%s", $connector, $value);
         }
         return implode(', ', $out);
@@ -270,19 +263,22 @@ class Person implements ResourceInterface
         return $this;
     }
 
-    public function getCustomSettingsObj(){
+    public function getCustomSettingsObj()
+    {
         return json_decode($this->getCustomSettings(), JSON_OBJECT_AS_ARRAY);
     }
 
-    public function getCustomSettingsKey( $key ){
+    public function getCustomSettingsKey($key)
+    {
         $custom = $this->getCustomSettingsObj();
-        if( is_array($custom) && array_key_exists($key, $custom) ){
+        if (is_array($custom) && array_key_exists($key, $custom)) {
             return $custom[$key];
         }
         return null;
     }
 
-    public function setCustomSettingsObj( $datas ){
+    public function setCustomSettingsObj($datas)
+    {
         $this->setCustomSettings(json_encode($datas));
         return $this;
     }
@@ -342,7 +338,8 @@ class Person implements ResourceInterface
         return $this;
     }
 
-    public function getRolesFromConnector( $connectorName ){
+    public function getRolesFromConnector($connectorName)
+    {
         return [];
     }
 
@@ -399,20 +396,21 @@ class Person implements ResourceInterface
     }
 
 
-
-    public function getLeadedOrganizations(){
+    public function getLeadedOrganizations()
+    {
         $organizations = [];
 
         /** @var OrganizationPerson $organizationPerson */
-        foreach( $this->getOrganizations() as $organizationPerson ){
-            if( $organizationPerson->getRoleObj()->isPrincipal() ){
+        foreach ($this->getOrganizations() as $organizationPerson) {
+            if ($organizationPerson->getRoleObj()->isPrincipal()) {
                 $organizations[] = $organizationPerson;
             }
         }
         return $organizations;
     }
 
-    public function isLeader(){
+    public function isLeader()
+    {
         return count($this->getLeadedOrganizations()) > 0;
     }
 
@@ -447,14 +445,14 @@ class Person implements ResourceInterface
      */
     public function setCentaureId($centaureId)
     {
-        if( !$this->hasCentaureId($centaureId) ){
+        if (!$this->hasCentaureId($centaureId)) {
             $this->centaureId[] = $centaureId;
         }
 
         return $this;
     }
 
-    public function hasCentaureId( $centaureId )
+    public function hasCentaureId($centaureId)
     {
         return in_array($centaureId, $this->centaureId);
     }
@@ -572,18 +570,24 @@ class Person implements ResourceInterface
         return $this;
     }
 
+    public function getMd5Email(): string
+    {
+        return md5($this->getEmail());
+    }
+
     /**
      * @return string
      */
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     /**
-     * @param string $email
+     * @param string|null $email
+     * @return $this
      */
-    public function setEmail($email)
+    public function setEmail(?string $email) :self
     {
         $this->email = $email;
 
@@ -731,7 +735,6 @@ class Person implements ResourceInterface
     }
 
 
-
     /**
      * @return string
      */
@@ -768,10 +771,10 @@ class Person implements ResourceInterface
         return $this;
     }
 
-    public function isLdapActive() :bool
+    public function isLdapActive(): bool
     {
-        if( $this->getLdapFinInscription() ){
-            if( date('Y-m-d') > $this->getLdapFinInscription() ){
+        if ($this->getLdapFinInscription()) {
+            if (date('Y-m-d') > $this->getLdapFinInscription()) {
                 return false;
             }
             return true;
@@ -828,22 +831,23 @@ class Person implements ResourceInterface
         return $this->connectors;
     }
 
-    public function getConnectorID( $connectorName )
+    public function getConnectorID($connectorName)
     {
         $id = null;
-        if( $this->connectors && isset($this->connectors[$connectorName]) ){
+        if ($this->connectors && isset($this->connectors[$connectorName])) {
             $id = $this->connectors[$connectorName];
         }
         return $id;
     }
 
-    public function setConnectorID( $connectorName, $value )
+    public function setConnectorID($connectorName, $value)
     {
         $this->connectors[$connectorName] = $value;
         return $this;
     }
 
-    public function setConnector( $data ){
+    public function setConnector($data)
+    {
         $this->connectors = $data;
         return $this;
     }
@@ -851,10 +855,9 @@ class Person implements ResourceInterface
     //////////////////////////////////////////////////////////
 
 
-
     public function getDisplayName()
     {
-        return $this->getFirstname().' '.$this->getLastname();
+        return $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     public function __toString()
@@ -867,16 +870,17 @@ class Person implements ResourceInterface
         return sprintf("%s %s", StringUtils::transliterateString($this->getDisplayName()), $this->getEmail());
     }
 
-    public function isDeclarerInActivity( Activity $activity )
+    public function isDeclarerInActivity(Activity $activity)
     {
         $activity->hasDeclarant($this);
     }
 
 
-    public function hasDeclarationIn( Activity $activity ){
+    public function hasDeclarationIn(Activity $activity)
+    {
         /** @var TimeSheet $timesheet */
-        foreach ($activity->getTimesheets() as $timesheet ){
-            if( $timesheet->getPerson() == $this ){
+        foreach ($activity->getTimesheets() as $timesheet) {
+            if ($timesheet->getPerson() == $this) {
                 return true;
             }
         }
@@ -886,36 +890,37 @@ class Person implements ResourceInterface
     public function toArray()
     {
         return array(
-            'id'                    => $this->getId(),
-            'firstName'             => $this->getFirstname(),
-            'lastName'              => $this->getLastname(),
-            'displayname'           => $this->getDisplayName(),
-            'login'                 => $this->getLadapLogin(),
-            'label'                 => $this->getDisplayName(),
-            'text'                  => $this->getDisplayName(),
-            'email'                 => $this->getEmail(),
-            'phone'                 => $this->getPhone(),
-            'mail'                  => $this->getEmail(),
-            'mailMd5'               => md5($this->getEmail()),
-            'ucbnSiteLocalisation'  => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
-            'affectation'           => $this->getLdapAffectation() ? $this->getLdapAffectation() :  ""
+            'id'                   => $this->getId(),
+            'firstName'            => $this->getFirstname(),
+            'lastName'             => $this->getLastname(),
+            'displayname'          => $this->getDisplayName(),
+            'login'                => $this->getLadapLogin(),
+            'label'                => $this->getDisplayName(),
+            'text'                 => $this->getDisplayName(),
+            'email'                => $this->getEmail(),
+            'phone'                => $this->getPhone(),
+            'mail'                 => $this->getEmail(),
+            'mailMd5'              => md5($this->getEmail()),
+            'ucbnSiteLocalisation' => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
+            'affectation'          => $this->getLdapAffectation() ? $this->getLdapAffectation() : ""
         );
     }
 
-    public function toArrayList(){
+    public function toArrayList()
+    {
         $datas = $this->toArray();
         $organisations = [];
         /** @var OrganizationPerson $o */
         foreach ($this->getOrganizations() as $o) {
             $organisation = $o->getOrganization();
             $role = (string)$o->getRoleObj();
-            if( !array_key_exists($organisation->getId()) ){
+            if (!array_key_exists($organisation->getId())) {
                 $organisations[$organisation->getId()] = [
                     'organisation' => $organisation->displayName(),
-                    'roles' => []
+                    'roles'        => []
                 ];
             }
-            if( !in_array($role, $organisations[$organisation->getId()]['roles']) ){
+            if (!in_array($role, $organisations[$organisation->getId()]['roles'])) {
                 $organisations[$organisation->getId()]['roles'][] = $role;
             }
         }
@@ -928,40 +933,40 @@ class Person implements ResourceInterface
      *
      * @param $idCentaure
      */
-    public function removeCentaureId( $idCentaure )
+    public function removeCentaureId($idCentaure)
     {
-       if( false !== ($key = array_search($idCentaure, $this->centaureId))){
-           unset($this->centaureId[$key]);
-       }
+        if (false !== ($key = array_search($idCentaure, $this->centaureId))) {
+            unset($this->centaureId[$key]);
+        }
     }
 
 
-    public function mergeTo( Person $person ){
-
+    public function mergeTo(Person $person)
+    {
         $activititesWithWP = [];
 
         /** @var ProjectMember $projectMember */
-        foreach($this->getProjectAffectations() as $projectMember ){
+        foreach ($this->getProjectAffectations() as $projectMember) {
             $projectMember->setPerson($person);
         }
         /** @var ActivityPerson $activityperson */
-        foreach($this->getActivities() as $activityperson ){
+        foreach ($this->getActivities() as $activityperson) {
             $activityperson->setPerson($person);
         }
 
         /** @var OrganizationPerson $organizationPerson */
-        foreach($this->getOrganizations() as $organizationPerson ){
+        foreach ($this->getOrganizations() as $organizationPerson) {
             $organizationPerson->setPerson($person);
         }
 
         /** @var WorkPackagePerson $organizationPerson */
-        foreach($this->getWorkPackages() as $workPackage ){
+        foreach ($this->getWorkPackages() as $workPackage) {
             $workPackage->setPerson($person);
-
         }
     }
 
-    public function toJson( $options = []){
+    public function toJson($options = [])
+    {
         $json = $this->toArray();
         $json['urlPerson'] = array_key_exists('urlPerson', $options) ? $options['urlPerson'] : false;
         return $json;
@@ -980,21 +985,26 @@ class Person implements ResourceInterface
     private $cGetDateCreated;
     private $cGetDateUpdated;
 
-    public function getDateCreatedStr(){
-        if( $this->cGetDateCreated == null ){
+    public function getDateCreatedStr()
+    {
+        if ($this->cGetDateCreated == null) {
             $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
         }
         return $this->cGetDateCreated;
     }
 
-    public function getDateUpdatedStr(){
-        if( $this->cGetDateUpdated == null ){
-            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format('c') : $this->getDateCreatedStr();
+    public function getDateUpdatedStr()
+    {
+        if ($this->cGetDateUpdated == null) {
+            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format(
+                'c'
+            ) : $this->getDateCreatedStr();
         }
         return $this->cGetDateUpdated;
     }
 
-    public function getDateCachedStr(){
+    public function getDateCachedStr()
+    {
         return $this->getDateUpdatedStr();
     }
 
