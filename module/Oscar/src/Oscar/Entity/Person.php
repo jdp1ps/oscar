@@ -985,27 +985,25 @@ class Person implements ResourceInterface
     private $cGetDateCreated;
     private $cGetDateUpdated;
 
-    public function getDateCreatedStr()
+    public function getDateCreatedStr( string $format = 'c' )
     {
         if ($this->cGetDateCreated == null) {
-            $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format('c') : "";
+            $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format($format) : "";
         }
         return $this->cGetDateCreated;
     }
 
-    public function getDateUpdatedStr()
+    public function getDateUpdatedStr( string $format = 'c' )
     {
         if ($this->cGetDateUpdated == null) {
-            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format(
-                'c'
-            ) : $this->getDateCreatedStr();
+            $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format($format) : $this->getDateCreatedStr();
         }
         return $this->cGetDateUpdated;
     }
 
-    public function getDateCachedStr()
+    public function getDateCachedStr( string $format = 'c' )
     {
-        return $this->getDateUpdatedStr();
+        return $this->getDateUpdatedStr($format);
     }
 
     /**

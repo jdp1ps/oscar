@@ -1,36 +1,21 @@
 <?php
-/**
- * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
- * @date: 19/11/15 10:52
- * @copyright Certic (c) 2015
- */
 
 namespace Oscar\Service;
 
-
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
-use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityType;
-use Oscar\Entity\ContractType;
 use Oscar\Entity\Country3166;
 use Oscar\Entity\Discipline;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\Person;
 use Oscar\Entity\SpentTypeGroup;
 use Oscar\Entity\TVA;
 use Oscar\Entity\TypeDocument;
-use Oscar\Exception\OscarException;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
-use UnicaenApp\Service\EntityManagerAwareInterface;
-use UnicaenApp\Service\EntityManagerAwareTrait;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareInterface;
-use UnicaenApp\ServiceManager\ServiceLocatorAwareTrait;
-use UnicaenSignature\Service\LoggerServiceAwareTrait;
 
 class BackupService implements UseEntityManager, UseLoggerService, UseServiceContainer
 {
@@ -43,6 +28,9 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
     const COUNTRIES = 'counties';
 
     const DISCIPLINES = 'disciplines';
+
+    const ORGANIZATIONS = 'organizations';
+
     const PERSONS = 'persons';
 
     const SPENT_TYPE_GROUPS = 'spentypegroups';
@@ -55,38 +43,48 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
     /**
      * @return string[]
      */
-    public static function getAvailables(bool $labeled): array
+    public static function getAvailables(bool $labeled = false): array
     {
-        $availables = [
-            self::ACTIVITY_TYPES => "Types d'activité",
-            self::DISCIPLINES => "Disciplines",
-            self::COUNTRIES => "Pays normalisés",
-            self::PERSONS => "Personnes",
+        $available = [
+            self::ACTIVITY_TYPES    => "Types d'activité",
+            self::DISCIPLINES       => "Disciplines",
+            self::COUNTRIES         => "Pays normalisés",
+            self::ORGANIZATIONS     => "Organisations",
+            self::PERSONS           => "Personnes",
             self::SPENT_TYPE_GROUPS => "Type de dépense (plan comptable)",
-            self::TVA => "TVA",
-            self::TYPE_DOCUMENTS => "Type de document"
+            self::TVA               => "TVA",
+            self::TYPE_DOCUMENTS    => "Type de document"
         ];
 
-        if( $labeled ){
-            return $availables;
-        } else {
-            return array_keys($availables);
+        if ($labeled) {
+            return $available;
+        }
+        else {
+            return array_keys($available);
         }
     }
 
     public function export(string $datakeys): array
     {
+        $took = microtime(true);
+        $out = [
+            'version' => 'beta',
+            'date'    => date('T-m-d H:i:s'),
+            'errors'  => [],
+            'params'  => $datakeys
+        ];
+
         if ($datakeys == self::ALL) {
             $keys = self::getAvailables();
         }
         else {
             $keys = array_intersect(explode(',', $datakeys), self::getAvailables());
         }
-        $out = [
-            'version' => 'beta',
-            'date'    => date('T-m-d H:i:s'),
-            'errors'  => []
-        ];
+
+        if (!count($keys)) {
+            $out['errors'][] = "clef '$datakeys' invalide";
+        }
+
         foreach ($keys as $key) {
             switch ($key) {
                 case self::ACTIVITY_TYPES:
@@ -110,10 +108,15 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
                 case self::TYPE_DOCUMENTS:
                     $out[self::TYPE_DOCUMENTS] = $this->typeDocuments();
                     break;
+                case self::ORGANIZATIONS:
+                    $out[self::ORGANIZATIONS] = $this->organizations();
+                    break;
                 default:
                     $out['errors'][] = "clef '$key' inconnue";
+                    break;
             }
         }
+        $out['took'] = microtime(true) - $took;
         return $out;
     }
 
@@ -143,7 +146,7 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
         $out = [];
         /** @var Person $person */
         foreach ($persons as $person) {
-            $out[$person->getId()] = $person->toArray();
+            $out[$person->getId()] = $this->person($person);
         }
         return $out;
     }
@@ -160,6 +163,51 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
                 'rate'  => $tva->getRate(),
             ];
         }
+        return $out;
+    }
+
+    public function person(Person $person): array
+    {
+        $address = [
+            "address1" => ""
+        ];
+        $groups = [];
+        $roles = [];
+
+        /** @var OrganizationPerson $organization */
+        foreach ($person->getOrganizations() as $organization) {
+            $codeOrganization = $organization->getOrganization()->getCode();
+            if (!array_key_exists($codeOrganization, $roles)) {
+                $roles[$codeOrganization] = [];
+            }
+            $roles[$codeOrganization][] = $organization->getRoleObj()->getRoleId();
+        }
+
+        $out = [
+            'id'                 => $person->getId(),
+            'uid'                => $person->getId(),
+            'login'              => $person->getLadapLogin(),
+            'firstName'          => $person->getFirstname(),
+            'lastName'           => $person->getLastname(),
+            'displayname'        => $person->getDisplayName(),
+            'mail'               => $person->getEmail(),
+            'email'              => $person->getEmail(),
+            'status'             => $person->getLdapStatus(),
+            'affectation'        => $person->getLdapAffectation() ? $person->getLdapAffectation() : "",
+            'structure'          => $person->getLdapSiteLocation() ? $person->getLdapSiteLocation() : "",
+            'inm'                => $person->getHarpegeINM(),
+            'phone'              => $person->getPhone(),
+            'datefininscription' => $person->getLdapFinInscription(),
+            'datecreated'        => $person->getDateCreatedStr('Y-m-d'),
+            'dateupdated'        => $person->getDateUpdatedStr('Y-m-d'),
+            'datecached'         => $person->getDateCachedStr('Y-m-d'),
+            'address'            => $address,
+            'groups'             => $groups,
+            'roles'              => $roles,
+            'label'              => $person->getDisplayName(),
+            'text'               => $person->getDisplayName(),
+            'mailMd5'            => md5($person->getEmail()),
+        ];
         return $out;
     }
 
@@ -218,19 +266,67 @@ class BackupService implements UseEntityManager, UseLoggerService, UseServiceCon
         return $out;
     }
 
-    public function disciplines():array
+    public function disciplines(): array
     {
         $out = [];
         $entities = $this->getEntityManager()->getRepository(Discipline::class)->findAll();
         /** @var Discipline $country */
         foreach ($entities as $entity) {
             $out[$entity->getId()] = [
-                'id'      => $entity->getId(),
-                'label'   => $entity->getLabel(),
+                'id'    => $entity->getId(),
+                'label' => $entity->getLabel(),
             ];
         }
         return $out;
-
     }
 
+    private function organizations(): array
+    {
+        $out = [];
+        $entities = $this->getEntityManager()->getRepository(Organization::class)->findAll();
+        foreach ($entities as $entity) {
+            $out[$entity->getId()] = $this->organization($entity);
+        }
+        return $out;
+    }
+
+    private function organization(Organization $organization): array
+    {
+        $address = [
+            "address1"     => $organization->getStreet1(),
+            "address2"     => $organization->getStreet2(),
+            "address3"     => $organization->getStreet3(),
+            "zipcode"      => $organization->getZipCode(),
+            "city"         => $organization->getCity(),
+            "country"      => $organization->getCountry(),
+            "country_code" => $organization->getCodePays(),
+        ];
+
+        $out = [
+            'id'          => $organization->getId(),
+            'uid'         => $organization->getId(),
+            'parent'      => $organization->getParent() ? $organization->getParent()->getId() : null,
+            'shortname'   => $organization->getShortName(),
+            'longname'    => $organization->getFullName(),
+            "labintel"    => $organization->getLabintel(),
+            'description' => $organization->getDescription(),
+            'email'       => $organization->getEmail(),
+            'phone'       => $organization->getPhone(),
+            'type'       => $organization->getType(),
+            'tvaintra'       => $organization->getTvaintra(),
+            'siret'       => $organization->getSiret(),
+            'datecreated' => $organization->getDateCreatedStr('Y-m-d'),
+            'dateupdated' => $organization->getDateUpdatedStr('Y-m-d'),
+            'datecached'  => $organization->getDateCachedStr('Y-m-d'),
+            'address'     => $address,
+            'mailMd5'     => md5($organization->getEmail()),
+        ];
+        return $out;
+    }
+
+    public function restore(string $key, array $value)
+    {
+        var_dump($key);
+        var_dump($value);
+    }
 }
