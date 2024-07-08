@@ -250,36 +250,17 @@ h2.tv-serie-label { border-bottom: none; }
 
 
     <section>
-        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project)): ?>
+        <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_SHOW, $project)): ?>
             <section class="has-btn">
                 <h2>
                     <i class="icon-group"></i>
                     Membres
                 </h2>
-                <section id="organizations" class="has-btn"></section>
-
+                <section id="persons_roled"
+                         data-title="Personne"
+                         data-url="<?= $this->url('project/persons', ['idproject' => $project->getId()]) ?>"></section>
+                <?= $this->Vite()->addJs('src/EntityWithRolePersons.js'); ?>
             </section>
-            <script>
-                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
-                    Vue.use(VueResource);
-                    Vue.http.options.emulateJSON = true;
-                    Vue.http.options.emulateHTTP = true;
-                    new Vue({
-                        el: "#organizations",
-                        render(h){
-                            return h(EntityWithRole, { props: {
-                                    url: "<?= $this->url('project/persons', ['idproject' => $project->getId()]) ?>",
-                                    urlNew: "<?= $this->url('personproject/new', ['idenroller' => $project->getId()]) ?>",
-                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_PERSON_MANAGE, $project) ? "true" : 'false' ?>,
-                                    title: "Personne",
-                                    roles: <?= json_encode($rolesPersons) ?>,
-                                    moment: moment
-                                }});
-                        }
-
-                    })
-                });
-            </script>
         <?php endif; ?>
 
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_SHOW, $project)): ?>
@@ -288,31 +269,11 @@ h2.tv-serie-label { border-bottom: none; }
                     <i class="icon-group"></i>
                     Partenaires
                 </h2>
-                <section id="organizations" class="has-btn"></section>
-
+                <section id="organizations_roled"
+                         data-title="Organisation"
+                         data-url="<?= $this->url('project/organizations', ['idproject' => $project->getId()]) ?>"></section>
+                <?= $this->Vite()->addJs('src/EntityWithRoleOrganizations.js'); ?>
             </section>
-            <script>
-                require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function(Vue, VueResource, EntityWithRole, moment){
-                    console.log("ORGANIZATIONS")
-                    Vue.use(VueResource);
-                    Vue.http.options.emulateJSON = true;
-                    Vue.http.options.emulateHTTP = true;
-                    new Vue({
-                        el: "#organizations",
-                        render(h){
-                            return h(EntityWithRole, { props: {
-                                    url: "<?= $this->url('project/organizations', ['idproject' => $project->getId()]) ?>",
-                                    urlNew: "<?= $this->url('organizationproject/new', ['idenroller' => $project->getId()]) ?>",
-                                    manage: <?= $this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_MANAGE, $project) ? "true" : 'false' ?>,
-                                    title: "Organisation",
-                                    roles: <?= json_encode($rolesOrganizations) ?>,
-                                    moment: moment
-                                }});
-                        }
-
-                    }).$mount()
-                });
-            </script>
         <?php endif; ?>
 
         <?php if ($this->grant()->privilege(\Oscar\Provider\Privileges::PROJECT_ORGANIZATION_SHOW, $project)): ?>

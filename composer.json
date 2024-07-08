@@ -34,8 +34,7 @@
     "unicaen/signature": "^0.0.15",
     "ext-gettext": "*",
     "ext-fileinfo": "*",
-    "symfony/filesystem": "^7.1",
-    "symfony/finder": "^7.1"
+    "symfony/filesystem": "^7.1"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

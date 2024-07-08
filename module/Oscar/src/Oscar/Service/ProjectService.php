@@ -664,7 +664,7 @@ class ProjectService implements UseServiceContainer
         )) {
             $output['urlNew'] = $urlHelper->fromRoute('personproject/new', ['idenroller' => $projet->getId()]);
             $output['roles'] = $this->getProjectGrantService()->getOscarUserContextService(
-            )->getAllRoleIdPersonInActivity();
+            )->getAvailabledRolesPersonActivity(OscarFormatterConst::FORMAT_ARRAY_SIMPLE);
         }
 
         $personProjectFormatter = new EnrollToArrayFormatter(
@@ -692,7 +692,7 @@ class ProjectService implements UseServiceContainer
         )) {
             $output['urlNew'] = $urlHelper->fromRoute('organizationproject/new', ['idenroller' => $projet->getId()]);
             $output['roles'] = $this->getProjectGrantService()->getOscarUserContextService(
-            )->getRolesOrganizationInActivity();
+            )->getRolesOrganizationInActivityArray();
         }
 
         $organizationProjectFormatter = new EnrollToArrayFormatter(

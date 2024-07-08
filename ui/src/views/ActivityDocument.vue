@@ -449,7 +449,6 @@ export default {
     currentFlow() {
       if (this.editedDocument.category.id) {
         let category = this.typesDocuments.find(i => i.id == this.editedDocument.category.id);
-        console.log(category);
         if (category.flow) {
           return category.flow.signatureflow;
         }
@@ -458,7 +457,6 @@ export default {
     },
     selectedTypeDocument() {
       if (this.selectedIdTypeDocument) {
-        console.log(this.typesDocuments);
         return this.typesDocuments.find(item => item.id == this.selectedIdTypeDocument);
       }
       return null;
@@ -566,12 +564,10 @@ export default {
       formData.append('flow_datas', JSON.stringify(signedProcess));
 
       axios.post(url, formData).then(ok => {
-        console.log("SUCCESS", ok);
         this.signDocument = null;
         this.selectedSignProcess = null;
         this.fetch();
       }, ko => {
-        console.log("ERROR", ko);
         this.error = ko.response.data ? ko.response.data : ko.message;
       })
       return false;
@@ -755,7 +751,6 @@ export default {
       axios.post(doc.manage_process, formData).then(ok => {
         this.fetch();
       }, ko => {
-        console.log("ERROR", ko);
         this.error = ko.response && ko.response.data ? ko.response.data : ko;
       })
     },
@@ -788,11 +783,9 @@ export default {
       }
 
       axios.post(url, formData).then(ok => {
-        console.log("SUCCESS", ok);
         this.editedDocument = null;
         this.fetch();
       }, ko => {
-        console.log("ERROR", ko);
         this.error = ko.response && ko.response.data ? ko.response.data : ko;
       })
     },
@@ -874,7 +867,6 @@ export default {
             tab.total = tab.documents.length;
             tab.documents.sort((x, y) => y.version - x.version);
             tab.documents.forEach(item => {
-              console.log(item.fileName, item.version);
               item.explode = true;
             })
             if (defaultTab == null) defaultTab = tab.id;

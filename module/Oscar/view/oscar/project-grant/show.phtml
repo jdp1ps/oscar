@@ -205,6 +205,7 @@
 
             <?php
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_SHOW, $entity)): ?>
+
                 <section class="has-btn">
                     <h2>
                         <i class="icon-group"></i>
@@ -213,6 +214,8 @@
                     <section id="membres" class="has-btn"></section>
 
                 </section>
+
+                <?php /***
                 <script>
                     require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function (Vue, VueResource, EntityWithRole, moment) {
                         Vue.use(VueResource);
@@ -242,11 +245,16 @@
                         }).$mount()
                     });
                 </script>
+                 * ****/ ?>
             <?php
             endif; ?>
 
             <?php
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
+                <section id="persons_roled"
+                         data-title="Personne"
+                         data-url="<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>"></section>
+                <?= $this->Vite()->addJs('src/EntityWithRolePersons.js'); ?>
                 <section id="involved"></section>
                 <script>
                     require(['vue'], function (Vue) {
@@ -305,37 +313,11 @@
                         <i class="icon-building-filled"></i>
                         Partenaires
                     </h2>
-                    <section id="organizations" class="has-btn"></section>
+                    <section id="organizations_roled"
+                             data-title="Organisation"
+                             data-url="<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>"></section>
+                    <?= $this->Vite()->addJs('src/EntityWithRoleOrganizations.js'); ?>
                 </section>
-                <script>
-                    require(['vue', 'vue-resource', 'EntityWithRole', 'moment'], function (Vue, VueResource, EntityWithRole, moment) {
-                        Vue.use(VueResource);
-                        Vue.http.options.emulateJSON = true;
-                        Vue.http.options.emulateHTTP = true;
-                        new Vue({
-                            el: "#organizations",
-                            render(h) {
-                                return h(EntityWithRole, {
-                                    props: {
-                                        url: "<?= $this->url('contract/organizations', ['id' => $entity->getId()]) ?>",
-                                        urlNew: "<?= $this->url(
-                                            'organizationactivity/new',
-                                            ['idenroller' => $entity->getId()]
-                                        ) ?>",
-                                        manage: <?= $this->grant()->privilege(
-                                            \Oscar\Provider\Privileges::ACTIVITY_ORGANIZATION_MANAGE,
-                                            $entity
-                                        ) ? "true" : 'false' ?>,
-                                        title: "Organisation",
-                                        roles: <?= json_encode($rolesOrganizations) ?>,
-                                        moment: moment
-                                    }
-                                });
-                            }
-
-                        }).$mount()
-                    });
-                </script>
             <?php
             endif; ?>
 

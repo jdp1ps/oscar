@@ -41,6 +41,13 @@ interface OscarFormatterConst
     // ]
     const FORMAT_ARRAY_ID_OBJECT = 'format_array_id_object';
 
+    // Liste d'éléments sous la forme :
+    // [
+    //  ["id" => "IDA", "label" => "Valeur A"],
+    //  ["id" => "IDB", "label" => "Valeur B"]
+    // ]
+    const FORMAT_ARRAY_SIMPLE = 'format_array_simple';
+
     //
     const FORMAT_IO_CSV = 'csv';
 

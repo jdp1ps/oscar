@@ -411,6 +411,7 @@ class ProjectController extends AbstractOscarController
             $this->getOscarUserContextService()->check(Privileges::PROJECT_ORGANIZATION_SHOW, $project);
             $out = $this->baseJsonResponse();
             $this->getProjectService()->getOrganizationsProjectsAPI($project, $out, $this->url());
+            $out['manage'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_ORGANIZATION_MANAGE, $project);
             return $this->ajaxResponse($out);
         } catch (\Exception $e) {
             return $this->getResponseInternalError($e->getMessage());
@@ -428,6 +429,7 @@ class ProjectController extends AbstractOscarController
 
             $out = $this->baseJsonResponse();
             $this->getProjectService()->getPersonsProjectsAPI($project, $out, $this->url());
+            $out['manage'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::PROJECT_PERSON_MANAGE, $project);
             return $this->ajaxResponse($out);
         } catch (\Exception $e) {
             return $this->getResponseInternalError($e->getMessage());

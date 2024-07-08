@@ -32,6 +32,8 @@ export default defineConfig({
         documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),
         documentsindex: resolve(__dirname, 'src/DocumentsIndex.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
+        organizations_roled: resolve(__dirname, 'src/EntityWithRoleOrganizations.js'),
+        persons_roled: resolve(__dirname, 'src/EntityWithRolePersons.js'),
         declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),
         //other: resolve(__dirname, 'src/other.js')

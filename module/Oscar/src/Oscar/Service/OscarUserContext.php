@@ -34,6 +34,7 @@ use Oscar\Entity\Role;
 use Oscar\Entity\RoleRepository;
 use Oscar\Entity\TabDocument;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
@@ -150,11 +151,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         if ($this->getUserContext()->getLdapUser()) {
             return self::AUTHENTIFICATION_METHOD_LDAP;
-        } elseif ($this->getUserContext()->getDbUser()) {
+        }
+        elseif ($this->getUserContext()->getDbUser()) {
             return self::AUTHENTIFICATION_METHOD_DB;
-        } elseif ($this->getUserContext()->getShibUser()) {
+        }
+        elseif ($this->getUserContext()->getShibUser()) {
             return self::AUTHENTIFICATION_METHOD_SHIB;
-        } else {
+        }
+        else {
             return self::AUTHENTIFICATION_METHOD_NONE;
         }
     }
@@ -202,9 +206,30 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return array
      * @throws \Doctrine\ORM\Exception\NotSupported
      */
-    public function getAvailabledRolesPersonActivity(): array
+    public function getAvailabledRolesPersonActivity($format = OscarFormatterConst::FORMAT_ARRAY_ID_VALUE): array
     {
-        return $this->getRoleRepository()->getRolesAvailableForPersonInActivityArray();
+        switch ($format) {
+            case OscarFormatterConst::FORMAT_ARRAY_SIMPLE:
+                $out = [];
+                foreach ($this->getRoleRepository()->getRolesAvailableForPersonInActivity() as $role) {
+                    $out[] = ['id' => $role->getId(), 'label' => $role->getRoleId()];
+                }
+                return $out;
+            default:
+                return $this->getRoleRepository()->getRolesAvailableForPersonInActivityArray();
+        }
+    }
+
+    public function getRolesPersonsInActivityArray(): array
+    {
+        $rolesActivity = [];
+        foreach ($this->getRoleRepository()->getRolesAvailableForPersonInActivity() as $role) {
+            $rolesActivity[] = [
+                'id'    => $role->getId(),
+                'label' => $role->getRoleId()
+            ];
+        }
+        return $rolesActivity;
     }
 
     /**
@@ -216,7 +241,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return $this->getOrganizationRoleRepository()->getRolesAvailableInActivityArray();
     }
 
-    public function getAvailableRolesActivityOrOrganization() :array
+    public function getAvailableRolesActivityOrOrganization(): array
     {
         return $this->getRoleRepository()->getRolesAvailableForPersonInActivityOrOrganizationArray();
     }
@@ -229,7 +254,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @return int[]
      * @throws OscarException
      */
-    public function getRolesIdsWithPrivileges($privilegeCode, $roleLevel = 0) :array
+    public function getRolesIdsWithPrivileges($privilegeCode, $roleLevel = 0): array
     {
         $ids = [];
         foreach ($this->getRolesWithPrivileges($privilegeCode, $roleLevel) as $privilege) {
@@ -250,7 +275,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         static $roles_privileges;
 
-        if( $roles_privileges == null ){
+        if ($roles_privileges == null) {
             $roles_privileges = [];
         }
 
@@ -418,7 +443,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         if (array_key_exists('HTTP_X_CSRF_TOKEN', $_SERVER)) {
             return $_SERVER['HTTP_X_CSRF_TOKEN'];
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -479,7 +505,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         if ($_ROLES_IDS_ACTIVITY === null) {
             $_ROLES_IDS_ACTIVITY = [];
             /** @var Role $role */
-            foreach ($this->getEntityManager()->getRepository(Role::class)->findAll() as $role) {
+            foreach ($this->getEntityManager()->getRepository(Role::class)->findBy([], ['roleId' => 'ASC']) as $role) {
                 if ($role->isLevelActivity()) {
                     $_ROLES_IDS_ACTIVITY[$role->getId()] = $role->getRoleId();
                 }
@@ -578,6 +604,27 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
     /**
+     * @return array
+     * @throws NotSupported
+     */
+    public function getRolesOrganizationInActivityArray(): array
+    {
+        $roles = [];
+
+
+        /** @var OrganizationRole $role */
+        foreach (
+            $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']) as $role
+        ) {
+            $roles[] = [
+                'id'    => $role->getId(),
+                'label' => $role->getLabel()
+            ];
+        }
+        return $roles;
+    }
+
+    /**
      * @return OrganizationRole[]
      */
     public function getRolesOrganizationInActivity()
@@ -586,8 +633,12 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         if ($_ROLE_ORGANIZATION_IN_ACTIVITY === null) {
             $_ROLE_ORGANIZATION_IN_ACTIVITY = [];
 
+
             /** @var OrganizationRole $role */
-            foreach ($this->getEntityManager()->getRepository(OrganizationRole::class)->findAll() as $role) {
+            foreach (
+                $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']
+                ) as $role
+            ) {
                 $_ROLE_ORGANIZATION_IN_ACTIVITY[$role->getId()] = $role->getLabel();
             }
         }
@@ -682,7 +733,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 }
 
                 $person = $this->getPersonService()->getPersonByLdapLogin($pseudo);
-            } elseif ($this->getUserContext()->getDbUser()) {
+            }
+            elseif ($this->getUserContext()->getDbUser()) {
                 $person = $this->getPersonService()->getPersonByLdapLogin(
                     $this->getUserContext()->getDbUser()->getUsername()
                 );
@@ -750,15 +802,16 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @param $roleId
      * @return bool
      */
-    public function hasRole($roleId) :bool
+    public function hasRole($roleId): bool
     {
         $recursiveCheck = function (
             $role,
             $roleId
-        ) use (&$recursiveCheck) :bool {
+        ) use (&$recursiveCheck): bool {
             if ($role->getRoleId() === $roleId) {
                 return true;
-            } elseif ($role->getParent()) {
+            }
+            elseif ($role->getParent()) {
                 return $recursiveCheck($role->getParent(), $roleId);
             }
             return false;
@@ -774,7 +827,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     }
 
 
-    private function getRoleIdRecursive(HierarchicalRoleInterface $role) :array
+    private function getRoleIdRecursive(HierarchicalRoleInterface $role): array
     {
         $roles = [];
         $roles[] = $role->getRoleId();
@@ -911,7 +964,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if (is_string($testedRole)) {
             $testedRole = [$testedRole];
-        } elseif (!is_array($testedRole)) {
+        }
+        elseif (!is_array($testedRole)) {
             throw new \Exception('Cette méthode accepte un tableau ou une chaîne.');
         }
 
@@ -931,11 +985,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         if ($entity instanceof Project) {
             return $this->getPrivilegesProjet($entity);
-        } elseif ($entity instanceof Activity) {
+        }
+        elseif ($entity instanceof Activity) {
             return $this->getPrivilegesActivity($entity);
-        } elseif ($entity instanceof Organization) {
+        }
+        elseif ($entity instanceof Organization) {
             return $this->getPrivilegesOrganization($entity);
-        } else {
+        }
+        else {
             throw new \Exception('La ressource fournie doit être un projet ou une activité');
         }
     }
@@ -969,9 +1026,10 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getRolesPersonInActivityDeep(?Person $person, Activity $activity)
     {
         $roles = $this->getRolesPersonInActivity($person, $activity);
-        if( $person ){
+        if ($person) {
             $roles = $this->getRolesPersonInActivity($person, $activity);
-        } else {
+        }
+        else {
             $roles = [];
         }
         $rolesAppli = $this->getBaseRoleId();
@@ -981,7 +1039,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getRolesPersonInActivity(?Person $person, Activity $activity)
     {
         static $tmpRolesActivities;
-        if( !$person ){
+        if (!$person) {
             return [];
         }
         $key = sprintf('%s-%s', $person->getId(), $activity->getId());
@@ -1183,7 +1241,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     public function getRolesInActivity(?Person $person, Activity $activity)
     {
         static $tmpActivities = [];
-        if( !$person ){
+        if (!$person) {
             return [];
         }
         $key = $person->getId() . '-' . $activity->getId();
@@ -1230,7 +1288,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         if (!$this->getCurrentPerson()) {
             return [];
-        } else {
+        }
+        else {
             $roles = $this->getRolesPersonInOrganization($this->getCurrentPerson(), $organization);
             return $this->getPrivilegesRoles($roles);;
         }
@@ -1240,7 +1299,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     {
         if (!$this->getCurrentPerson()) {
             return [];
-        } else {
+        }
+        else {
             $roles = [];
             if ($entity->getProject()) {
                 $roles = $this->getRolesPersonInProject(
@@ -1303,7 +1363,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      * @param $privileges
      * @return bool
      */
-    public function hasOneOfPrivilegesInAnyRoles($privileges) :bool
+    public function hasOneOfPrivilegesInAnyRoles($privileges): bool
     {
         foreach ($privileges as $privilege) {
             if ($this->hasPrivilegeInAnyRoles($privilege)) {
@@ -1333,7 +1393,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if ($roles === null) {
             $roles = $this->getBaseRoleId();
-
         }
         if ($tmpAccessByRoles === null) {
             $tmpAccessByRoles = [];
@@ -1341,7 +1400,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if ($tmpAccessTabDocuments === null) {
             $tabDocuments = $this->getEntityManager()->getRepository(TabDocument::class)->findAll();
-            if(!$tabDocuments){
+            if (!$tabDocuments) {
                 $this->getLoggerService()->critical("Aucun onglet de document configuré");
                 throw new OscarException("Aucun onglet de document configuré");
             }
@@ -1370,7 +1429,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     $write = true;
                 }
                 $accessRole[$id] = [
-                    'read' => $read,
+                    'read'  => $read,
                     'write' => $write,
                 ];
             }
@@ -1379,12 +1438,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if ($tabDocument === null) {
             return $tmpAccessByRoles[$key]['global'];
-        } else {
+        }
+        else {
             if (array_key_exists($tabDocument->getId(), $tmpAccessByRoles[$key])) {
                 return $tmpAccessByRoles[$key][$tabDocument->getId()];
             }
             return [
-                'read' => false,
+                'read'  => false,
                 'write' => false
             ];
         }
@@ -1415,16 +1475,19 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
         if (!array_key_exists($contractDocument->getId(), $tmpContractDocuments)) {
             // Document privé
-            if ($contractDocument->isPrivate() && $this->getCurrentPerson() && $contractDocument->getPersons()->contains(
+            if ($contractDocument->isPrivate() && $this->getCurrentPerson() && $contractDocument->getPersons(
+                )->contains(
                     $this->getCurrentPerson()
                 )) {
                 $read = true;
                 $write = true;
-            } elseif (!$contractDocument->hasTabDocument()) {
+            }
+            elseif (!$contractDocument->hasTabDocument()) {
                 // TODO On test le privilège global, à retirer
                 $read = false; //$this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $contractDocument->getActivity());
                 $write = false; // $this->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_MANAGE, $contractDocument->getActivity());
-            } else {
+            }
+            else {
                 // On charge les différents rôles de la personnes dans l'activités
                 $rolesInActivity = $this->getRolesInActivity(
                     $this->getCurrentPerson(),
@@ -1444,7 +1507,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 if ($contractDocument->isPrivate()) {
                     if ($contractDocument->getPersons()->contains($this->getCurrentPerson())) {
                         $read = true;
-                    } else {
+                    }
+                    else {
                         $read = false;
                         $write = false;
                     }
@@ -1485,7 +1549,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 );
                 $roles = $this->getCurrentRolesApplication();
 
-                if( $this->getCurrentPerson() ){
+                if ($this->getCurrentPerson()) {
                     $roles = array_merge(
                         $roles,
                         $this->getRolesInActivity($this->getCurrentPerson(), $activity)
@@ -1496,7 +1560,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 $write = $rules['write'];
             }
             $tmpActivityDocumentAccess[$activity->getId()] = [
-                'read' => $read,
+                'read'  => $read,
                 'write' => $write
             ];
         }
@@ -1559,7 +1623,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                         $access = $this->getAccessActivityDocument($ressource);
                         if ($privilege == Privileges::ACTIVITY_DOCUMENT_MANAGE) {
                             return $access['write'] === true;
-                        } else {
+                        }
+                        else {
                             return $access['read'] === true;
                         }
                     }
@@ -1654,25 +1719,26 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         /** @var Privilege $privilege */
         foreach ($privileges as $privilege) {
             $p = [
-                'id' => $privilege->getId(),
-                'label' => $privilege->getLibelle(),
+                'id'       => $privilege->getId(),
+                'label'    => $privilege->getLibelle(),
                 'category' => $privilege->getCategorie()->getLibelle(),
-                'spot' => $privilege->getSpot(),
-                'roleIds' => $privilege->getRoleIds(),
-                'root' => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
-                'enabled' => false
+                'spot'     => $privilege->getSpot(),
+                'roleIds'  => $privilege->getRoleIds(),
+                'root'     => $privilege->getRoot() ? $privilege->getRoot()->getId() : null,
+                'enabled'  => false
             ];
             $output[$privilege->getId()] = $p;
         }
         return $output;
     }
 
-    public function hasSignaturePersonalAccess() :bool
+    public function hasSignaturePersonalAccess(): bool
     {
         return $this->getOscarConfigurationService()->signatureEnabled();
     }
 
-    public function getCurrentRolesApplication() :array {
+    public function getCurrentRolesApplication(): array
+    {
         return $this->getBaseRoleId();
     }
 }

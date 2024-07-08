@@ -1385,13 +1385,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         return $view;
     }
 
-    public function myRoleAction() {
+    public function myRoleAction()
+    {
         $activity = $this->getActivityFromRoute('activity_id');
 
         $out = [
-          "id" => $activity->getId(),
-          "activity" => "$activity",
-          "roles" => $this->getOscarUserContextService()->getRolesPersonInActivityDeep($this->getCurrentPerson(), $activity)
+            "id"       => $activity->getId(),
+            "activity" => "$activity",
+            "roles"    => $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
+                $this->getCurrentPerson(),
+                $activity
+            )
         ];
         return $this->jsonOutput($out);
     }
@@ -2217,6 +2221,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $rolesPersons = $this->getOscarUserContextService()->getAllRoleIdPersonInActivity();
 
+
         $activityTypeChain = $this->getActivityTypeService()->getActivityTypeChain($entity->getActivityType());
 
         //$documentTypes = $this->getActivityService()->getTypesDocuments();
@@ -2388,7 +2393,11 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
 
-        $out = [];
+        $out = [
+            'persons' => [],
+            'manage' => $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+            'roles' => $this->getOscarUserContextService()->getRolesPersonsInActivityArray()
+        ];
 
         $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(
             Privileges::ACTIVITY_PERSON_MANAGE,
@@ -2442,7 +2451,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ) : false;
             }
 
-            $out[] = [
+            $out['persons'][] = [
                 'id'            => $activityPerson->getId(),
                 'role'          => $activityPerson->getRole(),
                 'roleLabel'     => $activityPerson->getRole(),
@@ -2478,7 +2487,24 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $activity
         );
 
-        $out = [];
+        $manage = $this->getOscarUserContextService()->hasPrivileges(
+            Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+            $activity
+        );
+
+        /***
+         * urlNew: "<?php //= $this->url(
+         * //                        'organizationactivity/new',
+         * //                        ['idenroller' => $entity->getId()]
+         * //                    ) ?>//",
+         */
+
+        $out = [
+            'organizations' => [],
+            'roles' => $this->getOscarUserContextService()->getRolesOrganizationInActivityArray(),
+            'urlNew' => $this->url()->fromRoute('organizationactivity/new', ['idenroller' => $activity->getId()]),
+            'manage' => $manage
+        ];
 
         $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(
             Privileges::ACTIVITY_ORGANIZATION_MANAGE,
@@ -2554,7 +2580,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 ['id' => $activityOrganization->getOrganization()->getId()]
             ) : false;
 
-            $out[] = [
+            $out['organizations'][] = [
                 'id'            => $activityOrganization->getId(),
                 'roleId'        => $roleId,
                 'role'          => $rolelabel,
