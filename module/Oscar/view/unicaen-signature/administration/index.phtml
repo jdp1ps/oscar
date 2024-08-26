@@ -1,0 +1,56 @@
+<div class="container">
+    <h1>MODULE SIGNATURE <strong>ADMINISTRATION</strong></h1>
+
+    <div class="alert alert-info">
+        Ce partie vous permet d'accèder aux différentes options de configuration du module de signature éléctronique
+    </div>
+
+    <article class="unicaen-signature-admin-item">
+        <h2>
+            <span>
+            <i class="fa-solid fa-pencil"></i>
+            Signatures simples
+            </span>
+            <a class="btn btn-xs btn-info" href="<?= $this->url('unicaen-signature/administration/simple-signature') ?>">Gérer</a>
+        </h2>
+        <p class="description">Administation des signatures "simples".</p>
+    </article>
+
+    <article class="unicaen-signature-admin-item">
+        <h2>
+            <span>
+            <i class="fa-solid fa-flag-checkered"></i>
+            Processus
+            </span>
+            <a class="btn btn-xs btn-info" href="<?= $this->url('unicaen-signature/administration/process') ?>">Gérer</a>
+        </h2>
+        <p class="description">Administration des processus de signature</p>
+    </article>
+
+    <article class="unicaen-signature-admin-item">
+        <h2>
+            <span>
+                <i class="fa-solid fa-box-archive"></i>
+                Parapheurs
+            </span>
+            <a class="btn btn-xs btn-info" href="<?= $this->url('unicaen-signature/administration/letterfile') ?>">Gérer</a>
+        </h2>
+        <p class="description">Liste des parapheurs configurés</p>
+    </article>
+
+    <article class="unicaen-signature-admin-item">
+        <h2>
+            <span>
+                <i class="fa-solid fa-gear"></i>
+                Configurer les processus
+            </span>
+            <a class="btn btn-xs btn-info" href="<?= $this->url('unicaen-signature/administration/signatureflowsui') ?>">Configurer</a>
+        </h2>
+        <p class="description">Configuration des processus de signature disponible</p>
+    </article>
+
+</div>
+
+<?php
+$this->signatureUi()->addJs('src/signature.scss');
+?>

@@ -524,7 +524,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                         try {
                             $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
-                            $this->getResponseOk();
+                            return $this->getResponseOk();
                         } catch (\Exception $e) {
                             return $this->getResponseInternalError(
                                 "Impossible de supprimer le type '$deleted' : " . $e->getMessage()
@@ -548,7 +548,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                         try {
                             $this->getOscarConfigurationService()->saveEditableConfKey('numerotation', $numerotation);
-                            $this->getResponseOk();
+                            return $this->getResponseOk();
                         } catch (\Exception $e) {
                             return $this->getResponseInternalError(
                                 "Impossible d'ajouter le type '$added' : " . $e->getMessage()
