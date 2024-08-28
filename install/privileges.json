@@ -841,6 +841,14 @@
     "fullcode": "MAINTENANCE-NOTIFICATION_PERSON"
   },
 
+  "MAINTENANCE-SIGNATURE_DELETE": {
+    "spot": 7,
+    "category_id": 6,
+    "code": "SIGNATURE_DELETE",
+    "libelle": "Peut supprimer les documents signés",
+    "fullcode": "MAINTENANCE-SIGNATURE_DELETE"
+  },
+
   "MAINTENANCE-PARAMETERS_MANAGE": {
     "spot": 7,
     "category_id": 6,

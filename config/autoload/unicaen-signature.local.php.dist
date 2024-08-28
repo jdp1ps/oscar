@@ -6,7 +6,7 @@ return [
     /**  **/
     'unicaen-signature' => [
 
-        'enabled' => false,
+        'enabled' => true,
 
         /////////////////////////////////////////////////////////////////////////////////
         // DEVELOPPEMENT
@@ -22,7 +22,7 @@ return [
             ///////////////////////////////////////
             // Activation d'un logger autonome
             'enable'          => true, // Actif
-            'level'           => \Monolog\Logger::DEBUG, // Niveau de log
+            'level'           => \Monolog\Logger::INFO, // Niveau de log
             'file'            => __DIR__ . '/../../logs/signature.log', // Fichier d'écriture
             'file_permission' => 0666,
 
@@ -57,10 +57,8 @@ return [
             ///////////////////////////////////////////////// ADRESSE ROOT du OSCAR ICI ///
             'base_url' => 'http://localhost',
             ///////////////////////////////////////////////////////////////////////////////
-            'subject' => 'Document à {ACTION} sur OSCAR(dev)',
-            'body'    => "Bonjour {FULLNAME},\r\nVous avez un document à {ACTION} sur OSCAR(dev). \r\n
-                {URL}
-            "
+            'subject' => 'document à {ACTION}',
+            'body'    => "Bonjour {FULLNAME},\r\nVous avez un document à {ACTION} sur OSCAR(dev). \r\n {CONTEXT} \r\n\r\n{URL}"
         ],
 
         /**
@@ -74,7 +72,7 @@ return [
                 string $message
             ): void {
                 $logger = $sc->get("Logger");
-                $logger->debug("CONFIG:Notification $recipient | $subject | $message");
+                $logger->info("Signature > mail '$recipient' | $subject | $message");
                 try {
                     /** @var \Oscar\Service\MailingService $mailer */
                     $mailer = $sc->get(\Oscar\Service\MailingService::class);
@@ -183,7 +181,7 @@ return [
         // Configuration des parafeurs numérique
         'letterfiles'            => [
 
-            /************
+            /************/
             [
                 // Nom visible côté applicatif
                 'label' => 'ESUP',
@@ -195,6 +193,12 @@ return [
 
                 // Utilisé par défaut
                 'default'     => true,
+
+                // URL d'accès au parapheur pour les destinataires
+                'url_recipient' => 'https://signature-pp.unicaen.fr/',
+
+                // [DEV] Emplacement où sont archivés les échanges de données ave le parapheur
+                'archive_exchange' => __DIR__.'/../../logs/signature_exchange',
 
                 // Classe
                 'class'       => \UnicaenSignature\Strategy\Letterfile\Esup\EsupLetterfileStrategy::class,
@@ -226,7 +230,7 @@ return [
                     'visa_hidden' => 'visa_hidden',
                 ],
                 'config'  => [
-                    'checkUserAcces' => function ($sc, $signatureRecipient) {
+                    'checkUserAccess' => function ($sc, $signatureRecipient) {
                         return true;
                         //return $sc->get(\Oscar\Service\ProjectGrantService::class)->getRecipients($options);
                     }

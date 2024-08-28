@@ -381,6 +381,9 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->leftJoin('d.grant', 'g');
     }
 
+    /**
+     * @throws OscarException
+     */
     public function getDocumentsGrouped(int $page = 1, int $limit = 10, ?array $filters = null): array
     {
         $queryByFileName = $this->getEntityManager()->createQueryBuilder()
@@ -416,10 +419,6 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             throw new OscarException("Impossible de charger le nombre de document : " . $e->getMessage());
         }
 
-//        var_dump($queryByFileName->getQuery()->getDQL());
-//        var_dump($total);
-//        die();
-
         $filenames = $queryByFileName
             ->select('DISTINCT d.fileName')
             ->setFirstResult(($page - 1) * $limit)
@@ -446,5 +445,9 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             'nbr'                => $limit,
             'documents'          => $documents,
         ];
+    }
+
+    public function getDocumentsActivity(int $id)
+    {
     }
 }

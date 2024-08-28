@@ -1746,9 +1746,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
         $processDatas = [];
         foreach ($this->getSignatureService()->getSignatureFlows() as $flow) {
-            $this->getLoggerService()->debug(
-                "Chargement du flow " . $flow['label'] . " pour l'activité " . $entity->getLabel()
-            );
             $flowId = $flow['id'];
             $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
                 "",
@@ -1935,48 +1932,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 "Impossible de générer le document d'estimation des dépenses : " . $e->getMessage()
             );
         }
-
-
-//        if ($format == 'pdf') {
-//            try {
-//                $template = $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate();
-//                $formatter = new EstimatedSpentActivityPDFFormater(
-//                    $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
-//                    $this->getViewRenderer(),
-//                    [
-//                        'lines' => $lines,
-//                        'masses' => $masses,
-//                        'years' => $years,
-//                        'totaux' => $totaux,
-//                        'values' => $values,
-//                        'activity' => $entity
-//                    ]
-//                );
-//            } catch (\Exception $e) {
-//                throw new OscarException("Impossible de générer le PDF");
-//            }
-//            $formatter->format(['download' => true]);
-//            die();
-//        } else {
-//            if ($format == "html") {
-//                //
-//                $formatter = new EstimatedSpentActivityHTMLFormater(
-//                    $this->getOscarConfigurationService()->getEstimatedSpentActivityTemplate(),
-//                    $this->getViewRenderer(),
-//                    [
-//                        'lines' => $lines,
-//                        'masses' => $masses,
-//                        'years' => $years,
-//                        'totaux' => $totaux,
-//                        'values' => $values,
-//                        'activity' => $entity
-//                    ]
-//                );
-//                die($formatter->format());
-//            } else {
-//                throw new OscarException("Format non-pris en charge");
-//            }
-//        }
     }
 
     /**
@@ -2388,16 +2343,18 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function personsAction()
     {
-        // Récupération de l'activités
+        // Récupération de l'activité
         $activity = $this->getProjectGrantService()->getGrant($this->params()->fromRoute('id'));
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_SHOW, $activity);
-
+        $manage = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
         $out = [
             'persons' => [],
-            'manage' => $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+            'manage' => $manage,
+            'urlNew' => $this->url()->fromRoute('personactivity/new', ['idenroller' => $activity->getId()]),
             'roles' => $this->getOscarUserContextService()->getRolesPersonsInActivityArray()
         ];
+
 
         $editableA = $deletableA = $this->getOscarUserContextService()->hasPrivileges(
             Privileges::ACTIVITY_PERSON_MANAGE,

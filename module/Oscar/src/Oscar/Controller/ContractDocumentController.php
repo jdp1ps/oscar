@@ -6,6 +6,8 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use Laminas\Http\Response;
+use Laminas\Mvc\Controller\Plugin\Redirect;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\Person;
@@ -154,7 +156,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     public function indexAction()
     {
         $format = $this->getRequest()->getQuery('f', 'ui');
-        if( $format == 'json' ){
+        if ($format == 'json') {
             try {
                 $out = $this->baseJsonResponse();
                 $out['page'] = $page = intval($this->params()->fromQuery('page', 1));
@@ -167,7 +169,6 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $arrayTabs = [];
                 $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
 
-                /** @var TabDocument $tabDocument */
                 foreach ($entitiesTabs as $tabDocument) {
                     $tabId = $tabDocument->getId();
                     $arrayTabs[$tabId] = $tabDocument->toJson();
@@ -186,7 +187,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     'sign' => $filterSign == "" ? null : $filterSign == "1",
                 ];
 
-                if( $filterActivity ){
+                if ($filterActivity) {
                     $ids = $this->getActivityService()->search($filterActivity);
                     $filters['activity_ids'] = $ids;
                 }
@@ -228,7 +229,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             } catch (Exception $e) {
                 return $this->jsonError("Impossible de charger les documents : " . $e->getMessage());
             }
-        } else {
+        }
+        else {
             return [];
         }
     }
@@ -236,11 +238,10 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     /**
      * Suppression d'un document
      *
-     * @return void
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return Response|Redirect
+     * @throws OscarException
      */
-    public function deleteAction()
+    public function deleteAction(): Response|Redirect
     {
         $document = $this->getContractDocumentService()->getDocument(
             $this->params()->fromRoute('id'),
@@ -250,13 +251,13 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         $access = $this->getOscarUserContextService()->getAccessDocument($document);
 
         if ($access['write'] === true) {
-            $activity = $document->getActivity();
             try {
                 $this->getContractDocumentService()->deleteDocument($document);
+                return $this->getResponseOk("Document supprimé");
             } catch (Exception $exception) {
                 throw new OscarException("Impossible de supprimer le document : " . $exception->getMessage());
             }
-            $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
+            return $this->redirect()->toRoute('contract/show', ['id' => $activity->getId()]);
         }
         else {
             return $this->getResponseUnauthorized("Vous ne pouvez pas supprimer ce document");
@@ -268,9 +269,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * Modification document (onglets, TYPE, privé/oui/non ...)
      *
      * @return JsonModel
-     * @throws OscarException|\HttpException
      */
-    public function changeTypeAction()
+    public function changeTypeAction(): Response|JsonModel
     {
         /** @var Request $request */
         $request = $this->getRequest();
@@ -354,7 +354,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     /**
      * @param string $field_name
-     * @return ContractDocument
+     * @return Activity
      * @throws OscarException
      */
     protected function getActivityFromRouteId(string $field_name = 'idactivity'): Activity
@@ -384,8 +384,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
      * Upload de document sur une activité
      * /documents-des-contracts/televerser/:idactivity[/:idtab][/:id]
      *
-     * @return array
+     * @return JsonModel|Response
      * @annotations Procédure générique pour l'envoi des fichiers.
+     * @throws OscarException
      */
     public function uploadAction()
     {
@@ -530,7 +531,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         }
     }
 
-    public function activityAction()
+    public function activityAction(): JsonModel|Response
     {
         try {
             $id = $this->params()->fromRoute('activity_id');
@@ -549,12 +550,11 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 $activity
             );
 
-            if ($this->getOscarUserContextService()->getAccessActivityDocument($activity)['read'] != true) {
+            if (!$this->getOscarUserContextService()->getAccessActivityDocument($activity)['read']) {
                 $this->getLoggerService()->error("Accès non authorisé");
                 return $this->getResponseUnauthorized();
             }
 
-            /** @var TabDocument $tabDocument */
             foreach ($entitiesTabs as $tabDocument) {
                 // Traitement final attendu sur les rôles
                 $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
@@ -575,6 +575,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             ];
 
             $allowPrivate = true;
+
             //Onglet privé
             $privateTab = [
                 "id"        => "private",
@@ -587,6 +588,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             /** @var JsonFormatterService $jsonFormatterService */
             $jsonFormatterService = $this->getServiceLocator()->get(JsonFormatterService::class);
             $jsonFormatterService->setUrlHelper($this->url());
+
+            //$documents = $this->getContractDocumentService()->getDocumentsActivity($activity->getId());
             //Docs reliés à une activité
             /** @var ContractDocument $doc */
             foreach ($activity->getDocuments() as $doc) {
@@ -636,10 +639,9 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                     if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
                         continue;
                     }
-
                     $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
                 }
-            } // End boucle
+            }
 
             if ($privateTab && $privateTab['documents']) {
                 $arrayTabs['private'] = $privateTab;
@@ -668,16 +670,12 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             $signatureService = $this->getContractDocumentService()->getSignatureService();
 
             foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
-                $this->getLoggerService()->debug(
-                    "Chargement du flow " . $flow['label'] . " pour l'activité " . $activity->getLabel()
-                );
                 $flowId = $flow['id'];
                 $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
                     "",
                     $flowId,
                     ['activity_id' => $activity->getId()]
                 );
-
                 $processDatas[] = $signatureFlowDatas['signatureflow'];
             }
 
@@ -729,7 +727,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     /**
      * Annulation d'un processus de signature.
      *
-     * @return \Laminas\Http\Response|JsonModel
+     * @return Response|JsonModel
      */
     public function processDeleteAction()
     {
@@ -747,7 +745,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     /**
      * Déclenchement d'un processus de signature.
      *
-     * @return \Laminas\Http\Response|JsonModel
+     * @return Response|JsonModel
      */
     public function processCreateAction()
     {
@@ -913,7 +911,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     }
 
     /**
-     * @return \Laminas\Http\Response|JsonModel
+     * @return Response|JsonModel
      */
     public function processAction()
     {

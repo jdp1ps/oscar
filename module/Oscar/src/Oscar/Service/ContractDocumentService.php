@@ -177,29 +177,10 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         // Configuration du Flow
         foreach ($signatureFlowDatas['steps'] as &$step) {
             if ($step['editable']) {
-                // Customisation des destinataires
-                $this->getLoggerService()->info(
-                    sprintf("Traitement de l'étape [%s]%s", $step['id'], $step['label'])
-                );
                 if (array_key_exists($step['id'], $sortedFlowDatas)) {
                     $config = $sortedFlowDatas[$step['id']];
-                    $this->getLoggerService()->debug(
-                        sprintf(
-                            "Configuration de l'étape [%s]%s > %s",
-                            $step['id'],
-                            $step['label'],
-                            print_r($config, true)
-                        )
-                    );
                     $recipients = [];
                     foreach ($config['recipients'] as $recipient) {
-                        $this->getLoggerService()->debug(
-                            sprintf(
-                                "Destinataire %s : %s",
-                                $recipient['email'],
-                                $recipient['selected'] ? 'OUI' : 'non'
-                            )
-                        );
                         if ($recipient['selected']) {
                             $recipients[] = $recipient;
                         }
@@ -211,13 +192,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
 
                     $observers = [];
                     foreach ($config['observers'] as $observer) {
-                        $this->getLoggerService()->debug(
-                            sprintf(
-                                "Destinataire %s : %s",
-                                $observer['email'],
-                                $observer['selected'] ? 'OUI' : 'non'
-                            )
-                        );
                         if ($observer['selected']) {
                             $observers[] = $observer;
                         }
@@ -249,7 +223,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
         $destination = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation()
             . DIRECTORY_SEPARATOR
             . $fileName;
-        $this->getLoggerService()->info("copy '$uploadPath' vers '$destination'");
+
         if (!copy($uploadPath, $destination)) {
             $this->getLoggerService()->critical("Impossible de déplacer '$uploadPath' ver '$destination'");
             throw new OscarException(
@@ -257,7 +231,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             );
         }
         // Création du processus
-        $this->getLoggerService()->debug("Traitement du processus de signature pour '$uploadPath'");
         $process = $this->getProcessService()->createUnconfiguredProcess($fileName, $signatureFlow->getId());
         $this->getProcessService()->configureProcess($process, $signatureFlowDatas);
         $document->setProcess($process);
@@ -771,5 +744,10 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     public function getDocumentsGrouped(int $page = 1, int $nbr = 10, ?array $filters = null)
     {
         return $this->getContractDocumentRepository()->getDocumentsGrouped($page, $nbr, $filters);
+    }
+
+    public function getDocumentsActivity(int $id)
+    {
+        return $this->getContractDocumentRepository()->getDocumentsActivity($id);
     }
 }

@@ -166,7 +166,7 @@
         </nav>
       </div>
     </div>
-
+    - ROLES : {{ roles }} / MANAGE : {{ manage ? 'OUI' : 'NON' }}
     <nav class="admin-bar text-right" v-if="manage">
       <a class="oscar-link" @click="handlerNew()">
         <i class="icon-doc-add"></i>

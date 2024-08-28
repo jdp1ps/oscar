@@ -211,7 +211,10 @@
                         <i class="icon-group"></i>
                         Membres
                     </h2>
-                    <section id="membres" class="has-btn"></section>
+                    <section id="persons_roled"
+                             data-title="Personne"
+                             data-url="<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>"></section>
+                    <?= $this->Vite()->addJs('src/EntityWithRolePersons.js'); ?>
 
                 </section>
 
@@ -251,10 +254,7 @@
 
             <?php
             if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_PERSON_ACCESS, $entity)): ?>
-                <section id="persons_roled"
-                         data-title="Personne"
-                         data-url="<?= $this->url('contract/persons', ['id' => $entity->getId()]) ?>"></section>
-                <?= $this->Vite()->addJs('src/EntityWithRolePersons.js'); ?>
+
                 <section id="involved"></section>
                 <script>
                     require(['vue'], function (Vue) {

@@ -86,8 +86,8 @@ class JsonFormatterService implements UseOscarConfigurationService, UseEntityMan
 
             if ($process->isFinished()) {
                 $allowProcessUpdate = false;
-                $allowProcessDelete = $allowDelete = $this->getOscarUserContextService()->hasPrivileges(
-                    Privileges::ACTIVITY_DOCUMENT_DELETEDSIGNED,
+                $allowDelete = $this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::MAINTENANCE_SIGNATURE_DELETE,
                     $activity
                 );
             }
