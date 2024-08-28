@@ -92,6 +92,7 @@ class ContractDocument extends AbstractVersionnedDocument
      *
      * @var Process|null
      * @ORM\ManyToOne(targetEntity="UnicaenSignature\Entity\Db\Process")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private Process|null $process = null;
 
