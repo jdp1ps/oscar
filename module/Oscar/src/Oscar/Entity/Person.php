@@ -26,12 +26,12 @@ class Person implements ResourceInterface
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $firstname;
+    protected ?string $firstname = "";
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $lastname;
+    protected ?string $lastname = "";
 
     /**
      * @ORM\Column(type="string", nullable=true)
@@ -57,29 +57,29 @@ class Person implements ResourceInterface
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $email;
+    protected ?string $email = null;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $emailPrive;
+    protected ?string $emailPrive = null;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $ldapStatus;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected ?string $ldapSiteLocation;
+    protected ?string $ldapStatus = null;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $ldapAffectation;
+    protected ?string $ldapSiteLocation = null;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $ldapAffectation = null;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
@@ -89,18 +89,18 @@ class Person implements ResourceInterface
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $ldapFinInscription;
+    protected ?string $ldapFinInscription = null;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $ladapLogin;
+    protected ?string $ladapLogin = null;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $phone;
+    protected ?string $phone = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -111,7 +111,7 @@ class Person implements ResourceInterface
      * @var
      * @ORM\Column(type="string", nullable=true)
      */
-    protected ?string $harpegeINM;
+    protected ?string $harpegeINM = null;
 
     /**
      * Liste des affectations.
@@ -578,7 +578,7 @@ class Person implements ResourceInterface
     /**
      * @return string
      */
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
