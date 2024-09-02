@@ -485,7 +485,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
     //removeSubStructure
-    public function removeSubStructure(int $masterOrganizationId, int $subOrganizationId): void
+    public function removeSubStructure(?int $masterOrganizationId, int $subOrganizationId): void
     {
         $subStructure = $this->getOrganizationRepository()->getOrganisationById($subOrganizationId);
         $subStructure->setParent(null);
