@@ -55,35 +55,26 @@ return [
 
         'notifications_messages' => [
             ///////////////////////////////////////////////// ADRESSE ROOT du OSCAR ICI ///
-            'base_url' => 'http://localhost',
-            ///////////////////////////////////////////////////////////////////////////////
-            'subject' => 'document à {ACTION}',
-            'body'    => "Bonjour {FULLNAME},\r\nVous avez un document à {ACTION} sur OSCAR(dev). \r\n {CONTEXT} \r\n\r\n{URL}"
+            'base_url' => 'http://localhost'
         ],
 
-        /**
-         * Liste des procédures déclenchées lors des notifications.
-         */
-        'notifications'          => [
-            function (
-                ContainerInterface $sc,
-                $recipient,
-                string $subject,
-                string $message
-            ): void {
-                $logger = $sc->get("Logger");
-                $logger->info("Signature > mail '$recipient' | $subject | $message");
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Diffusion des notifications
+        'notification_strategy' => [
+            function(ContainerInterface $container, string $email, string $subject, string $message) {
+                $logger = $container->get("Logger");
                 try {
                     /** @var \Oscar\Service\MailingService $mailer */
-                    $mailer = $sc->get(\Oscar\Service\MailingService::class);
+                    $mailer = $container->get(\Oscar\Service\MailingService::class);
                     $mail = $mailer->newMessage($subject);
-                    $mail->setTo($recipient->getEmail())
+                    $mail->setTo($email)
+                        ->setSubject($subject)
                         ->setBody($message);
                     $mailer->send($mail);
                 } catch (Exception $e) {
                     $logger->error("ERREUR MAIL SIGNATURE : ". $e->getMessage());
                 }
-
             }
         ],
 
@@ -181,7 +172,7 @@ return [
         // Configuration des parafeurs numérique
         'letterfiles'            => [
 
-            /************/
+            /************
             [
                 // Nom visible côté applicatif
                 'label' => 'ESUP',
@@ -195,7 +186,7 @@ return [
                 'default'     => true,
 
                 // URL d'accès au parapheur pour les destinataires
-                'url_recipient' => 'https://signature-pp.unicaen.fr/',
+                'url_recipient' => 'https://signature-pp.unicaen.fr',
 
                 // [DEV] Emplacement où sont archivés les échanges de données ave le parapheur
                 'archive_exchange' => __DIR__.'/../../logs/signature_exchange',
@@ -226,6 +217,8 @@ return [
                 'name'    => 'internal', // internal est une clef dédiée pour identifier le parapheur interne
                 'default' => false,
                 'class'   => \UnicaenSignature\Strategy\Letterfile\InternalVisa\InternalVisaStrategy::class,
+                'url_recipient' => 'http://localhost/signature/my-documents',
+                'url_visa' => 'http://localhost/signature/my-documents',
                 'levels'  => [
                     'visa_hidden' => 'visa_hidden',
                 ],
