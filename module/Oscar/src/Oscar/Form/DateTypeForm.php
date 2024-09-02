@@ -63,8 +63,8 @@ class DateTypeForm extends Form implements InputFilterProviderInterface
             'options' => [
                 'label' => $label,
                 'use_hidden_element' => false,
-                'checked_value' => 1,
-                'unchecked_value' => 0
+                'checked_value' => '1',
+                'unchecked_value' => '0'
             ],
             'attributes'    => [
                 'class'     => 'form-control',
