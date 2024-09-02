@@ -132,7 +132,7 @@ class ProjectController extends AbstractOscarController
                 $format = $this->params()->fromQuery('f');
             }
 
-            $allowedFormat = [OscarFormatterConst::FORMAT_IO_CSV, OscarFormatterConst::FORMAT_IO_JSON];
+            $allowedFormat = [OscarFormatterConst::FORMAT_IO_CSV, OscarFormatterConst::FORMAT_IO_JSON, OscarFormatterConst::FORMAT_IO_EXCEL];
 
             if (!in_array($format, $allowedFormat)) {
                 return $this->getResponseInternalError(sprintf(_("Format '%s' inconnue"), $format));
@@ -146,7 +146,7 @@ class ProjectController extends AbstractOscarController
 
             // Récupération des projets
             $projects = $this->getProjectService()->getProjectsByIds($projectIds);
-            $formatter = $this->getProjectService()->getFormatter($format);
+            $formatter = $this->getProjectService()->getFormatter($format == OscarFormatterConst::FORMAT_IO_JSON ?: OscarFormatterConst::FORMAT_IO_CSV);
 
             // Fichier temporaire
             $filename = uniqid('oscar_export_project_') . '.csv';
@@ -166,12 +166,25 @@ class ProjectController extends AbstractOscarController
             fclose($handler);
 
             $downloader = new CSVDownloader();
-            $downloader->downloadCSVToExcel($filePath);
+            if( $format == OscarFormatterConst::FORMAT_IO_CSV ){
+                $downloader->downloadCSV($filePath);
+            } else {
+                $downloader->downloadCSVToExcel($filePath);
+            }
             unlink($filePath);
             die();
         } catch (\Exception $e) {
             throw new OscarException($e->getMessage());
         }
+    }
+
+    public function emptyAction()
+    {
+        $projects = $this->getProjectService()->getEmptyProject();
+        return array(
+            'projects' => $projects,
+            'search' => '',
+        );
     }
 
     /**

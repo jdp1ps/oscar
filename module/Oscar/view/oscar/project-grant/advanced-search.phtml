@@ -638,9 +638,14 @@
             <?php if($projectview == 'on' && count($projectsIds) > 0): ?>
                 <form action="<?= $this->url('project/export-many') ?>" method="post">
                     <input type="hidden" value="<?= implode(',', $projectsIds) ?>" name="ids" />
+                    Exporter les projets :
                     <button type="submit" class="btn btn-primary" name="format" value="csv">
                         <i class="icon-download"></i>
-                        Exporter les projets (CSV)
+                        CSV
+                    </button>
+                    <button type="submit" class="btn btn-primary" name="format" value="excel">
+                        <i class="icon-download"></i>
+                        Excel
                     </button>
                 </form>
             <?php endif; ?>
