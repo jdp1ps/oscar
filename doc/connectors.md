@@ -413,6 +413,7 @@ De la même façon, 2 URL peuvent être utilisées pour synchroniser les donnée
 {
     "uid" : "ID UNIQUE (utilisé par oscar pour synchroniser)",
     "code" : "CODE UNIQUE (utiliser pour les affectations des personnes)",
+    "parent" : "CODE PARENT",
     "shortname" : "ex : ANR",
     "longname" : "ex : Agence Nationale de la Recherche",
     "description" : "",
@@ -440,6 +441,7 @@ Données minimales attendues :
 {
     "uid" : "ID UNIQUE",
     "code" : "CODE UNIQUE (utiliser pour les affectations des personnes)",
+    "parent": null,
     "shortname" : "ex : ANR",
     "longname" : "ex : Agence Nationale de la Recherche",
     "description" : "",
@@ -452,54 +454,17 @@ Données minimales attendues :
 }
 ```
 
-> Conernant le CODE. Le champs CODE permet dans la version actuelle d'établir la liaison entre une personne et une organisation. Dans les prochaines versions, cette liaison sera probablement découplée du reste (un nouveau connecteur sera dédié à gérer cette relation) et utilisera l'UID plutôt que le code.
+> **Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `organizations` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
 
-Forme attendue : 
 
-```JSON
-[
-    {  
-        "uid" : "ED209",
-        "code" : "ED209",
-        "shortname" : "OCP",
-        "longname" : "Omni Consumer Product",
-        "dateupdated" : "etc..."
-    },
-    {
-        "uid": "ORG2",
-        "code": "ORG2 etc ..." 
-    },
-    { 
-        "uid": "ORG3",
-        "code": "ORG3 etc ..." 
-    }
-]
-``` 
 
-**Remarque** : Depuis la version *2.7 "Lewis"*, Oscar accepte un objet contenant une clef `organizations` contenant le tableau d'objet afin de simplifier sa synchronisation avec les outils tel que **Talend ESB**.
+### Détails des champs : CODE
 
-```JSON
-{ 
-  "organization" : [
-      {  
-        "uid" : "ED209",
-        "code" : "ED209",
-        "shortname" : "OCP",
-        "longname" : "Omni Consumer Product",
-        "dateupdated" : "etc..."
-      },
-      {
-        "uid": "ORG2",
-        "code": "ORG2 etc ..." 
-      },
-      { 
-        "uid": "ORG3",
-        "code": "ORG3 etc ..." 
-      }
-  ]
-}
-``` 
-
+Concernant le CODE. Le champs CODE permet dans la version actuelle d'établir la liaison entre une personne et une organisation.
+ 
+Il permet également d'identifier la hiérarchie des structures
+ 
+> Dans les prochaines versions, cette liaison sera probablement découplée du reste (un nouveau connecteur sera dédié à gérer cette relation) et utilisera l'UID plutôt que le code.
 
 
 ## Importer des activités (Installation initiale)
@@ -507,6 +472,7 @@ Forme attendue :
 Oscar dispose d'un utilitaire en ligne de commande pour importer des activités depuis un fichier CSV ou JSON.
 
 Son fonctionnement est détaillé ici : [Importer des activités dans Oscar](./activity-import.md)
+
 
 
 ### Executer les connecteurs
