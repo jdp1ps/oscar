@@ -42,6 +42,11 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
                 'b',
                 InputOption::VALUE_NONE,
                 'Ignore la reconstruction de l\'index de recherche après la mise à jour'
+            )->addOption(
+                'purge',
+                'p',
+                InputOption::VALUE_NONE,
+                'Déclenche la des organisations qui sont retirées de la source'
             );
     }
 
@@ -66,6 +71,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         $connectorService = $this->getServicemanager()->get(ConnectorService::class);
 
         $connector = $connectorService->getConnector("organization." . $connectorName);
+        $connector->setOptionPurge($input->getOption('purge'));
 
         try {
             $repport = $connector->execute($force);

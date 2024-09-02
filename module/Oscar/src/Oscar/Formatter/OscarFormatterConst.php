@@ -51,6 +51,8 @@ interface OscarFormatterConst
     //
     const FORMAT_IO_CSV = 'csv';
 
+    const FORMAT_IO_EXCEL = 'excel';
+
     const FORMAT_IO_JSON = 'json';
 
     const FORMAT_IO_PDF = 'pdf';

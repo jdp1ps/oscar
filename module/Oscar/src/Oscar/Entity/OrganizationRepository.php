@@ -25,6 +25,25 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         return $this->findOneBy(['id' => $organizationId]);
     }
 
+    public function getUidsConnector(string $connectorName): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $search = sprintf('s:%s:"%s";', strlen($connectorName), $connectorName);
+
+        $qb->select('o.connectors')
+            ->from(Organization::class, 'o')
+            ->where('o.connectors LIKE :search')
+            ->setParameter('search', "%$search%");
+
+        $uids = [];
+        foreach ($qb->getQuery()->getArrayResult() as $a) {
+            if( array_key_exists('connectors', $a) && $a['connectors'][$connectorName]) {
+                $uids[] = $a['connectors'][$connectorName];
+            }
+        }
+        return $uids;
+    }
+
     /**
      * Retourne les sous-organizations de l'organisation donnée.
      *
@@ -326,5 +345,11 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
             }
         }
         return $out;
+    }
+
+    public function removeOrganizationById(int $organizationId)
+    {
+        $this->getEntityManager()->remove($this->find($organizationId));
+        $this->getEntityManager()->flush();
     }
 }

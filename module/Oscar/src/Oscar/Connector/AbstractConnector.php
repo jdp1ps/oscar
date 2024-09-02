@@ -67,7 +67,7 @@ abstract class AbstractConnector implements IConnector
     }
 
     public function getOption($optionName, $defaultValue=null){
-        if( array_key_exists($optionName, $this->options) ){
+        if( $this->options && array_key_exists($optionName, $this->options) ){
             return $this->options[$optionName];
         }
         return $defaultValue;

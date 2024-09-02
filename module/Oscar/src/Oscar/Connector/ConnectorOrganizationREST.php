@@ -68,7 +68,6 @@ class ConnectorOrganizationREST extends AbstractConnector
         return $this->getServicemanager();
     }
 
-
     /**
      * @param bool $force
      * @return ConnectorRepport
@@ -116,6 +115,7 @@ class ConnectorOrganizationREST extends AbstractConnector
         ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
             $json = $this->getAccessStrategy()->getDataAll();
+            $exist = $repository->getUidsConnector($this->getName());
             $jsonDatas = null;
 
             if( is_object($json) && property_exists($json, 'organizations') ){
@@ -131,6 +131,10 @@ class ConnectorOrganizationREST extends AbstractConnector
 
             foreach( $jsonDatas as $data ){
                 $organisationId = $data->uid;
+
+                if (($index = array_search($organisationId, $exist)) >= 0) {
+                    array_splice($exist, $index, 1);
+                }
 
                 try {
                     /** @var Person $personOscar */
@@ -154,43 +158,63 @@ class ConnectorOrganizationREST extends AbstractConnector
                     if( property_exists($data, 'type') )
                         $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
 
+                    $organization->setDateUpdated(new \DateTime($dateupdated));
                     $repository->flush($organization);
 
                     if( $organization->hasUpdatedParentInCycle() ){
                         try {
                             $newParentCode = $organization->getUpdatedParentInCycle();
-                            $this->getLogger()->debug("Mise à jour du parent");
                             if( $newParentCode ){
-                                $this->getLogger()->debug(" > Nouveau parent");
                                 $parent = $this->getOrganizationService()->getOrganizationRepository()->getOrganisationByCode($newParentCode)->getId();
                                 $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
                             } else {
-                                $this->getLogger()->debug(" > Suppression du parent");
                                 $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
-
                             }
                             $repository->flush($organization);
                         } catch (\Exception $e) {
                             $this->getLogger()->error("Erreur : " . $e->getMessage());
                         }
-                    } else {
-                        $this->getLogger()->debug("Parent : Aucun changement");
                     }
 
                     if( $action == 'add' ){
-                        $this->getLogger()->debug("Organisation '$organisationId' ajoutée");
+                        $this->getLogger()->info("Organisation '$organisationId' ajoutée");
                     } else {
-                        $this->getLogger()->debug("Organisation '$organisationId' mise à jour");
+                        $this->getLogger()->info("Organisation '$organisationId' mise à jour");
                     }
+                }
+            }
 
-                } else {
-                    $this->getLogger()->debug("Rien à faire pour '$organisationId'");
+            $idsToDelete = [];
+
+            foreach ($exist as $uid) {
+                if (!$uid) {
+                    continue;
+                }
+                try {
+                    $organization = $repository->getObjectByConnectorID($this->getName(), $uid);
+                    $this->getLogger()->info("'$organization' n'est plus présent dans les données du connecteur");
+
+                    if ($this->getOptionPurge()) {
+                        $idsToDelete[] = $organization->getId();
+                    }
+                } catch (\Exception $e) {
+                    $this->getLogger()->error($e->getMessage());
+                }
+            }
+            foreach ($idsToDelete as $id) {
+                try {
+                    $repository->removeOrganizationById($id);
+                    $this->getLogger()->error("Supression de l'organisation '$id'");
+                } catch (\Exception $e) {
+                    $this->getLogger()->error("Impossible de supprimer l'organisation : " . $e->getMessage());
+                    throw $e;
                 }
             }
         } catch (\Exception $e ){
             $repport->adderror($e->getMessage());
             throw $e;
         }
+        die();
 
 
         $repport->addnotice("FIN du traitement...");
