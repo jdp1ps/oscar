@@ -31,7 +31,7 @@
     "guzzlehttp/guzzle": "^7.0",
     "phpoffice/phpspreadsheet": "^1.29",
     "phpoffice/phpword": "^1.1",
-    "unicaen/signature": "^0.0.15",
+    "unicaen/signature": "^0.1",
     "ext-gettext": "*",
     "ext-fileinfo": "*",
     "symfony/filesystem": "^7.1"
