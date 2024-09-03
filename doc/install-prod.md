@@ -6,7 +6,7 @@ L'installation a été testée sous Debian et Ubuntu Server
 
  - Système linux (Debian, Ubuntu)
  - Serveur web (Apache2)
- - PHP 7.3+ (support LDAP, Postgresql, mcrypt, intl, DOM/XML, mbstring, gd, zip)
+ - PHP 8.2.x (support LDAP, Postgresql, mcrypt, intl, DOM/XML, mbstring, gd, zip)
  - Postgresql 9.4+ (version 10 supportée)
  - Annuaire LDAP (supann)
 
@@ -55,25 +55,9 @@ GIT est est le système de versionnage utilisé pour Oscar
 apt-get install git-core wget
 ```
 
-#### Serveur web (Apache) et PHP7.3
+#### Serveur web (Apache) et PHP8.2
 
-Commencez par ajouter les dépôts PHP 7.3 (Merci à Damien pour les informations) :
-
-```bash
-apt -y install lsb-release apt-transport-https ca-certificates 
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
-```
-Sous ubuntu il sera certainement nécessaire d'ajouter ces éléments
-```
-apt install software-properties-common
-add-apt-repository ppa:ondrej/php
-apt update
-apt install php7.3
-php -v
-```
-
-Mettre à jour les sources  : 
+Commencez par ajouter les dépôts PHP 8.2
 
 ```bash
 # Installation de APACHE2
@@ -82,27 +66,29 @@ apt update
 
 ```bash
 # Installation de APACHE2
-apt-get install apache2
+apt install apache2
 
 # PHP + Modules PHP
-apt-get install php7.3
-apt-get install php7.3-bcmath
-apt-get install php7.3-bz2
-apt-get install php7.3-cli
-apt-get install php7.3-curl
-apt-get install php7.3-dom
-apt-get install php7.3-gd
-apt-get install php7.3-gearman
-apt-get install php7.3-intl
-apt-get install php7.3-ldap
-apt-get install php7.3-mbstring
-apt-get install php-mcrypt
-apt-get install php7.3-pdo-pgsql
-apt-get install php7.3-xml 
-apt-get install php7.3-zip
+apt install \
+  php-pear \
+  php8.2-bcmath \
+  php8.2-bz2 \
+  php8.2-cli \
+  php8.2-curl \
+  php8.2-dev \
+  php8.2-dom \
+  php8.2-gd \
+  php8.2-gearman \
+  php8.2-intl \
+  php8.2-ldap \
+  php8.2-mbstring \
+  php8.2-pgsql \
+  php8.2-ssh2 \
+  php8.2-xml \
+  php8.2-zip
 ```
 
-Installez également le client postgresql qui sera necessaire pour importer la structure initale de la base de donnée :
+Installez également le client postgresql qui sera nécessaire pour importer la structure initiale de la base de donnée :
 
 ```bash
 # Postgresql (ou autre selon le client de BDD utilisé)
@@ -162,7 +148,7 @@ Faire un *checkout* de la copie de travail,
 git clone https://git.unicaen.fr/open-source/oscar.git
 ```
 
-> L'accès au dépôt sur le Gitlab Unicaen nécessite la création d'un compte nominatif. Un fois le compte activé, vous aurez accès aux dépôts complets (inculant cette documentation technique)
+> L'accès au dépôt sur le Gitlab Unicaen nécessite la création d'un compte nominatif. Une fois le compte activé, vous aurez accès aux dépôts complets (incluant cette documentation technique)
 
 
 ### Dépendances PHP
@@ -174,16 +160,14 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 
 #### Installation de composer
 
-> Novembre 2020 : Les dépendances Oscar **ne gère PAS composer 2**, il faut donc utiliser uniquement composer 1.
-
 Commencez par installer [Composer](https://getcomposer.org/) :
 
 ```bash
-# Récupération de la dernière version 1 de composer
-wget https://getcomposer.org/composer-1.phar
+# Récupération de la dernière version 2.2.x de composer
+wget https://getcomposer.org/download/2.2.24/composer.phar
 
 # On le place dans /bin
-mv composer-1.phar /bin/composer
+mv composer.phar /bin/composer
 
 #On donne les droit d'accès
 chmod +x /bin/composer
@@ -206,7 +190,7 @@ Vous pouvez tester le bon déroulement de l'installation de **composer** en sais
 / /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
 \____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
                     /_/
-Composer version 1.7-dev (837ad7c14e8ce364296e0d0600d04c415b6e359d) 2018-06-07 09:15:18
+Composer version 2.2.22 2023-09-29 10:53:45
 
 Usage:
   command [options] [arguments]
@@ -220,7 +204,9 @@ Options:
   -n, --no-interaction           Do not ask any interactive question
       --profile                  Display timing and memory usage information
       --no-plugins               Whether to disable plugins.
+      --no-scripts               Skips the execution of all scripts defined in composer.json file.
   -d, --working-dir=WORKING-DIR  If specified, use the given directory as working directory.
+      --no-cache                 Prevent use of the cache
   -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 
 etc...
@@ -238,7 +224,7 @@ Composer se chargera d'installer les dépendances PHP tel de définies dans le f
 
 Sous Ubuntu il est possible que ce paquet bcmath bloque, dans ce cas, ajouter cette commande
 ```
-apt install php7.*-bcmath
+apt install php8.2*-bcmath
 ```
 
 
@@ -262,10 +248,10 @@ watch "gearadmin --status | sort -n | column -t"
 apt-get install gearman-tools
 ```
 
-Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/7.3/cli/php.ini** et **/etc/php/7.3/apache2/php.ini** en ajoutant la ligne :
+Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/8.2/cli/php.ini** et **/etc/php/8.2/apache2/php.ini** en ajoutant la ligne :
 
 ```ini
-; /etc/php/7.3/cli/php.ini - /etc/php/7.3/apache2/php.ini
+; /etc/php/8.2/cli/php.ini - /etc/php/8.2/apache2/php.ini
 extension=gearman
 ```
 
@@ -409,7 +395,7 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 ### Mise à jour des privilèges de l'application
 
-Les droits d'accès au fonctionnalités sont gérés en base de données via des **privilèges**. Au cour du développement, des fonctionnalités sont ajoutées régulièrement, donnant lieu à la création à de nouveaux privilèges pour réguler l'accès à ces fonctionnalités.
+Les droits d'accès aux fonctionnalités sont gérés en base de données via des **privilèges**. Au cours du développement, des fonctionnalités sont ajoutées régulièrement, donnant lieu à la création à de nouveaux privilèges pour réguler l'accès à ces fonctionnalités.
 
 Il faut donc à chaque mise à jour mettre à jour ces privilèges en base de données.
 
