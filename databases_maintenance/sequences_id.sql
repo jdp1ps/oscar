@@ -1,4 +1,5 @@
-﻿-- MAJ des numérotations automatiques des séquences
+﻿
+-- MAJ des numérotations automatiques des séquences
 select setval('activity_id_seq',(select max(id)+1 from activity), false);
 select setval('activitydate_id_seq',(select max(id)+1 from activitydate), false);
 select setval('activityorganization_id_seq',(select max(id)+1 from activityorganization), false);
@@ -13,7 +14,6 @@ select setval('contracttype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM cont
 select setval('currency_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM currency), 1)), false);
 select setval('datetype_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM datetype), 1)), false);
 select setval('discipline_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM discipline), 1)), false);
-select setval('grantsource_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM grantsource), 1)), false);
 select setval('logactivity_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM logactivity), 1)), false);
 select setval('notification_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM notification), 1)), false);
 select setval('organization_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM organization), 1)), false);
@@ -25,7 +25,7 @@ select setval('privilege_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM privile
 select setval('project_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM project), 1)), false);
 select setval('projectmember_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM projectmember), 1)), false);
 select setval('projectpartner_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM projectpartner), 1)), false);
-select setval('role_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM role), 1)), false);
+select setval('role_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM user_role ur), 1)), false);
 select setval('timesheet_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM timesheet), 1)), false);
 select setval('tva_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM tva), 1)), false);
 select setval('typedocument_id_seq',(SELECT COALESCE((SELECT MAX(id)+1 FROM typedocument), 1)), false);
