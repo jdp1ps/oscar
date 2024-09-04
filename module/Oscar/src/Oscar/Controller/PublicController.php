@@ -181,7 +181,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             'person'                           => $this->getCurrentPerson(),
             'declarationsHours'                => $declarationsHours,
             'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
-            'parameters'                       => $auth->getSettings(),
+            'parameters'                       => $auth->getSettings() ?: [],
             'forceSend'                        => $forceSend
         ];
     }
