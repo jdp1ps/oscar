@@ -88,6 +88,8 @@ apt install \
   php8.2-zip
 ```
 
+> La configuration PHP est à adapter selon vos besoins. Prévoir une mémoire minimum à 1024 pour répondre aux besoins de certains scripts (notamment les exports massifs de données). Ainsi que d'ajuster la taille des données téléversés parfois volumineux (10Mo par exemple à Caen)
+
 Installez également le client postgresql qui sera nécessaire pour importer la structure initiale de la base de donnée :
 
 ```bash
