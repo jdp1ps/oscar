@@ -314,7 +314,7 @@ return array(
             'template' => realpath(__DIR__.'/../../module/Oscar/view/mail.phtml'),
 
             // Mails utilisé pour les tests / rapport
-            'administrators' => ['stephane.bouvry@unicaen.fr', 'jacksay14@gmail.com']
+            'administrators' => ['stephane.bouvry@unicaen.fr']
         ]
     ],
 
@@ -323,10 +323,9 @@ return array(
         'connection' => array(
             'orm_default' => array(
                 //////////////////////////////////////////////////////// DRIVERS
-                // MySQL
-                //'driverClass' => '\Doctrine\DBAL\Driver\PDOMySql\Driver',
                 // Postgresql
-                'driverClass' => '\Doctrine\DBAL\Driver\PDOPgSql\Driver',
+                'driverClass' => '\Doctrine\DBAL\Driver\PDO\PgSQL\Driver',
+
                 ////////////////////////////////////////////////////////////////
 
                 'doctrine_type_mappings' => array(
