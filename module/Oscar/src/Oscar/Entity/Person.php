@@ -105,7 +105,7 @@ class Person implements ResourceInterface
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    protected ?\DateTime $dateSyncLdap;
+    protected ?\DateTime $dateSyncLdap = null;
 
     /**
      * @var
