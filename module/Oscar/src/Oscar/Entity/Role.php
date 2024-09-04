@@ -32,7 +32,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
 
 
     /**
-     * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="role")
+     * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="role", cascade={"remove"})
      */
     private $tabsDocumentsRoles;
 

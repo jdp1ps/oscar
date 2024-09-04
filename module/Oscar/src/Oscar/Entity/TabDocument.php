@@ -41,7 +41,7 @@ class TabDocument
     private bool $default = false;
 
     /**
-     * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="tabDocument", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=TabsDocumentsRoles::class, mappedBy="tabDocument", cascade={"persist","remove"})
      */
     private Collection $tabsDocumentsRoles;
 

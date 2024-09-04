@@ -1280,6 +1280,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                             $this->getEntityManager()->flush();
                             return $this->getResponseOk("Rôle supprimé");
                         } catch (ForeignKeyConstraintViolationException $e) {
+                            $this->getLoggerService()->error($e->getMessage());
                             return $this->getResponseInternalError(
                                 "Impossible de supprimer le rôle '$role', il est encore utilisé et doit être conservé pour préserver l'historique"
                             );
