@@ -1,6 +1,6 @@
 # Mise à Jour 2.13.2 "RIPLEY"
 
-> Attention, version BETA sur la branche **"ripley-laminas-php8"**
+> Attention, version disponible sur la branche **"ripley"**
 
 ## Mise à jour et patch
 
