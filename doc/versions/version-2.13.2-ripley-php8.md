@@ -117,18 +117,17 @@ chmod +x /usr/local/bin/composer
 git fetch
 ```
 
-Vous devriez voir la branche **ripley-laminas-php8** : 
+Vous devriez voir la branche **ripley** : 
 
 ```
 Depuis https://git.unicaen.fr/open-source/oscar
    fb9f3601..4fe9f83d  ripley-suborganization -> origin/ripley-suborganization
    d5e5838e..b216c145  master                 -> origin/master
-   4ecdf421..a739dc85  ripley                 -> origin/ripley
- * [nouvelle branche]  ripley-laminas-php8    -> origin/ripley-laminas-php8
+ *  4ecdf421..a739dc85  ripley                 -> origin/ripley
    826e821d..a4996af6  spartan                -> origin/spartan
 ```
 
-Basculer sur la branche **ripley-laminas-php8** : 
+Basculer sur la branche **ripley** : 
 
 ```bash
 git checkout ripley-laminas-php8
