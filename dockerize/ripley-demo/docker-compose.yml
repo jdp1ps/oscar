@@ -1,0 +1,150 @@
+services:
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # OSCAR (sources)
+  oscar_ripley:
+    env_file:
+      - .env
+    depends_on:
+      oscar_ripley_elasticsearch:
+        condition: service_healthy
+
+    container_name: oscar_ripley
+    build:
+        context: ./oscar/
+        dockerfile: Dockerfile
+        args:
+            proxy_environnement: ""
+            service_oscar_name: oscar_ripley
+            service_postgresql_name: oscar_ripley_postgresql
+            service_gearman_name: oscar_ripley_gearman
+            service_elasticsearch_name: oscar_ripley_elasticsearch
+
+    ports:
+      - 8181:80
+    volumes:
+      - ${OSCAR_SRC}:/var/OscarApp
+    networks:
+      - oscar_ripley_network
+    tty: true
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # ELASTIC SEARCH
+  oscar_ripley_elasticsearch:
+    container_name: oscar_ripley_elasticsearch
+    environment:
+      - discovery.type=single-node
+    build:
+        context: ./elasticsearch/
+        dockerfile: Dockerfile
+        args:
+          proxy_environnement: ""
+          service_oscar_name: oscar_ripley
+          service_postgresql_name: oscar_ripley_postgresql
+          service_gearman_name: oscar_ripley_gearman
+    depends_on:
+      oscar_ripley_postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsSL http://oscar_ripley_elasticsearch:9200/_cluster/health || exit 1" ]
+      interval: 30s   # Intervalle entre chaque vérification
+      timeout: 10s    # Temps limite d'attente de la réponse
+      retries: 3
+
+    networks:
+      - oscar_ripley_network
+    tty: true
+    restart: "always"
+
+  # --------------------------------------------------------------------------------------------------------------------
+  # POSTGRESQL
+  oscar_ripley_postgresql:
+    env_file:
+      - .env
+    container_name: oscar_ripley_postgresql
+    build:
+      context: ./postgresql/
+      dockerfile: Dockerfile
+      args:
+        proxy_environnement: ""
+        service_oscar_name: oscar_ripley
+        service_gearman_name: oscar_ripley_gearman
+        service_elasticsearch_name: oscar_ripley_elasticsearch
+        pathdatas: ${POSTGRESQL_DATABASE_DIRECTORY}
+    environment:
+      POSTGRES_PASSWORD: "azerty"
+      POSTGRES_USER: "oscar"
+      POSTGRES_DB: "oscar_dev"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U oscar -d oscar_dev" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - oscar_ripley_network
+    tty: true
+    volumes:
+      - ${POSTGRESQL_DATABASE_DIRECTORY}:/var/lib/postgresql/data
+    restart: "always"
+
+  # ADMINERDEV
+  oscar_ripley_adminer:
+    container_name: oscar_ripley_adminer
+    image: adminer
+    restart: "always"
+    ports:
+      - 8182:8080
+    networks:
+      - oscar_ripley_network
+    tty: true
+
+
+  # GEARMAN
+  oscar_ripley_gearman:
+    container_name: oscar_ripley_gearman
+    build:
+        context: ./gearman/
+        dockerfile: Dockerfile
+        args:
+          proxy_environnement: ""
+          service_oscar_name: oscar_ripley
+          service_postgresql_name: oscar_ripley_postgresql
+          service_elasticsearch_name: oscar_ripley_elasticsearch
+    networks:
+      - oscar_ripley_network
+    tty: true
+    restart: "unless-stopped"
+
+  # MAILHOG (Ajout proposé par Joachim Dornbusch)
+  oscar_ripley_mailhog:
+    container_name: oscar_ripley_mailhog
+    image: mailhog/mailhog:latest
+    restart: "always"
+    ports:
+      - 8085:8085
+    networks:
+      - oscar_ripley_network
+
+
+  oscar_ripley_kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.23
+    container_name: oscar_ripley_kibana
+    depends_on:
+      oscar_ripley_elasticsearch:
+        condition: service_healthy
+    restart: always
+    networks:
+      - oscar_ripley_network
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+
+# RéSEAU VIRUEL
+networks:
+  oscar_ripley_network:
+    driver: bridge
