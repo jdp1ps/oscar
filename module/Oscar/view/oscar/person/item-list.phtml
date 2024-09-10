@@ -58,7 +58,7 @@
     <?php if( count($person->getOrganizations()) ): ?>
         <?php /** @var \Oscar\Entity\OrganizationPerson $affectation */
         foreach( $person->getOrganizations() as $affectation ): ?>
-            <?= $this->link()->affectationPerson($affectation) ?>
+            <?php echo $this->link()->affectationPerson($affectation); ?>
         <?php endforeach; ?>
     <?php endif; ?>
     <?php if( $person->getLdapMemberOf() != null ): ?>

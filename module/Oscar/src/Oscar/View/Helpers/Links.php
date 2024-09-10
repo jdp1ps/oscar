@@ -248,17 +248,21 @@ class Links extends AbstractHtmlElement implements ServiceLocatorAwareInterface
      * @param OrganizationPerson $affectation
      */
     public function affectationPerson( $affectation ){
-        if( !$affectation->getPerson() || !$affectation->getOrganization() ){
-            return '<span class="invalid-data">Données invalide</span>';
+        try {
+            if( !$affectation->getPerson() || !$affectation->getOrganization() ){
+                return '<span class="invalid-data">Données invalide</span>';
+            }
+            $css = 'cartouche-default';
+            if( $affectation->getRoleObj() && $affectation->getRoleObj()->isPrincipal() ){
+                $css .= ' primary';
+            }
+            return sprintf('<span class="cartouche organization %s">%s<span class="addon">%s</span></span>',
+                $css,
+                $this->organization($affectation->getOrganization()),
+                $affectation->getRole());
+        } catch (\Exception $e) {
+            $this->getServiceLocator()->get('Logger')->error("Echec rendu d'affectation d'une personne : " . $e->getMessage());
         }
-        $css = 'cartouche-default';
-        if( $affectation->getRoleObj() && $affectation->getRoleObj()->isPrincipal() ){
-            $css .= ' primary';
-        }
-        return sprintf('<span class="cartouche organization %s">%s<span class="addon">%s</span></span>',
-            $css,
-            $this->organization($affectation->getOrganization()),
-            $affectation->getRole());
     }
 
     /**
