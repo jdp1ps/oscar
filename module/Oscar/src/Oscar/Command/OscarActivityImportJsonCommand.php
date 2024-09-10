@@ -129,7 +129,7 @@ class OscarActivityImportJsonCommand extends OscarCommandAbstract
         return $realpath;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -158,7 +158,7 @@ class OscarActivityImportJsonCommand extends OscarCommandAbstract
             $file = $this->getReadablePath($input->getOption('fichier'));
         } catch (\Exception $e) {
             $io->error("Impossible de lire le fichier source : " . $e->getMessage());
-            return;
+            return self::FAILURE;
         }
 
         $options = [
@@ -223,6 +223,8 @@ class OscarActivityImportJsonCommand extends OscarCommandAbstract
 
         $output = new ConnectorRepportToPlainText();
         $output->format($repport);
+
+        return self::SUCCESS;
         /****/
     }
 }

@@ -45,7 +45,7 @@ class OscarPersonsSyncJsonCommand extends OscarCommandAbstract
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -77,7 +77,8 @@ class OscarPersonsSyncJsonCommand extends OscarCommandAbstract
             try {
                 $datas = $sourceJSONFile->getAll();
             } catch (\Exception $e) {
-                die("ERR : Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+                $io->error("Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+                return self::FAILURE;
             }
 
             $connector = new ConnectorPersonJSON($datas, $entityManager, "json");
@@ -86,7 +87,8 @@ class OscarPersonsSyncJsonCommand extends OscarCommandAbstract
 
             $connectorFormatter->format($repport);
         } catch (\Exception $e) {
-            die("ERR : " . $e->getMessage());
+            $io->error($e->getMessage());
+            return self::FAILURE;
         }
 
         $io->section("Reconstruction de l'index de recherche : ");
@@ -100,9 +102,11 @@ class OscarPersonsSyncJsonCommand extends OscarCommandAbstract
                 $io->success(sprintf('Index de recherche mis à jour avec %s organisations indexées', count($organizations)));
             } catch ( \Exception $e ){
                 $io->error($e->getMessage());
+                return self::FAILURE;
             }
         } else {
-            $io->warning("Pas de reconstruction d'index");
+            $io->info("Pas de reconstruction d'index");
         }
+        return self::SUCCESS;
     }
 }

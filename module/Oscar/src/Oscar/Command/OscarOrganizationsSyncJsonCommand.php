@@ -44,7 +44,7 @@ class OscarOrganizationsSyncJsonCommand extends OscarCommandAbstract
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output) :int
     {
         $this->addOutputStyle($output);
 
@@ -68,15 +68,18 @@ class OscarOrganizationsSyncJsonCommand extends OscarCommandAbstract
         try {
             $fichier = $input->getArgument('fichier');
 
-            if (!$fichier)
-                die("Vous devez spécifier le chemin complet vers le fichier JSON");
+            if (!$fichier) {
+                $io->error("Vous devez spécifier le chemin complet vers le fichier JSON");
+                return self::FAILURE;
+            }
 
-            echo "Synchronisation depuis le fichier $fichier\n";
+            $io->info("Synchronisation depuis le fichier $fichier");
             $sourceJSONFile = new GetJsonDataFromFileStrategy($fichier);
             try {
                 $datas = $sourceJSONFile->getAll();
             } catch (\Exception $e) {
-                die("ERR : Impossible de charger les ogranizations depuis $fichier : " . $e->getMessage());
+                $io->error($e->getMessage());
+                return self::FAILURE;
             }
 
             $connector = new ConnectorOrganizationJSON($datas,
@@ -88,7 +91,8 @@ class OscarOrganizationsSyncJsonCommand extends OscarCommandAbstract
 
             $connectorFormatter->format($repport);
         } catch (\Exception $e) {
-            die("ERR : " . $e->getMessage());
+            $io->error($e->getMessage());
+            return self::FAILURE;
         }
 
         $io->section("Reconstruction de l'index de recherche : ");
@@ -102,9 +106,11 @@ class OscarOrganizationsSyncJsonCommand extends OscarCommandAbstract
                 $io->success(sprintf('Index de recherche mis à jour avec %s organisations indexées', count($organizations)));
             } catch ( \Exception $e ){
                 $io->error($e->getMessage());
+                return self::FAILURE;
             }
         } else {
             $io->warning("Pas de reconstruction d'index");
         }
+        return self::SUCCESS;
     }
 }
