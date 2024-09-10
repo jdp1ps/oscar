@@ -11,6 +11,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
  - [Procédure d'installation](install-prod.md)
  - [Procédure de mise à jour](update.md)
+ - [Version DOCKER](../dockerize/README.md)
 
 ## Installation via *Docker*
 

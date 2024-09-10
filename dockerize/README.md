@@ -1,56 +1,12 @@
-# DOCKER
+# OSCAR with DOCKER
 
-Création des images DOCKER.
+Des instances *ready-to-use* basées sur docker sont disponibles. Elles sont basées sur : 
 
-```shell
-. install.sh dev http://proxy.unicaen.fr:3128
-# ou ""
-. install.sh dev ""
-```
+ - Docker version 27.2.0, build 3ab4256
 
-Soit
+## Instances Oscar
 
-```shell
-. install.sh <TAG> <PROXY>
-# <PROXY> mettre "" pour une valeur de proxy par défaut vide
-```
-
-les containers créé dans le dossier `local/<TAG>` :
-
- - `oscar_<TAG>` : Oscar (Application)
- - `oscar_<TAG>_postgresql` : Container Postgresql
- - `oscar_<TAG>_gearman` : Container Gearman
- - `oscar_<TAG>_elasticsearch` : L'index de recherche (Elastic Search)
- - `oscar_<TAG>_adminer` : Une instance d'Adminer
- - `oscar_<TAG>_mailhog` : Une instance de Mailhog
-
-# Build / Run
-
-```shell
-# cd local/<tag>
-cd local/dev
-
-# build
-docker-compose build
-
-# Run
-docker-compose up -d
-```
-
-Accès à oscar (pour les opérations en ligne de commande) : 
-
-```shell
-#docker-compose exec oscar_<TAG> sh
-docker-compose exec oscar_dev sh
-```
-
-Une fois dans l'instance : 
-
-```
-su
-```
-
-Enjoy
+ - [**OSCAR RIPLEY** (Version Démo/Test)](./ripley-demo/README.md)    
 
 # Dev
 
