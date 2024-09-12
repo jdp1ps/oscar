@@ -97,34 +97,34 @@ RUN apt-get install -y \
 RUN apt-get clean
 
 # Enable xdebug -> Need to install later xdebug
-#RUN pecl install xdebug
-#
-## SOUCIS DERRIERE PROXY UNICAEN (HM) METHODE COPIE DE FICHIERS, PASSAGE PAR UN TEST IF ET CELA FONCTIONNE DANS TOUS LES CAS DE FIGURE
-## PROXY (wget)
-##COPY etc/apt/wgetrc /etc/apt/wgetrc
-## INSTALL OCI ET UTILISATION DE WGET (ATTENTION PROXY) -> LE HOOK VIA UN if CI-DESSOUS FONCTIONNE BIEN DERRIERE OU PAS UN PROXY (HM)
-#RUN if [ "$proxy_environnement" != "" ]; \
-#    then \
-#      pear config-set http_proxy "$proxy_environnement"; \
-#      echo "http_proxy = $proxy_environnement"  >> /etc/wgetrc && echo "https_proxy = $proxy_environnement" >> /etc/wgetrc; \
-#    fi
-#
-#COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
-#COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
-#COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
-#
-#RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
-#    unzip -o /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
-#    unzip -o /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
-#
-#RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
-#    ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
-#
-#RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.2.0
-#RUN echo "extension=oci8.so" > /etc/php/8.2/apache2/conf.d/30-php-oci8.ini && \
-#    echo "extension=oci8.so" > /etc/php/8.2/cli/conf.d/30-php-oci8.ini && \
-#    echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
-#
+RUN pecl install xdebug
+
+# SOUCIS DERRIERE PROXY UNICAEN (HM) METHODE COPIE DE FICHIERS, PASSAGE PAR UN TEST IF ET CELA FONCTIONNE DANS TOUS LES CAS DE FIGURE
+# PROXY (wget)
+#COPY etc/apt/wgetrc /etc/apt/wgetrc
+# INSTALL OCI ET UTILISATION DE WGET (ATTENTION PROXY) -> LE HOOK VIA UN if CI-DESSOUS FONCTIONNE BIEN DERRIERE OU PAS UN PROXY (HM)
+RUN if [ "$proxy_environnement" != "" ]; \
+    then \
+      pear config-set http_proxy "$proxy_environnement"; \
+      echo "http_proxy = $proxy_environnement"  >> /etc/wgetrc && echo "https_proxy = $proxy_environnement" >> /etc/wgetrc; \
+    fi
+
+COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
+
+RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
+    unzip -o /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
+    unzip -o /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
+
+RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
+    ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
+
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
+RUN echo "extension=oci8.so" > /etc/php/8.2/apache2/conf.d/30-php-oci8.ini && \
+    echo "extension=oci8.so" > /etc/php/8.2/cli/conf.d/30-php-oci8.ini && \
+    echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+
 ##RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 #RUN echo "XDEBUG"
 COPY etc/php/8.2/mods-available/xdebug.ini /etc/php/8.2/mods-available/xdebug.ini
