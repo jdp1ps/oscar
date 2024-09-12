@@ -76,6 +76,8 @@ class OscarPersonsSearchCommand extends OscarCommandAbstract
             }
         } catch ( \Exception $e ){
             $io->error($e->getMessage());
+            return self::FAILURE;
         }
+        return self::SUCCESS;
     }
 }
