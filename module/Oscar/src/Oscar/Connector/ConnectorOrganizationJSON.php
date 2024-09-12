@@ -34,7 +34,8 @@ class ConnectorOrganizationJSON implements ConnectorInterface
     {
         $this->jsonDatas = $jsonData;
         $this->entityManager = $entityManager;
-        $this->organizationJsonFactory = new JsonToOrganization();
+        $types = $entityManager->getRepository(Organization::class)->getTypesKeyLabel();
+        $this->organizationJsonFactory = new JsonToOrganization($types);
         $this->connectorName = $connectorName;
     }
 
