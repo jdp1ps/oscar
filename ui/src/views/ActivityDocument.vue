@@ -40,7 +40,6 @@
           <li class="meta">Parapheur <strong>{{ s.letterfile }}</strong></li>
           <li class="meta">Niveau <strong>{{ s.level }}</strong></li>
         </ul>
-
         <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">
           <strong class="fullname">{{ r.fullname }}</strong>
           <em class="email">{{ r.email }}</em>
@@ -208,78 +207,6 @@
             </nav>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE ERRORMESSAGES -->
-    <div class="overlay" v-if="signDocument">
-      <div class="overlay-content">
-        <h2>
-          <span class="overlay-closer" @click="signDocument = null">X</span>
-        </h2>
-
-        <nav>
-          Selectionnez un procédure de signature
-          <span v-for="p in signProcess" class="btn btn-lg btn-default"
-                :class="{'btn-success':selectedSignProcess && selectedSignProcess.id == p.id}" @click="handlerSelectProcess(p)">
-            <strong>{{ p.label }}</strong><br>
-            <em>{{ p.description }}&nbsp;</em>
-          </span>
-        </nav>
-
-        <section v-if="selectedSignProcess">
-          <h3>
-            <small>Procédure de signature</small><br>
-            <strong>{{ selectedSignProcess.label }}</strong>
-          </h3>
-          <article v-for="step in selectedSignProcess.steps" class="step"
-                   :class="step.missing_recipients ? 'error' : 'ok'">
-            <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
-            <ul class="metas">
-              <li class="meta">Parapheur: <strong>{{ step.letterfile_label }}</strong></li>
-              <li class="meta">Type: <strong>{{ step.level_label }}</strong></li>
-              <li class="meta">Tous signent: <strong>{{ step.allSignToComplete ? 'Oui' : 'non' }}</strong></li>
-            </ul>
-            <div class="alert alert-danger" v-if="step.missing_recipients">
-              Il manque des destinataires pour cette procédure.
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <h5>Destinataires</h5>
-                <div class="recipient" v-for="r in step.recipients">
-                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
-                  <strong class="email">{{ r.email }}</strong>
-                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <h5>Observateurs</h5>
-                <div class="recipient" v-for="r in step.observers" v-if="step.observers.length">
-                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
-                  <strong class="email">{{ r.email }}</strong>
-                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
-                </div>
-                <div class="alert alert-info" v-else>
-                  Pas d'observateur pour cette étape
-                </div>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        <div class="alert alert-danger" v-if="signProcessError">
-          Signature non-disponible : <strong>{{ signProcessError }}</strong>
-        </div>
-
-        <nav class="buttons-bar">
-          <button class="btn btn-default" @click="signDocument = null">
-            <i class="icon-cancel-alt"></i> Annuler
-          </button>
-          <button class="btn btn-success" @click="handlerPerformSignDocument(signDocument, selectedSignProcess)"
-                  :class="{'disabled': handlerPerformSignDocumentDisabled(signDocument, selectedSignProcess)}">
-            <i class="icon-cancel-alt"></i> Valider
-          </button>
-        </nav>
       </div>
     </div>
 

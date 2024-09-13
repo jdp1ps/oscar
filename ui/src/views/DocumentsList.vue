@@ -170,7 +170,7 @@
       </div>
       <div v-else>
         <nav>
-          Selectionnez un procédure de signature
+          Sélectionnez une procédure de signature
           <span v-for="p in signProcess" class="btn btn-lg btn-default"
                 :class="{'btn-success':selectedSignProcess && selectedSignProcess.id == p.id}"
                 @click="handlerSelectProcess(p)">
