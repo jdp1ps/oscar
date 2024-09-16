@@ -78,9 +78,9 @@ class GearmanJobLauncherService implements UseOscarConfigurationService, UseLogg
     {
         /** @var ActivityOrganization $activityOrganization */
         foreach ($organization->getActivities() as $activityOrganization) {
-            if( $activityOrganization->isPrincipal() ){
+            //if( $activityOrganization->isPrincipal() ){
                 $this->triggerUpdateNotificationActivity($activityOrganization->getActivity());
-            }
+            //}
         }
 
         /** @var ProjectPartner $projectPartner */

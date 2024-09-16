@@ -100,6 +100,15 @@
     "isEntry": true,
     "src": "src/ActivityWorkpackage.js"
   },
+  "src/AdminRoleOrganization.js": {
+    "file": "assets/adminroleorganization-f7283560.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor4.js"
+    ],
+    "isEntry": true,
+    "src": "src/AdminRoleOrganization.js"
+  },
   "src/AdminTypeDocument.js": {
     "file": "assets/admintypedocument-ec363a01.js",
     "imports": [

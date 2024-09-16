@@ -46,7 +46,7 @@ requirejs.config({
         "LocalDB": "LocalDB/LocalDB",
         "OscarDepenses": "OscarDepenses",
         "privileges": "components/build/privileges",
-        "organizationrole": "oscar/dist/OrganizationRole",
+        //"organizationrole": "oscar/dist/OrganizationRole",
         "ical": "vendor/ical.js/build/ical.min",
         "timesheet": "components/build/timesheet",
         "in-the-box" : "vendor/in-the-box/build/InTheBox",

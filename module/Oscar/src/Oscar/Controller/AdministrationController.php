@@ -768,11 +768,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
             return [
 
             ];
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->getLoggerService()->critical($e->getMessage());
             throw new OscarException("Erreur lors de la construction de l'index de recherche");
         }
-
     }
 
     public function organizationTypeAction()
@@ -1294,7 +1293,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
             else {
                 // Création
                 if ($this->getHttpXMethod() == "POST") {
-
                     $this->getOscarUserContextService()->hasPrivileges(Privileges::DROIT_ROLE_EDITION);
                     $role = $this->getEntityManager()->getRepository(Role::class)->findOneBy(
                         ['roleId' => $request->getPost('roleId')]
@@ -1328,6 +1326,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
         }
     }
 
+    /**
+     * Liste des rôles
+     */
     public function rolesAction()
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLE_VISUALISATION);
@@ -1369,57 +1370,97 @@ class AdministrationController extends AbstractOscarController implements UsePro
     }
 
 
+    /**
+     * Gestion des rôles des organisations.
+     * url : /administration/organizationrole
+     */
     public function organizationRoleApiAction()
     {
-        $this->getLoggerService()->debug("> ORGANISATIONROLE API");
         $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_VISUALISATION);
         $roleId = $this->params('roleid', null);
+
         /** @var Request $request */
         $request = $this->getRequest();
+        
         if ($roleId == null) {
-            $this->getLoggerService()->debug("Pas de ROLEID");
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if ($this->getHttpXMethod() == 'GET') {
-                $roles = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(
-                    [],
-                    ['label' => 'ASC']
-                );
-                $out = [];
-                /** @var OrganizationRole $role */
-                foreach ($roles as $role) {
-                    $out[] = $role->toArray();
+                try {
+                    $out = $this->getOrganizationService()->getOrganizationsRolesAndUsage();
+                    return $this->ajaxResponse($out);
+                } catch (\Exception $exception){
+                    $msg = "Impossible de charger les roles des organisations";
+                    $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                    return $this->jsonError($msg);
                 }
-                return $this->ajaxResponse($out);
             }
             ////////////////////////////////////////////////////////////////////
-            // POST : Nouveau rôle
+            // POST : Nouveau rôle / Migration
             elseif ($this->getHttpXMethod() == 'POST') {
                 $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
 
-                // Contrôle du Role
-                $roleId = trim($request->getPost('label'));
-                if ($roleId == "") {
-                    return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
+                try {
+                    $datas = $this->getPutDataJson();
+                } catch (\Exception $exception) {
+                    $msg = "Les données transmises à l'API 'OrganizationRole' sont incohérentes";
+                    $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                    return $this->jsonError($msg);
                 }
 
-                $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(
-                    ['label' => $roleId]
-                );
-                if ($exist) {
-                    return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
-                }
+                if ($datas->action) {
+                    switch ($datas->action) {
+                        ////////////////////////////////////////////////////////////////////
+                        // Migration
+                        case 'merge' :
+                            $this->getLoggerService()->info("Migration d'un role d'organisation");
+                            try {
+                                $this->getLoggerService()->debug(json_encode($datas));
 
-                $role = new OrganizationRole();
-                $role->setLabel($roleId)
-                    ->setDescription($request->getPost('description'))
-                    ->setPrincipal($request->getPost('principal') == 'true');
-                $this->getEntityManager()->persist($role);
-                $this->getEntityManager()->flush();
-                return $this->ajaxResponse($role->toArray());
+                                $fromId = $datas['from']['id'];
+                                $destId = $datas['to']['id'];
+                                $this->getOrganizationService()->mergeRoleOrganization($fromId, $destId);
+                                return $this->getResponseOk();
+                            } catch (\Exception $exception) {
+                                $msg = "Impossible de migrer le role organisation";
+                                $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                                return $this->getResponseInternalError($msg);
+                            }
+
+                            return $this->getResponseNotImplemented();
+
+                        // Erreur
+                        default:
+                            $this->getLoggerService()->critical("Action $datas->action inconnue !");
+                            return $this->getResponseNotImplemented();
+                    }
+                }
+                else {
+                    // Contrôle du Role
+                    $roleId = trim($datas->get('label'));
+                    if ($roleId == "") {
+                        return $this->getResponseBadRequest("Impossible d'enregistrer un rôle vide");
+                    }
+
+                    $exist = $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy(
+                        ['label' => $roleId]
+                    );
+                    if ($exist) {
+                        return $this->getResponseBadRequest("Un rôle porte déja cette intitulé");
+                    }
+
+                    $role = new OrganizationRole();
+                    $role->setLabel($roleId)
+                        ->setDescription($datas->get('description'))
+                        ->setPrincipal($datas->get('principal') == 'true');
+                    $this->getEntityManager()->persist($role);
+                    $this->getEntityManager()->flush();
+                    return $this->ajaxResponse($role->toArray());
+                }
             }
         }
         else {
+            $method = $this->getHttpXMethod();
             $this->getOscarUserContextService()->check(Privileges::DROIT_ROLEORGA_EDITION);
             $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($roleId);
             if (!$role) {
@@ -1428,12 +1469,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
             if ($this->getHttpXMethod() == 'PUT') {
                 try {
+                    $datas = $this->getPutDataJson();
+
                     // Données du rôle à modifier
-                    $id = (int)$request->getPost('id');
-                    $label = trim($request->getPost('label'));
-                    $description = trim($request->getPost('description'));
-                    $principal = $request->getPost('principal') == "true";
-                    $this->getLoggerService()->info("Modification du rôle d'organization $label");
+                    $id = (int)$datas->get('id');
+                    $label = trim($datas->get('label'));
+                    $description = trim($datas->get('description'));
+                    $principal = $datas->get('principal') == "true";
 
                     if ($label == "") {
                         throw new OscarException("Vous devez renseigner un intitulé");
@@ -1451,7 +1493,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         ->setPrincipal($principal);
 
                     $this->getEntityManager()->flush();
-
                     return $this->ajaxResponse($roleObjEdited->toArray());
                 } catch (\Exception $e) {
                     return $this->getResponseInternalError("Impossible de modifier le rôle : " . $e->getMessage());
@@ -1459,11 +1500,20 @@ class AdministrationController extends AbstractOscarController implements UsePro
             }
 
             ////////////////////////////////////////////////////////////////////
-            // POST : Nouveau rôle
+            // Suppression d'un rôle
             elseif ($this->getHttpXMethod() == 'DELETE') {
-                $this->getEntityManager()->remove($role);
-                $this->getEntityManager()->flush();
-                return $this->getResponseOk('le rôle a été supprimé.');
+                try {
+                    $this->getEntityManager()->remove($role);
+                    $this->getEntityManager()->flush();
+                    return $this->getResponseOk('le rôle a été supprimé.');
+                } catch (ForeignKeyConstraintViolationException $exception) {
+                    $this->getLoggerService()->warning($exception->getMessage());
+                    return $this->jsonError("Ce role est utilisé, impossible de le supprimer");
+                } catch (\Exception $exception) {
+                    $msg = "Suppression du role impossible";
+                    $this->getLoggerService()->error("$msg : " . $exception->getMessage());
+                    return $this->getResponseInternalError($msg);
+                }
             }
         }
         return $this->getResponseBadRequest("Accès à l'API improbable...");
@@ -1512,7 +1562,9 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         'untyped_documents'   => $documentRepository->countUntypedDocuments(),
                         'documents_location'  => $this->getOscarConfigurationService()->getDocumentDropLocation(),
                         'documents_pcru_type' => $this->getOscarConfigurationService()->getPcruContractType(),
-                        'signatureflows'      => $this->getSignatureService()->getSignatureFlows(SignatureConstants::FORMAT_ARRAY),
+                        'signatureflows'      => $this->getSignatureService()->getSignatureFlows(
+                            SignatureConstants::FORMAT_ARRAY
+                        ),
                         'types'               => []
                     ];
 
@@ -1546,7 +1598,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $default = $this->params()->fromPost('default', '');
                     $this->getLoggerService()->info("Enregistrement de type de document '$signatureflow_id'");
 
-                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on', $signatureflow_id);
+                    $documentRepository->createOrUpdateTypeDocument(
+                        $id,
+                        $label,
+                        $description,
+                        $default == 'on',
+                        $signatureflow_id
+                    );
                 } catch (\Exception $e) {
                     return $this->jsonErrorLogged("Impossible d'ajouter le type de document", $e);
                 }
@@ -1568,7 +1626,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
                     $signatureflow_id = intval($_PUT->get('signatureflow_id'));
                     $this->getLoggerService()->info(" > $id, $label, $description, $signatureflow_id");
 
-                    $documentRepository->createOrUpdateTypeDocument($id, $label, $description, $default == 'on', $signatureflow_id);
+                    $documentRepository->createOrUpdateTypeDocument(
+                        $id,
+                        $label,
+                        $description,
+                        $default == 'on',
+                        $signatureflow_id
+                    );
                     return $this->getResponseOk();
                 } catch (\Exception $e) {
                     return $this->jsonErrorLogged(_("Impossible de mettre à jour le type de document"), $e);

@@ -27,6 +27,7 @@ export default defineConfig({
         activityspentdetails: resolve(__dirname, 'src/ActivitySpentDetails.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
+        adminroleorganization: resolve(__dirname, 'src/AdminRoleOrganization.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),

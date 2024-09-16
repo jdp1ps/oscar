@@ -352,4 +352,21 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $this->getEntityManager()->remove($this->find($organizationId));
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * Retourne les IDs des organisations qui ont le role $from dans une activité ou un projet.
+     * @param OrganizationRole $from
+     * @return array
+     */
+    public function getOrganizationsIdWithRole(OrganizationRole $from) :array
+    {
+        $qb = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->leftJoin('o.projects', 'p')
+            ->leftJoin('o.activities', 'a')
+            ->where('p.roleObj = :role OR a.roleObj = :role');
+        $qb->setParameter('role', $from);
+        $result = $qb->getQuery()->getResult();
+        return array_column($result, 'id');
+    }
 }
