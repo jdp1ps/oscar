@@ -140,7 +140,7 @@
                 Mettre à jour les données depuis SIFAC
               </button>
             </form>
-            <a :href="urlDownload" class="btn btn-default btn-xs" v-if="urlDownload">
+            <a :href="url_download" class="btn btn-default btn-xs" v-if="url_download">
               <i class="icon-download"></i>
               Télécharger les données (Excel)</a>
           </div>
@@ -265,7 +265,6 @@
 
 </template>
 <script>
-// nodejs node_modules/.bin/poi watch --format umd --moduleName  SpentLinePFI --filename.js SpentLinePFI.js --dist public/js/oscar/dist public/js/oscar/src/SpentLinePFI.vue
 
 import SpentLinePFIGrouped from "./SpentLinePFIGrouped.vue";
 import axios from "axios";
