@@ -34,7 +34,8 @@ class NotificationPerson
 
     /**
      * @var Person
-     * @ORM\ManyToOne(targetEntity="Person")
+     * @ORM\ManyToOne(targetEntity="Person", inversedBy="notifications")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $person;
 

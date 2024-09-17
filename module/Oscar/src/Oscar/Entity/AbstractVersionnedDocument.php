@@ -27,6 +27,7 @@ abstract class AbstractVersionnedDocument
      *
      * @var Person
      * @ORM\ManyToOne(targetEntity="Person")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     private $person;
 

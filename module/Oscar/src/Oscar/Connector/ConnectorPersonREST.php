@@ -201,6 +201,10 @@ class ConnectorPersonREST extends AbstractConnector
                     if ($this->getOptionPurge()) {
                         $activeIn = [];
 
+                        if (count($personOscarToDelete->getWorkPackages()) > 0) {
+                            $activeIn[] = "feuille de temps";
+                        }
+
                         if (count($personOscarToDelete->getActivities()) > 0) {
                             $activeIn[] = "activité";
                         }

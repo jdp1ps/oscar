@@ -130,6 +130,15 @@ class Person implements ResourceInterface
     protected $activities;
 
     /**
+     * Activités de recherche
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="NotificationPerson", mappedBy="person")
+     */
+
+    protected $notifications;
+
+    /**
      * Organization
      *
      * @var ArrayCollection
@@ -393,6 +402,24 @@ class Person implements ResourceInterface
         $this->workPackages = $workPackages;
 
         return $this;
+    }
+
+    /**
+     * Retourne uniquement les affectations (PersonOrganization)
+     * issue de la synchronisation.
+     *
+     * @return OrganizationPerson[]
+     */
+    public function getOrganizationsSync(): array
+    {
+        $syncOrganizations = [];
+        /** @var OrganizationPerson $organizationPerson */
+        foreach ($this->getOrganizations() as $organizationPerson) {
+            if( $organizationPerson->isSync() ){
+                $syncOrganizations[] = $organizationPerson;
+            }
+        }
+        return $syncOrganizations;
     }
 
 

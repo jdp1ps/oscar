@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @package Oscar\Entity
  * @ORM\Entity
  */
-class OrganizationPerson  implements ILoggable
+class OrganizationPerson implements ILoggable
 {
     use TraitRole, TraitTrackable;
 
@@ -87,17 +87,17 @@ class OrganizationPerson  implements ILoggable
     }
 
 
-
     public function getRole()
     {
-        if( $this->getRoleObj() ){
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->getRoleId();
         }
         return "rôle inconnu";
     }
 
-    public function isPrincipal(){
-        if( $this->getRoleObj() ){
+    public function isPrincipal()
+    {
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->isPrincipal();
         }
         return false;
@@ -139,7 +139,8 @@ class OrganizationPerson  implements ILoggable
         return $this;
     }
 
-    public function idLeader() {
+    public function idLeader()
+    {
         return in_array($this->getRole(), ['Responsable']);
     }
 
@@ -152,4 +153,18 @@ class OrganizationPerson  implements ILoggable
     {
         return $this->getOrganization();
     }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            "OrganizationPerson[%s-%s] %s > %s (%s)",
+            $this->getId(),
+            $this->getOrigin(),
+            $this->getOrganization(),
+            $this->getPerson(),
+            $this->getRoleObj()
+        );
+    }
+
+
 }
