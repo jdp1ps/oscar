@@ -1444,9 +1444,14 @@ class TimesheetController extends AbstractOscarController
             $dateStart = new \DateTime($period . '-01');
             $dateEnd = new \DateTime($period . '-01');
 
+            $conf    = $this->getOscarConfigurationService()->getConfigArray();
+            $etbName = '';
+            if ( isset( $conf['unicaen-app']['organisation']['name'] ) )
+                $etbName = $conf['unicaen-app']['organisation']['name'];
+
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
-            $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
+            $spreadsheet->getActiveSheet()->setCellValue('C4', $etbName );
             $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
             $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 

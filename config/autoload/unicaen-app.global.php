@@ -48,6 +48,12 @@ $settings = array(
         'informatiqueEtLibertes' => 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/',
     ),
 
+    'organisation' => [
+        'name'      => 'Université de Caen',
+        'fullname'  => '',
+        'adress'    => '',
+    ],
+
     'hostlocalization' => [
         'activated' => "",
         'proxies' => "",
