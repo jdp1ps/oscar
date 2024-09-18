@@ -31,6 +31,7 @@ $markText = function( $text, $search ){
             </div>
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary">Rechercher</button>
+
             </div>
         </div>
 
@@ -47,10 +48,15 @@ $markText = function( $text, $search ){
 
             </div>
         </div>
+        <h3 class="text-center">
+            <?= count($entities) ?> Résultat(s)
+            <?php if(count($entities) > 0): ?>
+                <button type="submit" name="action" value="export-csv" class="btn btn-primary">Télécharger CSV</button>
+            <?php endif; ?>
+        </h3>
 
     </form>
 
-    <h3 class="text-center"><?= count($entities) ?> Résultat(s)</h3>
 
 
     <?php if($error): ?>

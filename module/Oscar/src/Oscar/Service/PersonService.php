@@ -81,7 +81,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if ($searchStrategy === null) {
             $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.person.search_engine');
             $class = new \ReflectionClass($opt['class']);
-            $searchStrategy = $class->newInstanceArgs($opt['params']);
+            $params = $opt['params'];
+            $params[] = $this->getLoggerService();
+            $searchStrategy = $class->newInstanceArgs($params);
         }
         return $searchStrategy;
     }

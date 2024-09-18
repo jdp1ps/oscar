@@ -5,94 +5,127 @@ namespace Oscar\Strategy\Search;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Monolog\Logger;
 use Oscar\Exception\OscarException;
+use Oscar\Service\LoggerService;
 
 abstract class ElasticSearchEngine
 {
     private ?Client $elasticSearchClient = null;
     private array $hosts;
 
+    private Logger $loggerService;
+
     /**
      * @param array $hosts
+     * @param Logger $logger
      */
-    public function __construct(array $hosts)
+    public function __construct(array $hosts, Logger $logger)
     {
         $this->hosts = $hosts;
+        $this->loggerService = $logger;
     }
 
     //
     abstract public function getIndexableDatas(mixed $object): array;
+
     abstract public function getFieldsSearchedWeighted(): array;
+
     abstract public function getIndex(): string;
+
     abstract public function getType(): string;
 
     /**
      * @return Client
+     * @throws OscarException
      */
-    protected function getClient() :Client
+    protected function getClient(): Client
     {
-        if ($this->elasticSearchClient === null) {
-            $this->elasticSearchClient = ClientBuilder::create()
-                ->setHosts($this->getHosts())
-                ->build();
+        try {
+            if ($this->elasticSearchClient === null) {
+                $this->elasticSearchClient = ClientBuilder::create()
+                    ->setHosts($this->getHosts())
+                    ->build();
+            }
+            return $this->elasticSearchClient;
+        } catch (\Exception $exception) {
+            $msg = "Création du client impossible";
+            $this->loggerService->critical("$msg : " . $exception->getMessage());
+            throw new OscarException($msg);
         }
-        return $this->elasticSearchClient;
     }
 
     /**
      * @param mixed $object
      * @return callable|array
+     * @throws OscarException
      */
     public function addItem(mixed $object): callable|array
     {
-        $params = ['body' => []];
+        $client = $this->getClient();
 
-        $params['body'][] = [
-            'index' => [
-                '_index' => $this->getIndex(),
-                '_type' => $this->getType(),
-                '_id' => $object->getId(),
-            ]
-        ];
+        try {
+            $params = ['body' => []];
 
-        $params['body'][] = $this->getIndexableDatas($object);
+            $params['body'][] = [
+                'index' => [
+                    '_index' => $this->getIndex(),
+                    '_type'  => $this->getType(),
+                    '_id'    => $object->getId(),
+                ]
+            ];
 
-        return $this->getClient()->bulk($params);
+            $params['body'][] = $this->getIndexableDatas($object);
+
+            return $client->bulk($params);
+        } catch (\Exception $exception) {
+            $msg = "Impossible d'indexer l'information";
+            $this->loggerService->critical("$msg : " . $exception->getMessage());
+            throw new OscarException($msg);
+        }
     }
 
     /**
      * @param array $items
      * @return void
+     * @throws OscarException
      */
     public function rebuildIndex(array $items): void
     {
         $this->resetIndex();
+        $client = $this->getClient();
 
-        $i = 0;
-        foreach ($items as $item) {
-            $i++;
-            $params['body'][] = [
-                'index' => [
-                    '_index' => $this->getIndex(),
-                    '_type' => $this->getType(),
-                    '_id' => $item->getId()
-                ]
-            ];
+        try {
+            $i = 0;
+            foreach ($items as $item) {
+                $i++;
+                $params['body'][] = [
+                    'index' => [
+                        '_index' => $this->getIndex(),
+                        '_type'  => $this->getType(),
+                        '_id'    => $item->getId()
+                    ]
+                ];
 
-            $params['body'][] = $this->getIndexableDatas($item);
+                $params['body'][] = $this->getIndexableDatas($item);
 
-            // On envoie par paquet de 1000
-            if ($i % 1000 == 0) {
-                $responses = $this->getClient()->bulk($params);
+                // On envoie par paquet de 1000
+                if ($i % 1000 == 0) {
+                    $responses = $this->getClient()->bulk($params);
 
-                // clean datas
-                $params = ['body' => []];
-                unset($responses);
+                    // clean datas
+                    $params = ['body' => []];
+                    unset($responses);
+                }
             }
-        }
 
-        if (!empty($params['body'])) {
-            $this->getClient()->bulk($params);
+            if (!empty($params['body'])) {
+                $client->bulk($params);
+            }
+        } catch (\Exception $exception) {
+            $msg = "Réindexation impossible";
+            $this->loggerService->critical("$msg : " . $exception->getMessage());
+            throw new OscarException($msg);
         }
     }
 
@@ -100,19 +133,20 @@ abstract class ElasticSearchEngine
      * Retourne les paramètres utilisés pour la recherche.
      *
      * @param string $textSearch
+     * @param int $limit
      * @return array
      */
     public function getParamsQuery(string $textSearch, int $limit = 10000): array
     {
         return [
             'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'size' => $limit,
+            'type'  => $this->getType(),
+            'body'  => [
+                'size'  => $limit,
                 'query' => [
                     'query_string' => [
-                        'query' => $textSearch,
-                        'fields' => $this->getFieldsSearchedWeighted(),
+                        'query'     => $textSearch,
+                        'fields'    => $this->getFieldsSearchedWeighted(),
                         "fuzziness" => "auto"
                     ]
                 ]
@@ -120,32 +154,47 @@ abstract class ElasticSearchEngine
         ];
     }
 
-    public function searchRaw( string $search, int $limit = 10000 ):array
+    /**
+     * @throws OscarException
+     */
+    public function searchRaw(string $search, int $limit = 10000): array
     {
-        $search = trim($search);
-        // TRAITEMENT de la recherche
-        if (strpos($search, 'AND') || strpos($search, 'OR') || strpos($search, '"')) {
-        } else {
-            $split = explode(" ", $search);
-            if (count($split) == 1) {
-                $search = sprintf('%s OR %s', $split[0], $split[0] . '*');
-            } else {
-                $assembly = [];
-                foreach ($split as $term) {
-                    $assembly[] = trim($term);
-                }
-                $search = implode(' AND ', $assembly);
+        $this->loggerService->info("Search '$search' in " . $this->getIndex());
+        $client = $this->getClient();
+        try {
+            $search = trim($search);
+            // TRAITEMENT de la recherche
+            if (strpos($search, 'AND') || strpos($search, 'OR') || strpos($search, '"')) {
             }
+            else {
+                $split = explode(" ", $search);
+                if (count($split) == 1) {
+                    $search = sprintf('%s OR %s', $split[0], $split[0] . '*');
+                }
+                else {
+                    $assembly = [];
+                    foreach ($split as $term) {
+                        $assembly[] = trim($term);
+                    }
+                    $search = implode(' AND ', $assembly);
+                }
+            }
+
+            $params = $this->getParamsQuery($search, $limit);
+
+            return $client->search($params);
+
+        } catch (\Exception $exception) {
+            $msg = "Erreur de recherche";
+            $this->loggerService->critical("$msg : " . $exception->getMessage());
+            throw new OscarException($msg);
         }
-
-        $params = $this->getParamsQuery($search, $limit);
-
-        return $this->getClient()->search($params);
     }
 
     /**
      * @param string $search
      * @return array Liste des IDs
+     * @throws OscarException
      */
     public function search(string $search): array
     {
@@ -171,8 +220,8 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'id' => "$id"
+            'type'  => $this->getType(),
+            'id'    => "$id"
         ];
         return $this->getClient()->delete($params);
     }
@@ -186,9 +235,9 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'id' => $item->getId(),
-            'body' => [
+            'type'  => $this->getType(),
+            'id'    => $item->getId(),
+            'body'  => [
                 'doc' => $this->getIndexableDatas($item)
             ]
         ];
@@ -211,23 +260,20 @@ abstract class ElasticSearchEngine
      * @return array
      * @throws \Exception
      */
-    public function resetIndex() :array
+    public function resetIndex(): array
     {
         $params = [
             'index' => $this->getIndex()
         ];
 
+        $client = $this->getClient();
+
         try {
-            return $this->getClient()->indices()->delete($params);
-        } catch (Missing404Exception $e) {
-            return [];
+            return $client->indices()->delete($params);
         } catch (\Exception $e) {
-            throw new OscarException(
-                sprintf(
-                    "Impossible de réinitialiser l'index de recherche : '%s'",
-                    $e->getMessage()
-                )
-            );
+            $msg = "Impossible de réinitialiser le moteur de recherche";
+            $this->loggerService->critical("$msg : " . $e->getMessage());
+            throw new OscarException($msg);
         }
     }
 

@@ -30,12 +30,12 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
     }
 
 
-    public function add(Organization $organization): callable|array
+    public function add(Organization $entity): callable|array
     {
-        return $this->addItem($organization);
+        return $this->addItem($entity);
     }
 
-    public function getIndexableDatas(mixed $organization): array
+    public function getIndexableDatas(mixed $object): array
     {
         $projects = [];
         $activities = [];
@@ -43,12 +43,12 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
         $connectors = [];
 
         /** @var OrganizationPerson $member */
-        foreach ($organization->getPersons() as $member) {
+        foreach ($object->getPersons() as $member) {
             $persons[] = (string)$member->getPerson();
         }
 
         /** @var ActivityOrganization $activityOrganization */
-        foreach ($organization->getActivities() as $activityOrganization) {
+        foreach ($object->getActivities() as $activityOrganization) {
             if ($activityOrganization->getActivity()->getProject()) {
                 $project = (string)$activityOrganization->getActivity()->getProject()->getAcronym(
                     ) . " " . (string)$activityOrganization->getActivity()->getProject()->getLabel();
@@ -61,23 +61,23 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
                 $activities[] = $activity;
             }
         }
-        if ($organization->getConnectors()) {
-            foreach ($organization->getConnectors() as $name => $value) {
+        if ($object->getConnectors()) {
+            foreach ($object->getConnectors() as $name => $value) {
                 $connectors[] = $value;
             }
         }
 
         return [
-            'id'          => $organization->getId(),
-            'code'        => $organization->getCode() ? $organization->getCode() : "",
-            'shortname'   => $organization->getShortName(),
-            'fullname'    => $organization->getFullName(),
-            'email'       => $organization->getEmail(),
-            'city'        => $organization->getCity(),
-            'country'     => $organization->getCountry(),
-            'zipcode'     => $organization->getZipCode(),
-            'description' => $organization->getDescription(),
-            'siret'       => $organization->getSiret(),
+            'id'          => $object->getId(),
+            'code'        => $object->getCode() ? $object->getCode() : "",
+            'shortname'   => $object->getShortName(),
+            'fullname'    => $object->getFullName(),
+            'email'       => $object->getEmail(),
+            'city'        => $object->getCity(),
+            'country'     => $object->getCountry(),
+            'zipcode'     => $object->getZipCode(),
+            'description' => $object->getDescription(),
+            'siret'       => $object->getSiret(),
             'persons'     => $persons,
             'activities'  => $activities,
             'connectors'  => $connectors

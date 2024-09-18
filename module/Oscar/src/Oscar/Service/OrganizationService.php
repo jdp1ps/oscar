@@ -509,6 +509,94 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $idsOrganization;
     }
 
+    public function exportCsv($organizations) :void
+    {
+        // Fichier temporaire
+        $tmpDir = "/tmp";
+        $filename = uniqid('oscar_export_organization_') . '.csv';
+        $pathFileTmp = $tmpDir . '/' . $filename;
+        $handler = fopen($pathFileTmp, 'w');
+
+        if( !$handler ){
+            $this->getLoggerService()->error("Export organisation : L'emplacement $filename n'est pas accessible en écriture.");
+            throw new OscarException("Impossible d'exporter les données - Accès en écriture impossible");
+        }
+
+        $headers = [
+            'ID',
+            'NomCourt',
+            'NomLong',
+            'Code',
+            'Email',
+            'URL',
+            'rue1',
+            'rue2',
+            'rue3',
+            'CP',
+            'BP',
+            'ville',
+            'Pays',
+            'CodePays',
+            'Téléphone',
+            'SIFAC',
+            'SIRET',
+            'Type',
+            'TVA'
+        ];
+
+        fputcsv($handler, $headers);
+
+
+        $i = 0;
+        /** @var Organization $organization */
+        foreach ($organizations as $organization) {
+            $datas = [
+                'ID'        => $organization->getId(),
+                'NomCourt'  => $organization->getShortName(),
+                'NomLong'   => $organization->getFullName(),
+                'Code'      => $organization->getCode(),
+                'Email'     => $organization->getEmail(),
+                'URL'       => $organization->getUrl(),
+                'rue1'      => $organization->getStreet1(),
+                'rue2'      => $organization->getStreet2(),
+                'rue3'      => $organization->getStreet3(),
+                'CP'        => $organization->getZipCode(),
+                'BP'        => $organization->getBp(),
+                'ville'     => $organization->getCity(),
+                'Pays'      => $organization->getCountry(),
+                'CodePays'  => $organization->getCodePays(),
+                'Téléphone' => $organization->getPhone(),
+                'SIFAC'     => $organization->getSifacId(),
+                'SIRET'     => $organization->getSiret(),
+                'Type'      => $organization->getType(),
+                'TVA'       => $organization->getNumTVACA(),
+            ];
+//            $activities = [];
+//            /** @var ActivityOrganization $activity */
+//            foreach ($organization->getActivities() as $activity) {
+//                $activities[] = $activity->getActivity()->getOscarNum();
+//            }
+//            /** @var ProjectPartner $project */
+//            foreach ($organization->getProjects() as $project) {
+//                /** @var Activity $activity */
+//                foreach ($project->getProject()->getActivities() as $activity) {
+//                    $activities[] = $activity->getOscarNum();
+//                }
+//            }
+//            $datas['activities'] = implode(', ', $activities);
+
+            fputcsv($handler, $datas);
+        }
+
+        fclose($handler);
+
+        header('Content-Disposition: attachment; filename=oscar-export-organisations.csv');
+        header('Content-Length: ' . filesize($pathFileTmp));
+        header('Content-type: plain/text');
+
+        die(file_get_contents($pathFileTmp));
+    }
+
 
     public function getOrganizationTypes()
     {
@@ -587,7 +675,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         if ($searchStrategy === null) {
             $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
             $class = new \ReflectionClass($opt['class']);
-            $searchStrategy = $class->newInstanceArgs($opt['params']);
+            $params = $opt['params'];
+            $params[] = $this->getLoggerService();
+            $searchStrategy = $class->newInstanceArgs($params);
         }
         return $searchStrategy;
     }
@@ -602,11 +692,10 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      *
      * @param string $search
      *
-     * @return Organization[]
+     * @return UnicaenDoctrinePaginator
      */
-    public function getOrganizationsSearchPaged($search, $page, $filter = [])
+    public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []) :UnicaenDoctrinePaginator
     {
-        // $qb = $this->getSearchNativeQuery($search, $filter);
         $qb = $this->getSearchQuery($search, $filter);
 
         return new UnicaenDoctrinePaginator($qb, $page);

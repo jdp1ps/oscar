@@ -1936,8 +1936,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         static $searchStrategy;
         if ($searchStrategy === null) {
             $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.activity.search_engine');
+            $params = $opt['params'];
+            $params[] = $this->getLoggerService();
             $class = new \ReflectionClass($opt['class']);
-            $searchStrategy = $class->newInstanceArgs($opt['params']);
+            $searchStrategy = $class->newInstanceArgs($params);
         }
         return $searchStrategy;
     }

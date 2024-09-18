@@ -13,6 +13,7 @@ use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\Query;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
+use Elasticsearch\Common\Exceptions\NoNodesAvailableException;
 use Oscar\Connector\IConnector;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
@@ -56,6 +57,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
     /**
      * @param SessionService $sessionService
+     * @return OrganizationController
      */
     public function setSessionService(SessionService $sessionService): self
     {
@@ -86,13 +88,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                     );
                 }
             }
-        } else {
+        }
+        else {
             $token = $this->getSessionService()->createToken();
         }
 
         return [
             'organization' => $organization,
-            'token' => $token
+            'token'        => $token
         ];
     }
 
@@ -100,6 +103,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
      * Liste des organisations.
      *
      * @return array
+     * @throws \Exception
      */
     public function indexAction()
     {
@@ -111,12 +115,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ORGANIZATION_SHOW)) {
             $allow = true;
             $justXHR = false;
-        } else {
-            $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles([
-                                                                                           Privileges::ACTIVITY_ORGANIZATION_MANAGE,
-                                                                                           Privileges::PROJECT_ORGANIZATION_MANAGE,
-                                                                                           Privileges::ACTIVITY_INDEX,
-                                                                                       ]);
+        }
+        else {
+            $allow = $this->getOscarUserContextService()
+                ->hasOneOfPrivilegesInAnyRoles([
+                                                   Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                                                   Privileges::PROJECT_ORGANIZATION_MANAGE,
+                                                   Privileges::ACTIVITY_INDEX,
+                                               ]);
         }
 
         if (!$allow) {
@@ -131,16 +137,29 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $organizations = null;
 
         $filter = [
-            'roles' => $this->params()->fromQuery('roles', []),
-            'type' => $type,
+            'roles'  => $this->params()->fromQuery('roles', []),
+            'type'   => $type,
             'active' => $active,
         ];
+
+        $organizations = [];
+
+        if( $justXHR === false && $this->getRequest()->getQuery('action') == 'export-csv' ){
+            $query = $this->getOrganizationService()->getSearchQuery($search, $filter);
+            $organizations = $query->getQuery()->getResult();
+            $this->getOrganizationService()->exportCsv($organizations);
+            die();
+        }
 
         try {
             $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page, $filter);
         } catch (BadRequest400Exception $e) {
             $error = _("Expression de recherche incorrecte") . ' : ' . $e->getMessage();
+        } catch (NoNodesAvailableException $e) {
+            $error = "Le moteur de recherche est introuvable";
         }
+
+
 
 
         if ($this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') === 'json') {
@@ -161,107 +180,12 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
         return array(
             'entities' => $organizations,
-            'error' => $error,
-            'search' => $search,
-            'types' => $this->getOrganizationService()->getOrganizationTypesSelect(),
-            'type' => $type,
-            'active' => $active,
+            'error'    => $error,
+            'search'   => $search,
+            'types'    => $this->getOrganizationService()->getOrganizationTypesSelect(),
+            'type'     => $type,
+            'active'   => $active,
         );
-    }
-
-    /**
-     * Liste des organisations.
-     *
-     * @return array
-     */
-    public function exportCsvAction()
-    {
-        $type = $this->params()->fromQuery('t', []);
-
-        $filter = [
-            'roles' => $this->params()->fromQuery('roles', []),
-            'type' => $type
-        ];
-
-        $organizations = $this->getOrganizationService()->getOrganizations();
-
-        // Fichier temporaire
-        $filename = uniqid('oscar_export_organization_') . '.csv';
-        $handler = fopen('/tmp/' . $filename, 'w');
-
-        $headers = [
-            'ID',
-            'NomCourt',
-            'NomLong',
-            'Code',
-            'Email',
-            'URL',
-            'rue1',
-            'rue2',
-            'rue3',
-            'CP',
-            'BP',
-            'ville',
-            'Pays',
-            'CodePays',
-            'Téléphone',
-            'SIFAC',
-            'SIRET',
-            'Type',
-            'TVA'
-        ];
-
-        fputcsv($handler, $headers);
-
-
-        $i = 0;
-        /** @var Organization $organization */
-        foreach ($organizations as $organization) {
-            $datas = [
-                'ID' => $organization->getId(),
-                'NomCourt' => $organization->getShortName(),
-                'NomLong' => $organization->getFullName(),
-                'Code' => $organization->getCode(),
-                'Email' => $organization->getEmail(),
-                'URL' => $organization->getUrl(),
-                'rue1' => $organization->getStreet1(),
-                'rue2' => $organization->getStreet2(),
-                'rue3' => $organization->getStreet3(),
-                'CP' => $organization->getZipCode(),
-                'BP' => $organization->getBp(),
-                'ville' => $organization->getCity(),
-                'Pays' => $organization->getCountry(),
-                'CodePays' => $organization->getCodePays(),
-                'Téléphone' => $organization->getPhone(),
-                'SIFAC' => $organization->getSifacId(),
-                'SIRET' => $organization->getSiret(),
-                'Type' => $organization->getType(),
-                'TVA' => $organization->getNumTVACA(),
-            ];
-            $activities = [];
-            /** @var ActivityOrganization $activity */
-            foreach ($organization->getActivities() as $activity) {
-                $activities[] = $activity->getActivity()->getOscarNum();
-            }
-            /** @var ProjectPartner $project */
-            foreach ($organization->getProjects() as $project) {
-                /** @var Activity $activity */
-                foreach ($project->getProject()->getActivities() as $activity) {
-                    $activities[] = $activity->getOscarNum();
-                }
-            }
-            $datas['activities'] = implode(', ', $activities);
-
-            fputcsv($handler, $datas);
-        }
-
-        fclose($handler);
-
-        header('Content-Disposition: attachment; filename=oscar-export-organisations.csv');
-        header('Content-Length: ' . filesize('/tmp/' . $filename));
-        header('Content-type: plain/text');
-
-        die(file_get_contents('/tmp/' . $filename));
     }
 
     /**
@@ -284,6 +208,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         if (strlen($search) < 3) {
             return $this->getResponseBadRequest("Not enough chars (3 required)");
         }
+
         $organizations = $this->getOrganizationService()->getOrganizationsSearchPaged($search, $page);
 
         $result = ['datas' => []];
@@ -424,7 +349,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
             return [
                 'organizations' => $organizations,
-                'datas' => $propertiesValues,
+                'datas'         => $propertiesValues,
             ];
         }
     }
@@ -450,7 +375,9 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                         );
                     }
                     $output['organizations'] = $subStructures;
-                    $output['manage'] = $this->getOscarUserContextService()->hasPrivileges(Privileges::ORGANIZATION_EDIT);
+                    $output['manage'] = $this->getOscarUserContextService()->hasPrivileges(
+                        Privileges::ORGANIZATION_EDIT
+                    );
                     return $this->jsonOutput($output);
                     break;
 
@@ -518,14 +445,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $page = $this->params()->fromQuery('page', 1);
 
         $output = [
-            'connectors' => $this->getOrganizationService()->getConnectorsList(),
-            'organization' => $this->getOrganizationService()->getOrganization($organizationId),
-            'ancestors' => $this->getOrganizationService()->getAncestors($organizationId),
+            'connectors'    => $this->getOrganizationService()->getConnectorsList(),
+            'organization'  => $this->getOrganizationService()->getOrganization($organizationId),
+            'ancestors'     => $this->getOrganizationService()->getAncestors($organizationId),
             'subStructures' => $this->getOrganizationService()->getSubStructure($organizationId),
-            'projects' => new UnicaenDoctrinePaginator(
+            'projects'      => new UnicaenDoctrinePaginator(
                 $this->getProjectService()->getProjectOrganization($organizationId), $page
             ),
-            'activities' => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId, true),
+            'activities'    => $this->getProjectGrantService()->byOrganizationWithoutProject($organizationId, true),
         ];
 
         return $output;
@@ -554,9 +481,9 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         }
 
         $view = new ViewModel(array(
-                                  'form' => $form,
-                                  'id' => null,
-                                  'types' => $this->getOrganizationService()->getTypes(),
+                                  'form'       => $form,
+                                  'id'         => null,
+                                  'types'      => $this->getOrganizationService()->getTypes(),
                                   'connectors' => $this->getOrganizationService()->getConnectorsList(),
                               ));
         $view->setTemplate('oscar/organization/form');
@@ -589,7 +516,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             } catch (\Exception $e) {
                 throw $e;
             }
-        } else {
+        }
+        else {
             die('Bad connector ' . $connector);
         }
     }
@@ -634,7 +562,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                     if (!isset($_SESSION['fusion_data'])) {
                         $this->flashMessenger()->addErrorMessage("Erreur de transmission des données.");
                         $this->redirect()->toRoute('organization/fusion');
-                    } else {
+                    }
+                    else {
                         $organizationsFrom = $this->getEntityManager()->createQueryBuilder()
                             ->select('o')
                             ->from(Organization::class, 'o')
@@ -664,12 +593,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                         $this->flashMessenger()->addSuccessMessage("Fusion des organisations réussie.");
                         $this->redirect()->toRoute('organization/show', ['id' => $to->getId()]);
                     }
-                } else {
+                }
+                else {
                     $this->flashMessenger()->addErrorMessage("La procédure de fusion a été interrompue.");
                     $this->redirect()->toRoute('organization/fusion');
                     return;
                 }
-            } else {
+            }
+            else {
                 $etape = 2;
                 $hash = uniqid('fusion_');
                 $_SESSION['fusion_hash'] = $hash;
@@ -720,12 +651,12 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             }
         }
         return [
-            'activities' => $activities,
+            'activities'      => $activities,
             'organizationsTo' => $organisationsTo,
-            'from' => $from,
-            'to' => $to,
-            'etape' => $etape,
-            'hash' => $hash,
+            'from'            => $from,
+            'to'              => $to,
+            'etape'           => $etape,
+            'hash'            => $hash,
         ];
     }
 
@@ -766,7 +697,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                     if (!isset($_SESSION['fusion_data'])) {
                         $this->flashMessenger()->addErrorMessage("Erreur de transmission des données.");
                         $this->redirect()->toRoute('organization/fusion');
-                    } else {
+                    }
+                    else {
                         $organizationsFrom = $this->getEntityManager()->createQueryBuilder()
                             ->select('o')
                             ->from(Organization::class, 'o')
@@ -805,12 +737,14 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                         $this->flashMessenger()->addSuccessMessage("Fusion des organisations réussie.");
                         $this->redirect()->toRoute('organization/show', ['id' => $to->getId()]);
                     }
-                } else {
+                }
+                else {
                     $this->flashMessenger()->addErrorMessage("La procédure de fusion a été interrompue.");
                     $this->redirect()->toRoute('organization/fusion');
                     return;
                 }
-            } else {
+            }
+            else {
                 $etape = 2;
                 $hash = uniqid('fusion_');
                 $_SESSION['fusion_hash'] = $hash;
@@ -871,10 +805,10 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         }
         return [
             'activities' => $activities,
-            'from' => $from,
-            'to' => $to,
-            'etape' => $etape,
-            'hash' => $hash,
+            'from'       => $from,
+            'to'         => $to,
+            'etape'      => $etape,
+            'hash'       => $hash,
         ];
     }
 
@@ -945,11 +879,11 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
 
         $view = new ViewModel(array(
-                                  'id' => $id,
+                                  'id'           => $id,
                                   'organization' => $entity,
-                                  'types' => $this->getOrganizationService()->getTypes(),
-                                  'form' => $form,
-                                  'connectors' => $this->getOrganizationService()->getConnectorsList()
+                                  'types'        => $this->getOrganizationService()->getTypes(),
+                                  'form'         => $form,
+                                  'connectors'   => $this->getOrganizationService()->getConnectorsList()
                               ));
         $view->setTemplate('oscar/organization/form');
 
