@@ -85,11 +85,13 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
         }
 
         if ($paramID) {
-            $ids = explode(',', $paramID);
+            $numbers = explode(',', $paramID);
+            $ids     = array_filter( $numbers, function( $num ){
+                return is_numeric( $num );
+            });
+            $parameters['ids'] = array_values( $ids );
             $qb->andWhere('a.id IN (:ids)');
-            $parameters['ids'] = $ids;
         }
-
         $entities = $qb->getQuery()->setParameters($parameters)->getResult();
 
         if (!count($entities)) {
