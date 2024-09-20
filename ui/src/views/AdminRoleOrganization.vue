@@ -35,6 +35,46 @@
       </div>
     </div>
 
+    <!-- Ecran pour configurer le merge de rôle des organisation -->
+    <div class="overlay" v-if="doublons">
+      <div class="overlay-content container">
+        <h3>Dédoublonage des rôles</h3>
+        <div class="alert alert-info">
+          {{ doublons.length }} doublon(s) détécté dans les activités de recherche
+        </div>
+        <article v-for="doublon in doublons" style="border-bottom: solid thin #999">
+          L'organisation
+          <strong :title="doublon.organization_fullname">
+            <i class="icon-building-filled"></i>
+            <code v-if="doublon.organization_code">[{{ doublon.organization_code }}]</code>
+            {{ doublon.organization_shortname || doublon.organization_fullname }}</strong>
+          est qualifiée <strong>{{ doublon.total }} fois </strong> avec le rôle
+          <strong><i class="icon-tag"></i>{{ doublon.label }}</strong> <br>
+
+          <span v-if="doublon.activity_id">
+            sur l'activité
+            <strong>
+              <i class="icon-cube"></i>
+              <code>{{ doublon.activity_oscarnum }}</code>
+              <span>{{ doublon.activity_label }}</span>
+            </strong>
+          </span>
+          <span v-else>
+            sur le projet
+            <strong>
+              <i class="icon-cubes"></i>
+              <code>{{ doublon.project_acronym }}</code>
+              <span>{{ doublon.project_label }}</span>
+            </strong>
+          </span>
+        </article>
+        <nav>
+          <button type="button" class="btn btn-danger" @click="perfomDoublons()">Dédoublonner</button>
+          <button type="button" @click="doublons = null" class="btn btn-default">Annuler</button>
+        </nav>
+      </div>
+    </div>
+
     <!-- Formulaire de modification/création -->
     <transition name="popup">
       <div class="form-wrapper" v-if="form">
@@ -52,7 +92,7 @@
           <div class="form-group">
             <label>Nom du rôle</label>
             <input id="role_roleid" type="text" class="form-control" placeholder="Role" v-model="form.label"
-              name="label" />
+                   name="label"/>
           </div>
           <div class="form-group">
             <label>Principal (<span
@@ -63,7 +103,7 @@
               Un rôle définit comme principal débloque les droits des membres de l'organisation lorsqu'elle est affectée
               avec ce rôle à une activités
             </p>
-            <input type="checkbox" class="form-control" v-model="form.principal" />
+            <input type="checkbox" class="form-control" v-model="form.principal"/>
           </div>
 
           <div class="form-group">
@@ -86,8 +126,12 @@
         </form>
       </div>
     </transition>
-    <article v-for="role in roles" class="card xs" :class="{ 'active': role.principal }">
-      <h1 class="card-title">
+
+    <div class="row">
+      <div class="col-md-8">
+        Rôles :
+        <article v-for="role in roles" class="card xs" :class="{ 'active': role.principal }">
+          <h1 class="card-title">
         <span>
           <i v-if="role.principal" class="icon-asterisk"></i>
           {{ role.label }}
@@ -96,29 +140,38 @@
             utilisation(s)
           </span>
         </span>
+          </h1>
+          <p v-if="role.principal" class="alert alert-warning">
+            <i class="icon-attention-1"></i>
+            Ce rôle <strong style="text-decoration: underline">débloque les privilèges</strong> de ces membres lorsqu'il
+            est
+            utilisé pour qualifier le rôle d'une organisation sur une activité/un projet
+          </p>
+          <p>{{ role.description }}</p>
+          <nav class="card-footer" v-if="manage">
+            <button class="btn btn-xs btn-default" @click="form = JSON.parse(JSON.stringify(role))">
+              <i class="icon-pencil"></i>
+              Éditer
+            </button>
+            <button class="btn btn-xs btn-info" @click="mergeUi(role)">
+              <i class="icon-fork"></i>
+              Migrer
+            </button>
+            <button class="btn btn-xs btn-danger" @click="remove(role)">
+              <i class="icon-trash"></i>
+              Supprimer
+            </button>
+          </nav>
+        </article>
+      </div>
+      <div class="col-md-4">
+        Outils
+        <button class="btn btn-primary" @click="handlerDisplayDoublons">
+          Afficher les doublons
+        </button>
+      </div>
+    </div>
 
-      </h1>
-      <p v-if="role.principal" class="alert alert-warning">
-        <i class="icon-attention-1"></i>
-        Ce rôle <strong style="text-decoration: underline">débloque les privilèges</strong> de ces membres lorsqu'il est
-        utilisé pour qualifier le rôle d'une organisation sur une activité/un projet
-      </p>
-      <p>{{ role.description }}</p>
-      <nav class="card-footer" v-if="manage">
-        <button class="btn btn-xs btn-default" @click="form = JSON.parse(JSON.stringify(role))">
-          <i class="icon-pencil"></i>
-          Éditer
-        </button>
-        <button class="btn btn-xs btn-info" @click="mergeUi(role)">
-          <i class="icon-fork"></i>
-          Migrer
-        </button>
-        <button class="btn btn-xs btn-danger" @click="remove(role)">
-          <i class="icon-trash"></i>
-          Supprimer
-        </button>
-      </nav>
-    </article>
     <button @click="formNew" class="btn btn-default" v-if="manage">
       <i class="icon-circled-plus"></i>
       Ajouter un nouveau rôle
@@ -138,12 +191,13 @@ export default {
       manage: false,
       deleteRole: null,
       merged: null,
-      merged_dest: null
+      merged_dest: null,
+      doublons: null
     }
   },
   props: {
-    url: { required: true },
-    manage: { default: false }
+    url: {required: true},
+    manage: {default: false}
   },
   computed: {
     loading() {
@@ -154,12 +208,30 @@ export default {
 
     /**
      * Affichage de l'interface de fusion des rôles.
-     * 
-     * @param role 
+     *
+     * @param role
      */
     mergeUi(role) {
       this.merged_dest = null;
       this.merged = role;
+    },
+
+    perfomDoublons() {
+      let data = {
+        action: 'doublons'
+      };
+      this.loadingMsg = "Suppression des doublons...";
+      axios.post(this.url, data).then(
+          ok => {
+            this.fetch();
+          }, err => {
+            flashMessage('error', err.response.data);
+          }
+      ).then(() => {
+        this.loadingMsg = null;
+        this.doublons = null;
+        this.fetch();
+      });
     },
 
     /**
@@ -171,14 +243,16 @@ export default {
         from: this.merged,
         to: this.merged_dest
       };
+
+      this.loadingMsg = "Fusion des rôles...";
       axios.post(this.url, data).then(
-        ok => {
-          console.log('ok');
-          this.fetch();
-        }, err => {
-          console.log(err);
-          flashMessage('error', err.response.data);
-        }
+          ok => {
+            console.log('ok');
+            this.fetch();
+          }, err => {
+            console.log(err);
+            flashMessage('error', err.response.data);
+          }
       ).then(() => {
         this.loadingMsg = null;
         this.merged = null;
@@ -203,18 +277,18 @@ export default {
       if (this.form.id) {
         this.loadingMsg = "Mise à jour du rôle...";
         axios.put(this.url + '/' + this.form.id + "", this.form).then(
-          (res) => {
-            for (let i = 0; i < this.roles.length; i++) {
-              if (this.roles[i].id === this.form.id) {
-                this.roles.splice(i, 1, res.data);
-                flashMessage('success', 'le rôle a bien été mis à jour.');
-                return;
+            (res) => {
+              for (let i = 0; i < this.roles.length; i++) {
+                if (this.roles[i].id === this.form.id) {
+                  this.roles.splice(i, 1, res.data);
+                  flashMessage('success', 'le rôle a bien été mis à jour.');
+                  return;
+                }
               }
+            },
+            (err) => {
+              flashMessage('error', err.response.data);
             }
-          },
-          (err) => {
-            flashMessage('error', err.response.data);
-          }
         ).then(() => {
           this.loadingMsg = null;
           this.form = null;
@@ -222,13 +296,13 @@ export default {
       } else {
         this.loadingMsg = "Ajout du nouveau rôle...";
         axios.post(this.url + '', this.form).then(
-          (res) => {
-            this.roles.push(res.data);
-            flashMessage('success', 'le rôle a bien été ajouté.');
-          },
-          (err) => {
-            flashMessage('error', err.response.data);
-          }
+            (res) => {
+              this.roles.push(res.data);
+              flashMessage('success', 'le rôle a bien été ajouté.');
+            },
+            (err) => {
+              flashMessage('error', err.response.data);
+            }
         ).then(() => {
           this.loadingMsg = null;
           this.form = null;
@@ -240,13 +314,13 @@ export default {
       this.loadingMsg = "Suppression du rôle...";
       let role = this.deleteRole;
       axios.delete(this.url + '/' + role.id + '', this.form).then(
-        (res) => {
-          this.roles.splice(this.roles.indexOf(role), 1);
-          flashMessage('success', 'le rôle a bien été supprimé.');
-        },
-        (err) => {
-          flashMessage('error', err.response.data);
-        }
+          (res) => {
+            this.roles.splice(this.roles.indexOf(role), 1);
+            flashMessage('success', 'le rôle a bien été supprimé.');
+          },
+          (err) => {
+            flashMessage('error', err.response.data);
+          }
       ).then(() => {
         this.loadingMsg = null;
         this.form = null;
@@ -258,14 +332,24 @@ export default {
       this.deleteRole = role;
     },
 
+    handlerDisplayDoublons() {
+      this.loadingMsg = "Chargement des doublons";
+      axios.get(this.url + '?a=doublon').then(
+          (res) => {
+            this.doublons = res.data;
+          }, (err) => {
+            flashMessage('error', err.body);
+          }).then(() => this.loadingMsg = null);
+    },
+
     fetch() {
       this.loadingMsg = "Chargement des rôles";
       axios.get(this.url).then(
-        (res) => {
-          this.roles = res.data;
-        }, (err) => {
-          flashMessage('error', err.body);
-        }).then(() => this.loadingMsg = null);
+          (res) => {
+            this.roles = res.data;
+          }, (err) => {
+            flashMessage('error', err.body);
+          }).then(() => this.loadingMsg = null);
     }
   },
   created() {

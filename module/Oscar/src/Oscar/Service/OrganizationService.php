@@ -509,7 +509,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         return $idsOrganization;
     }
 
-    public function exportCsv($organizations) :void
+    public function exportCsv($organizations): void
     {
         // Fichier temporaire
         $tmpDir = "/tmp";
@@ -517,8 +517,10 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $pathFileTmp = $tmpDir . '/' . $filename;
         $handler = fopen($pathFileTmp, 'w');
 
-        if( !$handler ){
-            $this->getLoggerService()->error("Export organisation : L'emplacement $filename n'est pas accessible en écriture.");
+        if (!$handler) {
+            $this->getLoggerService()->error(
+                "Export organisation : L'emplacement $filename n'est pas accessible en écriture."
+            );
             throw new OscarException("Impossible d'exporter les données - Accès en écriture impossible");
         }
 
@@ -694,7 +696,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      *
      * @return UnicaenDoctrinePaginator
      */
-    public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []) :UnicaenDoctrinePaginator
+    public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []): UnicaenDoctrinePaginator
     {
         $qb = $this->getSearchQuery($search, $filter);
 
@@ -1043,7 +1045,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             try {
                 $organizations = $this->getOrganizationsByIds($organizationsIds);
                 foreach ($organizations as $organization) {
-                    $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateNotificationOrganization($organization);
+                    $this->getPersonService()->getGearmanJobLauncherService()->triggerUpdateNotificationOrganization(
+                        $organization
+                    );
                 }
             } catch (\Exception $exception) {
                 $this->getLoggerService()->critical($exception->getMessage());
@@ -1051,18 +1055,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         }
     }
 
-    private function areSameOrganization(Organization $organizationA, Organization $organizationB)
-    {
-        if ($organizationA->getCentaureId() == $organizationB->getCentaureId()) {
-            return true;
-        }
-        ?>
-        <pre>;
-        <?= $organizationA ?>
-            <?= $organizationB ?>
-        </pre>
-        <?php
-    }
     /////////////////////////////////////////////////////////////////////////////////////////////// TYPES D'ORGANISATION
     ///
     public function updateOrCreateOrganizationType($datas)
@@ -1123,30 +1115,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                 )
             );
         }
-
-//        if( $id ){
-//            $type = $this->getEntityManager()
-//                ->getRepository(OrganizationType::class)
-//                ->findOneBy(['id' => $id]);
-//            if( $type ){
-//                try {
-//                    foreach ($type->getChildren() as $t ){
-//                        $t->setRoot(null);
-//                    }
-//                    $this->getEntityManager()->flush();
-//                    $this->getEntityManager()->remove($type);
-//                    $this->getEntityManager()->flush();
-//                } catch (ForeignKeyConstraintViolationException $e ){
-//                    $this->getLoggerService()->error("Impossible de supprimer le type d'organisation: " . $e->getMessage());
-//                    return $this->getResponseInternalError("Erreur : ce type d'organisation est encore utilisé.");
-//                }
-//                return $this->getResponseOk("Type supprimé");
-//            } else {
-//                return $this->getResponseInternalError("Impossible de supprimer de type");
-//            }
-//
-//        }
-//        return $this->getResponseNotImplemented("En cours de développement");
         throw new \Exception("A FAIRE !!");
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1209,5 +1177,47 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getCountriesIso366Labels(): array
     {
         return $this->getCountries3166Repository()->getAllForSelects();
+    }
+
+    /**
+     * Affiche les doublons d'utilisation des rôles des organisations
+     * @return string[]
+     */
+    public function getOrganizationsRolesDoublonsPreview(): array
+    {
+        return array_merge(
+            $this->getOrganizationRoleRepository()->getRoleDoublonsActivity(),
+            $this->getOrganizationRoleRepository()->getRoleDoublonsProject()
+        );
+    }
+
+    /**
+     * Patch les doublons d'affectation des organisations aux activités/projet
+     * @return mixed
+     * @throws OscarException
+     */
+    public function organizationRoleDeDoublonnage()
+    {
+        // Récupération des données
+        $inActivity = $this->getOrganizationRoleRepository()->getRoleDoublonsActivity();
+        $toDelActivity = [];
+        foreach ($inActivity as $activity) {
+            $ids = json_decode($activity['activityorganization_id']);
+            array_splice($ids, 0, 1);
+            $toDelActivity = array_merge($toDelActivity, $ids);
+        }
+        $this->getLoggerService()->debug(implode(',', $toDelActivity));
+        $this->getOrganizationRoleRepository()->doublonDeleteActivityOrganizationBydIds($toDelActivity);
+
+        $inProject = $this->getOrganizationRoleRepository()->getRoleDoublonsProject();
+        $toDelProject = [];
+        foreach ($inProject as $activity) {
+            $ids = json_decode($activity['projectpartner_id']);
+            array_splice($ids, 0, 1);
+            $toDelProject = array_merge($toDelProject, $ids);
+        }
+        $this->getLoggerService()->debug(implode(',', $toDelProject));
+        $this->getOrganizationRoleRepository()->doublonDeleteProjectPartnerBydIds($toDelProject);
+        return count($toDelActivity) + count($toDelProject);
     }
 }

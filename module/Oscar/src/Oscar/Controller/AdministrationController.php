@@ -1381,18 +1381,31 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         /** @var Request $request */
         $request = $this->getRequest();
-        
+
         if ($roleId == null) {
             ////////////////////////////////////////////////////////////////////
             // GET : Liste des rôles
             if ($this->getHttpXMethod() == 'GET') {
-                try {
-                    $out = $this->getOrganizationService()->getOrganizationsRolesAndUsage();
-                    return $this->ajaxResponse($out);
-                } catch (\Exception $exception){
-                    $msg = "Impossible de charger les roles des organisations";
-                    $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
-                    return $this->jsonError($msg);
+                $action = $this->getRequest()->getQuery('a');
+                if ($action == 'doublon') {
+                    try {
+                        $out = $this->getOrganizationService()->getOrganizationsRolesDoublonsPreview();
+                        return $this->ajaxResponse($out);
+                    } catch (\Exception $exception) {
+                        $msg = "Impossible de charger les doublons des roles des organisations";
+                        $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                        return $this->jsonError($msg);
+                    }
+                }
+                else {
+                    try {
+                        $out = $this->getOrganizationService()->getOrganizationsRolesAndUsage();
+                        return $this->ajaxResponse($out);
+                    } catch (\Exception $exception) {
+                        $msg = "Impossible de charger les roles des organisations";
+                        $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                        return $this->jsonError($msg);
+                    }
                 }
             }
             ////////////////////////////////////////////////////////////////////
@@ -1427,7 +1440,16 @@ class AdministrationController extends AbstractOscarController implements UsePro
                                 return $this->getResponseInternalError($msg);
                             }
 
-                            return $this->getResponseNotImplemented();
+                        case 'doublons' :
+                            $this->getLoggerService()->info("Procédure de déboublonage");
+                            try {
+                                $this->getOrganizationService()->organizationRoleDeDoublonnage();
+                                return $this->getResponseOk();
+                            } catch (\Exception $exception) {
+                                $msg = "Impossible de migrer le role organisation";
+                                $this->getLoggerService()->critical("$msg : " . $exception->getMessage());
+                                return $this->getResponseInternalError($msg);
+                            }
 
                         // Erreur
                         default:
