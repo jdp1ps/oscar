@@ -25,14 +25,24 @@ class OrganizationRoleRepository extends EntityRepository
      */
     public function getRolesAndUsage() :array
     {
-        $sql = 'select r.id, count(a.id) as "in_activity", r.principal, count(p.id) as "in_project",  r.label 
+        $sql = 'select r.id, r.principal, r.label 
                 from organizationrole r
-                left join activityorganization a on a.roleobj_id = r.id
-                left join projectpartner p on p.roleobj_id = r.id
-                group by r.id order by r.label';
+                order by r.label';
 
         $stm = $this->getEntityManager()->getConnection()->prepare($sql);
-        return $stm->executeQuery()->fetchAllAssociative();
+        $roles = $stm->executeQuery()->fetchAllAssociative();
+
+        $countActivity = 'select count(distinct id) from activityorganization a where roleobj_id = :id';
+        $countProject = 'select count(distinct id) from projectpartner p where roleobj_id = :id';
+        $stmActivity = $this->getEntityManager()->getConnection()->prepare($countActivity);
+        $stmProject = $this->getEntityManager()->getConnection()->prepare($countProject);
+        foreach ($roles as &$role) {
+            $totalActivity = $stmActivity->executeQuery(['id'=>$role['id']])->fetchAssociative()['count'];
+            $totalProject = $stmProject->executeQuery(['id'=>$role['id']])->fetchAssociative()['count'];
+            $role['in_activity'] = $totalActivity;
+            $role['in_project'] = $totalProject;
+        }
+        return $roles;
     }
 
     public function getRoleByRoleIdOrCreate($roleId)
