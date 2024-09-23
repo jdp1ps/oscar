@@ -1019,20 +1019,21 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
      * la relance automatique et ayant des notifications non-lues.
      *
      * @param string $dateRef
+     * @param SymfonyStyle|null $io
+     * @throws \DateMalformedStringException
      */
-    public function mailPersonsWithUnreadNotification($dateRef = "", SymfonyStyle $io = null)
+    public function mailPersonsWithUnreadNotification(string $dateRef = "", SymfonyStyle $io = null): void
     {
         $logger = $this->getLoggerService();
 
         if ($io) {
             $log = function ($msg) use ($io, $logger) {
-                $logger->info($msg);
-                $io->writeln($msg);
+                $logger->debug($msg);
             };
         }
         else {
             $log = function ($msg) use ($logger) {
-                $logger->info($msg);
+                $logger->debug($msg);
             };
         }
 
@@ -1049,10 +1050,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             'Sun' => 'Dim',
         ];
 
-        // Fromat du cron
+        // Format du cron
         $cron = $rel[$date->format('D')] . $date->format('G');
-
-        $log("Notifications des inscrits à '$cron'");
 
         $authPersonNormalize = $this->getOscarConfigurationService()->getAuthPersonNormalize();
 
@@ -1061,7 +1060,9 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             $authPersonNormalize
         );
 
-        $log(sprintf(" %s personne(s) ont des notifications non-lues", count($persons)));
+        if( !count($persons) ){
+            return;
+        }
 
         /** @var Person $person */
         foreach ($persons as $person) {
@@ -1096,19 +1097,15 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $log(sprintf(" + >>> Envoi de mail pour %s", $text));
                     $this->mailNotificationsPerson($person);
                 }
-                else {
-                    $log(sprintf(' - %s n\'est pas inscrite à ce crénaux', $text));
-                }
             } catch (\Exception $e) {
-                $this->getLoggerService()->error("Impossible de récupérer l'authentification d'un personne.");
+                $this->getLoggerService()->error(
+                    "Impossible de calculer les notifications pour '$person'" . $e->getMessage());
             }
         }
     }
 
-    public function mailNotificationsPerson($person, $debug = true)
+    public function mailNotificationsPerson($person, $debug = true): void
     {
-        $this->getLoggerService()->debug("Calcule du mail pour '$person'");
-
         $configOscar = $this->getOscarConfigurationService();
 
         // Passage en FR
@@ -1146,8 +1143,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
 
         /////////////////////////// PAYEMENTS NON-FAIT
-
-
         $sending = false;
 
         $milestonesUndone_content = "";

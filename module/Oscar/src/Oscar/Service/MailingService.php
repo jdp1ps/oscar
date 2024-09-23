@@ -142,7 +142,7 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
         $logger = $this->getLoggerService();
 
         if( $send == false ){
-            // On test si le mail est dans l'exception
+            // On teste si le mail est dans l'exception
             if( count($exceptions) > 0 ){
                 $newTo = [];
                 foreach ($msg->getTo() as $mail=>$text) {
