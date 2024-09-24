@@ -72,7 +72,7 @@
     "src": "src/ActivityDocuments.js"
   },
   "src/ActivitySpentDetails.js": {
-    "file": "assets/activityspentdetails-74a4d8f7.js",
+    "file": "assets/activityspentdetails-74424ef4.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js",
@@ -82,7 +82,7 @@
     "src": "src/ActivitySpentDetails.js"
   },
   "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-228a166d.js",
+    "file": "assets/activityspentsynthesis-8c6fd827.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js",
@@ -101,7 +101,7 @@
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminRoleOrganization.js": {
-    "file": "assets/adminroleorganization-56a56b26.js",
+    "file": "assets/adminroleorganization-6f17d413.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js"
@@ -110,7 +110,7 @@
     "src": "src/AdminRoleOrganization.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-ec363a01.js",
+    "file": "assets/admintypedocument-3a920fad.js",
     "imports": [
       "_vendor.js",
       "_vendor6.js",
@@ -127,7 +127,7 @@
     "css": [
       "assets/DeclarersList-87a946a0.css"
     ],
-    "file": "assets/declarerslist-feb130df.js",
+    "file": "assets/declarerslist-2d53a19d.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js"

@@ -393,8 +393,10 @@ class PersonController extends AbstractOscarController
                 ],
                 $limit
             );
-        } catch (BadRequest400Exception $e) {
-            $error = "Expression de recherche incorrecte.";
+        } catch (\Exception $e) {
+            if( $this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') == 'json'){
+                return $this->jsonError($e->getMessage());
+            }
             throw $e;
         }
 

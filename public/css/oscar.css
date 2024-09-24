@@ -12929,7 +12929,7 @@ pre.alert-danger, pre.alert-info {
 .oscar-selector .options .option.closed {
   background: rgba(193, 210, 210, 0.5);
 }
-.oscar-selector .options .option.closed .fullname, .oscar-selector .options .option.closed .code {
+.oscar-selector .options .option.closed .fullname, .oscar-selector .options .option.closed .code, .oscar-selector .options .option.closed .displayname {
   text-decoration: line-through;
 }
 .oscar-selector .options .option.active {

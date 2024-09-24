@@ -2104,11 +2104,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     $filters['ids'] = $ids;
                 }
             } catch (\Exception $e) {
-                $msg = "Méthode de recherche des personnes non-disponible";
-                $this->getLoggerService()->error(
-                    $msg . " : " . $e->getMessage()
-                );
-                throw new OscarException($msg);
+                throw new OscarException($e->getMessage());
             }
         }
 

@@ -924,6 +924,7 @@ class Person implements ResourceInterface
             'login'                => $this->getLadapLogin(),
             'label'                => $this->getDisplayName(),
             'text'                 => $this->getDisplayName(),
+            'closed'                => !$this->isLdapActive(),
             'email'                => $this->getEmail(),
             'phone'                => $this->getPhone(),
             'mail'                 => $this->getEmail(),

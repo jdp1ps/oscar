@@ -1,33 +1,61 @@
 <template>
-  <div>
-    <div class="alert alert-danger" v-if="error">
-      {{ error }}
-      <button class="btn btn-default" @click="error = ''">Fermer</button>
+  <div class="oscar-selector">
+    <div class="input-group" style="position: relative;">
+      <div v-if="error" class="displayed-value text-danger" style="">
+        <i class="icon-attention-1"/>
+        {{ error }}
+        <i @click="error = ''" class="icon-cancel-circled-outline button-cancel-value"></i>
+      </div>
+      <div v-if="displayValue" class="displayed-value" style="">
+        {{ selectedLabel }}
+        <i v-if="selectedValue" @click="handlerUnselect" class="icon-cancel-circled-outline button-cancel-value"></i>
+      </div>
+      <span class="input-group-addon">
+            <i v-show="loading" class="icon-spinner animate-spin"></i>
+            <i v-show="!loading && noresult == false" class="icon-user"></i>
+            <i v-show="noresult" class="icon-user-times"></i>
+          </span>
+      <input type="text" v-model="expression"
+             placeholder="Rechercher une personne..."
+             class="form-control"/>
     </div>
-    <input type="text" v-model="expression" @keyup.enter.prevent="search"/>
-    <span v-show="loading">
-      <i class="icon-spinner animate-spin"></i>
-    </span>
-    <div class="choose"
-         style="position: absolute; z-index: 3000; max-height: 400px; overflow: hidden; overflow-y: scroll"
-         v-show="persons.length > 0 && showSelector">
-      <div class="choice" :key="c.id" v-for="c in persons" @click.prevent.stop="handlerSelectPerson(c.id)">
-        <div style="display: block; width: 50px; height: 50px">
+
+
+    <div class="options" v-show="showSelector && persons.length">
+      <header>
+        Résultat(s) : {{ persons.length }} /
+        <label for="hidder">
+          Afficher les comptes expirés
+          <input type="checkbox" id="hidder" value="on" v-model="displayClosed"/>
+        </label>
+      </header>
+      <div class="option" v-for="c, i in optionsFiltered"
+           @mouseover="highlightedIndex = i"
+           @click.prevent.stop="handlerSelectPerson(c.id)"
+           :id="'item_'+i"
+           :class="{
+                 'active': i == highlightedIndex,
+                 'selected': c.id == selectedValue,
+                 'closed': c.closed
+               }">
+        <div class="option-title">
+          <span style="display: inline-block; width: 50px; height: 50px">
           <img :src="'https://www.gravatar.com/avatar/'+c.mailMd5+'?s=50'" :alt="c.displayname" style="width: 100%"/>
+          </span>
+          <strong class="displayname" style="font-weight: 700; font-size: 1.1em; padding-left: 0">
+            {{ c.displayname }}
+            <em v-if="c.email" style="font-weight: 100; font-size: .9em"> ({{ c.email }})</em>
+          </strong>
         </div>
-        <div class="infos">
-          <strong style="font-weight: 700; font-size: 1.1em; padding-left: 0">{{ c.displayname }}</strong><br>
-          <span style="font-weight: 100; font-size: .8em; padding-left: 0"><i class="icon-location"></i>
-                        {{ c.affectation }}
-                        <span v-if="c.ucbnSiteLocalisation"> ~ {{ c.ucbnSiteLocalisation }}</span>
-                    </span><br>
-          <em style="font-weight: 100; font-size: .8em"><i class="icon-mail"></i>{{ c.email }}</em>
+        <div class="option-infos">
+          <span>
+              <i class="icon-location"></i>
+              {{ c.affectation }}
+              <span v-if="c.ucbnSiteLocalisation"> ~ {{ c.ucbnSiteLocalisation }}</span>
+          </span>
         </div>
       </div>
-    </div>
-    <div class="alert alert-danger" v-if="error">
-      <i class="icon-attention-1"></i>
-      {{ error }}
+
     </div>
   </div>
 
@@ -55,18 +83,41 @@ export default {
       selectedPerson: null,
       showSelector: true,
       request: null,
+      displayClosed: false,
+      highlightedIndex: null,
+      noresult: false,
       error: ""
     }
   },
+
+  computed: {
+    optionsFiltered() {
+      let opts = [];
+      if (this.displayClosed) {
+        return this.persons;
+      } else {
+        this.persons.forEach(item => {
+          if (!item.closed) {
+            opts.push(item);
+          }
+        });
+        return opts;
+      }
+    }
+  },
+
   watch: {
     expression(n, o) {
-
+      console.log('Expression changed');
       if (n.length >= 2) {
         if (tempo) {
+          console.log('Reset de la recherche');
           clearTimeout(tempo);
         }
         tempo = setTimeout(() => {
+        console.log('Déclenchement de la recherche');
           this.search();
+          clearTimeout(tempo);
         }, 500)
 
       }
@@ -75,7 +126,8 @@ export default {
   methods: {
     search() {
       this.loading = true;
-      axios.get(this.url + this.expression+'&f=json', {
+      this.noresult = false;
+      axios.get(this.url + this.expression + '&f=json', {
         before(r) {
           if (this.request) {
             this.request.abort();
@@ -84,19 +136,19 @@ export default {
         }
       }).then(
           ok => {
-            console.log(ok);
             this.persons = ok.data.datas;
             this.showSelector = true;
+            this.noresult = !this.persons || this.persons.length === 0;
+            this.error = this.persons.length + " résultat(s)";
           },
           ko => {
-            console.log(ko);
-            if( ko.status == 403 ){
+            this.persons = [];
+            this.noresult = false;
+            if (ko.status === 403) {
               this.error = "403 Unauthorized";
-            }
-            else if( ko.message ){
-              this.error = 'ERROR : ' + ko.message;
-            }
-            else if( ko.body ){
+            } else if (ko.response.data) {
+              this.error = 'ERROR : ' + ko.response.data;
+            } else if (ko.body) {
               this.error = ko.body;
             }
           }

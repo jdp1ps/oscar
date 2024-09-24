@@ -186,7 +186,16 @@ abstract class ElasticSearchEngine
 
         } catch (\Exception $exception) {
             $msg = "Erreur de recherche";
-            $this->loggerService->critical("$msg : " . $exception->getMessage());
+            $details = json_decode($exception->getMessage(), true);
+            $reason = $details['error']['root_cause'][0]['reason'];
+            if( $reason ){
+                $msg = "Cette recherche provoque une erreur";
+                if( strpos($reason,'Fail to parse query') >= 0 ){
+                    $msg = "Expression de recherche incorrecte";
+                }
+            }
+            $this->loggerService->error("$msg");
+            $this->loggerService->critical($exception->getMessage());
             throw new OscarException($msg);
         }
     }

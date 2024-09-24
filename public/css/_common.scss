@@ -5776,7 +5776,7 @@ pre.alert-danger, pre.alert-info {
       }
       &.closed {
         background: rgba(193, 210, 210, 0.5);
-        .fullname, .code {
+        .fullname, .code, .displayname {
           text-decoration: line-through;
         }
       }
