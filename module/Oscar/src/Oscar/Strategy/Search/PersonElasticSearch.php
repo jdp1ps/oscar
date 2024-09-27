@@ -30,6 +30,9 @@ class PersonElasticSearch extends ElasticSearchEngine implements IPersonISearchS
         return 'person';
     }
 
+    /**
+     * @throws OscarException
+     */
     public function add(Person $person):callable|array
     {
         $params = ['body' => []];
@@ -104,16 +107,84 @@ class PersonElasticSearch extends ElasticSearchEngine implements IPersonISearchS
        return $this->searchUpdate($person);
     }
 
-    public function getFieldsSearchedWeighted(): array
+    public function getFieldsSearchedWeighted(string $search): array
     {
         return [
-            'fullname3',
-            'lastname^7',
-            'firstname',
-            'email',
-            'location',
-            'affectation',
-            'connectors'
+            "bool" => [
+                "should"               => [
+                    [
+                        "match" => [
+                            "connectors" => [
+                                "query" => $search,
+                                "boost" => 6  // Favoriser les correspondances
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "lastname" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes
+                                "boost" => 5  // Favoriser les correspondances
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "fullname" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                                "boost" => 3
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "firstname" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                                "boost" => 2
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "email" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                                "boost" => 1
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "location" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "affectation" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "prefix" => [
+                            "lastname" => $search,  // Documents qui commencent par l'expression
+                        ]
+                    ],
+                    [
+                        "prefix" => [
+                            "connectors" => $search,  // Documents qui commencent par l'expression
+                        ]
+                    ]
+                ],
+                "minimum_should_match" => 1
+            ]
         ];
     }
 

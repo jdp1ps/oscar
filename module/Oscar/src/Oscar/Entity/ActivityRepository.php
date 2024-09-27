@@ -33,7 +33,8 @@ class ActivityRepository extends EntityRepository
 
         if (count($numerotations) == 0 || (in_array('null', $numerotations) && count($numerotations) == 1)) {
             $queryBuilder->where('a.numbers = \'a:0:{}\' OR a.numbers = \'N;\' OR a.numbers IS NULL');
-        } else {
+        }
+        else {
             $where = [];
             foreach ($numerotations as $num) {
                 $where[] = 'a.numbers LIKE \'%s:' . strlen($num) . ':"' . $num . '"%\'';
@@ -51,9 +52,9 @@ class ActivityRepository extends EntityRepository
      * Retourne les activités avec des jalons en retard.
      * @return array
      */
-    public function getActivitiesWithUndoneMilestones( string $dateRef = "") :array
+    public function getActivitiesWithUndoneMilestones(string $dateRef = ""): array
     {
-        if( !$dateRef ){
+        if (!$dateRef) {
             $dateRef = date('Y-m-d');
         }
 
@@ -85,6 +86,20 @@ class ActivityRepository extends EntityRepository
     {
         $queryBuilder = $this->baseQueryWithOrganizationOf()
             ->where('orga1.id IN (:organizations_ids) OR orga2.id IN (:organizations_ids)');
+
+        $queryBuilder->setParameters(
+            [
+                'organizations_ids' => $organisationsIds
+            ]
+        );
+        return array_map('current', $queryBuilder->getQuery()->getArrayResult());
+    }
+
+    public function getIdsProjectsWithOrganizations(array $organisationsIds): array
+    {
+        $queryBuilder = $this->baseQueryWithOrganizationOf()->select('DISTINCT pr.id')
+            ->where('orga1.id IN (:organizations_ids) OR orga2.id IN (:organizations_ids)')
+            ->andWhere('pr.id IS NOT NULL');
 
         $queryBuilder->setParameters(
             [
@@ -292,7 +307,7 @@ class ActivityRepository extends EntityRepository
 
         $parameters = [
             'idsOrganization' => $idsOrganization,
-            'principal' => $principal
+            'principal'       => $principal
         ];
 
         return array_map(
@@ -320,7 +335,7 @@ class ActivityRepository extends EntityRepository
             ->setParameters(
                 [
                     'personId' => "$personId",
-                    'date' => $date
+                    'date'     => $date
                 ]
             );
         return $qb->getQuery()->getResult();
@@ -341,7 +356,7 @@ class ActivityRepository extends EntityRepository
             ->setParameters(
                 [
                     'start' => $periodInfos['start'],
-                    'end' => $periodInfos['end'],
+                    'end'   => $periodInfos['end'],
                 ]
             );
         return $query->getQuery()->getResult();
@@ -362,7 +377,7 @@ class ActivityRepository extends EntityRepository
             ->setParameters(
                 [
                     'start' => $periodInfos['start'],
-                    'end' => $periodInfos['end'],
+                    'end'   => $periodInfos['end'],
                 ]
             );
         $activities = $query->getQuery()->getResult();
@@ -378,7 +393,8 @@ class ActivityRepository extends EntityRepository
             $error = "Impossible de charger l'activité $numOscar : " . $exception->getMessage();
             if ($throw) {
                 throw new OscarException($error);
-            } else {
+            }
+            else {
                 return null;
             }
         }
@@ -515,52 +531,6 @@ class ActivityRepository extends EntityRepository
      *
      * @return array
      */
-    public function getIdsForPersonAndOrWithRole(array $idPersons, int $idRole): array
-    {
-        $qb = $this->createQueryBuilder('a')
-            ->select('a.id')
-            ->leftJoin('a.persons', 'act_per')
-            ->leftJoin('a.project', 'prj')
-            ->leftJoin('prj.members', 'prj_pers');
-
-        // PERSONNES et ROLE
-        $parameters = [];
-
-        if(count($idPersons) > 0 && $idRole>0){
-            $parameters['person'] = $idPersons;
-            $qb->andWhere('(act_per.person IN(:person) AND act_per.roleObj = :role) OR (prj_pers.person IN(:person) AND prj_pers.roleObj = :role)');
-            $parameters['role'] = $idRole;
-            $parameters['person'] = $idPersons;
-        }
-        elseif (count($idPersons)>0){
-            $qb->andWhere('act_per.person IN(:person) OR prj_pers.person IN(:person)');
-            $parameters['person'] = $idPersons;
-        }
-        elseif ($idRole>0){
-            $qb->andWhere('act_per.roleObj = :role OR prj_pers.roleObj = :role');
-            $parameters['role'] = $idRole;
-        }
-        else {
-            throw new OscarException("Critère de requête incomplet");
-        }
-
-        return array_map(
-            'current',
-            $qb
-                ->getQuery()
-                ->setParameters($parameters)
-                ->getResult()
-        );
-    }
-
-    /**
-     * Retourne la liste des IDS des activités où la personne est impliquée (avec le role).
-     *
-     * @param int $idPerson ID de la personne (Person)
-     * @param int $idRole Si -1, ignoré
-     *
-     * @return array
-     */
     public function getIdsForPersonWithRole(int $idPerson, int $idRole): array
     {
         $qb = $this->createQueryBuilder('a')
@@ -579,7 +549,8 @@ class ActivityRepository extends EntityRepository
                 . 'OR (prj_pers.person = :person AND prj_pers.roleObj = :role)'
             );
             $parameters['role'] = $idRole;
-        } else {
+        }
+        else {
             $qb->where('act_per.person = :person OR prj_pers.person = :person');
         }
 
@@ -649,6 +620,9 @@ class ActivityRepository extends EntityRepository
         );
     }
 
+    /**
+     * @return integer[]
+     */
     public function getActivitiesIdsAll(): array
     {
         $qb = $this->createQueryBuilder('a')
@@ -711,7 +685,8 @@ class ActivityRepository extends EntityRepository
                 . 'OR (prj_org.organization = :organization AND prj_org.roleObj = :role)'
             );
             $parameters['role'] = $idRole;
-        } else {
+        }
+        else {
             $qb->where('act_org.organization = :organization OR prj_org.organization = :organization');
         }
 
@@ -754,5 +729,200 @@ class ActivityRepository extends EntityRepository
             ->innerJoin('a.workPackages', 'wp');
 
         return $qb;
+    }
+
+    /**
+     * @return integer[]
+     */
+    public function getProjectsIdsAll(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('p.id');
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * Retourne la liste des IDS des activités ayant un numoscar approchant.
+     *
+     * @param string $oscarNumLike
+     * @return integer[]
+     */
+    public function getActivityIdsByOscarNumLike(string $oscarNumLike): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('a.oscarNum LIKE :oscarnum')
+            ->setParameter('oscarnum', $oscarNumLike);
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * Retourne la liste des IDS des projets ayant l'activité correspondante
+     *
+     * @param string $oscarNumLike
+     * @return integer[]
+     */
+    public function getProjectIdsByOscarNumLike(string $oscarNumLike): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT p.id')
+            ->from(Project::class, 'p')
+            ->innerJoin('p.grants', 'a')
+            ->where('a.oscarNum LIKE :oscarnum')
+            ->setParameter('oscarnum', $oscarNumLike);
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * @param string $pfi
+     * @return integer[]
+     */
+    public function getActivityIdsByPFI(string $pfi): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT p.id')
+            ->from(Project::class, 'p')
+            ->innerJoin('p.grants', 'a')
+            ->where('LOWER(a.codeEOTP) = LOWER(:pfi)')
+            ->setParameter('pfi', $pfi);
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    /**
+     * @param string $pfi
+     * @return integer[]
+     */
+    public function getProjectIdsByPFI(string $pfi): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->where('LOWER(a.codeEOTP) = LOWER(:pfi)')
+            ->setParameter('pfi', $pfi);
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Permet d'obtenir la liste des IDS (Activités/Projets) ou la personne et/ou le rôle est impliqué.
+     *
+     * @param array $idPersons
+     * @param int $idRole
+     * @return QueryBuilder
+     * @throws OscarException
+     */
+    protected function getQueryIdsForPersonOrWithRole(array $idPersons, int $idRole): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.persons', 'act_per')
+            ->leftJoin('a.project', 'prj')
+            ->leftJoin('prj.members', 'prj_pers');
+
+        // PERSONNES et ROLE
+        $parameters = [];
+
+        if (count($idPersons) > 0 && $idRole > 0) {
+            $qb->andWhere(
+                '(act_per.person IN(:person) AND act_per.roleObj = :role) OR (prj_pers.person IN(:person) AND prj_pers.roleObj = :role)'
+            );
+            $parameters['role'] = $idRole;
+            $parameters['person'] = $idPersons;
+        }
+        elseif (count($idPersons) > 0) {
+            $qb->andWhere('act_per.person IN(:person) OR prj_pers.person IN(:person)');
+            $parameters['person'] = $idPersons;
+        }
+        elseif ($idRole > 0) {
+            $qb->andWhere('act_per.roleObj = :role OR prj_pers.roleObj = :role');
+            $parameters['role'] = $idRole;
+        }
+        else {
+            throw new OscarException("Critère de requête incomplet");
+        }
+
+        $qb->setParameters($parameters);
+
+        return $qb;
+    }
+
+    /**
+     * @param array $idPersons
+     * @param int $idRole
+     * @return array
+     * @throws OscarException
+     */
+    public function getIdsForPersonAndOrWithRole(array $idPersons, int $idRole): array
+    {
+        return array_map(
+            'current',
+            $this->getQueryIdsForPersonOrWithRole($idPersons, $idRole)->select('a.id')
+                ->getQuery()->getResult()
+        );
+    }
+
+    /**
+     * @param $idPersons
+     * @param int $idRole
+     * @return array
+     * @throws OscarException
+     */
+    public function getIdsProjectsForPersonAndOrWithRole($idPersons, int $idRole): array
+    {
+        return array_map(
+            'current',
+            $this->getQueryIdsForPersonOrWithRole($idPersons, $idRole)->select('DISTINCT prj.id')
+                ->getQuery()->getResult()
+        );
+    }
+
+    public function getIdsProjectsForActivity(?array $ids): array
+    {
+        if( $ids ){
+            $qb = $this->getEntityManager()->createQueryBuilder()
+                ->select('DISTINCT p.id')
+                ->from(Project::class, 'p')
+                ->innerJoin('p.grants', 'a')
+                ->where('a.id IN(:ids)')
+                ->setParameter('ids', $ids);
+
+            return array_map(
+                'current',
+                $qb
+                    ->getQuery()
+                    ->getResult()
+            );
+        } else {
+            return [];
+        }
     }
 }

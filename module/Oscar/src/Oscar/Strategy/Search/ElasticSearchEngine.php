@@ -11,25 +11,34 @@ use Oscar\Service\LoggerService;
 
 abstract class ElasticSearchEngine
 {
+
+    const VARIANT_RAPID_SEARCH_TEXT = 'VARIANT_RAPID_SEARCH_TEXT';
+    const VARIANT_ELASTIC_QUERY = 'VARIANT_ELASTIC_QUERY';
+
     private ?Client $elasticSearchClient = null;
+
     private array $hosts;
 
     private Logger $loggerService;
 
+    private string $searchVariant;
+
     /**
      * @param array $hosts
      * @param Logger $logger
+     * @param string $search_variant
      */
-    public function __construct(array $hosts, Logger $logger)
+    public function __construct(array $hosts, Logger $logger, string $search_variant = self::VARIANT_RAPID_SEARCH_TEXT)
     {
         $this->hosts = $hosts;
         $this->loggerService = $logger;
+        $this->searchVariant = $search_variant;
     }
 
     //
     abstract public function getIndexableDatas(mixed $object): array;
 
-    abstract public function getFieldsSearchedWeighted(): array;
+    abstract public function getFieldsSearchedWeighted(string $search): array;
 
     abstract public function getIndex(): string;
 
@@ -92,7 +101,11 @@ abstract class ElasticSearchEngine
      */
     public function rebuildIndex(array $items): void
     {
-        $this->resetIndex();
+        $this->loggerService->debug('[elasticsearch] Rebuilding index...');
+        try {
+            $this->resetIndex();
+        } catch (\Exception $exception) {
+        }
         $client = $this->getClient();
 
         try {
@@ -138,20 +151,21 @@ abstract class ElasticSearchEngine
      */
     public function getParamsQuery(string $textSearch, int $limit = 10000): array
     {
-        return [
+        $search = trim($textSearch);
+
+
+        $query = [
             'index' => $this->getIndex(),
             'type'  => $this->getType(),
             'body'  => [
                 'size'  => $limit,
-                'query' => [
-                    'query_string' => [
-                        'query'     => $textSearch,
-                        'fields'    => $this->getFieldsSearchedWeighted(),
-                        "fuzziness" => "auto"
-                    ]
-                ]
+                "query" => $this->getFieldsSearchedWeighted($search)
             ]
         ];
+
+        $this->loggerService->debug("----query elastic : \n" . json_encode($query['body']['query']) ."\n---- ");
+
+        return $query;
     }
 
     /**
@@ -162,41 +176,13 @@ abstract class ElasticSearchEngine
         $this->loggerService->info("Search '$search' in " . $this->getIndex());
         $client = $this->getClient();
         try {
-            $search = trim($search);
-            // TRAITEMENT de la recherche
-            if (strpos($search, 'AND') || strpos($search, 'OR') || strpos($search, '"')) {
-            }
-            else {
-                $split = explode(" ", $search);
-                if (count($split) == 1) {
-                    $search = sprintf('%s OR %s', $split[0], $split[0] . '*');
-                }
-                else {
-                    $assembly = [];
-                    foreach ($split as $term) {
-                        $assembly[] = trim($term);
-                    }
-                    $search = implode(' AND ', $assembly);
-                }
-            }
-
             $params = $this->getParamsQuery($search, $limit);
-
-            return $client->search($params);
-
-        } catch (\Exception $exception) {
-            $msg = "Erreur de recherche";
-            $details = json_decode($exception->getMessage(), true);
-            $reason = $details['error']['root_cause'][0]['reason'];
-            if( $reason ){
-                $msg = "Cette recherche provoque une erreur";
-                if( strpos($reason,'Fail to parse query') >= 0 ){
-                    $msg = "Expression de recherche incorrecte";
-                }
-            }
-            $this->loggerService->error("$msg");
-            $this->loggerService->critical($exception->getMessage());
-            throw new OscarException($msg);
+            $ids = $client->search($params);
+            return $ids;
+        } catch (\Throwable $exception) {
+            $ex = ElasticSearchEngineException::getInstance($exception);
+            $this->loggerService->error($ex->getMessage());
+            throw new OscarException($ex->getMessagePublic());
         }
     }
 
@@ -205,15 +191,27 @@ abstract class ElasticSearchEngine
      * @return array Liste des IDs
      * @throws OscarException
      */
-    public function search(string $search): array
+    public function search(string $search, bool $withIdsProjects = false): array
     {
         $response = $this->searchRaw($search);
 
         $ids = [];
+        $idsProjects = [];
         if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
                 $ids[] = intval($hit["_id"]);
+                $idProject = intval($hit['_source']["project_id"]);
+                if( $withIdsProjects && !in_array($idProject, $idsProjects) ){
+                    $idsProjects[] = $idProject;
+                }
             }
+        }
+
+        if( $withIdsProjects ){
+            return [
+                'activity_ids' => $ids,
+                'project_ids' => $idsProjects
+            ];
         }
 
         return $ids;
@@ -224,6 +222,7 @@ abstract class ElasticSearchEngine
      *
      * @param $id
      * @return callable|array
+     * @throws OscarException
      */
     public function searchDelete(int $id): callable|array
     {
@@ -253,6 +252,7 @@ abstract class ElasticSearchEngine
         try {
             return $this->getClient()->update($params);
         } catch (Missing404Exception $e) {
+            $this->loggerService->warning("Item à mettre à jour absent " . $e->getMessage());
             return $this->addItem($item);
         } catch (\Exception $e) {
             throw new OscarException(
@@ -271,6 +271,7 @@ abstract class ElasticSearchEngine
      */
     public function resetIndex(): array
     {
+        $this->loggerService->debug('[elastic] reset index...');
         $params = [
             'index' => $this->getIndex()
         ];
@@ -280,9 +281,7 @@ abstract class ElasticSearchEngine
         try {
             return $client->indices()->delete($params);
         } catch (\Exception $e) {
-            $msg = "Impossible de réinitialiser le moteur de recherche";
-            $this->loggerService->critical("$msg : " . $e->getMessage());
-            throw new OscarException($msg);
+            throw ElasticSearchEngineException::getInstance($e->getMessage());
         }
     }
 

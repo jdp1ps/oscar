@@ -582,11 +582,24 @@
                 Actualiser</button>
         </nav>
     </form>
-
+<?php /**
+ * 'page'                   => $page,
+ * 'totalResult'            => $totalResult,
+ * 'totalPages'             => $totalPages,
+ *
+*
+ ****/ ?>
     <div id="activities" style="opacity: 0">
-    <?php if($activities && count($activities) > 0): ?>
-        <h3 class="text-center"><?= count($activities) ?> résultat(s)</h3>
-
+    <h3 class="text-center">
+        <?php if($totalResult == 0): ?>
+        Aucun résultat
+        <?php else: ?>
+        <strong><?= $totalResult ?></strong> résultat(s)</h3>
+        <?php endif; ?>
+    <?php if($activities && $totalResult > 0): ?>
+        <div>
+            <?php echo $this->pagerSimple($totalResult, $page) ?>
+        </div>
 
     <?php /** @var \Oscar\Entity\Activity $contract **/ foreach ($activities as $activity):
         if( $projectview == true ) {
@@ -595,13 +608,6 @@
             echo $this->partial('/oscar/project-grant/item-list.phtml', ['activity' => $activity]);
         }
         endforeach; /**/?>
-    <?php
-    if( stripos($_SERVER['REQUEST_URI'], '?') === false ){
-        $url = $_SERVER['REQUEST_URI'].'?';
-    } else {
-        $url = $_SERVER['REQUEST_URI'];
-    }
-    echo $this->pager($activities, preg_replace("/&page=[0-9]*/", '', $url) . '&page=%s') ?>
     </div>
     <?php if ($this->grant(\Oscar\Provider\Privileges::ACTIVITY_EXPORT)): ?>
         <nav class="btn-group card" id="bottom-flash-menu">

@@ -30,14 +30,14 @@ class UnicaenDoctrinePaginator implements \Countable, \IteratorAggregate
     private $query;
 
     /**
-     * @return QueryBuilder
+     * @return Query|QueryBuilder
      */
     public function getQueryBuilder()
     {
         return $this->query;
     }
 
-    function __construct(QueryBuilder $qb, $currentPage = 1, $resultsByPage = 50, Query $countQuery = null)
+    function __construct(Query|QueryBuilder $qb, $currentPage = 1, $resultsByPage = 50, Query $countQuery = null)
     {
         $this->currentPage = $currentPage;
         $this->resultsByPage = $resultsByPage;

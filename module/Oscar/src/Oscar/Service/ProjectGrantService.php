@@ -1898,7 +1898,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
     public function searchIndex_rebuild()
     {
-        $this->searchIndex_reset();
         $activities = $this->getEntityManager()->getRepository(Activity::class)->findAll();
         $this->getLoggerService()->info('[elasic] Reindex ' . count($activities) . ' activitie(s)');
         return $this->getSearchEngineStrategy()->rebuildIndex($activities);
@@ -1944,9 +1943,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $searchStrategy;
     }
 
-    public function search($what)
+    public function search($what, bool $withIdsProjects = false)
     {
-        return $this->getSearchEngineStrategy()->search($what);
+        return $this->getSearchEngineStrategy()->search($what, $withIdsProjects);
     }
 
     public function searchProject($what)

@@ -139,7 +139,6 @@ export default {
             this.persons = ok.data.datas;
             this.showSelector = true;
             this.noresult = !this.persons || this.persons.length === 0;
-            this.error = this.persons.length + " résultat(s)";
           },
           ko => {
             this.persons = [];

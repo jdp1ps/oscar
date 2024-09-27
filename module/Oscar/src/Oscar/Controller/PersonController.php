@@ -34,6 +34,7 @@ use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\TimesheetService;
+use Oscar\Strategy\Search\PersonElasticSearch;
 use Oscar\Traits\UseNotificationService;
 use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UsePersonService;
@@ -292,7 +293,6 @@ class PersonController extends AbstractOscarController
 
         $search = $this->params()->fromQuery('q', '');
 
-
         // On test les accès
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)) {
             $allow = true;
@@ -310,9 +310,7 @@ class PersonController extends AbstractOscarController
                         OscarFormatterConst::FORMAT_ARRAY_OBJECT);
                         return new JsonModel($persons);
                         break;
-
                 }
-
             }
             else {
                 $allow = $this->getOscarUserContextService()->hasOneOfPrivilegesInAnyRoles(
@@ -389,6 +387,7 @@ class PersonController extends AbstractOscarController
                     'leader'       => $leader,
                     'declarers'    => $declarers,
                     'np1'          => $np1,
+                    'search_variant' => PersonElasticSearch::VARIANT_RAPID_SEARCH_TEXT,
                     'filteractive' => $filteractive
                 ],
                 $limit

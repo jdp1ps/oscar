@@ -113,26 +113,6 @@ class OscarActivitySearchCommand extends OscarAdvancedCommandAbstract
             $this->getIO()->writeln(sprintf("Résultats affichés : <bold>%s</bold> (%s ms)",
                                             $result['total_page'], $result['total_page_time']));
 
-
-//            $output = [
-//                'version' => OscarVersion::getBuild(),
-//                'date' => (new \DateTime())->format('Y-m-d H:i:s'),
-//                'total' => 0,
-//                'total_page' => 0,
-//                'time_result' => 0,
-//                'time_total' => 0,
-//                'page' => $page,
-//                'result_by_page' => $resultByPage,
-//                'options' => json_encode($options),
-//                'search_text' => '',
-//                'search_text_total' => 0,
-//                'search_text_error' => '',
-//                'search_text_time' => 0,
-//                'filters_infos' => [],
-//                'activities' => [],
-//            ];
-
-
         } catch (Exception $e) {
             return $this->finalFatalError($e);
         }

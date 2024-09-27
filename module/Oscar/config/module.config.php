@@ -644,6 +644,7 @@ return array(
             'keyvalue' => \Oscar\View\Helpers\KeyValueHelper::class,
             'moment' => \Oscar\View\Helpers\Moment::class,
             'pager' => UnicaenDoctrinePaginatorHelper::class,
+            'pagerSimple' => \Oscar\View\Helpers\UnicaenPaginatorHelper::class,
             'slugify' => \Oscar\View\Helpers\Slugify::class,
             'strEmpty' => \Oscar\View\Helpers\StrEmpty::class,
             'unAllowed' => \Oscar\View\Helpers\UnAllowed::class,

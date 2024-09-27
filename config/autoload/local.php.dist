@@ -9,6 +9,8 @@ if( file_exists($pathSocketConfig = __DIR__.'/../../socket/config.json') ){
     $socket = $socketConf['socket'];
 }
 
+$param_elastic_host = "localhost";
+
 return array(
     'view_manager' => array(
         'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',

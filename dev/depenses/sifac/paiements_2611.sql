@@ -32,9 +32,9 @@ from sapsr3.v_fmifi, SAPSR3.LFA1
 where
 ( SAPSR3.v_FMIFI.LIFNR=SAPSR3.LFA1.LIFNR(+) )
 AND
-sapsr3.v_fmifi.measure = '&pfi_name'
+sapsr3.v_fmifi.measure = '011C055C'
 AND sapsr3.v_fmifi.rldnr='9A' 
-AND sapsr3.v_fmifi.MANDT='500'
+AND sapsr3.v_fmifi.MANDT='430'
 AND sapsr3.v_fmifi.BTART='0250'
 -- on conserve seulement compteBudgetaire FG PG* IG RG*
 AND ( sapsr3.v_fmifi.fipex IN ('FG', 'IG') OR substr( sapsr3.v_fmifi.fipex , 1, 2) IN ('PG', 'RG') )

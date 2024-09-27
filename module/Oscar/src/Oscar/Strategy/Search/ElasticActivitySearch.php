@@ -20,8 +20,9 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
     /**
      * @param Activity $activity
      * @return array|callable
+     * @throws OscarException
      */
-    public function addActivity(Activity $activity) :array|callable
+    public function addActivity(Activity $activity): array|callable
     {
         return $this->addItem($activity);
     }
@@ -31,11 +32,12 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
      * @return array
      * @throws OscarException
      */
-    public function getIndexableDatas(mixed $object) :array
+    public function getIndexableDatas(mixed $object): array
     {
         if (!$object instanceof Activity) {
             throw new OscarException("L'objet indexé doit être une activité");
-        } else {
+        }
+        else {
             $activity = $object;
         }
 
@@ -59,21 +61,21 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
         }
 
         return [
-            'label' => $activity->getLabel(),
-            'description' => $activity->getDescription(),
-            'saic' => $activity->getCentaureId(),
+            'label'        => $activity->getLabel(),
+            'description'  => $activity->getDescription(),
+            'saic'         => $activity->getCentaureId(),
             'numerotation' => $activity->getNumbers(),
-            'oscar' => $activity->getOscarNum(),
+            'oscar'        => $activity->getOscarNum(),
             'activitytype' => $activity->getActivityType() ? (string)$activity->getActivityType() : '',
-            'numbers' => implode(" ", $activity->getNumbersValues()),
-            'eotp' => $activity->getCodeEOTP(),
-            'acronym' => $activity->getAcronym(),
-            'activity_id' => $activity->getId(),
-            'disciplines' => $activity->getDisciplinesArray(),
-            'members' => $members,
-            'partners' => $partners,
-            'project_id' => $project_id,
-            'project' => $project_body,
+            'numbers'      => implode(" ", $activity->getNumbersValues()),
+            'eotp'         => $activity->getCodeEOTP(),
+            'acronym'      => $activity->getAcronym(),
+            'activity_id'  => $activity->getId(),
+            'disciplines'  => $activity->getDisciplinesArray(),
+            'members'      => $members,
+            'partners'     => $partners,
+            'project_id'   => $project_id,
+            'project'      => $project_body,
         ];
     }
 
@@ -81,9 +83,9 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
     {
         $params = [
             'index' => $this->getIndex(),
-            'type' => $this->getType(),
-            'body' => [
-                'size' => 10000,
+            'type'  => $this->getType(),
+            'body'  => [
+                'size'  => 10000,
                 'query' => [
                     'query_string' => [
                         'query' => sprintf('%s OR %s*', $what, $what)
@@ -104,27 +106,148 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
         return $ids;
     }
 
-    public function getFieldsSearchedWeighted(): array
+    public function getFieldsSearchedWeighted(string $search): array
     {
-        return [
-            'acronym^10',
-            'numerotation^9',
-            'eotp^9',
-            'numbers^9',
-            'oscar^9',
-            'label^7',
-            'description^2',
-            'project^5',
-            'disciplines^5',
-            'activitytype^2',
-            'partners^5',
-            'members^5'
+        $words = explode(" ", $search);
+
+        $wordsNbr = count($words);
+        $andQuery = implode(" AND ", $words);
+
+
+        $query = [
+            "bool" => [
+                "should"               => [
+
+                ],
+                "minimum_should_match" => 1
+            ]
         ];
+
+        // TODO si plusieurs mots, ajouter une règle spécifique
+        if ($wordsNbr > 1) {
+            $wordsUpdated = [];
+            foreach ($words as $word) {
+                $lng = (int)(strlen($word) / 4);
+                $wordsUpdated[] = $word . ($lng > 0 ? "~$lng" : "");
+            }
+            $wordsUpdatedAndQuery = implode(" AND ", $wordsUpdated);
+            $query["bool"]["should"][] = [
+                "query_string" => [
+                    "query" => $wordsUpdatedAndQuery,
+                    "fields" => [
+                        'acronym^10',
+                        'numerotation^9',
+                        'eotp^9',
+                        'numbers^9',
+                        'oscar^9',
+                        'label~1^7',
+                        'description^2',
+                        'project^7',
+                        'disciplines^5',
+                        'activitytype^7',
+                        'partners^5',
+                        'members^5'
+                    ]
+                ]
+                ];
+        }
+        else {
+            $query["bool"]["should"] = [
+                [
+                    "query_string" => [
+                        "query"  => $andQuery,
+                        "fields" => ["label^7", "description2"]
+                    ]
+                ],
+                [
+                    "match" => [
+                        "discipline" => [
+                            "query"     => $search,
+                            "boost"     => 5
+                        ]
+                    ]
+                ],
+                [
+                    "match" => [
+                        "acronym" => [
+                            "query"     => $search,
+                            "boost"     => 10
+                        ]
+                    ]
+                ],
+                [
+                    "match" => [
+                        "description" => [
+                            "query"     => $search,
+                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                        ]
+                    ]
+                ],
+                [
+                    "match" => [
+                        "activitytype" => [
+                            "query"     => $search,
+                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            "boost"     => 2
+                        ]
+                    ]
+                ],
+                [
+                    "match" => [
+                        "project" => [
+                            "query"     => $search,
+                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            "boost"     => 2
+                        ]
+                    ]
+                ],
+
+                [
+                    "match" => [
+                        "partners" => [
+                            "query" => $search
+                        ]
+                    ]
+                ],
+
+                [
+                    "match" => [
+                        "members" => [
+                            "query" => $search
+                        ]
+                    ]
+                ],
+
+//                [
+//                    "prefix" => [
+//                        "acronym" => $search,  // Documents qui commencent par l'expression
+//                    ]
+//                ],
+//                [
+//                    "prefix" => [
+//                        "numerotation" => $search,  // Documents qui commencent par l'expression
+//                    ]
+//                ],
+//                [
+//                    "prefix" => [
+//                        "eotp" => $search,  // Documents qui commencent par l'expression
+//                    ]
+//                ]
+//                ,
+//                [
+//                    "prefix" => [
+//                        "oscar" => $search,  // Documents qui commencent par l'expression
+//                    ]
+//                ]
+            ];
+        }
+
+        return $query;
     }
 
     public function getIndex(): string
     {
-       return 'oscar-activity';
+        return 'oscar-activity';
     }
 
     public function getType(): string
@@ -132,11 +255,17 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
         return 'activity';
     }
 
+    /**
+     * @throws OscarException
+     */
     public function deleteActivity(int $id): callable|array
     {
         return $this->searchDelete($id);
     }
 
+    /**
+     * @throws OscarException
+     */
     public function updateActivity(Activity $activity): callable|array
     {
         return $this->searchUpdate($activity);

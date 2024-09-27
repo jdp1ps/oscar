@@ -1,0 +1,38 @@
+{
+  "error": {
+    "root_cause": [
+      {
+        "type": "query_shard_exception",
+        "reason": "Failed to parse query [CERTIC OR]",
+        "index_uuid": "1XidwS3rTCWXJjNVECdr4g",
+        "index": "oscar-activity"
+      }
+    ],
+    "type": "search_phase_execution_exception",
+    "reason": "all shards failed",
+    "phase": "query",
+    "grouped": true,
+    "failed_shards": [
+      {
+        "shard": 0,
+        "index": "oscar-activity",
+        "node": "NTKUB3gdQROPaPYCUsb1QA",
+        "reason": {
+          "type": "query_shard_exception",
+          "reason": "Failed to parse query [CERTIC OR]",
+          "index_uuid": "1XidwS3rTCWXJjNVECdr4g",
+          "index": "oscar-activity",
+          "caused_by": {
+            "type": "parse_exception",
+            "reason": "Cannot parse 'CERTIC OR': Encountered \"<EOF>\" at line 1, column 9.\nWas expecting one of:\n    <NOT> ...\n    \"+\" ...\n    \"-\" ...\n    <BAREOPER> ...\n    \"(\" ...\n    \"*\" ...\n    <QUOTED> ...\n    <TERM> ...\n    <PREFIXTERM> ...\n    <WILDTERM> ...\n    <REGEXPTERM> ...\n    \"[\" ...\n    \"{\" ...\n    <NUMBER> ...\n    <TERM> ...\n    \"*\" ...\n    ",
+            "caused_by": {
+              "type": "parse_exception",
+              "reason": "Encountered \"<EOF>\" at line 1, column 9.\nWas expecting one of:\n    <NOT> ...\n    \"+\" ...\n    \"-\" ...\n    <BAREOPER> ...\n    \"(\" ...\n    \"*\" ...\n    <QUOTED> ...\n    <TERM> ...\n    <PREFIXTERM> ...\n    <WILDTERM> ...\n    <REGEXPTERM> ...\n    \"[\" ...\n    \"{\" ...\n    <NUMBER> ...\n    <TERM> ...\n    \"*\" ...\n    "
+            }
+          }
+        }
+      }
+    ]
+  },
+  "status": 400
+}
