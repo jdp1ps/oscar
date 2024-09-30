@@ -568,6 +568,7 @@ return array(
             \Oscar\Service\PersonService::class => \Oscar\Service\PersonServiceFactory::class,
             \Oscar\Service\ProjectService::class => \Oscar\Service\ProjectServiceFactory::class,
             \Oscar\Service\ProjectGrantService::class => \Oscar\Service\ProjectGrantServiceFactory::class,
+            \Oscar\Service\ProjectGrantSearchService::class => \Oscar\Service\ProjectGrantSearchServiceFactory::class,
             \Oscar\Service\TimesheetService::class => \Oscar\Service\TimesheetServiceFactory::class,
             \Oscar\Service\SessionService::class => \Oscar\Service\SessionServiceFactory::class,
             \Oscar\Service\SpentService::class => \Oscar\Service\SpentServiceFactory::class,
@@ -631,6 +632,7 @@ return array(
         ),
     ),
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Aide de vue (Helper)
     'view_helpers' => [
         'invokables' => [

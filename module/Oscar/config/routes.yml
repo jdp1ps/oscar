@@ -964,13 +964,6 @@ contract:
         defaults:
           action: api
 
-    apiui:
-      type: segment
-      options:
-        route: /api-ui
-        defaults:
-          action: apiUi
-
     pcru-list:
       type: segment
       options:
