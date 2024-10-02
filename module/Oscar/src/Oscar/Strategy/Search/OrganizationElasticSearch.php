@@ -84,21 +84,111 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
         ];
     }
 
-    public function getFieldsSearchedWeighted(): array
+    public function getFieldsSearchedWeighted(string $search): array
     {
         return [
-            'code^7',
-            'shortname^9',
-            'fullname^5',
-            'description',
-            'email',
-            'city',
-            'siret',
-            'country',
-            'connectors',
-            'zipcode',
-            'persons',
-            'activities'
+            "bool" => [
+                "should"               => [
+                    [
+                        "match" => [
+                            "code" => [
+                                "query" => $search,
+                                "boost" => 9  // Favoriser les correspondances
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "shortname" => [
+                                "query" => $search,
+                                "boost" => 9  // Favoriser les correspondances
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "fullname" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes
+                                "boost" => 5  // Favoriser les correspondances
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "description" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "email" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO"
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "city" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "siret" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "country" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "connector" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "zipcode" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "persons" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                    [
+                        "match" => [
+                            "activities" => [
+                                "query" => $search,
+                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                            ]
+                        ]
+                    ],
+                ],
+                "minimum_should_match" => 1
+            ]
         ];
     }
 

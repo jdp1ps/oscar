@@ -881,11 +881,11 @@ class ActivityRepository extends EntityRepository
      * @return array
      * @throws OscarException
      */
-    public function getIdsForPersonAndOrWithRole(array $idPersons, int $idRole): array
+    public function getIdsForPersonAndOrWithRole(array $idPersons, int $idRole, bool $not = false): array
     {
         return array_map(
             'current',
-            $this->getQueryIdsForPersonOrWithRole($idPersons, $idRole)->select('a.id')
+            $this->getQueryIdsForPersonOrWithRole($idPersons, $idRole, $not)->select('a.id')
                 ->getQuery()->getResult()
         );
     }
@@ -905,9 +905,14 @@ class ActivityRepository extends EntityRepository
         );
     }
 
+    /**
+     * Retourne les IDs des projets pour la liste des IDs d'activité donnée.
+     * @param array|null $ids
+     * @return array
+     */
     public function getIdsProjectsForActivity(?array $ids): array
     {
-        if( $ids ){
+        if ($ids) {
             $qb = $this->getEntityManager()->createQueryBuilder()
                 ->select('DISTINCT p.id')
                 ->from(Project::class, 'p')
@@ -921,8 +926,149 @@ class ActivityRepository extends EntityRepository
                     ->getQuery()
                     ->getResult()
             );
-        } else {
+        }
+        else {
             return [];
         }
+    }
+
+    /**
+     * Retourne la liste des IDS inverse
+     * @param array $ids
+     * @return array
+     */
+    public function getIdsInverse(array $ids): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT c.id')
+            ->from(Activity::class, 'c');
+        if (count($ids) > 0) {
+            $qb->where('c.id NOT IN(:ids)')
+                ->setParameter('ids', $ids);
+        }
+
+        return array_map('current', $qb->getQuery()->getResult());
+    }
+
+    public function getIdsAmount(mixed $min, mixed $max)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT c.id')
+            ->from(Activity::class, 'c');
+
+        $parameters = [];
+
+        if ($min !== null) {
+            $qb->where('c.amount >= :min');
+            $parameters['min'] = $min;
+        }
+
+        if ($max !== null) {
+            $qb->where('c.amount >= :max');
+            $parameters['max'] = $max;
+        }
+
+
+        return array_map('current', $qb->getQuery()->setParameters($parameters)->getResult());
+    }
+
+    /**
+     * Liste des ID avec une des disciplines
+     * @param array $disciplines
+     * @return array
+     */
+    public function getIdsDisciplines(array $disciplines): array
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT c.id')
+            ->from(Activity::class, 'c')
+            ->innerJoin('c.disciplines', 'd')
+            ->where('d IN (:disciplines)')
+            ->setParameter('disciplines', $disciplines);
+        return array_map('current', $qb->getQuery()->getResult());
+    }
+
+    /**
+     * @param int $milestoneId (DateType->id)
+     * @param array|null $progression
+     * @return array
+     */
+    public function getIdsMilestone(int $milestoneId, ?array $progression): array
+    {
+        $q = $this->createQueryBuilder('c')
+            ->select('c.id')
+            ->innerJoin('c.milestones', 'm')
+            ->where('m.type = :jalonId');
+
+        if (is_array($progression) && count($progression) > 0) {
+            $clause = 'm.finished IN(:progression)';
+
+            if (in_array('0', $progression)) {
+                $clause .= ' OR m.finished IS NULL';
+            }
+            $q->andWhere($clause)
+                ->setParameter('progression', $progression);
+        }
+
+        $q->setParameter('jalonId', $milestoneId);
+
+        $activities = $q->getQuery()->getResult();
+        return array_map('current', $activities);
+    }
+
+    /**
+     * @param string $field
+     * @param mixed $value1
+     * @param mixed $value2
+     * @return integer[]
+     * @throws \Exception
+     */
+    public function getIdsByDate(string $field, mixed $value1, mixed $value2): array
+    {
+        if (!$value1 && !$value2) {
+            throw new \Exception("Aucune date à filtrer");
+        }
+        $q = $this->createQueryBuilder('c')
+            ->select('c.id');
+
+        $parameters = [];
+
+        if ($value1) {
+            $q->andWhere('c.' . $field . ' >= :from');
+            $parameters['from'] = $value1;
+        }
+        if ($value2) {
+            $q->andWhere('c.' . $field . ' <= :to');
+            $parameters['to'] = $value2;
+        }
+
+
+        $q->setParameters($parameters);
+
+        $activities = $q->getQuery()->getResult();
+        return array_map('current', $activities);
+    }
+
+    public function getIdsFinancialImpact(mixed $value1, bool $inversed = false): array
+    {
+        if (!array_key_exists($value1, Activity::getFinancialImpactValues())) {
+            throw new \Exception("Ce type d'incidence financière n'existe pas");
+        }
+
+        $param = Activity::getFinancialImpactValues()[$value1];
+
+        $q = $this->createQueryBuilder('c')
+            ->select('c.id');
+
+        if ($inversed) {
+            $q->andWhere('c.financialImpact != :param');
+        }
+        else {
+            $q->where('c.financialImpact = :param');
+        }
+
+        $q->setParameter('param', $param);
+
+        return array_map('current', $q->getQuery()->getResult());
     }
 }

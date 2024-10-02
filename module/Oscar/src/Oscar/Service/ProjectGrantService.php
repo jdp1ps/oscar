@@ -10,6 +10,7 @@ namespace Oscar\Service;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ObjectRepository;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityDateRepository;
@@ -270,19 +271,20 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
     public function getRecipients($options)
     {
-        if(!array_key_exists('activity_id', $options)){
+        if (!array_key_exists('activity_id', $options)) {
             return [];
         }
         $activity_id = intval($options['activity_id']);
 
-        if(!array_key_exists('role_person_id', $options)){
+        if (!array_key_exists('role_person_id', $options)) {
             return [];
         }
         $role_activity_id = ArrayUtils::normalizeArray($options['role_person_id']);
 
-        if(!array_key_exists('role_person_id', $options)){
+        if (!array_key_exists('role_person_id', $options)) {
             $role_organisation_id = [];
-        } else {
+        }
+        else {
             $role_organisation_id = ArrayUtils::normalizeArray($options['role_organisation_id']);
         }
 
@@ -291,8 +293,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         foreach ($persons as $p) {
             $recipients[$p->getId()] = [
                 'firstname' => $p->getFirstname(),
-                'lastname' => $p->getLastname(),
-                'email' => $p->getEmail(),
+                'lastname'  => $p->getLastname(),
+                'email'     => $p->getEmail(),
             ];
         }
         return $recipients;
@@ -363,9 +365,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
             if (!array_key_exists($person->getId(), $out)) {
                 $out[$person->getId()] = [
-                    'id' => $person->getId(),
-                    'email' => $person->getEmail(),
-                    'label' => $person->getFullname(),
+                    'id'        => $person->getId(),
+                    'email'     => $person->getEmail(),
+                    'label'     => $person->getFullname(),
                     'roles_ids' => [],
                 ];
             }
@@ -411,9 +413,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
                 if (!array_key_exists($person->getId(), $out)) {
                     $out[$person->getId()] = [
-                        'id' => $person->getId(),
-                        'email' => $person->getEmail(),
-                        'label' => $person->getFullname(),
+                        'id'        => $person->getId(),
+                        'email'     => $person->getEmail(),
+                        'label'     => $person->getFullname(),
                         'roles_ids' => [],
                     ];
                 }
@@ -430,10 +432,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         $out = [
             'warnings' => [],
-            'valids' => [],
-            'count' => 0,
-            'valid' => false,
-            'error' => []
+            'valids'   => [],
+            'count'    => 0,
+            'valid'    => false,
+            'error'    => []
         ];
 
         $badPfi = false;
@@ -445,7 +447,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             }
             if (preg_match_all($regex, $pfiTested, $matches, PREG_SET_ORDER, 0)) {
                 $out['valids'][] = $pfiTested;
-            } else {
+            }
+            else {
                 $badPfi = "Un ou plusieurs N°Financier ne correspondent pas au format attendu";
                 $out['warnings'][] = $pfiTested;
             }
@@ -489,8 +492,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->setParameters(
                 [
                     'person' => $person,
-                    'from' => $from,
-                    'to' => $to
+                    'from'   => $from,
+                    'to'     => $to
                 ]
             )
             ->getQuery();
@@ -544,7 +547,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if (!$activity) {
             if ($throw === true) {
                 throw new OscarException("Impossible de charger l'activité (ID = $id)");
-            } else {
+            }
+            else {
                 return null;
             }
         }
@@ -563,7 +567,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if (!$activity) {
             if ($throw === true) {
                 throw new OscarException("Impossible de charger l'activité (UID = $importedUid)");
-            } else {
+            }
+            else {
                 return null;
             }
         }
@@ -593,7 +598,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         $out = [
             'organizations_ids' => [],
-            'organizations' => []
+            'organizations'     => []
         ];
 
         /** @var ActivityOrganization $activityOrganization */
@@ -636,8 +641,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $personId = $person->getId();
             if (!array_key_exists($personId, $out)) {
                 $out[$personId] = [
-                    'person' => $person,
-                    'role_ids' => [],
+                    'person'      => $person,
+                    'role_ids'    => [],
                     'role_labels' => []
 
                 ];
@@ -668,8 +673,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 $personId = $person->getId();
                 if (!array_key_exists($personId, $out)) {
                     $out[$personId] = [
-                        'person' => $person,
-                        'role_ids' => [],
+                        'person'      => $person,
+                        'role_ids'    => [],
                         'role_labels' => []
 
                     ];
@@ -695,7 +700,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if (!$activity) {
             if ($throw === true) {
                 throw new OscarException("Impossible de charger l'activité (OSCAR N° = $oscarNum)");
-            } else {
+            }
+            else {
                 return null;
             }
         }
@@ -718,7 +724,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             foreach ($types as $type) {
                 $documentTypes[$type->getId()] = $type->getLabel();
             }
-        } else {
+        }
+        else {
             $documentTypes = $types;
         }
         return $documentTypes;
@@ -784,30 +791,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return array_map('current', $projects);
     }
 
-
-    public function getActivityIdsByJalon($jalonTypeId, $progression = null)
-    {
-        $q = $this->getActivityRepository()->createQueryBuilder('c')
-            ->select('c.id')
-            ->innerJoin('c.milestones', 'm')
-            ->where('m.type = :jalonId');
-
-        if (is_array($progression) && count($progression) > 0) {
-            $clause = 'm.finished IN(:progression)';
-
-            if (in_array('0', $progression)) {
-                $clause .= ' OR m.finished IS NULL';
-            }
-            $q->andWhere($clause)
-                ->setParameter('progression', $progression);
-        }
-
-        $q->setParameter('jalonId', $jalonTypeId);
-
-        $activities = $q->getQuery()->getResult();
-        return array_map('current', $activities);
-    }
-
     /**
      * @param $ids
      * @param int $page
@@ -870,21 +853,21 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
 
         $output = [
-            'version' => OscarVersion::getBuild(),
-            'date' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'total' => 0,
-            'total_page' => 0,
-            'total_time' => 0,
-            'total_page_time' => 0,
-            'page' => $page,
-            'result_by_page' => $resultByPage,
-            'options' => json_encode($options),
-            'search_text' => '',
+            'version'           => OscarVersion::getBuild(),
+            'date'              => (new \DateTime())->format('Y-m-d H:i:s'),
+            'total'             => 0,
+            'total_page'        => 0,
+            'total_time'        => 0,
+            'total_page_time'   => 0,
+            'page'              => $page,
+            'result_by_page'    => $resultByPage,
+            'options'           => json_encode($options),
+            'search_text'       => '',
             'search_text_total' => 0,
             'search_text_error' => '',
-            'search_text_time' => 0,
-            'filters_infos' => [],
-            'activities' => [],
+            'search_text_time'  => 0,
+            'filters_infos'     => [],
+            'activities'        => [],
         ];
 
         $step = $begin = microtime(true);
@@ -909,7 +892,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if (is_array($restricted_ids)) {
             if ($ids_search === null) {
                 $ids_search = $restricted_ids;
-            } else {
+            }
+            else {
                 $ids_search = array_intersect($ids_search, $restricted_ids);
             }
         }
@@ -921,8 +905,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 $filter_info = [
                     'input' => $filterStr,
                     'error' => '',
-                    'time' => 0,
-                    'type' => '',
+                    'time'  => 0,
+                    'type'  => '',
                     'label' => '',
                     'total' => 0
                 ];
@@ -1070,7 +1054,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
                     if ($ids_search === null) {
                         $ids_search = $ids;
-                    } else {
+                    }
+                    else {
                         $ids_search = array_intersect($ids_search, $ids);
                     }
                 } catch (\Exception $e) {
@@ -1100,7 +1085,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                     return $a1ID > $a2ID;
                 };
                 usort($resultRaw, $pertinenceFunction);
-            } else {
+            }
+            else {
                 $queryBuilder->orderBy('c.' . $sort, $direction);
                 $resultRaw = $queryBuilder->getQuery()->getResult();
             }
@@ -1120,6 +1106,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         );
 
         return $output;
+    }
+
+    public function getActivitiesIdsInverse(array $idsActivitySearch): array
+    {
+        return $this->getActivityRepository()->getIdsInverse($idsActivitySearch);
     }
 
     protected function debug__displayIds(array $ids)
@@ -1144,18 +1135,18 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         static $_activitiesSearchSort;
         if ($_activitiesSearchSort === null) {
             $_activitiesSearchSort = [
-                'hit' => 'Pertinence',
+                'hit'         => 'Pertinence',
                 'dateUpdated' => 'Date de mise à jour',
                 'dateCreated' => 'Date de création',
-                'dateStart' => 'Date de début',
-                'dateEnd' => 'Date de fin',
-                'dateSigned' => 'Date de signature',
-                'acronym' => 'Acronyme de projet',
-                'label' => 'Intitulé',
-                'status' => 'Status',
-                'oscarNum' => 'N°Oscar',
-                'codeEOTP' => 'N°Financier (' . $this->getOscarConfigurationService()->getFinancialLabel() . ')',
-                'amount' => 'Montant'
+                'dateStart'   => 'Date de début',
+                'dateEnd'     => 'Date de fin',
+                'dateSigned'  => 'Date de signature',
+                'acronym'     => 'Acronyme de projet',
+                'label'       => 'Intitulé',
+                'status'      => 'Status',
+                'oscarNum'    => 'N°Oscar',
+                'codeEOTP'    => 'N°Financier (' . $this->getOscarConfigurationService()->getFinancialLabel() . ')',
+                'amount'      => 'Montant'
             ];
         }
         return $_activitiesSearchSort;
@@ -1176,7 +1167,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         static $_activitiesSearchDirection;
         if ($_activitiesSearchDirection === null) {
             $_activitiesSearchDirection = [
-                'asc' => 'Croissant',
+                'asc'  => 'Croissant',
                 'desc' => 'Décroissant',
             ];
         }
@@ -1193,31 +1184,31 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         static $activitiesSearchCriteria;
         if ($activitiesSearchCriteria === null) {
             $activitiesSearchCriteria = [
-                'ap' => "Impliquant la personne",
-                'sp' => "N'impliquant pas la personne",
-                'pm' => "Impliquant une de ces personnes",
-                'ao' => "Impliquant l'organisation",
-                'so' => "N'impliquant pas l'organisation",
-                'om' => "Impliquant une des organisations",
-                'as' => 'Ayant le statut',
-                'ss' => 'N\'ayant pas le statut',
+                'ap'  => "Impliquant la personne",
+                'sp'  => "N'impliquant pas la personne",
+                'pm'  => "Impliquant une de ces personnes",
+                'ao'  => "Impliquant l'organisation",
+                'so'  => "N'impliquant pas l'organisation",
+                'om'  => "Impliquant une des organisations",
+                'as'  => 'Ayant le statut',
+                'ss'  => 'N\'ayant pas le statut',
                 'cnt' => "Pays (d'une organisation)",
                 'tnt' => "Type d'organisation",
-                'af' => 'Ayant comme incidence financière',
-                'sf' => 'N\'ayant pas comme incidence financière',
-                'mp' => 'Montant prévu',
-                'at' => 'est de type',
-                'st' => 'n\'est pas de type',
+                'af'  => 'Ayant comme incidence financière',
+                'sf'  => 'N\'ayant pas comme incidence financière',
+                'mp'  => 'Montant prévu',
+                'at'  => 'est de type',
+                'st'  => 'n\'est pas de type',
                 'add' => 'Date de début',
                 'adf' => 'Date de fin',
                 'adc' => 'Date de création',
                 'adm' => 'Date de dernière mise à jour',
                 'ads' => 'Date de signature',
                 'adp' => 'Date d\'ouverture du N°Financier',
-                'pp' => 'Activités sans projet',
+                'pp'  => 'Activités sans projet',
                 'fdt' => 'Activités soumise à feuille de temps',
-                'ds' => 'Ayant pour discipline',
-                'aj' => 'Ayant le jalon'
+                'ds'  => 'Ayant pour discipline',
+                'aj'  => 'Ayant le jalon'
             ];
         }
         return $activitiesSearchCriteria;
@@ -1264,8 +1255,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         /** @var ActivityPayment $payment */
         foreach ($activity->getPayments() as $payment) {
             $datas['payments'][] = [
-                'amount' => $payment->getAmount(),
-                'date' => $payment->getDatePayment() ? $payment->getDatePayment()->format('Y-m-d') : null,
+                'amount'    => $payment->getAmount(),
+                'date'      => $payment->getDatePayment() ? $payment->getDatePayment()->format('Y-m-d') : null,
                 'predicted' => $payment->getDatePredicted() ? $payment->getDatePredicted()->format('Y-m-d') : null
 
             ];
@@ -1337,7 +1328,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['persons'] = [
             'readable' => false,
             'editable' => false,
-            'datas' => []
+            'datas'    => []
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity)) {
             $datas['persons']['readable'] = true;
@@ -1349,12 +1340,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             foreach ($activity->getPersonsDeep() as $p) {
                 $person = $p->getPerson();
                 $datas['persons']['datas'][$person->getId()] = [
-                    'join' => get_class($p),
-                    'join_id' => $p->getId(),
+                    'join'        => get_class($p),
+                    'join_id'     => $p->getId(),
                     'displayName' => (string)$person,
-                    'main' => $p->isPrincipal(),
-                    'role' => $p->getRole(),
-                    'editable' => $editable
+                    'main'        => $p->isPrincipal(),
+                    'role'        => $p->getRole(),
+                    'editable'    => $editable
                 ];
             }
         }
@@ -1363,7 +1354,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['organizations'] = [
             'readable' => false,
             'editable' => false,
-            'datas' => []
+            'datas'    => []
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity)) {
             $datas['organizations']['readable'] = true;
@@ -1374,11 +1365,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             foreach ($activity->getOrganizationsDeep() as $p) {
                 $organization = $p->getOrganization();
                 $datas['organizations']['datas'][$organization->getId()] = [
-                    'join' => get_class($p),
-                    'join_id' => $p->getId(),
+                    'join'        => get_class($p),
+                    'join_id'     => $p->getId(),
                     'displayName' => (string)$organization,
-                    'role' => $p->getRole(),
-                    'editable' => $editable
+                    'role'        => $p->getRole(),
+                    'editable'    => $editable
                 ];
             }
         }
@@ -1387,7 +1378,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['milestones'] = [
             'readable' => false,
             'editable' => false,
-            'datas' => []
+            'datas'    => []
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity)) {
             $datas['milestones']['readable'] = true;
@@ -1410,7 +1401,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['payments'] = [
             'readable' => false,
             'editable' => false,
-            'datas' => []
+            'datas'    => []
         ];
         if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $datas['payments']['readable'] = true;
@@ -1552,12 +1543,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     public function getFieldsCSV()
     {
         $headers = [
-            'core' => Activity::csvHeaders(),
+            'core'          => Activity::csvHeaders(),
             'organizations' => [],
-            'persons' => [],
-            'milestones' => [],
-            'numerotation' => $this->getOscarConfigurationService()->getNumerotationKeys(),
-            'computed' => []
+            'persons'       => [],
+            'milestones'    => [],
+            'numerotation'  => $this->getOscarConfigurationService()->getNumerotationKeys(),
+            'computed'      => []
         ];
 
         $rolesOrganizationsQuery = $this->getEntityManager()->createQueryBuilder()
@@ -1666,19 +1657,13 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         return [
             'activities' => $activities,
-            'keys' => $keys
+            'keys'       => $keys
         ];
     }
 
     public function getActivitiesIdsWithTypeDocument(array $idsTypeDocument, bool $reverse = false): array
     {
         return $this->getActivityRepository()->getActivitiesIdsWithTypeDocument($idsTypeDocument, $reverse);
-    }
-
-    public function getActivitiesWithNumerotation(array $numerotations): array
-    {
-        $ids = $this->getActivityRepository()->getActivitiesIdsWithNumerotations($numerotations);
-        return $ids;
     }
 
     /**
@@ -1788,7 +1773,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      * @param \DateTime $from
      * @param \DateTime $to
      * @param string $field
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getActivitiesBeetween2dates(\DateTime $from, \DateTime $to, $field = 'dateStart')
     {
@@ -1799,7 +1784,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->setParameters(
                 [
                     'from' => $from->format('Y-m-d'),
-                    'to' => $to->format('Y-m-d')
+                    'to'   => $to->format('Y-m-d')
                 ]
             );
     }
@@ -1809,7 +1794,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      *
      * @param string $gap
      * @param string $start
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getActivityAlmostDone($gap = '+1 month', $start = 'now')
     {
@@ -1824,7 +1809,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /**
      * @param string $gap
      * @param string $start
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
+     * @throws \DateMalformedStringException
      */
     public function getActivityBeginsSoon($gap = '+2 weeks', $start = 'now')
     {
@@ -1865,7 +1851,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 if (!$this->searchIndex_checkPath()) {
                     $this->index = \Zend_Search_Lucene::create($path);
                     $this->index = \Zend_Search_Lucene::create($path);
-                } else {
+                }
+                else {
                     $this->index = \Zend_Search_Lucene::open($path);
                 }
                 // Lucene configuration globale
@@ -1886,12 +1873,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
-     * Retourne les jalons de l'activités.
+     * Retourne les jalons de l'activité.
      *
      * @param $idActivity
      * @return array
      */
-    public function getMilestones($idActivity)
+    public function getMilestones($idActivity): array
     {
         return $this->getMilestoneService()->getMilestonesByActivityId($idActivity);
     }
@@ -2093,11 +2080,11 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $tvas = [];
             foreach ($query->getQuery()->getResult() as $tva) {
                 $tvas[] = [
-                    'id' => $tva['id'],
-                    'label' => $tva['label'],
-                    'rate' => $tva['rate'],
+                    'id'     => $tva['id'],
+                    'label'  => $tva['label'],
+                    'rate'   => $tva['rate'],
                     'active' => $tva['active'],
-                    'used' => $tva['used'],
+                    'used'   => $tva['used'],
                 ];
             }
 
@@ -2126,7 +2113,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $facet = $data->getFacet() ? $data->getFacet() : 'Général';
             if (!isset($options[$facet])) {
                 $options[$facet] = [
-                    'label' => $facet,
+                    'label'   => $facet,
                     'options' => []
                 ];
             }
@@ -2141,7 +2128,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     protected function getQueryBuilderDateType()
     {
@@ -2367,13 +2354,15 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         if ($datePayment) {
             $payment->setDatePayment(new \DateTime($datePayment));
-        } else {
+        }
+        else {
             $payment->setDatePayment(null);
         }
 
         if ($datePredicted) {
             $payment->setDatePredicted(new \DateTime($datePredicted));
-        } else {
+        }
+        else {
             $payment->setDatePredicted(null);
         }
         $payment->setRate($rate)
@@ -2420,13 +2409,15 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         if ($datePayment) {
             $payment->setDatePayment(new \DateTime($datePayment));
-        } else {
+        }
+        else {
             $payment->setDatePayment(null);
         }
 
         if ($datePredicted) {
             $payment->setDatePredicted(new \DateTime($datePredicted));
-        } else {
+        }
+        else {
             $payment->setDatePredicted(null);
         }
 
@@ -2490,7 +2481,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
 
         return [
-            'search' => $search,
+            'search'   => $search,
             'payments' => new UnicaenDoctrinePaginator($qb, $page, 50)
         ];
     }
@@ -2561,8 +2552,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->orderBy('p.datePredicted', 'desc')
             ->setParameters(
                 [
-                    'start' => $start->format('Y-m-d'),
-                    'end' => $end->format('Y-m-d'),
+                    'start'  => $start->format('Y-m-d'),
+                    'end'    => $end->format('Y-m-d'),
                     'status' => ActivityPayment::STATUS_PREVISIONNEL,
                 ]
             );
@@ -2580,7 +2571,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             ->orderBy('p.datePredicted', 'desc')
             ->setParameters(
                 [
-                    'date' => $date->format('Y-m-d'),
+                    'date'   => $date->format('Y-m-d'),
                     'status' => ActivityPayment::STATUS_PREVISIONNEL,
                 ]
             );
@@ -2710,7 +2701,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if ($deep) {
             $ids = $this->getOrganizationService()->getOrganizationIdsDeep($idOrganization);
             $ids[] = $idOrganization;
-        } else {
+        }
+        else {
             $ids = [$idOrganization];
         }
         return $this->getBaseQuery()
@@ -2770,7 +2762,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     /**
      * Retourne la requète pour obtenir la liste complète des contrats.
      *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getGrants()
     {
@@ -2874,7 +2866,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             while ($close > 0) {
                 if ($open[count($open) - 1] < $grantType->getLft()) {
                     array_pop($open);
-                } else {
+                }
+                else {
                     $prefix .= " - ";
                     $prefix .= " - ";
                 }
@@ -2884,7 +2877,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             if ($grantType->getLft() + 1 == $grantType->getRgt()) {
                 $prefix .= ' # ';
                 $qt = '';
-            } else {
+            }
+            else {
                 $open[] = $grantType->getRgt();
                 $qt = sprintf(' (%s)', (($grantType->getRgt() - $grantType->getLft() - 1) / 2));
             }
@@ -2914,22 +2908,22 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     {
         //
         $datas = [
-            'id' => '',
-            'acronym' => '',
-            'amount' => '',
-            'pfi' => '',
-            'oscar' => '',
-            'montant' => '',
-            'annee-debut' => '',
-            'annee-fin' => '',
-            'debut' => '',
-            'fin' => '',
-            'intitule' => '',
-            'label' => '',
-            'tva' => '',
+            'id'                       => '',
+            'acronym'                  => '',
+            'amount'                   => '',
+            'pfi'                      => '',
+            'oscar'                    => '',
+            'montant'                  => '',
+            'annee-debut'              => '',
+            'annee-fin'                => '',
+            'debut'                    => '',
+            'fin'                      => '',
+            'intitule'                 => '',
+            'label'                    => '',
+            'tva'                      => '',
             'assiette-subventionnable' => '',
-            'note-financiere' => '',
-            'type' => '',
+            'note-financiere'          => '',
+            'type'                     => '',
         ];
 
         $sluger = Slugify::create();
@@ -3041,7 +3035,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         try {
             if (!$activityorganization->getRoleObj()) {
                 $updateNotification = $roleOrganization->isPrincipal();
-            } else {
+            }
+            else {
                 $updateNotification = $activityorganization->getRoleObj()->isPrincipal(
                     ) !== $roleOrganization->isPrincipal();
             }
@@ -3163,13 +3158,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     public function getBaseQuery($includeObsolet = false)
     {
         if ($includeObsolet === true) {
             $roleClaude = ' AND ((m.dateStart is NULL OR m.dateStart <= :dateRef)AND(m.dateEnd is NULL OR m.dateEnd >= :dateRef))';
-        } else {
+        }
+        else {
             $roleClaude = '';
         }
         $qb = $this->getEntityManager()->createQueryBuilder()
@@ -3239,7 +3235,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             } catch (\Exception $e) {
                 throw new OscarException("Impossible d'ajouter le pôle '$label', " . $e->getMessage());
             }
-        } else {
+        }
+        else {
             throw new OscarException("Le pôle '$label' existe déjà");
         }
     }
@@ -3258,7 +3255,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             } catch (\Exception $e) {
                 throw new OscarException("Impossible d'ajouter la source de financement '$label', " . $e->getMessage());
             }
-        } else {
+        }
+        else {
             throw new OscarException("La source de financement '$label' existe déjà");
         }
     }
@@ -3277,7 +3275,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             } catch (\Exception $e) {
                 throw new OscarException("Impossible d'ajouter le type de contrat '$label', " . $e->getMessage());
             }
-        } else {
+        }
+        else {
             throw new OscarException("Le type de contrat '$label' existe déjà");
         }
     }
@@ -3293,7 +3292,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $repository = $this->getEntityManager()->getRepository(PcruTypeContract::class);
         if ($format == AsArrayFormatter::ARRAY_FLAT) {
             return $repository->getFlatArrayLabel();
-        } else {
+        }
+        else {
             throw new OscarException("Format pour la liste des Type de contrat PCRU non-disponible");
         }
     }
@@ -3383,12 +3383,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         if ($format == AsArrayFormatter::ARRAY_FLAT) {
             if ($withEmptyAtFirst == true) {
                 $array = ["Aucun"];
-            } else {
+            }
+            else {
                 $array = [];
             }
             $array = array_merge($array, $repository->getFlatArrayLabel());
             return $array;
-        } else {
+        }
+        else {
             throw new OscarException("Format pour la liste des pôles de compétivité PCRU non-disponible");
         }
     }
@@ -3404,7 +3406,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $repository = $this->getEntityManager()->getRepository(PcruSourceFinancement::class);
         if ($format == AsArrayFormatter::ARRAY_FLAT) {
             return $repository->getFlatArrayLabel();
-        } else {
+        }
+        else {
             throw new OscarException("Format pour la liste des sources de financement PCRU non-disponible");
         }
     }

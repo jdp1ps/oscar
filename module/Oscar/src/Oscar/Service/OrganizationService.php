@@ -675,11 +675,16 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     {
         static $searchStrategy;
         if ($searchStrategy === null) {
-            $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
-            $class = new \ReflectionClass($opt['class']);
-            $params = $opt['params'];
-            $params[] = $this->getLoggerService();
-            $searchStrategy = $class->newInstanceArgs($params);
+            try {
+                $opt = $this->getOscarConfigurationService()->getConfiguration('strategy.organization.search_engine');
+                $class = new \ReflectionClass($opt['class']);
+                $params = $opt['params'];
+                $params[] = $this->getLoggerService();
+                $searchStrategy = $class->newInstanceArgs($params);
+            } catch (\Throwable $e) {
+                $this->getLoggerService()->critical($e->getMessage());
+                throw new OscarException("Impossible d'instancier l'accès au moteur de recherche");
+            }
         }
         return $searchStrategy;
     }
@@ -699,7 +704,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []): UnicaenDoctrinePaginator
     {
         $qb = $this->getSearchQuery($search, $filter);
-
         return new UnicaenDoctrinePaginator($qb, $page);
     }
 
@@ -803,6 +807,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getSearchQuery($search, $filter)
     {
+        $this->getLoggerService()->debug(__METHOD__);
         $qb = $this->getBaseQuery();
 
         if ($search != "") {

@@ -9,6 +9,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
+use Oscar\Exception\OscarException;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
@@ -210,17 +211,17 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             $request->getQuery(self::QUERY_PARAM_PROJECTVIEW, '') == "on";
 
         // Récupération des filtres
-        $params[self::QUERY_PARAM_CRITERIA] =
+        $params['search'] = $request->getQuery(self::QUERY_PARAM_SEARCH, null);
         $criteria = $request->getQuery(self::QUERY_PARAM_CRITERIA, []);
         // Extraction des filtres
         $filters = [];
         $filtersError = false;
         foreach ($criteria as $criterion) {
             $c = $criterion;
-            $params = explode(';', $c);
-            $type = $params[0];
-            $value1 = (int)$params[1];
-            $value2 = (int)$params[2];
+            $filterParams = explode(';', $c);
+            $type = $filterParams[0];
+            $value1 = (int)$filterParams[1];
+            $value2 = (int)$filterParams[2];
 
             $crit = [
                 'raw'      => $criterion,
@@ -243,8 +244,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                 // Personne (plusieurs)
                 case 'pm' :
-                    $value1 = ArrayUtils::explodeIntegerFromString($params[1]);
-                    if( $value1 < 1 ) {
+                    $value1 = ArrayUtils::explodeIntegerFromString($filterParams[1]);
+                    if ($value1 < 1) {
                         $filtersError = true;
                         $crit['error'] = "Identifiant de personne incorrecte";
                     }
@@ -253,7 +254,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                 case 'om' :
                     // TODO extraction d'un tableau d'entiers positifs
-                    $value1 = explode(',', $params[1]);
+                    $value1 = explode(',', $filterParams[1]);
                     $crit['val1'] = $value1;
                     break;
 
@@ -267,16 +268,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     break;
 
                 // --- Impliquant un compte
-                case 'cb':
-                    // TODO extraction d'un tableau d'entiers positifs
-                    $crit['val1'] = explode(',', $params[1]);
-                    break;
 
-                // --- Compte général
-                case 'cb2':
-                    // TODO extraction d'un tableau d'entiers positifs
-                    $crit['val1'] = explode(',', $params[1]);
-                    break;
 
                 // --- Type de document
                 case 'td':
@@ -285,13 +277,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     }
                     else {
                         // TODO extraction d'un tableau d'entiers positifs
-                        $crit['val1'] = explode(',', $params[1]);
+                        $crit['val1'] = explode(',', $filterParams[1]);
                     }
-                    break;
-
-                case 'num' :
-                    // TODO extraction d'un tableau d'entiers positifs
-                    $value1 = $crit['val1'] = explode(',', $params[1]);
                     break;
 
                 case 'ao' :
@@ -299,29 +286,27 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     $crit['val1Label'] = "Non déterminé";
                     break;
 
-                // Filtre sur le statut de l'activité
+                // Filtre où value1 est un tableau
+                case 'num' :
                 case 'as' :
                 case 'ss' :
+                case 'cnt' :
+                case 'tnt' :
+                case 'ds' :
+                case 'cb':
+                case 'cb2':
+                    // TODO A TESTER
+                    $crit['val1'] = explode(',', $filterParams[1]);
+
+                    break;
                 case 'at' :
                 case 'st' :
                 case 'af' :
                 case 'sf' :
                     break;
 
-                case 'cnt' :
-                    if ($params[1]) {
-                        $crit['val1'] = explode(',', $params[1]);
-                    }
-                    break;
-
-                case 'tnt' :
-                    if ($params[1]) {
-                        $crit['val1'] = explode(',', $params[1]);
-                    }
-                    break;
-
                 case 'aj':
-                    $progressStr = $params[2];
+                    $progressStr = $filterParams[2];
                     $progressArray = null;
 
                     if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
@@ -334,27 +319,23 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     }
                     break;
 
-                case 'ds' :
-                    break;
-
                 case 'add' :
                 case 'adf' :
                 case 'adm' :
                 case 'adc' :
                 case 'ads' :
                 case 'adp' :
-                    $start = DateTimeUtils::toDatetime($params[1]);
-                    $end = DateTimeUtils::toDatetime($params[2]);
+                    $start = DateTimeUtils::toDatetime($filterParams[1]);
+                    $end = DateTimeUtils::toDatetime($filterParams[2]);
                     $value1 = $start ? $start->format('Y-m-d') : '';
                     $value2 = $end ? $end->format('Y-m-d') : '';
                     $crit['val1'] = $value1;
                     $crit['val2'] = $value2;
-                    $clause = [];
 
                     // TODO tester les dates incohérentes
 
-                    if ($start && $end && $start > $clause) {
-                        $crit['error'] = 'Plage de date invalide';
+                    if (($start && $end) && ($start > $end)) {
+                        $crit['error'] = "plage de date incohérente";
                     }
                     break;
             }
@@ -370,20 +351,19 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
         /* TODO En cas de périmètre organization, calculer les affectations de la personne pour les retourner */
         $affectationsDetails = [];
-
         $output = $this->searchAPI($params);
 
         $output["affectationsDetails"] = $affectationsDetails;
+
 
         return $output;
     }
 
     public function searchAPI(array $params): array
     {
-        $time_start = time();
+        $time_start = microtime(true);
 
         $criterias = [];
-        $times = [];
 
         // Personnes pour afficher le filtre des personnes
         $filterPersons = [];
@@ -403,9 +383,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $projectview = $params['projectview'];
 
         // Résultats
-        $activities = null;
         $activitiesIds = null;
-        $projects = null;
         $projectsIds = null;
 
         // --- Périmètre (Organization)
@@ -416,8 +394,12 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // --- Recherche textuelle
-        if ($params['search']) {
+        // RECHERCHE TEXTUELLE
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if ($search) {
+            $this->getLoggerService()->debug("Recherche textuelle '$search'");
+
+            //////////////////////////
             // Recherche NUMERO OSCAR
             $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
             if (preg_match("/^[0-9]{4}" . $oscarNumSeparator . ".*/mi", $search)) {
@@ -426,11 +408,14 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     ->getActivityRepository()
                     ->getActivityIdsByOscarNumLike($search . "%");
 
+                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
+
                 $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
                     array_intersect($idsActivitySearch, $activitiesIds);
             }
 
-            // --- La saisie est un PFI
+            //////////////////////////
+            // Recherche PFI
             elseif ($this->getOscarConfigurationService()->isPfiStrict()
                 && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
                 $this->getLoggerService()->debug(
@@ -441,18 +426,24 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     ->getActivityRepository()
                     ->getActivityIdsByPFI($search);
 
+                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
+
                 $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
                     array_intersect($idsActivitySearch, $activitiesIds);
             }
 
-            // --- Recherche textuelle
+            //////////////////////////
+            // Recherche ELASTIC
             else {
                 try {
+                    $this->getLoggerService()->debug(
+                        "Recherche textuelle '" . $search . "')"
+                    );;
                     $idsSearched = $this->getProjectGrantService()->search($search, true);
                     $idsActivitySearch = $idsSearched['activity_ids'];
                     $this->getLoggerService()->debug(
                         "La recherche textuelle a retournée " . count($idsActivitySearch) . " résultat(s) en " .
-                        (time() - $time_start) . " ms"
+                        (microtime(true) - $time_start) . " ms"
                     );;
 
                     $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
@@ -464,18 +455,182 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                 }
             }
         }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // FILTRES de RECHERCHE
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         foreach ($params['filters'] as &$filter) {
-            var_dump($filter);
+            $this->getLoggerService()->debug("Traitement du filtre '" . $filter['raw'] . "'");
             $value1 = $filter['val1'];
             $value2 = $filter['val2'];
+            $type = $filter['type'];
+            $raw = $filter['raw'];
+            $filter_time_start = microtime(true);
 
-            switch ($filter['type']) {
-                ///////////////////////////////// Filtre PERSONNE/ROLE
-                case 'ap' :
-                case 'sp' :
-                    try {
+            // On range dans cette variable les IDS obtenus avec le
+            // filtre. En sortie du SWITCH/CASE de l'enfer ci-après,
+            // On actualise les IDs, on enregistre les résultats
+            // donnés par le filtre.
+            $filteredIds = null;
 
+            try {
+                switch ($type) {
+                    ////////////////////////////////////////////////////////////////////
+                    ///////////////////////////////// Structure de RECHERCHE - PLUSIEURS
+                    case 'om':
+                        try {
+                            $value1 = explode(',', $params[1]);
+                            $filter['val1'] = $value1;
+                            $organisationsRequire = $this->getOrganizationService()->getOrganizationsByIds($value1);
+
+                            foreach ($organisationsRequire as $organisation) {
+                                $filterOrganizations[$organisation->getId()] = (string)$organisation;
+                            }
+
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository(
+                            )->getIdsWithOneOfOrganizationsRoled(
+                                $value1
+                            );
+                        } catch (\Exception $e) {
+                            throw new OscarException("Erreur en filtrant les structures");
+                        }
+                        break;
+
+                    /////////////////////////////////////////////////////////////////////
+                    ///////////////////////////////// Structure de RECHERCHE/ROLE (et NOT)
+                    case 'ao' :
+                    case 'so' :
+                        try {
+                            $filter['val1Label'] = "Non déterminé";
+                            $organization = null;
+                            $organizationId = (int)$value1;
+                            $roleId = (int)$value2;
+
+                            // Récupération de l'organisation
+                            if ($organizationId > 0) {
+                                try {
+                                    $organization = $this->getOrganizationService()->getOrganization($organizationId);
+                                    $organizations[$organization->getId()] = $organization;
+                                    $filter['val1Label'] = (string)$organization;
+                                } catch (Exception $e) {
+                                    $this->getLoggerService()->warning($e->getMessage());
+                                    throw new OscarException("Erreur en filtrant l'organisation");
+                                }
+                            }
+
+                            try {
+                                $filteredIds = $this->getProjectGrantService()->getActivityRepository(
+                                )->getIdsWithOrganizationAndRole(
+                                    $organizationId,
+                                    $roleId
+                                );
+
+                                if ($type == 'so') {
+                                    $filteredIds = $this->getProjectGrantService()->getActivityRepository()
+                                        ->getIdsInverse($filteredIds);
+                                }
+                            } catch (Exception $e) {
+                                $this->getLoggerService()->warning("Filter $raw error : " . $e->getMessage());
+                                throw new OscarException("Impossible de filtrer sur le rôle");
+                            }
+                        } catch (Exception $exception) {
+                            throw new OscarException($exception->getMessage());
+                        }
+                        break;
+
+                    ///////////////////////////////// Structure (PAYS)
+                    case 'cnt' :
+                        if ($value1) {
+                            try {
+                                $filteredIds = $this->getProjectGrantService()->getActivityRepository()
+                                    ->getIdsWithOrganizationOfCountry($value1);
+                            } catch (\Exception $e) {
+                                $this->getLoggerService()->warning($e->getMessage());
+                                throw new OscarException("Erreur en filtrant le pays");
+                            }
+                        }
+                        else {
+                            throw new OscarException("Erreur en filtrant le pays");
+                        }
+                        break;
+
+                    ///////////////////////////////// Structure (TYPE de STRUCTURE)
+                    case 'tnt' :
+                        if ($value1) {
+                            $typeIds = $this->getOrganizationService()->getTypesIdsByLabel($value1);
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()
+                                ->getIdsWithOrganizationOfType($typeIds);
+                        }
+                        else {
+                            throw new OscarException("Donnée incorrect");
+                        }
+                        break;
+
+                    ///////////////////////////////// Plusieurs PERSONNE
+                    case 'pm' :
+                        $value1 = \Oscar\Utils\ArrayUtils::explodeIntegerFromString($params[1]);
+                        $filter['val1'] = $value1;
+                        $filterPersons = $this->getProjectGrantService()->getPersonService()->getPersonRepository(
+                        )->getPersonsByIds_idValue(
+                            $value1
+                        );
+                        $idsActivity = $this->getProjectGrantService()->getActivityRepository()
+                            ->getIdsForPersons(array_keys($filterPersons));
+
+                        $activitiesIds = $activitiesIds == null ? $idsActivity :
+                            array_intersect($activitiesIds, $idsActivity);
+
+                        $filter['filtered'] = count($idsActivity);
+                        $this->getLoggerService()->debug(
+                            "Filtre $type : " . count($idsActivity) . ' activité(s) trouvée(s)'
+                        );
+                        break;
+                    ///////////////////////////////// Filtre MONTANT
+                    case 'mp':
+                        try {
+                            $min = null;
+                            $max = null;
+
+                            if ($value1) {
+                                $min = $value1;
+                            }
+                            if ($value2) {
+                                $max = $value2;
+                            }
+                            $this->getLoggerService()->debug("Filtre $type : min($min) / max($max)");
+
+                            if (!$value1 && !$value2) {
+                                $filter['error'] = 'Plage numérique farfelue...';
+                            }
+                            elseif ($value1 && $value2 && $value1 > $value2) {
+                                $filter['error'] = 'Le montant est un nombre imaginaire ?';
+                            }
+                            else {
+                                $idsActivity = $this->getProjectGrantService()->getActivityRepository()
+                                    ->getIdsAmount($min, $max);
+
+                                $activitiesIds = $activitiesIds == null ? $idsActivity :
+                                    array_intersect($activitiesIds, $idsActivity);
+
+                                $filter['filtered'] = count($idsActivity);
+                                $this->getLoggerService()->debug(
+                                    "Filtre $type : " . count($idsActivity) . ' activité(s) trouvée(s)'
+                                );
+                            }
+                        } catch (Exception $exception) {
+                            $this->getLoggerService()->error(
+                                "Erreur filtre 'montant : " . $exception->getMessage()
+                            );
+                            $filter['error'] = "Impossible de filtrer sur le montant";
+                        }
+                        break;
+
+                    ///////////////////////////////// Filtre PERSONNE/ROLE
+                    case 'ap' :
+                    case 'sp' :
+                        try {
                             $personIds = [];
                             $roleId = 0;
                             $role = null;
@@ -497,7 +652,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                             }
                             if ($value2) {
                                 try {
-                                    $roles = $this->getProjectGrantService()->getOscarUserContextService()->getAllRoleIdPerson();
+                                    $roles = $this->getProjectGrantService()->getOscarUserContextService(
+                                    )->getAllRoleIdPerson();
                                     if (array_key_exists($value2, $roles)) {
                                         $roleId = $value2;
                                         $role = $roles[$value2];
@@ -512,21 +668,170 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                                 }
                             }
 
-                            $idsActivity = $this->getProjectGrantService()->getActivityRepository()
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()
                                 ->getIdsForPersonAndOrWithRole($personIds, $roleId);
 
-                            $activitiesIds = $activitiesIds == null ? $idsActivity :
-                                array_intersect($activitiesIds, $idsActivity);
+                            // Filtre inversé
+                            if ($type == 'sp') {
+                                // TODO optimisation, si le résultat est vide (l'inverse c'est tout), on peut garder la liste des IDS initiale pour éviter une requête.
+                                // On inverse
+                                $filteredIds = $this->getProjectGrantService()->getActivitiesIdsInverse($filteredIds);
+                            }
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->error(
+                                "Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage()
+                            );
+                            throw new OscarException("Impossible de filtrer sur la personne");
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / STATUS
+                    case 'as' :
+                    case 'ss' :
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()->getIdsWithStatus(
+                                $value1
+                            );
+                            if ($type == 'ss') {
+                                $filteredIds = $this->getProjectGrantService()->getActivitiesIdsInverse($filteredIds);
+                            }
+                        } catch (Exception $e) {
+                            $filter['error'] = "Impossible de filtrer sur le status";
+                        }
+
+                        break;
 
 
-                    } catch (Exception $e) {
-                        $this->getLoggerService()->error(
-                            "Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage()
+                    ///////////////////////////////// ACTIVITE / DISCIPLINE
+                    case 'ds' :
+
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()->getIdsDisciplines(
+                                $value1
+                            );
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            $filter['error'] = "Impossible de filtrer sur les disciplines";
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / JALON
+                    case 'aj':
+                        $progressStr = $value2;
+                        $progressArray = null;
+
+                        if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
+                            $progressArray = explode(',', $progressStr);
+                            $filter['val1'] = $value1;
+                            $filter['val2'] = ArrayUtils::implode(',', $progressArray);
+                        }
+                        else {
+                            $filter['val2'] = '';
+                        }
+                        $filteredIds = $this->getProjectGrantService()->getActivityRepository()->getIdsMilestone(
+                            $value1,
+                            $progressArray
                         );
-                        $filter['error'] = "Impossible de filtrer sur la personne";
-                    }
-                    break;
+                        break;
 
+                    ///////////////////////////////// ACTIVITE / TYPE de DOCUMENT
+                    case 'td':
+
+                        try {
+                            $reverse = $value2 == "1";
+                            $filteredIds = $this->getProjectGrantService()->getActivitiesIdsWithTypeDocument(
+                                $value1,
+                                $reverse
+                            );
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            throw new OscarException("Un problème est survenu en filtrant sur les types de documents");
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / FEUILLE de TEMPS
+                    case 'fdt' :
+                        $filteredIds = $this->getProjectGrantService()
+                            ->getActivityRepository()->getActivityIdsWithWorkpackage();
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / DATES
+                    case 'add' :
+                    case 'adf' :
+                    case 'adm' :
+                    case 'adc' :
+                    case 'ads' :
+                    case 'adp' :
+                        // Correspondance Filtre/Champ de date
+                        $field = $this->getFiltersDateMatch()[$type];
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()->getIdsByDate(
+                                $field,
+                                $value1,
+                                $value2
+                            );
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            $filter['error'] = $e->getMessage();
+                        }
+                        break;
+
+
+                    ///////////////////////////////// ACTIVITE / NUMEROTATION
+                    case 'num' :
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository(
+                            )->getActivitiesIdsWithNumerotations($value1);
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            throw new OscarException("Le filtre sur les numérotations a provoqué une erreur");
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / INCIDENCE FINANCIERE
+                    case 'af' :
+                    case 'sf' :
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository(
+                            )->getIdsFinancialImpact($value1, $type == 'sf');
+                        } catch (Exception $exception) {
+                            $this->getLoggerService()->warning($exception->getMessage());
+                            $filter['error'] = "Un problème est survenu en filtrant sur l'incidence financiere'";
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITE / COMPTE
+                    case 'cb':
+
+                        try {
+                            $accountsInfos = $this->getSpentService()->getAccountsInfosUsed();
+                            $compteGeneralList = $accountsInfos->getCompteGeneralListByAccountIds($value1);
+                            $filteredIds = $this->getSpentService()->getIdsActivitiesForAccounts($compteGeneralList);
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            throw new Exception("Impossible de filtrer sur le compte");
+                        }
+                        break;
+                }
+
+                if ($filteredIds !== null) {
+                    $this->getLoggerService()->debug(
+                        "Filtre $type : " . count($filteredIds) . ' activité(s) trouvée(s)'
+                    );
+                    // On filtre les IDS à garder sur au filtrage
+                    $activitiesIds = $activitiesIds == null ? $filteredIds :
+                        array_intersect($activitiesIds, $filteredIds);
+
+                    $filter['filtered'] = count($filteredIds);
+                }
+                else {
+                    $filter['error'] = "Filtre non-appliqué";
+                }
+
+                $filter['took'] = (int)((microtime(true) - $time_start) * 1000);
+                $criterias[] = $filter;
+            } catch (Exception $e) {
+                $filter['error'] = $e->getMessage();
             }
         }
 
@@ -534,137 +839,15 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         // --- FILTRES
 //        switch ($type) {
 //
-//            case 'mp':
-//                $clause = [];
-//
-//                if ($value1) {
-//                    $clause[] = 'c.amount >= :amountMin';
-//                    $parameters['amountMin'] = $value1;
-//                }
-//                if ($value2) {
-//                    $clause[] = 'c.amount <= :amountMax';
-//                    $parameters['amountMax'] = $value2;
-//                }
-//
-//                if (!$value1 && !$value2) {
-//                    $crit['error'] = 'Plage numérique farfelue...';
-//                }
-//                else {
-//                    $qb->andWhere(ArrayUtils::implode(' AND ', $clause));
-//                }
-//                break;
+
 //
 //            case 'pp' :
 //                $qb->andWhere('c.project IS NULL');
 //                break;
 //
-//            // Filtre sur les activités ayant des feuilles de temps (Lot de travail)
-//            case 'fdt' :
-//                $ids = $this->getProjectGrantService()->getActivityRepository()->getActivityIdsWithWorkpackage(
-//                );
-//                break;
-//
-//            // Personne (plusieurs)
-//            case 'pm' :
-//                $value1 = \Oscar\Utils\ArrayUtils::explodeIntegerFromString($params[1]);
-//                $crit['val1'] = $value1;
-//                $filterPersons = $this->getPersonService()->getPersonRepository()->getPersonsByIds_idValue(
-//                    $value1
-//                );
-//                $ids = $this->getProjectGrantService()->getActivityRepository()
-//                    ->getIdsForPersons(array_keys($filterPersons));
-//                break;
-//
-//            case 'om' :
-//                $value1 = explode(',', $params[1]);
-//                $crit['val1'] = $value1;
-//                $organisationsRequire = $this->getOrganizationService()->getOrganizationsByIds($value1);
-//
-//                foreach ($organisationsRequire as $organisation) {
-//                    $filterOrganizations[$organisation->getId()] = (string)$organisation;
-//                }
-//
-//                $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOneOfOrganizationsRoled(
-//                    $value1
-//                );
-//
-//                break;
-//
-//            ////////////////////////// PERSONNE (Avec/Sans)
-//            case 'ap' :
-//            case 'sp' :
-//                try {
-//                    if (!$value1 && !$value2) {
-//                        $crit['error'] = "Aucun critère pour ce filtre";
-//                    }
-//                    else {
-//                        $personIds = [];
-//                        $roleId = 0;
-//                        $role = null;
-//
-//                        // Personne
-//                        if ($value1) {
-//                            try {
-//                                $person = $this->getPersonService()->getPerson($value1);
-//                                $personIds = [$person->getId()];
-//                                $persons[$person->getId()] = $person;
-//                                $crit['val1Label'] = $person->getDisplayName();
-//                            } catch (Exception $e) {
-//                                $this->getLoggerService()->error(
-//                                    "Erreur filtre 'sur la personne/role, impossible de charger la personne '$value1'' : " . $e->getMessage(
-//                                    )
-//                                );
-//                                $crit['error'] = "Impossible de trouver la personne";
-//                            }
-//                        }
-//                        if ($value2) {
-//                            try {
-//                                $roles = $this->getOscarUserContextService()->getAllRoleIdPerson();
-//                                if (array_key_exists($value2, $roles)) {
-//                                    $roleId = $value2;
-//                                    $role = $roles[$value2];
-//                                    $crit['val2Label'] = $role;
-//                                }
-//                            } catch (Exception $e) {
-//                                $this->getLoggerService()->error(
-//                                    "Erreur filtre 'sur la personne/role, impossible de charger le rôle '$value2'' : " . $e->getMessage(
-//                                    )
-//                                );
-//                                $crit['error'] = "Impossible de trouver le rôle";
-//                            }
-//                        }
-//
-//                        $idsActivity = $this->getActivityService()->getActivityRepository()
-//                            ->getIdsForPersonAndOrWithRole($personIds, $roleId);
-//
-//                        $idsProject = $this->getActivityService()->getActivityRepository()
-//                            ->getIdsProjectsForPersonAndOrWithRole($personIds, $roleId);
-//
-//                        $idsActivityRestricted = array_intersect($idsActivityRestricted, $idsActivity);
-//                        $idsProjectRestricted = array_intersect($idsProjectRestricted, $idsProject);
-//                    }
-//                } catch (Exception $e) {
-//                    $this->getLoggerService()->error(
-//                        "Erreur filtre 'sur la personne '$value1'/role '$roleId' : " . $e->getMessage()
-//                    );
-//                    $crit['error'] = "Impossible de filtrer sur la personne";
-//                }
-//                break;
-//
-//            // --- Impliquant un compte
-//            case 'cb':
-//                $value1 = $crit['val1'] = explode(',', $params[1]);
-//                try {
-//                    $compteGeneralList = $accountsInfos->getCompteGeneralListByAccountIds($value1);
-//                    $idsActivity = $this->getSpentService()->getIdsActivitiesForAccounts($compteGeneralList);
-//                    $idsProject = $this->getActivityService()->getActivityRepository()
-//                        ->getIdsProjectsForActivity($ids);
-//                    $idsActivityRestricted = array_intersect($idsActivityRestricted, $idsActivity);
-//                    $idsProjectRestricted = array_intersect($idsProjectRestricted, $idsProject);
-//                } catch (Exception $e) {
-//                    $crit['error'] = "Impossible de filtrer sur le compte";
-//                }
-//                break;
+
+
+
 //
 //
 //            // --- Compte général
@@ -682,83 +865,12 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 //                }
 //                break;
 //
-//            // --- Type de document
-//            case 'td':
-//                if ($crit['val1'] == "null" || !$crit['val1']) {
-//                    $value1 = [];
-//                }
-//                else {
-//                    $value1 = $crit['val1'] = explode(',', $params[1]);
-//                }
+
 //
-//                try {
-//                    $reverse = $value2 == "1";
-//                    $ids = $this->getActivityService()->getActivitiesIdsWithTypeDocument($value1, $reverse);
-//                    $idsProject = $this->getActivityService()->getActivityRepository(
-//                    )->getIdsProjectsForActivity($ids);
-//                    $idsActivityRestricted = array_intersect($idsActivityRestricted, $ids);
-//                    $idsProjectRestricted = array_intersect($idsProjectRestricted, $idsProject);
-//                } catch (Exception $e) {
-//                    throw new OscarException($e->getMessage());
-//                }
-//                break;
+
 //
-//            case 'num' :
-//                $value1 = $crit['val1'] = explode(',', $params[1]);
-//                try {
-//                    $ids = $this->getActivityService()->getActivitiesWithNumerotation($value1);
-//                } catch (Exception $e) {
-//                    throw new OscarException($e->getMessage());
-//                }
-//                break;
-//
-//            case 'ao' :
-//            case 'so' :
-//                $organizationId[] = $value1;
-//
-//                $crit['val1Label'] = "Non déterminé";
-//                $organization = null;
-//
-//                $organizationId = (int)$value1;
-//                $roleId = (int)$value2;
-//
-//                // Récupération de l'organisation
-//                if ($organizationId > 0) {
-//                    try {
-//                        $organization = $this->getOrganizationService()->getOrganization($value1);
-//                        $organizations[$organization->getId()] = $organization;
-//                        $crit['val1Label'] = (string)$organization;
-//                    } catch (Exception $e) {
-//                    }
-//                }
-//
-//                try {
-//                    $ids = $this->getActivityService()->getActivityRepository()->getIdsWithOrganizationAndRole(
-//                        $organizationId,
-//                        $roleId
-//                    );
-//                } catch (Exception $e) {
-//                    $crit['error'] = $e->getMessage();
-//                }
-//
-//                break;
-//
-//            // Filtre sur le statut de l'activité
-//            case 'as' :
-//                if (!isset($parameters['withstatus'])) {
-//                    $parameters['withstatus'] = [];
-//                }
-//                $parameters['withstatus'][] = $value1;
-//                $qb->andWhere('c.status IN (:withstatus)');
-//                break;
-//
-//            case 'ss' :
-//                if (!isset($parameters['withoutstatus'])) {
-//                    $parameters['withoutstatus'] = [];
-//                }
-//                $parameters['withoutstatus'][] = $value1;
-//                $qb->andWhere('c.status NOT IN (:withoutstatus)');
-//                break;
+
+
 //
 //            case 'at' :
 //
@@ -792,98 +904,22 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 //                );
 //                break;
 //
-//            // Filtre sur la/les incidences financière
-//            case 'af' :
-//                if (!isset($parameters['withfinancial'])) {
-//                    $parameters['withfinancial'] = [];
-//                    $qb->andWhere('c.financialImpact IN (:withfinancial)');
-//                }
-//                $parameters['withfinancial'][] = Activity::getFinancialImpactValues()[$value1];
-//                break;
+
 //
 //            case 'sf' :
-//                if (!isset($parameters['withoutfinancial'])) {
-//                    $parameters['withoutfinancial'] = [];
-//                    $qb->andWhere('c.financialImpact NOT IN (:withoutfinancial)');
-//                }
-//                $parameters['withoutfinancial'][] = Activity::getFinancialImpactValues()[$value1];
-//                break;
+
 //
-//            case 'cnt' :
-//                if ($params[1]) {
-//                    $value1 = $crit['val1'] = explode(',', $params[1]);
-//                    $ids = $this->getActivityService()->getActivityRepository()
-//                        ->getIdsWithOrganizationOfCountry($value1);
-//                }
-//                break;
+
 //
-//            case 'tnt' :
-//                if ($params[1]) {
-//                    $value1 = $crit['val1'] = explode(',', $params[1]);
-//                    $typeIds = $this->getOrganizationService()->getTypesIdsByLabel($value1);
-//                    $ids = $this->getActivityService()->getActivityRepository()
-//                        ->getIdsWithOrganizationOfType($typeIds);
-//                }
-//                break;
-//
-//            case 'aj':
-//                $progressStr = $params[2];
-//                $progressArray = null;
-//
-//                if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
-//                    $progressArray = explode(',', $progressStr);
-//                    $crit['val1'] = $value1;
-//                    $crit['val2'] = ArrayUtils::implode(',', $progressArray);
-//                }
-//                else {
-//                    $crit['val2'] = '';
-//                }
-//                $filterIds = $this->getActivityService()->getActivityIdsByJalon($crit['val1'], $progressArray);
-//                break;
-//
-//            case 'ds' :
-//                $qb->andWhere('dis.id = :discipline');
-//                $parameters['discipline'] = $value1;
-//                break;
-//
-//            case 'add' :
-//            case 'adf' :
-//            case 'adm' :
-//            case 'adc' :
-//            case 'ads' :
-//            case 'adp' :
-//                $field = $dateFields[$type];
-//
-//                $start = DateTimeUtils::toDatetime($params[1]);
-//                $end = DateTimeUtils::toDatetime($params[2]);
-//                $value1 = $start ? $start->format('Y-m-d') : '';
-//                $value2 = $end ? $end->format('Y-m-d') : '';
-//                $crit['val1'] = $value1;
-//                $crit['val2'] = $value2;
-//                $clause = [];
-//
-//                if ($value1) {
-//                    $clause[] = 'c.' . $field . ' >= :' . $filterKey . 'start';
-//                    $parameters[$filterKey . 'start'] = $value1;
-//                }
-//                if ($value2) {
-//                    $clause[] = 'c.' . $field . ' <= :' . $filterKey . 'end';
-//                    $parameters[$filterKey . 'end'] = $value2;
-//                }
-//
-//                if ($clause) {
-//                    $qb->andWhere(ArrayUtils::implode(' AND ', $clause));
-//                }
-//                else {
-//                    $crit['error'] = 'Plage de date invalide';
-//                }
-//                break;
+
 //        }
 
         /////////////////////////////
         $totalResult = 0;
         $totalPages = 0;
 
+        // Cette partie est utilisée pour afficher les dernières activités
+        // lors d'une recherche vide.
         if ($startEmpty === false) {
             if (!$search && count($criterias) == 0) {
                 if ($activitiesIds !== null) {
@@ -901,6 +937,10 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             }
             else {
             }
+        }
+
+        if ($activitiesIds === null) {
+            $activitiesIds = [];
         }
 
         $idsRef = $activitiesIds;
@@ -982,9 +1022,9 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             'projectsIds'            => $projectsIds,
         ];
 
-        $time_end = time();
+        $time_end = microtime(true);
 
-        $output['took'] = $time_end - $time_start;
+        $output['took'] = intval(($time_end - $time_start) * 1000);
 
         return $output;
     }
@@ -1125,5 +1165,10 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             self::SORT_DIRECTION_DESC => 'Décroissant',
             self::SORT_DIRECTON_ASC   => 'Croissant'
         ];
+    }
+
+    public function getOrganizationService(): OrganizationService
+    {
+        return $this->getProjectGrantService()->getOrganizationService();
     }
 }

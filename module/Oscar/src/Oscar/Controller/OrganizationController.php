@@ -157,10 +157,10 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $error = _("Expression de recherche incorrecte") . ' : ' . $e->getMessage();
         } catch (NoNodesAvailableException $e) {
             $error = "Le moteur de recherche est introuvable";
+        } catch (\Exception $exception){
+            $this->getLoggerService()->error($exception->getMessage());
+            return $this->jsonError("Quelquechose c'est mal passé...");
         }
-
-
-
 
         if ($this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') === 'json') {
             // test : return $this->getResponseUnauthorized("nop");

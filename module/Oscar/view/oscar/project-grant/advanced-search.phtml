@@ -63,7 +63,7 @@
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
 
-            <select class="select2organizations changer val1" multiple>
+            <select class="select2 organizations changer val1" multiple>
                 <?php foreach($filterOrganizations as $id=>$label): ?>
                 <option value="<?= $id ?>" selected><?= $label ?></option>
                 <?php endforeach; ?>
@@ -106,7 +106,7 @@
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <small>{{typeLabel}}</small>
-            <select class="changer val1 status">
+            <select class="changer val1 status select2" multiple >
                 <?php foreach(\Oscar\Entity\Activity::getStatusSelect() as $key=>$label ): ?>
                 <option value="<?= $key ?>"><?= $label ?></option>
                 <?php endforeach; ?>
@@ -195,7 +195,7 @@
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <small>{{typeLabel}}</small>
-            <select class="select2 form-control val1 changer types" id="filter_discipline">
+            <select class="select2 form-control val1 changer types" id="filter_discipline" multiple>
                 <option></option>
                 <?php foreach ($disciplines as $id => $label): ?>
                     <option
@@ -286,7 +286,7 @@
         <article class="criteria criteria-typedocument card">
             <div class="icon-docs"></div>
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
-            <input type="text" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <small>
                 <strong></p>Ayant au moins un des types de document</strong>
                 (Laisser vide pour n'importe quel type de document)
@@ -594,8 +594,16 @@
         <?php if($totalResult == 0): ?>
         Aucun résultat
         <?php else: ?>
-        <strong><?= $totalResult ?></strong> résultat(s)</h3>
+        <strong><?= $totalResult ?></strong> résultat(s)
         <?php endif; ?>
+        <div>
+            <small>
+                en <?= $took ?> milliseconde(s)
+            </small>
+        </div>
+    </h3>
+        <h2>CRITERES</h2>
+        <pre><?php var_dump($criteria) ?></pre>
     <?php if($activities && $totalResult > 0): ?>
         <div>
             <?php echo $this->pagerSimple($totalResult, $page) ?>
@@ -752,10 +760,10 @@
     <?php endif; ?>
     <?php else: ?>
 
-
     <?php endif; ?>
 
-    <?php if( $activities != null && count($activities) == 0 ): ?>
+
+    <?php if( $activities !== null && count($activities) == 0 ): ?>
     <div class="alert-info alert">
         <?php if ($search == 'Pourquoi la vie, l\'univers et le reste'): ?>
             <h1 style="text-align: center; font-size: 72px">42</h1>
@@ -959,7 +967,8 @@
                         }
 
                         // Select
-                        var input = filter.find('input[type="text"].val2');
+                        var input = filter.find('input.val2');
+                        console.log(input);
 
                         if( input.length > 0 ){
                             console.log("VAL2 INPUT");
