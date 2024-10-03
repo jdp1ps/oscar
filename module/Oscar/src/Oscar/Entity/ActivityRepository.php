@@ -11,6 +11,7 @@ namespace Oscar\Entity;
 use \DateTime;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
 
@@ -387,9 +388,8 @@ class ActivityRepository extends EntityRepository
     public function getActivityByNumOscar($numOscar, $throw = false)
     {
         try {
-            $activity = $this->findOneBy(['oscarNum' => $numOscar]);
-            return $activity;
-        } catch (\Exception $exception) {
+            return $this->findOneBy(['oscarNum' => $numOscar]);
+        } catch (Exception $exception) {
             $error = "Impossible de charger l'activité $numOscar : " . $exception->getMessage();
             if ($throw) {
                 throw new OscarException($error);
@@ -401,13 +401,12 @@ class ActivityRepository extends EntityRepository
     }
 
     /**
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
-    protected function qbActivityWithWorkPackage()
+    protected function qbActivityWithWorkPackage(): QueryBuilder
     {
-        $qb = $this->createQueryBuilder('a')
+        return $this->createQueryBuilder('a')
             ->innerJoin('a.workPackages', 'wp');
-        return $qb;
     }
 
     /**
@@ -424,18 +423,6 @@ class ActivityRepository extends EntityRepository
     {
         return $this->createQueryBuilder('c')
             ->leftJoin('c.project', 'p');
-//            ->leftJoin('c.persons', 'm1')
-//            ->leftJoin('m1.person', 'pers1')
-//            ->leftJoin('c.disciplines', 'dis')
-//            ->leftJoin('c.activityType', 't1')
-//            ->leftJoin('c.organizations', 'p1')
-//            ->leftJoin('p1.organization', 'orga1')
-//            ->leftJoin('c.documents', 'd1')
-//            ->leftJoin('c.project', 'pr')
-//            ->leftJoin('pr.members', 'm2')
-//            ->leftJoin('pr.partners', 'p2')
-//            ->leftJoin('m2.person', 'pers2')
-//            ->leftJoin('p2.organization', 'orga2');
     }
 
     public function getBaseQueryBuilderByIdsPaged(array $ids, int $page = 1, int $resultByPage = 50): QueryBuilder
@@ -910,22 +897,28 @@ class ActivityRepository extends EntityRepository
      * @param array|null $ids
      * @return array
      */
-    public function getIdsProjectsForActivity(?array $ids): array
+    public function getIdsProjectsForActivity(?array $ids, string $orderBy = "", string $direction = 'desc'): array
     {
         if ($ids) {
             $qb = $this->getEntityManager()->createQueryBuilder()
-                ->select('DISTINCT p.id')
+                ->select('DISTINCT p.id, 
+                    MIN(a.dateCreated) as dateCreated, 
+                    MAX(a.dateUpdated) as dateUpdated,
+                    MAX(a.dateEnd) as dateEnd')
                 ->from(Project::class, 'p')
                 ->innerJoin('p.grants', 'a')
                 ->where('a.id IN(:ids)')
+                ->groupBy('p.id')
                 ->setParameter('ids', $ids);
 
-            return array_map(
-                'current',
-                $qb
-                    ->getQuery()
-                    ->getResult()
-            );
+            $orderable = ['dateCreated', 'dateUpdated', 'dateEnd'];
+            if ($orderBy && in_array($orderBy, $orderable)) {
+                $qb->orderBy($orderBy, $direction);
+            }
+
+            $results = $qb->getQuery()->getResult();
+
+            return array_map('current', $results);
         }
         else {
             return [];
@@ -1021,12 +1014,12 @@ class ActivityRepository extends EntityRepository
      * @param mixed $value1
      * @param mixed $value2
      * @return integer[]
-     * @throws \Exception
+     * @throws Exception
      */
     public function getIdsByDate(string $field, mixed $value1, mixed $value2): array
     {
         if (!$value1 && !$value2) {
-            throw new \Exception("Aucune date à filtrer");
+            throw new Exception("Aucune date à filtrer");
         }
         $q = $this->createQueryBuilder('c')
             ->select('c.id');
@@ -1049,18 +1042,25 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $activities);
     }
 
-    public function getIdsFinancialImpact(mixed $value1, bool $inversed = false): array
+    /**
+     * Retourne les IDS des activités en fonction de l'impact financier.
+     * @param mixed $indexImpact Index dans la liste des impacts possibles
+     * @param bool $inverse
+     * @return array
+     * @throws Exception
+     */
+    public function getIdsFinancialImpact(mixed $indexImpact, bool $inverse = false): array
     {
-        if (!array_key_exists($value1, Activity::getFinancialImpactValues())) {
-            throw new \Exception("Ce type d'incidence financière n'existe pas");
+        if (!array_key_exists($indexImpact, Activity::getFinancialImpactValues())) {
+            throw new Exception("Ce type d'incidence financière n'existe pas");
         }
 
-        $param = Activity::getFinancialImpactValues()[$value1];
+        $param = Activity::getFinancialImpactValues()[$indexImpact];
 
         $q = $this->createQueryBuilder('c')
             ->select('c.id');
 
-        if ($inversed) {
+        if ($inverse) {
             $q->andWhere('c.financialImpact != :param');
         }
         else {
@@ -1070,5 +1070,39 @@ class ActivityRepository extends EntityRepository
         $q->setParameter('param', $param);
 
         return array_map('current', $q->getQuery()->getResult());
+    }
+
+    /**
+     * Retourne les IDS des activités sans projet.
+     * @return integer[]
+     */
+    public function getIdsWithoutProject(): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.id')
+            ->leftJoin('c.project', 'p')
+            ->where('c.project IS NULL');;
+        return array_map('current', $qb->getQuery()->getResult());
+    }
+
+    /**
+     * Retourne les IDS des activités d'un des types.
+     * @param array $types
+     * @param bool $inverse
+     * @return array
+     */
+    public function getIdsWithTypes(array $types, bool $inverse = false): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.id')
+            ->leftJoin('c.activityType', 't');
+
+        if ($inverse === false) {
+            $qb->where('c.activityType IN(:types)');
+        }
+        else {
+            $qb->where('c.activityType NOT IN (:types)');;
+        }
+        return array_map('current', $qb->setParameter('types', $types)->getQuery()->getResult());
     }
 }

@@ -451,6 +451,7 @@ class ProjectController extends AbstractOscarController
 
     public function currentUserStructureProjectsAction(): array
     {
+        die("ICI");
         /** @var Person|null $currentPerson */
         $currentPerson = $this->getOscarUserContextService()->getCurrentPerson();
 

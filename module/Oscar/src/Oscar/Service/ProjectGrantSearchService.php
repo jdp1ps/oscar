@@ -189,22 +189,14 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $params['include'] = $request->getQuery('include', null);
 
         // Champ de tri
-        $params[self::QUERY_PARAM_SORT] = $this->extractValueInArrayKey(
-            $request->getQuery(self::QUERY_PARAM_SORT),
-            $this->getSortOptions(),
-            $search ? self::SORT_HIT : self::SORT_DATE_UPDATED
-        );
+        $params[self::QUERY_PARAM_SORT] = $request->getQuery(self::QUERY_PARAM_SORT);
 
         // Ignorer les valeurs nulles
         $params[self::QUERY_PARAM_SORT_IGNORE_NULL] =
             (bool)$request->getQuery(self::QUERY_PARAM_SORT_IGNORE_NULL, false);
 
         // Sens du tri
-        $params[self::QUERY_PARAM_SORT_DIRECTION] = $this->extractValueInArrayKey(
-            $request->getQuery(self::QUERY_PARAM_SORT_DIRECTION),
-            $this->getSortDirections(),
-            self::SORT_DIRECTION_DESC
-        );
+        $params[self::QUERY_PARAM_SORT_DIRECTION] = $request->getQuery(self::QUERY_PARAM_SORT_DIRECTION);
 
         // Mode PROJET
         $params[self::QUERY_PARAM_PROJECTVIEW] =
@@ -235,6 +227,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             ];
 
             switch ($type) {
+                case 'pp' :
+                    $crit['val1'] = '';
+                    $crit['val2'] = '';
+                    break;
+
                 case 'mp':
                     if (!$value1 && !$value2) {
                         $filtersError = true;
@@ -388,9 +385,36 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
         // --- Périmètre (Organization)
         if ($organizationsPerimeter !== null) {
-            die("Calculer le périmètre organisation");
-            // TODO IDs des activités réservées
-            // TODO IDs des projets réservés
+            $include = $params['include'];
+            if ($include) {
+                $includeClear = [];
+                foreach ($include as $index => $value) {
+                    if ($value > 0) {
+                        $includeClear[] = intval($value);
+                    }
+                }
+                $include = array_intersect(
+                    $includeClear,
+                    $organizationsPerimeter
+                );
+            }
+            else {
+                $include = $params['organizationsPerimeter'];
+            }
+
+            // IDS concernés
+            $organizationsIdsPerimeter = $this->getProjectGrantService()
+                ->getActivityRepository()
+                ->getIdsWithOrganizations($include);
+
+            // FIX
+            if (count($organizationsIdsPerimeter) == 0) {
+                $organizationsIdsPerimeter = [0];
+                $activitiesIds = [];
+            }
+            else {
+                $activitiesIds = $organizationsIdsPerimeter;
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -749,13 +773,13 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         }
                         break;
 
-                    ///////////////////////////////// ACTIVITE / FEUILLE de TEMPS
+                    ///////////////////////////////// ACTIVITY / FEUILLE de TEMPS
                     case 'fdt' :
                         $filteredIds = $this->getProjectGrantService()
                             ->getActivityRepository()->getActivityIdsWithWorkpackage();
                         break;
 
-                    ///////////////////////////////// ACTIVITE / DATES
+                    ///////////////////////////////// ACTIVITY / DATES
                     case 'add' :
                     case 'adf' :
                     case 'adm' :
@@ -777,7 +801,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         break;
 
 
-                    ///////////////////////////////// ACTIVITE / NUMEROTATION
+                    ///////////////////////////////// ACTIVITY / NUMERATION
                     case 'num' :
                         try {
                             $filteredIds = $this->getProjectGrantService()->getActivityRepository(
@@ -788,7 +812,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         }
                         break;
 
-                    ///////////////////////////////// ACTIVITE / INCIDENCE FINANCIERE
+                    ///////////////////////////////// ACTIVITY / INCIDENCE FINANCIERS
                     case 'af' :
                     case 'sf' :
                         try {
@@ -796,13 +820,12 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                             )->getIdsFinancialImpact($value1, $type == 'sf');
                         } catch (Exception $exception) {
                             $this->getLoggerService()->warning($exception->getMessage());
-                            $filter['error'] = "Un problème est survenu en filtrant sur l'incidence financiere'";
+                            $filter['error'] = "Un problème est survenu en filtrant sur l'incidence financière'";
                         }
                         break;
 
-                    ///////////////////////////////// ACTIVITE / COMPTE
+                    ///////////////////////////////// ACTIVITY / COMPTE
                     case 'cb':
-
                         try {
                             $accountsInfos = $this->getSpentService()->getAccountsInfosUsed();
                             $compteGeneralList = $accountsInfos->getCompteGeneralListByAccountIds($value1);
@@ -810,6 +833,47 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         } catch (Exception $e) {
                             $this->getLoggerService()->warning($e->getMessage());
                             throw new Exception("Impossible de filtrer sur le compte");
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITY / PAS de PROJET
+                    case 'pp' :
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository(
+                            )->getIdsWithoutProject();
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            $filter['error'] = "Impossible de filtrer les activités sans projet";
+                        }
+                        break;
+
+                    ///////////////////////////////// ACTIVITY / TYPE
+                    case 'at' :
+                    case 'st' :
+
+                        if ($value2 == 1) {
+                            $types = [$value1];
+                        }
+                        else {
+                            $types = $this->getProjectGrantService()->getActivityTypeService()->getTypeIdsInside(
+                                $value1
+                            );
+                        }
+
+                        $filteredIds = $this->getProjectGrantService()->getActivityRepository()
+                            ->getIdsWithTypes($types, $type === 'st');
+
+                        break;
+
+                    ///////////////////////////////// ACTIVITY / COMPTE STRICT
+                    /// (Note : Accessible depuis l'interface d'administration uniquement)
+                    case 'cb2':
+
+                        try {
+                            $filteredIds = $this->getSpentService()->getIdsActivitiesForCompteGeneral($value1);
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            throw new OscarException("Impossible de filtrer sur le compte");
                         }
                         break;
                 }
@@ -825,7 +889,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     $filter['filtered'] = count($filteredIds);
                 }
                 else {
-                    $filter['error'] = "Filtre non-appliqué";
+                    $filter['error'] = $filter['error'] ?: "Filtre non-appliqué";
                 }
 
                 $filter['took'] = (int)((microtime(true) - $time_start) * 1000);
@@ -835,85 +899,6 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // --- FILTRES
-//        switch ($type) {
-//
-
-//
-//            case 'pp' :
-//                $qb->andWhere('c.project IS NULL');
-//                break;
-//
-
-
-
-//
-//
-//            // --- Compte général
-//            case 'cb2':
-//                $value1 = $crit['val1'] = explode(',', $params[1]);
-//
-//                try {
-//                    $idsActivity = $this->getSpentService()->getIdsActivitiesForCompteGeneral($value1);
-//                    $idsProject = $this->getActivityService()->getActivityRepository(
-//                    )->getIdsProjectsForActivity($idsActivity);
-//                    $idsActivityRestricted = array_intersect($idsActivityRestricted, $idsActivity);
-//                    $idsProjectRestricted = array_intersect($idsProjectRestricted, $idsProject);
-//                } catch (Exception $e) {
-//                    throw new OscarException($e->getMessage());
-//                }
-//                break;
-//
-
-//
-
-//
-
-
-//
-//            case 'at' :
-//
-//                if (!isset($parameters['withtype'])) {
-//                    $parameters['withtype'] = [];
-//                    $qb->andWhere('c.activityType IN (:withtype)');
-//                }
-//
-//                if ($value2 == 1) {
-//                    $types = [$value1];
-//                }
-//                else {
-//                    $types = $this->getActivityTypeService()->getTypeIdsInside($value1);
-//                }
-//
-//                $parameters['withtype'] = array_merge(
-//                    $parameters['withtype'],
-//                    $types
-//                );
-//                $result = $qb->setParameters($parameters)->getQuery()->getResult();
-//                break;
-//
-//            case 'st' :
-//                if (!isset($parameters['withouttype'])) {
-//                    $parameters['withouttype'] = [];
-//                    $qb->andWhere('c.activityType NOT IN (:withouttype)');
-//                }
-//                $parameters['withouttype'] = array_merge(
-//                    $parameters['withouttype'],
-//                    $this->getActivityTypeService()->getTypeIdsInside($value1)
-//                );
-//                break;
-//
-
-//
-//            case 'sf' :
-
-//
-
-//
-
-//        }
-
         /////////////////////////////
         $totalResult = 0;
         $totalPages = 0;
@@ -922,10 +907,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         // lors d'une recherche vide.
         if ($startEmpty === false) {
             if (!$search && count($criterias) == 0) {
-                if ($activitiesIds !== null) {
-                    die("START EMPTY : TRUE");
-                }
-                else {
+                if ($activitiesIds === null) {
                     // AFFICHER TOUS
                     $allIds = $this->getEntityManager()->createQueryBuilder()
                         ->select('c.id')
@@ -935,8 +917,6 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     $activitiesIds = array_map('current', $allIds);
                 }
             }
-            else {
-            }
         }
 
         if ($activitiesIds === null) {
@@ -945,8 +925,12 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
         $idsRef = $activitiesIds;
         if ($projectview) {
-            $idsRef = $projectsIds;
-            die("VUE PROJET");
+            if ($search) {
+                // TODO Ajouter les projets vides aux résultats
+            }
+            $idsProject = $this->getProjectGrantService()->getActivityRepository()
+                ->getIdsProjectsForActivity($activitiesIds, $params['sort'], $params['sortDirection']);
+            $idsRef = $idsProject;
         }
 
         $totalResult = count($idsRef);
@@ -956,11 +940,13 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $orderedIds = array_slice($idsRef, $offset, $limit);
 
         if ($projectview) {
+            $projectsIds = $idsRef;
             $qb = $this->getEntityManager()->createQueryBuilder()
-                ->select('c')
-                ->from(Project::class, 'c')
-                ->where('c.id IN(:ids)')
-                ->setParameter('ids', $idsProjectRestricted);
+                ->select('p, c')
+                ->from(Project::class, 'p')
+                ->leftJoin('p.grants', 'c')
+                ->where('p.id IN(:ids)')
+                ->setParameter('ids', $orderedIds);
         }
         else {
             $qb = $this->getEntityManager()->createQueryBuilder()
@@ -980,6 +966,10 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                 ->leftJoin('p2.organization', 'orga2')
                 ->where('c.id IN(:ids)')
                 ->setParameter('ids', $orderedIds);
+        }
+
+        if ($params['sort']) {
+            // $qb->orderBy('c.'.$params['sort'], $params['sortDirection']);
         }
 
         $activities = $qb->getQuery()->getResult();
