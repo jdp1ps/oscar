@@ -884,6 +884,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                         break;
 
+                    ///////////////////////////////// PROJETS VIDES
+                    case 'pv' :
+
+                        break;
+
                     ///////////////////////////////// ACTIVITY / COMPTE STRICT
                     /// (Note : Accessible depuis l'interface d'administration uniquement)
                     case 'cb2':
@@ -970,7 +975,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         // Vue projet
         if ($projectView) {
             if ($search) {
-                // TODO Ajouter les projets vides aux résultats
+
                 $idsProject = $this->getProjectGrantService()->getActivityRepository()
                     ->getIdsProjectsForActivityAndEmpty(
                         $search,
@@ -979,7 +984,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         $params['sortDirection'],
                         $params['sortIgnoreNull'] == 'on'
                     );
-                $this->getLoggerService()->debug("Projet(s) : " . (count($idsProject)) . " projet(s)");
+
             } else {
                 $idsProject = $this->getProjectGrantService()->getActivityRepository()
                     ->getIdsProjectsForActivity(

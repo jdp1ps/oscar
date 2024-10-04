@@ -948,15 +948,6 @@ class ActivityRepository extends EntityRepository
         if ($ids) {
             $qb = $this->getEntityManager()->createQueryBuilder()
                 ->select(
-
-                    /*'DISTINCT p.id,
-                    COALESCE(MIN(a.dateCreated),p.dateCreated) as dateCreated,
-                    MIN(a.dateStart) as dateStart,
-                    MAX(a.dateEnd) as dateEnd,
-                    COALESCE(MAX(a.dateUpdated),p.dateUpdated) as dateUpdated,
-                    MAX(a.dateSigned) as dateSigned,
-                    MAX(a.dateOpened) as dateOpened
-                    '*/
                     'DISTINCT p.id as projectId,
                     MIN(a.dateCreated) as dateCreated, 
                     MIN(a.dateStart) as dateStart,
@@ -971,11 +962,11 @@ class ActivityRepository extends EntityRepository
                 ->where('a.id IN(:ids)')
                 ->groupBy('p.id');
 
-
-            if($search){
-                $qb->orWhere('(LOWER(p.acronym) LIKE LOWER(:search) OR LOWER(p.label) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search))')
-                    ->setParameter('search', '%' . $search . '%');
-            }
+// TODO TROUVER UNE AUTRE SOLUTION, sinon, des projets vides remontent sans tenir compte des filtres
+//            if($search){
+//                $qb->orWhere('(LOWER(p.acronym) LIKE LOWER(:search) OR LOWER(p.label) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search))')
+//                    ->setParameter('search', '%' . $search . '%');
+//            }
 
             $qb->setParameter('ids', $ids);
 
