@@ -169,73 +169,95 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
     }
 
 
+    /**
+     * Point d'entrée depuis le contrôleur. Analyse des donnèes reçues.
+     * @param Request $request
+     * @param array|null $organizationsPerimeter IDs des organisations de référence
+     * @return array
+     */
     public function searchFromRequest(Request $request, ?array $organizationsPerimeter = null): array
     {
         // Traitement des données reçues
         $params = [];
 
-        // --- Paramètres de base
+        // PARAMETRES DE BASE
+
+        // --- Page
         $params[self::QUERY_PARAM_PAGE] =
             $this->extractValuePositiveInt($request->getQuery(self::QUERY_PARAM_PAGE), 1);
 
+        // --- Recherche textuelle
         $search = $request->getQuery(self::QUERY_PARAM_SEARCH, null);
         if ($search !== null) {
             $search = trim($search);
         }
         $params['search'] = $search;
-        $params['startEmpty'] = $search === true;
 
+        // --- Champ de tri
+        $params[self::QUERY_PARAM_SORT] =
+            $request->getQuery(self::QUERY_PARAM_SORT, 'dateUpdated');
 
-        $params['include'] = $request->getQuery('include', null);
-
-        // Champ de tri
-        $params[self::QUERY_PARAM_SORT] = $request->getQuery(self::QUERY_PARAM_SORT);
-
-        // Ignorer les valeurs nulles
+        // --- Ignorer les valeurs nulles
         $params[self::QUERY_PARAM_SORT_IGNORE_NULL] =
             (bool)$request->getQuery(self::QUERY_PARAM_SORT_IGNORE_NULL, false);
 
-        // Sens du tri
-        $params[self::QUERY_PARAM_SORT_DIRECTION] = $request->getQuery(self::QUERY_PARAM_SORT_DIRECTION);
+        // --- Sens du tri
+        $params[self::QUERY_PARAM_SORT_DIRECTION] =
+            $request->getQuery(self::QUERY_PARAM_SORT_DIRECTION, 'desc');
 
-        // Mode PROJET
+        // --- Mode PROJET
         $params[self::QUERY_PARAM_PROJECTVIEW] =
             $request->getQuery(self::QUERY_PARAM_PROJECTVIEW, '') == "on";
+        //
+        $params['startEmpty'] = $search === true;
 
-        // Récupération des filtres
-        $params['search'] = $request->getQuery(self::QUERY_PARAM_SEARCH, null);
+        // --- Périmètre de recherche
+        $params['include'] = $request->getQuery('include', null);
+
+        // --- Format
+        $params['format'] = $request->getQuery('f', null);
+
+
+        // --- Récupération des filtres
+        $params['search'] =
+            $request->getQuery(self::QUERY_PARAM_SEARCH, null);
+
         $criteria = $request->getQuery(self::QUERY_PARAM_CRITERIA, []);
+
         // Extraction des filtres
         $filters = [];
         $filtersError = false;
         foreach ($criteria as $criterion) {
-            $c = $criterion;
-            $filterParams = explode(';', $c);
+            $filterParams = explode(';', $criterion);
             $type = $filterParams[0];
+
+            // Par défaut, les deux valeurs reçues sont des entiers
+            // MAIS sur certains critères non
             $value1 = (int)$filterParams[1];
             $value2 = (int)$filterParams[2];
 
-            $crit = [
-                'raw'      => $criterion,
+            // Mise au propre des paramètres reçus
+            $param = [
+                'raw'      => $criterion, // la chaîne reçue
                 'type'     => $type,
                 'key'      => uniqid('filter_'),
                 'val1'     => $value1,
                 'val2'     => $value2,
                 'error'    => null,
-                'took'     => null,
-                'filtered' => null
+                'took'     => null, // Temps d'exécution du filtre
+                'filtered' => null // Nombre de résultats pour ce filtre
             ];
 
             switch ($type) {
                 case 'pp' :
-                    $crit['val1'] = '';
-                    $crit['val2'] = '';
+                    $param['val1'] = '';
+                    $param['val2'] = '';
                     break;
 
                 case 'mp':
                     if (!$value1 && !$value2) {
                         $filtersError = true;
-                        $crit['error'] = 'Plage numérique farfelue...';
+                        $param['error'] = 'Plage numérique farfelue...';
                     }
                     break;
 
@@ -244,15 +266,15 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     $value1 = ArrayUtils::explodeIntegerFromString($filterParams[1]);
                     if ($value1 < 1) {
                         $filtersError = true;
-                        $crit['error'] = "Identifiant de personne incorrecte";
+                        $param['error'] = "Identifiant de personne incorrecte";
                     }
-                    $crit['val1'] = $value1;
+                    $param['val1'] = $value1;
                     break;
 
                 case 'om' :
                     // TODO extraction d'un tableau d'entiers positifs
                     $value1 = explode(',', $filterParams[1]);
-                    $crit['val1'] = $value1;
+                    $param['val1'] = $value1;
                     break;
 
                 ////////////////////////// PERSONNE (Avec/Sans)
@@ -260,7 +282,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                 case 'sp' :
                     if (!$value1 && !$value2) {
                         $filtersError = true;
-                        $crit['error'] = "Aucun critère pour ce filtre";
+                        $param['error'] = "Aucun critère pour ce filtre";
                     }
                     break;
 
@@ -269,18 +291,18 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                 // --- Type de document
                 case 'td':
-                    if ($crit['val1'] == "null" || !$crit['val1']) {
-                        $crit['val1'] = [];
+                    if ($param['val1'] == "null" || !$param['val1']) {
+                        $param['val1'] = [];
                     }
                     else {
                         // TODO extraction d'un tableau d'entiers positifs
-                        $crit['val1'] = explode(',', $filterParams[1]);
+                        $param['val1'] = explode(',', $filterParams[1]);
                     }
                     break;
 
                 case 'ao' :
                 case 'so' :
-                    $crit['val1Label'] = "Non déterminé";
+                    $param['val1Label'] = "Non déterminé";
                     break;
 
                 // Filtre où value1 est un tableau
@@ -293,7 +315,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                 case 'cb':
                 case 'cb2':
                     // TODO A TESTER
-                    $crit['val1'] = explode(',', $filterParams[1]);
+                    $param['val1'] = explode(',', $filterParams[1]);
 
                     break;
                 case 'at' :
@@ -308,11 +330,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                     if ($progressStr != null && $progressStr != "" && $progressStr != 'null' && $progressStr != 'undefined') {
                         $progressArray = explode(',', $progressStr);
-                        $crit['val1'] = $value1;
-                        $crit['val2'] = ArrayUtils::implode(',', $progressArray);
+                        $param['val1'] = $value1;
+                        $param['val2'] = ArrayUtils::implode(',', $progressArray);
                     }
                     else {
-                        $crit['val2'] = '';
+                        $param['val2'] = '';
                     }
                     break;
 
@@ -326,25 +348,23 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     $end = DateTimeUtils::toDatetime($filterParams[2]);
                     $value1 = $start ? $start->format('Y-m-d') : '';
                     $value2 = $end ? $end->format('Y-m-d') : '';
-                    $crit['val1'] = $value1;
-                    $crit['val2'] = $value2;
+                    $param['val1'] = $value1;
+                    $param['val2'] = $value2;
 
                     // TODO tester les dates incohérentes
 
                     if (($start && $end) && ($start > $end)) {
-                        $crit['error'] = "plage de date incohérente";
+                        $param['error'] = "plage de date incohérente";
                     }
                     break;
             }
-            $filters[] = $crit;
+            $filters[] = $param;
         }
 
         $params['filters'] = $filters;
 
         // Périmètre de recherche
         $params['organizationsPerimeter'] = $organizationsPerimeter;
-
-        $affectationsDetails = null;
 
         /* TODO En cas de périmètre organization, calculer les affectations de la personne pour les retourner */
         $affectationsDetails = [];
@@ -377,7 +397,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $startEmpty = $params['startEmpty'];
         $page = $params['page'];
         $organizationsPerimeter = $params['organizationsPerimeter'];
-        $projectview = $params['projectview'];
+        $projectView = $params['projectview'];
 
         // Résultats
         $activitiesIds = null;
@@ -474,8 +494,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         array_intersect($idsActivitySearch, $activitiesIds);
                 } catch (Exception $e) {
                     $error = "Erreur Elasticsearch : " . $e->getMessage();
-                    $idsActivityRestricted = [];
-                    $idsProjectRestricted = [];
+                    $activitiesIds = [];
                 }
             }
         }
@@ -900,36 +919,76 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         }
 
         /////////////////////////////
-        $totalResult = 0;
-        $totalPages = 0;
+        $sorted = $params['sort'] == 'hit'; // Les IDS sont-t-ils déjà triés ?
 
-        // Cette partie est utilisée pour afficher les dernières activités
-        // lors d'une recherche vide.
-        if ($startEmpty === false) {
-            if (!$search && count($criterias) == 0) {
-                if ($activitiesIds === null) {
-                    // AFFICHER TOUS
-                    $allIds = $this->getEntityManager()->createQueryBuilder()
-                        ->select('c.id')
-                        ->from(Activity::class, 'c')
-                        ->getQuery()
-                        ->getResult();
-                    $activitiesIds = array_map('current', $allIds);
+
+        if (!$search && count($criterias) == 0) {
+            if ($activitiesIds === null) {
+                $sorted = true;
+
+                // AFFICHER TOUS
+                $queryAll = $this->getEntityManager()->createQueryBuilder()
+                    ->select('c.id, c.dateUpdated')
+                    ->from(Activity::class, 'c');
+
+                if ($params['sort'] !== 'hit') {
+                    $queryAll->orderBy('c.' . $params['sort'], $params['sortDirection']);
+                    if ($params['sortIgnoreNull'] == 'on') {
+                        $queryAll->where('c.' . $params['sort'] . ' IS NOT NULL');
+                    }
                 }
+
+                $allIds = $queryAll
+                    ->getQuery()
+                    ->getResult();
+
+                $activitiesIds = array_map('current', $allIds);
             }
         }
+
 
         if ($activitiesIds === null) {
             $activitiesIds = [];
         }
+        else {
+            // On trie les IDS si besoin
+            if ($sorted === false) {
+                $this->getLoggerService()->debug("Trie des " . (count($activitiesIds)) . " résultat(s");
+                $activitiesIds = $this->getProjectGrantService()->getActivityRepository()
+                    ->getIdsOrderedBy(
+                        $activitiesIds,
+                        $params['sort'],
+                        $params['sortDirection'],
+                        $params['sortIgnoreNull'] == 'on'
+                    );
+            }
+        }
+
 
         $idsRef = $activitiesIds;
-        if ($projectview) {
+
+        // Vue projet
+        if ($projectView) {
             if ($search) {
                 // TODO Ajouter les projets vides aux résultats
+                $idsProject = $this->getProjectGrantService()->getActivityRepository()
+                    ->getIdsProjectsForActivityAndEmpty(
+                        $search,
+                        $activitiesIds,
+                        $params['sort'],
+                        $params['sortDirection'],
+                        $params['sortIgnoreNull'] == 'on'
+                    );
+                $this->getLoggerService()->debug("Projet(s) : " . (count($idsProject)) . " projet(s)");
+            } else {
+                $idsProject = $this->getProjectGrantService()->getActivityRepository()
+                    ->getIdsProjectsForActivity(
+                        $activitiesIds,
+                        $params['sort'],
+                        $params['sortDirection'],
+                        $params['sortIgnoreNull'] == 'on'
+                    );
             }
-            $idsProject = $this->getProjectGrantService()->getActivityRepository()
-                ->getIdsProjectsForActivity($activitiesIds, $params['sort'], $params['sortDirection']);
             $idsRef = $idsProject;
         }
 
@@ -939,7 +998,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $offset = ($page - 1) * $limit;
         $orderedIds = array_slice($idsRef, $offset, $limit);
 
-        if ($projectview) {
+        if ($projectView) {
             $projectsIds = $idsRef;
             $qb = $this->getEntityManager()->createQueryBuilder()
                 ->select('p, c')
@@ -968,16 +1027,27 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                 ->setParameter('ids', $orderedIds);
         }
 
-        if ($params['sort']) {
-            // $qb->orderBy('c.'.$params['sort'], $params['sortDirection']);
+        if ($params['sort'] !== 'hit') {
+            $qb->orderBy('c.' . $params['sort'], $params['sortDirection']);
         }
 
         $activities = $qb->getQuery()->getResult();
 
+        usort($activities, function ($a, $b) use ($orderedIds) {
+            $indexA = array_search($a->getId(), $orderedIds);
+            $indexB = array_search($b->getId(), $orderedIds);
+            return $indexA - $indexB;
+        });
+
+        if ($params['format'] == 'json') {
+            $json = [];
+            foreach ($activities as $activity) {
+                $json[] = $activity->toArray();
+            }
+            $activities = $json;
+        }
+
         $output = [
-            "took_ms"                => 0,
-            "took_ms_filter"         => 0,
-            "took_ms_search"         => 0,
             "params_requested"       => $params,
             "errors"                 => null,
             "page"                   => $params['page'] ?? 1,
@@ -1015,6 +1085,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         $time_end = microtime(true);
 
         $output['took'] = intval(($time_end - $time_start) * 1000);
+
+        if ($params['format'] == 'json') {
+            echo json_encode($output, JSON_PRETTY_PRINT);
+            die();
+        }
 
         return $output;
     }

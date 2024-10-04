@@ -865,6 +865,7 @@ class ActivityRepository extends EntityRepository
     /**
      * @param array $idPersons
      * @param int $idRole
+     * @param bool $not
      * @return array
      * @throws OscarException
      */
@@ -895,23 +896,35 @@ class ActivityRepository extends EntityRepository
     /**
      * Retourne les IDs des projets pour la liste des IDs d'activité donnée.
      * @param array|null $ids
+     * @param string $orderBy
+     * @param string $direction
      * @return array
      */
-    public function getIdsProjectsForActivity(?array $ids, string $orderBy = "", string $direction = 'desc'): array
-    {
+    public function getIdsProjectsForActivity(
+        ?array $ids,
+        string $orderBy = "",
+        string $direction = 'desc',
+        bool $ignoreNull = false
+    ): array {
         if ($ids) {
             $qb = $this->getEntityManager()->createQueryBuilder()
-                ->select('DISTINCT p.id, 
+                ->select(
+                    'DISTINCT p.id, 
                     MIN(a.dateCreated) as dateCreated, 
+                    MIN(a.dateStart) as dateStart,
+                    MAX(a.dateEnd) as dateEnd,
                     MAX(a.dateUpdated) as dateUpdated,
-                    MAX(a.dateEnd) as dateEnd')
+                    MAX(a.dateSigned) as dateSigned, 
+                    MAX(a.dateOpened) as dateOpened
+                    '
+                )
                 ->from(Project::class, 'p')
-                ->innerJoin('p.grants', 'a')
+                ->leftJoin('p.grants', 'a')
                 ->where('a.id IN(:ids)')
                 ->groupBy('p.id')
                 ->setParameter('ids', $ids);
 
-            $orderable = ['dateCreated', 'dateUpdated', 'dateEnd'];
+            $orderable = ['dateCreated', 'dateUpdated', 'dateEnd', 'dateStart', 'dateSigned', 'dateOpened'];
             if ($orderBy && in_array($orderBy, $orderable)) {
                 $qb->orderBy($orderBy, $direction);
             }
@@ -924,6 +937,63 @@ class ActivityRepository extends EntityRepository
             return [];
         }
     }
+
+    public function getIdsProjectsForActivityAndEmpty(
+        string $search,
+        ?array $ids,
+        string $orderBy = "",
+        string $direction = 'desc',
+        bool $ignoreNull = false
+    ): array {
+        if ($ids) {
+            $qb = $this->getEntityManager()->createQueryBuilder()
+                ->select(
+
+                    /*'DISTINCT p.id,
+                    COALESCE(MIN(a.dateCreated),p.dateCreated) as dateCreated,
+                    MIN(a.dateStart) as dateStart,
+                    MAX(a.dateEnd) as dateEnd,
+                    COALESCE(MAX(a.dateUpdated),p.dateUpdated) as dateUpdated,
+                    MAX(a.dateSigned) as dateSigned,
+                    MAX(a.dateOpened) as dateOpened
+                    '*/
+                    'DISTINCT p.id as projectId,
+                    MIN(a.dateCreated) as dateCreated, 
+                    MIN(a.dateStart) as dateStart,
+                    MAX(a.dateEnd) as dateEnd,
+                    MAX(a.dateUpdated) as dateUpdated,
+                    MAX(a.dateSigned) as dateSigned, 
+                    MAX(a.dateOpened) as dateOpened
+                    '
+                )
+                ->from(Project::class, 'p')
+                ->leftJoin('p.grants', 'a')
+                ->where('a.id IN(:ids)')
+                ->groupBy('p.id');
+
+
+            if($search){
+                $qb->orWhere('(LOWER(p.acronym) LIKE LOWER(:search) OR LOWER(p.label) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search))')
+                    ->setParameter('search', '%' . $search . '%');
+            }
+
+            $qb->setParameter('ids', $ids);
+
+            $orderable = ['dateCreated', 'dateUpdated', 'dateEnd', 'dateStart', 'dateSigned', 'dateOpened'];
+            if ($orderBy && in_array($orderBy, $orderable)) {
+                $qb->orderBy($orderBy, $direction);
+            }
+
+            $results = $qb->getQuery()->getResult();
+
+            return array_map('current', $results);
+        }
+        else {
+            return [];
+        }
+    }
+
+
 
     /**
      * Retourne la liste des IDS inverse
@@ -943,6 +1013,12 @@ class ActivityRepository extends EntityRepository
         return array_map('current', $qb->getQuery()->getResult());
     }
 
+    /**
+     * Liste des IDs dont le montant est entre Min et Max.
+     * @param mixed $min
+     * @param mixed $max
+     * @return array
+     */
     public function getIdsAmount(mixed $min, mixed $max)
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
@@ -1104,5 +1180,25 @@ class ActivityRepository extends EntityRepository
             $qb->where('c.activityType NOT IN (:types)');;
         }
         return array_map('current', $qb->setParameter('types', $types)->getQuery()->getResult());
+    }
+
+    /**
+     * @param array $activitiesIds
+     * @param mixed $sort
+     * @param mixed $sortDirection
+     * @param bool $ignoreNull
+     * @return integer[]
+     */
+    public function getIdsOrderedBy(array $activitiesIds, mixed $sort, mixed $sortDirection, bool $ignoreNull): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('c.id')
+            ->orderBy('c.' . $sort, $sortDirection)
+            ->where('c.id IN(:ids)')
+            ->setParameter('ids', $activitiesIds);
+        if ($ignoreNull) {
+            $qb->andWhere("c." . $sort . " IS NOT NULL");
+        }
+        return array_map('current', $qb->getQuery()->getResult());
     }
 }

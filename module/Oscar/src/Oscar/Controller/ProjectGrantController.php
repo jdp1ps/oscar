@@ -2581,7 +2581,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     /**
      * @return array
      */
-    public function searchActivityAction(): array|ViewModel
+    public function searchActivityAction(): array|ViewModel|Response
     {
         $search = $this->params()->fromQuery('q', "");
         $options = [];
@@ -2603,13 +2603,19 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     }
 
     /**
+     * Recherche avancée des activités.
      * @param \Doctrine\ORM\QueryBuilder $qb
      * @return ViewModel
      * @throws Exception
      */
-    public function applyAdvancedSearch($qb) :ViewModel
+    public function applyAdvancedSearch($qb): ViewModel
     {
-        $view = new ViewModel($this->getProjectGrantSearchService()->searchFromRequest($this->getRequest(), $this->getOrganizationPerimeter()));
+        $view = new ViewModel(
+            $this->getProjectGrantSearchService()->searchFromRequest(
+                $this->getRequest(),
+                $this->getOrganizationPerimeter()
+            )
+        );
         $view->setTemplate('oscar/project-grant/advanced-search.phtml');
         return $view;
     }
