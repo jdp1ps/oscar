@@ -785,9 +785,8 @@ class ActivityRepository extends EntityRepository
     public function getActivityIdsByPFI(string $pfi): array
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
-            ->select('DISTINCT p.id')
-            ->from(Project::class, 'p')
-            ->innerJoin('p.grants', 'a')
+            ->select('DISTINCT a.id')
+            ->from(Activity::class, 'a')
             ->where('LOWER(a.codeEOTP) = LOWER(:pfi)')
             ->setParameter('pfi', $pfi);
 
