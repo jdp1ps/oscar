@@ -5,8 +5,9 @@
         Ce partie vous permet d'accèder aux différentes options de configuration du module de signature éléctronique
     </div>
 
+    <?php if(DEBUG_OSCAR): ?>
     <li><a href="<?= $this->url('unicaen-signature/signatures') ?>">Signatures actives</a></li>
-
+    <?php endif; ?>
     <article class="unicaen-signature-admin-item">
         <h2>
             <span>
