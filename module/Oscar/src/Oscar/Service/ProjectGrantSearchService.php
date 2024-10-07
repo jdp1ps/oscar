@@ -442,61 +442,78 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if ($search) {
             $this->getLoggerService()->debug("Recherche textuelle '$search'");
-
-            //////////////////////////
-            // Recherche NUMERO OSCAR
-            $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
-            if (preg_match("/^[0-9]{4}" . $oscarNumSeparator . ".*/mi", $search)) {
-                $this->getLoggerService()->debug("Recherche stricte sur le Numéro OSCAR : $search");
-                $idsActivitySearch = $this->getProjectGrantService()
-                    ->getActivityRepository()
-                    ->getActivityIdsByOscarNumLike($search . "%");
-
-                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
-
-                $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
-                    array_intersect($idsActivitySearch, $activitiesIds);
-            }
-
-            //////////////////////////
-            // Recherche PFI
-            elseif ($this->getOscarConfigurationService()->isPfiStrict()
-                && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
+            try {
                 $this->getLoggerService()->debug(
-                    "Recherche sur le PFI (regex: " . $this->getOscarConfigurationService()->getValidationPFI() . ")"
+                    "Recherche textuelle '" . $search . "')"
+                );;
+                $idsSearched = $this->getProjectGrantService()->search($search, true);
+                $idsActivitySearch = $idsSearched['activity_ids'];
+                $this->getLoggerService()->debug(
+                    "La recherche textuelle a retournée " . count($idsActivitySearch) . " résultat(s) en " .
+                    (microtime(true) - $time_start) . " ms"
                 );;
 
-                $idsActivitySearch = $this->getProjectGrantService()
-                    ->getActivityRepository()
-                    ->getActivityIdsByPFI($search);
-
-                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
-
                 $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
                     array_intersect($idsActivitySearch, $activitiesIds);
+            } catch (Exception $e) {
+                $error = "Erreur Elasticsearch : " . $e->getMessage();
+                $activitiesIds = [];
             }
 
-            //////////////////////////
-            // Recherche ELASTIC
-            else {
-                try {
-                    $this->getLoggerService()->debug(
-                        "Recherche textuelle '" . $search . "')"
-                    );;
-                    $idsSearched = $this->getProjectGrantService()->search($search, true);
-                    $idsActivitySearch = $idsSearched['activity_ids'];
-                    $this->getLoggerService()->debug(
-                        "La recherche textuelle a retournée " . count($idsActivitySearch) . " résultat(s) en " .
-                        (microtime(true) - $time_start) . " ms"
-                    );;
-
-                    $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
-                        array_intersect($idsActivitySearch, $activitiesIds);
-                } catch (Exception $e) {
-                    $error = "Erreur Elasticsearch : " . $e->getMessage();
-                    $activitiesIds = [];
-                }
-            }
+//            //////////////////////////
+//            // Recherche NUMERO OSCAR
+//            $oscarNumSeparator = $this->getOscarConfigurationService()->getConfiguration("oscar_num_separator");
+//            if (preg_match("/^[0-9]{4}" . $oscarNumSeparator . ".*/mi", $search)) {
+//                $this->getLoggerService()->debug("Recherche stricte sur le Numéro OSCAR : $search");
+//                $idsActivitySearch = $this->getProjectGrantService()
+//                    ->getActivityRepository()
+//                    ->getActivityIdsByOscarNumLike($search . "%");
+//
+//                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
+//
+//                $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
+//                    array_intersect($idsActivitySearch, $activitiesIds);
+//            }
+//
+//            //////////////////////////
+//            // Recherche PFI
+//            elseif ($this->getOscarConfigurationService()->isPfiStrict()
+//                && preg_match($this->getOscarConfigurationService()->getValidationPFI(), $search)) {
+//                $this->getLoggerService()->debug(
+//                    "Recherche sur le PFI (regex: " . $this->getOscarConfigurationService()->getValidationPFI() . ")"
+//                );;
+//
+//                $idsActivitySearch = $this->getProjectGrantService()
+//                    ->getActivityRepository()
+//                    ->getActivityIdsByPFI($search);
+//
+//                $this->getLoggerService()->debug(" > " . count($idsActivitySearch) . " résultat(s)");
+//
+//                $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
+//                    array_intersect($idsActivitySearch, $activitiesIds);
+//            }
+//
+//            //////////////////////////
+//            // Recherche ELASTIC
+//            else {
+//                try {
+//                    $this->getLoggerService()->debug(
+//                        "Recherche textuelle '" . $search . "')"
+//                    );;
+//                    $idsSearched = $this->getProjectGrantService()->search($search, true);
+//                    $idsActivitySearch = $idsSearched['activity_ids'];
+//                    $this->getLoggerService()->debug(
+//                        "La recherche textuelle a retournée " . count($idsActivitySearch) . " résultat(s) en " .
+//                        (microtime(true) - $time_start) . " ms"
+//                    );;
+//
+//                    $activitiesIds = $activitiesIds === null ? $idsActivitySearch :
+//                        array_intersect($idsActivitySearch, $activitiesIds);
+//                } catch (Exception $e) {
+//                    $error = "Erreur Elasticsearch : " . $e->getMessage();
+//                    $activitiesIds = [];
+//                }
+//            }
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

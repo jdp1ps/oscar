@@ -108,10 +108,43 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
 
     public function getFieldsSearchedWeighted(string $search): array
     {
-        $words = explode(" ", $search);
+        $andQuery = null;
+        $wordsNbr = 1;
 
-        $wordsNbr = count($words);
-        $andQuery = implode(" AND ", $words);
+        // Détection des recherches strictes
+        if(preg_match_all('/^"(.*)"$/', $search, $matches, PREG_SET_ORDER)) {
+            if( count($matches) == 1 && array_key_exists(1, $matches[0])) {
+                $andQuery = $matches[0][0];
+                $wordsNbr = 2;
+            }
+        }
+
+//        if(preg_match_all('/^query:(.*)$/', $search, $matches, PREG_SET_ORDER)) {
+//            if( count($matches) == 1 && array_key_exists(1, $matches[0])) {
+//                $andQuery = $matches[0][1];
+//                $wordsNbr = 2;
+//            }
+//        }
+
+        if(preg_match_all('/^(.*)\*$/', $search, $matches, PREG_SET_ORDER)) {
+            if( count($matches) == 1 && array_key_exists(1, $matches[0])) {
+                $andQuery = $matches[0][0];
+                $wordsNbr = 2;
+            }
+        }
+
+        if( $andQuery === null ){
+            $words = explode(" ", $search);
+            $wordsNbr = count($words);
+            $andQuery = implode(" AND ", $words);
+
+            // TEST d'approximation
+//            $wordsUpdated = [];
+//            foreach ($words as $word) {
+//                $lng = (int)(strlen($word) / 4);
+//                $wordsUpdated[] = $word . ($lng > 0 ? "~$lng" : "");
+//            }
+        }
 
 
         $query = [
@@ -125,120 +158,39 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
 
         // TODO si plusieurs mots, ajouter une règle spécifique
         if ($wordsNbr > 1) {
-            $wordsUpdated = [];
-            foreach ($words as $word) {
-                $lng = (int)(strlen($word) / 4);
-                $wordsUpdated[] = $word . ($lng > 0 ? "~$lng" : "");
-            }
-            $wordsUpdatedAndQuery = implode(" AND ", $wordsUpdated);
+
             $query["bool"]["should"][] = [
                 "query_string" => [
-                    "query" => $wordsUpdatedAndQuery,
+                    "query"  => $andQuery,
                     "fields" => [
-                        'acronym^10',
-                        'numerotation^9',
-                        'eotp^9',
-                        'numbers^9',
-                        'oscar^9',
-                        'label~1^7',
+                        'oscar^20',
+                        'eotp^20',
+                        'acronym^15',
+                        'numbers^10',
+                        'disciplines^7',
+                        'label^5',
+                        'project^5',
+                        'activitytype^3',
                         'description^2',
-                        'project^7',
-                        'disciplines^5',
-                        'activitytype^7',
-                        'partners^5',
-                        'members^5'
+                        'partners',
+                        'members'
                     ]
                 ]
-                ];
+            ];
         }
         else {
             $query["bool"]["should"] = [
-                [
-                    "query_string" => [
-                        "query"  => $andQuery,
-                        "fields" => ["label^7", "description2"]
-                    ]
-                ],
-                [
-                    "match" => [
-                        "discipline" => [
-                            "query"     => $search,
-                            "boost"     => 5
-                        ]
-                    ]
-                ],
-                [
-                    "match" => [
-                        "acronym" => [
-                            "query"     => $search,
-                            "boost"     => 10
-                        ]
-                    ]
-                ],
-                [
-                    "match" => [
-                        "description" => [
-                            "query"     => $search,
-                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
-                        ]
-                    ]
-                ],
-                [
-                    "match" => [
-                        "activitytype" => [
-                            "query"     => $search,
-                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
-                            "boost"     => 2
-                        ]
-                    ]
-                ],
-                [
-                    "match" => [
-                        "project" => [
-                            "query"     => $search,
-                            'fuzziness' => "AUTO", // "Tolérance" aux fautes,
-                            "boost"     => 2
-                        ]
-                    ]
-                ],
-
-                [
-                    "match" => [
-                        "partners" => [
-                            "query" => $search
-                        ]
-                    ]
-                ],
-
-                [
-                    "match" => [
-                        "members" => [
-                            "query" => $search
-                        ]
-                    ]
-                ],
-
-//                [
-//                    "prefix" => [
-//                        "acronym" => $search,  // Documents qui commencent par l'expression
-//                    ]
-//                ],
-//                [
-//                    "prefix" => [
-//                        "numerotation" => $search,  // Documents qui commencent par l'expression
-//                    ]
-//                ],
-//                [
-//                    "prefix" => [
-//                        "eotp" => $search,  // Documents qui commencent par l'expression
-//                    ]
-//                ]
-//                ,
-//                [
-//                    "prefix" => [
-//                        "oscar" => $search,  // Documents qui commencent par l'expression
-//                    ]
-//                ]
+                ["match" => [ "oscar" => ["query" => $andQuery, "boost" => 20]]],
+                ["match" => [ "eotp" => ["query" => $andQuery, "boost" => 20]]],
+                ["match" => [ "acronym" => ["query" => $andQuery, "boost" => 15]]],
+                ["match" => [ "numbers" => ["query" => $andQuery, "boost" => 10]]],
+                ["match" => [ "disciplines" => ["query" => $andQuery, "boost" => 7]]],
+                ["match" => [ "label" => ["query" => $andQuery, "boost" => 5]]],
+                ["match" => [ "activitytype" => ["query" => $andQuery, "boost" => 3]]],
+                ["match" => [ "project" => ["query" => $andQuery, "boost" => 5]]],
+                ["match" => [ "description" => ["query" => $andQuery, "boost" => 1]]],
+                ["match" => [ "partners" => ["query" => $andQuery, "boost" => 1]]],
+                ["match" => [ "members" => ["query" => $andQuery, "boost" => 1]]],
             ];
         }
 

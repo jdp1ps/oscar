@@ -188,6 +188,7 @@ abstract class ElasticSearchEngine
 
     /**
      * @param string $search
+     * @param bool $withIdsProjects
      * @return array Liste des IDs
      * @throws OscarException
      */
