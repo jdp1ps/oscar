@@ -423,26 +423,21 @@
                    value="<?= htmlentities($search) ?>"/>
 
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" onclick="$('#aide').toggle()" title="Tous savoir sur les expressions de recherche ?"><i class="icon-lifebuoy-1"></i></button>
+                    <!--<button type="button" class="btn btn-default" onclick="$('#aide').toggle()" title="Tous savoir sur les expressions de recherche ?"><i class="icon-lifebuoy-1"></i></button>-->
                     <button type="submit" class="btn btn-primary">Rechercher</button>
                 </span>
         </div>
-        <div id="aide" style="display: none" class="alert alert-info alert-help">
-            <h3><i class="icon-lifebuoy-1"></i> Rechercher dans les activités</h3>
-            <p>La recherche va analyser le contenu de votre recherche en isolant les <strong>termes</strong>,
-                par défaut les termes sont des contenus approchant,
-                par exemple la recherche <q>reseau normand</q> va rechercher les mots <em>reseau</em> et <em>normand</em> en classant les résultats par pertinence (d'abord les activités contenant les 2 termes stricts, puis celle contenant au moins un des 2 termes)</p>
-
-            <p>Vous pouvez utiliser des <em>expressions de recherche</em> en spécifiant les <strong>termes</strong> plus finement : </p>
-            <ul>
-                <li><strong>"Recherche stricte"</strong>, vous pouvez entourer de guillemets double un terme, par exemple en entourant votre recherche de guillemets double <em>"reseau normand"</em>, le moteur cherchera ce terme précis</li>
-                <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>
-                <li><strong>ET/OU</strong> Les mots clefs <strong>OR</strong> et <strong>AND</strong> permettent de préciser les termes à rechercher : NORMAND* OR RESEAU, cherchera les activités contenant des termes commençant par "NORMAND..." ou contenant le terme RESEAU</li>
-                <li><strong><?= $this->options()->getConfiguration()->getFinancialLabel() ?></strong> Saisissez directement le <?= $this->options()->getConfiguration()->getFinancialLabel() ?>.</li>
-                <li><strong>XXXX<?= $this->options()->oscarNumSeparator() ?></strong> Recherche sur le système de numérotation Oscar (2017<?= $this->options()->oscarNumSeparator() ?>...).</li>
-                <li><strong>num=valeur</strong> Permet de chercher sur la numérotation libre proposée dans les activités de recherche.</li>
-            </ul>
-        </div>
+<!--        <div id="aide" style="display: none" class="alert alert-info alert-help">-->
+<!--            <h3><i class="icon-lifebuoy-1"></i> Rechercher dans les activités</h3>-->
+<!--            <p>La recherche va analyser le contenu de votre recherche en isolant les <strong>termes</strong>,-->
+<!--                par défaut les termes sont des contenus approchant,-->
+<!--                par exemple la recherche <q>reseau normand</q> va rechercher les mots <em>reseau</em> et <em>normand</em> en classant les résultats par pertinence (d'abord les activités contenant les 2 termes, puis celle contenant au moins un des 2 termes)</p>-->
+<!---->
+<!--            <p>Vous pouvez utiliser des <em>expressions de recherche</em> en spécifiant les <strong>termes</strong> plus finement : </p>-->
+<!--            <ul>-->
+<!--                <li><strong>Wildcard *</strong> le caractère <em>*</em> en fin de terme permet d'élargir les résultats, ex : Normand* fera remonter les résultats avec Normandie, Normand, etc... (Un terme se terminant par une wildcard doit commencer par au moins 2 caractères standards)</li>-->
+<!--            </ul>-->
+<!--        </div>-->
         <?php if( $error ): ?>
             <div class="alert alert-danger">
                 <?= $error ?>
