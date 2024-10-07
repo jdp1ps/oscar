@@ -186,7 +186,7 @@
           </h3>
           <article v-for="step in selectedSignProcess.steps" class="step"
                    :class="step.missing_recipients ? 'error' : 'ok'">
-            <h4>étape {{ step.order }} :<strong>{{ step.label }}</strong></h4>
+            <h4>ÉTAPE {{ step.order }} :<strong>{{ step.label }}</strong></h4>
             <ul class="metas">
               <li class="meta">Parapheur: <strong>{{ step.letterfile_label }}</strong></li>
               <li class="meta">Type: <strong>{{ step.level_label }}</strong></li>
@@ -197,19 +197,33 @@
             </div>
             <div class="row">
               <div class="col-md-6">
-                <h5>Destinataires</h5>
-                <div class="recipient" v-for="r in step.recipients">
-                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
-                  <strong class="email">{{ r.email }}</strong>
-                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
+                <h5>
+                  <i class="icon-group"></i>
+                  Destinataires
+                  - <a href="#" @click.prevent="handlerToggleCheck(step.recipients)">Inverser selection</a>
+                </h5>
+                <div class="recipient" v-for="r,index in step.recipients" :class="{'selected': r.selected}">
+                  <label :for="'des_'+step.id +'_'+index">
+                    <input type="checkbox" v-if="step.editable" v-model="r.selected" :id="'des_'+step.id +'_'+index"/>
+                    &nbsp;
+                    <span class="fullname">{{ r.firstname }} {{ r.lastname }} - </span>
+                    <small class="email" style="font-weight: 500">{{ r.email }}</small>
+                  </label>
                 </div>
               </div>
               <div class="col-md-6">
-                <h5>Observateurs</h5>
-                <div class="recipient" v-for="r in step.observers" v-if="step.observers.length">
-                  <input type="checkbox" v-if="step.editable" v-model="r.selected"/>
-                  <strong class="email">{{ r.email }}</strong>
-                  <span class="fullname">{{ r.firstname }} {{ r.lastname }}</span>
+                <h5>
+                  <i class="icon-bell-alt"></i>
+                  <strong>Observateurs</strong>
+                  - <a href="#" @click.prevent="handlerToggleCheck(step.observers)">Inverser selection</a>
+                </h5>
+                <div class="recipient" v-for="r, index in step.observers" v-if="step.observers.length" :class="{'selected': r.selected}">
+                  <label :for="'obs_'+step.id +'_'+index">
+                    <input type="checkbox" v-if="step.editable" :id="'obs_'+step.id +'_'+index" v-model="r.selected"/>
+                    &nbsp;
+                    <strong class="fullname">{{ r.firstname }} {{ r.lastname }} - </strong>
+                    <small class="email" style="font-weight: 500">{{ r.email }}</small>
+                  </label>
                 </div>
                 <div class="alert alert-info" v-else>
                   Pas d'observateur pour cette étape
@@ -452,6 +466,12 @@ export default {
       } else {
         return false;
       }
+    },
+
+    handlerToggleCheck(selectableList){
+      selectableList.forEach(item => {
+        item.selected = !item.selected;
+      });
     },
 
     handlerProcessInit(doc) {
@@ -723,9 +743,20 @@ export default {
   border: solid thin #92b2ae;
   border-left-width: 8px;
   display: flex;
-  text-shadow: 1px -1px 0 rgb(255, 255, 255);
-  padding: .25em 0 .25em .5em;
+  text-shadow: 4px -1px 0 rgb(255, 255, 255, .3);
+  padding: .2em 0 .2em .5em;
   margin-right: .5em
+}
+.recipient label {
+  color:#777;
+}
+
+.recipient.selected {
+  border-color: #12b368;
+  background: #adfad8;
+}
+.recipient.selected label {
+  color: #000;
 }
 
 .recipient .email, .recipient .fullname {

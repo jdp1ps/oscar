@@ -31,7 +31,7 @@
 
       <section class="signature" :class="'signature-status-'+s.status" v-for="s in processDetails.steps">
         <h4>
-          <small>étape {{ s.order }} : </small>
+          <small>Étape {{ s.order }} : </small>
           <strong>{{ s.label }}</strong>
           <span class="status"> ({{ s.status_text }})</span>
         </h4>
