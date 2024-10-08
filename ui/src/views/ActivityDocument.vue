@@ -290,6 +290,7 @@ import DocumentsList from "./DocumentsList.vue";
 // Traitement spécifique de l'onglet Privé
 const PRIVATE = "private";
 
+
 export default {
 
   components: {

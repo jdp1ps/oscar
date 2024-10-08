@@ -1,6 +1,10 @@
-import { createApp } from 'vue'
+import { createApp } from "vue"
 
-import Example from './components/Example.vue'
+// Importation du composant
+import Example from "./components/Example.vue"
 
+// Création de la vue
 const app = createApp(Example)
-app.mount('#example')
+
+// Affichage dans l'élément du DOM #example (<div id="example"></div>)
+app.mount("#example")

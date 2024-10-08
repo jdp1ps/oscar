@@ -204,9 +204,10 @@
                 </h5>
                 <div class="recipient" v-for="r,index in step.recipients" :class="{'selected': r.selected}">
                   <label :for="'des_'+step.id +'_'+index">
-                    <input type="checkbox" v-if="step.editable" v-model="r.selected" :id="'des_'+step.id +'_'+index"/>
-                    &nbsp;
-                    <span class="fullname">{{ r.firstname }} {{ r.lastname }} - </span>
+                    <span class="fullname">
+                      <input type="checkbox" v-if="step.editable" v-model="r.selected" :id="'des_'+step.id +'_'+index"/>
+                      &nbsp;
+                      <em style="font-weight: 300">{{ r.firstname }}</em> {{ r.lastname }}</span>
                     <small class="email" style="font-weight: 500">{{ r.email }}</small>
                   </label>
                 </div>
@@ -219,9 +220,11 @@
                 </h5>
                 <div class="recipient" v-for="r, index in step.observers" v-if="step.observers.length" :class="{'selected': r.selected}">
                   <label :for="'obs_'+step.id +'_'+index">
-                    <input type="checkbox" v-if="step.editable" :id="'obs_'+step.id +'_'+index" v-model="r.selected"/>
-                    &nbsp;
-                    <strong class="fullname">{{ r.firstname }} {{ r.lastname }} - </strong>
+                    <span class="fullname">
+                      <input type="checkbox" v-if="step.editable" :id="'obs_'+step.id +'_'+index" v-model="r.selected"/>
+                      &nbsp;
+                      <em style="font-weight: 300">{{ r.firstname }}</em> {{ r.lastname }}
+                    </span>
                     <small class="email" style="font-weight: 500">{{ r.email }}</small>
                   </label>
                 </div>
@@ -742,11 +745,27 @@ export default {
 .recipient {
   border: solid thin #92b2ae;
   border-left-width: 8px;
-  display: flex;
+  /*display: flex;*/
   text-shadow: 4px -1px 0 rgb(255, 255, 255, .3);
   padding: .2em 0 .2em .5em;
   margin-right: .5em
 }
+
+.recipient label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.recipient .fullname {
+  flex: 1;
+}
+
+.recipient .email {
+  flex: 0;
+  margin-right: auto;
+  text-align: right;
+}
+
 .recipient label {
   color:#777;
 }

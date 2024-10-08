@@ -234,13 +234,13 @@
             template: `<div>
                 <section>
                     <p v-if="declarationsHoursOverwrite">
-                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong><br>
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en pourcentage jour' }}</strong><br>
                         <a @click="switchDeclarationMode()" href="#" class="btn btn-primary">
                             {{ declarationsHours ? 'utiliser la déclaration en pourcentage jour' : 'utiliser la déclaration en heure' }}
                         </a>
                     </p>
                     <p v-else class="alert alert-info">
-                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en poucentage jour' }}</strong>
+                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en pourcentage jour' }}</strong>
                     </p>
                 </section>
                 </div>`,

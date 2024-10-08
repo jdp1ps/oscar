@@ -233,6 +233,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ?array $filterRoleOrganization = null
     ): array {
         $out = [];
+        $this->getLoggerService()->debug(__METHOD__);
         $activity = $this->getActivityById($idActivity);
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
@@ -266,11 +267,22 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 }
             }
         }
+
+        usort($out, function ($a, $b) {
+           return $a->getLastName() <=> $b->getLastName();
+        });
+
         return $out;
     }
 
+    /**
+     * @param $options
+     * @return array
+     * @throws OscarException
+     */
     public function getRecipients($options)
     {
+        $this->getLoggerService()->debug(__METHOD__);
         if (!array_key_exists('activity_id', $options)) {
             return [];
         }
@@ -292,7 +304,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $recipients = [];
         foreach ($persons as $p) {
             $recipients[$p->getId()] = [
-                'firstname' => $p->getFirstname(),
+                'firstname' => ucfirst(strtolower($p->getFirstname())),
                 'lastname'  => $p->getLastname(),
                 'email'     => $p->getEmail(),
             ];
