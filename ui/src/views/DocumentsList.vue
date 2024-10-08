@@ -745,11 +745,11 @@ export default {
 .recipient {
   border: solid thin #92b2ae;
   border-left-width: 8px;
-  /*display: flex;*/
   text-shadow: 4px -1px 0 rgb(255, 255, 255, .3);
   padding: .2em 0 .2em .5em;
   margin-right: .5em
 }
+
 
 .recipient label {
   display: flex;

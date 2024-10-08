@@ -1,6 +1,6 @@
 {
   "DocumentsList.css": {
-    "file": "assets/DocumentsList-c099b3ca.css",
+    "file": "assets/DocumentsList-631f301b.css",
     "src": "DocumentsList.css"
   },
   "_vendor.js": {
@@ -8,7 +8,7 @@
   },
   "_vendor2.js": {
     "css": [
-      "assets/DocumentsList-c099b3ca.css"
+      "assets/DocumentsList-631f301b.css"
     ],
     "file": "vendor2.js",
     "imports": [
