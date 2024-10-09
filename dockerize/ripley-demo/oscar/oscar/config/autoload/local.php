@@ -185,7 +185,7 @@ return array(
         'connection' => array(
             'orm_default' => array(
                 // Postgresql
-                'driverClass' => '\Doctrine\DBAL\Driver\PDOPgSql\Driver',
+                'driverClass' => '\Doctrine\DBAL\Driver\PDO\PgSQL\Driver',
                 ////////////////////////////////////////////////////////////////
 
                 'doctrine_type_mappings' => array(
