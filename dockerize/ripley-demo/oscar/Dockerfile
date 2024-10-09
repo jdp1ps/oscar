@@ -149,7 +149,7 @@ RUN a2enmod rewrite && a2enmod ssl
 
 
 ##Composer (Attention proxy important pour du wget)
-RUN wget https://getcomposer.org/download/latest-stable/composer.phar
+RUN wget https://getcomposer.org/download/2.2.22/composer.phar
 RUN mv composer.phar /usr/local/bin/composer
 RUN chmod +x /usr/local/bin/composer
 
