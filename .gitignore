@@ -130,3 +130,4 @@ module/Demo
 # DOCKER
 dockerize/local/*
 !dockerize/local/.gitkeep
+.env
