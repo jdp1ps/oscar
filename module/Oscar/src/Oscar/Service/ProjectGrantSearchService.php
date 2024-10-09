@@ -1076,7 +1076,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             "totalResult"            => $totalResult,
             'totalPages'             => $totalPages,
             'projectview'            => $params['projectview'],
-            'exportIds'              => [], //ArrayUtils::implode(',', $idsExport),
+            'exportIds'              => ArrayUtils::implode(',', $activitiesIds),
             'error'                  => $error,
             'criteria'               => $criterias,
             'persons'                => $persons,
