@@ -38,6 +38,23 @@ Server: Docker Engine - Community
   GitCommit:        de40ad0
 ```
 
+## Récupération des sources
+```bash
+git clone https://git.unicaen.fr/open-source/oscar.git
+cd oscar
+```
+
+## Copie des fichiers de base de configuration
+
+```bash
+cp dockerize/ripley-demo/oscar/oscar/config/autoload/local.php config/autoload/
+cp dockerize/ripley-demo/oscar/oscar/config/autoload/unicaen-app.local.php config/autoload/
+cp dockerize/ripley-demo/oscar/oscar/config/autoload/unicaen-auth.local.php config/autoload/
+
+# droits d'écriture
+sudo chmod -R 777 data/DoctrineORMModule
+```
+
 ## Construction de l'application
 
 Le *docker-compose.yml* est disponible dans les sources de l'application : `dockerize/ripley-demo`
@@ -77,7 +94,7 @@ Accès : http://localhost:8181
 
 ```bash
 # Se connecter à oscar
-sudo docker compose exec oscar_ripley exec sh
+sudo docker compose exec oscar_ripley sh
 
 # Une fois connecté
 su
