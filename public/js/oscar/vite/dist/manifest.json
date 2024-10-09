@@ -1,6 +1,6 @@
 {
   "DocumentsList.css": {
-    "file": "assets/DocumentsList-631f301b.css",
+    "file": "assets/DocumentsList-6c28cd54.css",
     "src": "DocumentsList.css"
   },
   "_vendor.js": {
@@ -8,7 +8,7 @@
   },
   "_vendor2.js": {
     "css": [
-      "assets/DocumentsList-631f301b.css"
+      "assets/DocumentsList-6c28cd54.css"
     ],
     "file": "vendor2.js",
     "imports": [
@@ -54,14 +54,14 @@
     ]
   },
   "src/ActivityDocuments.css": {
-    "file": "assets/ActivityDocuments-5fbb0b62.css",
+    "file": "assets/ActivityDocuments-7738ec7a.css",
     "src": "src/ActivityDocuments.css"
   },
   "src/ActivityDocuments.js": {
     "css": [
-      "assets/ActivityDocuments-5fbb0b62.css"
+      "assets/ActivityDocuments-7738ec7a.css"
     ],
-    "file": "assets/activitydocuments-51ddd1d1.js",
+    "file": "assets/activitydocuments-c02d2134.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",

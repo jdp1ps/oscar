@@ -290,7 +290,7 @@ import DocumentsList from "./DocumentsList.vue";
 // Traitement spécifique de l'onglet Privé
 const PRIVATE = "private";
 
-
+// ok
 export default {
 
   components: {
@@ -621,8 +621,8 @@ export default {
 
     /**
      Déclenche ouverture Modal Upload nouveau document initialise datas/reset et affectation de base
-     Important surtout dans le scénario de l'ouverture modal avec modification datas et fermeture de la modal,
-     réouverture de cette modal sans avoir soumis la première fois
+     Important surtout dans le scénario de l'ouverture modal avec modification datas et fermeture de la modale,
+     réouverture de cette modale sans avoir soumis la première fois
      */
     handlerNew(tabId) {
       this.mode = 'new';
@@ -689,19 +689,19 @@ export default {
       let url = "";
       formData.append('data', JSON.stringify(this.editedDocument));
 
-      if (this.mode == 'version') {
+      if (this.mode === 'version') {
         formData.append('action', 'version');
         url = this.editedDocument.urlReupload;
-      } else if (this.mode == 'new') {
+      } else if (this.mode === 'new') {
         formData.append('action', 'new');
         formData.append('flow', ''); //JSON.stringify(this.currentFlow));
         url = this.urlUploadNewDoc;
-      } else if (this.mode == 'edit') {
+      } else if (this.mode === 'edit') {
         formData.append('action', 'edit');
         url = this.editedDocument.urlReupload;
       }
 
-      if (this.mode != 'edit') {
+      if (this.mode !== 'edit') {
         if (this.fileToDownload !== null) {
           formData.append('file', this.fileToDownload, this.fileToDownload.name);
         } else {

@@ -280,12 +280,18 @@
         </ul>
 
         <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">
-          <strong class="fullname">{{ r.fullname }}</strong>
-          <em class="email">{{ r.email }}</em>
-          <small>{{ $filters.dateFull(r.dateFinished) }}</small>
-          <span class="status">
-            <span class="status-text">{{ r.status_text }}</span>
-          </span>
+          <div class="title">
+            <strong class="fullname">{{ r.fullname }}</strong>
+            <em class="email">{{ r.email }}</em>
+            <small class="dateFinished" v-if="r.dateFinished">{{ $filters.dateFull(r.dateFinished) }}</small>
+            <span class="status">
+              <span class="status-text">{{ r.status_text }}</span>
+            </span>
+          </div>
+          <div v-if="r.informations" :class="{'alert alert-danger': r.status === 501}">
+            <i class="icon-comment"></i>
+            {{ r.informations }}
+          </div>
         </article>
         <strong>Observateurs : </strong>
         <span v-for="o in s.observers" class="observer-inline">
@@ -742,6 +748,14 @@ export default {
   padding: .5em
 }
 
+.signature .recipient {
+  display: block;
+}
+
+.signature .recipient .title {
+  display: flex;
+}
+
 .recipient {
   border: solid thin #92b2ae;
   border-left-width: 8px;
@@ -767,6 +781,9 @@ export default {
 }
 
 .recipient label {
+  display: flex;
+  padding: 0 1em 0 0;
+  width: 100%;
   color:#777;
 }
 

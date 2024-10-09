@@ -57,14 +57,6 @@
             {{ totalDocuments }} document(s) au total / page {{ currentPage }} sur {{ totalPages }}
           </a>
         </li>
-        <!--
-        <li v-for="p in totalPages" :class="currentPage == p ? 'active' : ''">
-          <a href="#" @click="fetchPage(p)">
-          {{ p }}
-        </a>
-        </li>
-        -->
-
         <li>
           <a href="#" aria-label="Next" v-if="currentPage < totalPages" @click="fetchPage(currentPage + 1)">
             <span aria-hidden="true">&raquo;</span>
@@ -155,8 +147,6 @@ export default {
           }
         }
       }
-
-
       return documents;
     }
   },
