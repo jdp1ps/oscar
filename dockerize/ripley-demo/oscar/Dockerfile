@@ -158,10 +158,10 @@ COPY startup.sh /opt/startup.sh
 RUN chmod +x /opt/startup.sh
 
 ### OSCAR CONFIG (default)
-#RUN mkdir /etc/oscar_config/
-#COPY oscar/config/autoload/local.php /opt/oscar_config/local.php
-#COPY oscar/config/autoload/unicaen-app.local.php /opt/oscar_config/unicaen-app.local.php
-#COPY oscar/config/autoload/unicaen-auth.local.php /opt/oscar_config/unicaen-auth.local.php
+RUN mkdir /etc/oscar_config/
+COPY oscar/config/autoload/local.php /opt/oscar_config/local.php
+COPY oscar/config/autoload/unicaen-app.local.php /opt/oscar_config/unicaen-app.local.php
+COPY oscar/config/autoload/unicaen-auth.local.php /opt/oscar_config/unicaen-auth.local.php
 
 ##SUPERVISOR FICHIERS DE CONFIG POUR MULTIPLES SERVICES IN CONTAINER DOCKER
 COPY supervisor /etc/supervisor/conf.d/oscar.conf

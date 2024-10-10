@@ -5,8 +5,6 @@ cd /opt/OscarApp
 composer install
 
 # PATH Access
-chmod -R 777 data/DoctrineORMModule
-
 touch config/autoload/oscar-editable.yml
 touch logs/oscar.log
 chmod 777 config/autoload/oscar-editable.yml
@@ -41,5 +39,7 @@ php bin/oscar.php persons:search-rebuild
 php bin/oscar.php organizations:search-rebuild
 php bin/oscar.php activity:search-rebuild
 ### DEMO}}}
+
+chmod -R 777 data/DoctrineORMModule
 
 exit 0

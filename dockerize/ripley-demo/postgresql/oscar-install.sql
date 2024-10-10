@@ -3031,7 +3031,7 @@ COPY public.administrativedocumentsection (id, label, description) FROM stdin;
 --
 
 COPY public.authentification (id, username, email, display_name, password, state, datelogin, settings, secret) FROM stdin;
-2	administrateur	administrateur@unicaen.fr	Admin	$2y$14$GaLU0nKUpZ96o1NZtjsc/O9DuUPUx98SIs3RjLJ.wm/F/L30P9KsO	0	\N		\N
+	\N		\N
 \.
 
 
@@ -3040,7 +3040,6 @@ COPY public.authentification (id, username, email, display_name, password, state
 --
 
 COPY public.authentification_role (authentification_id, role_id) FROM stdin;
-2	1
 \.
 
 
