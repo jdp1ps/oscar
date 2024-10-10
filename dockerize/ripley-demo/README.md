@@ -46,13 +46,12 @@ cd oscar
 
 ## Copie des fichiers de base de configuration
 
+Copiez les fichiers de configurations de base
+
 ```bash
 cp dockerize/ripley-demo/oscar/oscar/config/autoload/local.php config/autoload/
 cp dockerize/ripley-demo/oscar/oscar/config/autoload/unicaen-app.local.php config/autoload/
 cp dockerize/ripley-demo/oscar/oscar/config/autoload/unicaen-auth.local.php config/autoload/
-
-# droits d'écriture
-sudo chmod -R 777 data/DoctrineORMModule
 ```
 
 ## Construction de l'application

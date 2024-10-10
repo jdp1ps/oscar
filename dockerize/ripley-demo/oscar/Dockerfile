@@ -80,6 +80,7 @@ RUN apt-get update
 RUN apt-get install -y \
     php8.2 \
     php8.2-gearman \
+    php8.2-bcmath \
     php8.2-bz2 \
     php8.2-cli \
     php8.2-curl \
