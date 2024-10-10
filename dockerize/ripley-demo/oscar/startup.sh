@@ -18,6 +18,7 @@ chmod 777 /var/documents/activity
 mkdir -p /var/documents/public
 chmod 777 /var/documents/public
 
+cp -u -p /opt/oscar_config/oscarworker.service config/
 cp -u -p /opt/oscar_config/local.php config/autoload/local.php
 cp -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
 cp -u -p /opt/oscar_config/unicaen-auth.local.php config/autoload/unicaen-auth.local.php
