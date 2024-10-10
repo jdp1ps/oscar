@@ -1,5 +1,7 @@
 #!/bin/sh
-cd /opt/OscarApp
+cd /var/OscarApp
+
+git config --global --add safe.directory /var/OscarApp
 
 # Composer
 composer install
@@ -9,6 +11,7 @@ touch config/autoload/oscar-editable.yml
 touch logs/oscar.log
 chmod 777 config/autoload/oscar-editable.yml
 chmod 777 logs/oscar.log
+chmod 777 logs
 
 mkdir -p /var/documents/activity
 chmod 777 /var/documents/activity
