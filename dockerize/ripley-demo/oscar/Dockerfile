@@ -154,15 +154,17 @@ RUN wget https://getcomposer.org/download/2.2.22/composer.phar
 RUN mv composer.phar /usr/local/bin/composer
 RUN chmod +x /usr/local/bin/composer
 
-COPY startup.sh /opt/startup.sh
-RUN chmod +x /opt/startup.sh
-
 ### OSCAR CONFIG (default)
 RUN mkdir /etc/oscar_config/
 COPY oscar/config/autoload/local.php /opt/oscar_config/local.php
 COPY oscar/config/autoload/unicaen-app.local.php /opt/oscar_config/unicaen-app.local.php
 COPY oscar/config/autoload/unicaen-auth.local.php /opt/oscar_config/unicaen-auth.local.php
+COPY oscar/config/autoload/unicaen-signature.local.php /opt/oscar_config/unicaen-signature.local.php
 COPY oscar/config/oscarworker.service /opt/oscar_config/oscarworker.service
+
+### Script de démarrage
+COPY startup.sh /opt/startup.sh
+RUN chmod +x /opt/startup.sh
 
 ##SUPERVISOR FICHIERS DE CONFIG POUR MULTIPLES SERVICES IN CONTAINER DOCKER
 COPY supervisor /etc/supervisor/conf.d/oscar.conf

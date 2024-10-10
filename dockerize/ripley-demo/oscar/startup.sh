@@ -22,6 +22,7 @@ cp -u -p /opt/oscar_config/oscarworker.service config/
 cp -u -p /opt/oscar_config/local.php config/autoload/local.php
 cp -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
 cp -u -p /opt/oscar_config/unicaen-auth.local.php config/autoload/unicaen-auth.local.php
+cp -u -p /opt/oscar_config/unicaen-signature.local.php config/autoload/unicaen-signature.local.php
 
 # On attends que Postgresql soit UP
 until PGPASSWORD="azerty" psql -h "oscar_ripley_postgresql" -U "oscar" "oscar_dev" -c '\q'; do
