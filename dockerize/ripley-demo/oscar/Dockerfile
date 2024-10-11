@@ -129,6 +129,8 @@ RUN echo "extension=oci8.so" > /etc/php/8.2/apache2/conf.d/30-php-oci8.ini && \
 ##RUN echo "http_proxy = http://proxy.unicaen.fr:3128"  >> /etc/wgetrc && echo "https_proxy = http://proxy.unicaen.fr:3128" >> /etc/wgetrc;
 #RUN echo "XDEBUG"
 COPY etc/php/8.2/mods-available/xdebug.ini /etc/php/8.2/mods-available/xdebug.ini
+COPY etc/php/8.2/99-oscar.ini /etc/php/8.2/cli/conf.d/99-oscar.ini
+COPY etc/php/8.2/99-oscar.ini /etc/php/8.2/apache2/conf.d/99-oscar.ini
 #RUN phpenmod -v ALL -s ALL xdebug
 
 ##POINT DE MONTAGE OSCAR
@@ -147,6 +149,9 @@ RUN a2dissite 000-default && a2dissite default-ssl && a2ensite oscar
 COPY run /usr/local/bin/run
 RUN chmod +x /usr/local/bin/run
 RUN a2enmod rewrite && a2enmod ssl
+
+RUN ln -sf /dev/stdout /var/log/apache2/access.log \
+    && ln -sf /dev/stderr /var/log/apache2/error.log
 
 
 ##Composer (Attention proxy important pour du wget)
@@ -171,4 +176,5 @@ COPY supervisor /etc/supervisor/conf.d/oscar.conf
 EXPOSE 80 9000 9003
 
 #SUPERVISOR LA CLEF DU MULTIPLE SERVICES DANS UN CONTAINER DOCKER EN NO DAEMON
-CMD supervisord -n
+ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/oscar.conf"]
+#CMD supervisord -n

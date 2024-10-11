@@ -1,3 +1,6 @@
+[supervisord]
+nodaemon=true
+
 [program:general_worker]
 command=php /var/OscarApp/bin/oscar-worker.php
 numprocs=1
@@ -5,15 +8,24 @@ process_name=%(program_name)s_%(process_num)02d
 directory=/var/OscarApp/bin
 autostart=true
 autorestart=true
-stdout_logfile=/var/OscarApp/logs/worker.log
-stdout_logfile_maxbytes=1MB
-stderr_logfile=/var/OscarApp/logs/worker.log
-stderr_logfile_maxbytes=1MB
+stderr_logfile=/dev/stderr
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile_maxbytes=0
+; stdout_logfile=/var/OscarApp/logs/worker.log
+; stdout_logfile_maxbytes=1MB
+; stderr_logfile=/var/OscarApp/logs/worker.log
+; stderr_logfile_maxbytes=1MB
 
 [program:apache2]
 command=/etc/init.d/apache2 start
 autostart=true
 autorestart=true
+redirect_stderr=true
+stderr_logfile=/dev/stderr
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile_maxbytes=0
 
 [program:startup]
 command = /bin/bash /opt/startup.sh
@@ -22,9 +34,8 @@ autorestart = false
 startretries = 1
 redirect_stderr=true
 priority=600
-# Sortie
-stdout_logfile=/dev/fd/1
+stderr_logfile=/dev/stderr
+stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
-stderr_logfile=/dev/fd/1
 stderr_logfile_maxbytes=0
 
