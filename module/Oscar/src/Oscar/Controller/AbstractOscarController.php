@@ -155,12 +155,14 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
 
     protected function getEditableConfRoot(){
         $path = $this->getYamlConfigPath();
-        if( file_exists($path) ){
-            $parser = new Parser();
-            return $parser->parse(file_get_contents($path));
-        } else {
-            return [];
+        if( file_exists($path) ) {
+            $contentFile = file_get_contents($path);
+            if ($contentFile) {
+                $parser = new Parser();
+                return $parser->parse(file_get_contents($path));
+            }
         }
+        return [];
     }
 
     protected function getEditableConfKey($key, $default = null){
