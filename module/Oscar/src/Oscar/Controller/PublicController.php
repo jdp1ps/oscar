@@ -70,11 +70,11 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
     public function gitlogAction()
     {
-        exec(
-            'git log --pretty=format:"<span class="hash">%h</span><span class="author">%an</span><time>%ai</time><span class="message">%s</span>"',
-            $log
-        );
-        return ['log' => $log];
+        $file = file_get_contents(__DIR__.'/../../../../../public/gitlogs.html');
+        if( !$file ){
+            $file = '<div class="alert alert-danger">GITLOG non-disponible, vous pouvez le générer avec le script gitlog.sh</div>';
+        }
+        return ['log' => $file];
     }
 
     public function parametersAction()

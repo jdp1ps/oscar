@@ -131,3 +131,7 @@ module/Demo
 dockerize/local/*
 !dockerize/local/.gitkeep
 .env
+supervisord.log
+
+# Fichier à générer
+public/gitlogs.html
