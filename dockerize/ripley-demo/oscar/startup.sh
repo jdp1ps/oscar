@@ -47,4 +47,9 @@ php bin/oscar.php activity:search-rebuild
 
 chmod -R 777 data/DoctrineORMModule
 
+### Lien symbolique unicaen-signature
+mkdir -p public/unicaen
+cd public/unicaen
+ln -s ../../vendor/unicaen/signature/public/dist signature
+
 exit 0
