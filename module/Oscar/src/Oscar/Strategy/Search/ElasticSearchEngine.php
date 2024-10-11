@@ -282,7 +282,7 @@ abstract class ElasticSearchEngine
         try {
             return $client->indices()->delete($params);
         } catch (\Exception $e) {
-            throw ElasticSearchEngineException::getInstance($e->getMessage());
+            throw ElasticSearchEngineException::getInstance($e);
         }
     }
 
