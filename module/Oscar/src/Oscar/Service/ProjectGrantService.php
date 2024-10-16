@@ -233,7 +233,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ?array $filterRoleOrganization = null
     ): array {
         $out = [];
-        $this->getLoggerService()->debug(__METHOD__);
         $activity = $this->getActivityById($idActivity);
         /** @var ActivityPerson $personActivity */
         foreach ($activity->getPersonsDeep() as $personActivity) {
@@ -282,7 +281,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      */
     public function getRecipients($options)
     {
-        $this->getLoggerService()->debug(__METHOD__);
         if (!array_key_exists('activity_id', $options)) {
             return [];
         }
