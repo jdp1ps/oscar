@@ -111,7 +111,9 @@ php bin/oscar.php check:sequences-num
 
 # ANNEXE : Requêtes de maintenance
 
-> Les requêtes ici ne sont utilisées que dans le cadre du développement
+> Les requêtes ici ne sont utilisées que dans le cadre du développement, **NE PAS UTILISER EN PRODUCTION**
+> 
+> ELLES SEMBLENT DANS CERTAINS CAS SUPPRIMER TROP DE DONNEES, AUDIT EN COURS
 
 Supprimer les jointures activité > Personnes orphelines :
 
