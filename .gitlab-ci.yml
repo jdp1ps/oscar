@@ -1,14 +1,31 @@
-image: localhost:5000/unicaen-dev-php8.2-apache
-before_script:
-  - export http_proxy=http://10.14.128.99:3128
-  - export https_proxy=http://10.14.128.99:3128
-  - apt-get -qq update && apt-get -qq install -y curl wget gnupg2 build-essential libssl-dev git
-  - wget https://getcomposer.org/download/latest-stable/composer.phar
-  - php composer.phar install --ignore-platform-reqs
-#  - curl -sL https://deb.nodesource.com/setup_6.x | bash
-#  - apt-get -qq install -y nodejs
-#  - npm install --silent
+stages:
+  - test
+  -
+variables:
+  # Cette variable permet de spécifier que Composer installera uniquement les dépendances nécessaires
+  COMPOSER_ALLOW_SUPERUSER: 1
+  APP_ENV: test
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - vendor/
 
 test:
+  stage: test
+  image: php:8.2
+  before_script:
+    # Met à jour Composer et installe les dépendances
+    - apt-get update -yqq
+    - apt-get install git unzip -yqq
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --prefer-dist --no-progress --no-interaction
   script:
-  - php vendor/bin/phpunit --bootstrap vendor/autoload.php tests/
+    # Exécute les tests PHPUnit
+    - mkdir -p tests/_output
+    - ./vendor/bin/phpunit --colors=always  --log-junit tests/_output/junit.xml
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: tests/_output/junit.xml
