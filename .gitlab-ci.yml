@@ -13,11 +13,12 @@ cache:
 
 test:
   stage: test
-  image: php:8.2
+  image: registre.unicaen.fr:5000/open-source/docker/unicaen-image:php8.2
+
   before_script:
     # Met à jour Composer et installe les dépendances
     - apt-get update -yqq
-    - apt-get install git unzip php8.2-bcmath php8.2-bz2 php8.2-dom php8.2-gd php8.2-intl php8.2-ldap php8.2-mbstring php-bcmath -yqq
+    - apt-get install git unzip -yqq
     - curl -sS https://getcomposer.org/installer | php
     - php composer.phar install --prefer-dist --no-progress --no-interaction
   script:
