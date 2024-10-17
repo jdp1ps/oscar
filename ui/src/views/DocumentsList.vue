@@ -255,7 +255,7 @@
 
   <!-- Détails du processus -->
   <div class="overlay" v-if="processDetails">
-    <div class="overlay-content" style="max-width: 50%">
+    <div class="overlay-content" style="max-width: 75%">
       <h2>
         <small><i class="icon-edit"></i>
           Procédure</small> <br><strong>{{ processDetails.label }}</strong> <br>
@@ -278,6 +278,13 @@
           <li class="meta">Niveau <strong>{{ s.level }}</strong></li>
           <li class="meta">Tous les destinataires signent <strong>{{ s.allSignToComplete ? 'Oui' : 'Non' }}</strong></li>
         </ul>
+
+        <div class="alert alert-danger" v-if="s.refused_text">
+          Message de refus : <br>
+          <blockquote>
+            {{ s.refused_text }}
+          </blockquote>
+        </div>
 
         <article class="recipient" :class="'signature-status-'+r.status" v-for="r in s.recipients">
           <div class="title">
