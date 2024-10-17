@@ -1,6 +1,6 @@
 stages:
   - test
-  -
+
 variables:
   # Cette variable permet de spécifier que Composer installera uniquement les dépendances nécessaires
   COMPOSER_ALLOW_SUPERUSER: 1
