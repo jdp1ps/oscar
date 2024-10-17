@@ -11,6 +11,10 @@ cache:
   paths:
     - vendor/
 
+before_script:
+  # Met à jour Composer et installe les dépendances
+  - docker logout
+
 test:
   stage: test
   image: registre.unicaen.fr:5000/open-source/docker/unicaen-image:php8.2
