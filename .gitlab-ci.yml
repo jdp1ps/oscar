@@ -30,7 +30,7 @@ test:
   script:
     # Exécute les tests PHPUnit
     - mkdir -p tests/_output
-    - ./vendor/bin/phpunit --colors=always  --log-junit tests/_output/junit.xml
+    - ./vendor/bin/phpunit tests/ --colors=always  --log-junit tests/_output/junit.xml
 
   artifacts:
     when: always
