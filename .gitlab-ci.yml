@@ -21,11 +21,7 @@ test:
 
   before_script:
     # Met à jour Composer et installe les dépendances
-    - apt-get update -yqq
-    - apt-get install git -yqq
-    - apt-get install -y wget
-    - wget https://getcomposer.org/download/2.2.22/composer.phar
-    - php composer.phar install --prefer-dist --no-progress --no-interaction
+    - composer.phar install --prefer-dist --no-progress --no-interaction
 
   script:
     # Exécute les tests PHPUnit
