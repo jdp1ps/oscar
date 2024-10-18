@@ -21,7 +21,7 @@ test:
 
   before_script:
     # Met à jour Composer et installe les dépendances
-    - composer.phar install --prefer-dist --no-progress --no-interaction
+    - composer install --prefer-dist --no-progress --no-interaction
 
   script:
     # Exécute les tests PHPUnit
