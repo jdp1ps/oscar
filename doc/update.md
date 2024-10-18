@@ -151,13 +151,11 @@ DELETE FROM activitypayment
 
 
 ```sql
-DELETE FROM contractdocument WHERE id IN (SELECT j.id FROM contractdocument j LEFT JOIN activity a ON j.id = j.grant_id WHERE a.id IS NULL);
+-- Suppression des documents orphelins
+DELETE FROM contractdocument WHERE grant_id IS NULL;
 ```
 
 ```sql
-UPDATE activity SET project_id = null WHERE id IN (SELECT a.id FROM activity a LEFT JOIN project p ON a.project_id = p.id WHERE p.id IS NULL);
-```
-
-```sql
-DELETE FROM activitydate WHERE id IN (SELECT j.id FROM activitydate j LEFT JOIN activity a ON j.id = j.activity_id WHERE a.id IS NULL);
+-- Suppression des jalons orphelins
+DELETE FROM activitydate WHERE activity_id IS NULL);
 ```
