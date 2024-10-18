@@ -6,28 +6,28 @@ variables:
   COMPOSER_ALLOW_SUPERUSER: 1
   APP_ENV: test
 
+# (semble mettre en cache les vendor, Pas sûr de ça fonctionne, mais on laisse)
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - vendor/
 
-before_script:
-  # Met à jour Composer et installe les dépendances
-  - docker logout
-
 test:
   stage: test
+  # Image unicaen avec les librairies usuelles (et Composer 2.3.x)
   image: registre.unicaen.fr:5000/open-source/docker/unicaen-image:php8.2
 
   before_script:
-    # Met à jour Composer et installe les dépendances
+    # Installation des dépendances PHP
     - composer install --prefer-dist --no-progress --no-interaction
 
   script:
-    # Exécute les tests PHPUnit
+    # On crée le dossier pour le rapport de test
     - mkdir -p tests/_output
+    # Exécute les tests PHPUnit
     - ./vendor/bin/phpunit tests/ --colors=always  --log-junit tests/_output/junit.xml
 
+  # Permet d'afficher le rapport de test
   artifacts:
     when: always
     expire_in: 1 week
