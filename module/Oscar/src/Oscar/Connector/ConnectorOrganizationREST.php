@@ -255,4 +255,25 @@ class ConnectorOrganizationREST extends AbstractConnector
     {
         return sprintf($this->getParameter('url_organization'), $remoteId);
     }
+
+    public function checkAccess()
+    {
+        parent::checkAccess();
+
+        $json = $this->getAccessStrategy()->getDataAll();
+        $jsonDatas = null;
+
+        if(is_object($json) && property_exists($json, 'organizations') ){
+            $jsonDatas = $json->organizations;
+        } else {
+            $jsonDatas = $json;
+        }
+        if (!is_array($jsonDatas)) {
+            throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+        }
+
+        echo " (" . \count($jsonDatas) . " organisations retournées par l'API) ";
+
+        return true;
+    }
 }

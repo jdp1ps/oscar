@@ -303,4 +303,25 @@ class ConnectorPersonREST extends AbstractConnector
             throw new \Exception($msg);
         }
     }
+
+    public function checkAccess()
+    {
+        parent::checkAccess();
+
+        $json = $this->getAccessStrategy()->getDataAll();
+        $personsDatas = null;
+
+        if (is_object($json) && property_exists($json, 'persons')) {
+            $personsDatas = $json->persons;
+        } else {
+            $personsDatas = $json;
+        }
+        if (!is_array($personsDatas)) {
+            throw new \Exception("L'API n'a pas retourné un tableau de donnée");
+        }
+
+        echo " (" . \count($personsDatas) . " personnes retournées par l'API) ";
+
+        return true;
+    }
 }
