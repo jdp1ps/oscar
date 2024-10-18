@@ -117,7 +117,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     }
 
 
-    public function getPersonDocumentIds(Person $person) :array {
+    public function getPersonDocumentIds(Person $person): array
+    {
         $ids = [];
 
         return $ids;
@@ -141,6 +142,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             throw new OscarException($msg);
         }
 
+        // écriture des informations pour la signature
         $contextShort = sprintf(
             "Activité %s, '%s' (Projet %s)",
             $activity->getOscarNum(),
@@ -157,6 +159,8 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $activity->getAcronym()
         );
 
+        // On recrée le modèle de données du processus de signature
+        // But : Le comparer aux données reçues pour valider
         $signatureFlowDatas = $this->getSignatureService()->createSignatureFlowDatasById(
             "",
             $signatureFlow->getId(),
@@ -167,6 +171,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             ]
         )['signatureflow'];
 
+        // On commence par ranger les données reçues
         $sortedFlowDatas = [];
         if ($flowDt) {
             foreach ($flowDt['steps'] as $step) {
@@ -174,7 +179,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             }
         }
 
-        // Configuration du Flow
+        // Configuration du Flow / Comparaison à la configuration initiale
         foreach ($signatureFlowDatas['steps'] as &$step) {
             if ($step['editable']) {
                 if (array_key_exists($step['id'], $sortedFlowDatas)) {
@@ -214,33 +219,44 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             throw new OscarException("Ils manquent des destinataires pour déclencher le processus de signature");
         }
 
-        // Emplacement du document
-        $uploadPath = $this->getOscarConfigurationService()->getDocumentRealpath($document);
-        $fileName = $document->getFileName();
+        try {
+            // Emplacement du document
+            $uploadPath = $this->getOscarConfigurationService()->getDocumentRealpath($document);
+            $fileName = $document->getFileName();
 
+            // Destination du fichier
+            $destination = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation()
+                . DIRECTORY_SEPARATOR
+                . $fileName;
 
-        // déplacement du fichier
-        $destination = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation()
-            . DIRECTORY_SEPARATOR
-            . $fileName;
-
-        if (!copy($uploadPath, $destination)) {
-            $this->getLoggerService()->critical("Impossible de déplacer '$uploadPath' ver '$destination'");
-            throw new OscarException(
-                "Un problème est survenu lors de la création de la procédure de signature, inpossible de copier le document"
-            );
+            // Déplacement
+            if (!copy($uploadPath, $destination)) {
+                $this->getLoggerService()->critical("Impossible de déplacer '$uploadPath' ver '$destination'");
+                throw new OscarException(
+                    "Un problème est survenu lors de la création de la procédure de signature, inpossible de copier le document"
+                );
+            }
+        } catch (\Exception $e) {
+            $path = $this->getSignatureService()->getSignatureConfigurationService()->getDocumentsLocation(false);
+            $this->getLoggerService()->critical("ERROR : Fichier de signature '$path' - " . $e->getMessage());
+            throw new OscarException($e->getMessage());
         }
-        // Création du processus
-        $process = $this->getProcessService()->createUnconfiguredProcess($fileName, $signatureFlow->getId());
-        $this->getProcessService()->configureProcess($process, $signatureFlowDatas);
-        $document->setProcess($process);
-        $this->getEntityManager()->flush();
-        $this->getProcessService()->trigger($process, true);
-        $this->getActivityLogService()->addUserInfo(
-            "a déclenché un circuit de signature pour '$document'",
-            LogActivity::CONTEXT_ACTIVITY,
-            $activity->getId()
-        );
+
+        try {
+            // Création du processus
+            $process = $this->getProcessService()->createUnconfiguredProcess($fileName, $signatureFlow->getId());
+            $this->getProcessService()->configureProcess($process, $signatureFlowDatas);
+            $document->setProcess($process);
+            $this->getEntityManager()->flush();
+            $this->getProcessService()->trigger($process, true);
+            $this->getActivityLogService()->addUserInfo(
+                "a déclenché un circuit de signature pour '$document'",
+                LogActivity::CONTEXT_ACTIVITY,
+                $activity->getId()
+            );
+        } catch (\Exception $e) {
+            $this->getLoggerService()->critical($e->getMessage());
+        }
     }
 
     protected function getNextDocId(): int
@@ -725,7 +741,7 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
     /**
      * @return ContractDocument[]
      */
-    public function getDocuments() :array
+    public function getDocuments(): array
     {
         return $this->getContractDocumentRepository()->getAllDocuments();
     }
@@ -738,7 +754,6 @@ class ContractDocumentService implements UseOscarConfigurationService, UseEntity
             $out[] = $document->toJson();
         }
         return $out;
-
     }
 
     public function getDocumentsGrouped(int $page = 1, int $nbr = 10, ?array $filters = null)

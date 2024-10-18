@@ -20,14 +20,6 @@
           </div>
 
           <div class="form-group">
-            <label for="signatureflow">Procédure de signature</label>
-            <select name="signatureflow" id="signatureflow" v-model="form.signatureflow_id">
-              <option value="">Aucune</option>
-              <option v-for="s in signatureflows" :value="s.id">{{ s.label }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
             <label for="typedoc_default">
               Par défaut
               <input id='typedoc_default' type="checkbox" class="form-control" v-model="form.default" name="default"/>
@@ -104,8 +96,6 @@
             Type de document utilisé pour les envois PCRU :<br>
             <strong>{{ documents_pcru_type }}</strong>
           </p>
-          <p>Procédures de signature disponibles : </p>
-          <pre>{{ signatureflows }}</pre>
         </div>
         <template v-if="untyped_documents">
           <div class="alert alert-danger">
