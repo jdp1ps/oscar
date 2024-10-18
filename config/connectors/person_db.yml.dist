@@ -1,0 +1,26 @@
+
+# On laisse les URLs même si elles ne sont pas utilisées
+url_persons: 'https://rest.service.tdl/api/persons'
+url_person: 'https://rest.service.tld/api/person/%s'
+
+# Accès spécifique
+access_strategy:  Oscar\Connector\Access\ConnectorAccessOracleDB
+
+db_host:
+db_port:
+db_user:
+db_password:
+db_name:
+
+db_query_single: >
+  SELECT REMOTE_ID, PRENOM, NOM, CIVILITE, LOGIN, EMAIL, LANGAGE, STATUT,
+    AFFECTATION, INM, TELEPHONE, DATE_EXPIRATION, ADRESSE_PROFESSIONNELLE,
+    ROLES
+  FROM user
+  WHERE REMOTE_ID = :p1
+  FETCH FIRST ROW ONLY
+
+db_query_all: >
+  SELECT REMOTE_ID, PRENOM, NOM, CIVILITE, LOGIN, EMAIL, LANGAGE, STATUT,
+      AFFECTATION, INM, TELEPHONE, DATE_EXPIRATION, ADRESSE_PROFESSIONNELLE,
+      ROLES, FROM distinct_user ORDER BY REMOTE_ID
