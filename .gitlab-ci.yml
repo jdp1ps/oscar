@@ -17,13 +17,13 @@ before_script:
 
 test:
   stage: test
-  image: debian:bookworm
+  image: registre.unicaen.fr:5000/open-source/docker/unicaen-image:php8.2
 
   before_script:
     # Met à jour Composer et installe les dépendances
     - apt-get update -yqq
-    - apt-get install git unzip curl -yqq
-    - apt-get install -y wget php8.2-cli php8.2-bcmath php8.2-bz2 php8.2-curl php8.2-dom php8.2-gd php8.2-intl php8.2-ldap php8.2-mbstring php8.2-pgsql php8.2-xml php8.2-zip
+    - apt-get install git -yqq
+    - apt-get install -y wget
     - wget https://getcomposer.org/download/2.2.22/composer.phar
     - php composer.phar install --prefer-dist --no-progress --no-interaction
 
