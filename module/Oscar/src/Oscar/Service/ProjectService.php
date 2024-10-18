@@ -650,7 +650,7 @@ class ProjectService implements UseServiceContainer
     /// API
     ///
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function getPersonsProjectsAPI(Project $projet, ?array &$output = null, Url $urlHelper): array
+    public function getPersonsProjectsAPI(Project $projet, ?array &$output, Url $urlHelper): array
     {
         if ($output === null) {
             $output = [];
@@ -678,7 +678,7 @@ class ProjectService implements UseServiceContainer
         return $output;
     }
 
-    public function getOrganizationsProjectsAPI(Project $projet, ?array &$output = null, Url $urlHelper): array
+    public function getOrganizationsProjectsAPI(Project $projet, ?array &$output, Url $urlHelper): array
     {
         if ($output === null) {
             $output = [];
