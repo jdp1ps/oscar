@@ -92,7 +92,6 @@ RUN apt-get install -y \
     php8.2-pgsql \
     php8.2-xml \
     php8.2-zip \
-    php-bcmath \
     php8.2-dev
 
 RUN apt-get clean

@@ -5431,7 +5431,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param Activity $activity
      * @return array
      */
-    public function getDatasActivityMembers(Activity $activity, bool $showlink = false, Url $urlHelper): array
+    public function getDatasActivityMembers(Activity $activity, bool $showlink, Url $urlHelper): array
     {
         $members = [];
         /** @var ActivityPerson $personActivity */

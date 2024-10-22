@@ -1615,7 +1615,6 @@ class AdministrationController extends AbstractOscarController implements UsePro
                 try {
                     $id = null;
                     $label = $this->params()->fromPost('label');
-                    $signatureflow_id = intval($this->params()->fromPost('signatureflow_id'));
                     $description = $this->params()->fromPost('description');
                     $default = $this->params()->fromPost('default', '');
                     $this->getLoggerService()->info("Enregistrement de type de document '$signatureflow_id'");
@@ -1624,8 +1623,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         $id,
                         $label,
                         $description,
-                        $default == 'on',
-                        $signatureflow_id
+                        $default == 'on'
                     );
                 } catch (\Exception $e) {
                     return $this->jsonErrorLogged("Impossible d'ajouter le type de document", $e);
@@ -1652,8 +1650,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         $id,
                         $label,
                         $description,
-                        $default == 'on',
-                        $signatureflow_id
+                        $default == 'on'
                     );
                     return $this->getResponseOk();
                 } catch (\Exception $e) {

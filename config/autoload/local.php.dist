@@ -200,6 +200,10 @@ return array(
                   'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
                   'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
                   'editable'  => false
+               ],
+               'db' => [
+                  'class'     => \Oscar\Connector\ConnectorOrganizationDB::class,
+                  'params'    => realpath(__DIR__) . '/../connectors/organization_db.yml'
                ]
                /****/
             ],
@@ -209,7 +213,11 @@ return array(
                   'class'     => \Oscar\Connector\ConnectorPersonREST::class,
                   'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
                   'editable'  => false
-               ]
+               ],
+               'db' => [
+                  'class'     => \Oscar\Connector\ConnectorPersonDB::class,
+                  'params'    => realpath(__DIR__) . '/../connectors/person_db.yml'
+               ]               
                /****/
             ],
 

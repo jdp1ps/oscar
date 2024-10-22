@@ -13,11 +13,18 @@ chmod 777 config/autoload/oscar-editable.yml
 chmod 777 logs/oscar.log
 chmod 777 logs
 
-mkdir -p /var/documents/activity
-chmod 777 /var/documents/activity
-mkdir -p /var/documents/public
-chmod 777 /var/documents/public
+# Dossier de dépôt des documents
+mkdir -p /var/OscarApp/data/documents/activity
+mkdir -p /var/OscarApp/data/documents/public
+mkdir -p /var/OscarApp/data/documents/signature
+mkdir -p /var/OscarApp/data/documents/request
 
+chmod 777 /var/OscarApp/data/documents/activity
+chmod 777 /var/OscarApp/data/documents/public
+chmod 777 /var/OscarApp/data/documents/signature
+chmod 777 /var/OscarApp/data/documents/request
+
+# Copie des fichiers de configuration par défaut
 cp -u -p /opt/oscar_config/oscarworker.service config/
 cp -u -p /opt/oscar_config/local.php config/autoload/local.php
 cp -u -p /opt/oscar_config/unicaen-app.local.php config/autoload/unicaen-app.local.php
@@ -34,15 +41,8 @@ done
 php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 ### {{{DEMO
-#php bin/oscar.php auth:sync install/demo/authentification.json
-#php bin/oscar.php organizations:sync-json install/demo/organizations.json
-#php bin/oscar.php persons:sync-json install/demo/persons.json
-#php bin/oscar.php activity:import-json -f install/demo/activity.json
 php bin/oscar.php check:privileges -n
 php bin/oscar.php check:privileges -n
-php bin/oscar.php persons:search-rebuild
-php bin/oscar.php organizations:search-rebuild
-php bin/oscar.php activity:search-rebuild
 ### DEMO}}}
 
 chmod -R 777 data/DoctrineORMModule

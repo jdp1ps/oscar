@@ -13,6 +13,9 @@ return array(
         // gearman
         'gearman-job-server-host'=>'oscar_ripley_gearman',
 
+        // Niveau de LOG
+        'log_level' => \Monolog\Logger::DEBUG,
+
         ////////////////////////////////////////////////////////////////////////
         // ! EXPERIMENTAL !
         'generated-documents' => [],
@@ -72,10 +75,10 @@ return array(
         ////////////////////////////////////////////////////////////////////////
         'paths' => [
             // Emplacement où sont stoqués les documents Oscar
-            'document_oscar' => realpath(__DIR__) . '/../../../documents/activity/',
+            'document_oscar' => realpath(__DIR__) . '/../../data/documents/activity/',
 
             // Emplacement où sont stoqués les documents administratifs Oscar
-            'document_admin_oscar' => realpath(__DIR__) . '/../../../documents/public/',
+            'document_admin_oscar' => realpath(__DIR__) . '/../../data/documents/public/',
 
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),

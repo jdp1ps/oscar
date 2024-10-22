@@ -1,72 +1,18 @@
 <?php
+
 namespace Oscar\Connector;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\Access\ConnectorAccessCurlHttp;
-use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
-use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
-use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
 use Oscar\Factory\JsonToOrganization;
 use Oscar\Service\OrganizationService;
 
-class ConnectorOrganizationREST extends AbstractConnector
+class ConnectorOrganizationDB extends AbstractConnector
 {
-    private bool $editable = false;
-
-    public function setEditable($editable){
-        $this->editable = $editable;
-    }
-
-    public function isEditable(){
-        return $this->editable;
-    }
-
-    function getRemoteID()
-    {
-        return "code";
-    }
-
-    function getRemoteFieldname($oscarFieldName)
-    {
-        // TODO: Implement getRemoteFieldname() method.
-    }
-
-    function getPersonData($idConnector)
-    {
-        // TODO: Implement getPersonData() method.
-    }
-
-    public function getConfigData()
-    {
-        return null;
-    }
-
-    /**
-     * @return OrganizationRepository
-     */
-    public function getRepository()
-    {
-        return $this->getServiceLocator()->get(EntityManager::class)->getRepository(Organization::class);
-    }
-
-    /**
-     * @return OrganizationService
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    public function getOrganizationService()
-    {
-        return $this->getServiceLocator()->get(OrganizationService::class);
-    }
-
-    protected function getServiceLocator(){
-        return $this->getServicemanager();
-    }
 
     /**
      * @param bool $force
@@ -80,24 +26,6 @@ class ConnectorOrganizationREST extends AbstractConnector
     }
 
     /**
-     * @return JsonToOrganization
-     */
-    protected function factory() :JsonToOrganization
-    {
-        static $factory;
-        if( $factory === null ) {
-            $types = $this->getRepository()->getTypesKeyLabel();
-            $factory = new JsonToOrganization($types);
-        }
-        return $factory;
-    }
-
-    protected function getLogger()
-    {
-        return $this->getOrganizationService()->getLoggerService();
-    }
-
-    /**
      * @param OrganizationRepository $repository
      * @param bool $force
      * @return ConnectorRepport
@@ -106,22 +34,23 @@ class ConnectorOrganizationREST extends AbstractConnector
     function syncAll(OrganizationRepository $repository, bool $force = false)
     {
         $this->getLogger()->info("Synchronisation des structures");
-        $repport = new ConnectorRepport();
+        $report = new ConnectorRepport();
 
-        $url = $this->getParameter('url_organizations');
-        $repport->addnotice("URL : $url");
-
-        /////////////////////////////////////
-        ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
-            $json = $this->getAccessStrategy()->getDataAll();
+            $rows = $this->getAccessStrategy()->getDataAll($this->mapParams());
+
+            $orgs = [];
+            foreach( $rows as $row ){
+                $orgs[] = $this->objectFromDBRow($row);
+            }
+
             $exist = $repository->getUidsConnector($this->getName());
             $jsonDatas = null;
 
-            if( is_object($json) && property_exists($json, 'organizations') ){
-                $jsonDatas = $json->organizations;
+            if( is_object($orgs) && property_exists($orgs, 'organizations') ){
+                $jsonDatas = $orgs->organizations;
             } else {
-                $jsonDatas = $json;
+                $jsonDatas = $orgs;
             }
 
             if( !is_array($jsonDatas) ){
@@ -137,7 +66,6 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
 
                 try {
-                    /** @var Person $personOscar */
                     $organization = $repository->getObjectByConnectorID($this->getName(), $organisationId);
                     $action = "update";
                 } catch( NoResultException $e ){
@@ -211,39 +139,91 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
             }
         } catch (\Exception $e ){
-            $repport->adderror($e->getMessage());
+            $report->adderror($e->getMessage());
             throw $e;
         }
-        die();
 
+        $report->addnotice("FIN du traitement...");
+        return $report;
+    }
 
-        $repport->addnotice("FIN du traitement...");
-        return $repport;
+    private function mapParams() {
+        $dbParam = [];
+        $dbParam['db_host'] = $this->getParameter('db_host');
+        $dbParam['db_port'] = $this->getParameter('db_port');
+        $dbParam['db_user'] = $this->getParameter('db_user');
+        $dbParam['db_password'] = $this->getParameter('db_password');
+        $dbParam['db_name'] = $this->getParameter('db_name');
+        $dbParam['db_query_all'] = $this->getParameter('db_query_all');
+        return $dbParam;
+    }
+
+    private function objectFromDBRow($row) {
+        $org = new \stdClass();
+        $org->uid = $row['ID'];
+        $org->code = $row['CODE'];
+        $org->shortname = $row['LIBELLE_COURT'];
+        $org->dateupdate = $row['UPDATED_AT'];
+        $org->dateupdated = $row['UPDATED_AT'];
+        $org->labintel = NULL;
+        if ($row['TYPE_RECHERCHE'] != NULL && $row['CODE_RECHERCHE'] != NULL) {
+            $org->labintel = $row['TYPE_RECHERCHE'] . $row['CODE_RECHERCHE'];
+        }
+        $org->longname = $row['LIBELLE_LONG'];
+        $org->phone = $row['TELEPHONE'];
+        $org->description = NULL;
+        $org->email = NULL;
+        $org->url = $row['SITE_URL'];
+        $org->siret = NULL;
+        $org->type = $row['TYPE'];
+        $org->duns = NULL;
+        $org->tvaintra = NULL;
+        $org->rnsr = $row['RNSR'];
+        $org->parent = $row['PARENT'];
+
+        $addr_json = $row['ADRESSE_POSTALE'];
+        $addr = NULL;
+        if ($addr_json != NULL) {
+            $addr = json_decode($addr_json);
+        }
+        $org->address = $addr;
+
+        return $org;
     }
 
     private function hydrateWithDatas( Organization $organization, $data ){
         return $this->factory()->hydrateWithDatas($organization, $data, $this->getName());
     }
 
-    function syncOrganization(Organization $organization)
+    /**
+     * @return JsonToOrganization
+     */
+    protected function factory() :JsonToOrganization
     {
-        if ($organization->getConnectorID($this->getName())) {
-            $organizationIdRemote = $organization->getConnectorID($this->getName());
-            try {
-                $organizationData = $this->getAccessStrategy()->getDataSingle($organizationIdRemote);
-                if( property_exists($organizationData, 'person') ){
-                    $organizationData = $organizationData->person;
-                }
-                if( property_exists($organizationData, 'organization') ){
-                    $organizationData = $organizationData->organization;
-                }
-                return $this->hydrateWithDatas($organization, $organizationData);
-            } catch (\Exception $e) {
-                throw new \Exception("Impossible de traiter des données : " . $e->getMessage());
-            }
-        } else {
-            throw new \Exception('Impossible de synchroniser la structure ' . $organization);
+        static $factory;
+        if( $factory === null ) {
+            $types = $this->getRepository()->getTypesKeyLabel();
+            $factory = new JsonToOrganization($types);
         }
+        return $factory;
+    }
+
+    /**
+     * @return OrganizationRepository
+     */
+    public function getRepository()
+    {
+        return $this->getServiceLocator()->get(EntityManager::class)->getRepository(Organization::class);
+    }
+
+    function getRemoteID()
+    {
+        return "code";
+    }
+    
+    function getRemoteFieldname($oscarFieldName)
+    {
+
     }
 
     public function getPathAll(): string
@@ -256,24 +236,29 @@ class ConnectorOrganizationREST extends AbstractConnector
         return sprintf($this->getParameter('url_organization'), $remoteId);
     }
 
+    /**
+     * @return OrganizationService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getOrganizationService()
+    {
+        return $this->getServiceLocator()->get(OrganizationService::class);
+    }
+
+    public function logError($msg) {
+        $this->getLogger()->error($msg);
+    }
+
     public function checkAccess()
     {
         parent::checkAccess();
 
-        $json = $this->getAccessStrategy()->getDataAll();
-        $jsonDatas = null;
-
-        if(is_object($json) && property_exists($json, 'organizations') ){
-            $jsonDatas = $json->organizations;
-        } else {
-            $jsonDatas = $json;
+        $rows = $this->getAccessStrategy()->getDataAll($this->mapParams());
+        if (!is_array($rows)) {
+            throw new \Exception("Le connecteur OrganizationDB n'a pas retourné un tableau de donnée");
         }
-        if (!is_array($jsonDatas)) {
-            throw new \Exception("L'API n'a pas retourné un tableau de donnée");
-        }
-
-        echo " (" . \count($jsonDatas) . " organisations retournées par l'API) ";
-
+        echo " (" . \count($rows) . " organisations trouvées en DB) ";
         return true;
     }
 }

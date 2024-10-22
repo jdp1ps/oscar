@@ -1,90 +1,24 @@
 <?php
-/**
- * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
- * @date: 16-09-30 14:58
- * @copyright Certic (c) 2016
- */
 
 namespace Oscar\Connector;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
-use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
-use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 
-class ConnectorPersonREST extends AbstractConnector
+class ConnectorPersonDB extends AbstractConnector
 {
-    public function getPathAll(): string
-    {
-        return $this->getParameter('url_persons');
-    }
-
-    public function getPathSingle($remoteId): string
-    {
-        return sprintf($this->getParameter('url_person'), $remoteId);
-    }
-
-    private $editable = false;
-    private $options;
 
     /** @var  ConnectorPersonHydrator */
     private $personHydrator = null;
-
-    public function setEditable($editable)
-    {
-        $this->editable = $editable;
-    }
-
-    public function isEditable()
-    {
-        return $this->editable;
-    }
-
-    function getRemoteID()
-    {
-        return "uid";
-    }
-
-    function getRemoteFieldname($oscarFieldName)
-    {
-        // TODO: Implement getRemoteFieldname() method.
-    }
-
-    function getPersonData($idConnector)
-    {
-        // TODO: Implement getPersonData() method.
-    }
 
     public function execute($force = false)
     {
         $personRepository = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->getRepository(Person::class);
 
         return $this->syncPersons($personRepository, $force);
-    }
-
-    /**
-     * @return ConnectorPersonHydrator
-     */
-    public function getPersonHydrator()
-    {
-        if ($this->personHydrator === null) {
-            $this->personHydrator = new ConnectorPersonHydrator(
-                $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
-            );
-            $this->personHydrator->setPurge($this->getOptionPurge());
-        }
-        return $this->personHydrator;
-    }
-
-    protected function log(string $text): void
-    {
-        if (true) {
-            echo "$text";
-        }
     }
 
     /**
@@ -109,18 +43,15 @@ class ConnectorPersonREST extends AbstractConnector
         $this->log("Pending access : " . count($exist));
 
         try {
-            $json = $access->getDataAll();
+            $rows = $access->getDataAll($this->mapParams());
 
-            if (is_object($json) && property_exists($json, 'persons')) {
-                $personsDatas = $json->persons;
-            } else {
-                $personsDatas = $json;
+            $personsDatas = [];
+            foreach( $rows as $row ){
+                $personsDatas[] = $this->objectFromDBRow($row);
             }
+
             $this->log("data gain : " . count($personsDatas));
 
-            if (!is_array($personsDatas)) {
-                throw new \Exception("L'API n'a pas retourné un tableau de donnée");
-            }
             $repport->addnotice(count($personsDatas) . " résultat(s) a traiter.");
             ////////////////////////////////////
 
@@ -272,29 +203,14 @@ class ConnectorPersonREST extends AbstractConnector
             $personIdRemote = $person->getConnectorID($this->getName());
 
             try {
-                $personData = $this->getAccessStrategy()->getDataSingle($personIdRemote);
+                $row = $this->getAccessStrategy()->getDataSingle($personIdRemote, $this->mapParams());
             } catch (\Exception $e) {
                 $msg = "Aucune données de correspondance pour la personne '$personIdRemote' : " . $e->getMessage();
                 $this->getLogger()->error($msg);
                 throw new OscarException($msg);
             }
-            // Fix : Nouveau format
-            if (property_exists($personData, 'error_code')) {
-                switch ($personData->error_code) {
-                    case 'PERSON_DISABLED':
-                        $person->disabledLdapNow();
-                        $this->getLogger()->info("'$person' a été désactivée");
-                        return $person;
-                    default:
-                        throw new OscarException("Code d'erreur '" . $personData->error_code . "' inconnu");
-                }
-                $personData = $personData->person;
-            }
 
-            // Fix : Nouveau format
-            if (property_exists($personData, 'person')) {
-                $personData = $personData->person;
-            }
+            $personData = $this->objectFromDBRow($row);            
 
             return $this->getPersonHydrator()->hydratePerson($person, $personData, $this->getName());
         } else {
@@ -304,24 +220,142 @@ class ConnectorPersonREST extends AbstractConnector
         }
     }
 
+    private function mapParams() {
+        $dbParam = [];
+        $dbParam['db_host'] = $this->getParameter('db_host');
+        $dbParam['db_port'] = $this->getParameter('db_port');
+        $dbParam['db_user'] = $this->getParameter('db_user');
+        $dbParam['db_password'] = $this->getParameter('db_password');
+        $dbParam['db_name'] = $this->getParameter('db_name');
+        $dbParam['db_query_all'] = $this->getParameter('db_query_all');
+        $dbParam['db_query_single'] = $this->getParameter('db_query_single');
+        return $dbParam;
+    }
+
+    private function objectFromDBRow($row) {
+        $person = new \stdClass();
+
+        $person->uid = $row['REMOTE_ID'];
+        $person->login = $row['LOGIN'];
+        $person->firstname = $row['PRENOM'];
+        $person->lastname = $row['NOM'];
+        $person->mail = $row['EMAIL'];
+        $person->civilite = $row['CIVILITE'];
+        $person->preferedlanguage = $row['LANGAGE'];
+        $person->status = $row['STATUT'];
+        $person->affectation = $row['AFFECTATION'];
+        $person->inm = $row['INM'];
+        $person->phone = $row['TELEPHONE'];
+        $person->datefininscription = $row['DATE_EXPIRATION'];
+        $person->datecreated = NULL;
+        $person->dateupdated = NULL;
+        $person->datecached = NULL;
+
+        $person->address = NULL;
+        if ($row['ADRESSE_PROFESSIONNELLE'] != NULL) {
+            $person->address = json_decode($row['ADRESSE_PROFESSIONNELLE']);
+        }
+
+        $roles_json = $row['ROLES'];
+        $oscar_roles = new \stdClass();
+        if ($roles_json != NULL) {
+            $roles = json_decode($roles_json);
+            foreach ($roles as $key => $values) {
+                $oscar_role_for_structure = [];
+                foreach ($values as $value) {
+                    if ($value == 'D30') {
+                        $oscar_role_for_structure[] = 'Directeur de composante';
+                    } else if ($value == 'R00') {
+                        $oscar_role_for_structure[] = 'Responsable';
+                    } else if ($value == 'R40') {
+                        $oscar_role_for_structure[] = 'Directeur de composante';
+                    } else if ($value == 'P50') {
+                        $oscar_role_for_structure[] = 'Directeur de composante';
+                    } else if ($value == 'T87') {
+                        $oscar_role_for_structure[] = 'Informaticien';
+                    } else if ($value == 'T98') {
+                        $oscar_role_for_structure[] = 'Gestionnaire de laboratoire';
+                    } else if ($value == 'A009') {
+                        $oscar_role_for_structure[] = 'Gestion financière';
+                    } else if ($value == 'Gestionnaire financière des contrats de recherche') {
+                        $oscar_role_for_structure[] = 'Gestion financière';
+                    } else if ($value == 'Gestionnaire financiere des contrats de recherche') {
+                        $oscar_role_for_structure[] = 'Gestion financière';
+                    } else if ($value == 'Directrice') {
+                        $oscar_role_for_structure[] = 'Directeur';
+                    } else if ($value == 'Directeur adjoint') {
+                        $oscar_role_for_structure[] = 'Directeur';
+                    } else if ($value == 'Directrice adjointe') {
+                        $oscar_role_for_structure[] = 'Directeur';
+                    } else if ($value == 'Responsable administrative') {
+                        $oscar_role_for_structure[] = 'Responsable administratif';
+                    } else {
+                        $oscar_role_for_structure[] = $value;
+                    }
+                }
+                $oscar_roles->$key = $oscar_role_for_structure;
+            }
+        }
+
+        $person->roles = $oscar_roles;
+
+        return $person;
+    }
+
+    protected function log(string $text): void
+    {
+        if (true) {
+            echo "$text";
+        }
+    }
+
+    /**
+     * @return ConnectorPersonHydrator
+     */
+    public function getPersonHydrator()
+    {
+        if ($this->personHydrator === null) {
+            $this->personHydrator = new ConnectorPersonHydrator(
+                $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
+            );
+            $this->personHydrator->setPurge($this->getOptionPurge());
+        }
+        return $this->personHydrator;
+    }
+
+    function getRemoteID()
+    {
+        return "REMOTE_ID";
+    }
+    
+    function getRemoteFieldname($oscarFieldName)
+    {
+
+    }
+
+    public function getPathAll(): string
+    {
+        return $this->getParameter('url_persons');
+    }
+
+    public function getPathSingle($remoteId): string
+    {
+        return sprintf($this->getParameter('url_person'), $remoteId);
+    }
+
+    public function logError($msg) {
+        $this->getLogger()->error($msg);
+    }
+
     public function checkAccess()
     {
         parent::checkAccess();
 
-        $json = $this->getAccessStrategy()->getDataAll();
-        $personsDatas = null;
-
-        if (is_object($json) && property_exists($json, 'persons')) {
-            $personsDatas = $json->persons;
-        } else {
-            $personsDatas = $json;
+        $rows = $this->getAccessStrategy()->getDataAll($this->mapParams());
+        if (!is_array($rows)) {
+            throw new \Exception("Le connecteur PersonDB n'a pas retourné un tableau de donnée");
         }
-        if (!is_array($personsDatas)) {
-            throw new \Exception("L'API n'a pas retourné un tableau de donnée");
-        }
-
-        echo " (" . \count($personsDatas) . " personnes retournées par l'API) ";
-
+        $this->log(" (" . \count($rows) . " personnes trouvées en DB) ");
         return true;
     }
 }

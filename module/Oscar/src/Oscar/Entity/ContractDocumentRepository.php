@@ -197,16 +197,8 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             }
         }
 
-        if ($signatureflow_id) {
-            $signatureflow = $this->getEntityManager()->getRepository(SignatureFlow::class)->find($signatureflow_id);
-        }
-        else {
-            $signatureflow = null;
-        }
-
         $type->setLabel($label)
             ->setDefault($default)
-            ->setSignatureFlow($signatureflow)
             ->setDescription($description);
 
         $this->getEntityManager()->flush();

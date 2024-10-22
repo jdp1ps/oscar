@@ -1,0 +1,21 @@
+
+# Accès spécifique
+access_strategy:  Oscar\Connector\Access\ConnectorAccessOracleDB
+
+db_host:
+db_port:
+db_user:
+db_password:
+db_name:
+
+db_query_all: >
+  SELECT
+    ID, CODE, PARENT, LIBELLE_COURT,
+    TO_CHAR(
+          CAST (DATE_MODIFICATION AS timestamp) AT TIME ZONE 'UTC',
+          'yyyy-mm-dd"T"hh24:mi:ss.ff3"Z"'
+      ) UPDATED_AT,
+      TYPE_RECHERCHE, CODE_RECHERCHE, LIBELLE_LONG, TELEPHONE, SITE_URL, TYPE,
+      RNSR, ADRESSE_POSTALE
+  FROM organizations
+  ORDER BY NIVEAU, CODE
