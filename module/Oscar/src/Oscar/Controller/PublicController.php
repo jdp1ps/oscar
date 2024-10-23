@@ -70,11 +70,18 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
     public function gitlogAction()
     {
-        $file = file_get_contents(__DIR__.'/../../../../../public/gitlogs.html');
+        $file = file_get_contents(__DIR__.'/../../../../../oscar-info.json');
+        $infos = false;
+        $error = false;
         if( !$file ){
-            $file = '<div class="alert alert-danger">GITLOG non-disponible, vous pouvez le générer avec le script gitlog.sh</div>';
+            $error = '<div class="alert alert-danger">GITLOG non-disponible, vous pouvez le générer avec la commande <code>php bin/oscar.php infos</code></div>';
+        } else {
+            $infos = json_decode($file, true);
+            if( !$infos ){
+                $error = "Bad format JSON";
+            }
         }
-        return ['log' => $file];
+        return ['log' => $infos, 'error' => $error];
     }
 
     public function parametersAction()

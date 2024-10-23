@@ -44,7 +44,27 @@
     }
 </style>
 <div class="container">
-    <h1>Historique des builds et des changements</h1>
-    <?= $log ?>
+    <?php if($error): ?>
+        <?= $error ?>
+    <?php else: ?>
+    <h1>
+        <strong><?php echo $log['app'] ?></strong>
+        <em>"<?php echo $log['name'] ?>" (v<?php echo $log['version'] ?>)</em>
+    </h1>
+    <h2>
+        Branch: <code><?php echo $log['branch'] ?></code>,<br>
+        Hash: <code><?php echo $log['commitHash'] ?></code>,<br>
+        Update: <code><?php echo $log['dateUpdate'] ?></code>
+    </h2>
+    <h3>Historique des builds et des changements</h3>
+    <?php foreach ($log['logs'] as $l) : ?>
+    <div class="line">
+        <code class="hash" title="<?= $l['commit'] ?>"><?= $l['commit_short'] ?></code>
+        <span class="author"><?= $l['author'] ?></span>
+        <time class="date"><?= $l['date'] ?></time>
+        <span class="message"><?= $l['message'] ?></span>
+    </div>
+    <?php endforeach; ?>
+    <?php endif; ?>
 
 </div>

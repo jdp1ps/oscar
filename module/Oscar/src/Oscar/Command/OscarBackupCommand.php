@@ -17,6 +17,7 @@ use Symfony\Component\Finder\Finder;
 class OscarBackupCommand extends OscarCommandAbstract
 {
     protected static $defaultName = 'backup';
+    public $disabled = true;
 
     protected function configure()
     {
