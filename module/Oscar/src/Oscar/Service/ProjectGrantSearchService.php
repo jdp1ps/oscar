@@ -1108,11 +1108,6 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
         $output['took'] = intval(($time_end - $time_start) * 1000);
 
-        if ($params['format'] == 'json') {
-            echo json_encode($output, JSON_PRETTY_PRINT);
-            die();
-        }
-
         return $output;
     }
 

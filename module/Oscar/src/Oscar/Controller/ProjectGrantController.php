@@ -2608,15 +2608,25 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      * @return ViewModel
      * @throws Exception
      */
-    public function applyAdvancedSearch($qb): ViewModel
+    public function applyAdvancedSearch(): ViewModel
     {
-        $view = new ViewModel(
-            $this->getProjectGrantSearchService()->searchFromRequest(
-                $this->getRequest(),
-                $this->getOrganizationPerimeter()
-            )
+        $datas = $this->getProjectGrantSearchService()->searchFromRequest(
+            $this->getRequest(),
+            $this->getOrganizationPerimeter()
         );
-        $view->setTemplate('oscar/project-grant/advanced-search.phtml');
+        if( $this->isAjax() || $this->getRequest()->getQuery('f') === 'json' ){
+            $activities = [];
+            foreach ($datas['activities'] as $activity) {
+                $activities[] = $activity->toArray();
+            }
+            $datas['activities'] = $activities;
+            $view = new JsonModel($datas);
+        } else {
+            $view = new ViewModel(
+                $datas
+            );
+            $view->setTemplate('oscar/project-grant/advanced-search.phtml');
+        }
         return $view;
     }
 
@@ -2628,7 +2638,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function advancedSearchAction(): array|ViewModel
     {
-        return $this->applyAdvancedSearch($qb);
+        return $this->applyAdvancedSearch();
     }
 
     /**

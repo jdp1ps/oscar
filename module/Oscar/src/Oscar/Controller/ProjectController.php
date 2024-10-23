@@ -702,6 +702,7 @@ class ProjectController extends AbstractOscarController
      * Lance la recherche sur la requête envoyée.
      *
      * @return array
+     * @throws OscarException
      */
     public function searchAction()
     {
@@ -715,7 +716,7 @@ class ProjectController extends AbstractOscarController
 
         $search = $this->params()->fromQuery('q', '');
         if (strlen($search) < 2) {
-            return $this->getResponseBadRequest("Not enough chars (4 required");
+            return $this->getResponseBadRequest("Not enough chars (2 required");
         }
         $datas = $this->getProjectService()->search($search)->getQuery()->getResult();
 

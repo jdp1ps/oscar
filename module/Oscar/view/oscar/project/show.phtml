@@ -154,18 +154,17 @@ h2.tv-serie-label { border-bottom: none; }
                             var formatRepo, formatRepoSelection;
 
                             formatRepo = function (repo) {
-                                console.log('Format');
                                 if (repo.loading) return repo.text;
 
                                 var markup = '<div class="clearfix">';
-                                markup += ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                                markup += ( (repo.numOscar?'<strong>['+repo.numOscar+']</strong> ':'') + repo.label) || repo.text;
                                 markup += '</div>';
 
                                 return markup;
                             };
 
                             formatRepoSelection = function (repo) {
-                                return ( (repo.num?'<strong>['+repo.num+']</strong> ':'') + repo.label) || repo.text;
+                                return ( (repo.numOscar?'<strong>['+repo.numOscar+']</strong> ':'') + repo.label) || repo.text;
                             };
 
                             $('#activities-choose').select2({
@@ -177,15 +176,13 @@ h2.tv-serie-label { border-bottom: none; }
                                     dataType: 'json',
                                     delay: 250,
                                     data: function (params) {
-                                        console.log(params);
                                         return {
                                             q: params.term, // search term
                                             page: params.page
                                         };
                                     },
                                     processResults: function (data, page) {
-                                        console.log('Données', data);
-                                        return {results: data.datas};
+                                        return {results: data.activities};
                                     },
                                     cache: true
                                 },
