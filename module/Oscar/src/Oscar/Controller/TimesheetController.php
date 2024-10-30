@@ -2,45 +2,47 @@
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/11/15 10:52
+ * @update: 18/09/24 10:52
  * @copyright Certic (c) 2015
  */
 
 namespace Oscar\Controller;
 
-
-use BjyAuthorize\Exception\UnAuthorizedException;
+use Oscar\OscarVersion;
+use Oscar\Entity\Person;
 use Laminas\Http\Request;
 use Laminas\Http\Response;
-use Laminas\Mvc\Console\View\Renderer;
-use Laminas\View\Model\JsonModel;
-use Laminas\View\Renderer\PhpRenderer;
 use Oscar\Entity\Activity;
-use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\Organization;
-use Oscar\Entity\OrganizationPerson;
-use Oscar\Entity\Person;
 use Oscar\Entity\TimeSheet;
-use Oscar\Entity\ValidationPeriod;
-use Oscar\Entity\WorkPackage;
-use Oscar\Entity\WorkPackagePerson;
-use Oscar\Exception\OscarException;
-use Oscar\Formatter\OscarFormatterConst;
-use Oscar\Formatter\Timesheet\TimesheetActivityPeriodHtmlFormatter;
-use Oscar\Formatter\Timesheet\TimesheetPeriodHtmlFormatter;
-use Oscar\Formatter\Timesheet\TimesheetPeriodPdfFormatter;
-use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
-use Oscar\Formatter\Timesheet\TimesheetPersonPeriodPdfFormatter;
-use Oscar\Formatter\TimesheetActivityPeriodFormatter;
-use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
-use Oscar\OscarVersion;
-use Oscar\Provider\Privileges;
-use Oscar\Service\DocumentFormatterService;
-use Oscar\Service\PersonService;
-use Oscar\Service\ProjectGrantService;
-use Oscar\Service\TimesheetService;
-use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\StringUtils;
+use Oscar\Entity\WorkPackage;
+use Oscar\Entity\Organization;
+use Oscar\Provider\Privileges;
+use Oscar\Utils\DateTimeUtils;
+use Oscar\Service\PersonService;
+use Laminas\View\Model\JsonModel;
+use Oscar\Entity\ActivityPayment;
+use Oscar\Entity\ValidationPeriod;
+use Oscar\Entity\WorkPackagePerson;
+use Oscar\Exception\OscarException;
+use Oscar\Service\TimesheetService;
+use Oscar\Entity\OrganizationPerson;
+use Laminas\Mvc\Console\View\Renderer;
+use Laminas\View\Renderer\PhpRenderer;
+use Oscar\Service\ProjectGrantService;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Oscar\Formatter\OscarFormatterConst;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Oscar\Service\DocumentFormatterService;
+use BjyAuthorize\Exception\UnAuthorizedException;
+use Oscar\Formatter\TimesheetActivityPeriodFormatter;
+use Oscar\Formatter\TimesheetActivityPeriodPdfFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPeriodPdfFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodPdfFormatter;
+use Oscar\Formatter\Timesheet\TimesheetPersonPeriodHtmlFormatter;
+use Oscar\Formatter\Timesheet\TimesheetActivityPeriodHtmlFormatter;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -1019,7 +1021,7 @@ class TimesheetController extends AbstractOscarController
             $lineWpStart = 10;
 
             /** @var \PHPExcel $spreadsheet */
-            $spreadsheet = \PHPExcel_IOFactory::load($modele);
+            $spreadsheet = IOFactory::load($modele);
 
 
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
@@ -1042,7 +1044,7 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue('C6', $period);
             $spreadsheet->getActiveSheet()->setCellValue('B8', $period);
 
-            $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+            $edited = IOFactory::createWriter($spreadsheet, 'Excel5');
 
             $spreadsheet->getActiveSheet()->insertNewColumnBefore('D');
 
@@ -1371,7 +1373,7 @@ class TimesheetController extends AbstractOscarController
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period, false, $restrictedActivity);
             $datas['format'] = $out;
             $this->getDocumentFormatterService()->buildAndDownload(
-                $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
+                (string) $this->getOscarConfigurationService()->getConfiguration('timesheet_person_month_template'),
                 $datas,
                 $out,
                 $datas['filename'],
@@ -1381,8 +1383,8 @@ class TimesheetController extends AbstractOscarController
 
         if ($action == "export") {
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
+            $modele = (string) $this->getOscarConfigurationService()->getConfiguration('paths.timesheet_modele');
 
-            $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
             if (!$modele) {
                 throw new OscarException("Impossible de charger le modèle de feuille de temps");
             }
@@ -1439,19 +1441,14 @@ class TimesheetController extends AbstractOscarController
             $lineWpStart = 10;
 
             /** @var \PHPExcel $spreadsheet */
-            $spreadsheet = \PHPExcel_IOFactory::load($modele);
+            $spreadsheet = IOFactory::load( $modele );
 
             $dateStart = new \DateTime($period . '-01');
             $dateEnd = new \DateTime($period . '-01');
 
-            $conf    = $this->getOscarConfigurationService()->getConfigArray();
-            $etbName = '';
-            if ( isset( $conf['unicaen-app']['organisation']['name'] ) )
-                $etbName = $conf['unicaen-app']['organisation']['name'];
-
             $spreadsheet->getActiveSheet()->setCellValue('A1', "Déclaration");
             $spreadsheet->getActiveSheet()->setCellValue('C3', (string)$person);
-            $spreadsheet->getActiveSheet()->setCellValue('C4', $etbName );
+            $spreadsheet->getActiveSheet()->setCellValue('C4', 'Université de Caen');
             $spreadsheet->getActiveSheet()->setCellValue('C5', $datas['acronyms']);
             $spreadsheet->getActiveSheet()->setCellValue('C15', $datas['commentaires']);
 
@@ -1497,7 +1494,7 @@ class TimesheetController extends AbstractOscarController
                         $value = 0.0;
                         $style = [
                             'fill' => [
-                                'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                                'type' => FILL::FILL_SOLID,
                                 'color' => ['rgb' => 'ffffff']
                             ]
                         ];
@@ -1549,12 +1546,12 @@ class TimesheetController extends AbstractOscarController
                     $value = 0.0;
                     $style = [
                         'fill' => [
-                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                            'type' => FILL::FILL_SOLID,
                             'color' => ['rgb' => 'ffffff']
                         ]
                     ];
 
-                    if (array_key_exists($day, $daysDatas)) {
+                    if ( is_array( $daysDatas ) && array_key_exists($day, $daysDatas)) {
                         $value = $daysDatas[$day];
                         $style['fill']['color']['rgb'] = 'bbf776';
                     }
@@ -1589,7 +1586,7 @@ class TimesheetController extends AbstractOscarController
                 $value = sprintf("=SUM(%s%s:%s%s)", $col, $startTotal, $col, $end); //$lineTotalWP';
                 $style = [
                     'fill' => [
-                        'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                        'type' => FILL::FILL_SOLID,
                         'color' => ['rgb' => 'ffffff']
                     ]
                 ];
@@ -1607,9 +1604,9 @@ class TimesheetController extends AbstractOscarController
             // TOTAL
 
 
-            $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+            $edited = IOFactory::createWriter( $spreadsheet, 'Xlsx' );
 
-            $name = ($person->getLadapLogin()) . "-" . $period . ".xls";
+            $name = ( $person->getLadapLogin() ) . "-" . $period . ".xlsx";
             $filepath = '/tmp/' . $name;
 
             $edited->save($filepath);
@@ -2078,9 +2075,7 @@ class TimesheetController extends AbstractOscarController
             return $this->jsonOutput($json);
         }
 
-        return [
-
-        ];
+        return [];
     }
 
     public function validationsAction()
