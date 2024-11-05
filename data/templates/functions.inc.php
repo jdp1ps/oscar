@@ -7,7 +7,7 @@ require_once __DIR__ . '/variables.inc.php';
  * @return string
  */
 function duration ($duration): string {
-    $duration = (float)$duration;
+    $duration = floatval($duration);
     $heures = floor($duration);
     $minutes = round(($duration - $heures) * 60);
     if ($minutes < 10) {
@@ -21,7 +21,7 @@ function duration ($duration): string {
  * @return string
  */
 function durationRounded ($duration): string {
-    $duration = (float)$duration;
+    $duration = floatval($duration);
     $roundStep = 5;
     $heures = floor($duration);
     $minutes = round(($duration - $heures) * 60 / $roundStep) * $roundStep;

@@ -18,5 +18,8 @@
     <testsuite name="Service">
       <directory>Oscar/Service</directory>
     </testsuite>
+    <testsuite name="TemplateFunctions">
+      <directory>Oscar/template</directory>
+    </testsuite>
   </testsuites>
 </phpunit>
