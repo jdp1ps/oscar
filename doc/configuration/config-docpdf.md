@@ -76,3 +76,10 @@ return array(
     ]
 );
 ```
+
+## Dysfonctionnement
+
+ Sous **Redhat**, les emplacements pour la commandes sont différents. Donc : 
+ 
+ 1. Installer la police **Open-Sans** `dnf install open-sans-fonts`
+ 2. Créer un lien symbolique `/usr/local/bin/wkhtmltopdf ` > `/opt/wkhtmltopdf/bin/wkhtmltopdf` 

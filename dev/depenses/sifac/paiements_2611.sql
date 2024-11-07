@@ -32,7 +32,7 @@ from sapsr3.v_fmifi, SAPSR3.LFA1
 where
 ( SAPSR3.v_FMIFI.LIFNR=SAPSR3.LFA1.LIFNR(+) )
 AND
-sapsr3.v_fmifi.measure = '011C055C'
+sapsr3.v_fmifi.measure = '956C078B'
 AND sapsr3.v_fmifi.rldnr='9A' 
 AND sapsr3.v_fmifi.MANDT='430'
 AND sapsr3.v_fmifi.BTART='0250'

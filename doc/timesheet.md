@@ -395,7 +395,36 @@ Les documents générés disposent de plusieurs options disponibles dans l'inter
 ![Synthèse 2](images/timesheet-options.png)
 
 
-### Personnalisation des rendus
+## Personnalisation des rendus
+
+### Modifier votre logo
+
+Pour juste ajouter votre logo, commencez par copier le fichier image de votre établissement à un emplacement accessible.
+
+```bash
+# Rendez-vous dans le dossier `data/templates`
+cd data/templates
+
+# créez un fichier "custom.inc.php"
+cp custom.inc.php.dist custom.inc.php
+
+nano custom.inc.php
+```
+
+Puis adaptez le code : 
+
+```php
+<?php
+$logo_data = "data:image/png;base64," . base64_encode(
+    // Mettre le chemin complet vers votre image
+    file_get_contents('/var/OscarApp/data/templates/logo.example.png')
+);
+```
+
+> Cette méthode est idéale si vous souhaitez le modifier que votre logo tout en bénéficiant des mise à jour des gabarits par défaut.
+
+### Créer ces propres gabarits
+
 
 Vous pouvez modifier le rendu des documents en dupliquant les gabarits fournit par défaut : 
 

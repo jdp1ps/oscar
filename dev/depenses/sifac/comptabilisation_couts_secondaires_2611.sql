@@ -30,6 +30,6 @@ budat,
 ''
 
 from SAPSR3.fmia
-where rmeasure = '014C311F'
+where rmeasure = '956C078B'
 and rwrttp = '95'
 AND rclnt = '430';

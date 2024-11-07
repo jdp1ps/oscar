@@ -1,0 +1,10 @@
+<?php
+/*
+ La variable $logo_data est utilisée dans le code HTML
+ sous la forme <img src="<?= $logo_data ?>">
+ Note : Une URL absolue peut ne pas fonctionner dans le cadre
+ de la génération d'un PDF, d'où l'usage de BASE64
+*/
+$logo_data = "data:image/png;base64," . base64_encode(
+    file_get_contents(__DIR__.'/logo.example.png')
+);

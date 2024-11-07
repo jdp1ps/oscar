@@ -61,7 +61,7 @@ WHERE
   (
    SAPSR3.FMIOI.MANDT  IN  ( '430'  )
    AND
-   sapsr3.fmioi.measure = '011C055C'
+   sapsr3.fmioi.measure = '956C078B'
    and
    SAPSR3.FMIOI.WRTTP = '52'
   )

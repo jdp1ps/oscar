@@ -12,13 +12,12 @@ $labels = [
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Document PDF</title>
+        <title>Synthèse de l'activité</title>
         <style>
             <?php echo file_get_contents(__DIR__.'/common.css'); ?>
         </style>
     </head>
     <body>
-
             <table border="0">
                 <tr>
                     <td>
@@ -38,64 +37,69 @@ $labels = [
                     <th>&nbsp;</th>
                     <?php
 
-                    // Nombre de colonne dans les groupe
-                    $colWP      = count($wps) + (count($wps)>1 ? 1 : 0);
-                    $colCE      = count($ces) + (count($ces)>1 ? 1 : 0);
-                    $colSEARCH  = count($othersGroups['research']) + (count($othersGroups['research'])>1 ? 1 : 0);
+                    ////////////////////////////// Colonnes RECHERCHE
+                    //// Colonnes du projet
+                    $nbrColProjetLots = count($wps); // Lots
+                    $nbrColProjetTotal = $nbrColProjetLots > 1 ? 1 : 0; // Colonne TOTAL
+                    $nbrColProjet = $nbrColProjetLots + $nbrColProjetTotal;
 
-                    // Largeur des colonnes
-                    $colonneLot = count($wps);
-                    $colonneLotTotal = $colonneLot > 1 ? 1 : 0;
+                    //// Colonnes Autres Projets
+                    $nbrColCEProjet = count($ces);
+                    $nbrColCETotal = $nbrColCEProjet > 1 ? 1 : 0;
+                    $nbrColCE = $nbrColCEProjet + $nbrColCETotal;
 
-                    $colonneAutresProjets = count($ces);
-                    $colonneAutresProjetsTotal = $colonneAutresProjets > 1 ? 1 : 0;
+                    //// Colonnes Autres Recherche
+                    $nbrColOtherSearchItems = count($othersGroups['research']);
+                    $nbrColOtherSearchTotal = $nbrColOtherSearchItems > 1 ? 1 : 0;
+                    $nbrColOtherSearch = $nbrColOtherSearchItems + $nbrColOtherSearchTotal;
 
-                    $colonneRecherches = count($othersGroups['research']);
-                    $colonneRecherchesTotal = $colonneRecherches > 1 ? 1 : 0;
-
-                    $colonneCategorieRecherche = $colonneLot + $colonneLotTotal + $colonneRecherches + $colonneRecherchesTotal + $colonneAutresProjets + $colonneAutresProjetsTotal;
-                    $colonneCategorieRechercheTotal = $colonneCategorieRecherche > 2 ? 1 : 0;
-
-                    $colonneAbs = count($othersGroups['abs']);
-                    $colonneAbsTotal = $colonneAbs > 1 ? 1 : 0;
-
-                    $colonneOthers = count($othersGroups['other']);
-                    $colonneOthersTotal = $colonneOthers > 1 ? 1 : 0;
-
-                    $colonneOthers = count($othersGroups['education']);
-                    $colonneOthersTotal = $colonneOthers > 1 ? 1 : 0;
+                    $nbrColResearch = $nbrColProjet + $nbrColCE + $nbrColOtherSearch;
 
 
+                    //// Colonnes Autres
+                    $nbrColOthers = [];
+                    foreach ($othersGroups as $key => $value) {
+                        if( $key == "research" ){
+                            continue;
+                        }
+                        $nbrItems = count($value);
+                        $hasTotal = $nbrItems > 1 ? 1 : 0;
+                        $total = $nbrItems + $hasTotal;
 
-                    $colspanLot = count($wps) -1 +1;
-                    $colspanCE = count($ces) -1;
-                    if( $colspanCE > 1 ) $colspanCE +=1;
+                        $nbrColOthers[$key] = [
+                            'items' => $nbrItems,
+                            'hasTotal' => $hasTotal,
+                            'total' => $total,
+                        ];
+                    }
                     ?>
-                    <th class="research" colspan="<?= $colonneCategorieRecherche + $colonneCategorieRechercheTotal ?>">Recherches</th>
+                    <th class="research" colspan="<?= $nbrColResearch + 1 ?>">Recherches</th>
 
                     <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue;?>
-                        <th class="<?= $k ?>" colspan="<?= count($othersGroup)+(count($othersGroup)>1 ? 1 : 0) ?>">
-                            <?= array_keys($labels, $k) ? $labels[$k] : $k ?>
+                        <th class="<?= $k ?>" colspan="<?= $nbrColOthers[$k]['total'] ?>">
+                            <?= array_key_exists($k, $labels) ? $labels[$k] : $k ?>
                         </th>
                     <?php endforeach; ?>
-                    <th colspan="2" class="totalall">TOTAL</th>
+                    <th colspan="2" class="totalall">TOTAL période</th>
                 </tr>
                 <tr>
                     <th>&nbsp;</th>
 
-                    <th class="research main" colspan="<?= $colonneLot + $colonneLotTotal ?>">
-                        <strong><?= $activity['projectacronym'] ?></strong>
+                    <th class="research main" colspan="<?= $nbrColProjet ?>">
+                        <strong>
+                            <?= $activity['projectacronym'] ?>
+                        </strong>
                     </th>
-                    <?php if( count($ces) > 0): ?>
-                        <th class="research ce" colspan="<?= $colonneAutresProjets + $colonneAutresProjetsTotal ?>">
-                            <strong>Projets</strong>
+                    <?php if( $nbrColCE > 0): ?>
+                        <th class="research ce" colspan="<?= $nbrColCE ?>">
+                            <strong>Autres Projets</strong>
                         </th>
                     <?php endif; ?>
-                    <th class="research other" colspan="<?= $colonneRecherches + $colonneRecherchesTotal ?>">
-                        <strong>Autres</strong>
+                    <th class="research other" colspan="<?= $nbrColOtherSearch ?>">
+                        <span>Autres </span>
                     </th>
                     <th class="research totalcategory" rowspan="2">
-                        Total
+                        Total<br> recherche
                     </th>
 
                     <?php foreach ($othersGroups as $k=>$othersGroup): if( $k == 'research') continue;?>
@@ -110,7 +114,7 @@ $labels = [
                             </th>
                         <?php endif; ?>
                     <?php endforeach; ?>
-                    <th rowspan="2">ACTIF</th>
+                    <th rowspan="2">Actif</th>
                     <th rowspan="2" class="total">TOTAL</th>
                 </tr>
                 <tr>
@@ -155,9 +159,11 @@ $labels = [
                                 <?= duration($duration) ?>
                             </td>
                         <?php endforeach; ?>
+                        <?php if($nbrColProjetLots > 1): ?>
                         <td class="stotal main research <?= $line['totalMain'] ? 'value' : 'empty' ?>">
                             <?= duration($line['totalMain']) ?>
                         </td>
+                        <?php endif; ?>
 
                         <?php foreach ($line['ce'] as $acronym=>$duration): ?>
                             <td class="ce research <?= $duration ? 'value' : 'empty' ?>">

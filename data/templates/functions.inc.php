@@ -1,7 +1,10 @@
 <?php
 
 require_once __DIR__ . '/variables.inc.php';
-
+$custom = __DIR__ . '/custom.inc.php';
+if( file_exists($custom) ){
+    require_once $custom;
+}
 /**
  * @param $duration
  * @return string

@@ -124,6 +124,7 @@ class DocumentFormatterService implements UseLoggerService, UseOscarConfiguratio
     {
         $this->debug("Build HTML from '$templatePath'");
         if (!file_exists($templatePath)) {
+            $this->getLoggerService()->critical("Template introuvable");
             throw new OscarException("Le gabarit n'existe pas");
         }
 
@@ -139,10 +140,10 @@ class DocumentFormatterService implements UseLoggerService, UseOscarConfiguratio
         } catch (\Exception $e) {
             throw new OscarException('Impossible de charger le template');
         }
-
         $view = new ViewModel($datas);
         $view->setTerminal(true);
         $view->setTemplate('oscar_template_generate_html');
+//        die("ICI");
 
         try {
             // TODO Essayé de récupérer l'erreur dans le template

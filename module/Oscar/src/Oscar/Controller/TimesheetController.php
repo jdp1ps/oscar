@@ -840,7 +840,6 @@ class TimesheetController extends AbstractOscarController
                 $output['format'] = 'json';
                 return $this->jsonOutput($output);
             } else {
-                die("HTML");
                 $output['format'] = 'html';
                 $formatter = new TimesheetActivityPeriodHtmlFormatter(
                     $this->getOscarConfigurationService()->getConfiguration('timesheet_activity_synthesis_template'),
@@ -1377,6 +1376,7 @@ class TimesheetController extends AbstractOscarController
                 $datas['filename'],
                 DocumentFormatterService::PDF_ORIENTATION_LANDSCAPE
             );
+            die();
         }
 
         if ($action == "export") {

@@ -2,6 +2,21 @@
 
 > Ce document historise les tests pour améliorer la synchronisation des dépenses entre Oscar est SIFAC. Les résultats / notes sont historisés dans le document du plus récent au début, au plus ancien en bas.
 
+## Réunion Unicaen
+
+Avec Nikola DAVOT-JéAN (DRI/Finance)
+
+### Termes
+
+effectué => payé
+
+### Transaction journal des pièces
+
+ - Version actuelle (**Z_SUIVI_EXEC**)
+ - Version proposée : **FMRP_RFFMEP1AX** (Celle proposée par l'Université de Bourgogne dans le cahier des charges des dépenses)
+
+### Infos complémentaires (EOTP / PFI)
+ - Utilisation à Caen des EOTP pour distinguer certaines dépenses (Exemple évoqué : les gratifications de stage, afin d'isoler ce type de dépense. Car elles peuvent être traiter dans des masses différentes selon le financeur)
 
 
 ## Test 2024/09/25
@@ -131,3 +146,43 @@ WHERE
 
 
 BLDATE/DATE PIECE = Date de référence de création de la ligne/pièce
+
+# Avant
+
+Requête actuelle : 
+
+```sql
+select  
+    MEASURE AS pfi,  
+    RLDNR as AB9,
+    STUNR as idsync,
+    awref AS numSifac,
+    vrefbn as numCommandeAff,
+    vobelnr as numPiece,
+    LIFNR as numFournisseur,
+    KNBELNR as pieceRef,
+    fikrs AS codeSociete,
+    BLART AS codeServiceFait,
+    FAREA AS codeDomaineFonct,
+    sgtxt AS designation,
+    BKTXT as texteFacture,
+    wrttp as typeDocument,
+    TRBTR as montant,
+    fistl as centreDeProfit,
+    fipex as compteBudgetaire,
+    prctr AS centreFinancier,
+    HKONT AS compteGeneral,
+    budat as datePiece,
+    bldat as dateComptable,
+    gjahr as dateAnneeExercice,
+    zhldt AS datePaiement,
+    MANDT as mandt,
+    BTART as BTART,
+    PSOBT AS dateServiceFait 
+from sapsr3.v_fmifi 
+where 
+    RLDNR ='9A' 
+  AND measure = '%s' 
+  AND MANDT ='430' 
+  AND BTART IN('0250','0100')
+```
