@@ -227,6 +227,7 @@ class ConnectorPersonDB extends AbstractConnector
         $dbParam['db_user'] = $this->getParameter('db_user');
         $dbParam['db_password'] = $this->getParameter('db_password');
         $dbParam['db_name'] = $this->getParameter('db_name');
+        $dbParam['db_charset'] = $this->getParameter('db_charset');
         $dbParam['db_query_all'] = $this->getParameter('db_query_all');
         $dbParam['db_query_single'] = $this->getParameter('db_query_single');
         return $dbParam;

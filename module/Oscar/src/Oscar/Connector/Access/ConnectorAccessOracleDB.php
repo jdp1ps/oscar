@@ -4,6 +4,7 @@ namespace Oscar\Connector\Access;
 
 use Oscar\Connector\IConnector;
 use Oscar\Exception\OscarException;
+use Oscar\Exception\OscarNoResultException;
 
 class ConnectorAccessOracleDB implements IConnectorAccess
 {
@@ -75,10 +76,10 @@ class ConnectorAccessOracleDB implements IConnectorAccess
         }
 
         if (\count($rows) < 1) {
-            throw new OscarException("PERSON CONNECTOR SYNC ONE : Aucune personne trouvée pour l'ID " . $remoteId);
+            throw new OscarNoResultException("CONNECTOR SYNC ONE : Aucune élément trouvé dans la base de données pour l'ID " . $remoteId);
         }
         if (\count($rows) > 1) {
-            throw new OscarException("PERSON CONNECTOR SYNC ONE : Plusieurs personnes trouvées pour l'ID " . $remoteId);
+            throw new OscarException("CONNECTOR SYNC ONE : Plusieurs éléments trouvées dans la base de données pour l'ID " . $remoteId);
         }
 
         return $rows[0];
@@ -139,7 +140,8 @@ class ConnectorAccessOracleDB implements IConnectorAccess
                 $params['db_host'],
                 $params['db_port'],
                 $params['db_name']
-            )
+            ),
+            $params['db_charset']
         );
 
         if (!$c) {

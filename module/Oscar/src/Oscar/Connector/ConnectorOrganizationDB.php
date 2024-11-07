@@ -8,6 +8,7 @@ use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Exception\OscarException;
+use Oscar\Exception\OscarNoResultException;
 use Oscar\Factory\JsonToOrganization;
 use Oscar\Service\OrganizationService;
 
@@ -21,8 +22,8 @@ class ConnectorOrganizationDB extends AbstractConnector
      */
     public function execute( bool $force = false) :ConnectorRepport
     {
-        $personRepository = $this->getRepository();
-        return $this->syncAll($personRepository, $force);
+        $organizationRepository = $this->getRepository();
+        return $this->syncAll($organizationRepository, $force);
     }
 
     /**
@@ -45,20 +46,10 @@ class ConnectorOrganizationDB extends AbstractConnector
             }
 
             $exist = $repository->getUidsConnector($this->getName());
-            $jsonDatas = null;
 
-            if( is_object($orgs) && property_exists($orgs, 'organizations') ){
-                $jsonDatas = $orgs->organizations;
-            } else {
-                $jsonDatas = $orgs;
-            }
-
-            if( !is_array($jsonDatas) ){
-                throw new \Exception("L'API n'a pas retourné un tableau de donnée");
-            }
             ////////////////////////////////////
 
-            foreach( $jsonDatas as $data ){
+            foreach( $orgs as $data ){
                 $organisationId = $data->uid;
 
                 if (($index = array_search($organisationId, $exist)) >= 0) {
@@ -147,6 +138,77 @@ class ConnectorOrganizationDB extends AbstractConnector
         return $report;
     }
 
+    function syncOrganization(?Organization $organization, string $organizationIdRemote = NULL, bool $force = false)
+    {
+        if ($organization == NULL && $organizationIdRemote == NULL) {
+            throw new \Exception('Pour synchroniser une organisation, il faut son id dans la source de données distance (connector remote id)');
+        }
+
+        if ($organizationIdRemote == NULL) {
+            $organizationIdRemote = $organization->getConnectorID($this->getName());
+        }
+        if ($organizationIdRemote == NULL) {
+            throw new \Exception('Impossible de synchroniser la structure ' . $organization . ' car elle n\'a pas de remote id pour le connecteur ' . $this->getName());
+        }
+
+        try {
+            $organizationRow = $this->getAccessStrategy()->getDataSingle($organizationIdRemote, $this->mapParams());
+            $organizationData = $this->objectFromDBRow($organizationRow);
+    
+            $dateupdated = date('Y-m-d H:i:s');
+            if( property_exists($organizationData, 'dateupdated') ){
+                $dateupdated = $organizationData->dateupdated;
+            }
+
+            if ($organization == NULL) {
+                $organization = $this->getRepository()->newPersistantObject();
+            }
+
+            if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
+                $organization = $this->hydrateWithDatas($organization, $organizationData);
+                if( property_exists($organizationData, 'type') )
+                    $organization->setTypeObj($this->getRepository()->getTypeObjByLabel($organizationData->type));
+    
+                $organization->setDateUpdated(new \DateTime($dateupdated));
+                $this->getRepository()->flush($organization);
+    
+                if( $organization->hasUpdatedParentInCycle() ){
+                    try {
+                        $newParentCode = $organization->getUpdatedParentInCycle();
+                        if( $newParentCode ){
+                            $parent = $this->getOrganizationService()->getOrganizationRepository()->getOrganisationByCode($newParentCode)->getId();
+                            $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
+                        } else {
+                            $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
+                        }
+                        $this->getRepository()->flush($organization);
+                    } catch (\Exception $e) {
+                        $this->getLogger()->error("Erreur : " . $e->getMessage());
+                    }
+                }
+            }
+        } catch (OscarNoResultException $e) {
+            if ($organization != NULL) {
+                $this->getLogger()->info("'$organization' n'est plus présente dans les données du connecteur");
+
+                if ($this->getOptionPurge()) {
+                    try {
+                        $orga = $organization->log();
+                        $this->getRepository()->removeOrganizationById($organization->getId());
+                        $this->getLogger()->error("Supression de l'organisation '$orga'");
+                    } catch (\Exception $e) {
+                        $this->getLogger()->error("Impossible de supprimer l'organisation : " . $e->getMessage());
+                        throw $e;
+                    }
+                }
+
+                return NULL;
+            }
+        }
+
+        return $organization;
+    }
+
     private function mapParams() {
         $dbParam = [];
         $dbParam['db_host'] = $this->getParameter('db_host');
@@ -154,7 +216,9 @@ class ConnectorOrganizationDB extends AbstractConnector
         $dbParam['db_user'] = $this->getParameter('db_user');
         $dbParam['db_password'] = $this->getParameter('db_password');
         $dbParam['db_name'] = $this->getParameter('db_name');
+        $dbParam['db_charset'] = $this->getParameter('db_charset');
         $dbParam['db_query_all'] = $this->getParameter('db_query_all');
+        $dbParam['db_query_single'] = $this->getParameter('db_query_single');
         return $dbParam;
     }
 
