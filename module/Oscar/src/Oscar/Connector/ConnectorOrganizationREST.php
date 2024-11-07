@@ -214,8 +214,6 @@ class ConnectorOrganizationREST extends AbstractConnector
             $repport->adderror($e->getMessage());
             throw $e;
         }
-        die();
-
 
         $repport->addnotice("FIN du traitement...");
         return $repport;

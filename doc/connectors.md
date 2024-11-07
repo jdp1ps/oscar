@@ -9,7 +9,7 @@ Il propose des utilitaires en ligne de commande pour **importer des données** d
 
 Les connectors permettent de *brancher* Oscar sur des sources de données et d'automatiser la maintenance de ces données.
 
-Les connectors dans version 2.0 d'Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé.
+Les connectors dans la version 2.0 d'Oscar s'appuient sur un service REST distant qui va livrer les données à Oscar sous un format standardisé. Pour importer des données directement depuis une base de données Oracle sans passer par un service REST, voir [connectors-db.md](connectors-db.md).
 
 Oscar possède la possibilité de se connecter via une connexion ssl en relation avec un certificat .p12 avec mdp, il faudra cependant le préparer en le scindant en deux fichiers (certificat et clef)
 

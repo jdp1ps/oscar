@@ -64,6 +64,7 @@ class OscarPersonSearchSyncOneCommand extends OscarCommandAbstract
                 $connectorService = $this->getServicemanager()->get(ConnectorService::class);
                 $connector = $connectorService->getConnector("person.".$connector);
                 $person = $connector->syncPerson($person);
+                $personRepository->flush($person);
 
                 $io->success(sprintf("La personne '%s' a été synchronisée.", $person));
             }
@@ -72,5 +73,7 @@ class OscarPersonSearchSyncOneCommand extends OscarCommandAbstract
         } catch ( \Exception $e ){
             $io->error($e->getMessage());
         }
+
+        return self::SUCCESS;
     }
 }

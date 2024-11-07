@@ -11,6 +11,7 @@ db_port:
 db_user:
 db_password:
 db_name:
+db_charset: AL32UTF8
 
 db_query_single: >
   SELECT REMOTE_ID, PRENOM, NOM, CIVILITE, LOGIN, EMAIL, LANGAGE, STATUT,
