@@ -7,6 +7,18 @@ db_port:
 db_user:
 db_password:
 db_name:
+db_charset: AL32UTF8
+
+db_query_single: >
+  SELECT
+    ID, CODE, PARENT, LIBELLE_COURT,
+    TO_CHAR(
+          CAST (DATE_MODIFICATION AS timestamp) AT TIME ZONE 'UTC',
+          'yyyy-mm-dd"T"hh24:mi:ss.ff3"Z"'
+      ) UPDATED_AT,
+      TYPE_RECHERCHE, CODE_RECHERCHE, LIBELLE_LONG, TELEPHONE, SITE_URL, TYPE,
+      RNSR, ADRESSE_POSTALE
+  FROM organizations WHERE ID = :p1 ORDER BY UPDATED_AT DESC FETCH FIRST ROW ONLY
 
 db_query_all: >
   SELECT

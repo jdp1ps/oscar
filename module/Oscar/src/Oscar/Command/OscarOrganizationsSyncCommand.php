@@ -46,7 +46,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
                 'purge',
                 'p',
                 InputOption::VALUE_NONE,
-                'Déclenche la des organisations qui sont retirées de la source'
+                'Déclenche la suppression des organisations qui sont retirées de la source'
             );
     }
 
