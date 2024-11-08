@@ -1,10 +1,11 @@
 # OSCAR with DOCKER
 
-Des instances *ready-to-use* basées sur docker sont disponibles. Elles sont basées sur : 
+Pour installer une version *dockerisée* de Oscar, un dépôt dédié est disponible ici : https://git.unicaen.fr/oscar-staff/oscar-docker
 
- - Docker version 27.2.0, build 3ab4256
 
-## Instances Oscar
+## Instances Oscar (développeur)
+
+> A mettre à jour
 
  - [**OSCAR RIPLEY** (Version Démo/Test)](./ripley-demo/README.md)    
 
