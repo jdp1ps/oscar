@@ -86,9 +86,31 @@ apt install \
   php8.2-ssh2 \
   php8.2-xml \
   php8.2-zip
+  
+# Installation WKHtmlToPdf/OpenSans
+apt install wkhtmltopdf fonts-open-sans
 ```
 
-> La configuration PHP est à adapter selon vos besoins. Prévoir une mémoire minimum à 1024 pour répondre aux besoins de certains scripts (notamment les exports massifs de données). Ainsi que d'ajuster la taille des données téléversés parfois volumineux (10Mo par exemple à Caen)
+> La configuration PHP est à adapter selon vos besoins. Prévoir une mémoire minimum à 1024 pour répondre aux besoins de certains scripts (notamment les exports massifs de données). Ainsi que d'ajuster la taille des données téléversées parfois volumineux (10Mo par exemple à Caen)
+> ```txt
+> # Exemple 
+> # Fichier /etc/php/8.2/apache2/conf.d/99-oscar.ini
+> # --------------------------
+> # Configuration PHP : OSCAR
+> # --------------------------
+> # Divers
+> date.timezone = Europe/Paris
+> max_execution_time = 240
+> memory_limit = 2048M
+> upload_max_filesize=10M
+> 
+> # Debug
+> log_errors = On
+> display_startup_errors = Off
+> display_errors = Off
+> error_reporting = E_ERROR
+> ```
+> Pensez également au fichier pour PHP-CLIP `/etc/php/8.2/cli/conf.d/99-oscar.ini` et là aussi, adapter la configuration à vos besoins
 
 Installez également le client postgresql qui sera nécessaire pour importer la structure initiale de la base de donnée :
 
@@ -97,43 +119,7 @@ Installez également le client postgresql qui sera nécessaire pour importer la 
 apt-get install postgresql postgresql-client postgresql-client-common
 ```
 
-
-### Installation de la base de donnée
-
-Si la base de données est sur la même machine, installation du serveur **Postgresql** :
-
-```bash
-# Postgresql (ou autre selon le client de BDD utilisé)
-apt-get install postgresql-server
-```
-En cas de soucis sur Ubuntu il est possible de procéder ainsi :
-```
-wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
-sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
-apt update
-apt-get install postgresql postgresql-contrib
-
-```
-Une fois connecté :
-```
-psql
-postgres-# \conninfo
-résultat :
-Vous êtes connecté à la base de données « postgres » en tant qu'utilisateur « postgres » via le socket dans « /var/run/postgresql » via le port « 5432 ».
-```
-CTRL D (deux fois)
-```
-postgres=# \q
-xxx@zzzz:~$ déconnexion
-```
-
-Vérification du bon fonctionnement
-```
-sudo -i -u postgres
-```
-CTRL D (pour quitter)
-
-## Installation de la copie de Oscar
+## Installation des sources Oscar
 
 ### Emplacement
 
@@ -224,16 +210,9 @@ composer install --prefer-dist
 
 Composer se chargera d'installer les dépendances PHP tel de définies dans le fichier `composer.json`.
 
-Sous Ubuntu il est possible que ce paquet bcmath bloque, dans ce cas, ajouter cette commande
-```
-apt install php8.2*-bcmath
-```
-
-
 ## Gestionnaire de tâche (via Gearman)
 
 Gearman est un *daemon* qui se chargera de gérer les tâches Oscar.
-
 
 ```bash
 # Installation de Gearman
@@ -243,21 +222,16 @@ apt install gearman-job-server
 systemctl status gearman-job-server.service
 # ou (selon que vous utilisiez systemd ou non selon votre version debian)
 service gearman-job-server status
-
-# Surveiller les tâches en attentes
-watch "gearadmin --status | sort -n | column -t"
-# Dans le cas ou vous avez un message "gearadmin not found", installez le nécessaire
-apt-get install gearman-tools
 ```
 
-Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichier **/etc/php/8.2/cli/php.ini** et **/etc/php/8.2/apache2/php.ini** en ajoutant la ligne :
+Par défaut, l'extension *Gearman* n'est pas activée dans le `php.ini`. Éditez les fichiers **/etc/php/8.2/cli/php.ini** et **/etc/php/8.2/apache2/php.ini** en ajoutant la ligne :
 
 ```ini
 ; /etc/php/8.2/cli/php.ini - /etc/php/8.2/apache2/php.ini
 extension=gearman
 ```
 
-Ensuite il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur :
+Ensuite, il faut configurer le *Worker Oscar* qui se chargera de réaliser les tâches disponibles sur le serveur :
 
 ```bash
 # on copie le gabarit de configuration du service
@@ -283,6 +257,7 @@ ln -s /var/OscarApp/oscar/config/oscarworker.service oscarworker.service
 
 # On lance le service
 service oscarworker start
+
 # Si vous utilisez systemd
 systemctl start oscarworker.service
 
@@ -298,7 +273,34 @@ Etape détaillée dans [Installation de Gearman](./install-gearman.md)
 
 ## Installation de la base de données
 
-### Création de la base de données vide
+### CAS 1 : Vous avez un serveur de base de données (Recommandé)
+
+Connectez-vous à votre serveur de base de donnée pour créer la base de données initiale à partir du fichier `install/oscar-install.sql`
+
+### CAS 2 : La base de données est sur la même machine
+
+```bash
+# Installation du serveur Postgresql
+apt-get install postgresql-server
+```
+On se connecte à la base de données Postgresql :
+```
+psql
+postgres-# \conninfo
+résultat :
+Vous êtes connecté à la base de données « postgres » en tant qu'utilisateur « postgres » via le socket dans « /var/run/postgresql » via le port « 5432 ».
+```
+CTRL D (deux fois)
+```
+postgres=# \q
+xxx@zzzz:~$ déconnexion
+```
+
+Vérification du bon fonctionnement
+```
+sudo -i -u postgres
+```
+CTRL D (pour quitter)
 
 Création de l'utilisateur/bdd locale si besoin :
 
@@ -306,10 +308,6 @@ Création de l'utilisateur/bdd locale si besoin :
 su - postgres
 psql
 ```
-
-### Création de l'utilisateur
-
-Puis création de l'utilisateur/bdd :
 
 ```sql
 CREATE USER oscar WITH PASSWORD 'azerty';
@@ -327,7 +325,7 @@ le dépôt dans le fichier : `install/oscar-install.sql`.
 psql -h localhost -U oscar oscar_dev < install/oscar-install.sql
 ```
 
-> La structure initiale n'est pas forcement à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
+> La structure initiale n'est pas forcément à jour, vous devez donc procéder à la **Mise à jour du modèle** présenté dans le point suivant.
 
 
 ## Configuration d'oscar
@@ -340,7 +338,7 @@ création du fichier **config/autoload/oscar-editable.yml**
 touch config/autoload/oscar-editable.yml
 ```
 
-Assurez vous qu'il est accessible en écriture
+Assurez-vous qu'il est accessible en écriture
 
 
 ### Base de données configuration
