@@ -1,11 +1,6 @@
 # Export PDF (feuille de temps)
 
-Par défaut, l'export des documents des feuilles de temps sont exportées en utilisant **DOMPdf** : 
-
- - [x] Synthèse mensuelle des activités
- - [ ] Synthèse mesuelle d'une personne
- 
-Il est possible d'utlise une alternative avec **Wkhtmltopdf** plus perforant et donnant un résultat visuel plus *propre*.
+Depuis la version **Ripley**, l'exportation des feuilles de temps au format PDF s'appuie sur l'utilitaire **Wkhtmltopdf** : 
 
 ## Installer Wkhtmltopdf
 
@@ -26,7 +21,7 @@ apt install fonts-open-sans
 
 Plusieurs problèmes peuvent survenir lors de l'utilisation de *Wkhtmltopdf*.
 
-Avant d'activer *Wkhtmltopdf* dans Oscar, vous pouvez tester le bon fonctionnement sur votre serveur: 
+Avant d'activer *Wkhtmltopdf* dans Oscar, vous pouvez tester le bon fonctionnement sur votre serveur : 
 
 ```bash
 $ wkhtmltopdf install/demo/timesheets/documents/synthese-mensuelle-apercu.html /tmp/preview.pdf
@@ -43,7 +38,7 @@ Renseigner le mode *offscreen* en complétant la variable d'environnement `QT_QP
 export QT_QPA_PLATFORM=offscreen && wkhtmltopdf install/demo/timesheets/documents/synthese-mensuelle-apercu.html /tmp/preview.pdf
 ```
 
-Vérifiez le fichier, si le texte ne s'affiche pas, vous allez devoir indiquer l'emplacement de la police open-sans précédement installée : 
+Vérifiez le fichier, si le texte ne s'affiche pas, vous allez devoir indiquer l'emplacement de la police **open-sans** précédemment installée : 
 
 ```bash
 export QT_QPA_PLATFORM=offscreen 
@@ -77,9 +72,9 @@ return array(
 );
 ```
 
-## Dysfonctionnement
+## Dysfonctionnements connus
 
- Sous **Redhat**, les emplacements pour la commandes sont différents. Donc : 
+ Sous **Redhat**, les emplacements pour la commande sont différents. Donc : 
  
  1. Installer la police **Open-Sans** `dnf install open-sans-fonts`
  2. Créer un lien symbolique `/usr/local/bin/wkhtmltopdf ` > `/opt/wkhtmltopdf/bin/wkhtmltopdf` 
