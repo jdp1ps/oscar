@@ -1,10 +1,16 @@
 # OSCAR 2.13 "Ripley" (Documentation technique)
 
-### Version actuelle
-- **VERSION 2.13.2** (PHP8.2) "Ripley" ([Mise à jour](doc/versions/version-2.13.2-ripley-php8.md))
+## Derniers changements
+
+- [Documentation technique](doc/index.md)
+- [Liste des changement (CHANGELOG)](./CHANGELOG.md)
+
+## Versions
+
+### Stable (MASTER)
 - **VERSION 2.13.1** "Ripley" ([Mise à jour](doc/versions/version-2.13-ripley.md))
   
-### Version antérieurs
+### Versions antérieures (Non-maintenues)
 - VERSION 2.12.1 "Spartan" ([Note de version](doc/versions/version-2.12.1.md))
 - VERSION 2.12 "Spartan" ([Note de version](doc/versions/version-2.12.md) / [Mise à jour technique](doc/upgrade-to-spartan.md) )
  - VERSION 2.11 "MacClane" ([Note de version](doc/versions/version-2.11.md))
@@ -16,8 +22,8 @@
 > La version Oscar installée est indiquée en pied de page de l'application 
 
 
-## Documentation
+## Liens utiles
 
-[Documentation technique](doc/index.md)
+ - [Redmine](https://redmine.unicaen.fr/Etablissement/projects/gestion-projet-oscar) : Outils de gestion du projet / Assistance / Documentation fonctionnelle
 
 

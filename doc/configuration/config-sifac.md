@@ -6,12 +6,12 @@ Oscar permet de synchroniser depuis le SI(Système d'Information) **les dépense
 
 ## SIFAC
 
-Pour activer l'affichage des dépenses, vous devez accorder le privilèges **Voir les dépenses**, configurer les masses et le plan comptable par défaut.
+Pour activer l'affichage des dépenses, vous devez accorder le privilège **Voir les dépenses**, configurer les masses et le plan comptable par défaut.
 
 
 ### Configurer les masses
 
-Vous devez commencer par spécifier les masses dans la configuration `config/autoload/local.php`. La configuration ci dessous est celle généralement utilisée.
+Vous devez commencer par spécifier les masses dans la configuration `config/autoload/local.php`. La configuration ci-dessous est celle généralement utilisée.
 
 ```php
 <?php
@@ -113,7 +113,7 @@ La liste des dépenses s'appuis sur le plan comptable pour gérer certains intit
 
 Depuis le menu **Administration>Configuration et maintenance>Options>Comptes filtrés**.
 
-![Filtrer certains comptes dans l'affichage des dépense](./images/depenses-filtres-comptes.png)
+![Filtrer certains comptes dans l'affichage des dépense](../images/depenses-filtres-comptes.png)
 
 Cette option va exclure certains résultats.
 

@@ -52,7 +52,7 @@ return [
 ];
 ```
 
-Ce paramètres est pour le moment utilisé par la commande `php pubic/index.php oscar test:mailer` pour distribuer un mail de test lors de la configuration du *mailer*.
+Ce paramètre est pour le moment utilisé par la commande `php pubic/index.php oscar test:mailer` pour distribuer un mail de test lors de la configuration du *mailer*.
 
 > Il sera probablement utilisé par la suite pour des outils de diagnostic
 

@@ -9,24 +9,24 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
 ### Installation de base
 
- - [Procédure d'installation](install-prod.md)
- - [Procédure de mise à jour](update.md)
- - [Version DOCKER](../dockerize/README.md)
+ - [Procédure d'installation](install-prod.md) : Installation détaillée d'une instance Oscar
+ - [Procédure de mise à jour](update.md) : Procédure à appliquer lors d'une mise à jour 
+ - [Version DOCKER](../dockerize/README.md) : Déployer une instance via *Docker*
 
-## Installation via *Docker*
+## Documentation complémentaire
 
 ### Configuration de base
- - [Authentification](configuration/config-auth.md)
+ - [Authentification (CAS/LDAP)](configuration/config-auth.md) : Configurer les accès à Oscar
  - [Gestion des documents](configuration/config-documents.md) : Configuration de la gestion des documents.
- - [Configuration des documents](configuration/config-documents.md)
- - [Configuration du moteur de recherche](configuration/config-elasticsearch.md)
- - [Configuration du serveur de tâche](configuration/config-gearman.md)
+ - [Configuration du moteur de recherche (Elasticsearch)](configuration/config-elasticsearch.md)
+ - [Configuration du serveur de tâche (Gearman)](configuration/config-gearman.md)
  - [Configuration du PFI](configuration/config-pfi.md)
  - [Configuration de la distribution des courriels](configuration/config-mailer.md)
  - [Configuration des notifications](configuration/config-notifications.md)
  - [Configuration de la numérotation automatique OSCAR](configuration/config-numerotation.md)
  - [Configuration des feuilles de temps](timesheet.md)
  - [Configuration des dépenses (SIFAC)](configuration/config-sifac.md)
+ - [Configuation des signatures](./configuration/config-signature.md)
 
 ### Synchronisation au Système d'Information
  - [Connectors Oscar](connectors.md) : Connecter Oscar au système d'information
@@ -43,14 +43,6 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Personnaliser l'export des activités](activities-export.md)
  - [Activier le mode ADAJ](adaj.md)
 
-## Note de version
-  - **VERSION 2.11 "MacClane"** ([Note de version](versions/version-2.11.md))
-  - VERSION 2.10 "Creed" ([Note de version](versions/version-2.10.md))
-  - VERSION 2.9 "Matrix" ([Note de version](versions/version-2.9.md))
-  - VERSION 2.8 "Callahan" ([Note de version](versions/version-2.8.md))
-  - VERSION 2.7 "Lewis" ([Note de version](versions/version-2.7.md))
-
- > La version Oscar installée est indiquée en pied de page de l'application
 
 # Développeurs
 
