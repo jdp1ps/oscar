@@ -24,6 +24,7 @@ export default defineConfig({
       // into your library
       input: {
         activitydocuments: resolve(__dirname, 'src/ActivityDocuments.js'),
+        activitynotes: resolve(__dirname, 'src/ActivityNotes.js'),
         activityspentdetails: resolve(__dirname, 'src/ActivitySpentDetails.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),

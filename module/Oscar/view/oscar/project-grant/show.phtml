@@ -530,6 +530,17 @@
         </div>
     </div>
     <hr>
+
+    <div id="activity-notes"
+        data-activityid="<?= $entity->getId() ?>"
+        data-url="<?= $this->url('activity-notes/api') ?>"
+        data-showallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_SHOW) ?>"
+        data-manageallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_MANAGE) ?>"
+        data-userid="<?= $this->grant()->getCurrentPerson()->getId() ?>"
+    ></div>
+    <?php echo $this->Vite()->addJs('src/ActivityNotes.js'); ?>
+
+    <hr>
     <?php
     if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_TIMESHEET_VIEW, $entity)): ?>
         <section>
