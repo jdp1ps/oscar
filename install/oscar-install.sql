@@ -3912,6 +3912,8 @@ COPY public.privilege (id, categorie_id, code, libelle, ordre, root_id, spot) FR
 128	10	SIGNATURE_ADMIN_CONFIG	Configuration des processus métier	\N	\N	7
 74	6	NOTIFICATION_PERSON	Peut notifier manuellement une personne	\N	\N	7
 129	6	SIGNATURE_DELETE	Peut supprimer les documents signés	\N	\N	7
+130	2	NOTES_SHOW	Voir les notes	\N	\N	7
+131	2	NOTES_MANAGE	Gestion des notes	\N	130	7
 \.
 
 
