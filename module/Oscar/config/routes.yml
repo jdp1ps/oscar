@@ -2124,3 +2124,19 @@ administration:
         defaults:
           action: sourcesFinancement
       may_terminate: true
+
+
+activity-notes:
+  type: literal
+  options:
+    route: /activity-notes
+    defaults:
+      controller: ActivityNotes
+  may_terminate: false
+  child_routes:
+    api:
+      type: segment
+      options:
+        route: /api
+        defaults:
+          action: api
