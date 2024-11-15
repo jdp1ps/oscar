@@ -926,6 +926,16 @@
                             }
                         }
 
+                        // Select
+                        var input = filter.find('input.val2');
+                        if( input.length > 0 ){
+                            console.log("VAL2 INPUT");
+                            var val2Elem = filter.find('.val2');
+                            if( val2Elem ){
+                                val2 = val2Elem[0].value ? val2Elem[0].value : "";
+                            }
+                        }
+
                         // Checkbox ?
                         var checkboxs = filter.find('.val2[type="checkbox"]');
 
@@ -958,18 +968,6 @@
                                 val2 = val2Elem[0].value ? val2Elem[0].value : "0";
                             }
 
-                        }
-
-                        // Select
-                        var input = filter.find('input.val2');
-                        console.log(input);
-
-                        if( input.length > 0 ){
-                            console.log("VAL2 INPUT");
-                            var val2Elem = filter.find('.val2');
-                            if( val2Elem ){
-                                val2 = val2Elem[0].value ? val2Elem[0].value : "";
-                            }
                         }
 
                         console.log("VAL2:", val2);

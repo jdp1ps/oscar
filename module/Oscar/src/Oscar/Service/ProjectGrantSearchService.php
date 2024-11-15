@@ -986,13 +986,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             }
         }
 
-
         $idsRef = $activitiesIds;
 
         // Vue projet
         if ($projectView) {
             if ($search) {
-
                 $idsProject = $this->getProjectGrantService()->getActivityRepository()
                     ->getIdsProjectsForActivityAndEmpty(
                         $search,
@@ -1001,8 +999,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         $params['sortDirection'],
                         $params['sortIgnoreNull'] == 'on'
                     );
-
-            } else {
+            }
+            else {
                 $idsProject = $this->getProjectGrantService()->getActivityRepository()
                     ->getIdsProjectsForActivity(
                         $activitiesIds,
@@ -1156,7 +1154,11 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
      */
     private function getFilterOptionsDocumentTypes(): array
     {
-        return $this->getProjectGrantService()->getDocumentTypes();
+        $types = [];
+        foreach ($this->getProjectGrantService()->getDocumentTypes() as $type) {
+            $types[$type->getId()] = $type->getLabel();
+        };
+        return $types;
     }
 
     /**
