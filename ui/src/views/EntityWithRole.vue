@@ -35,6 +35,49 @@
       </div>
     </div>
 
+    <div class="overlay" v-if="toPaste">
+      <div class="overlay-content">
+        <i class="icon-cancel-outline overlay-closer" @click="toPaste = null"></i>
+
+        <h2>Ajouter des {{ title }} ?</h2>
+
+        <table class="table-bordered table-borderless table-responsive-md">
+          <thead>
+            <th>#</th>
+            <th>{{ title }}</th>
+            <td>Rôle</td>
+          </thead>
+          <tbody>
+            <tr v-for="item in toPaste">
+              <td><input type="checkbox" v-model="item.selected" /></td>
+              <td>{{ item.enrolledLabel }}</td>
+              <td>
+                <select name="role" class=" form-control" v-model="item.roleId">
+                  <option :value="role.id" v-for="role in roles">
+                    {{ role.label }}
+                  </option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+          <tr>
+
+          </tr>
+        </table>
+
+        <nav class="admin-bar">
+          <button class="btn btn-default button-back" @click="toPaste = null">
+            <i class="icon-angle-left"></i>
+            Annuler
+          </button>
+          <button class="btn btn-primary" @click="performPast">
+            <i class="icon-trash"></i>
+            Confirmer
+          </button>
+        </nav>
+      </div>
+    </div>
+
     <div class="overlay" v-if="error">
       <div class="overlay-content">
         <i class="icon-cancel-outline overlay-closer" @click="error = ''"></i>
@@ -177,6 +220,14 @@
         <i class="icon-edit"></i>
         Modifier
       </a>
+      <a class="oscar-link" @click="handlerCopy()">
+        <i class="icon-doc"></i>
+        Copier
+      </a>
+      <a class="oscar-link" @click="handlerPaste()">
+        <i class="icon-paste"></i>
+        Coller
+      </a>
     </nav>
 
     <section v-if="editMode">
@@ -259,7 +310,10 @@ export default {
 
       urlNew: "",
       manage: false,
-      roles: []
+      roles: [],
+
+      // Utils
+      toPaste: null
     };
   },
 
@@ -267,6 +321,7 @@ export default {
     sortedFull() {
       return this.entities.sort((a, b) => a.enrolled - b.enrolled)
     },
+
     stacked() {
       let stacks = {};
       this.entities.forEach(i => {
@@ -393,6 +448,24 @@ export default {
       })
     },
 
+    performPast(){
+      let data = new FormData();
+      this.loading = "Création...";
+      let json = JSON.stringify(this.toPaste.filter(item => item.selected));
+      data.append('action', 'multi');
+      data.append('json', json);
+
+      axios.post(this.urlNew, data).then(ok => {
+
+      }, ko => {
+        this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
+      }).then(foo => {
+        this.loading = false;
+        this.toPaste = null;
+        this.fetch();
+      })
+    },
+
     fetch() {
       console.log("FETCH", this.url);
       this.loading = "Chargement...";
@@ -421,7 +494,35 @@ export default {
           ko => {
             this.error = "Erreur : " + ko.body;
           });
-    }
+    },
+
+    handlerCopy(){
+      let storage_key = "copy_" +this.title;
+      let datas = [];
+      this.entities.forEach(item => {
+        datas.push({
+          'enrolled': item.enrolled,
+          'enrolledLabel': item.enrolledLabel,
+          'roleId': item.roleId,
+          'roleLabel': item.roleLabel,
+        });
+      });
+      localStorage.setItem(storage_key, JSON.stringify(datas));
+    },
+
+    handlerPaste(){
+      let storage_key = "copy_" +this.title;
+      let stored = localStorage.getItem(storage_key);
+      if( stored ){
+        let infos = JSON.parse(stored);
+        this.toPaste = [];
+        infos.forEach(item => {
+          item.selected = true;
+          this.toPaste.push(item);
+        })
+      }
+    },
+
   },
 
   mounted() {

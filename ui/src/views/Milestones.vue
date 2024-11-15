@@ -194,7 +194,6 @@
         Nouveau Jalon
       </a>
     </nav>
-    {{ types }}
   </section>
 
 </template>

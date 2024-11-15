@@ -117,13 +117,13 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     {
         try {
             $idenroll = $this->params()->fromRoute('idenroll');
-            if( !$idenroll ){
+            if (!$idenroll) {
                 throw new OscarException("Identifiant non-trouvé " . $idenroll);
             }
 
             /** @var ProjectPartner $enroll */
             $enroll = $this->getEntityManager()->getRepository(ProjectPartner::class)->find($idenroll);
-            if( !$enroll ){
+            if (!$enroll) {
                 throw new OscarException("L'association Organization/Projet est manquante");
             }
 
@@ -172,7 +172,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
             $enroller,
             [
                 'label' => 'Personne',
-                'url' => $this->url()->fromRoute('person/search')
+                'url'   => $this->url()->fromRoute('person/search')
             ]
         );
 
@@ -205,7 +205,7 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
                         $organizationPerson->getDateEnd()
                     );
                     $this->redirect()->toRoute('organization/show', ['id' => $organization->getId()]);
-                } catch (\Exception $e){
+                } catch (\Exception $e) {
                     $msg = "Impossible d'ajouter la personne dans l'organisation";
                     $this->getLoggerService()->error("$msg : " . $e->getMessage());
                     throw new OscarException($msg);
@@ -215,13 +215,13 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
 
         $view = new ViewModel(
             array(
-                'id' => null,
-                'title' => "Nouvelle personne dans $organization",
-                'form' => $form,
+                'id'            => null,
+                'title'         => "Nouvelle personne dans $organization",
+                'form'          => $form,
                 'labelEnrolled' => "Personne",
-                'enroller' => $organization,
-                'enrolled' => null,
-                'backlink' => $this->url()->fromRoute('organization/show', ['id' => $organization->getId()])
+                'enroller'      => $organization,
+                'enrolled'      => null,
+                'backlink'      => $this->url()->fromRoute('organization/show', ['id' => $organization->getId()])
             )
         );
 
@@ -348,29 +348,63 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PERSON_MANAGE, $activity);
 
         try {
-            $datas = $this->getPostedNew();
-            $person = $this->getPersonService()->getPersonById($datas['enroled'], false);
-            if( !$person ){
-                throw new OscarException(sprintf("Impossible de charger la personne '%s'.", $datas['enroled']));
-            }
-            $role = $this->getPersonService()->getRolePersonById($datas['role'], false);
-            if( !$role ){
-                throw new OscarException("Vous devez renseigner un rôle");
-            }
+            if ($this->params()->fromPost('action') === 'multi') {
+                try {
+                    $json = $this->params()->fromPost('json');
+                    if( !$json ){
+                        throw new \Exception("Aucune données reçue");
+                    }
+                    $this->getLoggerService()->info($json);
+                    $datas = json_decode($json, true);
+                    if( $datas === false ){
+                        throw new \Exception("Données reçues incorrectes");
+                    }
 
-            $this->getPersonService()->personActivityAdd(
-                $activity,
-                $person,
-                $role,
-                $datas['dateStart'],
-                $datas['dateEnd']
-            );
-            return $this->getResponseOk("La personne a bien été ajouté");
+                    foreach ($datas as $data) {
+                        $person = $this->getPersonService()->getPersonById($data['enrolled']);
+                        $role = $this->getPersonService()->getRolePersonById($data['roleId']);
+                        $this->getPersonService()->personActivityAdd(
+                            $activity,
+                            $person,
+                            $role,
+                            null,
+                            null
+                        );
+                    }
+
+                    return $this->getResponseOk("Personnes ajoutées à l'activité");
+
+                } catch (\Exception $e) {
+                    $msg = "Impossible d'ajouter les personnes à l'activité, " . $e->getMessage();
+                    return $this->getResponseInternalError($msg);
+                }
+            }
+            else {
+                $datas = $this->getPostedNew();
+                $person = $this->getPersonService()->getPersonById($datas['enroled'], false);
+                if (!$person) {
+                    throw new OscarException(sprintf("Impossible de charger la personne '%s'.", $datas['enroled']));
+                }
+                $role = $this->getPersonService()->getRolePersonById($datas['role'], false);
+                if (!$role) {
+                    throw new OscarException("Vous devez renseigner un rôle");
+                }
+
+                $this->getPersonService()->personActivityAdd(
+                    $activity,
+                    $person,
+                    $role,
+                    $datas['dateStart'],
+                    $datas['dateEnd']
+                );
+                return $this->getResponseOk("La personne a bien été ajouté");
+            }
         } catch (\Exception $e) {
             $msg = "Impossible d'ajouter la personne à l'activité, " . $e->getMessage();
             return $this->getResponseInternalError($msg);
         }
     }
+
 
     /**
      * Suppression d'une personne dans une activité.
@@ -442,21 +476,57 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity);
 
         try {
-            $organization = $this->getOrganizationService()->getOrganization(
-                $this->getPostedInteger('enroled')
-            );
-            $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'));
-            $dateStart = $this->getPostedDateTime('dateStart');
-            $dateEnd = $this->getPostedDateTime('dateEnd');
+            if ($this->params()->fromPost('action') === 'multi') {
+                try {
+                    $json = $this->params()->fromPost('json');
+                    if( !$json ){
+                        throw new \Exception("Aucune données reçue");
+                    }
+                    $this->getLoggerService()->info($json);
+                    $datas = json_decode($json, true);
+                    if( $datas === false ){
+                        throw new \Exception("Données reçues incorrectes");
+                    }
 
-            $this->getProjectGrantService()->organizationActivityAdd(
-                $organization,
-                $activity,
-                $role,
-                $dateStart,
-                $dateEnd
-            );
-            return $this->getResponseOk("L'organisation a bien été ajoutée");
+                    foreach ($datas as $data) {
+                        $organization = $this->getOrganizationService()->getOrganization(
+                            $data['enrolled']
+                        );
+                        $role = $this->getOrganizationService()->getRoleOrganizationById($data['roleId']);
+
+                        $this->getProjectGrantService()->organizationActivityAdd(
+                            $organization,
+                            $activity,
+                            $role,
+                            null,
+                            null
+                        );
+                    }
+
+                    return $this->getResponseOk("Organisations ajoutées");
+
+                } catch (\Exception $e) {
+                    $msg = "Impossible d'ajouter les organisations à l'activité, " . $e->getMessage();
+                    return $this->getResponseInternalError($msg);
+                }
+            }else {
+                $organization = $this->getOrganizationService()->getOrganization(
+                    $this->getPostedInteger('enroled')
+                );
+                $role = $this->getOrganizationService()->getRoleOrganizationById($this->getPostedInteger('role'));
+                $dateStart = $this->getPostedDateTime('dateStart');
+                $dateEnd = $this->getPostedDateTime('dateEnd');
+
+                $this->getProjectGrantService()->organizationActivityAdd(
+                    $organization,
+                    $activity,
+                    $role,
+                    $dateStart,
+                    $dateEnd
+                );
+                return $this->getResponseOk("L'organisation a bien été ajoutée");
+            }
+
         } catch (\Exception $e) {
             $msg = "Impossible d'ajouter l'organisation à l'activité : " . $e->getMessage();
             $this->getLoggerService()->error("$msg : " . $e->getMessage());
@@ -561,7 +631,8 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     {
         if ($value == null) {
             throw new OscarException("Aucune valeur donnée");
-        } else {
+        }
+        else {
             $input = intval($value);
         }
         if (!is_int($input)) {
@@ -596,10 +667,10 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
     protected function getPostedNew(): array
     {
         $datas = [
-            "role" => $this->getPostedInteger('role'),
-            "enroled" => $this->getPostedInteger('enroled'),
+            "role"      => $this->getPostedInteger('role'),
+            "enroled"   => $this->getPostedInteger('enroled'),
             "dateStart" => $this->getPostedDateTime('dateStart'),
-            "dateEnd" => $this->getPostedDateTime('dateEnd'),
+            "dateEnd"   => $this->getPostedDateTime('dateEnd'),
         ];
         return $datas;
     }
@@ -667,7 +738,9 @@ class EnrollController extends AbstractOscarController implements UsePersonServi
         $this->getOscarUserContextService()->check(Privileges::ORGANIZATION_EDIT);
 
         /** @var OrganizationPerson $enroll */
-        $enroll = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find($this->params()->fromRoute('idenroll'));
+        $enroll = $this->getEntityManager()->getRepository(OrganizationPerson::class)->find(
+            $this->params()->fromRoute('idenroll')
+        );
 
         $organization = $enroll->getOrganization();
         $date = $this->getPostedDateTime('at');

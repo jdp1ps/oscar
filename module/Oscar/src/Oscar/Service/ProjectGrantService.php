@@ -1467,10 +1467,25 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             'editable' => false,
             'datas'    => []
         ];
+
         if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity)) {
             $datas['milestones']['readable'] = true;
             $datas['milestones']['url'] = $urlPlugin->fromRoute(
                 'milestones/activity',
+                ['idactivity' => $activity->getId()]
+            );
+        }
+
+        // --- Lot de travail
+        $datas['workpackages'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas'    => []
+        ];
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_SHOW, $activity)) {
+            $datas['workpackages']['readable'] = true;
+            $datas['workpackages']['url'] = $urlPlugin->fromRoute(
+                'workpackage/rest',
                 ['idactivity' => $activity->getId()]
             );
         }

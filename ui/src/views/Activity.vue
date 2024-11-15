@@ -40,7 +40,8 @@
               Reprendre les organisations
             </strong>
             <div class="material-switch pull-right">
-              <input id="keeporganizations" name="keeporganizations" type="checkbox" v-model="duplicateDatas.keepOrganizations"/>
+              <input id="keeporganizations" name="keeporganizations" type="checkbox"
+                     v-model="duplicateDatas.keepOrganizations"/>
               <label for="keeporganizations" class="label-primary"></label>
             </div>
           </div>
@@ -52,7 +53,8 @@
             </strong>
 
             <div class="material-switch pull-right">
-              <input id="keepworkpackages" name="keepworkpackages" type="checkbox" v-model="duplicateDatas.keepWorkpackages"/>
+              <input id="keepworkpackages" name="keepworkpackages" type="checkbox"
+                     v-model="duplicateDatas.keepWorkpackages"/>
               <label for="keepworkpackages" class="label-primary"></label>
             </div>
           </div>
@@ -81,16 +83,80 @@
   </div>
 
   <div v-if="activity.infos">
+    <nav class="navbar navbar-default navbar-fixed-top" style="top: 50px; z-index:500">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                  data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+            <i class="icon-cube"></i>
+            {{ activity.infos.label }}
+            <i class="icon-pin" :style="{'opacity': isSticky ? 1.0 : 0.3}" @click="toogleSticky"></i>
+          </a>
+        </div>
 
-    <header class="jumbotron activity-header oscar-header">
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="#">Membres</a></li>
+            <li><a href="#">Partenaires</a></li>
+            <li><a href="#">Jalons</a></li>
+            <li><a href="#">Versements</a></li>
+            <li><a href="#" @click="test">Dépenses</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                 aria-expanded="false">
+                <i class="icon-pin text-primary"></i>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li v-if="isSticky"><a href="#" @click="handlerUnSticky">Désépingler</a></li>
+                <li v-else><a href="#" @click="handlerSticky">
+                  <i class="icon-pin-outline"></i>
+                  Epingler</a></li>
+                <li role="separator" class="divider"></li>
+                <li v-for="a in sticky" :class="a.id == activity.infos.id ? 'disabled':''">
+                  <a href="#" @click="handlerNavigateSticky(a)">
+                    <i class="icon-cube"></i>
+                    <strong>{{ a.num }}</strong>
+                    <em>{{ a.label }}</em>
+                    <i class="icon-link-ext" v-if="a.id != activity.infos.id"></i>
+                  </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                  <a href="#" @click.prevent="handlerPurgeSticky">
+                    <i class="icon-trash"></i>
+                    Supprimer les épingles
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+    <header class="jumbotron activity-header oscar-header" style="margin-top: 60px">
       <div class="row line-bottom">
         <div class="col-md-10">
           <h4>
             <i class="icon-cubes"></i> Projet :
-            <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()">
+            <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()" v-if="activity.project">
               <strong v-if="activity.project.acronym">{{ activity.project.acronym }}</strong>
               <em>&nbsp;{{ activity.project.label }}</em>
             </span>
+            <em v-else>
+              Aucun projet
+            </em>
           </h4>
 
           <h3>
@@ -152,7 +218,7 @@
 
       </div>
 
-      <p class="baseline">
+      <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull" v-if="activity.infos.description">
         <small>{{ activity.infos.description }}</small>
       </p>
 
@@ -238,20 +304,27 @@
 
         <h2><i class="icon-book"></i>Documents</h2>
         <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
+
       </div>
       <aside class="col-md-4">
         <h2><i class="icon-calendar"></i>Jalons</h2>
         <Milestones :url="activity.milestones.url"/>
 
+        <h2><i class="icon-calendar"></i>Versements</h2>
+
+
         <button class="btn btn-primary" @click="fetch">
           Recharger
         </button>
         <pre>
-      URL: {{ url }}
-      {{ $data }}
       </pre>
       </aside>
     </div>
+    <section>
+      <h2><i class="icon-book"></i>Feuille de temps</h2>
+      {{ activity.workpackages.url }}
+      <WorkpackageUI :url="activity.workpackages.url" />
+    </section>
   </div>
   <pre></pre>
 </template>
@@ -261,31 +334,92 @@ import axios from 'axios';
 import EntityWithRole from "./EntityWithRole.vue";
 import ActivityDocument from "./ActivityDocument.vue";
 import Milestones from "./Milestones.vue";
+import Workpackage from "./Workpackage.vue";
+import WorkpackageUI from "./WorkpackageUI.vue";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+const storage_key = 'activities_sticky';
 
 export default {
   name: 'Activity',
 
   components: {
-    EntityWithRole,
+    WorkpackageUI,
     ActivityDocument,
-    Milestones
+    EntityWithRole,
+    Milestones,
+    Workpackage
   },
 
   props: {
     url: {required: true}
   },
 
+  computed: {
+    storage() {
+      return localStorage.getItem(storage_key);
+    },
+    isSticky() {
+      return this.sticky.find(item => item.id == this.activity.infos.id);
+    }
+  },
+
   data() {
     return {
       activity: {},
-      duplicateDatas: null
+      duplicateDatas: null,
+      sticky: [],
+      descriptionFull: false
     }
   },
 
   methods: {
+  ////////////////////////////////////////// Système d'épingle
+
+    handlerPurgeSticky() {
+      this.sticky = [];
+      localStorage.removeItem(storage_key);
+    },
+
+    toogleSticky() {
+      if( this.isSticky ){
+        this.handlerUnSticky()
+      } else {
+        this.handlerSticky()
+      }
+    },
+
+    handlerUnSticky() {
+      this.sticky.forEach((item, id) => {
+        if( item.id == this.activity.infos.id ){
+          this.sticky.splice(id, 1);
+        }
+      })
+      localStorage.setItem(storage_key, JSON.stringify(this.sticky));
+    },
+
+    handlerSticky() {
+      this.sticky.push({
+        id: this.activity.infos.id,
+        label: this.activity.infos.label,
+        num: this.activity.infos.numOscar,
+        location: document.location.href,
+      });
+      localStorage.setItem(storage_key, JSON.stringify(this.sticky));
+    },
+
+    handlerNavigateSticky(sticked){
+      if(sticked.location) {
+        document.location = sticked.location;
+      }
+    },
+
+    test() {
+      console.log(localStorage.getItem());
+    },
+
     fetch() {
       axios.get(this.url).then(response => {
         this.activity = response.data.activity
@@ -321,6 +455,13 @@ export default {
   },
   mounted() {
     this.fetch();
+    let saved = localStorage.getItem(storage_key);
+    if (saved) {
+      saved = JSON.parse(saved);
+    } else {
+      saved = [];
+    }
+    this.sticky = saved;
   }
 }
 </script>
@@ -368,6 +509,12 @@ header {
       color: #000;
     }
   }
+}
+
+.descriptionPacked {
+  cursor: pointer;
+  max-height: 4em;
+  overflow: hidden;
 }
 
 .budget {
