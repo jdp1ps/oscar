@@ -2,9 +2,6 @@
   <div @mouseenter="handlerShow" @mouseleave="handlerHide">
     <div class="input-group">
       <input type="text" class="form-control" v-model="renderValue"/>
-<!--      <span class="input-group-btn">-->
-<!--        <button class="btn btn-default" type="button">Go!</button>-->
-<!--      </span>-->
       <div class="input-group-addon">
         <i class="icon-calendar"></i>
       </div>

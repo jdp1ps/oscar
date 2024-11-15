@@ -1,0 +1,384 @@
+<template>
+
+  <div class="overlay" v-if="duplicateDatas">
+    <div class="overlay-content">
+      <h1 class="overlay-title">Dupliquer cette activité</h1>
+      <a class="overlay-closer" @click="duplicateDatas = null">x</a>
+
+      <div class="row" style="width: 80%">
+        <h1 class="col-md-6 col-md-offset-3">
+          <small>Options de copie pour</small> <br>
+
+          <strong>{{ activity.infos.label }}</strong></h1>
+
+        <div class="col-md-6 col-md-offset-3">
+          <div class="list-group-item separator-bottom">
+            <strong>
+              <i class="icon-group"></i>
+              Reprendre les personnes
+            </strong>
+            <div class="material-switch pull-right">
+              <input id="keeppersons" name="keeppersons" type="checkbox" v-model="duplicateDatas.keepPersons"/>
+              <label for="keeppersons" class="label-primary"></label>
+            </div>
+          </div>
+
+          <div class="list-group-item separator-bottom">
+            <strong>
+              <i class="icon-calendar"></i>
+              Reprendre les jalons
+            </strong>
+            <div class="material-switch pull-right">
+              <input id="keepmilestones" name="keepmilestones" type="checkbox" v-model="duplicateDatas.keepMilestones"/>
+              <label for="keepmilestones" class="label-primary"></label>
+            </div>
+          </div>
+
+          <div class="list-group-item separator-bottom">
+            <strong>
+              <i class="icon-building-filled"></i>
+              Reprendre les organisations
+            </strong>
+            <div class="material-switch pull-right">
+              <input id="keeporganizations" name="keeporganizations" type="checkbox" v-model="duplicateDatas.keepOrganizations"/>
+              <label for="keeporganizations" class="label-primary"></label>
+            </div>
+          </div>
+
+          <div class="list-group-item separator-bottom">
+            <strong>
+              <i class="icon-archive"></i>
+              Reprendre les lots de travail
+            </strong>
+
+            <div class="material-switch pull-right">
+              <input id="keepworkpackages" name="keepworkpackages" type="checkbox" v-model="duplicateDatas.keepWorkpackages"/>
+              <label for="keepworkpackages" class="label-primary"></label>
+            </div>
+          </div>
+
+          <div class="list-group-item separator-bottom">
+            <strong>
+              <i class="icon-archive"></i>
+              Reprendre les données de base
+            </strong><br>
+            <small>Données du formulaire de créaton : Dates de début / fin, intitulé, description, type, etc...</small>
+
+            <div class="material-switch pull-right">
+              <input id="keepadmdata" name="keepadmdata" type="checkbox" v-model="duplicateDatas.keepAdmData"/>
+              <label for="keepadmdata" class="label-primary"></label>
+            </div>
+          </div>
+
+          <nav class="text-center">
+            <a href="#" class="btn btn-primary" @click="duplicateDatas = null">Annuler</a>
+            <a href="#" class="btn btn-default" @click="handlerDuplicateDo">Dupliquer l'activité</a>
+          </nav>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div v-if="activity.infos">
+
+    <header class="jumbotron activity-header oscar-header">
+      <div class="row line-bottom">
+        <div class="col-md-10">
+          <h4>
+            <i class="icon-cubes"></i> Projet :
+            <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()">
+              <strong v-if="activity.project.acronym">{{ activity.project.acronym }}</strong>
+              <em>&nbsp;{{ activity.project.label }}</em>
+            </span>
+          </h4>
+
+          <h3>
+            <span class="picto status-" :class="'status-'+activity.infos.statut">
+              <i class="icon"></i>
+              {{ activity.infos.statut_label }}
+            </span>
+            :::
+
+            <span class="type-chain">
+            <i :class="activity.infos.type_slug"></i>
+            <span v-for="t in activity.infos.type_chain">
+              {{ t.label }}
+            </span>
+          </span>
+          </h3>
+
+          <h1>
+            <span><i class="icon-cube"></i> {{ activity.infos.label }}</span>
+          </h1>
+        </div>
+        <div class="col-md-2">
+          <div class="budget" v-if="activity.budget">
+            <em>Montant</em>
+            <strong>{{ $filters.money(activity.budget.montant) }} {{ activity.budget.currency.symbol }}</strong>
+            <div class="details">
+              <small>
+                Frais de gestion :
+                <b>{{ $filters.money(activity.budget.fraisDeGestion) }} €</b>
+              </small>
+
+              <small>
+                Part unité :
+                <b v-if="activity.budget.fraisDeGestionPartUnite">
+                  {{ $filters.money(activity.budget.fraisDeGestionPartUnite) }} {{ activity.budget.currency.symbol }}
+                </b>
+                <i v-else>
+                  ~
+                </i>
+              </small>
+
+              <small>
+                Part hébergeur :
+                <b>{{ $filters.money(activity.budget.fraisDeGestionPartHebergeur) }} {{ activity.budget.currency.symbol
+                  }}</b>
+              </small>
+
+              <small>
+                TVA :
+                <b>{{ activity.budget.tva }}</b>
+              </small>
+            </div>
+            <div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+
+      </div>
+
+      <p class="baseline">
+        <small>{{ activity.infos.description }}</small>
+      </p>
+
+      <div class="row line-bottom">
+        <div class="col-md-4">
+          <h4><i class="icon-calendar"></i>Dates</h4>
+          <p class="texthighlight baseline">
+            Début :
+            <time>{{ $filters.date(activity.infos.dateStart) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateStart) }})</small>
+            <br>
+            Fin :
+            <time>{{ $filters.dateFull(activity.infos.dateEnd) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateEnd) }})</small>
+            <br>
+            Signé le :
+            <time>{{ $filters.dateFull(activity.infos.dateSigned) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateSigned) }})</small>
+          </p>
+          <h4><i class="icon-tags"></i>Métas-données</h4>
+          <p class="texthighlight baseline">
+            Disciplines :
+            <span class="cartouche xs" v-for="d in activity.infos.disciplines">{{ d }}</span>
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <h4><i class="icon-briefcase"></i>Numérotations</h4>
+          <p class="texthighlight baseline">
+            N° Oscar" : <strong>{{ activity.infos.numOscar }}</strong><br/>
+            Numéro financier : <strong v-if="activity.infos.PFI">{{ activity.infos.PFI }}</strong><strong
+              v-else>AUCUN</strong> -
+            Ouverture du PFI le
+            <time>{{ $filters.dateFull(activity.infos.dateOpened) }}</time>
+            <br>
+          </p>
+          <p class="texthighlight baseline" v-for="n, label in activity.infos.numeros">
+            {{ label }} : <strong>{{ n }}</strong>
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <h4><i class="icon-database-1"></i>Divers</h4>
+          <p class="texthighlight baseline">
+            Création
+            <time>{{ $filters.dateFull(activity.infos.dateCreated) }}</time>
+            <br>
+            Dernière MAJ
+            <time>{{ $filters.dateFull(activity.infos.dateUpdated) }}</time>
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <nav class="buttons xs">
+            <a class="btn btn-primary btn-xs" v-if="activity.urls.edit" :href="activity.urls.edit">
+              <i class="icon-pencil"></i>
+              Modifier les informations</a>
+
+            <a class="btn btn-xs btn-default" v-if="activity.urls.change_project" :href="activity.urls.change_project">
+              <i class="icon-cubes"></i>
+              Modifier le projet</a>
+
+            <a class="btn btn-xs btn-default" v-if="activity.urls.new_project" :href="activity.urls.new_project">
+              <i class="icon-cubes"></i>
+              Créer un nouveau projet</a>
+
+            <a class="btn btn-xs btn-default" v-if="activity.urls.duplicate" @click="handlerDuplicate">
+              <i class="icon-paste"></i>
+              Dupliquer</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <div class="container-fluid">
+      <div class="col-md-8">
+        <h2><i class="icon-group"></i>Membres</h2>
+        <EntityWithRole title="Personnes" :url="activity.persons.url"/>
+
+        <h2><i class="icon-building-filled"></i>Partenaires</h2>
+        <EntityWithRole title="Organisations" :url="activity.organizations.url"/>
+
+        <h2><i class="icon-book"></i>Documents</h2>
+        <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
+      </div>
+      <aside class="col-md-4">
+        <h2><i class="icon-calendar"></i>Jalons</h2>
+        <Milestones :url="activity.milestones.url"/>
+
+        <button class="btn btn-primary" @click="fetch">
+          Recharger
+        </button>
+        <pre>
+      URL: {{ url }}
+      {{ $data }}
+      </pre>
+      </aside>
+    </div>
+  </div>
+  <pre></pre>
+</template>
+<script>
+
+import axios from 'axios';
+import EntityWithRole from "./EntityWithRole.vue";
+import ActivityDocument from "./ActivityDocument.vue";
+import Milestones from "./Milestones.vue";
+
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+export default {
+  name: 'Activity',
+
+  components: {
+    EntityWithRole,
+    ActivityDocument,
+    Milestones
+  },
+
+  props: {
+    url: {required: true}
+  },
+
+  data() {
+    return {
+      activity: {},
+      duplicateDatas: null
+    }
+  },
+
+  methods: {
+    fetch() {
+      axios.get(this.url).then(response => {
+        this.activity = response.data.activity
+      })
+    },
+
+    ///////////////////////////////////////////////// DUPLICATION
+    handlerDuplicate() {
+      this.duplicateDatas = {
+        displayed: false,
+        keepPersons: true,
+        keepOrganizations: true,
+        keepMilestones: true,
+        keepWorkpackages: false,
+        keepAdmData: false
+      };
+    },
+
+    handlerDuplicateDo() {
+      document.location = this.activity.urls.duplicate + "?"
+          + (this.duplicateDatas.keepPersons ? '&keeppersons=on' : '')
+          + (this.duplicateDatas.keepOrganizations ? '&keeporganizations=on' : '')
+          + (this.duplicateDatas.keepMilestones ? '&keepmilestones=on' : '')
+          + (this.duplicateDatas.keepWorkpackages ? '&keepworkpackage=on' : '')
+          + (this.duplicateDatas.keepAdmData ? '&keepadmdata=on' : '');
+    },
+
+    handlerShowProject() {
+      if (this.activity.project.url_show) {
+        document.location = this.activity.project.url_show
+      }
+    }
+  },
+  mounted() {
+    this.fetch();
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.type-chain span:last-child {
+  font-weight: bold
+}
+
+.type-chain span:last-child:after {
+  content: '';
+}
+
+.type-chain span {
+  margin: auto;
+}
+
+.type-chain span:after {
+  content: ' > ';
+}
+
+.buttons {
+  padding: 1em;
+  text-align: right;
+}
+
+header {
+  .line-bottom {
+    border-bottom: #dee2ea thin solid;
+    padding-bottom: 1em;
+  }
+
+  h3 {
+    font-size: 1em;
+  }
+
+  h4 {
+    color: #95afe3
+  }
+
+  .texthighlight {
+    color: #111;
+
+    strong, time {
+      color: #000;
+    }
+  }
+}
+
+.budget {
+  border-left: #dee2ea thin solid;
+
+  .details {
+    font-size: .8em;
+
+    small {
+      display: block;
+    }
+  }
+}
+</style>

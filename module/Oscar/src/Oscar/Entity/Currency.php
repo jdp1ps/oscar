@@ -47,6 +47,10 @@ class Currency
         ];
     }
 
+    public function toJson() :array {
+        return $this->asArray();
+    }
+
     /**
      * @return string
      */

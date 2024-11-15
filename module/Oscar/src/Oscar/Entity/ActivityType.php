@@ -193,6 +193,14 @@ class ActivityType implements ITrackable
         return $this;
     }
 
+    public function toJson() :array
+    {
+        return [
+            'id' => $this->getId(),
+            'label' => $this->getLabel()
+        ];
+    }
+
     function __toString()
     {
         return $this->getLabel();

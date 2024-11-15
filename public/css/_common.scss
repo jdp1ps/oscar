@@ -1634,19 +1634,20 @@ a.organization.cartouche {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .budget {
-    color: $brand-secondary1;
-    text-align: center;
-    em {
-      font-weight: 100;
-      font-size: .5em;
-      display: block;
-    }
-    strong {
-      display: block;
-      font-size: 1em;
-      white-space: nowrap;
-    }
+}
+.budget {
+  font-size: 1.4em;
+  color: $brand-secondary1;
+  text-align: center;
+  em {
+    font-weight: 100;
+    font-size: .5em;
+    display: block;
+  }
+  strong {
+    display: block;
+    font-size: 1em;
+    white-space: nowrap;
   }
 }
 

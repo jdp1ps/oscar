@@ -1,19 +1,10 @@
 <div class="container">
-    <h1>membres</h1>
-    <article class="activity" id="activityPersons"></article>
+    <div class="activity" id="activity"
+         data-url="<?php echo $this->url('contract/show2', ['id' => $activity->getId()]) ?>"
+         data-manage="<?php $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity) ? "true" : "false" ?>"
+    ></div>
+    <?= $this->Vite()->addJs('src/Activity.js'); ?>
 </div>
 
-<script>
-    require(['vue', 'vue-resource', 'ActivityPersons'], function(Vue, VueResource, ActivityPersons){
-        Vue.use(VueResource);
-        new Vue({
-            el: "#activityPersons",
-            render(h){
-                return h(ActivityPersons.default, {props: { url: '/activites-de-recherche/persons/2' }})
-            }
-        })
-
-    })
-</script>
 
 

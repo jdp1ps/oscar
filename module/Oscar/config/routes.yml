@@ -936,13 +936,6 @@ contract:
         defaults:
           action: timesheet
 
-    sdfjkhsdfjk:
-      type: segment
-      options:
-        route: /foo
-        defaults:
-          action: searchActivity
-
     personaccess:
       type: segment
       options:

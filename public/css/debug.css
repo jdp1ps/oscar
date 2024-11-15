@@ -9061,16 +9061,18 @@ a.organization.cartouche.unclickable:hover {
   justify-content: space-between;
   align-items: center;
 }
-.activity-header h1 .budget {
+
+.budget {
+  font-size: 1.4em;
   color: #290671;
   text-align: center;
 }
-.activity-header h1 .budget em {
+.budget em {
   font-weight: 100;
   font-size: 0.5em;
   display: block;
 }
-.activity-header h1 .budget strong {
+.budget strong {
   display: block;
   font-size: 1em;
   white-space: nowrap;

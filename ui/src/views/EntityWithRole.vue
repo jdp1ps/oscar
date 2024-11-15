@@ -181,7 +181,8 @@
 
     <section v-if="editMode">
       <div class="alert alert-info">
-        Détails des affectations. Une personne peut apparaître plusieurs fois selon le contexte et le rôle
+        Détails des affectations. Un élément peut apparaître plusieurs fois selon le contexte et le rôle.
+        Les affectation aux activités sont indiquées par un cube simple <i class="icon-cube"></i>, les affectations aux projets par plusieurs cubes <i class="icon-cubes"></i>
       </div>
       <article class="row card" v-for="e in sortedFull">
         <div class="col-md-6">

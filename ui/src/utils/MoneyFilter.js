@@ -1,5 +1,6 @@
 export default {
     money(value){
+        value = parseFloat(value);
         var chaine = value.toFixed(2);
         var out = "";
 

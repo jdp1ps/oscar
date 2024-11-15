@@ -1745,27 +1745,33 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
     public function show2Action()
     {
         $method = $this->getHttpXMethod();
+        $isAjax = $this->isAjax();
 
         $id = $this->params()->fromRoute('id');
-
-        /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($id);
+        $this->getLoggerService()->debug(__METHOD__ . " id:$id, ajax:" . ($isAjax?'true':'false'));
+        $entity = $this->getActivityService()->getActivityById($id);
 
         // Check access
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_SHOW, $entity);
 
         switch ($method) {
             case 'GET' :
-                if ($this->isAjax()) {
-                    return $this->getResponseOk('RETOUR AJAX');
+                $this->getLoggerService()->debug("GET");
+                if ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
+                    $datas = [
+                        'activity' => $this->getActivityService()->getActivityJson(
+                                $entity->getId(),
+                                true,
+                                true,
+                                $this->getOscarUserContextService(),
+                                $this->url()
+                        ),
+                    ];
+                    return $this->jsonOutput($datas);
                 }
                 else {
                     return [
-                        'activity' => $entity,
-                        'json'     => $this->getActivityService()->getActivityJson(
-                            $id,
-                            $this->getOscarUserContextService()
-                        )
+                        'activity' => $entity
                     ];
                 }
                 break;

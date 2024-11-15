@@ -8,10 +8,9 @@
 namespace Oscar\Service;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ObjectRepository;
+use Laminas\Mvc\Controller\Plugin\Url;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityDateRepository;
 use Oscar\Entity\ActivityOrganization;
@@ -268,7 +267,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         }
 
         usort($out, function ($a, $b) {
-           return $a->getLastName() <=> $b->getLastName();
+            return $a->getLastName() <=> $b->getLastName();
         });
 
         return $out;
@@ -1321,12 +1320,23 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
     }
 
     /**
-     * @param $id
-     * @param OscarUserContext $oscaruserContext
+     * @param int $id
+     * @param bool $checkPrivileges
+     * @param bool $makeUrl
+     * @param OscarUserContext|null $oscarUserContext
+     * @param Url|null $urlPlugin
      * @return array
+     * @throws \Exception
      */
-    public function getActivityJson($id, $oscaruserContext)
-    {
+    public function getActivityJson(
+        int $id,
+        bool $checkPrivileges = false,
+        bool $makeUrl = false,
+        ?OscarUserContext $oscarUserContext = null,
+        ?Url $urlPlugin = null
+    ): array {
+        //////////////////////////////////////////////////////////////////// ACTIVITY
+        /// ------ Base
         /** @var Activity $activity */
         $activity = $this->getActivityRepository()->find($id);
 
@@ -1334,96 +1344,145 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             'infos' => $activity->toArray()
         ];
 
-        // --- Membres de l'activités
+        $datas['infos']['description'] = $activity->getDescription();
+        $datas['infos']['dateCreated'] = $activity->getDateCreated()->format('Y-m-d H:i:s');
+
+        //// ------- DISCIPLINES
+        $datas['infos']['disciplines'] = [];
+        foreach ($activity->getDisciplines() as $discipline) {
+            $datas['infos']['disciplines'][] = $discipline->getLabel();
+        }
+
+        //// ------- NUMEROTATIONS
+        $datas['infos']['numeros'] = [];
+        foreach ($activity->getNumbers() as $key => $number) {
+            $datas['infos']['numeros'][$key] = $number;
+        }
+
+        //// ------- TYPES
+        $types = $this->getActivityTypeService()->getActivityTypeChain($activity->getActivityType());
+        if (count($types) > 0 && $types[0]->getLabel() === 'ROOT') {
+            array_shift($types);
+        }
+
+        $typesJson = [];
+        foreach ($types as $type) {
+            $typesJson[] = $type->toJson();
+        }
+        $datas['infos']['type_slug'] = $activity->getTypeSlug();
+        $datas['infos']['type_chain'] = $typesJson;
+
+        ////
+        $datas['urls'] = [
+        ];
+        if ($oscarUserContext->hasPrivileges(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity)) {
+            $datas['urls']['edit'] = $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]);
+        }
+        if ($oscarUserContext->hasPrivileges(\Oscar\Provider\Privileges::ACTIVITY_CREATE)) {
+            $datas['urls']['duplicate'] = $urlPlugin->fromRoute('contract/duplicate', ['id' => $activity->getId()]);
+        }
+        if ($oscarUserContext->hasPrivileges(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT, $activity)) {
+            $datas['urls']['change_project'] = $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]);
+            $datas['urls']['new_project'] = $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId();
+        }
+
+        //////////////////////////////////////////////////////////////////// DOCUMENTS
+        $datas['documents'] = [
+            'url' => $urlPlugin->fromRoute('contractdocument/activity', ['activity_id' => $activity->getId()]),
+        ];
+
+        //////////////////////////////////////////////////////////////////// PROJET
+        $project = $activity->getProject();
+        if ($project) {
+            $datas['project'] = [
+                'id'          => $project->getId(),
+                'label'       => $project->getLabel(),
+                'acronym'     => $project->getAcronym(),
+                'description' => $project->getDescription(),
+            ];
+            // Lien vers Projet
+            if ($makeUrl && $urlPlugin) {
+                if (!$checkPrivileges || $oscarUserContext->hasPrivileges(
+                        Privileges::PROJECT_SHOW,
+                        $project
+                    )) {
+                    $datas['project']['url_show'] = $urlPlugin->fromRoute(
+                        'project/show',
+                        ['id' => $project->getId()]
+                    );
+                }
+            }
+        }
+
+        // BUDGET
+        if (!$checkPrivileges || $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
+            $budget = [
+                'montant'                     => $activity->getAmount(),
+                'currency'                    => $activity->getCurrency()->toJson(),
+                'fraisDeGestion'              => $activity->getFraisDeGestionDisplay(),
+                'fraisDeGestionPartHebergeur' => $activity->getFraisDeGestionPartHebergeurDisplay(),
+                'fraisDeGestionPartUnite'     => $activity->getFraisDeGestionPartUniteDisplay(),
+                'tva'                         => (string)$activity->getTva(),
+                'assietteSubventionnable'     => $activity->getAssietteSubventionnable(),
+            ];
+
+            $datas['budget'] = $budget;
+        }
+
+        // --- Membres de l'activité
         $datas['persons'] = [
             'readable' => false,
             'editable' => false,
-            'datas'    => []
         ];
-        if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity)) {
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity)) {
             $datas['persons']['readable'] = true;
-            $editable = $datas['persons']['editable'] = $oscaruserContext->hasPrivileges(
+            $editable = $datas['persons']['editable'] = $oscarUserContext->hasPrivileges(
                 Privileges::ACTIVITY_PERSON_MANAGE,
                 $activity
             );
-            /** @var ActivityPerson $p */
-            foreach ($activity->getPersonsDeep() as $p) {
-                $person = $p->getPerson();
-                $datas['persons']['datas'][$person->getId()] = [
-                    'join'        => get_class($p),
-                    'join_id'     => $p->getId(),
-                    'displayName' => (string)$person,
-                    'main'        => $p->isPrincipal(),
-                    'role'        => $p->getRole(),
-                    'editable'    => $editable
-                ];
-            }
+            $datas['persons']['editable'] = $editable;
+            $datas['persons']['url'] = $urlPlugin->fromRoute('contract/persons', ['id' => $activity->getId()]);
         }
 
-        // --- Partenaires de l'activités
+        // --- Partenaires de l'activité
         $datas['organizations'] = [
             'readable' => false,
             'editable' => false,
-            'datas'    => []
         ];
-        if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity)) {
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity)) {
             $datas['organizations']['readable'] = true;
-            $editable = $datas['organizations']['editable'] = $oscaruserContext->hasPrivileges(
+            $datas['organizations']['editable'] = $oscarUserContext->hasPrivileges(
                 Privileges::ACTIVITY_ORGANIZATION_MANAGE,
                 $activity
             );
-            foreach ($activity->getOrganizationsDeep() as $p) {
-                $organization = $p->getOrganization();
-                $datas['organizations']['datas'][$organization->getId()] = [
-                    'join'        => get_class($p),
-                    'join_id'     => $p->getId(),
-                    'displayName' => (string)$organization,
-                    'role'        => $p->getRole(),
-                    'editable'    => $editable
-                ];
-            }
+            $datas['organizations']['url'] = $urlPlugin->fromRoute(
+                'contract/organizations',
+                ['id' => $activity->getId()]
+            );
         }
 
-        // --- Partenaires de l'activités
+        // --- Partenaires de l'activité
         $datas['milestones'] = [
             'readable' => false,
             'editable' => false,
             'datas'    => []
         ];
-        if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity)) {
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity)) {
             $datas['milestones']['readable'] = true;
-            $editable = $datas['milestones']['editable'] = $oscaruserContext->hasPrivileges(
-                Privileges::ACTIVITY_MILESTONE_MANAGE,
-                $activity
+            $datas['milestones']['url'] = $urlPlugin->fromRoute(
+                'milestones/activity',
+                ['idactivity' => $activity->getId()]
             );
-
-            if ($editable) {
-                $datas['milestones']['types'] = $this->getMilestoneTypesArray();
-                $datas['milestoneEdit'] = null;
-            }
-            /** @var ActivityDate $m */
-            foreach ($activity->getMilestones() as $m) {
-                $datas['milestones']['datas'][$m->getId()] = $m->toArray();
-            }
         }
 
-        // --- Partenaires de l'activités
+        // --- Partenaires de l'activité
         $datas['payments'] = [
             'readable' => false,
             'editable' => false,
             'datas'    => []
         ];
-        if ($oscaruserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $datas['payments']['readable'] = true;
-            $editable = $datas['payments']['editable'] = $oscaruserContext->hasPrivileges(
-                Privileges::ACTIVITY_PAYMENT_MANAGE,
-                $activity
-            );
-
-            /** @var ActivityPayment $p */
-            foreach ($activity->getPayments() as $p) {
-                $datas['payments']['datas'][$p->getId()] = $p->toArray();
-            }
         }
 
 
