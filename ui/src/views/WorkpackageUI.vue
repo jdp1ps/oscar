@@ -10,24 +10,38 @@
       </div>
     </transition>
 
-    <nav class="buttons">
-      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew" >Nouveau lot</a>
-    </nav>
+    <transition name="fade">
+      <div class="overlay" v-if="confirm">
+        <div class="overlay-content">
+          <div class="overlay-title">
+            {{ confirm }}
+            <a href="#" class="overlay-closer" @click.prevent="confirm = null">x</a>
+          </div>
+          <nav class="buttons">
+            <a href="#" class="btn btn-danger" @click.prevent="confirm = null">Annuler</a>
+            <a href="#" class="btn btn-danger" @click.prevent="handlerConfirm()">Confirmer</a>
+          </nav>
+        </div>
+      </div>
+    </transition>
 
+    <nav class="buttons">
+      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">Nouveau lot</a>
+    </nav>
     <section class="workpackages">
-                  <workpackage v-for="wp in workpackages"
-                               v-bind:key="wp.id"
-                               :workpackage="wp"
-                               :persons="persons"
-                               :editable="editable"
-                               :is-validateur="isValidateur"
-                               @addperson="addperson"
-                               @workpackageupdate="handlerWorkPackageUpdate"
-                               @workpackagepersonupdate="handlerUpdateWorkPackagePerson"
-                               @workpackagepersondelete="handlerWorkPackagePersonDelete"
-                               @workpackagedelete="handlerWorkPackageDelete"
-                               @workpackagecancelnew="handlerWorkPackageCancelNew"
-                  ></workpackage>
+      <workpackage v-for="wp in workpackages"
+                   v-bind:key="wp.id"
+                   :workpackage="wp"
+                   :persons="persons"
+                   :editable="editable"
+                   :is-validateur="isValidateur"
+                   @addperson="addperson"
+                   @workpackageupdate="handlerWorkPackageUpdate"
+                   @workpackagepersonupdate="handlerUpdateWorkPackagePerson"
+                   @workpackagepersondelete="handlerWorkPackagePersonDelete"
+                   @workpackagedelete="handlerWorkPackageDelete"
+                   @workpackagecancelnew="handlerWorkPackageCancelNew"
+      ></workpackage>
     </section>
   </section>
 </template>
@@ -46,11 +60,15 @@ export default {
       loading: false,
       errors: [],
       workpackages: [],
-      persons: [],
       editable: false,
       isDeclarant: false,
       isValidateur: false,
-      token: 'DEFAULT_TKN'
+      persons: [],
+      token: 'DEFAULT_TKN',
+
+      confirm: null,
+      confirmData: null,
+      confirmHandler: null,
     }
   },
 
@@ -58,11 +76,15 @@ export default {
     url: {required: true},
     token: {required: true},
     isValidateur: {required: true},
-    editable: {required: true},
-    Bootbox: {required: true}
+    Bootbox: {required: true},
+    outsidePerson: {required: true},
   },
 
-  watch: {},
+  watch: {
+    outsidePerson: function(newVal, oldVal) {
+      this.fetchPersons();
+    }
+  },
   computed: {},
 
   mounted() {
@@ -87,25 +109,40 @@ export default {
       })
     },
 
-    handlerWorkPackagePersonDelete(workpackageperson) {
-      this.Bootbox.confirm("Supprimer le déclarant ? ", (result) => {
-        if (result) {
-          this.$http.delete(this.url + "?workpackagepersonid=" + workpackageperson.id).then(
-              (res) => {
-                this.fetch();
-              },
-              (err) => {
-                this.errors.push("Impossible de supprimer le déclarant : " + err.body);
-              }
-          );
-        }
-      });
+    handlerConfirm(){
+      console.log("handlerConfirm");
+      this.confirmHandler(this.confirmData);
+      this.confirm = null;
     },
 
+    /////////////////////////////////////////////////////////////////// SUPPRESSION des DECLARANTS
+
+    handlerWorkPackagePersonDelete(workpackageperson) {
+      this.confirm = "Supprimer le déclarant ?";
+      this.confirmData = workpackageperson;
+      this.confirmHandler = this.handlerWorkPackagePersonDeleteDo;
+    },
+
+    handlerWorkPackagePersonDeleteDo(workpackageperson) {
+      axios.delete(this.url + "?workpackagepersonid=" + workpackageperson.id).then(
+          (res) => {
+            this.fetch();
+          },
+          (err) => {
+            this.errors.push("Impossible de supprimer le déclarant : " + err.body);
+          }
+      );
+    },
+
+    /////////////////////////////////////////////////////////////////// SUPPRESSION des LOTS
     handlerWorkPackageDelete(workpackage) {
-      this.Bootbox.confirm("Souhaitez-vous supprimer ce lot ?", (result) => {
-        if (result) {
-          this.$http.delete(this.url + "?workpackageid=" + workpackage.id).then(
+      this.confirm = "Supprimer le lot de travail ?";
+      this.confirmData = workpackage;
+      this.confirmHandler = this.handlerWorkPackageDeleteDo;
+    },
+
+    handlerWorkPackageDeleteDo(workpackage) {
+          axios.delete(this.url + "?workpackageid=" + workpackage.id).then(
               (res) => {
                 this.fetch();
               },
@@ -113,10 +150,10 @@ export default {
                 this.errors.push("Impossible de supprimer le lot : " + err.body);
               }
           );
-        }
-      });
     },
 
+
+    /////////////////////////////////////////////////////////////////// CREATION/EDITION d'un LOT
     handlerWorkPackageUpdate(workPackageData) {
       var datas = new FormData();
       for (var key in workPackageData) {
@@ -126,7 +163,7 @@ export default {
         console.log("MAJ du LOT");
         // Mise à jour
         datas.append('workpackageid', workPackageData.id);
-        this.$http.post(this.url, datas).then(
+        axios.post(this.url, datas).then(
             (res) => {
               this.fetch();
             },
@@ -136,8 +173,9 @@ export default {
         );
       } else {
         console.log("NOUVEAU du LOT");
-        datas.append('workpackageid', -1);
-        axios.put(this.url, datas).then(
+        let dataSend = JSON.parse(JSON.stringify(workPackageData));
+        dataSend.workpackageid = -1;
+        axios.put(this.url, dataSend).then(
             (res) => {
               this.fetch();
             },
@@ -152,7 +190,7 @@ export default {
       var datas = new FormData();
       datas.append('workpackagepersonid', workpackageperson.id);
       datas.append('duration', duration);
-      this.$http.post(this.url, datas).then(
+      axios.post(this.url, datas).then(
           (res) => {
             workpackageperson.duration = duration;
           },
@@ -164,11 +202,12 @@ export default {
 
     addperson(personid, workpackageid) {
       console.log(arguments);
-      var data = new FormData();
-      data.append('idworkpackage', workpackageid);
-      data.append('idperson', personid);
+      var data = {
+        idworkpackage: workpackageid,
+        idperson: personid
+      };
 
-      this.$http.put(this.url, data).then(
+      axios.put(this.url, data).then(
           (res) => {
             this.fetch();
           },
@@ -182,7 +221,7 @@ export default {
       this.loading = true;
       axios.get(this.url).then(
           (res) => {
-            console.log(res);
+            console.log("Chargement des lots de travail : ", res);
             this.workpackages = res.data.workpackages;
             this.persons = res.data.persons;
             this.editable = res.data.editable;
@@ -194,6 +233,9 @@ export default {
           }
       ).then(() => this.loading = false);
 
+    },
+    fetchPersons() {
+      this.fetch();
     }
   }
 }

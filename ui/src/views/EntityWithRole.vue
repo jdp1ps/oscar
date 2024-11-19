@@ -478,7 +478,6 @@ export default {
               this.manage = ok.data.manage;
             }
             if (ok.data.urlNew) {
-              console.log("urlnew:", ok.data.urlNew);
               this.urlNew = ok.data.urlNew;
             }
             if (ok.data.persons) {
@@ -488,7 +487,8 @@ export default {
             } else {
               this.entities = ok.data;
             }
-
+            console.log("EMIT updated");
+            this.$emit('Updated', {entries: this.entities});
             this.loading = false;
           },
           ko => {

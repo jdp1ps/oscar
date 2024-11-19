@@ -104,11 +104,11 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="#">Membres</a></li>
-            <li><a href="#">Partenaires</a></li>
-            <li><a href="#">Jalons</a></li>
-            <li><a href="#">Versements</a></li>
-            <li><a href="#" @click="test">Dépenses</a></li>
+            <li><a href="#members">Membres</a></li>
+            <li><a href="#parters">Partenaires</a></li>
+            <li><a href="#milestones">Jalons</a></li>
+            <li><a href="#payments">Versements</a></li>
+            <li><a href="#spents" @click="test">Dépenses</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
 
@@ -120,7 +120,7 @@
               </a>
               <ul class="dropdown-menu">
                 <li v-if="isSticky"><a href="#" @click="handlerUnSticky">Désépingler</a></li>
-                <li v-else><a href="#" @click="handlerSticky">
+                <li v-else><a href="#" @click.prevent="handlerSticky">
                   <i class="icon-pin-outline"></i>
                   Epingler</a></li>
                 <li role="separator" class="divider"></li>
@@ -296,21 +296,21 @@
     </header>
     <div class="container-fluid">
       <div class="col-md-8">
-        <h2><i class="icon-group"></i>Membres</h2>
-        <EntityWithRole title="Personnes" :url="activity.persons.url"/>
+        <h2 id="members"><i class="icon-group"></i>Membres</h2>
+        <EntityWithRole title="Personne" :url="activity.persons.url" @updated="handlerUpdatePersons"/>
 
-        <h2><i class="icon-building-filled"></i>Partenaires</h2>
-        <EntityWithRole title="Organisations" :url="activity.organizations.url"/>
+        <h2 id="partners"><i class="icon-building-filled"></i>Partenaires</h2>
+        <EntityWithRole title="Organisation" :url="activity.organizations.url"/>
 
-        <h2><i class="icon-book"></i>Documents</h2>
+        <h2 id="documents"><i class="icon-book"></i>Documents</h2>
         <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
 
       </div>
       <aside class="col-md-4">
-        <h2><i class="icon-calendar"></i>Jalons</h2>
+        <h2 id="milestones"><i class="icon-calendar"></i>Jalons</h2>
         <Milestones :url="activity.milestones.url"/>
 
-        <h2><i class="icon-calendar"></i>Versements</h2>
+        <h2 id="payments"><i class="icon-calendar"></i>Versements</h2>
 
 
         <button class="btn btn-primary" @click="fetch">
@@ -322,8 +322,14 @@
     </div>
     <section>
       <h2><i class="icon-book"></i>Feuille de temps</h2>
-      {{ activity.workpackages.url }}
-      <WorkpackageUI :url="activity.workpackages.url" />
+      <section id="timesheets" v-if="activity.timesheets.readable">
+        <a  :href="activity.timesheets.url_global"
+            class="btn btn-primary">
+          <i class="icon-calendar"></i>
+          Feuilles de temps
+        </a>
+      </section>
+      <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons" />
     </section>
   </div>
   <pre></pre>
@@ -371,11 +377,16 @@ export default {
       activity: {},
       duplicateDatas: null,
       sticky: [],
-      descriptionFull: false
+      descriptionFull: false,
+      persons: []
     }
   },
 
   methods: {
+    handlerUpdatePersons(d){
+      console.log("Store Person");
+      this.persons = d.entries;
+    },
   ////////////////////////////////////////// Système d'épingle
 
     handlerPurgeSticky() {

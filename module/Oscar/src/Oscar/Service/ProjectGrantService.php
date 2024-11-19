@@ -1490,6 +1490,22 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             );
         }
 
+        // --- Feuilles de temps de l'activité
+        $datas['timesheets'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas'    => []
+        ];
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
+            $datas['timesheets']['readable'] = true;
+
+            // écran "bilan"
+            $datas['timesheets']['url_global'] = $urlPlugin->fromRoute(
+                'contract/timesheet',
+                ['id' => $activity->getId()]
+            );
+        }
+
         // --- Partenaires de l'activité
         $datas['payments'] = [
             'readable' => false,

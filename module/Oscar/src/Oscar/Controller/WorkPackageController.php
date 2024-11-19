@@ -45,6 +45,8 @@ class WorkPackageController extends AbstractOscarController
         $idactivity = $this->params()->fromRoute('idactivity', null);
         $method = $this->getHttpXMethod();
 
+        $this->getLoggerService()->info("WORKPACKAGE REST " . $method . ' idactivity:' . $idactivity);
+
         if( !$idactivity ){
             return $this->getResponseBadRequest("Erreur d'activité");
         }
@@ -64,6 +66,9 @@ class WorkPackageController extends AbstractOscarController
         // Mise à jour d'un déclarant
 
         if( $method == 'POST' ) {
+            $this->getLoggerService()->info("WORKPACKAGE POST ");
+
+
             if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
@@ -118,11 +123,17 @@ class WorkPackageController extends AbstractOscarController
 
         ///////////////////////////////////: AJOUT d'un déclarant
         if( $method == 'PUT' ){
+            $this->getLoggerService()->info("WORKPACKAGE PUT ");
             $data = $this->getRequest()->getPost()->toArray();
+            if( !$data ){
+                try {
+                  $data = $this->getPutDataJson();
+                } catch (\Exception $exception) {
+                    $this->getLoggerService()->error("Impossible de charger les données PUT : " . $exception->getMessage());
+                }
+            }
+            $this->getLoggerService()->info("datas: " . json_encode($data, JSON_PRETTY_PRINT));
 
-//            parse_str(file_get_contents('php://input'), $_PUT);
-//
-//            $this->>$this->getLoggerService()->info(print_r($_PUT, true));
 
             if( $data['workpackageid'] == -1) {
                 $code = trim($data['code']);
