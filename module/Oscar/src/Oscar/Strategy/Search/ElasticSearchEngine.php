@@ -201,9 +201,11 @@ abstract class ElasticSearchEngine
         if ($response && $response['hits'] && $response['hits']['total'] > 0) {
             foreach ($response['hits']['hits'] as $hit) {
                 $ids[] = intval($hit["_id"]);
-                $idProject = intval($hit['_source']["project_id"]);
-                if( $withIdsProjects && !in_array($idProject, $idsProjects) ){
-                    $idsProjects[] = $idProject;
+                if( array_key_exists('project_ids', $hit['_source']) ) {
+                    $idProject = intval($hit['_source']["project_id"]);
+                    if( $withIdsProjects && !in_array($idProject, $idsProjects) ){
+                        $idsProjects[] = $idProject;
+                    }
                 }
             }
         }
