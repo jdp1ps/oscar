@@ -9,6 +9,20 @@ use Oscar\Exception\OscarException;
 
 class LoggerService extends Logger
 {
+    private string $currentFile = "";
+
+    public function getCurrentFile(): string
+    {
+        return realpath($this->currentFile);
+    }
+
+    public function setCurrentFile(string $currentFile): self
+    {
+        $this->currentFile = $currentFile;
+        return $this;
+    }
+
+
     /**
      * @param $error
      * @param string $class

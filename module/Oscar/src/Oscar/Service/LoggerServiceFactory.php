@@ -42,6 +42,9 @@ class LoggerServiceFactory implements FactoryInterface
 
         $logger = new LoggerService('oscar');
         $logger->pushHandler($stream);
+        $logger->setCurrentFile($stream->getUrl());
+
+
 
         // Sortie standard (Built-in server)
         if( $configurationService->getConfiguration('log_stdout_enabled') ){

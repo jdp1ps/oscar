@@ -1,15 +1,8 @@
 <section class="container">
     <h1><i class="icon-user-md"></i>Logs</h1>
-    <p class="alert alert-info">
-        Cet écran n'affiche que les 25 dernières lignes de la sortie standard <strong><?= $log_file ?></strong>. Pour afficher les logs en temps réél, connectez-vous à l'instance d'Oscar et utilisez la commande <code>tail -f <?= $log_file ?></code>.
-    </p>
-
-    <p>
-        Le niveau de log est fixé à <code><?= $log_level ?></code>
-    </p>
 
     <pre id="logs">
-        TOTO
+
     </pre>
 
     <script>
@@ -20,23 +13,32 @@
                 el: "#logs",
                 data: {
                     logs: "Pas de logs...",
+                    file: "Pas de fichier",
+                    level: "INCONNU",
+                    limits: 25,
                     refresh: 5,
                     loading: false
                 },
                 template: `
-<div class="logger terminal" :class="{'loading': loading}">
-    <div class="terminal-header">
-        <em>Mise à jour toute les {{refresh}} secondes</em>
-        <i class="icon-hourglass-3"></i>
-    </div>
-    <pre class="terminal-content">{{ logs }}</pre>
-</div>`,
+                  <div class="logger terminal" :class="{'loading': loading}">
+                    <div class="terminal-header">
+                      <em>Mise à jour toute les <strong>{{refresh}} secondes</strong>
+                        des <strong>{{limits}} dernières entrées</strong><br>
+                        <em>Fichier de log : <strong>{{file}}</strong>)</em><br>
+                        <em>Niveau de log : <strong>{{level}}</strong></em>
+                    </div>
+                    <pre class="terminal-content">{{ logs }}</pre>
+                  </div>`,
                 methods: {
                     loadLastLogs(){
                         this.loading = true;
                         this.$http.get('').then(
                             ok => {
-                                this.logs = ok.body;
+                                console.log(ok);
+                                this.logs = ok.body.logs;
+                                this.level = ok.body.log_level;
+                                this.limits = ok.body.limits;
+                                this.file = ok.body.file;
                             },
                             ko => {
                                 this.logs = "Impossible de connaitre l'état de OscarWorker : " + ko.body;
