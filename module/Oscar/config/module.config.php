@@ -168,6 +168,7 @@ return array(
                         'pcru',
                         'pcruInfos',
                         "pcruList",
+                        "traces",
                         "apiUi",
                         "timesheet",
                         "myRole"

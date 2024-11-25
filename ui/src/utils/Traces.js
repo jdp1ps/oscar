@@ -1,0 +1,22 @@
+
+const regex = /\[Person:(\d*):([\w -]*)\]/gm;
+const regexActivity = /\[Activity:(\d*):(.*)\]/gm;
+const regexOrganization = /\[Organization:(\d*):(.*)\]/gm;
+const urlPerson = '/person/show/';
+const urlOrganization = '/organization/show/';
+const urlActivity = '/activites-de-recherche/fiche/';
+
+export default {
+    log(message) {
+        return this.organization(this.activity(this.person(message)));
+    },
+    person(message) {
+       return message.replace(regex, `<a href="`+urlPerson+`$1" class="person">$2</a>`);
+    },
+    activity(message) {
+       return message.replace(regexActivity, `<a href="`+urlActivity+`$1" class="person">$2</a>`);
+    },
+    organization(message) {
+        return message.replace(regexOrganization, `<a href="`+urlOrganization+`$1" class="organization">$2</a>`);
+    }
+};

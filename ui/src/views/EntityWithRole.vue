@@ -212,19 +212,20 @@
     </div>
 
     <nav class="admin-bar text-right" v-if="manage">
-      <a class="oscar-link" @click="handlerNew()">
+      <a class="btn btn-xs btn-default" @click="handlerNew()">
         <i class="icon-doc-add"></i>
         Nouveau
       </a>
-      <a class="oscar-link" @click="handlerEditEnable()">
+      <a class="btn btn-xs btn-default" @click="handlerEditEnable()">
         <i class="icon-edit"></i>
-        Modifier
+        <span v-if="editMode">Mode visualisation</span>
+        <span v-else>Mode Edition</span>
       </a>
-      <a class="oscar-link" @click="handlerCopy()">
+      <a class="btn btn-xs btn-default" @click="handlerCopy()">
         <i class="icon-doc"></i>
         Copier
       </a>
-      <a class="oscar-link" @click="handlerPaste()">
+      <a class="btn btn-xs btn-default" @click="handlerPaste()">
         <i class="icon-paste"></i>
         Coller
       </a>

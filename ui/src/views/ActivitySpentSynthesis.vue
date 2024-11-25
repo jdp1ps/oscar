@@ -122,7 +122,10 @@
       </table>
     </div>
 
-    <small>Données mise à jour : <strong v-if="dateUpdated">{{ dateUpdated.date | dateFull }}</strong></small>
+    <small v-if="dateUpdated">
+      Données mise à jour :
+      <strong v-if="dateUpdated">{{ $filters.fullDate(dateUpdated.date) }}</strong>
+    </small>
   </section>
 </template>
 <script>

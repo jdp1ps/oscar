@@ -936,6 +936,13 @@ contract:
         defaults:
           action: timesheet
 
+    traces:
+      type: segment
+      options:
+        route: /traces/:id
+        defaults:
+          action: traces
+
     personaccess:
       type: segment
       options:

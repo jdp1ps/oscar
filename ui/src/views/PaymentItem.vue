@@ -3,18 +3,18 @@
         <div class="heading">
             <strong class="amount">
                 <i class="icon-attention-1" v-if="late" title="Ce versement prévisionnel est en retard" style="color: darkred"></i>
-                {{ payment.amount | money }} {{ payment.currency.symbol }}
-                <div v-if="payment.currency.symbol != '€'">
-                    <small style="font-weight: 100">soit <strong>{{ payment.amount / payment.rate | money }} €</strong></small>
+                {{ $filters.money(payment.amount) }} {{ payment.currency.symbol }}
+                <div v-if="payment.currency.symbol !== '€'">
+                    <small style="font-weight: 100">soit <strong>{{ $filters.money(payment.amount / payment.rate) }} €</strong></small>
                 </div>
             </strong>
 
-            <div class="date" v-if="payment.status == 3">
+            <div class="date" v-if="payment.status === 3">
                 Écart de paiement
             </div>
             <div class="date" v-else>
                     <time v-if="useDate" :datetime="useDate.date" class="date">
-                        <i class="icon-calendar"></i> {{ useDate | moment }}</time>
+                        <i class="icon-calendar"></i> {{ $filters.dateFull(useDate) }}</time>
                     <span class="error" v-else>
                         Problème avec la date <code>{{ useDate }}</code>
                     </span>
@@ -35,8 +35,9 @@
     </article>
 </template>
 <script>
+import moment from "moment";
     export default {
-        props: ['payment', 'moment', 'manage'],
+        props: ['payment', 'manage'],
 
         data(){
             return {
@@ -46,10 +47,10 @@
 
         computed: {
             late(){
-                if( this.payment.status == 1 ){
+                if( this.payment.status === 1 ){
                     if( !this.payment.datePredicted ) return true;
-                    let now = this.moment().unix();
-                    let predicted = this.moment(this.payment.datePredicted.date).unix();
+                    let now = moment().unix();
+                    let predicted = moment(this.payment.datePredicted.date).unix();
                     return predicted < now;
                 }
                 return false;
@@ -57,11 +58,11 @@
             },
             useDate(){
                 // Payment réalisé
-                if( this.payment.status == 2 ){
-                    return this.payment.datePayment;
+                if( this.payment.status === 2 ){
+                    return this.payment.datePayment.date;
                 }
-                if( this.payment.status == 1){
-                    return this.payment.datePredicted;
+                if( this.payment.status === 1){
+                    return this.payment.datePredicted.date;
                 }
                 return null;
             },
@@ -74,7 +75,7 @@
                 return css;
             },
             isPredicted(){
-                return this.payment.status == 1;
+                return this.payment.status === 1;
             }
         },
 

@@ -85,7 +85,6 @@
   <div v-if="activity.infos">
     <nav class="navbar navbar-default navbar-fixed-top" style="top: 50px; z-index:500">
       <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                   data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -96,7 +95,8 @@
           </button>
           <a class="navbar-brand" href="#">
             <i class="icon-cube"></i>
-            {{ activity.infos.label }}
+            <strong>{{ activity.infos.numOscar }}</strong>
+            <span> / {{ labelReduced }}</span>
             <i class="icon-pin" :style="{'opacity': isSticky ? 1.0 : 0.3}" @click="toogleSticky"></i>
           </a>
         </div>
@@ -104,11 +104,12 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="#members">Membres</a></li>
-            <li><a href="#parters">Partenaires</a></li>
-            <li><a href="#milestones">Jalons</a></li>
-            <li><a href="#payments">Versements</a></li>
-            <li><a href="#spents" @click="test">Dépenses</a></li>
+            <li><a href="#members" v-if="activity.persons.readable">Membres</a></li>
+            <li><a href="#partners" v-if="activity.organizations.readable">Partenaires</a></li>
+            <li><a href="#milestones" v-if="activity.milestones.readable">Jalons</a></li>
+            <li><a href="#payments" v-if="activity.payments.readable">Versements</a></li>
+            <li><a href="#spents" v-if="activity.spents.readable">Dépenses</a></li>
+            <li><a href="#timesheets" v-if="activity.timesheets.readable">Feuilles de temps</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
 
@@ -150,7 +151,8 @@
         <div class="col-md-10">
           <h4>
             <i class="icon-cubes"></i> Projet :
-            <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()" v-if="activity.project">
+            <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()"
+                  v-if="activity.project">
               <strong v-if="activity.project.acronym">{{ activity.project.acronym }}</strong>
               <em>&nbsp;{{ activity.project.label }}</em>
             </span>
@@ -218,7 +220,8 @@
 
       </div>
 
-      <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull" v-if="activity.infos.description">
+      <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull"
+         v-if="activity.infos.description">
         <small>{{ activity.infos.description }}</small>
       </p>
 
@@ -296,43 +299,145 @@
     </header>
     <div class="container-fluid">
       <div class="col-md-8">
-        <h2 id="members"><i class="icon-group"></i>Membres</h2>
-        <EntityWithRole title="Personne" :url="activity.persons.url" @updated="handlerUpdatePersons"/>
+        <section class="section-infos" id="members" v-if="activity.persons.readable">
+          <h2><i class="icon-group"></i>Membres</h2>
+          <EntityWithRole title="Personne" :url="activity.persons.url" @updated="handlerUpdatePersons"/>
+        </section>
 
-        <h2 id="partners"><i class="icon-building-filled"></i>Partenaires</h2>
-        <EntityWithRole title="Organisation" :url="activity.organizations.url"/>
+        <section class="section-infos" id="partners" v-if="activity.organizations.readable">
+          <h2><i class="icon-building-filled"></i>Partenaires</h2>
+          <EntityWithRole title="Organisation" :url="activity.organizations.url"/>
+        </section>
 
-        <h2 id="documents"><i class="icon-book"></i>Documents</h2>
-        <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
+        <section class="section-infos" id="documents" v-if="activity.documents.readable">
+          <h2><i class="icon-book"></i>Documents</h2>
+          <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
+        </section>
+
+        <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
+          <h2><i class="icon-book"></i>Feuille de temps</h2>
+          <section id="timesheets" v-if="activity.timesheets.enabled">
+            <section v-if="activity.timesheets.declarers.length">
+              <h3>Général</h3>
+              <a :href="activity.timesheets.url_global"
+                 class="btn btn-primary">
+                <i class="icon-calendar"></i>
+                Informations générales
+              </a>
+              <a :href="activity.timesheets.url_synthesis"
+                 class="btn btn-primary">
+                <i class="icon-book"></i>
+                Résumé et documents
+              </a>
+            </section>
+
+            <section class="declarers">
+              <h3>Déclarants</h3>
+              <div v-if="activity.timesheets.declarers.length">
+                <div class="alert alert-info">
+                  <i class="icon-info-outline"></i> Pour nommer un déclarant, affectez un membre de l'activité à un des lots de travail.
+                </div>
+                <a :href="d.url_details" v-for="d in activity.timesheets.declarers" class="btn"
+                   :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
+                  {{ d.label }}
+                </a>
+              </div>
+              <div v-else class="alert alert-info">
+                Aucun déclarant désigné sur un lot de travail
+              </div>
+            </section>
+
+            <section class="validators">
+              <h3>Validateurs</h3>
+              <div class="row">
+                <div class="col-md-4">
+                  <h4><i class="icon-cube"></i>Validation PROJET</h4>
+                  <section class="persons" v-if="activity.timesheets.validators.prj.length">
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.prj" class="cartouche primary" />
+                  </section>
+                  <div class="alert alert-warning" v-else>
+                    Aucun validateur désigné pour cette étape
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <h4><i class="icon-beaker"></i>Validation SCIENTIFIQUE</h4>
+                  <section class="persons" v-if="activity.timesheets.validators.sci.length">
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.sci" class="cartouche primary"/>
+                  </section>
+                  <div class="alert alert-warning" v-else>
+                    Aucun validateur désigné pour cette étape
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <h4><i class="icon-hammer"></i>Validation ADMINISTRATIVE</h4>
+                  <section class="persons" v-if="activity.timesheets.validators.adm.length">
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.adm" class="cartouche primary"/>
+                  </section>
+                  <div class="alert alert-warning" v-else>
+                    Aucun validateur désigné pour cette étape
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="lots">
+              <h3>Lots de travail</h3>
+              <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons"/>
+            </section>
+          </section>
+          <div class="alert alert-warning" v-else>
+            {{ activity.timesheets.enabled_details }}
+          </div>
+        </section>
 
       </div>
       <aside class="col-md-4">
-        <h2 id="milestones"><i class="icon-calendar"></i>Jalons</h2>
-        <Milestones :url="activity.milestones.url"/>
+        <section id="milestones" class="section-infos">
+          <h2><i class="icon-calendar"></i>Jalons</h2>
+          <Milestones :url="activity.milestones.url" :editable="activity.milestones.editable" :payments="payments"/>
+          <a v-if="activity.milestones.url_notifications" :href="activity.milestones.url_notifications"
+             class="btn btn-primary">
+            <i class="icon-bell"></i>
+            Voir les notifications planifiées
+          </a>
+        </section>
 
-        <h2 id="payments"><i class="icon-calendar"></i>Versements</h2>
+        <section id="payments" class="section-infos" v-if="activity.payments.readable">
+          <h2><i class="icon-bank"></i>Versements</h2>
+          <Payments :url="activity.payments.url" :manage="activity.payments.editable"
+                    :amount="activity.infos.amount"
+                    @update="handlerPaymentsUpdate"
+          />
+        </section>
 
+        <section id="spents" class="section-infos" v-if="activity.spents.readable">
+          <h2><i class="icon-bank"></i>Dépenses</h2>
+          <ActivitySpentSynthesis :url="activity.spents.url"/>
+          <nav class="buttons xs">
+            <a :href="activity.spents.url_details" class="btn btn-primary btn" v-if="activity.spents.url_details">
+              <i class="icon-file-excel"></i>
+              Détails des dépenses</a>
+            <a :href="activity.spents.url_previsionnel" class="btn btn-primary btn"
+               v-if="activity.spents.url_previsionnel">
+              <i class="icon-file-excel"></i>
+              Dépenses prévisionnelles (beta)</a>
+          </nav>
 
-        <button class="btn btn-primary" @click="fetch">
-          Recharger
-        </button>
-        <pre>
-      </pre>
+        </section>
       </aside>
     </div>
-    <section>
-      <h2><i class="icon-book"></i>Feuille de temps</h2>
-      <section id="timesheets" v-if="activity.timesheets.readable">
-        <a  :href="activity.timesheets.url_global"
-            class="btn btn-primary">
-          <i class="icon-calendar"></i>
-          Feuilles de temps
-        </a>
-      </section>
-      <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons" />
-    </section>
+    <div class="container-fluid" v-if="activity.administration.readable">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>
+            <i class="icon-cog"></i>
+            Technique</h2>
+          {{ activity.administration }}
+            <ActivityLogs :url="activity.administration.url_logs" />
+        </div>
+      </div>
+    </div>
   </div>
-  <pre></pre>
 </template>
 <script>
 
@@ -342,6 +447,10 @@ import ActivityDocument from "./ActivityDocument.vue";
 import Milestones from "./Milestones.vue";
 import Workpackage from "./Workpackage.vue";
 import WorkpackageUI from "./WorkpackageUI.vue";
+import ActivitySpentSynthesis from "./ActivitySpentSynthesis.vue";
+import Payments from "./Payments.vue";
+import PersonCartouche from "../components/PersonCartouche.vue";
+import ActivityLogs from "./ActivityLogs.vue";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -352,11 +461,15 @@ export default {
   name: 'Activity',
 
   components: {
-    WorkpackageUI,
+    ActivityLogs,
     ActivityDocument,
+    ActivitySpentSynthesis,
     EntityWithRole,
+    Payments,
+    PersonCartouche,
     Milestones,
-    Workpackage
+    Workpackage,
+    WorkpackageUI,
   },
 
   props: {
@@ -369,6 +482,14 @@ export default {
     },
     isSticky() {
       return this.sticky.find(item => item.id == this.activity.infos.id);
+    },
+    labelReduced() {
+      let label = this.activity.infos.label;
+      if (label.length > 50) {
+        return label.substr(0, 50) + '...';
+      } else {
+        return label;
+      }
     }
   },
 
@@ -378,16 +499,19 @@ export default {
       duplicateDatas: null,
       sticky: [],
       descriptionFull: false,
-      persons: []
+      persons: [],
+      payments: [],
     }
   },
 
   methods: {
-    handlerUpdatePersons(d){
-      console.log("Store Person");
+    handlerPaymentsUpdate(p) {
+      this.payments = p;
+    },
+    handlerUpdatePersons(d) {
       this.persons = d.entries;
     },
-  ////////////////////////////////////////// Système d'épingle
+    ////////////////////////////////////////// Système d'épingle
 
     handlerPurgeSticky() {
       this.sticky = [];
@@ -395,7 +519,7 @@ export default {
     },
 
     toogleSticky() {
-      if( this.isSticky ){
+      if (this.isSticky) {
         this.handlerUnSticky()
       } else {
         this.handlerSticky()
@@ -404,7 +528,7 @@ export default {
 
     handlerUnSticky() {
       this.sticky.forEach((item, id) => {
-        if( item.id == this.activity.infos.id ){
+        if (item.id == this.activity.infos.id) {
           this.sticky.splice(id, 1);
         }
       })
@@ -421,8 +545,8 @@ export default {
       localStorage.setItem(storage_key, JSON.stringify(this.sticky));
     },
 
-    handlerNavigateSticky(sticked){
-      if(sticked.location) {
+    handlerNavigateSticky(sticked) {
+      if (sticked.location) {
         document.location = sticked.location;
       }
     },
@@ -478,6 +602,70 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+
+.section-infos {
+  margin-top: 1em;
+  scroll-margin-top: 120px;
+
+  &:target h2 {
+    -webkit-animation-name: animation;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-play-state: running;
+
+    animation-name: animation;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+    animation-play-state: running;
+  }
+
+  > h2 {
+    border-bottom: 1px solid #a2a7af;
+    margin: 0;
+    padding: .2em 0;
+  }
+}
+
+
+@-webkit-keyframes animation {
+  0% {
+    color: #333333;
+  }
+  15.0% {
+    color: #0a53be;
+  }
+  30.0% {
+    color: #333333;
+  }
+  50.0% {
+    color: #0a53be;
+  }
+  100.0% {
+    color: #333333;
+  }
+}
+
+@keyframes animation {
+  0% {
+    color: #333333;
+  }
+  15.0% {
+    color: #0a53be;
+  }
+  30.0% {
+    color: #333333;
+  }
+  50.0% {
+    color: #0a53be;
+  }
+  100.0% {
+    color: #333333;
+  }
+}
+
 .type-chain span:last-child {
   font-weight: bold
 }

@@ -1,5 +1,4 @@
 <template>
-  LOTS de TRAVAIL
   <section>
     <transition name="fade">
       <div class="vue-loader" v-if="errors.length">
@@ -25,9 +24,6 @@
       </div>
     </transition>
 
-    <nav class="buttons">
-      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">Nouveau lot</a>
-    </nav>
     <section class="workpackages">
       <workpackage v-for="wp in workpackages"
                    v-bind:key="wp.id"
@@ -43,6 +39,11 @@
                    @workpackagecancelnew="handlerWorkPackageCancelNew"
       ></workpackage>
     </section>
+    <nav class="buttons">
+      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">
+        <i class="icon-book"></i>
+        Nouveau lot</a>
+    </nav>
   </section>
 </template>
 <script>
@@ -65,7 +66,6 @@ export default {
       isValidateur: false,
       persons: [],
       token: 'DEFAULT_TKN',
-
       confirm: null,
       confirmData: null,
       confirmHandler: null,
@@ -81,7 +81,7 @@ export default {
   },
 
   watch: {
-    outsidePerson: function(newVal, oldVal) {
+    outsidePerson: function (newVal, oldVal) {
       this.fetchPersons();
     }
   },
@@ -98,7 +98,6 @@ export default {
       this.workpackages.splice(this.workpackages.indexOf(workpackage), 1);
     },
 
-
     handlerWorkPackageNew() {
       this.workpackages.push({
         id: -1,
@@ -109,7 +108,7 @@ export default {
       })
     },
 
-    handlerConfirm(){
+    handlerConfirm() {
       console.log("handlerConfirm");
       this.confirmHandler(this.confirmData);
       this.confirm = null;
@@ -142,14 +141,14 @@ export default {
     },
 
     handlerWorkPackageDeleteDo(workpackage) {
-          axios.delete(this.url + "?workpackageid=" + workpackage.id).then(
-              (res) => {
-                this.fetch();
-              },
-              (err) => {
-                this.errors.push("Impossible de supprimer le lot : " + err.body);
-              }
-          );
+      axios.delete(this.url + "?workpackageid=" + workpackage.id).then(
+          (res) => {
+            this.fetch();
+          },
+          (err) => {
+            this.errors.push("Impossible de supprimer le lot : " + err.body);
+          }
+      );
     },
 
 
@@ -240,3 +239,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.workpackage {
+  max-width: 31%;
+  margin: 1%;
+}
+</style>

@@ -111,7 +111,8 @@ class WorkPackageController extends AbstractOscarController
                     $this->getEntityManager()->flush();
                     return $this->getResponseOk();
                 } catch( \Exception $e ){
-                    return $this->getResponseInternalError('Impossible de supprimer le déclarant.');
+                    $this->getLoggerService()->error("Impossible le déclarant : " . $e->getMessage());
+                    return $this->getResponseInternalError('Impossible de modifier le déclarant.');
                 }
             }
             else {

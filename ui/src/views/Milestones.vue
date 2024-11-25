@@ -19,8 +19,11 @@
       <div class="overlay" v-if="formData">
         <div class="overlay-content">
 
-          <h3 v-if="formData.id">Modification du jalon <strong>{{ formData.type.label }}</strong></h3>
-          <h3 v-else>Nouveau jalon</h3>
+          <h2>
+            <i class="icon-calendar"></i>
+            <span v-if="formData.id">Modification du jalon <strong>{{ formData.type.label }}</strong></span>
+            <span v-else>Nouveau jalon</span>
+          </h2>
 
           <div class="form-group">
             <label for="">Type de jalon</label>
@@ -63,9 +66,12 @@
     <transition name="fade">
       <div class="deleteconfirm overlay" v-if="deleteMilestone">
         <div class="overlay-content">
-          <h3><i class="icon-help-circled"></i>
-            Supprimer ce jalon ?</h3>
-          <p>Cette suppression sera <strong>définitive</strong>, si vous souhaitez signifier que ce jalon est réalisé, utilisez plutôt l'option <em>Marquer comme terminé</em>. Si cette option n'est pas disponible, demandez à l'administrateur Oscar si vous avez les privilèges pour réaliser cette action ou si le type de jalon <strong>{{ deleteMilestone.type.label }}</strong> est correctement configuré.</p>
+          <h2><i class="icon-help-circled"></i>
+            Supprimer ce jalon ?</h2>
+          <p>Cette suppression sera <strong>définitive</strong>, si vous souhaitez signifier que ce jalon est réalisé,
+            utilisez plutôt l'option <em>Marquer comme terminé</em>. Si cette option n'est pas disponible, demandez à
+            l'administrateur Oscar si vous avez les privilèges pour réaliser cette action ou si le type de jalon
+            <strong>{{ deleteMilestone.type.label }}</strong> est correctement configuré.</p>
           <nav>
             <button class="btn btn-default" @click="preformDelete">
               <i class="icon-trash"></i>
@@ -83,10 +89,10 @@
     <transition name="fade">
       <div class="validconfirm overlay" v-if="validMilestone">
         <div class="overlay-content">
-          <h3>
+          <h2>
             <i class="icon-help-circled"></i>
             Valider ce jalon ?
-          </h3>
+          </h2>
           <p>Les jalons marqués comme terminés ne feront pas l'objet de notifications ou d'alertes.</p>
           <nav>
             <button class="btn btn-default" @click="performValid('valid')">
@@ -105,11 +111,11 @@
     <transition name="fade">
       <div class="inprogressconfirm overlay" v-if="inProgressMilestone">
         <div class="overlay-content">
-          <h3>
+          <h2>
             <i class="icon-help-circled"></i>
             Marquer ce jalon "en cours" ?
-          </h3>
-          <p> </p>
+          </h2>
+          <p></p>
           <nav>
             <button class="btn btn-default" @click="performValid('inprogress')">
               <i class="icon-cw-outline"></i>
@@ -127,11 +133,12 @@
     <transition name="fade">
       <div class="inprogressconfirm overlay" v-if="actionMessage">
         <div class="overlay-content">
-          <h3>
+          <h2>
             <i class="icon-help-circled"></i>
             {{ actionMessage }} ?
-          </h3>
-          <p>Les jalons marqués comme terminés (Validé, refusé ou sans suite) ne feront pas l'objet de notifications ou d'alertes</p>
+          </h2>
+          <p>Les jalons marqués comme terminés (Validé, refusé ou sans suite) ne feront pas l'objet de notifications ou
+            d'alertes</p>
           <nav>
             <button class="btn btn-default" @click="performValid(action)">
               <i class="icon-cw-outline"></i>
@@ -149,17 +156,17 @@
     <transition name="fade">
       <div class="validconfirm overlay" v-if="unvalidMilestone">
         <div class="overlay-content">
-          <h3>
+          <h2>
             <i class="icon-help-circled"></i>
             Invalider ce jalon ?
-          </h3>
+          </h2>
           <p>L'état d'avancement du jalon sera réinitialisé.</p>
           <nav>
-            <button class="btn btn-default" @click="performValid('unvalid')">
+            <button class="btn btn-success" @click="performValid('unvalid')">
               <i class="icon-ok-circled"></i>
               Réinitialiser la progression de ce jalon
             </button>
-            <button class="btn btn-default" @click="unvalidMilestone = null">
+            <button class="btn btn-danger" @click="unvalidMilestone = null">
               <i class="icon-cancel-outline"></i>
               Annuler
             </button>
@@ -176,7 +183,14 @@
     </transition>
 
     <section class="list" v-if="jalons != null">
-      <p><small>Il y a {{ milestones.length }} jalon(s)</small></p>
+      <nav class="text-right">
+        <a href="#" @click.prevent="handlerNew" v-show="creatable" class="btn btn-xs btn-default">
+          <i class="icon-calendar-plus-o"></i>
+          Nouveau Jalon
+        </a>
+
+      </nav>
+
       <milestone :milestone="m" v-for="m in milestones" :key="m.id"
                  @valid="handlerValid"
                  @unvalid="handlerUnvalid"
@@ -189,10 +203,7 @@
     </section>
 
     <nav class="text-right">
-      <a href="#" @click.prevent="handlerNew" v-show="creatable" class="oscar-link">
-        <i class="icon-calendar-plus-o"></i>
-        Nouveau Jalon
-      </a>
+
     </nav>
   </section>
 
@@ -211,7 +222,7 @@ export default {
   props: {
     'url': {'required': true},
     // Payements chargés depuis un autre composant
-    'payments': { 'required' : false, default: [], type: Array }
+    'payments': {'required': false, default: [], type: Array}
   },
 
   components: {
@@ -247,29 +258,29 @@ export default {
 
   computed: {
     //// MODEL
-    types(){
+    types() {
       return this.types;
     },
 
-    milestones(){
+    milestones() {
       let milestones = [];
 
-      this.payments.forEach( payment => {
+      this.payments.forEach(payment => {
 
         // Récupération de la bonne date
         let datePayment = new Date(),
             late = false,
             done = false,
             comment;
-        switch( payment.status ){
+        switch (payment.status) {
           case 1 :
             datePayment = payment.datePredicted;
-            if( !datePayment ) {
+            if (!datePayment) {
               comment = "ERREUR DE DATE"
             } else {
               comment = "PRÉVU";
               late = moment(payment.datePredicted.date).unix() < moment().unix();
-              if( late )  comment += " EN RETARD";
+              if (late) comment += " EN RETARD";
             }
 
             break;
@@ -281,7 +292,7 @@ export default {
           default:
             return;
         }
-        if( !datePayment )
+        if (!datePayment)
           datePayment = new Date();
 
         milestones.push({
@@ -300,11 +311,11 @@ export default {
         });
       });
 
-      this.jalons.forEach( milestone => {
+      this.jalons.forEach(milestone => {
         milestones.push(milestone);
       });
 
-      milestones.sort( (a, b) => {
+      milestones.sort((a, b) => {
         let vA = moment(a.dateStart.date).unix();
         let vB = moment(b.dateStart.date).unix();
         return vA - vB;
@@ -313,21 +324,21 @@ export default {
       return milestones;
     },
 
-    payments(){
+    payments() {
       return this.payments;
     },
 
-    formTypeFinishable(){
-      if( !this.formData )
+    formTypeFinishable() {
+      if (!this.formData)
         return false;
-      return this.types.find( type => type.id == this.formData.type.id && type.finishable );
+      return this.types.find(type => type.id == this.formData.type.id && type.finishable);
     },
 
-    groupedTypes(){
+    groupedTypes() {
       let groupedTypes = {};
-      this.types.forEach( type => {
+      this.types.forEach(type => {
         let facet = type.facet;
-        if(!groupedTypes.hasOwnProperty(facet) ){
+        if (!groupedTypes.hasOwnProperty(facet)) {
           groupedTypes[facet] = {
             label: facet,
             types: []
@@ -361,13 +372,13 @@ export default {
       this.unvalidMilestone = milestone;
     },
 
-    handlerActionConfirm(milestone, action, actionMessage){
+    handlerActionConfirm(milestone, action, actionMessage) {
       this.actionMilestone = milestone;
       this.action = action;
       this.actionMessage = actionMessage;
     },
 
-    handlerActionCancel(){
+    handlerActionCancel() {
       this.actionMilestone = null;
       this.action = null;
       this.actionMessage = "";
@@ -437,7 +448,7 @@ export default {
     /**
      * Marquer le jalon comme terminé.
      */
-    performValid(action){
+    performValid(action) {
       var datas = new FormData(),
           milestone;
 
@@ -500,7 +511,7 @@ export default {
       datas.append('type', this.formData.type.id)
       datas.append('comment', this.formData.comment)
       datas.append('dateStart', this.formData.dateStart)
-      datas.append('action', this.formData.id ?'update' : 'create')
+      datas.append('action', this.formData.id ? 'update' : 'create')
 
       this.pendingMsg = this.formData.id ? "Enregistrement des modifications" : "Création du nouveau jalon";
 
@@ -534,7 +545,9 @@ export default {
             console.log(error);
             this.error = "Impossible de charger les jalons de cette activités : " + error
           }
-      ).then(n => { this.pendingMsg = ""; });
+      ).then(n => {
+        this.pendingMsg = "";
+      });
     },
 
     ////////////////////////////////////////////////////////////////

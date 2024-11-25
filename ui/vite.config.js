@@ -1,6 +1,6 @@
-import { defineConfig, splitVendorChunkPlugin } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
 
 console.log("OSCAR BUILDER v3");
 
@@ -30,14 +30,15 @@ export default defineConfig({
         admintypedocument: resolve(__dirname, 'src/AdminTypeDocument.js'),
         adminroleorganization: resolve(__dirname, 'src/AdminRoleOrganization.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
+        declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),
         documentsindex: resolve(__dirname, 'src/DocumentsIndex.js'),
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         organizations_roled: resolve(__dirname, 'src/EntityWithRoleOrganizations.js'),
-        persons_roled: resolve(__dirname, 'src/EntityWithRolePersons.js'),
-        declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),
+        persons_roled: resolve(__dirname, 'src/EntityWithRolePersons.js'),
+        sticky: resolve(__dirname, 'src/Sticky.js'),
         //other: resolve(__dirname, 'src/other.js')
       },
       output: {
@@ -49,5 +50,10 @@ export default defineConfig({
     alias: {
       'vue': '/node_modules/vue/dist/vue.runtime.esm-browser.js'
     }
+  },
+  test:{
+    globals: true,
+    environment: "jsdom",
+    //setupFiles: './test/setup.js',
   }
-})
+});

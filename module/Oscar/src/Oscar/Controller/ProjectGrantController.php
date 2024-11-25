@@ -2189,6 +2189,16 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         ];
     }
 
+    public function tracesAction(): JsonModel
+    {
+        $output = [];
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+        $output['traces'] = $this->getActivityLogService()->activityActivities($this->params()->fromRoute('id'))
+            ->getQuery()
+            ->getArrayResult();
+        return $this->jsonOutput($output);
+    }
+
     public function personsAccessDeepAction()
     {
         $activityId = $this->params()->fromRoute('id');

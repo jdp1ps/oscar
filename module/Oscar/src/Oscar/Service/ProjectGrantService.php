@@ -1474,6 +1474,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 'milestones/activity',
                 ['idactivity' => $activity->getId()]
             );
+
+
+            if ($oscarUserContext->hasPrivileges(\Oscar\Provider\Privileges::ACTIVITY_NOTIFICATIONS_SHOW, $activity)) {
+                $datas['milestones']['url_notifications'] = $urlPlugin->fromRoute(
+                    'contract/notifications',
+                    ['id' => $activity->getId()]
+                );
+            }
         }
 
         // --- Lot de travail
@@ -1494,19 +1502,89 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['timesheets'] = [
             'readable' => false,
             'editable' => false,
+            'enabled' => false,
+            "declarers" => [],
+            "validators" => [
+                "prj" => [],
+                "sci" => [],
+                "adm" => [],
+            ],
             'datas'    => []
         ];
-        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity)) {
             $datas['timesheets']['readable'] = true;
 
+            if( !$activity->getAcronym() ){
+                $datas['timesheets']['enabled'] = false;
+                $datas['timesheets']['enabled_details'] = "L'activité doit appartenir à un projet pour activer les feuilles de temps";
+            } else {
+                $datas['timesheets']['enabled'] = true;
+            }
             // écran "bilan"
             $datas['timesheets']['url_global'] = $urlPlugin->fromRoute(
                 'contract/timesheet',
                 ['id' => $activity->getId()]
             );
+
+            $datas['timesheets']['url_synthesis'] = $urlPlugin->fromRoute(
+                'timesheet/synthesis',
+                ['id' => $activity->getId()]
+            ) . '?activity_id=' . $activity->getId();
+
+            // Récupération des déclarants
+            foreach ($activity->getPersonsDeep() as $personActivity) {
+                /** @var Person $person */
+                $person = $personActivity->getPerson();
+                if( $activity->hasDeclarant($person) ){
+                    $datas['timesheets']['declarers'][] = [
+                        'label' => $person->getDisplayName(),
+                        'hasDeclaration' => $person->hasDeclarationIn($activity),
+                        'url_details' => $urlPlugin->fromRoute('timesheet/resume').'?person_id=' . $person->getId(),
+                    ];
+                }
+            }
+
+            // Récupération des validateurs
+            foreach ($activity->getValidatorsPrj() as $validator) {
+                $datas['timesheets']['validators']['prj'][] = $validator->toJson();
+            }
+            foreach ($activity->getValidatorsSci() as $validator) {
+                $datas['timesheets']['validators']['sci'][] = $validator->toJson();
+            }
+            foreach ($activity->getValidatorsAdm() as $validator) {
+                $datas['timesheets']['validators']['adm'][] = $validator->toJson();
+            }
         }
 
-        // --- Partenaires de l'activité
+        // --- DEPENSES
+        $datas['spents'] = [
+            'readable' => false,
+            'editable' => false,
+            'url'    => null
+        ];
+        if ($oscarUserContext->hasPrivileges(Privileges::DEPENSE_SHOW, $activity)) {
+            $datas['spents']['readable'] = true;
+            $datas['spents']['url'] = $urlPlugin->fromRoute(
+                'contract/spent-synthesis',
+                ['id' => $activity->getId()]
+            );
+
+            if ($oscarUserContext->hasPrivileges(Privileges::DEPENSE_DETAILS, $activity)) {
+                $datas['spents']['url_details'] = $urlPlugin->fromRoute(
+                    'contract/list-spent',
+                    ['id' => $activity->getId()]
+                );
+            }
+
+            if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ESTIMATEDSPENT_SHOW, $activity)) {
+                $datas['spents']['url_previsionnel'] = $urlPlugin->fromRoute(
+                    'contract/estimated-spent',
+                    ['id' => $activity->getId()]
+                );
+            }
+        }
+
+        // --- Versements de l'activité
         $datas['payments'] = [
             'readable' => false,
             'editable' => false,
@@ -1514,6 +1592,29 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ];
         if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $datas['payments']['readable'] = true;
+            $datas['payments']['editable'] = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
+            $datas['payments']['url'] = $urlPlugin->fromRoute(
+                'activitypayment',
+                ['idactivity' => $activity->getId()]
+            );
+        }
+
+        // --- Options d'administration
+        $datas['administration'] = [
+            'readable' => false,
+            'editable' => false
+        ];
+
+
+        if ($oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN)) {
+            $datas['administration']['url_logs'] = $urlPlugin->fromRoute(
+                'contract/traces',
+                ['id' => $activity->getId()]
+            );
+        }
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PCRU, $activity)) {
+            $datas['administration']['readable'] = true;
+            $datas['administration']['pcru'] = true;
         }
 
 

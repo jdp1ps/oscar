@@ -216,7 +216,7 @@ class Links extends AbstractHtmlElement implements ServiceLocatorAwareInterface
             );
         }
 
-        $out .= sprintf(self::$TLP_ACTIVITY, $this->getView()->url('contract/show', ['id'=>$activity->getId()]), (string)$activity);
+        $out .= sprintf(self::$TLP_ACTIVITY, $this->getView()->url('contract/show', ['id'=>$activity->getId()]), $activity->getLabel());
         $out .= '</span>';
 
         return $out;

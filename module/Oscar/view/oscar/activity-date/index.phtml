@@ -187,7 +187,11 @@
                             le <time><?= $this->moment($milestone->getDateStart()) ?></time>
                         </nav>
                     </h3>
-                    <p><?= $this->link($milestone->getActivity()) ?></p>
+                    <p><?php
+                     echo $this->link()->activity($milestone->getActivity());
+
+                        ?>
+                    </p>
                     <p><?= $milestone->getComment() ?></p>
                 </article>
             <?php endforeach; ?>
