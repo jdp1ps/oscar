@@ -9148,6 +9148,7 @@ body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
   font-size: 16px;
   min-height: 100%;
+  scroll-behavior: smooth;
 }
 
 textarea {

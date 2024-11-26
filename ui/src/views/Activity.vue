@@ -1,4 +1,10 @@
 <template>
+  <modal title="Une erreur est survenue" title-icon="icon-bug" :visible="error != null">
+    <div class="alert alert-danger">{{ error }}</div>
+    <template #buttons>
+      <button class="btn btn-default" @click="error=null">FERMER</button>
+    </template>
+  </modal>
 
   <div class="overlay" v-if="duplicateDatas">
     <div class="overlay-content">
@@ -81,7 +87,6 @@
 
     </div>
   </div>
-
   <div v-if="activity.infos">
     <nav class="navbar navbar-default navbar-fixed-top" style="top: 50px; z-index:500">
       <div class="container">
@@ -433,7 +438,7 @@
             <i class="icon-cog"></i>
             Technique</h2>
           {{ activity.administration }}
-            <ActivityLogs :url="activity.administration.url_logs" />
+            <ActivityLogs :url="activity.administration.url_logs" @error="handlerError"/>
         </div>
       </div>
     </div>
@@ -442,15 +447,17 @@
 <script>
 
 import axios from 'axios';
-import EntityWithRole from "./EntityWithRole.vue";
 import ActivityDocument from "./ActivityDocument.vue";
-import Milestones from "./Milestones.vue";
-import Workpackage from "./Workpackage.vue";
-import WorkpackageUI from "./WorkpackageUI.vue";
+import ActivityLogs from "./ActivityLogs.vue";
 import ActivitySpentSynthesis from "./ActivitySpentSynthesis.vue";
+import EntityWithRole from "./EntityWithRole.vue";
+import Milestones from "./Milestones.vue";
+import Modal from "../components/Modal.vue";
 import Payments from "./Payments.vue";
 import PersonCartouche from "../components/PersonCartouche.vue";
-import ActivityLogs from "./ActivityLogs.vue";
+import Workpackage from "./Workpackage.vue";
+import WorkpackageUI from "./WorkpackageUI.vue";
+import AxiosMessage from "../utils/AxiosMessage.js";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -468,6 +475,7 @@ export default {
     Payments,
     PersonCartouche,
     Milestones,
+    Modal,
     Workpackage,
     WorkpackageUI,
   },
@@ -501,10 +509,16 @@ export default {
       descriptionFull: false,
       persons: [],
       payments: [],
+      error: null,
     }
   },
 
   methods: {
+    handlerError(err){
+      console.log(err);
+      this.error = err.message;
+    },
+
     handlerPaymentsUpdate(p) {
       this.payments = p;
     },
@@ -558,6 +572,8 @@ export default {
     fetch() {
       axios.get(this.url).then(response => {
         this.activity = response.data.activity
+      }, error => {
+        this.handlerError(AxiosMessage.manageErrorResponse(error));
       })
     },
 
