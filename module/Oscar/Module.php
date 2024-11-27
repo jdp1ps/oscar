@@ -115,7 +115,7 @@ class Module
             if( $dbUser ){
                 $cdm->getLoggerService()->info("Authentification de " . $dbUser->getUsername());
                 $dbUser->setDateLogin(new \DateTime());
-                $cdm->getEntityManager()->persist($dbUser);
+                $cdm->getEntityManager()->flush($dbUser);
             }
         }
     }
