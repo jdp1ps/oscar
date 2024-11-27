@@ -414,7 +414,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
                 );
                 $accessTab = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesInActivity);
                 if (!$accessTab['write']) {
-                    throw new OscarException("Vous ne pouvez pas uploader dans cet onglet");
+                    return $this->jsonError("Vous ne pouvez pas uploader dans cet onglet");
                 }
             }
             else {
@@ -503,13 +503,22 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
 
             try {
+                if( !$idType ){
+                    throw new Exception("Aucun type de document selectionné");
+                }
+                $typeDocument = $this->getContractDocumentService()->getContractDocumentType($idType);
+            } catch (Exception $e) {
+                return $this->jsonError($e->getMessage());
+            }
+
+            try {
                 $flowDt = null;
 
                 $this->getContractDocumentService()->uploadContractDocument(
                     $_FILES['file'],
                     $activity,
                     $tabDocument,
-                    $this->getContractDocumentService()->getContractDocumentType($idType),
+                    $typeDocument,
                     $this->getCurrentPerson(),
                     $privatePersons,
                     $dateDeposit,
