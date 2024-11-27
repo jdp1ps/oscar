@@ -41,6 +41,8 @@ use Oscar\Service\TimesheetService;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\PeriodInfos;
 use Oscar\Utils\StringUtils;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 /**
  * Class TimesheetController, fournit l'API de communication pour soumettre, et
@@ -1380,9 +1382,10 @@ class TimesheetController extends AbstractOscarController
         }
 
         if ($action == "export") {
+            $this->getLoggerService()->info("Export EXCEL");
             $datas = $timesheetService->getPersonTimesheetsDatas($person, $period);
 
-            $modele = $this->getConfiguration('oscar.paths.timesheet_modele');
+            $modele = $this->getOscarConfigurationService()->getConfiguration('paths.timesheet_modele');
             if (!$modele) {
                 throw new OscarException("Impossible de charger le modèle de feuille de temps");
             }
@@ -1395,9 +1398,6 @@ class TimesheetController extends AbstractOscarController
                 \IntlDateFormatter::GREGORIAN,
                 'd MMMM Y'
             );
-
-//            /** @var Activity $activity */
-//            $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activityId);
 
             $cellDays = [
                 'C',
@@ -1438,8 +1438,7 @@ class TimesheetController extends AbstractOscarController
             // Début des LOTS
             $lineWpStart = 10;
 
-            /** @var \PHPExcel $spreadsheet */
-            $spreadsheet = \PHPExcel_IOFactory::load($modele);
+            $spreadsheet = IOFactory::load($modele);
 
             $dateStart = new \DateTime($period . '-01');
             $dateEnd = new \DateTime($period . '-01');
@@ -1458,11 +1457,13 @@ class TimesheetController extends AbstractOscarController
             $spreadsheet->getActiveSheet()->setCellValue(
                 'U3',
                 $datas['debut']
-            ); //$fmt->format($activity->getDateStart()));
+            );
+
             $spreadsheet->getActiveSheet()->setCellValue(
                 'U4',
                 $datas['fin']
-            ); // $fmt->format($activity->getDateEnd()));
+            );
+
             $spreadsheet->getActiveSheet()->setCellValue('U5', $datas['num']); //$activity->getOscarNum());
             $spreadsheet->getActiveSheet()->setCellValue('U6', $datas['pfi']); //$activity->getCodeEOTP());
 
@@ -1495,9 +1496,10 @@ class TimesheetController extends AbstractOscarController
 
                         $cellIndex = $cellDays[$i] . $line;
                         $value = 0.0;
+
                         $style = [
                             'fill' => [
-                                'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                                'type' => Fill::FILL_SOLID,
                                 'color' => ['rgb' => 'ffffff']
                             ]
                         ];
@@ -1523,8 +1525,10 @@ class TimesheetController extends AbstractOscarController
 
             for ($i = 0; $i < count($cellDays); $i++) {
                 $cell = $cellDays[$i];
-                $sum = sprintf($rowWpFormula, $cell, $cell, $line);
-                $spreadsheet->getActiveSheet()->setCellValue($cell . ($line + 1), $sum);
+                $formula = sprintf($rowWpFormula, $cell, $cell, $line);
+                $cellPos = $cell.($line + 1);
+                $this->getLoggerService()->debug(" - $cell -- $formula");
+                $spreadsheet->getActiveSheet()->setCellValue($cellPos, $formula);
             }
 
             $spreadsheet->getActiveSheet()->setCellValue('AH' . ($line + 1), sprintf($rowWpFormula, 'AH', 'AH', $line));
@@ -1534,9 +1538,15 @@ class TimesheetController extends AbstractOscarController
             $line++;
 
             foreach ($this->getOthersWP() as $other) {
+                $label = $other['label'];
+                $code = $other['code'];
+
+                if( !array_key_exists($label, $datas['declarations']['others']) ){
+                    continue;
+                }
+                $daysDatas = $datas['declarations']['others'][$label]['subgroup'][$code]['days'];
                 $spreadsheet->getActiveSheet()->insertNewRowBefore(($line + 1));
-                $spreadsheet->getActiveSheet()->setCellValue('B' . $line, $other['label']);
-                $daysDatas = $datas['declarations']['others']['Hors-lot']['subgroup'][$other['label']]['days'];
+                $spreadsheet->getActiveSheet()->setCellValue('B' . $line, $label);
 
                 for ($i = 0; $i < count($cellDays); $i++) {
                     // Mise en forme du jour pour obtenir les clefs
@@ -1547,13 +1557,6 @@ class TimesheetController extends AbstractOscarController
 
                     $cellIndex = $cellDays[$i] . $line;
                     $value = 0.0;
-                    $style = [
-                        'fill' => [
-                            'type' => \PHPExcel_Style_Fill::FILL_SOLID,
-                            'color' => ['rgb' => 'ffffff']
-                        ]
-                    ];
-
                     if (array_key_exists($day, $daysDatas)) {
                         $value = $daysDatas[$day];
                         $style['fill']['color']['rgb'] = 'bbf776';
@@ -1563,15 +1566,19 @@ class TimesheetController extends AbstractOscarController
                         $style['fill']['color']['rgb'] = 'cccccc';
                     }
 
+                    $style = [
+                        'fill' => [
+                            'type' => Fill::FILL_SOLID,
+                            'color' => ['rgb' => 'ffffff']
+                        ]
+                    ];
                     $spreadsheet->getActiveSheet()->getCell($cellIndex)->getStyle()->applyFromArray($style);
                     $spreadsheet->getActiveSheet()->setCellValue($cellIndex, $value);
                 }
                 $spreadsheet->getActiveSheet()->setCellValue('AH' . $line, sprintf($lineWpFormula, $line, $line));
                 $line++;
             }
-
             $line += 1;
-
 
             $startTotal = $lineTotalWP;
             $end = $line - 1;
@@ -1587,9 +1594,10 @@ class TimesheetController extends AbstractOscarController
                 $cellIndex = $cellDays[$i] . $line;
 
                 $value = sprintf("=SUM(%s%s:%s%s)", $col, $startTotal, $col, $end); //$lineTotalWP';
+
                 $style = [
                     'fill' => [
-                        'type' => \PHPExcel_Style_Fill::FILL_SOLID,
+                        'type' => Fill::FILL_SOLID,
                         'color' => ['rgb' => 'ffffff']
                     ]
                 ];
@@ -1604,10 +1612,7 @@ class TimesheetController extends AbstractOscarController
 
             $spreadsheet->getActiveSheet()->setCellValue('AH' . $line, sprintf($lineWpFormula, $line, $line));
 
-            // TOTAL
-
-
-            $edited = \PHPExcel_IOFactory::createWriter($spreadsheet, 'Excel5');
+            $edited = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
             $name = ($person->getLadapLogin()) . "-" . $period . ".xls";
             $filepath = '/tmp/' . $name;
@@ -1617,6 +1622,7 @@ class TimesheetController extends AbstractOscarController
             header('Content-Type: application/octet-stream');
             header("Content-Transfer-Encoding: Binary");
             header("Content-disposition: attachment; filename=\"" . $name . "\"");
+
             die(readfile($filepath));
         }
 
