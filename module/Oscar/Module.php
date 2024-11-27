@@ -12,6 +12,7 @@ namespace Oscar;
 use Laminas\EventManager\Event;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
+use Oscar\Entity\Authentification;
 use Oscar\Service\ContractDocumentService;
 use UnicaenAuthentification\Event\UserAuthenticatedEvent;
 use UnicaenSignature\Event\ProcessEvent;
@@ -99,15 +100,24 @@ class Module
             $this->onSignatureEvent($e);
         });
 
-        $manager->getEventManager()->getSharedManager()->attach('*', 'authentification.ldap.fail', function ($e) {
-            $this->onUserLoginFail($e);
-        });
 // EVENT TRACKER
-//        $manager->getEventManager()->getSharedManager()->attach('*', '*', function ($e) {
-//            echo $e->getName()."\n";
-//            $w = fopen('/tmp/debug-oscar.txt', 'a+');
-//            fwrite($w, $e->getName()."\n");
-//        });
+        $manager->getEventManager()->getSharedManager()->attach('*', 'postPersist', function ($e) {
+            $this->onLoginSuccess($e);
+        });
+    }
+
+    public function onLoginSuccess( $e ) {
+        if( get_class($e) == UserAuthenticatedEvent::class ) {
+            /** @var ContractDocumentService $cdm */
+            $cdm = $this->sm->get(ContractDocumentService::class);
+            /** @var Authentification $dbUser */
+            $dbUser = $e->getDbUser();
+            if( $dbUser ){
+                $cdm->getLoggerService()->info("Authentification de " . $dbUser->getUsername());
+                $dbUser->setDateLogin(new \DateTime());
+                $cdm->getEntityManager()->persist($dbUser);
+            }
+        }
     }
 
     public function onLdapError(Event $event)
