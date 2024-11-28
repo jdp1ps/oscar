@@ -3,6 +3,11 @@
 ## 2024
 
 ### Novembre 2024
+ - [Fix] Erreur avec les commandes lièes aux dépenses (`spent:list`, `spent:infos`, `spent:accounts`)
+ - [Fix] Erreur dans le calcule d'accès aux documents des activités pour les personnes associées à une organisation affectée au projet des activitées.
+ - [Fix] La date de dernière autentification est de nouveau mise à jour correctement.
+ - [Fix] Erreur lors de la génération des versions Excel des feuilles de temps mensuelles validées pour une personne
+ - [Fix] Affichage d'un message d'erreur lors de l'envoi d'un document sans spécifier le type depuis la fiche activité
  - [Fix] Maj du module Signature : Fix un problème avec les observateurs fixes déclarés via l'email. Normalisation de la case des emails.
  - [Up] Ajout d'un connector DB (Oracle) pour les synchronisations des personnes/organisations (doc : [doc/connectors-db.md](doc/connectors-db.md))
  - [Up] Mise à jour des *templates* pour la génération des feuilles de temps (doc: [doc/timesheet.md#personnalisation-des-rendus](doc/timesheet.md#personnalisation-des-rendus)). Permet de simplifier la personnalisation du logo, tout en conservant les *templates* par défaut.

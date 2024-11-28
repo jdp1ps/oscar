@@ -264,7 +264,15 @@ class Project implements ResourceInterface
                 $roles[] = $member->getRole();
             }
         }
-        return $roles;
+
+        foreach ($this->partners as $partner) {
+            /** @var \Oscar\Entity\ProjectPartner $partner */
+            if( $partner->getRoleObj()->isPrincipal() ){
+                $rolesInPartner = $partner->getOrganization()->getPersonRolesId($person);
+                $roles = array_merge($roles, $rolesInPartner);
+            }
+        }
+        return array_unique($roles);
     }
 
     public function log()

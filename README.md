@@ -8,7 +8,7 @@
 ## Versions
 
 ### Stable (MASTER)
-- **VERSION 2.13.1** "Ripley" ([Mise à jour](doc/versions/version-2.13-ripley.md))
+- **VERSION 2.13.1** "Ripley" ([Mise à jour](doc/versions/version-2.13.2-ripley-php8.md))
   
 ### Versions antérieures (Non-maintenues)
 - VERSION 2.12.1 "Spartan" ([Note de version](doc/versions/version-2.12.1.md))
