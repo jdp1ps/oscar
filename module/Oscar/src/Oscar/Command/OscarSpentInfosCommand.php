@@ -12,6 +12,9 @@ namespace Oscar\Command;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\SpentService;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableCellStyle;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -48,30 +51,67 @@ class OscarSpentInfosCommand extends OscarCommandAbstract
         /** @var SpentService $spentService */
         $spentService = $this->getServicemanager()->get(SpentService::class);
 
-        $datas = $spentService->getSynthesisDatasPFI($pfi);
+        $datas = $spentService->getSynthesisDatasPFI([$pfi]);
 
         $masses = $oscarConfig->getMasses();
 
-        $headers = ["Annexe", "Total"];
+        $headers = ["Annexe", "Engagé", "Nbr", "Effectué", "Nbr"];
         $rows = [];
 
+        $styleNumber = new TableCellStyle(['align' => 'right']);
+        $money = function($value) use ($styleNumber){
+          $amount = number_format($value, 2, ',', ' ');
+          return new TableCell($amount, ['style' => $styleNumber]);
+        };
+
         foreach ($masses as $masse=>$label) {
-            $rows[] = ["$label ($masse)", $datas[$masse]];
+            $rows[] = [
+                "$label ($masse)",
+                $money($datas['synthesis'][$masse]['total_engage']),
+                $datas['synthesis'][$masse]['nbr_engage'],
+                $money($datas['synthesis'][$masse]['total_effectue']),
+                $datas['synthesis'][$masse]['nbr_effectue'],
+            ];
 //            $io->text($label . " : <bold>" . $datas[$masse]. "</bold>");
         }
-        $rows[] = [];
 
-        $rows[] = ["Hors-masse", $datas['N.B']];
-        $rows[] = ["Nbr d'enregistrements", $datas['entries']];
-        $rows[] = ["TOTAL", $datas['total']];
+        $rows[] = ["TOTAL",
+            $money($datas['synthesis']['totaux']['engage']),
+            "-",
+            $money($datas['synthesis']['totaux']['effectue']),
+            "-",
+        ];
+
+
+        $rows[] = new TableSeparator();
+        $rows[] = ["Hors-masse",
+            $money($datas['synthesis']['N.B']['total_engage']),
+            $datas['synthesis']['N.B']['nbr_engage'],
+            $money($datas['synthesis']['N.B']['total_effectue']),
+            $datas['synthesis']['N.B']['nbr_effectue'],
+        ];
+        $rows[] = ["Ignorés",
+            $money($datas['synthesis'][0]['total_engage']),
+            $datas['synthesis'][0]['nbr_engage'],
+            $money($datas['synthesis'][0]['total_effectue']),
+            $datas['synthesis'][0]['nbr_effectue'],
+        ];
+        $rows[] = ["Recettes",
+            $money($datas['synthesis'][1]['total_engage']),
+            $datas['synthesis'][1]['nbr_engage'],
+            $money($datas['synthesis'][1]['total_effectue']),
+            $datas['synthesis'][1]['nbr_effectue'],
+        ];
 
         $io->table($headers, $rows);
 
-        if( count($datas['details']['N.B']) > 0 ){
-            $io->title("Compte Générale dont la masse n'est pas renseignée : ");
-            foreach( $datas['details']['N.B'] as $compte){
-                $io->text( " - <bold>$compte</bold>");
-            }
-        }
+        return self::SUCCESS;
+
+//        if( count($datas['details']['N.B']) > 0 ){
+//            $io->title("Compte Générale dont la masse n'est pas renseignée : ");
+//            foreach( $datas['details']['N.B'] as $compte){
+//                $io->text( " - <bold>$compte</bold>");
+//            }
+//        }
     }
 }
