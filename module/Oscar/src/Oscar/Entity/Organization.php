@@ -663,7 +663,7 @@ class Organization implements ResourceInterface, IConnectedObject
             /** @var OrganizationPerson $member */
             foreach ($this->getPersons() as $member) {
                 if ($member->getPerson()->getId() == $person->getId()) {
-                    $roleId = $member->getRoleObj()->getId();
+                    $roleId = $member->getRoleObj()->getRoleId();
                     if( !in_array($roleId, $roleIds) ){
                         $roleIds[] = $roleId;
                     }

@@ -167,6 +167,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
                 // ID des tabs (onglets pour ranger les documents)
                 $arrayTabs = [];
+
                 $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
 
                 foreach ($entitiesTabs as $tabDocument) {

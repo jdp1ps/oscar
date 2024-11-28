@@ -1025,7 +1025,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
 
     public function getRolesPersonInActivityDeep(?Person $person, Activity $activity)
     {
-        $roles = $this->getRolesPersonInActivity($person, $activity);
         if ($person) {
             $roles = $this->getRolesPersonInActivity($person, $activity);
         }

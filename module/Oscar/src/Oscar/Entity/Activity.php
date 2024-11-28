@@ -1630,7 +1630,6 @@ class Activity implements ResourceInterface
                 $roles[] = $member->getRole();
             }
         }
-
         return array_unique($roles);
     }
 
