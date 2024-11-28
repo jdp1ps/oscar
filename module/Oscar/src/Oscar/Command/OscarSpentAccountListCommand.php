@@ -69,9 +69,11 @@ class OscarSpentAccountListCommand extends OscarCommandAbstract
                 }
             }
             $io->table(['Masse(cd)','Masse', 'Masse Héritée', 'Compte', 'Intitulé'], $table);
+            return self::SUCCESS;
 
         } catch (\Exception $e) {
             $io->error($e->getMessage());
+            return self::FAILURE;
         }
     }
 }
