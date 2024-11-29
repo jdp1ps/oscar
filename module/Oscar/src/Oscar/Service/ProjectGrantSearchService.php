@@ -263,8 +263,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                 // Personne (plusieurs)
                 case 'pm' :
-                    $value1 = ArrayUtils::explodeIntegerFromString($filterParams[1]);
-                    if ($value1 < 1) {
+                    $value1 = explode(',', $filterParams[1]);
+                    if (count($value1) < 1) {
                         $filtersError = true;
                         $param['error'] = "Identifiant de personne incorrecte";
                     }
@@ -441,11 +441,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         // RECHERCHE TEXTUELLE
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if ($search) {
-            $this->getLoggerService()->debug("Recherche textuelle '$search'");
             try {
-                $this->getLoggerService()->debug(
-                    "Recherche textuelle '" . $search . "')"
-                );;
                 $idsSearched = $this->getProjectGrantService()->search($search, true);
                 $idsActivitySearch = $idsSearched['activity_ids'];
                 $this->getLoggerService()->debug(
@@ -541,8 +537,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     ///////////////////////////////// Structure de RECHERCHE - PLUSIEURS
                     case 'om':
                         try {
-                            $value1 = explode(',', $params[1]);
-                            $filter['val1'] = $value1;
+                            $filter['val1'] = implode(',', $value1);
                             $organisationsRequire = $this->getOrganizationService()->getOrganizationsByIds($value1);
 
                             foreach ($organisationsRequire as $organisation) {
@@ -630,8 +625,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                     ///////////////////////////////// Plusieurs PERSONNE
                     case 'pm' :
-                        $value1 = \Oscar\Utils\ArrayUtils::explodeIntegerFromString($params[1]);
-                        $filter['val1'] = $value1;
+                        $value1 = $value1;
+                        $filter['val1'] = implode(',', $value1);
                         $filterPersons = $this->getProjectGrantService()->getPersonService()->getPersonRepository(
                         )->getPersonsByIds_idValue(
                             $value1
@@ -928,9 +923,6 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         array_intersect($activitiesIds, $filteredIds);
 
                     $filter['filtered'] = count($filteredIds);
-                }
-                else {
-                    $filter['error'] = $filter['error'] ?: "Filtre non-appliqué";
                 }
 
                 $filter['took'] = (int)((microtime(true) - $time_start) * 1000);

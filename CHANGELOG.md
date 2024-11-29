@@ -3,6 +3,7 @@
 ## 2024
 
 ### Novembre 2024
+ - [Fix] Erreur sur les filtres 'Plusieurs personnes' et 'Plusieurs organisations'
  - [Fix] Erreur avec les commandes lièes aux dépenses (`spent:list`, `spent:infos`, `spent:accounts`)
  - [Fix] Erreur dans le calcule d'accès aux documents des activités pour les personnes associées à une organisation affectée au projet des activitées.
  - [Fix] La date de dernière autentification est de nouveau mise à jour correctement.
