@@ -534,9 +534,10 @@
     <div id="activity-notes"
         data-activityid="<?= $entity->getId() ?>"
         data-url="<?= $this->url('activity-notes/api') ?>"
-        data-showallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_SHOW) ?>"
-        data-manageallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_MANAGE) ?>"
-        data-userid="<?= $this->grant()->getCurrentPerson()->getId() ?>"
+        data-showallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_SHOW, $entity) ?>"
+        data-manageuserallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_MANAGE_USER, $entity) ?>"
+        data-manageadminallowed="<?php echo $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $entity) ?>"
+        data-userid="<?= $this->grant()->getCurrentPerson() ? $this->grant()->getCurrentPerson()->getId() : -1 ?>"
     ></div>
     <?php echo $this->Vite()->addJs('src/ActivityNotes.js'); ?>
 

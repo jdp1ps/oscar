@@ -10,7 +10,8 @@ const app = createApp(ActivityNotes, {
     "activityid": elemDatas.dataset.activityid,
     "url": elemDatas.dataset.url,
     "showallowed": elemDatas.dataset.showallowed == "1" ? true : false,
-    "manageallowed": elemDatas.dataset.manageallowed == "1" ? true : false,
+    "manageuserallowed": elemDatas.dataset.manageuserallowed == "1" ? true : false,
+    "manageadminallowed": elemDatas.dataset.manageadminallowed == "1" ? true : false,
     "userid": elemDatas.dataset.userid
 });
 

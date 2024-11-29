@@ -72,14 +72,14 @@
     "src": "src/ActivityDocuments.js"
   },
   "src/ActivityNotes.css": {
-    "file": "assets/ActivityNotes-749d262d.css",
+    "file": "assets/ActivityNotes-8943f852.css",
     "src": "src/ActivityNotes.css"
   },
   "src/ActivityNotes.js": {
     "css": [
-      "assets/ActivityNotes-749d262d.css"
+      "assets/ActivityNotes-8943f852.css"
     ],
-    "file": "assets/activitynotes-d187b45b.js",
+    "file": "assets/activitynotes-056a0b19.js",
     "imports": [
       "_vendor.js",
       "_vendor4.js"

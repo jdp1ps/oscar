@@ -31,7 +31,7 @@
     <!-- LISTE DES NOTES -->
     <h2><i class="icon-doc"></i> Notes</h2>
     <nav class="admin-bar text-right">
-      <a class="oscar-link" v-if="manageallowed" @click="handlerNew()"><i class="icon-doc-add"></i> Nouvelle </a>
+      <a class="oscar-link" v-if="manageadminallowed || manageuserallowed" @click="handlerNew()"><i class="icon-doc-add"></i> Nouvelle </a>
     </nav>
     <div class="note" v-for="c in notes" v-if="showallowed">
         <div style="margin-bottom: 1em; display: flex; justify-content: space-between">
@@ -43,7 +43,7 @@
               <i class="icon-user"></i> {{ c.created_by.first_name + ' ' +c.created_by.last_name }}
             </span>
           </div>
-          <div v-if="manageallowed && c.created_by.id == this.userid">
+          <div v-if="manageadminallowed || (manageuserallowed && c.created_by.id == this.userid)">
             <button type="button" class="btn btn-danger" @click="handlerDelete(c.id)" style="margin-right: 1em;"><i class="icon-trash" style="background: transparent;"></i> Supprimer</button>
             <button type="button" class="btn btn-default" @click="handleModify(c)"><i class="icon-pencil"></i> Modifier</button>
           </div>
@@ -100,7 +100,8 @@ export default {
     activityid: {default: null},
     url: {default: null},
     showallowed: { default: false },
-    manageallowed: { default:false },
+    manageuserallowed: { default:false },
+    manageadminallowed: { default:false },
     userid: { default: null }
   },
 
@@ -125,7 +126,7 @@ export default {
 
     applyEdit() {
       this.loading = "Enregistrement en cours";
-      axios.post(this.url, { action: this.mode, note_id: this.editedNote.id, content: this.editedNote.content, activity_id: this.activityid }).then(
+      axios.post(this.url + "?activityid=" + this.activityid, { action: this.mode, note_id: this.editedNote.id, content: this.editedNote.content, activity_id: this.activityid }).then(
           () => {
             this.fetch();
           }, err => {
@@ -138,7 +139,7 @@ export default {
     },
 
     fetch() {
-      axios.get("/activity-notes/api?activityid=" + this.activityid).then(ok => {
+      axios.get(this.url + "?activityid=" + this.activityid).then(ok => {
         this.notes = ok.data.notes;
       }, err => {
         this.handleError(err);
@@ -147,7 +148,7 @@ export default {
 
     handlerDelete(noteID) {
       this.loading = "Suppression en cours";
-      axios.post(this.url, { action: "delete", note_id: noteID } ).then(
+      axios.post(this.url + "?activityid=" + this.activityid, { action: "delete", note_id: noteID } ).then(
           () => {
             this.fetch();
           }, err => {
@@ -172,7 +173,7 @@ export default {
         el.innerHTML = err.response.data;
         const errorHTML = el.querySelector('[id="contenu-principal"]');
         if (errorHTML) {
-          this.error = errorHTML;
+          this.error = errorHTML.innerHTML;
           return;
         }
       }

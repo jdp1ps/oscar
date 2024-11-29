@@ -17,26 +17,39 @@ class ActivityNotesController extends AbstractOscarController
     public function apiAction()
     {
         try {
-
             if ($this->getRequest()->getMethod() == "GET") {
                 return $this->getNotes();
             }
 
             if ($this->getRequest()->getMethod() == "POST") {
 
-                $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTES_MANAGE);
+                $activity_id = $this->getRequest()->getQuery('activityid');
+                if (!$activity_id) {
+                    throw new \Exception("activityid query param mandatory");
+                }
+        
+                /** @var Activity $activity */
+                $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+                if (!$activity) {
+                    throw new \Exception("activityid not found in DB");
+                }
+
+                if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity)
+                    && !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity)) {
+                    throw new UnAuthorizedException('Droits insuffisants');
+                }
 
                 $action_note_json = json_decode($this->getRequest()->getContent());
 
                 if ($action_note_json->action == "create") {
-                    return $this->createNote($action_note_json);
+                    return $this->createNote($action_note_json, $activity);
                 }
                 if ($action_note_json->action == "update") {
-                    return $this->updateNote($action_note_json);                    
+                    return $this->updateNote($action_note_json, $activity);
                 }
                
                 if ($action_note_json->action == "delete") {
-                    return $this->deleteNote($action_note_json->note_id);
+                    return $this->deleteNote($action_note_json->note_id, $activity);
                 }
             }
 
@@ -54,12 +67,18 @@ class ActivityNotesController extends AbstractOscarController
     }
 
     private function getNotes() {
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTES_SHOW);
-
         $activity_id = $this->getRequest()->getQuery('activityid');
         if (!$activity_id) {
-            throw new \Exception();
+            throw new \Exception("activityid query param mandatory");
         }
+
+        /** @var Activity $activity */
+        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+        if (!$activity) {
+            throw new \Exception("activityid not found in DB");
+        }
+
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTES_SHOW, $activity);
 
         $allNotes = $this->getEntityManager()
                 ->getRepository(ActivityNote::class)
@@ -87,9 +106,9 @@ class ActivityNotesController extends AbstractOscarController
                 'content'     => $note->getContent(),
                 'date_updated' => $date_updated,
                 'created_by' => [
-                    'id' => $note->getCreatedBy()->getId(),
-                    'first_name'      => $note->getCreatedBy()->getFirstName(),
-                    'last_name'      => $note->getCreatedBy()->getLastName(),
+                    'id' => $note->getCreatedBy() ? $note->getCreatedBy()->getId() : -1,
+                    'first_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getFirstName() : "",
+                    'last_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getLastName() : "",
                 ],
             ];
         }
@@ -99,12 +118,10 @@ class ActivityNotesController extends AbstractOscarController
         return $response;
     }
 
-    private function createNote($action_note_json) {
+    private function createNote($action_note_json, $activity) {
         $note = new ActivityNote();
         $note->setContent($action_note_json->content);
         $note->setCreatedBy($this->getCurrentPerson());
-        $activity = $this->getEntityManager()
-            ->getReference(Activity::class, $action_note_json->activity_id);
         $note->setActivity($activity);
         $this->getEntityManager()->persist($note);
         $this->getEntityManager()->flush();
@@ -114,12 +131,17 @@ class ActivityNotesController extends AbstractOscarController
         return $response;
     }
 
-    private function updateNote($action_note_json) {
+    private function updateNote($action_note_json, $activity) {
         $note = $this->getEntityManager()
             ->getRepository(ActivityNote::class)
             ->findOneBy(array('id' => $action_note_json->note_id));
+        if (!$note) {
+            throw new \Exception("La note n'existe pas. Veuillez actualiser la page.");
+        }
 
-        if ($this->getCurrentPerson()->getId() != $note->getCreatedBy()->getId()) {
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity)
+            && (!$this->getCurrentPerson()
+                 || $this->getCurrentPerson()->getId() != $note->getCreatedBy()->getId())) {
             throw new UnAuthorizedException('Droits insuffisants');
         }
 
@@ -135,12 +157,17 @@ class ActivityNotesController extends AbstractOscarController
         return $response;
     }
 
-    private function deleteNote($note_id) {
+    private function deleteNote($note_id, $activity) {
         $note = $this->getEntityManager()
             ->getRepository(ActivityNote::class)
             ->findOneBy(array('id' => $note_id));
+        if (!$note) {
+            throw new \Exception("La note n'existe pas. Veuillez actualiser la page.");
+        }
 
-        if ($this->getCurrentPerson()->getId() != $note->getCreatedBy()->getId()) {
+        if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity)
+            && (!$this->getCurrentPerson()
+                 || $this->getCurrentPerson()->getId() != $note->getCreatedBy()->getId())) {
             throw new UnAuthorizedException('Droits insuffisants');
         }
 
