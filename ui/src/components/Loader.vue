@@ -43,7 +43,7 @@ export default {
   justify-content: center;
   .message {
     text-align: center;
-    font-size: 1.5em;
+    font-size: 1em;
     font-weight: 600;
     -webkit-animation-name: animation;
     -webkit-animation-duration: .5s;

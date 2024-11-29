@@ -2,6 +2,13 @@
 
   <loader text="Chargement de l'activité" :visible="loading" />
 
+  <modal title="Debugger" title-icon="icon-bug" :visible="debug_displayed" @modal-cancel="debug_displayed = false">
+    <pre>{{ debug_content }}</pre>
+    <template #buttons>
+      <button class="btn btn-default" @click="handlerDebugHide">FERMER</button>
+    </template>
+  </modal>
+
   <modal title="Une erreur est survenue" title-icon="icon-bug" :visible="error != null">
     <div class="alert alert-danger">{{ error }}</div>
     <template #buttons>
@@ -225,9 +232,6 @@
           </div>
         </div>
       </div>
-      <div>
-
-      </div>
 
       <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull"
          v-if="activity.infos.description">
@@ -302,10 +306,19 @@
             <a class="btn btn-xs btn-default" v-if="activity.urls.duplicate" @click="handlerDuplicate">
               <i class="icon-paste"></i>
               Dupliquer</a>
+
+            <a class="btn btn-xs btn-danger" v-if="debugEnabled" @click="handlerDebugShow($data)">
+              <i class="icon-bug"></i>
+              Afficher le modèle</a>
+
+            <a class="btn btn-xs btn-danger" v-if="debugEnabled" @click="fetch">
+              <i class="icon-bug"></i>
+              Recharger le modèle</a>
           </nav>
         </div>
       </div>
     </header>
+
     <div class="container-fluid">
       <div class="col-md-8">
         <section class="section-infos" id="members" v-if="activity.persons.readable">
@@ -487,7 +500,8 @@ export default {
   },
 
   props: {
-    url: {required: true}
+    url: {required: true},
+    debugEnabled: {required: false, type: Boolean, default: false},
   },
 
   data() {
@@ -498,6 +512,9 @@ export default {
       descriptionFull: false,
       persons: [],
       payments: [],
+
+      debug_content: null,
+      debug_displayed: false,
       error: null,
       loading: true
     }
@@ -521,6 +538,15 @@ export default {
   },
 
   methods: {
+    handlerDebugHide(){
+      this.debug_displayed = false;
+    },
+
+    handlerDebugShow(content){
+      this.debug_content = JSON.parse(JSON.stringify(content));
+      this.debug_displayed = true;
+    },
+
     handlerError(err){
       this.error = err.message;
     },

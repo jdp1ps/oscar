@@ -1,4 +1,6 @@
 <template>
+
+
   <!-- ERREUR -->
   <div class="overlay" v-if="error" style="z-index: 101">
     <div class="overlay-content" style="max-width: 50%">
@@ -229,6 +231,7 @@
 
     <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
     <section class="documents-content">
+      <Loader :visible="loading" :text="loading" />
       <div class="tabs">
         <div class="tab" :class="{'selected': selectedTabId === tab.id }"
              v-for="tab in packedDocuments"
@@ -286,6 +289,7 @@ import PersonAutoCompleter from '../components/PersonAutoCompleter.vue';
 import moment from 'moment';
 import 'moment/locale/fr';
 import DocumentsList from "./DocumentsList.vue";
+import Loader from "../components/Loader.vue";
 
 // Traitement spécifique de l'onglet Privé
 const PRIVATE = "private";
@@ -294,6 +298,7 @@ const PRIVATE = "private";
 export default {
 
   components: {
+    Loader,
     "document-list": DocumentsList,
     "date-picker": Datepicker,
     "person-auto-completer": PersonAutoCompleter
@@ -346,7 +351,7 @@ export default {
       editData: null,
       uploadDoc: null,
       documents: [],
-      loading: true,
+      loading: false,
       sortField: 'dateUpload',
       sortDirection: -1,
       editable: true,
@@ -843,11 +848,12 @@ export default {
 
     // Recup datas Docs
     fetch() {
+      this.loading = "Chargement des documents...";
       axios.get(this.url).then(ok => {
         this.handlerSuccess(ok)
       }, ko => {
         this.error = ko.response.data ? ko.response.data : ko;
-      });
+      }).finally(t=>this.loading = false);
     }
   },
 

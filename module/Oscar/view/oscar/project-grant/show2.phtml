@@ -1,5 +1,6 @@
 <div class="container">
     <div class="activity" id="activity"
+         <?php if( DEBUG_OSCAR ) echo 'data-debug-enabled="true"' ?>
          data-url="<?php echo $this->url('contract/show', ['id' => $activity->getId()]) ?>"
          data-manage="<?php $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity) ? "true" : "false" ?>"
     ></div>

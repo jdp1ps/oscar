@@ -5,15 +5,17 @@
         <h2 class="overlay-title">
           <i :class="titleIcon" v-if="titleIcon !== 'no-icon'"></i>
           {{ title }}
-          <a href="#" @click="handlerCancel" class="overlay-closer">x</a>
+          <a href="#" @click.prevent="handlerCancel" class="overlay-closer">x</a>
         </h2>
         <transition name="fade" mode="out-in">
-        <div v-if="pending" class="overlay-pending">
-          <i class="animate-spin icon-spinner"></i>{{ pendingMessage }}
-        </div>
-        <slot v-else>
-          Some content here
-        </slot>
+          <div class="overlay-body">
+            <div v-if="pending" class="overlay-pending">
+              <i class="animate-spin icon-spinner"></i>{{ pendingMessage }}
+            </div>
+            <slot v-else>
+              Some content here
+            </slot>
+          </div>
         </transition>
         <nav class="overlay-buttons">
           <slot name="buttons">
@@ -29,11 +31,11 @@
 export default {
   name: "Modal",
   props: {
-    title: { type: String, required: true },
-    titleIcon: { type: String, default: "no-icon" },
-    visible: { type: Boolean, required: true },
-    pending: { type: Boolean, required: false, default: false },
-    pendingMessage: { type: String, required: false, default: "Chargement des données" },
+    title: {type: String, required: true},
+    titleIcon: {type: String, default: "no-icon"},
+    visible: {type: Boolean, required: true},
+    pending: {type: Boolean, required: false, default: false},
+    pendingMessage: {type: String, required: false, default: "Chargement des données"},
   },
 
   data() {
@@ -44,7 +46,7 @@ export default {
 
   methods: {
     handlerClickOutside() {
-      if( this.cursorIn === false ){
+      if (this.cursorIn === false) {
         this.handlerCancel();
       }
     },
@@ -53,7 +55,7 @@ export default {
       this.$emit("modal-cancel");
     },
 
-    handlerValid(){
+    handlerValid() {
       this.$emit("modal-valid");
     }
   }
@@ -62,31 +64,63 @@ export default {
 <style scoped>
 .overlay {
   z-index: 5000;
-}
 
-.overlay-pending {
-  font-weight: 600;
-  min-height: 10em;
-  line-height: 10em;
-  text-align: center;
+  .overlay-content {
+    height: 90vh;
+    position: relative;
 
-  -webkit-animation-name: animation;
-  -webkit-animation-duration: 1s;
-  -webkit-animation-timing-function: ease-in-out;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-play-state: running;
+    .overlay-pending {
+      font-weight: 600;
+      min-height: 10em;
+      line-height: 10em;
+      text-align: center;
 
-  animation-name: animation;
-  animation-duration: 1s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-play-state: running;
-}
+      -webkit-animation-name: animation;
+      -webkit-animation-duration: 1s;
+      -webkit-animation-timing-function: ease-in-out;
+      -webkit-animation-iteration-count: infinite;
+      -webkit-animation-play-state: running;
 
-.overlay-buttons {
-  text-align: center;
-  border-top: thin solid #ddd;
-  padding: .5em 0 .3em 0;
+      animation-name: animation;
+      animation-duration: 1s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-play-state: running;
+    }
+
+    .overlay-title {
+      color: #333;
+      padding: .25em;
+      position: relative;
+      height: 2em;
+      .overlay-closer {
+        position: absolute;
+        right: 0em;
+        top: 0;
+      }
+    }
+
+    .overlay-buttons {
+      text-align: center;
+      padding: .5em 0 .3em 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .overlay-body {
+      border: thin solid #eee;
+      background: #FEFEFE;
+      margin: 1em;
+      position: absolute;
+      top: 2.5em;
+      left: 0;
+      right: 0;
+      bottom: 2.5em;
+      overflow: scroll;
+    }
+  }
 }
 
 

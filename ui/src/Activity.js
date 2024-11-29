@@ -8,6 +8,7 @@ import traces from "./utils/Traces.js";
 let elemDatas = document.querySelector("#activity");
 const app = createApp(Activity, {
     "url": elemDatas.dataset.url,
+    "debug-enabled": elemDatas.dataset.debugEnabled,
     "manage": elemDatas.dataset.manage
 });
 

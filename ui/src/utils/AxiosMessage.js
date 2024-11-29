@@ -24,7 +24,7 @@ export default {
                 message = response.response.data.error ? response.response.data.error : response.response.data;
             }
             if( code === 403 ){
-                message = message === ERROR_MESSAGE_DEFAULT ? ERROR_MESSAGE_DISCONNECTED : message + " (" + ERROR_MESSAGE_DISCONNECTED +")";
+                message = ERROR_MESSAGE_DISCONNECTED;
             }
         }
         return {

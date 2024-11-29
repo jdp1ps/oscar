@@ -36,22 +36,24 @@
 
         <table class="table-bordered table-borderless table-responsive-md">
           <thead>
+          <tr>
             <th>#</th>
             <th>{{ title }}</th>
             <td>Rôle</td>
+          </tr>
           </thead>
           <tbody>
-            <tr v-for="item in toPaste">
-              <td><input type="checkbox" v-model="item.selected" /></td>
-              <td>{{ item.enrolledLabel }}</td>
-              <td>
-                <select name="role" class=" form-control" v-model="item.roleId">
-                  <option :value="role.id" v-for="role in roles">
-                    {{ role.label }}
-                  </option>
-                </select>
-              </td>
-            </tr>
+          <tr v-for="item in toPaste">
+            <td><input type="checkbox" v-model="item.selected"/></td>
+            <td>{{ item.enrolledLabel }}</td>
+            <td>
+              <select name="role" class=" form-control" v-model="item.roleId">
+                <option :value="role.id" v-for="role in roles">
+                  {{ role.label }}
+                </option>
+              </select>
+            </td>
+          </tr>
           </tbody>
           <tr>
 
@@ -66,21 +68,6 @@
           <button class="btn btn-primary" @click="performPast">
             <i class="icon-trash"></i>
             Confirmer
-          </button>
-        </nav>
-      </div>
-    </div>
-
-    <div class="overlay" v-if="error">
-      <div class="overlay-content">
-        <i class="icon-cancel-outline overlay-closer" @click="error = ''"></i>
-
-        <h2>Erreur : <strong>{{ error }}</strong></h2>
-
-        <nav class="admin-bar">
-          <button class="btn btn-default button-back" @click="error = ''">
-            <i class="icon-angle-left"></i>
-            Annuler
           </button>
         </nav>
       </div>
@@ -227,7 +214,8 @@
     <section v-if="editMode">
       <div class="alert alert-info">
         Détails des affectations. Un élément peut apparaître plusieurs fois selon le contexte et le rôle.
-        Les affectation aux activités sont indiquées par un cube simple <i class="icon-cube"></i>, les affectations aux projets par plusieurs cubes <i class="icon-cubes"></i>
+        Les affectation aux activités sont indiquées par un cube simple <i class="icon-cube"></i>, les affectations aux
+        projets par plusieurs cubes <i class="icon-cubes"></i>
       </div>
       <article class="row card" v-for="e in sortedFull">
         <div class="col-md-6">
@@ -446,7 +434,7 @@ export default {
       })
     },
 
-    performPast(){
+    performPast() {
       let data = new FormData();
       this.loading = "Création...";
       let json = JSON.stringify(this.toPaste.filter(item => item.selected));
@@ -487,11 +475,11 @@ export default {
           },
           ko => {
             this.error = "Erreur : " + ko.body;
-          }).finally(e=> this.loading = null);
+          }).finally(e => this.loading = null);
     },
 
-    handlerCopy(){
-      let storage_key = "copy_" +this.title;
+    handlerCopy() {
+      let storage_key = "copy_" + this.title;
       let datas = [];
       this.entities.forEach(item => {
         datas.push({
@@ -504,10 +492,10 @@ export default {
       localStorage.setItem(storage_key, JSON.stringify(datas));
     },
 
-    handlerPaste(){
-      let storage_key = "copy_" +this.title;
+    handlerPaste() {
+      let storage_key = "copy_" + this.title;
       let stored = localStorage.getItem(storage_key);
-      if( stored ){
+      if (stored) {
         let infos = JSON.parse(stored);
         this.toPaste = [];
         infos.forEach(item => {
@@ -520,7 +508,6 @@ export default {
   },
 
   mounted() {
-    console.log("MOUNTED");
     this.fetch();
   }
 }
