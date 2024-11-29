@@ -1748,7 +1748,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
         $isAjax = $this->isAjax();
 
         $id = $this->params()->fromRoute('id');
-        $this->getLoggerService()->debug(__METHOD__ . " id:$id, ajax:" . ($isAjax?'true':'false'));
         $entity = $this->getActivityService()->getActivityById($id);
 
         // Check access
@@ -1756,7 +1755,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         switch ($method) {
             case 'GET' :
-                $this->getLoggerService()->debug("GET");
                 if ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
                     $datas = [
                         'activity' => $this->getActivityService()->getActivityJson(

@@ -1,19 +1,12 @@
 <template>
-  <div>
-    <template>
-      <div class="oscar-ajax" v-show="loading || error">
-        <div class="oscar-ajax-content">
-          <div v-if="loading" class="loading-message">
-            <i class="icon-spinner animate-spin animate"></i> {{ loading }}
-          </div>
-          <div v-if="error" class="error-message">
-            <span @click="error = false" style="font-weight: bold; position: absolute; top: 1em; right: 1em ">x</span>
-            <i class="icon-attention-1"></i> <strong>{{ error }} </strong>
-          </div>
+  <div style="position: relative;">
+    <loader :visible="loading" :text="loading"></loader>
 
-        </div>
+    <modal title="Erreur" :visible="error">
+      <div class="alert alert-danger">
+        {{ error }}
       </div>
-    </template>
+    </modal>
 
     <div class="overlay" v-if="entityDelete">
       <div class="overlay-content">
@@ -281,15 +274,19 @@
 <script>
 
 import axios from 'axios';
+import Datepicker from "../components/Datepicker.vue";
+import Loader from "../components/Loader.vue";
 import OrganizationAutoCompleter from "../components/OrganizationAutoComplete.vue";
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
-import Datepicker from "../components/Datepicker.vue";
+import Modal from "../components/Modal.vue";
 
 export default {
   components: {
+    Modal,
+    datepicker: Datepicker,
+    Loader,
     organizationselector: OrganizationAutoCompleter,
     personselector: PersonAutoCompleter,
-    datepicker: Datepicker
   },
 
   props: {
@@ -468,10 +465,8 @@ export default {
     },
 
     fetch() {
-      console.log("FETCH", this.url);
-      this.loading = "Chargement...";
+      this.loading = "Chargement des données";
       axios.get(this.url).then(ok => {
-            console.log("LOADED", ok);
             if (ok.data.roles) {
               this.roles = ok.data.roles;
             }
@@ -488,13 +483,11 @@ export default {
             } else {
               this.entities = ok.data;
             }
-            console.log("EMIT updated");
             this.$emit('Updated', {entries: this.entities});
-            this.loading = false;
           },
           ko => {
             this.error = "Erreur : " + ko.body;
-          });
+          }).finally(e=> this.loading = null);
     },
 
     handlerCopy(){

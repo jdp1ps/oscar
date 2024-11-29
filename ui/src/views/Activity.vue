@@ -1,4 +1,7 @@
 <template>
+
+  <loader text="Chargement de l'activité" :visible="loading" />
+
   <modal title="Une erreur est survenue" title-icon="icon-bug" :visible="error != null">
     <div class="alert alert-danger">{{ error }}</div>
     <template #buttons>
@@ -87,6 +90,7 @@
 
     </div>
   </div>
+
   <div v-if="activity.infos">
     <nav class="navbar navbar-default navbar-fixed-top" style="top: 50px; z-index:500">
       <div class="container">
@@ -431,18 +435,18 @@
         </section>
       </aside>
     </div>
-    <div class="container-fluid" v-if="activity.administration.readable">
+    <div class="container-fluid activity-fiche" v-if="activity.administration.readable">
       <div class="row">
         <div class="col-md-12">
           <h2>
             <i class="icon-cog"></i>
             Technique</h2>
-          {{ activity.administration }}
             <ActivityLogs :url="activity.administration.url_logs" @error="handlerError"/>
         </div>
       </div>
     </div>
   </div>
+
 </template>
 <script>
 
@@ -451,6 +455,7 @@ import ActivityDocument from "./ActivityDocument.vue";
 import ActivityLogs from "./ActivityLogs.vue";
 import ActivitySpentSynthesis from "./ActivitySpentSynthesis.vue";
 import EntityWithRole from "./EntityWithRole.vue";
+import Loader from "../components/Loader.vue";
 import Milestones from "./Milestones.vue";
 import Modal from "../components/Modal.vue";
 import Payments from "./Payments.vue";
@@ -472,6 +477,7 @@ export default {
     ActivityDocument,
     ActivitySpentSynthesis,
     EntityWithRole,
+    Loader,
     Payments,
     PersonCartouche,
     Milestones,
@@ -482,6 +488,19 @@ export default {
 
   props: {
     url: {required: true}
+  },
+
+  data() {
+    return {
+      activity: {},
+      duplicateDatas: null,
+      sticky: [],
+      descriptionFull: false,
+      persons: [],
+      payments: [],
+      error: null,
+      loading: true
+    }
   },
 
   computed: {
@@ -501,32 +520,20 @@ export default {
     }
   },
 
-  data() {
-    return {
-      activity: {},
-      duplicateDatas: null,
-      sticky: [],
-      descriptionFull: false,
-      persons: [],
-      payments: [],
-      error: null,
-    }
-  },
-
   methods: {
     handlerError(err){
-      console.log(err);
       this.error = err.message;
     },
 
     handlerPaymentsUpdate(p) {
       this.payments = p;
     },
+
     handlerUpdatePersons(d) {
       this.persons = d.entries;
     },
-    ////////////////////////////////////////// Système d'épingle
 
+    ////////////////////////////////////////// Système d'épingle
     handlerPurgeSticky() {
       this.sticky = [];
       localStorage.removeItem(storage_key);
@@ -565,15 +572,19 @@ export default {
       }
     },
 
+    ////////////////////////////////////////// Système d'épingle
     test() {
       console.log(localStorage.getItem());
     },
 
     fetch() {
+      this.loading = true;
       axios.get(this.url).then(response => {
         this.activity = response.data.activity
       }, error => {
         this.handlerError(AxiosMessage.manageErrorResponse(error));
+      }).finally( f => {
+        this.loading = false;
       })
     },
 
@@ -619,7 +630,10 @@ export default {
 
 <style lang="scss" scoped>
 
-
+.activity-fiche {
+  position: relative;
+  padding-bottom: 4em;
+}
 .section-infos {
   margin-top: 1em;
   scroll-margin-top: 120px;

@@ -15,12 +15,13 @@ export default {
         }
     },
     manageErrorResponse: function (response){
+        console.log(response.response.data);
         let code = 500;
         let message = null;
         if( response && response.response ){
             code = response.response.status;
             if( response.response.data ){
-                message = response.response.data.error ? response.response.data.error : ERROR_MESSAGE_DEFAULT;
+                message = response.response.data.error ? response.response.data.error : response.response.data;
             }
             if( code === 403 ){
                 message = message === ERROR_MESSAGE_DEFAULT ? ERROR_MESSAGE_DISCONNECTED : message + " (" + ERROR_MESSAGE_DISCONNECTED +")";

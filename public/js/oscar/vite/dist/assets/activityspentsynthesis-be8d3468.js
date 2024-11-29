@@ -1,0 +1,1 @@
+import{z as o}from"../vendor.js";import{A as n}from"../vendor7.js";import{M as s}from"../vendor3.js";import"../vendor6.js";let e=document.querySelector("#depenses2");const t=o(n,{url:e.dataset.url,syncurl:e.dataset.syncurl});t.config.globalProperties.$filters={money:function(r){return s.money(r)}};t.mount("#depenses2");

@@ -1,6 +1,6 @@
 <div class="container">
     <div class="activity" id="activity"
-         data-url="<?php echo $this->url('contract/show2', ['id' => $activity->getId()]) ?>"
+         data-url="<?php echo $this->url('contract/show', ['id' => $activity->getId()]) ?>"
          data-manage="<?php $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_EDIT, $activity) ? "true" : "false" ?>"
     ></div>
     <?= $this->Vite()->addJs('src/Activity.js'); ?>
