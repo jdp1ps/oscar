@@ -11,9 +11,9 @@ namespace Oscar;
 class OscarVersion
 {
     const MAJOR = 2;
-    const MINOR = 13;
-    const PATCH = 2;
-    const NAME = "Ripley";
+    const MINOR = 14;
+    const PATCH = 0;
+    const NAME = "Starling";
 
     public static function getBuild(){
         return sprintf('v%s.%s.%s "%s"', self::MAJOR, self::MINOR, self::PATCH, self::NAME);
