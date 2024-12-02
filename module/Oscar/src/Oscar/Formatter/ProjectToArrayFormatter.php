@@ -197,7 +197,9 @@ class ProjectToArrayFormatter implements IProjectFormater
                 $managementsFees[] = $activity->getFraisDeGestion();
             }
 
-            $financialImpacts = [];
+            if ($activity->getFinancialImpact()) {
+                $financialImpacts[] = $activity->getFinancialImpact();
+            }
 
             if ($activity->getDisciplines()) {
                 $disciplines = array_merge($disciplines, $activity->getDisciplinesArray());
@@ -237,6 +239,7 @@ class ProjectToArrayFormatter implements IProjectFormater
         $output['paymentsExplain'] = implode(', ', $paymentsExplain);
         $output['managementsFeesHoster'] = implode(', ', $managementsFeesHoster);
         $output['managementsFees'] = implode(', ', $managementsFees);
+        $output['financialImpacts'] = implode(', ', $financialImpacts);
         $output['disciplines'] = implode(', ', array_unique($disciplines));
 
         foreach ($persons as $role => $p) {
@@ -285,10 +288,11 @@ class ProjectToArrayFormatter implements IProjectFormater
                 'signed' => "Signatures",
                 'paymentsDone' => "Versements effectués",
                 'paymentsExpected' => "Versements prévus",
-                'paymentsGap' => "écarts de payments",
+                'paymentsGap' => "écarts de paiements",
                 'paymentsExplain' => "Info versement",
                 'managementsFeesHoster' => "Part hébergeur",
                 'managementsFees' => "Frais de gestion",
+                'financialImpacts' => "Impact financier",
                 'disciplines' => "Disciplines",
             ];
 
