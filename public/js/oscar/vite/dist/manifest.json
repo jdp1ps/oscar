@@ -1,6 +1,6 @@
 {
   "ActivityDocument.css": {
-    "file": "assets/ActivityDocument-7738ec7a.css",
+    "file": "assets/ActivityDocument-3b2e6cd7.css",
     "src": "ActivityDocument.css"
   },
   "DocumentsList.css": {
@@ -8,14 +8,25 @@
     "src": "DocumentsList.css"
   },
   "EntityWithRole.css": {
-    "file": "assets/EntityWithRole-4440939e.css",
+    "file": "assets/EntityWithRole-c4353636.css",
     "src": "EntityWithRole.css"
+  },
+  "Loader.css": {
+    "file": "assets/Loader-ee83f9da.css",
+    "src": "Loader.css"
   },
   "_vendor.js": {
     "file": "vendor.js"
   },
   "_vendor10.js": {
     "file": "vendor10.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor6.js"
+    ]
+  },
+  "_vendor11.js": {
+    "file": "vendor11.js",
     "imports": [
       "_vendor.js",
       "_vendor6.js"
@@ -28,7 +39,7 @@
     "file": "vendor2.js",
     "imports": [
       "_vendor.js",
-      "_vendor8.js",
+      "_vendor9.js",
       "_vendor6.js"
     ]
   },
@@ -37,26 +48,28 @@
   },
   "_vendor4.js": {
     "css": [
-      "assets/ActivityDocument-7738ec7a.css"
+      "assets/ActivityDocument-3b2e6cd7.css"
     ],
     "file": "vendor4.js",
     "imports": [
       "_vendor.js",
-      "_vendor8.js",
+      "_vendor9.js",
       "_vendor2.js",
+      "_vendor8.js",
       "_vendor6.js"
     ]
   },
   "_vendor5.js": {
     "css": [
-      "assets/EntityWithRole-4440939e.css"
+      "assets/EntityWithRole-c4353636.css"
     ],
     "file": "vendor5.js",
     "imports": [
       "_vendor.js",
+      "_vendor9.js",
       "_vendor8.js",
-      "_vendor6.js",
-      "_vendor9.js"
+      "_vendor10.js",
+      "_vendor6.js"
     ]
   },
   "_vendor6.js": {
@@ -70,6 +83,9 @@
     ]
   },
   "_vendor8.js": {
+    "css": [
+      "assets/Loader-ee83f9da.css"
+    ],
     "file": "vendor8.js",
     "imports": [
       "_vendor.js",
@@ -84,14 +100,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-c09e42e1.css",
+    "file": "assets/Activity-4dc1d43e.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-c09e42e1.css"
+      "assets/Activity-4dc1d43e.css"
     ],
-    "file": "assets/activity-78f2fa10.js",
+    "file": "assets/activity-fa850445.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -101,19 +117,21 @@
       "_vendor6.js",
       "_vendor7.js",
       "_vendor8.js",
-      "_vendor9.js"
+      "_vendor9.js",
+      "_vendor10.js"
     ],
     "isEntry": true,
     "src": "src/Activity.js"
   },
   "src/ActivityDocuments.js": {
-    "file": "assets/activitydocuments-63b39f06.js",
+    "file": "assets/activitydocuments-ac958241.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
       "_vendor4.js",
-      "_vendor8.js",
-      "_vendor6.js"
+      "_vendor9.js",
+      "_vendor6.js",
+      "_vendor8.js"
     ],
     "isEntry": true,
     "src": "src/ActivityDocuments.js"
@@ -158,10 +176,10 @@
     "src": "src/AdminRoleOrganization.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-6b482c04.js",
+    "file": "assets/admintypedocument-b9774a89.js",
     "imports": [
       "_vendor.js",
-      "_vendor10.js",
+      "_vendor11.js",
       "_vendor6.js"
     ],
     "isEntry": true,
@@ -184,47 +202,49 @@
     "src": "src/DeclarersList.js"
   },
   "src/DocumentsIndex.js": {
-    "file": "assets/documentsindex-f0feaca6.js",
+    "file": "assets/documentsindex-49ae187d.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
       "_vendor6.js",
-      "_vendor8.js"
+      "_vendor9.js"
     ],
     "isEntry": true,
     "src": "src/DocumentsIndex.js"
   },
   "src/DocumentsObserved.js": {
-    "file": "assets/documentsobserved-8cb78ae8.js",
+    "file": "assets/documentsobserved-68457a0a.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
       "_vendor6.js",
-      "_vendor8.js"
+      "_vendor9.js"
     ],
     "isEntry": true,
     "src": "src/DocumentsObserved.js"
   },
   "src/EntityWithRoleOrganizations.js": {
-    "file": "assets/organizations_roled-304e325b.js",
+    "file": "assets/organizations_roled-dcff0c77.js",
     "imports": [
       "_vendor.js",
       "_vendor5.js",
-      "_vendor8.js",
+      "_vendor9.js",
       "_vendor6.js",
-      "_vendor9.js"
+      "_vendor8.js",
+      "_vendor10.js"
     ],
     "isEntry": true,
     "src": "src/EntityWithRoleOrganizations.js"
   },
   "src/EntityWithRolePersons.js": {
-    "file": "assets/persons_roled-c0b07d0a.js",
+    "file": "assets/persons_roled-9081f493.js",
     "imports": [
       "_vendor.js",
       "_vendor5.js",
-      "_vendor8.js",
+      "_vendor9.js",
       "_vendor6.js",
-      "_vendor9.js"
+      "_vendor8.js",
+      "_vendor10.js"
     ],
     "isEntry": true,
     "src": "src/EntityWithRolePersons.js"
@@ -253,11 +273,11 @@
     "css": [
       "assets/OrganizationSubOrganizations-b532b187.css"
     ],
-    "file": "assets/organizationsuborganizations-4c5e22e0.js",
+    "file": "assets/organizationsuborganizations-196668e2.js",
     "imports": [
       "_vendor.js",
-      "_vendor9.js",
       "_vendor10.js",
+      "_vendor11.js",
       "_vendor6.js"
     ],
     "isEntry": true,

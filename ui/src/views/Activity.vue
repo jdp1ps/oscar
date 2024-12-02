@@ -1,6 +1,6 @@
 <template>
 
-  <loader text="Chargement de l'activité" :visible="loading" />
+  <loader text="Chargement de l'activité" :visible="loading"/>
 
   <modal title="Debugger" title-icon="icon-bug" :visible="debug_displayed" @modal-cancel="debug_displayed = false">
     <pre>{{ debug_content }}</pre>
@@ -164,7 +164,7 @@
     </nav>
     <header class="jumbotron activity-header oscar-header" style="margin-top: 60px">
       <div class="row line-bottom">
-        <div class="col-md-10">
+        <div class="col-md-9">
           <h4>
             <i class="icon-cubes"></i> Projet :
             <span :class="activity.project.url_show ? 'link' : ''" @click="handlerShowProject()"
@@ -196,20 +196,20 @@
             <span><i class="icon-cube"></i> {{ activity.infos.label }}</span>
           </h1>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <div class="budget" v-if="activity.budget">
             <em>Montant</em>
             <strong>{{ $filters.money(activity.budget.montant) }} {{ activity.budget.currency.symbol }}</strong>
             <div class="details">
               <small>
                 Frais de gestion :
-                <b>{{ $filters.money(activity.budget.fraisDeGestion) }} €</b>
+                <b>{{ activity.budget.fraisDeGestion }}</b>
               </small>
 
               <small>
                 Part unité :
                 <b v-if="activity.budget.fraisDeGestionPartUnite">
-                  {{ $filters.money(activity.budget.fraisDeGestionPartUnite) }} {{ activity.budget.currency.symbol }}
+                  {{ activity.budget.fraisDeGestionPartUnite }}
                 </b>
                 <i v-else>
                   ~
@@ -218,8 +218,16 @@
 
               <small>
                 Part hébergeur :
-                <b>{{ $filters.money(activity.budget.fraisDeGestionPartHebergeur) }} {{ activity.budget.currency.symbol
-                  }}</b>
+                <b>
+                  {{ activity.budget.fraisDeGestionPartHebergeur }}
+                </b>
+              </small>
+
+              <small>
+                Part Gestionnaire :
+                <b>
+                  {{ activity.budget.fraisDeGestionPartGestionnaire }}
+                </b>
               </small>
 
               <small>
@@ -357,7 +365,8 @@
               <h3>Déclarants</h3>
               <div v-if="activity.timesheets.declarers.length">
                 <div class="alert alert-info">
-                  <i class="icon-info-outline"></i> Pour nommer un déclarant, affectez un membre de l'activité à un des lots de travail.
+                  <i class="icon-info-outline"></i> Pour nommer un déclarant, affectez un membre de l'activité à un des
+                  lots de travail.
                 </div>
                 <a :href="d.url_details" v-for="d in activity.timesheets.declarers" class="btn"
                    :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
@@ -375,7 +384,8 @@
                 <div class="col-md-4">
                   <h4><i class="icon-cube"></i>Validation PROJET</h4>
                   <section class="persons" v-if="activity.timesheets.validators.prj.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.prj" class="cartouche primary" />
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.prj"
+                                     class="cartouche primary"/>
                   </section>
                   <div class="alert alert-warning" v-else>
                     Aucun validateur désigné pour cette étape
@@ -384,7 +394,8 @@
                 <div class="col-md-4">
                   <h4><i class="icon-beaker"></i>Validation SCIENTIFIQUE</h4>
                   <section class="persons" v-if="activity.timesheets.validators.sci.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.sci" class="cartouche primary"/>
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.sci"
+                                     class="cartouche primary"/>
                   </section>
                   <div class="alert alert-warning" v-else>
                     Aucun validateur désigné pour cette étape
@@ -393,7 +404,8 @@
                 <div class="col-md-4">
                   <h4><i class="icon-hammer"></i>Validation ADMINISTRATIVE</h4>
                   <section class="persons" v-if="activity.timesheets.validators.adm.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.adm" class="cartouche primary"/>
+                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.adm"
+                                     class="cartouche primary"/>
                   </section>
                   <div class="alert alert-warning" v-else>
                     Aucun validateur désigné pour cette étape
@@ -454,7 +466,7 @@
           <h2>
             <i class="icon-cog"></i>
             Technique</h2>
-            <ActivityLogs :url="activity.administration.url_logs" @error="handlerError"/>
+          <ActivityLogs :url="activity.administration.url_logs" @error="handlerError"/>
         </div>
       </div>
     </div>
@@ -538,16 +550,16 @@ export default {
   },
 
   methods: {
-    handlerDebugHide(){
+    handlerDebugHide() {
       this.debug_displayed = false;
     },
 
-    handlerDebugShow(content){
+    handlerDebugShow(content) {
       this.debug_content = JSON.parse(JSON.stringify(content));
       this.debug_displayed = true;
     },
 
-    handlerError(err){
+    handlerError(err) {
       this.error = err.message;
     },
 
@@ -609,7 +621,7 @@ export default {
         this.activity = response.data.activity
       }, error => {
         this.handlerError(AxiosMessage.manageErrorResponse(error));
-      }).finally( f => {
+      }).finally(f => {
         this.loading = false;
       })
     },
@@ -660,6 +672,7 @@ export default {
   position: relative;
   padding-bottom: 4em;
 }
+
 .section-infos {
   margin-top: 1em;
   scroll-margin-top: 120px;

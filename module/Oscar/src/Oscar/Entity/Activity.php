@@ -221,6 +221,12 @@ class Activity implements ResourceInterface
      */
     private $fraisDeGestionPartUnite;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $fraisDeGestionPartGestionnaire;
+
 
     /**
      * @var string
@@ -611,28 +617,7 @@ class Activity implements ResourceInterface
 
     public function getFraisDeGestionDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
     {
-        $percent = '';
-        $currency = '';
-        $data = '';
-
-        if ($diplayCurrency) {
-            $currency = '' . $this->getCurrency()->getSymbol();
-        }
-
-        if (($partH = $this->getFraisDeGestion())) {
-            if (strpos($partH, '%')) {
-                if ($displayPercentInfo) {
-                    $percent = sprintf(' (%s)', $partH);
-                }
-                $data = $this->getAmount() / 100 * floatval($partH);
-            }
-            else {
-                $data = $partH;
-            }
-
-            return number_format($data, 2, ',', '') . $currency . $percent;
-        }
-        return $this->fraisDeGestion;
+        return $this->getFraisDisplay($this->getFraisDeGestion(), $diplayCurrency, $displayPercentInfo);
     }
 
     /**
@@ -660,8 +645,23 @@ class Activity implements ResourceInterface
         return $this->fraisDeGestionPartUnite;
     }
 
-    public function getFraisDeGestionPartUniteDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
+    public function getFraisDeGestionPartGestionnaire(): ?string
     {
+        return $this->fraisDeGestionPartGestionnaire;
+    }
+
+    public function setFraisDeGestionPartGestionnaire(?string $fraisDeGestionPartGestionnaire): self
+    {
+        $this->fraisDeGestionPartGestionnaire = $fraisDeGestionPartGestionnaire;
+        return $this;
+    }
+
+
+    protected function getFraisDisplay(
+        ?string $value,
+        bool $diplayCurrency = true,
+        bool $displayPercentInfo = true
+    ): string {
         $percent = '';
         $currency = '';
         $data = '';
@@ -670,47 +670,42 @@ class Activity implements ResourceInterface
             $currency = '' . $this->getCurrency()->getSymbol();
         }
 
-        if (($partH = $this->getFraisDeGestionPartUnite())) {
-            if (strpos($partH, '%')) {
+        if (is_string($value)) {
+            if (strpos($value, '%')) {
                 if ($displayPercentInfo) {
-                    $percent = sprintf(' (%s)', $partH);
+                    $percent = sprintf(' (%s)', $value);
                 }
-                $data = $this->getAmount() / 100 * floatval($partH);
+                $data = $this->getAmount() / 100 * floatval($value);
             }
             else {
-                $data = $partH;
+                $data = floatval($value);
             }
 
-            return number_format($data, 2, ',', '') . $currency . $percent;
+            $out = number_format($data, 2, ',', '');
         }
-        return $this->fraisDeGestionPartUnite;
+        else {
+            $out = "0,00";
+        }
+
+        return $out . $currency . $percent;
+    }
+
+    public function getFraisDeGestionPartUniteDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
+    {
+        return $this->getFraisDisplay($this->getFraisDeGestionPartUnite());
     }
 
 
     public function getFraisDeGestionPartHebergeurDisplay(bool $diplayCurrency = true, bool $displayPercentInfo = true)
     {
-        $percent = '';
-        $currency = '';
-        $data = '';
+        return $this->getFraisDisplay($this->getFraisDeGestionPartHebergeur());
+    }
 
-        if ($diplayCurrency) {
-            $currency = '' . $this->getCurrency()->getSymbol();
-        }
-
-        if (($partH = $this->getFraisDeGestionPartHebergeur())) {
-            if (strpos($partH, '%')) {
-                if ($displayPercentInfo) {
-                    $percent = sprintf(' (%s)', $partH);
-                }
-                $data = $this->getAmount() / 100 * floatval($partH);
-            }
-            else {
-                $data = $partH;
-            }
-
-            return number_format($data, 2, ',', '') . $currency . $percent;
-        }
-        return $this->fraisDeGestionPartHebergeur;
+    public function getFraisDeGestionPartGestionnaireDisplay(
+        bool $diplayCurrency = true,
+        bool $displayPercentInfo = true
+    ) {
+        return $this->getFraisDisplay($this->getFraisDeGestionPartGestionnaire());
     }
 
     /**
@@ -2026,15 +2021,17 @@ class Activity implements ResourceInterface
         return $this->documents;
     }
 
-    public function getDocumentsGrouped() :array {
+    public function getDocumentsGrouped(): array
+    {
         $out = [];
         /** @var ContractDocument $document */
         foreach ($this->getDocuments() as $document) {
             $key = $document->getFileName();
-            if( !array_key_exists($key, $out) ){
+            if (!array_key_exists($key, $out)) {
                 $out[$key] = $document;
-            } else {
-                if( $out[$key]->getVersion() < $document->getVersion() ) {
+            }
+            else {
+                if ($out[$key]->getVersion() < $document->getVersion()) {
                     $out[$key] = $document;
                 }
             }
@@ -2489,39 +2486,42 @@ class Activity implements ResourceInterface
     public function csv($dateFormat = 'Y-m-d')
     {
         return array(
-            'ID'                                => $this->getId(),
-            'ID Projet'                         => $this->getProject() ? $this->getProject()->getId() : 'N.D',
-            'Acronyme'                          => $this->getAcronym(),
-            'Projet'                            => $this->getProject() ? $this->getProject()->getLabel() : '',
-            'Intitulé'                          => $this->getLabel(),
-            'N°Financier'                       => $this->getCodeEOTP(),
-            'Date du N°Financier'               => $this->getDateOpened() ? $this->getDateOpened()->format(
+            'ID'                                   => $this->getId(),
+            'ID Projet'                            => $this->getProject() ? $this->getProject()->getId() : 'N.D',
+            'Acronyme'                             => $this->getAcronym(),
+            'Projet'                               => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'Intitulé'                             => $this->getLabel(),
+            'N°Financier'                          => $this->getCodeEOTP(),
+            'Date du N°Financier'                  => $this->getDateOpened() ? $this->getDateOpened()->format(
                 $dateFormat
             ) : '',
-            'Montant'                           => number_format($this->getAmount(), 2, ',', ''),
+            'Montant'                              => number_format($this->getAmount(), 2, ',', ''),
             //.$this->getCurrency()->getSymbol(),
-            'numéro SAIC'                       => $this->getCentaureNumConvention(),
-            'numéro oscar'                      => $this->getOscarNum(),
-            'Type'                              => $this->getActivityType() ? (string)$this->getActivityType() : '',
-            'Statut'                            => Activity::getStatusLabel(),
-            'Début'                             => $this->getDateStart() ? $this->getDateStart()->format(
+            'numéro SAIC'                          => $this->getCentaureNumConvention(),
+            'numéro oscar'                         => $this->getOscarNum(),
+            'Type'                                 => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'Statut'                               => Activity::getStatusLabel(),
+            'Début'                                => $this->getDateStart() ? $this->getDateStart()->format(
                 $dateFormat
             ) : '',
-            'Fin'                               => $this->getDateEnd() ? $this->getDateEnd()->format($dateFormat) : '',
-            'Date de signature'                 => $this->getDateSigned() ? $this->getDateSigned()->format(
+            'Fin'                                  => $this->getDateEnd() ? $this->getDateEnd()->format(
                 $dateFormat
             ) : '',
-            'versement effectué'                => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
-            'versement prévu'                   => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
-            'écart de paiement'                 => number_format($this->getEcartPaiement(), 2, ',', ''),
-            'justificatif écart de paiement'    => $this->getJustificatifEcartPaiement(),
-            'Frais de gestion'                  => $this->getFraisDeGestionDisplay(),
-            'Frais de gestion (part hébergeur)' => $this->getFraisDeGestionPartHebergeurDisplay(true, false),
-            'Frais de gestion (part unité)'     => $this->getFraisDeGestionPartUniteDisplay(true, false),
-            'incidence financière'              => $this->getIncidenceFinanciere(),
-            'Assiette subventionnable'          => $this->getAssietteSubventionnable(),
-            'Note'                              => $this->getNoteFinanciere(),
-            'Disciplines'                       => $this->getDisciplines() ? implode(
+            'Date de signature'                    => $this->getDateSigned() ? $this->getDateSigned()->format(
+                $dateFormat
+            ) : '',
+            'versement effectué'                   => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
+            'versement prévu'                      => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
+            'écart de paiement'                    => number_format($this->getEcartPaiement(), 2, ',', ''),
+            'justificatif écart de paiement'       => $this->getJustificatifEcartPaiement(),
+            'Frais de gestion'                     => $this->getFraisDeGestionDisplay(),
+            'Frais de gestion (part hébergeur)'    => $this->getFraisDeGestionPartHebergeurDisplay(true, false),
+            'Frais de gestion (part unité)'        => $this->getFraisDeGestionPartUniteDisplay(true, false),
+            'Frais de gestion (part gestionnaire)' => $this->getFraisDeGestionPartGestionnaireDisplay(true, false),
+            'incidence financière'                 => $this->getIncidenceFinanciere(),
+            'Assiette subventionnable'             => $this->getAssietteSubventionnable(),
+            'Note'                                 => $this->getNoteFinanciere(),
+            'Disciplines'                          => $this->getDisciplines() ? implode(
                 ", ",
                 $this->getDisciplinesArray()
             ) : ""
@@ -2563,6 +2563,7 @@ class Activity implements ResourceInterface
             'Frais de gestion',
             'Frais de gestion (part hébergeur)',
             'Frais de gestion (part unité)',
+            'Frais de gestion (part gestionnaire)',
             'incidence financière',
             'Assiette subventionnable',
             'Note',
@@ -2742,12 +2743,12 @@ class Activity implements ResourceInterface
     public function toJson()
     {
         return [
-            'id'    => $this->getId(),
-            'text'  => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
-            'num'   => $this->getOscarNum(),
-            'label' => $this->getLabel(),
+            'id'              => $this->getId(),
+            'text'            => sprintf("[%s] %s", $this->getOscarNum(), $this->getLabel()),
+            'num'             => $this->getOscarNum(),
+            'label'           => $this->getLabel(),
             'project_acronym' => $this->getProject() ? $this->getProject()->getAcronym() : "",
-            'project_label' => $this->getProject() ? $this->getProject()->getLabel() : "",
+            'project_label'   => $this->getProject() ? $this->getProject()->getLabel() : "",
         ];
     }
 

@@ -9,7 +9,7 @@ ${COMPOSER} install
 
 echo "############################################### MODEL UPDATE"
 ## Mise à jour du modèle
-php vendor/bin/doctrine-module orm:schema-tool:update --force >> $LOG
+php vendor/bin/doctrine-module orm:schema-tool:update --force
 
 
 echo "############################################### CHECK PRIVILEGES"

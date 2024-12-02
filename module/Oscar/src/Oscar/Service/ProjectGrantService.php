@@ -1382,14 +1382,17 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             $datas['urls']['duplicate'] = $urlPlugin->fromRoute('contract/duplicate', ['id' => $activity->getId()]);
         }
         if ($oscarUserContext->hasPrivileges(\Oscar\Provider\Privileges::ACTIVITY_CHANGE_PROJECT, $activity)) {
-            $datas['urls']['change_project'] = $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]);
+            $datas['urls']['change_project'] = $urlPlugin->fromRoute(
+                'contract/moveToProject',
+                ['id' => $activity->getId()]
+            );
             $datas['urls']['new_project'] = $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId();
         }
 
         //////////////////////////////////////////////////////////////////// DOCUMENTS
         $datas['documents'] = [
             'readable' => $oscarUserContext->getAccessActivityDocument($activity),
-            'url' => $urlPlugin->fromRoute('contractdocument/activity', ['activity_id' => $activity->getId()]),
+            'url'      => $urlPlugin->fromRoute('contractdocument/activity', ['activity_id' => $activity->getId()]),
         ];
 
         //////////////////////////////////////////////////////////////////// PROJET
@@ -1418,13 +1421,14 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         // BUDGET
         if (!$checkPrivileges || $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $budget = [
-                'montant'                     => $activity->getAmount(),
-                'currency'                    => $activity->getCurrency()->toJson(),
-                'fraisDeGestion'              => $activity->getFraisDeGestionDisplay(),
-                'fraisDeGestionPartHebergeur' => $activity->getFraisDeGestionPartHebergeurDisplay(),
-                'fraisDeGestionPartUnite'     => $activity->getFraisDeGestionPartUniteDisplay(),
-                'tva'                         => (string)$activity->getTva(),
-                'assietteSubventionnable'     => $activity->getAssietteSubventionnable(),
+                'montant'                        => $activity->getAmount(),
+                'currency'                       => $activity->getCurrency()->toJson(),
+                'fraisDeGestion'                 => $activity->getFraisDeGestionDisplay(),
+                'fraisDeGestionPartHebergeur'    => $activity->getFraisDeGestionPartHebergeurDisplay(),
+                'fraisDeGestionPartUnite'        => $activity->getFraisDeGestionPartUniteDisplay(),
+                'fraisDeGestionPartGestionnaire' => $activity->getFraisDeGestionPartGestionnaireDisplay(),
+                'tva'                            => (string)$activity->getTva(),
+                'assietteSubventionnable'        => $activity->getAssietteSubventionnable(),
             ];
 
             $datas['budget'] = $budget;
@@ -1501,24 +1505,25 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
 
         // --- Feuilles de temps de l'activité
         $datas['timesheets'] = [
-            'readable' => false,
-            'editable' => false,
-            'enabled' => false,
-            "declarers" => [],
+            'readable'   => false,
+            'editable'   => false,
+            'enabled'    => false,
+            "declarers"  => [],
             "validators" => [
                 "prj" => [],
                 "sci" => [],
                 "adm" => [],
             ],
-            'datas'    => []
+            'datas'      => []
         ];
         if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity)) {
             $datas['timesheets']['readable'] = true;
 
-            if( !$activity->getAcronym() ){
+            if (!$activity->getAcronym()) {
                 $datas['timesheets']['enabled'] = false;
                 $datas['timesheets']['enabled_details'] = "L'activité doit appartenir à un projet pour activer les feuilles de temps";
-            } else {
+            }
+            else {
                 $datas['timesheets']['enabled'] = true;
             }
             // écran "bilan"
@@ -1528,19 +1533,20 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             );
 
             $datas['timesheets']['url_synthesis'] = $urlPlugin->fromRoute(
-                'timesheet/synthesis',
-                ['id' => $activity->getId()]
-            ) . '?activity_id=' . $activity->getId();
+                    'timesheet/synthesis',
+                    ['id' => $activity->getId()]
+                ) . '?activity_id=' . $activity->getId();
 
             // Récupération des déclarants
             foreach ($activity->getPersonsDeep() as $personActivity) {
                 /** @var Person $person */
                 $person = $personActivity->getPerson();
-                if( $activity->hasDeclarant($person) ){
+                if ($activity->hasDeclarant($person)) {
                     $datas['timesheets']['declarers'][] = [
-                        'label' => $person->getDisplayName(),
+                        'label'          => $person->getDisplayName(),
                         'hasDeclaration' => $person->hasDeclarationIn($activity),
-                        'url_details' => $urlPlugin->fromRoute('timesheet/resume').'?person_id=' . $person->getId(),
+                        'url_details'    => $urlPlugin->fromRoute('timesheet/resume') . '?person_id=' . $person->getId(
+                            ),
                     ];
                 }
             }
@@ -1561,7 +1567,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['spents'] = [
             'readable' => false,
             'editable' => false,
-            'url'    => null
+            'url'      => null
         ];
         if ($oscarUserContext->hasPrivileges(Privileges::DEPENSE_SHOW, $activity)) {
             $datas['spents']['readable'] = true;
@@ -1593,7 +1599,10 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         ];
         if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity)) {
             $datas['payments']['readable'] = true;
-            $datas['payments']['editable'] = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity);
+            $datas['payments']['editable'] = $oscarUserContext->hasPrivileges(
+                Privileges::ACTIVITY_PAYMENT_MANAGE,
+                $activity
+            );
             $datas['payments']['url'] = $urlPlugin->fromRoute(
                 'activitypayment',
                 ['idactivity' => $activity->getId()]

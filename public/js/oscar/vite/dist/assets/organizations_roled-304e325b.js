@@ -1,1 +1,0 @@
-import{z as o}from"../vendor.js";import{E as e}from"../vendor5.js";import"../vendor8.js";import"../vendor6.js";import"../vendor9.js";let t=document.querySelector("#organizations_roled");const r=o(e,{url:t.dataset.url,title:t.dataset.title});r.mount("#organizations_roled");
