@@ -108,6 +108,29 @@ return array(
 );
 ```
 
+### Usurpation
+
+L'usurpation est une mécanique qui permet à un utilisateur d'endosser l'identité d'un autre utilisateur pour voir l'application avec "ces yeux". C'est pratique dans le cadre des tests ou pour assister les utilisateurs.
+
+Pour l'activer, vous devez ajouter les identifiants des utilisateurs autorisés à utiliser l'usurpation dans le fichier `config/autoload/unicaen-auth.local.php`
+
+```php
+<?php
+//config/autoload/unicaen-auth.local.php
+$settings = array(
+    
+    // ...
+    
+    'usurpation_allowed_usernames' => array('bouvry'),
+);
+
+return array(
+    'unicaen-auth' => $settings,
+);
+```
+
+> L'identifiant renseigné dans le tableau `usurpation_allowed_usernames` correspond à l'identifiant de connexion de l'usurpateur
+
 ### LDAP Non-Supann
 
 Pour les LDAP non-spann, il est possible que le champ utilisé pour l'autentification soit différent de **supannaliaslogin**, généralement le champ uid. Si c'est la cas, il faudra modifier le fichier **unicaen-app.local.php** : 
