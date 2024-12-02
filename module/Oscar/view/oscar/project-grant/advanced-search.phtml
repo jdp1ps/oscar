@@ -63,14 +63,13 @@
             {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
 
-            <select class="select2 organizations changer val1" multiple>
+            <select class="select2organizations changer val1" multiple>
                 <?php foreach($filterOrganizations as $id=>$label): ?>
                 <option value="<?= $id ?>" selected><?= $label ?></option>
                 <?php endforeach; ?>
             </select>
             <nav>
                 <a href="#" class="delete">
-                    <i class="icon-cancel-outline"></i>
                     <i class="icon-cancel-outline"></i>
                 </a>
             </nav>
