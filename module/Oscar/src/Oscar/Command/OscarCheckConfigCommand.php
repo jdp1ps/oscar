@@ -455,6 +455,29 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             );
             return self::FAILURE;
         }
+
+        $io->section(" ### LDAP : ");
+
+        try {
+            $ldapConfig = $config->getConfiguration('unicaen-app.ldap');
+
+            $options = [];
+            foreach ($ldapConfig['connection'] as $name => $connection) {
+                $options[$name] = $connection['params'];
+            }
+
+            $ldap = new \Laminas\Ldap\Ldap($options['default']);
+            $ldap->searchEntries(sprintf($options['default']['accountFilterFormat'], "test"));
+
+            $io->writeln("Connexion au serveur LDAP <green>OK</green>\n");
+
+        } catch (\Exception $e) {
+            $io->error(
+                "LDAP FAIL, Impossible de se connecter au serveur LDAP : \n Erreur : " . $e
+            );
+            return self::FAILURE;
+        }
+
         return self::SUCCESS;
     }
 

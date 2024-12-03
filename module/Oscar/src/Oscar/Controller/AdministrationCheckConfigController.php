@@ -294,6 +294,21 @@ class AdministrationCheckConfigController extends AbstractOscarController
             $worker_error = sprintf("GEARMAN FAIL, Impossible de se connecter au serveur Gearman : %s", $e->getMessage());
         }
 
+        $ldap_error = NULL;
+        try {
+            $ldapConfig = $config->getConfiguration('unicaen-app.ldap');
+
+            $options = [];
+            foreach ($ldapConfig['connection'] as $name => $connection) {
+                $options[$name] = $connection['params'];
+            }
+
+            $ldap = new \Laminas\Ldap\Ldap($options['default']);
+            $ldap->searchEntries(sprintf($options['default']['accountFilterFormat'], "test"));
+
+        } catch (\Exception $e) {
+            $ldap_error = "LDAP FAIL, Impossible de se connecter au serveur LDAP : \n Erreur : " . $e;
+        }
 
         return [
             'build' => \Oscar\OscarVersion::getBuild(),
@@ -328,7 +343,8 @@ class AdministrationCheckConfigController extends AbstractOscarController
             'connectors_persons' => $connectors_persons,
             'worker_error' => $worker_error,
             'worker_gearman_host' => $worker_gearman_host,
-            'worker_response' => $worker_response
+            'worker_response' => $worker_response,
+            'ldap_error' => $ldap_error
         ];
     }
 

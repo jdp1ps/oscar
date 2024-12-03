@@ -184,4 +184,14 @@
         </article>
     <?php endif; ?>
 
+    <h3> ### LDAP : </h3>
+    <ul>
+        <li>Connexion au serveur LDAP : <?php if(!$ldap_error): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;">KO</b><?php endif; ?></li>
+    </ul>
+    <?php if($ldap_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $ldap_error ?>
+        </article>
+    <?php endif; ?>
+
 </section>
