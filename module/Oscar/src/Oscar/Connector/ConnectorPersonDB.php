@@ -356,7 +356,7 @@ class ConnectorPersonDB extends AbstractConnector
         if (!is_array($rows)) {
             throw new \Exception("Le connecteur PersonDB n'a pas retourné un tableau de donnée");
         }
-        $this->log(" (" . \count($rows) . " personnes trouvées en DB) ");
-        return true;
+
+        return \count($rows);
     }
 }

@@ -540,6 +540,27 @@
                 <br>$ <code>php bin/oscar.php activity:search-build</code>
             </p>
         </article>
+        <article class="card xs">
+            <h3 class="card-title">
+                <strong>
+                    <i class="icon-stethoscope"></i>
+                    Vérification de la configuration</strong>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_MENU_ADMIN)): ?>
+                    <a href="<?= $this->url('administration/check_config') ?>" class="right">
+                        <i class="icon-cog"></i>
+                        <?= $this->translate("Afficher") ?>
+                    </a>
+                <?php
+                else: ?>
+                    <em class="right"><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php
+                endif; ?>
+            </h3>
+            <p>
+                Réalise le diagnostic de la configuration et affiche le résultat.
+            </p>
+        </article>
 
         <h2>
             <i class="icon-puzzle"></i>
