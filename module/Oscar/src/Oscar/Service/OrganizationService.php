@@ -704,6 +704,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []): UnicaenDoctrinePaginator
     {
         $qb = $this->getSearchQuery($search, $filter);
+
+        //die($qb->getDQL());
         return new UnicaenDoctrinePaginator($qb, $page);
     }
 
@@ -807,36 +809,73 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getSearchQuery($search, $filter)
     {
-        $this->getLoggerService()->debug(__METHOD__);
         $qb = $this->getBaseQuery();
 
         if ($search != "") {
             $ids = $this->search($search, true);
 
-            $sortSize = 25;
 
             // ORDER BY de LREM
             // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
-            if (count($ids) > 1) {
-                $selectHidden = "(CASE ";
-                $i = 0;
-                foreach ($ids as $id) {
-                    $selectHidden .= " WHEN o.id = $id THEN $i ";
-                    $i++;
-                    if ($i > $sortSize) {
-                        break;
+            if (count($ids) > 1 ) {
+                if( $filter['sort'] == 'hit' ){
+                    $sortSize = 25; // On ne trie que les 25 premiers
+                    $this->getLoggerService()->debug("SORT BY HIT (elastic IDS)");
+
+                    $selectHidden = "(CASE ";
+                    $i = 0;
+                    foreach ($ids as $id) {
+                        $selectHidden .= " WHEN o.id = $id THEN $i ";
+                        $i++;
+                        if ($i > $sortSize) {
+                            break;
+                        }
                     }
+                    $selectHidden .= " ELSE $i END) AS HIDDEN ORD";
+                    $qb->addSelect($selectHidden);
+                    $qb->orderBy('ORD', 'ASC');
                 }
-                $selectHidden .= " ELSE $i END) AS HIDDEN ORD";
-                $qb->addSelect($selectHidden);
-                $qb->orderBy('ORD', 'ASC');
+                $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
+            }
+        }
+
+        if( $filter['sort'] != 'hit' ){
+            $field = $filter['sort'];
+            $direction = $filter['direction'];
+            $this->getLoggerService()->debug("TRIE $field/$direction");
+            $qb->addSelect("CASE WHEN o.$field IS NULL THEN 0 ELSE 1 END as HIDDEN null_value");
+            $qb->addOrderBy('null_value', 'DESC');
+            if( $field != 'dateUpdated' && $field != 'dateEnd' && $field != 'dateCreated'){
+                $qb->addSelect("CASE WHEN o.$field =  '' THEN 0 ELSE 1 END as HIDDEN zero_value");
+                $qb->addOrderBy('zero_value', 'DESC');
             }
 
-            $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
+            switch ($filter['sort']) {
+                case 'shortName':
+                    $qb->addOrderBy('o.shortName', $direction);
+                    break;
+                case 'fullName':
+                    $qb->addOrderBy('o.fullName', $direction);
+                    break;
+                case 'code':
+                    $qb->addOrderBy('o.code', $direction);
+                    break;
+                case 'dateUpdated':
+                    $qb->addOrderBy('o.dateUpdated', $direction);
+                    break;
+                case 'dateEnd':
+                    $qb->addOrderBy('o.dateEnd', $direction);
+                    break;
+                case 'dateCreated':
+                    $qb->addOrderBy('o.dateCreated', $direction);
+                    break;
+            }
+
+
         }
-        else {
-            $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
-        }
+//        else {
+//            $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');
+//        }
 
         //
 
@@ -891,6 +930,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             $qb->andWhere('o.id IN (:ids)')
                 ->setParameter('ids', $ids);
         }
+        //die($qb->getDQL());
 
         return $qb;
     }

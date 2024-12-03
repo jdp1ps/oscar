@@ -2,6 +2,10 @@
 
 ## 2024
 
+### Décembre
+ - [Up] Critère de tri ajouté à la recherche des organisations.
+ - [Up] La colonne indicence financière a été ajoutée pour les exports des projets.
+
 ### Novembre 2024
  - [Fix] Erreur sur les filtres 'Plusieurs personnes' et 'Plusieurs organisations'
  - [Fix] Erreur avec les commandes lièes aux dépenses (`spent:list`, `spent:infos`, `spent:accounts`)
