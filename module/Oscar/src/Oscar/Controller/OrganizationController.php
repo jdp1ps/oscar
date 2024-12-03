@@ -111,6 +111,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $allow = false;
         $justXHR = true;
 
+
         // On test les accès
         if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ORGANIZATION_SHOW)) {
             $allow = true;
@@ -133,18 +134,47 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $search = $this->params()->fromQuery('q', '');
         $type = $this->params()->fromQuery('t', []);
         $active = $this->params()->fromQuery('active', '');
+        $sort = $this->params()->fromQuery('sort', 'hit');
+        $direction = $this->params()->fromQuery('direction', 'ASC');
         $error = null;
         $organizations = null;
 
-        $filter = [
-            'roles'  => $this->params()->fromQuery('roles', []),
-            'type'   => $type,
-            'active' => $active,
+        $sorting = [
+            'hit'         => 'Pertinence (recherche textuelle)',
+            'shortName'   => 'Nom court',
+            'fullName'    => 'Nom long',
+            'code'        => 'Code',
+            'dateUpdated' => 'Date de mise à jour',
+            'dateEnd'     => 'Date de fermeture',
+            'dateCreated' => 'Date de création',
         ];
+
+        $directions = [
+            'ASC'  => "Croissant",
+            'DESC' => "Décroissant"
+        ];
+
+        // Controle du trie/direction
+        if (!in_array($sort, array_keys($sorting))) {
+            $sort = 'hit';
+        }
+
+        if (!in_array($direction, array_keys($directions))) {
+            $direction = 'ASC';
+        }
+
+        $filter = [
+            'roles'     => $this->params()->fromQuery('roles', []),
+            'type'      => $type,
+            'sort'      => $sort,
+            'active'    => $active,
+            'direction' => $direction,
+        ];
+
 
         $organizations = [];
 
-        if( $justXHR === false && $this->getRequest()->getQuery('action') == 'export-csv' ){
+        if ($justXHR === false && $this->getRequest()->getQuery('action') == 'export-csv') {
             $query = $this->getOrganizationService()->getSearchQuery($search, $filter);
             $organizations = $query->getQuery()->getResult();
             $this->getOrganizationService()->exportCsv($organizations);
@@ -157,7 +187,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $error = _("Expression de recherche incorrecte") . ' : ' . $e->getMessage();
         } catch (NoNodesAvailableException $e) {
             $error = "Le moteur de recherche est introuvable";
-        } catch (\Exception $exception){
+        } catch (\Exception $exception) {
             $this->getLoggerService()->error($exception->getMessage());
             return $this->jsonError("Quelquechose c'est mal passé...");
         }
@@ -179,12 +209,16 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         }
 
         return array(
-            'entities' => $organizations,
-            'error'    => $error,
-            'search'   => $search,
-            'types'    => $this->getOrganizationService()->getOrganizationTypesSelect(),
-            'type'     => $type,
-            'active'   => $active,
+            'entities'   => $organizations,
+            'error'      => $error,
+            'sorting'    => $sorting,
+            'sort'       => $sort,
+            'direction'  => $direction,
+            'directions' => $directions,
+            'search'     => $search,
+            'types'      => $this->getOrganizationService()->getOrganizationTypesSelect(),
+            'type'       => $type,
+            'active'     => $active,
         );
     }
 
@@ -371,7 +405,8 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
                     $subStructures = $this->getOrganizationService()->getSubStructure($organizationId);
                     foreach ($subStructures as &$organization) {
                         $organization['show'] = $this->url()->fromRoute(
-                            'organization/show', ['id' => $organization['id']]
+                            'organization/show',
+                            ['id' => $organization['id']]
                         );
                     }
                     $output['organizations'] = $subStructures;

@@ -45,7 +45,36 @@ $markText = function( $text, $search ){
                 </select>
             </div>
             <div class="col-md-6">
-
+                <label>Trie :</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <select name="sort" class="form-control" onchange="handlerChangeSort" id="sort">
+                            <?php foreach ($sorting as $key=>$label): ?>
+                            <option value="<?= $key ?>" <?= $sort == $key ? 'SELECTED' : '' ?>><?= $label ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="direction">
+                        <select name="direction" class="form-control">
+                            <?php foreach ($directions as $key=>$label): ?>
+                                <option value="<?= $key ?>" <?= $direction == $key ? 'SELECTED' : '' ?>><?= $label ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <script>
+                        document.querySelector('#sort').addEventListener('change', handlerChangeSort);
+                        function handlerChangeSort(e){
+                            console.log("handlerChangeSort");
+                            let isHit = document.querySelector('#sort').value == 'hit';
+                            if( isHit ){
+                                document.querySelector('#direction').style.display = 'none';
+                            } else {
+                                document.querySelector('#direction').style.display = 'block';
+                            }
+                        }
+                        handlerChangeSort();
+                    </script>
+                </div>
             </div>
         </div>
         <h3 class="text-center">
