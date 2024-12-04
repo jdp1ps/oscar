@@ -320,8 +320,6 @@ class ConnectorPersonREST extends AbstractConnector
             throw new \Exception("L'API n'a pas retourné un tableau de donnée");
         }
 
-        echo " (" . \count($personsDatas) . " personnes retournées par l'API) ";
-
-        return true;
+        return  \count($personsDatas);
     }
 }

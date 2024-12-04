@@ -1,0 +1,197 @@
+<section class="container">
+    <h2>Vérification de la configuration</h2>
+
+    <ul>
+        <li>N°Version : <b><?= $build ?></b></li>
+        <li>Configuration : <b><?= $config_path_real ?></b></li>
+        <li>System : <b><?= $uname ?></b></li>
+    </ul>
+
+    <h3>PHP Requirements :</h3>
+
+    <ul>
+        <li>PHP version : <b><?= $php_version ?></b></li>
+        <li>php.ini : <b><?= $php_ini ?></b></li>
+    </ul>
+    <?php if($php_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $php_error ?>
+        </article>
+    <?php endif; ?>
+
+    <h3>Modules :</h3>
+    <table class="table table-condensed table-hover card">
+        <thead>
+            <th>Module PHP</th>
+            <th>Version</th>
+            <th>Statut</th>
+        </thead>
+        <tbody>
+            <?php foreach( $modules_status as $moduleStatus ): ?>
+                <tr>
+                    <td><?= $moduleStatus[0] ?></td>
+                    <td><?= $moduleStatus[1] ?></td>
+                    <td style="color: <?= $moduleStatus[2] == 'Installed' ? 'green' : 'red' ?>;"><?= $moduleStatus[2] ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h3>OSCAR configuration :</h3>
+    <ul>
+        <li>Configuration LOCAL <b><?= $config_path ?></b> : <?php if(!$config_path_error): ?><b style="color: green;">OK</b><?php endif; ?></li>
+    </ul>
+    <?php if($config_path_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $config_path_error ?>
+        </article>
+    <?php endif; ?>
+
+    <ul>
+        <li>Configuration éditable (<b><?= $config_editable_path ?></b>) : <?php if(!$config_editable_path_error): ?><b style="color: green;">OK</b><?php endif; ?></li>
+    </ul>
+    <?php if($config_editable_path_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $config_editable_path_error ?>
+        </article>
+    <?php endif; ?>
+
+    <ul>
+        <li>Fichier de LOG (<b><?= $log_path ?></b>) : <?php if(!$log_path_error): ?><b style="color: green;">OK</b><?php endif; ?></li>
+    </ul>
+    <?php if($log_path_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $log_path_error ?>
+        </article>
+    <?php endif; ?>
+
+    <ul>
+        <li>Accès à la base de données <?= $db_host ?> ... <?php if($db_connected): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;">NON CONNECTÉ</b><?php endif; ?></li>
+    </ul>
+    <?php if($db_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $db_error ?>
+        </article>
+    <?php endif; ?>
+
+    <ul>
+        <li>Modèle de donnée <?php if(!$db_model_error): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;">Erreur</b><?php endif; ?></li>
+    </ul>
+    <?php if($db_model_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <b><?= $db_model_error ?></b>
+            <br />
+            <br />
+            <p>Détail des instructions qui seront réalisées par la commande :</p>
+            <ul>
+                <?php foreach( $db_model_updates as $db_model_update ): ?>
+                    <li><?= $db_model_update ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </article>
+    <?php endif; ?>
+
+    <h3>Emplacements des fichiers/Dossiers :</h3>
+    <ul>
+        <?php foreach( $files as $file ): ?>
+            <li>Path <b><?= $file['path'] ? $file['path'] : $file['file'] ?></b> : <?php if(!$file['error']): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;"><?= $file['error'] ?></b><?php endif; ?></li>
+        <?php endforeach; ?>
+    </ul>
+
+    <h3> ### Configuration du mailer : </h3>
+    <ul>
+        <li> - URL absolue (Utilisée pour forger les liens) : <?= $mailer_url_absolute ?></li>
+        <li> - Transport : <span <?php if ($type_transport_valid): ?>style="color: green;"<?php endif; ?> > <?= $type_transport ?></span></li>
+        <?php if ($type_transport == 'file'): ?><li> - Path <b><?= $mailer_file_path ?></b> : <?php if(!$mailer_error): ?><b style="color: green;">OK</b><?php endif; ?></li><?php endif; ?>
+    </ul>
+    <?php if($mailer_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $mailer_error ?>
+        </article>
+    <?php endif; ?>
+
+    <h3> ### Système d'indexation des activités : </h3>
+    <ul>
+        <?php foreach( $indexer_elastic as $one_indexer_elastic ): ?>
+            <li>Moteur Elastic Search : <b><?= $one_indexer_elastic['url'] ?></b> : <?php if(!$one_indexer_elastic['error']): ?><b style="color: green;">OK (Response 200)</b><?php else: ?><b style="color: red;">ERREUR : <?= $one_indexer_elastic['error'] ?></b><?php endif; ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <?php if($indexer_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $indexer_error ?>
+        </article>
+    <?php endif; ?>
+
+
+    <h3>Configuration du connecteur ORGANIZATION</h3>
+    <?php foreach( $connectors_orga as $connector_orga ): ?>
+        <h4>Configuration : <b><?= $connector_orga['key'] ?></b></h4>
+        <ul>
+            <li>Class : <b><?= $connector_orga['class'] ?></b></li>
+            <li>Fichier de configuration : <b><?= $connector_orga['config'] ?></b></li>
+            <ul>
+                <?php foreach( $connector_orga['params'] as $key => $value ): ?>
+                    <li><?= $key ?> : <b><?= $value ?></b></li>
+                <?php endforeach; ?>
+            </ul>
+            <li>Accès au connecteur : <?php if($connector_orga['count'] !== NULL): ?><b style="color: green;">OK</b> <?= $connector_orga['count'] ?> organisations trouvées<?php else: ?><b style="color: red;">KO</b><?php endif; ?></li></li>
+        </ul>
+        <?php if($connector_orga['error']): ?>
+            <article class="card xsc repport repport-error">
+                <i class="icon-repport"></i> <?= $connector_orga['error'] ?>
+            </article>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php if($connector_orga_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $connector_orga_error ?>
+        </article>
+    <?php endif; ?>
+
+    <h3>Configuration du connecteur PERSON</h3>
+    <?php foreach( $connectors_persons as $connector_persons ): ?>
+        <h4>Configuration : <b><?= $connector_persons['key'] ?></b></h4>
+        <ul>
+            <li>Class : <b><?= $connector_persons['class'] ?></b></li>
+            <li>Fichier de configuration : <b><?= $connector_persons['config'] ?></b></li>
+            <ul>
+                <?php foreach( $connector_persons['params'] as $key => $value ): ?>
+                    <li><?= $key ?> : <b><?= $value ?></b></li>
+                <?php endforeach; ?>
+            </ul>
+            <li>Accès au connecteur : <?php if($connector_persons['count'] !== NULL): ?><b style="color: green;">OK</b> <?= $connector_persons['count'] ?> personnes trouvées<?php else: ?><b style="color: red;">KO</b><?php endif; ?></li></li>
+        </ul>
+        <?php if($connector_persons['error']): ?>
+            <article class="card xsc repport repport-error">
+                <i class="icon-repport"></i> <?= $connector_persons['error'] ?>
+            </article>
+        <?php endif; ?>
+    <?php endforeach; ?>
+    <?php if($connector_persons_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $connector_persons_error ?>
+        </article>
+    <?php endif; ?>
+
+    <h3> ### GEARMAN : </h3>
+    <ul>
+        <li>Envoi d'un job 'HELLO' à Gearman sur : '<b><?= $worker_gearman_host ?></b>'</li>
+        <?php if($worker_response): ?><li>OscarWorker a répondu : '<b style="color: green;"><?= $worker_response ?></b>'</li><?php endif; ?>
+    </ul>
+    <?php if($worker_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $worker_error ?>
+        </article>
+    <?php endif; ?>
+
+    <h3> ### LDAP : </h3>
+    <ul>
+        <li>Connexion au serveur LDAP : <?php if(!$ldap_error): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;">KO</b><?php endif; ?></li>
+    </ul>
+    <?php if($ldap_error): ?>
+        <article class="card xsc repport repport-error">
+            <i class="icon-repport"></i> <?= $ldap_error ?>
+        </article>
+    <?php endif; ?>
+
+</section>

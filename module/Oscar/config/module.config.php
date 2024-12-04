@@ -91,6 +91,14 @@ return array(
                 ],
 
                 [
+                    'controller' => 'AdministrationCheckConfig',
+                    'action' => [
+                        'checkConfigHome',
+                    ],
+                    'roles' => ['user']
+                ],
+
+                [
                     'controller' => 'Connector',
                     'action' => ['person', 'persons', 'organization', "organizations"],
                     'roles' => ['user']
@@ -606,6 +614,7 @@ return array(
             'ActivityType' => \Oscar\Controller\ActivityTypeControllerFactory::class,
             'Api' => \Oscar\Controller\ApiControllerFactory::class,
             'Administration' => \Oscar\Controller\AdministrationControllerFactory::class,
+            'AdministrationCheckConfig' => \Oscar\Controller\AdministrationCheckConfigControllerFactory::class,
             'AdministrativeDocument' => \Oscar\Controller\AdministrativeDocumentControllerFactory::class,
             'Connector' => \Oscar\Controller\ConnectorControllerFactory::class,
             'DateType' => \Oscar\Controller\DateTypeControllerFactory::class,

@@ -270,8 +270,6 @@ class ConnectorOrganizationREST extends AbstractConnector
             throw new \Exception("L'API n'a pas retourné un tableau de donnée");
         }
 
-        echo " (" . \count($jsonDatas) . " organisations retournées par l'API) ";
-
-        return true;
+        return \count($jsonDatas);
     }
 }

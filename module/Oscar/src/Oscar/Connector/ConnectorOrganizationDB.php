@@ -322,7 +322,7 @@ class ConnectorOrganizationDB extends AbstractConnector
         if (!is_array($rows)) {
             throw new \Exception("Le connecteur OrganizationDB n'a pas retourné un tableau de donnée");
         }
-        echo " (" . \count($rows) . " organisations trouvées en DB) ";
-        return true;
+
+        return \count($rows);
     }
 }

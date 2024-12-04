@@ -85,8 +85,12 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
                 $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
 
-                if ($class->checkAccess()) {
+                $checkResult = $class->checkAccess();
+                if ($checkResult) {
                     $io->write(" <green>OK</green>");
+                    if ($checkResult !== TRUE) {
+                        $io->writeln(" => " . $checkResult . " person trouvées");
+                    }
                 } else {
                     $io->write(" <error>ERROR !</error>");
                 }
@@ -128,8 +132,12 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
                 $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organization']));
 
-                if ($class->checkAccess()) {
+                $checkResult = $class->checkAccess();
+                if ($checkResult) {
                     $io->write(" <green>OK</green>");
+                    if ($checkResult !== TRUE) {
+                        $io->writeln(" => " . $checkResult . " organisations trouvées");
+                    }
                 } else {
                     $io->write(" <error>ERROR !</error>");
                 }
@@ -257,6 +265,14 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
             $validator = new SchemaValidator($em);
             $errors = $validator->validateMapping();
+
+            $classes = $em->getMetadataFactory()->getAllMetadata();
+            $tool = new \Doctrine\ORM\Tools\SchemaTool($em);
+            $saveMode = false;
+            $db_model_updates = $tool->getUpdateSchemaSql($classes, $saveMode);
+            if (count($db_model_updates) > 0) {
+                $errors[] = 'Modèle de donnée obsolète';
+            }
 
             $io->write(" - Modèle de donnée ");
             if (count($errors) > 0) {
@@ -439,6 +455,29 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             );
             return self::FAILURE;
         }
+
+        $io->section(" ### LDAP : ");
+
+        try {
+            $ldapConfig = $config->getConfiguration('unicaen-app.ldap');
+
+            $options = [];
+            foreach ($ldapConfig['connection'] as $name => $connection) {
+                $options[$name] = $connection['params'];
+            }
+
+            $ldap = new \Laminas\Ldap\Ldap($options['default']);
+            $ldap->searchEntries(sprintf($options['default']['accountFilterFormat'], "test"));
+
+            $io->writeln("Connexion au serveur LDAP <green>OK</green>\n");
+
+        } catch (\Exception $e) {
+            $io->error(
+                "LDAP FAIL, Impossible de se connecter au serveur LDAP : \n Erreur : " . $e
+            );
+            return self::FAILURE;
+        }
+
         return self::SUCCESS;
     }
 
