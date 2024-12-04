@@ -1466,7 +1466,7 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
             );
         }
 
-        // --- Partenaires de l'activité
+        // --- Jalons de l'activité
         $datas['milestones'] = [
             'readable' => false,
             'editable' => false,
@@ -1502,6 +1502,22 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 ['idactivity' => $activity->getId()]
             );
         }
+
+        // --- Notes
+        $datas['notes'] = [
+            'readable' => false,
+            'editable' => false,
+            'datas'    => []
+        ];
+        if ($oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity)) {
+            $datas['notes']['readable'] = true;
+            $datas['notes']['url'] = $urlPlugin->fromRoute('activity-notes/api');
+            $datas['notes']['editable'] = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity);
+            $datas['notes']['manage'] = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity);
+            $datas['notes']['personid'] = $oscarUserContext->getCurrentPerson() ? $oscarUserContext->getCurrentPerson()->getId() : -1;
+        }
+
+
 
         // --- Feuilles de temps de l'activité
         $datas['timesheets'] = [

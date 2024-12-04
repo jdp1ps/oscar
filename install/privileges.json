@@ -898,5 +898,28 @@
     "code": "SIGNATURE_ADMIN_CONFIG",
     "libelle": "Configuration des processus métier",
     "fullcode": "SIGNATURE-SIGNATURE_ADMIN_CONFIG"
+  },
+  "ACTIVITY-NOTES_SHOW": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "NOTES_SHOW",
+    "libelle": "Voir les notes",
+    "fullcode": "ACTIVITY-NOTES_SHOW"
+  },
+  "ACTIVITY-NOTES_MANAGE_USER": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-NOTES_SHOW",
+    "code": "NOTES_MANAGE_USER",
+    "libelle": "Créer/Modifier/Supprimer mes propres notes",
+    "fullcode": "ACTIVITY-NOTES_MANAGE_USER"
+  },
+  "ACTIVITY-NOTES_MANAGE_ADMIN": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-NOTES_SHOW",
+    "code": "NOTES_MANAGE_ADMIN",
+    "libelle": "Créer/Modifier/Supprimer toutes les notes",
+    "fullcode": "ACTIVITY-NOTES_MANAGE_ADMIN"
   }
 }

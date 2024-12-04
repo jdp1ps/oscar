@@ -3,6 +3,10 @@
     "file": "assets/ActivityDocument-3b2e6cd7.css",
     "src": "ActivityDocument.css"
   },
+  "ActivityNotes.css": {
+    "file": "assets/ActivityNotes-19837ec4.css",
+    "src": "ActivityNotes.css"
+  },
   "DocumentsList.css": {
     "file": "assets/DocumentsList-ac71c2db.css",
     "src": "DocumentsList.css"
@@ -19,6 +23,9 @@
     "file": "vendor.js"
   },
   "_vendor10.js": {
+    "css": [
+      "assets/ActivityNotes-19837ec4.css"
+    ],
     "file": "vendor10.js",
     "imports": [
       "_vendor.js",
@@ -27,6 +34,13 @@
   },
   "_vendor11.js": {
     "file": "vendor11.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor6.js"
+    ]
+  },
+  "_vendor12.js": {
+    "file": "vendor12.js",
     "imports": [
       "_vendor.js",
       "_vendor6.js"
@@ -68,7 +82,7 @@
       "_vendor.js",
       "_vendor9.js",
       "_vendor8.js",
-      "_vendor10.js",
+      "_vendor11.js",
       "_vendor6.js"
     ]
   },
@@ -100,14 +114,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-4dc1d43e.css",
+    "file": "assets/Activity-280ee5e3.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-4dc1d43e.css"
+      "assets/Activity-280ee5e3.css"
     ],
-    "file": "assets/activity-fa850445.js",
+    "file": "assets/activity-5b31b55e.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -118,7 +132,8 @@
       "_vendor7.js",
       "_vendor8.js",
       "_vendor9.js",
-      "_vendor10.js"
+      "_vendor10.js",
+      "_vendor11.js"
     ],
     "isEntry": true,
     "src": "src/Activity.js"
@@ -135,6 +150,16 @@
     ],
     "isEntry": true,
     "src": "src/ActivityDocuments.js"
+  },
+  "src/ActivityNotes.js": {
+    "file": "assets/activitynotes-20b4898b.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor10.js",
+      "_vendor6.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivityNotes.js"
   },
   "src/ActivitySpentDetails.js": {
     "file": "assets/activityspentdetails-29dc042e.js",
@@ -176,10 +201,10 @@
     "src": "src/AdminRoleOrganization.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-b9774a89.js",
+    "file": "assets/admintypedocument-3c3f120c.js",
     "imports": [
       "_vendor.js",
-      "_vendor11.js",
+      "_vendor12.js",
       "_vendor6.js"
     ],
     "isEntry": true,
@@ -224,27 +249,27 @@
     "src": "src/DocumentsObserved.js"
   },
   "src/EntityWithRoleOrganizations.js": {
-    "file": "assets/organizations_roled-dcff0c77.js",
+    "file": "assets/organizations_roled-f0ecc82f.js",
     "imports": [
       "_vendor.js",
       "_vendor5.js",
       "_vendor9.js",
       "_vendor6.js",
       "_vendor8.js",
-      "_vendor10.js"
+      "_vendor11.js"
     ],
     "isEntry": true,
     "src": "src/EntityWithRoleOrganizations.js"
   },
   "src/EntityWithRolePersons.js": {
-    "file": "assets/persons_roled-9081f493.js",
+    "file": "assets/persons_roled-0a2bbddd.js",
     "imports": [
       "_vendor.js",
       "_vendor5.js",
       "_vendor9.js",
       "_vendor6.js",
       "_vendor8.js",
-      "_vendor10.js"
+      "_vendor11.js"
     ],
     "isEntry": true,
     "src": "src/EntityWithRolePersons.js"
@@ -273,11 +298,11 @@
     "css": [
       "assets/OrganizationSubOrganizations-b532b187.css"
     ],
-    "file": "assets/organizationsuborganizations-196668e2.js",
+    "file": "assets/organizationsuborganizations-1b515908.js",
     "imports": [
       "_vendor.js",
-      "_vendor10.js",
       "_vendor11.js",
+      "_vendor12.js",
       "_vendor6.js"
     ],
     "isEntry": true,

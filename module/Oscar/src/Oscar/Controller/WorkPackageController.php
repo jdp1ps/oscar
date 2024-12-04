@@ -36,16 +36,8 @@ class WorkPackageController extends AbstractOscarController
      */
     public function restAction(){
 
-//        try {
-//            $this->getOscarUserContextService()->checkToken();
-//        } catch( \Exception $e ){
-//            return $this->getResponseBadRequest($e->getMessage());
-//        }
-
         $idactivity = $this->params()->fromRoute('idactivity', null);
         $method = $this->getHttpXMethod();
-
-        $this->getLoggerService()->info("WORKPACKAGE REST " . $method . ' idactivity:' . $idactivity);
 
         if( !$idactivity ){
             return $this->getResponseBadRequest("Erreur d'activité");
@@ -66,15 +58,12 @@ class WorkPackageController extends AbstractOscarController
         // Mise à jour d'un déclarant
 
         if( $method == 'POST' ) {
-            $this->getLoggerService()->info("WORKPACKAGE POST ");
-
 
             if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
                 return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
             }
 
             $datas = $this->getRequest()->getPost()->toArray();
-
 
             if( array_key_exists('workpackageid', $datas) ){
                 // Enregistrement du lot de travail

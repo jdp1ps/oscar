@@ -123,6 +123,7 @@
             <li><a href="#members" v-if="activity.persons.readable">Membres</a></li>
             <li><a href="#partners" v-if="activity.organizations.readable">Partenaires</a></li>
             <li><a href="#milestones" v-if="activity.milestones.readable">Jalons</a></li>
+            <li><a href="#notes" v-if="activity.notes.readable">Notes</a></li>
             <li><a href="#payments" v-if="activity.payments.readable">Versements</a></li>
             <li><a href="#spents" v-if="activity.spents.readable">Dépenses</a></li>
             <li><a href="#timesheets" v-if="activity.timesheets.readable">Feuilles de temps</a></li>
@@ -344,6 +345,18 @@
           <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
         </section>
 
+        <section class="section-infos" id="notes" v-if="activity.notes.readable">
+          <h2><i class="icon-comment"></i>Notes</h2>
+          <activity-notes
+              :url="activity.notes.url"
+              :showallowed="activity.notes.readable"
+              :manageuserallowed="activity.notes.editable"
+              :manageadminallowed="activity.notes.manage"
+              :activityid="activity.infos.id"
+              :userid="activity.notes.personid"
+          />
+        </section>
+
         <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
           <h2><i class="icon-book"></i>Feuille de temps</h2>
           <section id="timesheets" v-if="activity.timesheets.enabled">
@@ -488,6 +501,7 @@ import PersonCartouche from "../components/PersonCartouche.vue";
 import Workpackage from "./Workpackage.vue";
 import WorkpackageUI from "./WorkpackageUI.vue";
 import AxiosMessage from "../utils/AxiosMessage.js";
+import ActivityNotes from "./ActivityNotes.vue";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -498,6 +512,7 @@ export default {
   name: 'Activity',
 
   components: {
+    ActivityNotes,
     ActivityLogs,
     ActivityDocument,
     ActivitySpentSynthesis,

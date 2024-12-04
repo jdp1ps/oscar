@@ -991,12 +991,12 @@ contract:
         route: /modifier-projet/:id
         defaults:
           action: changeProject
-#    show:
-#      type: segment
-#      options:
-#        route: /fiche-detaillee/:id
-#        defaults:
-#          action: show2
+    show-old:
+      type: segment
+      options:
+        route: /fiche-ancienne/:id
+        defaults:
+          action: show
 
     pcru-infos:
       type: segment
@@ -2124,3 +2124,19 @@ administration:
         defaults:
           action: sourcesFinancement
       may_terminate: true
+
+
+activity-notes:
+  type: literal
+  options:
+    route: /activity-notes
+    defaults:
+      controller: ActivityNotes
+  may_terminate: false
+  child_routes:
+    api:
+      type: segment
+      options:
+        route: /api
+        defaults:
+          action: api

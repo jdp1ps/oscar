@@ -1,0 +1,1 @@
+import{z as e}from"../vendor.js";import{E as o}from"../vendor5.js";import"../vendor9.js";import"../vendor6.js";import"../vendor8.js";import"../vendor11.js";let t=document.querySelector("#persons_roled");const r=e(o,{url:t.dataset.url,title:t.dataset.title});r.mount("#persons_roled");
