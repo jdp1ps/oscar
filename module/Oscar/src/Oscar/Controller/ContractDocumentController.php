@@ -488,6 +488,18 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             }
 
             if ($action == 'edit') {
+                $tabIdFrom = $document->getTabDocument()->getId();
+                $tabIdTo = $documentDatas['tabDocument']['id'];
+                if( $tabIdFrom != $tabIdTo) {
+                    $this->getLoggerService()->debug("Modification de l'onglet $tabIdFrom > $tabIdTo");
+                    $versions = $this->getContractDocumentService()->getContractDocumentRepository()->getVersionsOf($document);
+                    $tab = $this->getContractDocumentService()->getContractTabDocument($tabIdTo);
+                    foreach ($versions as $version) {
+                        $this->getLoggerService()->debug("Update $version");
+                        $version->setTabDocument($tab);
+                    }
+                }
+
                 $document->setTypeDocument(
                     $this->getContractDocumentService()->getContractDocumentType($documentDatas['category']['id'])
                 );

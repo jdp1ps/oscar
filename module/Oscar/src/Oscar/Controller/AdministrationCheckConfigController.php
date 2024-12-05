@@ -4,6 +4,7 @@ namespace Oscar\Controller;
 
 use Doctrine\ORM\Tools\SchemaValidator;
 use Oscar\Provider\Privileges;
+use Oscar\Service\administration\CheckConfigService;
 use Oscar\Strategy\Search\ActivityElasticSearch;
 use Psr\Container\ContainerInterface;
 
@@ -28,6 +29,9 @@ class AdministrationCheckConfigController extends AbstractOscarController
     public function checkConfigHomeAction()
     {
         $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+
+//        var_dump($this->checkConfigService->checkPHPModules());
+//        die("ICI");
 
         $rootPath = __DIR__ . '/../../../../../';
         $configPath = 'config/autoload/local.php';
@@ -415,5 +419,11 @@ class AdministrationCheckConfigController extends AbstractOscarController
         }
 
         return $connectors_info;
+    }
+
+    private CheckConfigService $checkConfigService;
+    public function setCheckConfigService($checkConfigService)
+    {
+        $this->checkConfigService = $checkConfigService;
     }
 }

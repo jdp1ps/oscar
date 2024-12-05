@@ -1,6 +1,5 @@
 <template>
 
-
   <!-- ERREUR -->
   <div class="overlay" v-if="error" style="z-index: 101">
     <div class="overlay-content" style="max-width: 50%">
@@ -229,6 +228,12 @@
       </div>
     </div>
 
+    <nav v-if="debugEnabled" class="text-right">
+      <button v-on:click="handlerDebug" class="btn btn-xs btn-danger">
+        <i class="icon-bug"></i>
+        Voir le modèle
+      </button>
+    </nav>
     <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
     <section class="documents-content">
       <Loader :visible="loading" :text="loading" />
@@ -307,6 +312,7 @@ export default {
   props: {
     urlUploadNewDoc: {required: true},
     urlSignDocument: {required: false},
+    debugEnabled: {default: false},
     url: {required: true}
   },
 
@@ -448,6 +454,11 @@ export default {
   },
 
   methods: {
+
+    handlerDebug(){
+      let data = JSON.parse(JSON.stringify(this.$data));
+      this.$emit('debug',data);
+    },
 
     /**
      * Permet de calculer si le bouton "Valider" en actif ou pas.

@@ -342,7 +342,13 @@
 
         <section class="section-infos" id="documents" v-if="activity.documents.readable">
           <h2><i class="icon-book"></i>Documents</h2>
-          <activity-document :url="activity.documents.url" url-upload-new-doc=""/>
+          <activity-document
+              @debug="handlerDebug"
+              :debug-enabled="debugEnabled"
+              :url="activity.documents.url"
+              :url-upload-new-doc="activity.documents.url_upload_new_doc"
+              :url-sign-document="activity.documents.url_sign_document"
+          />
         </section>
 
         <section class="section-infos" id="notes" v-if="activity.notes.readable">
@@ -565,6 +571,11 @@ export default {
   },
 
   methods: {
+    handlerDebug(debugData){
+      this.debug_content = debugData;
+      this.debug_displayed = true;
+    },
+
     handlerDebugHide() {
       this.debug_displayed = false;
     },

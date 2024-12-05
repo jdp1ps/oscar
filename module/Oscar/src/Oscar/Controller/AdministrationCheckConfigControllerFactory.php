@@ -4,6 +4,7 @@ namespace Oscar\Controller;
 
 use Interop\Container\ContainerInterface;
 use Oscar\Factory\AbstractOscarFactory;
+use Oscar\Service\administration\CheckConfigService;
 
 class AdministrationCheckConfigControllerFactory extends AbstractOscarFactory
 {
@@ -11,6 +12,7 @@ class AdministrationCheckConfigControllerFactory extends AbstractOscarFactory
     {
         $c = new AdministrationCheckConfigController();
         $c->setServiceLocator($container);
+        $c->setCheckConfigService($container->get(CheckConfigService::class));
         $this->init($c, $container);
         return $c;
     }

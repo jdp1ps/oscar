@@ -1393,6 +1393,9 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['documents'] = [
             'readable' => $oscarUserContext->getAccessActivityDocument($activity),
             'url'      => $urlPlugin->fromRoute('contractdocument/activity', ['activity_id' => $activity->getId()]),
+            'url_upload_new_doc' => $urlPlugin->fromRoute('contractdocument/upload', ['idactivity' => $activity->getId()]),
+            'url_sign_document' => $urlPlugin->fromRoute('contractdocument/signdocument'),
+            'url_document_type' => $urlPlugin->fromRoute('contractdocument/document-change-type'),
         ];
 
         //////////////////////////////////////////////////////////////////// PROJET

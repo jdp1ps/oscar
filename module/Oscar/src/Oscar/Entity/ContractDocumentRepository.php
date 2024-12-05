@@ -442,4 +442,21 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
     public function getDocumentsActivity(int $id)
     {
     }
+
+    /**
+     * Retourne toutes les versions d'un document.
+     *
+     * @param ContractDocument|null $document
+     * @return float|int|mixed|string
+     */
+    public function getVersionsOf(?ContractDocument $document)
+    {
+        $filename = $document->getFilename();
+        return $this->createQueryBuilder('d')
+            ->where('d.fileName = :filename')
+            ->setParameter('filename', $filename)
+            ->getQuery()
+            ->getResult();
+
+    }
 }

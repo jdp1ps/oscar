@@ -385,8 +385,7 @@
           <i class="picto icon-doc" :class="'doc' + sub.extension"></i>
           <strong>{{ sub.fileName }}</strong>
           version <em>{{ sub.version }} </em>,
-          téléchargé le
-          <time>{{ sub.dateUpload | dateFullSort }}</time>
+          téléchargé <time>{{ $filters.dateFull(sub.dateUpload) }}</time>
           <span v-if="sub.uploader">
                         par <strong>{{ sub.uploader.displayname }}</strong>
                         </span>

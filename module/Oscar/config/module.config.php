@@ -566,6 +566,7 @@ return array(
             \Oscar\Service\ActivityTypeService::class => \Oscar\Service\ActivityTypeServiceFactory::class,
             \Oscar\Service\AdministrativeDocumentService::class => \Oscar\Service\AdministrativeDocumentServiceFactory::class,
             \Oscar\Service\BackupService::class => \Oscar\Service\BackupServiceFactory::class,
+            \Oscar\Service\administration\CheckConfigService::class => \Oscar\Service\administration\CheckConfigServiceFactory::class,
             \Oscar\Service\ConnectorService::class => \Oscar\Service\ConnectorServiceFactory::class,
             \Oscar\Service\ContractDocumentService::class => \Oscar\Service\ContractDocumentServiceFactory::class,
             \Oscar\Service\DocumentFormatterService::class => \Oscar\Service\DocumentFormatterServiceFactory::class,

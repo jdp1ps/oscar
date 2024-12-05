@@ -1,6 +1,6 @@
 {
   "ActivityDocument.css": {
-    "file": "assets/ActivityDocument-3b2e6cd7.css",
+    "file": "assets/ActivityDocument-4bf3910d.css",
     "src": "ActivityDocument.css"
   },
   "ActivityNotes.css": {
@@ -8,7 +8,7 @@
     "src": "ActivityNotes.css"
   },
   "DocumentsList.css": {
-    "file": "assets/DocumentsList-ac71c2db.css",
+    "file": "assets/DocumentsList-fb824d78.css",
     "src": "DocumentsList.css"
   },
   "EntityWithRole.css": {
@@ -48,7 +48,7 @@
   },
   "_vendor2.js": {
     "css": [
-      "assets/DocumentsList-ac71c2db.css"
+      "assets/DocumentsList-fb824d78.css"
     ],
     "file": "vendor2.js",
     "imports": [
@@ -62,7 +62,7 @@
   },
   "_vendor4.js": {
     "css": [
-      "assets/ActivityDocument-3b2e6cd7.css"
+      "assets/ActivityDocument-4bf3910d.css"
     ],
     "file": "vendor4.js",
     "imports": [
@@ -114,14 +114,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-280ee5e3.css",
+    "file": "assets/Activity-c35f7800.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-280ee5e3.css"
+      "assets/Activity-c35f7800.css"
     ],
-    "file": "assets/activity-5b31b55e.js",
+    "file": "assets/activity-d192f31f.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
