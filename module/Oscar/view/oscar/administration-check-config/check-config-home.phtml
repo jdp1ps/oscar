@@ -76,6 +76,11 @@
 
     <ul>
         <li>Modèle de donnée <?php if(!$db_model_error): ?><b style="color: green;">OK</b><?php else: ?><b style="color: red;">Erreur</b><?php endif; ?></li>
+        <li>Base de données <?php if(!$db_database_error): ?>
+                <b style="color: green;">OK</b>
+            <?php else: ?>
+                <b style="color: red;"><?= $db_database_error ?></b>
+            <?php endif; ?></li>
     </ul>
     <?php if($db_model_error): ?>
         <article class="card xsc repport repport-error">

@@ -2,7 +2,9 @@
 
 namespace Oscar\Controller;
 
+use Doctrine\ORM\Tools\SchemaValidator;
 use Oscar\Provider\Privileges;
+use Oscar\Strategy\Search\ActivityElasticSearch;
 use Psr\Container\ContainerInterface;
 
 class AdministrationCheckConfigController extends AbstractOscarController
@@ -101,21 +103,43 @@ class AdministrationCheckConfigController extends AbstractOscarController
         }
         
         $db_model_error = NULL;
+        $db_database_error = NULL;
         $db_model_updates = [];
+
+        // ERREURS dans le SCHEMA
         try {
 
-            $cmf     = $this->getEntityManager()->getMetadataFactory();
-            $classes = $cmf->getAllMetadata();
+            $schemaValidator = new SchemaValidator($this->getEntityManager());
 
-            $tool = new \Doctrine\ORM\Tools\SchemaTool($this->getEntityManager());
-            $saveMode = false;
-            $db_model_updates = $tool->getUpdateSchemaSql($classes, $saveMode);
+            $errors = $schemaValidator->validateMapping();
 
-            if (count($db_model_updates) > 0) {
-                $db_model_error = 'EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force';
+            if( !empty($errors)) {
+                $db_model_error = "Erreurs dans le mapping des entités : \n";
+                foreach ($errors as $entity=>$issues) {
+                    echo "Entité $entity : ";
+                    foreach ($issues as $issue) {
+                        echo "- $issue\n";
+                    }
+                }
+                $db_database_error = "Une correction du schema est necessaire !";
+            } else {
+                if( !$schemaValidator->schemaInSyncWithMetadata() ){
+                    $db_database_error = "Base de données non synchronisée : EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force";
+                }
             }
+//            $cmf     = $this->getEntityManager()->getMetadataFactory();
+//            $classes = $cmf->getAllMetadata();
+//
+//            $tool = new \Doctrine\ORM\Tools\SchemaTool($this->getEntityManager());
+//            $saveMode = false;
+//            $db_model_updates = $tool->getUpdateSchemaSql($classes, $saveMode);
+//
+//            if (count($db_model_updates) > 0) {
+//                $db_model_error = 'EXECUTER : php vendor/bin/doctrine-module orm:schema-tool:update --force';
+//            }
         } catch (\Exception $e) {
-            $db_model_error = "ERROR DB : " . $e->getMessage();
+            $db_model_error = "ERROR VALIDATION SCHEMA : " . $e->getMessage();
+            $db_database_error = "non testé";
         }
         
 
@@ -195,7 +219,7 @@ class AdministrationCheckConfigController extends AbstractOscarController
             $searchClass = $config->getConfiguration('oscar.strategy.activity.search_engine.class');
             
             // ELASTIC SEARCH
-            if ($searchClass == 'Oscar\Strategy\Search\ElasticActivitySearch') {
+            if ($searchClass == ActivityElasticSearch::class) {
 
                 $nodesUrl = $config->getConfiguration('oscar.strategy.activity.search_engine.params');
 
@@ -328,6 +352,7 @@ class AdministrationCheckConfigController extends AbstractOscarController
             'db_host' => $db_host,
             'db_connected' => $db_connected,
             'db_model_error' => $db_model_error,
+            'db_database_error' => $db_database_error,
             'db_model_updates' => $db_model_updates,
             'files' => $files,
             'mailer_error' => $mailer_error,
