@@ -51,7 +51,7 @@
 
           <nav>
             <button class="btn btn-default" @click="performSave">
-              <i class="icon-trash"></i>
+              <i class="icon-floppy"></i>
               Enregistrer
             </button>
             <button class="btn btn-default" @click="formData = null">
