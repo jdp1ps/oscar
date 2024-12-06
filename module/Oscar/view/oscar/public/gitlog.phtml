@@ -57,11 +57,14 @@
         Update: <code><?php echo $log['dateUpdate'] ?></code>
     </h2>
     <h3>Historique des builds et des changements</h3>
-    <?php foreach ($log['logs'] as $l) : ?>
+    <?php $currentDate = null; foreach ($log['logs'] as $l) :  ?>
+        <?php
+            $date = (new DateTime($l['date']));
+            ?>
     <div class="line">
         <code class="hash" title="<?= $l['commit'] ?>"><?= $l['commit_short'] ?></code>
         <span class="author"><?= $l['author'] ?></span>
-        <time class="date"><?= $l['date'] ?></time>
+        <time class="date"><?= $this->moment($date->format('Y-m-d H:i:s'))->fullDay() ?></time>
         <span class="message"><?= $l['message'] ?></span>
     </div>
     <?php endforeach; ?>

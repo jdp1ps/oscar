@@ -97,12 +97,14 @@ class Moment extends AbstractHtmlElement
             return '';
         }
         if ($from instanceof \DateTime) {
+            $refFrom = $from->format('Y-m-d');
             $from = $from->format('c');
         } else {
-            $from = new \DateTime($from);
+            $refFrom = date('Y-m-d');
+            $from = "now";
         }
 
-        if( $from->format('Y-m-d') == date('Y-m-d') ){
+        if( $this->moment->format('Y-m-d') == $refFrom ){
             return "Aujourd'hui";
         }
 
@@ -114,14 +116,14 @@ class Moment extends AbstractHtmlElement
      * Retourne le texte complet sous la forme DATE, DEPUIS NOW
      * @return string
      */
-    public function full()
+    public function full($from='now')
     {
-        return $this->__toString(). ($this->moment !== null ? ', ' . $this->since() : '');
+        return $this->__toString(). ($this->moment !== null ? ', ' . $this->since($from) : '');
     }
 
-    public function fullDay()
+    public function fullDay($from='now')
     {
-        return $this->__toString(). ($this->moment !== null ? ', ' . $this->sinceDays() : '');
+        return $this->__toString(). ($this->moment !== null ? ', ' . $this->sinceDays($from) : '');
     }
 
     /**

@@ -25,7 +25,7 @@ class OscarInfosCommand extends OscarCommandAbstract
             ->setDescription("Informations sur la version installée (JSON)")
             ->addOption('stdout', 's', InputOption::VALUE_NONE, "Affiche le résultat dans la sortie standard")
             ->addOption('file', 'f', InputOption::VALUE_OPTIONAL, "Fichier de sortie", "oscar-info.json")
-            ->addOption('logs', 'l', InputOption::VALUE_OPTIONAL, "Nombre de logs", 30);
+            ->addOption('logs', 'l', InputOption::VALUE_OPTIONAL, "Nombre de logs", 200);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
