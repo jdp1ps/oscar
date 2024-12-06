@@ -21,6 +21,8 @@ use Oscar\Service\OrganizationService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantApiService;
+use Oscar\Service\ProjectGrantApiServiceFactory;
 use Oscar\Service\ProjectGrantSearchService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\ProjectService;
@@ -54,6 +56,7 @@ class ProjectGrantControllerFactory implements FactoryInterface
         $c->setDocumentFormatterService($container->get(DocumentFormatterService::class));
         $c->setSignatureService($container->get(SignatureService::class));
         $c->setProjectGrantSearchService($container->get(ProjectGrantSearchService::class));
+        $c->setProjectGrantApiService($container->get(ProjectGrantApiService::class));
         $c->setServiceContainer($container);
         return $c;
     }

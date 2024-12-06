@@ -56,6 +56,7 @@ use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\DocumentFormatterService;
 use Oscar\Service\OrganizationService;
+use Oscar\Service\ProjectGrantApiService;
 use Oscar\Service\ProjectGrantSearchService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\TimesheetService;
@@ -116,6 +117,25 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
     /** @var TimesheetService */
     private $timesheetService;
+
+    private $projectGrantApiService;
+
+    /**
+     * @return ProjectGrantApiService
+     */
+    public function getProjectGrantApiService()
+    {
+        return $this->projectGrantApiService;
+    }
+
+    /**
+     * @param mixed $projectGrantApiService
+     */
+    public function setProjectGrantApiService($projectGrantApiService): self
+    {
+        $this->projectGrantApiService = $projectGrantApiService;
+        return $this;
+    }
 
     /** @var ProjectGrantSearchService */
     private ProjectGrantSearchService $projectGrantSearchService;
@@ -1755,14 +1775,22 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
         switch ($method) {
             case 'GET' :
-                if ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
+                if ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json2') {
                     $datas = [
-                        'activity' => $this->getActivityService()->getActivityJson(
+                        'activity' => $this->getProjectGrantApiService()->getActivityJson(
+                            $entity->getId(),
+                            $this->url(),
+                            $this->getOscarUserContextService()
+                        ),
+                    ];
+                    return $this->jsonOutput($datas);
+                }
+                elseif ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
+                    $datas = [
+                        'activity' => $this->getProjectGrantApiService()->getActivityJson(
                                 $entity->getId(),
-                                true,
-                                true,
+                                $this->url(),
                                 $this->getOscarUserContextService(),
-                                $this->url()
                         ),
                     ];
                     return $this->jsonOutput($datas);

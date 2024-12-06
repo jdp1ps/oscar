@@ -1,5 +1,7 @@
 <template>
   <div style="position: relative;">
+
+    ITEMS : {{ items }}
     <loader :visible="loading" :text="loading"></loader>
 
     <modal title="Erreur" :visible="error">
@@ -279,14 +281,16 @@ export default {
 
   props: {
     url: {required: true},
-    title: {required: true}
+    title: {required: true},
+    items: { required: true, default: []},
+    entityLinkShow: { default: false },
+    manage: { default: false }
   },
 
   data() {
     return {
       selectedPerson: null,
       selected: null,
-      entities: [],
       entityEdited: null,
       entityDelete: null,
       entityNew: null,
@@ -304,34 +308,38 @@ export default {
   },
 
   computed: {
+    entities(){
+      return this.items;
+    },
     sortedFull() {
       return this.entities.sort((a, b) => a.enrolled - b.enrolled)
     },
 
     stacked() {
       let stacks = {};
-      this.entities.forEach(i => {
-        let id = i.enrolled;
-        if (!stacks.hasOwnProperty(id)) {
-          stacks[id] = {
-            enrolled: i.enrolled,
-            urlShow: i.urlShow,
-            enrolledLabel: i.enrolledLabel,
-            hasPrimary: false
+      if( this.items ){
+        this.items.forEach(i => {
+          let id = i.enrolled;
+          if (!stacks.hasOwnProperty(id)) {
+            stacks[id] = {
+              enrolled: i.enrolled,
+              urlShow: i.urlShow,
+              enrolledLabel: i.enrolledLabel,
+              hasPrimary: false
+            }
+            stacks[id]['roles'] = {};
           }
-          stacks[id]['roles'] = {};
-        }
-        stacks[id]['roles'][i.roleId] = {
-          role: i.roleLabel,
-          roleId: i.roleId,
-          rolePrincipal: i.rolePrincipal,
-          context: i.context,
-        };
-        if (i.rolePrincipal) {
-          stacks[id].hasPrimary = true;
-        }
-
-      })
+          stacks[id]['roles'][i.roleId] = {
+            role: i.roleLabel,
+            roleId: i.roleId,
+            rolePrincipal: i.rolePrincipal,
+            context: i.context,
+          };
+          if (i.rolePrincipal) {
+            stacks[id].hasPrimary = true;
+          }
+        })
+      }
       return stacks;
     }
   },
@@ -508,7 +516,7 @@ export default {
   },
 
   mounted() {
-    this.fetch();
+    //this.fetch();
   }
 }
 

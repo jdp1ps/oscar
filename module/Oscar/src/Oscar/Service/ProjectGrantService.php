@@ -1340,6 +1340,8 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         /** @var Activity $activity */
         $activity = $this->getActivityRepository()->find($id);
 
+
+
         $datas = [
             'infos' => $activity->toArray()
         ];

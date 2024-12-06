@@ -25,7 +25,7 @@
         <h1 class="col-md-6 col-md-offset-3">
           <small>Options de copie pour</small> <br>
 
-          <strong>{{ activity.infos.label }}</strong></h1>
+          <strong>{{ activity.datas.core.label }}</strong></h1>
 
         <div class="col-md-6 col-md-offset-3">
           <div class="list-group-item separator-bottom">
@@ -98,7 +98,7 @@
     </div>
   </div>
 
-  <div v-if="activity.infos">
+  <div v-if="activity.datas">
     <nav class="navbar navbar-default navbar-fixed-top" style="top: 50px; z-index:500">
       <div class="container">
         <div class="navbar-header">
@@ -111,7 +111,7 @@
           </button>
           <a class="navbar-brand" href="#">
             <i class="icon-cube"></i>
-            <strong>{{ activity.infos.numOscar }}</strong>
+            <strong>{{ activity.datas.core.numOscar }}</strong>
             <span> / {{ labelReduced }}</span>
             <i class="icon-pin" :style="{'opacity': isSticky ? 1.0 : 0.3}" @click="toogleSticky"></i>
           </a>
@@ -120,13 +120,13 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="#members" v-if="activity.persons.readable">Membres</a></li>
-            <li><a href="#partners" v-if="activity.organizations.readable">Partenaires</a></li>
-            <li><a href="#milestones" v-if="activity.milestones.readable">Jalons</a></li>
-            <li><a href="#notes" v-if="activity.notes.readable">Notes</a></li>
-            <li><a href="#payments" v-if="activity.payments.readable">Versements</a></li>
-            <li><a href="#spents" v-if="activity.spents.readable">Dépenses</a></li>
-            <li><a href="#timesheets" v-if="activity.timesheets.readable">Feuilles de temps</a></li>
+            <li><a href="#members" v-if="activity.credentials.persons.read">Membres</a></li>
+            <li><a href="#partners" v-if="activity.credentials.organizations.read">Partenaires</a></li>
+            <li><a href="#milestones" v-if="activity.credentials.milestones.read">Jalons</a></li>
+            <li><a href="#notes" v-if="activity.credentials.notes.read">Notes</a></li>
+            <li><a href="#payments" v-if="activity.credentials.budget.read">Versements</a></li>
+            <li><a href="#spents" v-if="activity.credentials.spents.read">Dépenses</a></li>
+            <li><a href="#timesheets" v-if="activity.credentials.timesheets.read">Feuilles de temps</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
 
@@ -142,12 +142,12 @@
                   <i class="icon-pin-outline"></i>
                   Epingler</a></li>
                 <li role="separator" class="divider"></li>
-                <li v-for="a in sticky" :class="a.id == activity.infos.id ? 'disabled':''">
+                <li v-for="a in sticky" :class="a.id == activity.datas.core.id ? 'disabled':''">
                   <a href="#" @click="handlerNavigateSticky(a)">
                     <i class="icon-cube"></i>
                     <strong>{{ a.num }}</strong>
                     <em>{{ a.label }}</em>
-                    <i class="icon-link-ext" v-if="a.id != activity.infos.id"></i>
+                    <i class="icon-link-ext" v-if="a.id != activity.datas.core.id"></i>
                   </a>
                 </li>
                 <li role="separator" class="divider"></li>
@@ -179,38 +179,38 @@
           </h4>
 
           <h3>
-            <span class="picto status-" :class="'status-'+activity.infos.statut">
+            <span class="picto status-" :class="'status-'+activity.datas.core.statut">
               <i class="icon"></i>
-              {{ activity.infos.statut_label }}
+              {{ activity.datas.core.statut_label }}
             </span>
             :::
 
             <span class="type-chain">
-            <i :class="activity.infos.type_slug"></i>
-            <span v-for="t in activity.infos.type_chain">
+            <i :class="activity.datas.core.type_slug"></i>
+            <span v-for="t in activity.datas.core.type_chain">
               {{ t.label }}
             </span>
           </span>
           </h3>
 
           <h1>
-            <span><i class="icon-cube"></i> {{ activity.infos.label }}</span>
+            <span><i class="icon-cube"></i> {{ activity.datas.core.label }}</span>
           </h1>
         </div>
         <div class="col-md-3">
-          <div class="budget" v-if="activity.budget">
+          <div class="budget" v-if="activity.credentials.budget.read">
             <em>Montant</em>
-            <strong>{{ $filters.money(activity.budget.montant) }} {{ activity.budget.currency.symbol }}</strong>
+            <strong>{{ $filters.money(activity.datas.budget.montant) }} {{ activity.datas.budget.currency.symbol }}</strong>
             <div class="details">
               <small>
                 Frais de gestion :
-                <b>{{ activity.budget.fraisDeGestion }}</b>
+                <b>{{ activity.datas.budget.fraisDeGestion }}</b>
               </small>
 
               <small>
                 Part unité :
-                <b v-if="activity.budget.fraisDeGestionPartUnite">
-                  {{ activity.budget.fraisDeGestionPartUnite }}
+                <b v-if="activity.datas.budget.fraisDeGestionPartUnite">
+                  {{ activity.datas.budget.fraisDeGestionPartUnite }}
                 </b>
                 <i v-else>
                   ~
@@ -220,20 +220,20 @@
               <small>
                 Part hébergeur :
                 <b>
-                  {{ activity.budget.fraisDeGestionPartHebergeur }}
+                  {{ activity.datas.budget.fraisDeGestionPartHebergeur }}
                 </b>
               </small>
 
               <small>
                 Part Gestionnaire :
                 <b>
-                  {{ activity.budget.fraisDeGestionPartGestionnaire }}
+                  {{ activity.datas.budget.fraisDeGestionPartGestionnaire }}
                 </b>
               </small>
 
               <small>
                 TVA :
-                <b>{{ activity.budget.tva }}</b>
+                <b>{{ activity.datas.budget.tva }}</b>
               </small>
             </div>
             <div>
@@ -243,8 +243,8 @@
       </div>
 
       <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull"
-         v-if="activity.infos.description">
-        <small>{{ activity.infos.description }}</small>
+         v-if="activity.datas.core.description">
+        <small>{{ activity.datas.core.description }}</small>
       </p>
 
       <div class="row line-bottom">
@@ -252,35 +252,35 @@
           <h4><i class="icon-calendar"></i>Dates</h4>
           <p class="texthighlight baseline">
             Début :
-            <time>{{ $filters.date(activity.infos.dateStart) }}</time>
-            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateStart) }})</small>
+            <time>{{ $filters.date(activity.datas.core.dateStart) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.datas.core.dateStart) }})</small>
             <br>
             Fin :
-            <time>{{ $filters.dateFull(activity.infos.dateEnd) }}</time>
-            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateEnd) }})</small>
+            <time>{{ $filters.dateFull(activity.datas.core.dateEnd) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.datas.core.dateEnd) }})</small>
             <br>
             Signé le :
-            <time>{{ $filters.dateFull(activity.infos.dateSigned) }}</time>
-            <small class="aggo"> ({{ $filters.timeAgo(activity.infos.dateSigned) }})</small>
+            <time>{{ $filters.dateFull(activity.datas.core.dateSigned) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(activity.datas.core.dateSigned) }})</small>
           </p>
           <h4><i class="icon-tags"></i>Métas-données</h4>
           <p class="texthighlight baseline">
             Disciplines :
-            <span class="cartouche xs" v-for="d in activity.infos.disciplines">{{ d }}</span>
+            <span class="cartouche xs" v-for="d in activity.datas.core.disciplines">{{ d }}</span>
           </p>
         </div>
 
         <div class="col-md-4">
           <h4><i class="icon-briefcase"></i>Numérotations</h4>
           <p class="texthighlight baseline">
-            N° Oscar" : <strong>{{ activity.infos.numOscar }}</strong><br/>
-            Numéro financier : <strong v-if="activity.infos.PFI">{{ activity.infos.PFI }}</strong><strong
+            N° Oscar" : <strong>{{ activity.datas.core.numOscar }}</strong><br/>
+            Numéro financier : <strong v-if="activity.datas.core.PFI">{{ activity.datas.core.PFI }}</strong><strong
               v-else>AUCUN</strong> -
             Ouverture du PFI le
-            <time>{{ $filters.dateFull(activity.infos.dateOpened) }}</time>
+            <time>{{ $filters.dateFull(activity.datas.core.dateOpened) }}</time>
             <br>
           </p>
-          <p class="texthighlight baseline" v-for="n, label in activity.infos.numeros">
+          <p class="texthighlight baseline" v-for="n, label in activity.datas.core.numeros">
             {{ label }} : <strong>{{ n }}</strong>
           </p>
         </div>
@@ -289,10 +289,10 @@
           <h4><i class="icon-database-1"></i>Divers</h4>
           <p class="texthighlight baseline">
             Création
-            <time>{{ $filters.dateFull(activity.infos.dateCreated) }}</time>
+            <time>{{ $filters.dateFull(activity.datas.core.dateCreated) }}</time>
             <br>
             Dernière MAJ
-            <time>{{ $filters.dateFull(activity.infos.dateUpdated) }}</time>
+            <time>{{ $filters.dateFull(activity.datas.core.dateUpdated) }}</time>
           </p>
         </div>
       </div>
@@ -300,19 +300,19 @@
       <div class="row">
         <div class="col-md-12">
           <nav class="buttons xs">
-            <a class="btn btn-primary btn-xs" v-if="activity.urls.edit" :href="activity.urls.edit">
+            <a class="btn btn-primary btn-xs" v-if="activity.datas.core.urls.edit" :href="activity.datas.core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
 
-            <a class="btn btn-xs btn-default" v-if="activity.urls.change_project" :href="activity.urls.change_project">
+            <a class="btn btn-xs btn-default" v-if="activity.datas.core.urls.change_project" :href="activity.datas.core.urls.change_project">
               <i class="icon-cubes"></i>
               Modifier le projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="activity.urls.new_project" :href="activity.urls.new_project">
+            <a class="btn btn-xs btn-default" v-if="activity.datas.core.urls.new_project" :href="activity.datas.core.urls.new_project">
               <i class="icon-cubes"></i>
               Créer un nouveau projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="activity.urls.duplicate" @click="handlerDuplicate">
+            <a class="btn btn-xs btn-default" v-if="activity.datas.core.urls.duplicate" @click="handlerDuplicate">
               <i class="icon-paste"></i>
               Dupliquer</a>
 
@@ -330,16 +330,22 @@
 
     <div class="container-fluid">
       <div class="col-md-8">
-        <section class="section-infos" id="members" v-if="activity.persons.readable">
+        <section class="section-infos" id="members" v-if="activity.credentials.persons.read && activity.datas.persons.entities">
           <h2><i class="icon-group"></i>Membres</h2>
-          <EntityWithRole title="Personne" :url="activity.persons.url" @updated="handlerUpdatePersons"/>
+          <EntityWithRole title="Personne"
+                          :entity-link-show="false"
+                          :manage="false"
+                          :items="activity.datas.persons.entities"
+                          :url="activity.datas.persons.url" @updated="handlerUpdatePersons"
+          />
         </section>
 
-        <section class="section-infos" id="partners" v-if="activity.organizations.readable">
+        <section class="section-infos" id="partners" v-if="activity.credentials.organizations.read">
           <h2><i class="icon-building-filled"></i>Partenaires</h2>
-          <EntityWithRole title="Organisation" :url="activity.organizations.url"/>
+          <!--           <EntityWithRole title="Organisation" :url="activity.datas.organizations.url"/> -->
         </section>
 
+        <!--
         <section class="section-infos" id="documents" v-if="activity.documents.readable">
           <h2><i class="icon-book"></i>Documents</h2>
           <activity-document
@@ -350,7 +356,9 @@
               :url-sign-document="activity.documents.url_sign_document"
           />
         </section>
+        -->
 
+        <!--
         <section class="section-infos" id="notes" v-if="activity.notes.readable">
           <h2><i class="icon-comment"></i>Notes</h2>
           <activity-notes
@@ -358,11 +366,12 @@
               :showallowed="activity.notes.readable"
               :manageuserallowed="activity.notes.editable"
               :manageadminallowed="activity.notes.manage"
-              :activityid="activity.infos.id"
+              :activityid="activity.datas.core.id"
               :userid="activity.notes.personid"
           />
         </section>
-
+        -->
+        <!--
         <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
           <h2><i class="icon-book"></i>Feuille de temps</h2>
           <section id="timesheets" v-if="activity.timesheets.enabled">
@@ -432,63 +441,67 @@
                 </div>
               </div>
             </section>
+                    <section class="lots">
+                      <h3>Lots de travail</h3>
+                      <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons"/>
+                    </section>
+                  </section>
+                  <div class="alert alert-warning" v-else>
+                    {{ activity.timesheets.enabled_details }}
+                  </div>
+                </section>
 
-            <section class="lots">
-              <h3>Lots de travail</h3>
-              <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons"/>
-            </section>
-          </section>
-          <div class="alert alert-warning" v-else>
-            {{ activity.timesheets.enabled_details }}
-          </div>
-        </section>
+              </div>
+              -->
+              <aside class="col-md-4">
+                <!--
+                <section id="milestones" class="section-infos">
+                  <h2><i class="icon-calendar"></i>Jalons</h2>
+                  <Milestones :url="activity.milestones.url" :editable="activity.milestones.editable" :payments="payments"/>
+                  <a v-if="activity.milestones.url_notifications" :href="activity.milestones.url_notifications"
+                     class="btn btn-primary">
+                    <i class="icon-bell"></i>
+                    Voir les notifications planifiées
+                  </a>
+                </section>
 
-      </div>
-      <aside class="col-md-4">
-        <section id="milestones" class="section-infos">
-          <h2><i class="icon-calendar"></i>Jalons</h2>
-          <Milestones :url="activity.milestones.url" :editable="activity.milestones.editable" :payments="payments"/>
-          <a v-if="activity.milestones.url_notifications" :href="activity.milestones.url_notifications"
-             class="btn btn-primary">
-            <i class="icon-bell"></i>
-            Voir les notifications planifiées
-          </a>
-        </section>
+                <section id="payments" class="section-infos" v-if="activity.payments.readable">
+                  <h2><i class="icon-bank"></i>Versements</h2>
+                  <Payments :url="activity.payments.url" :manage="activity.payments.editable"
+                            :amount="activity.datas.core.amount"
+                            @update="handlerPaymentsUpdate"
+                  />
+                </section>
 
-        <section id="payments" class="section-infos" v-if="activity.payments.readable">
-          <h2><i class="icon-bank"></i>Versements</h2>
-          <Payments :url="activity.payments.url" :manage="activity.payments.editable"
-                    :amount="activity.infos.amount"
-                    @update="handlerPaymentsUpdate"
-          />
-        </section>
+                <section id="spents" class="section-infos" v-if="activity.spents.readable">
+                  <h2><i class="icon-bank"></i>Dépenses</h2>
+                  <ActivitySpentSynthesis :url="activity.spents.url"/>
+                  <nav class="buttons xs">
+                    <a :href="activity.spents.url_details" class="btn btn-primary btn" v-if="activity.spents.url_details">
+                      <i class="icon-file-excel"></i>
+                      Détails des dépenses</a>
+                    <a :href="activity.spents.url_previsionnel" class="btn btn-primary btn"
+                       v-if="activity.spents.url_previsionnel">
+                      <i class="icon-file-excel"></i>
+                      Dépenses prévisionnelles (beta)</a>
+                  </nav>
 
-        <section id="spents" class="section-infos" v-if="activity.spents.readable">
-          <h2><i class="icon-bank"></i>Dépenses</h2>
-          <ActivitySpentSynthesis :url="activity.spents.url"/>
-          <nav class="buttons xs">
-            <a :href="activity.spents.url_details" class="btn btn-primary btn" v-if="activity.spents.url_details">
-              <i class="icon-file-excel"></i>
-              Détails des dépenses</a>
-            <a :href="activity.spents.url_previsionnel" class="btn btn-primary btn"
-               v-if="activity.spents.url_previsionnel">
-              <i class="icon-file-excel"></i>
-              Dépenses prévisionnelles (beta)</a>
-          </nav>
+                </section>
+                -->
+              </aside>
 
-        </section>
-      </aside>
     </div>
-    <div class="container-fluid activity-fiche" v-if="activity.administration.readable">
+    <div class="container-fluid activity-fiche" v-if="activity.credentials.administration.read">
       <div class="row">
         <div class="col-md-12">
           <h2>
             <i class="icon-cog"></i>
             Technique</h2>
-          <ActivityLogs :url="activity.administration.url_logs" @error="handlerError"/>
+          <ActivityLogs :url="activity.datas.core.urls.logs" @error="handlerError"/>
         </div>
       </div>
     </div>
+  </div>
   </div>
 
 </template>
@@ -558,10 +571,10 @@ export default {
       return localStorage.getItem(storage_key);
     },
     isSticky() {
-      return this.sticky.find(item => item.id == this.activity.infos.id);
+      return this.sticky.find(item => item.id == this.activity.datas.core.id);
     },
     labelReduced() {
-      let label = this.activity.infos.label;
+      let label = this.activity.datas.core.label;
       if (label.length > 50) {
         return label.substr(0, 50) + '...';
       } else {
@@ -613,7 +626,7 @@ export default {
 
     handlerUnSticky() {
       this.sticky.forEach((item, id) => {
-        if (item.id == this.activity.infos.id) {
+        if (item.id == this.activity.datas.core.id) {
           this.sticky.splice(id, 1);
         }
       })
@@ -622,9 +635,9 @@ export default {
 
     handlerSticky() {
       this.sticky.push({
-        id: this.activity.infos.id,
-        label: this.activity.infos.label,
-        num: this.activity.infos.numOscar,
+        id: this.activity.datas.core.id,
+        label: this.activity.datas.core.label,
+        num: this.activity.datas.core.numOscar,
         location: document.location.href,
       });
       localStorage.setItem(storage_key, JSON.stringify(this.sticky));
@@ -644,7 +657,8 @@ export default {
     fetch() {
       this.loading = true;
       axios.get(this.url).then(response => {
-        this.activity = response.data.activity
+        console.log(response.data);
+        this.activity = response.data.activity;
       }, error => {
         this.handlerError(AxiosMessage.manageErrorResponse(error));
       }).finally(f => {
@@ -665,7 +679,7 @@ export default {
     },
 
     handlerDuplicateDo() {
-      document.location = this.activity.urls.duplicate + "?"
+      document.location = this.activity.datas.core.urls.duplicate + "?"
           + (this.duplicateDatas.keepPersons ? '&keeppersons=on' : '')
           + (this.duplicateDatas.keepOrganizations ? '&keeporganizations=on' : '')
           + (this.duplicateDatas.keepMilestones ? '&keepmilestones=on' : '')

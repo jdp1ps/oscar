@@ -321,6 +321,36 @@ class Activity implements ResourceInterface
      */
     private $dateOpened;
 
+    /**
+     * Date de la dernière mise en cache des données
+     *
+     * @var datetime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateCached;
+
+    /**
+     * Cache
+     *
+     * @var string
+     * @ORM\Column(type="text", options={"default": ""})
+     */
+    private string $cache;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private bool $cacheLocked;
+
+    /**
+     * Cache
+     *
+     * @var string
+     * @ORM\Column(type="string", options={"default": ""})
+     */
+    private string $cacheLockedReason;
+
 
     /**
      * Incidence financière.
@@ -649,6 +679,80 @@ class Activity implements ResourceInterface
     {
         return $this->fraisDeGestionPartGestionnaire;
     }
+
+
+    public function getCache(): string
+    {
+        return $this->cache;
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getDateCache() :?\DateTime
+    {
+        return $this->dateCached;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCached(): bool
+    {
+        return $this->cache !== "";
+    }
+
+    const CACHE_REASON_DEFAULT = "default";
+    const CACHE_REASON_ARCHIVE = "archive";
+    const CACHE_REASON_LOCKED = "locked";
+
+    /**
+     * Mise en cache des données de l'activité.
+     *
+     * @param string $cache_content
+     * @param \DateTime $cache_at
+     * @param bool $cache_lock
+     * @param string $cache_lock_reason
+     * @return $this
+     */
+    public function setCacheOn(
+        string $cache_content,
+        \DateTime $cache_at = new \DateTime(),
+        bool $cache_lock = false,
+        string $cache_lock_reason = self::CACHE_REASON_DEFAULT
+    ): self {
+        $this->cache = $cache_content;
+        $this->dateCached = $cache_at;
+        if ($cache_lock === true) {
+            $this->setCacheLock($cache_at);
+        }
+        return $this;
+    }
+
+    /**
+     * Verrouillage du cache.
+     *
+     * @param \DateTime $at
+     * @return Activity
+     */
+    public function setCacheLock(\DateTime $at = new \DateTime()): self
+    {
+        $this->cacheLock = true;
+        $this->dateCached = $at;
+        return $this;
+    }
+
+    /**
+     * Déverrouillage du cache.
+     *
+     * @return Activity
+     */
+    public function setCacheUnLock(): self
+    {
+        $this->cacheLock = false;
+        return $this;
+    }
+
 
     public function setFraisDeGestionPartGestionnaire(?string $fraisDeGestionPartGestionnaire): self
     {
