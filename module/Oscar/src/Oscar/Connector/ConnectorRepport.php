@@ -16,6 +16,7 @@ class ConnectorRepport
     private $added;
     private $updated;
     private $removed;
+    private $nothing;
 
     private $start;
     private $end;
@@ -29,6 +30,7 @@ class ConnectorRepport
             'warnings' => $this->getWarnings(),
             'removed' => $this->getRemoved(),
             'notices' => $this->getNotices(),
+            'nothing' => $this->getNothing(),
         ];
     }
 
@@ -80,6 +82,11 @@ class ConnectorRepport
         return $this->removed;
     }
 
+    public function getNothing()
+    {
+        return $this->nothing;
+    }
+
     public function isSuspect(){
         return count($this->getErrors()) + count($this->getWarnings()) > 0;
     }
@@ -97,11 +104,12 @@ class ConnectorRepport
         $this->added = [];
         $this->updated = [];
         $this->removed = [];
+        $this->nothing = [];
         $this->start();
     }
 
     public function start(){
-        $this->start = time();
+        $this->start = microtime(true);
     }
 
     public function addnotice( $message ){
@@ -146,6 +154,13 @@ class ConnectorRepport
         ];
     }
 
+    public function addnothing( $message ){
+        $this->nothing[] = [
+            'time' => time(),
+            'message' => '[-] ' . $message
+        ];
+    }
+
     public function addRepport( ConnectorRepport $repport ){
         foreach ( $repport->getRepportStates() as $state=>$rep ){
             $this->$state = array_merge($this->$state, $rep);
@@ -153,12 +168,12 @@ class ConnectorRepport
     }
 
     public function end(){
-        $this->end = time();
+        $this->end = microtime(true);
     }
 
     public function getDuration(){
         if( !$this->end ){
-            return time() - $this->start;
+            return microtime(true) - $this->start;
         }
         return $this->end - $this->start;
     }

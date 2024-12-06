@@ -36,6 +36,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         $this
             ->setDescription("Execute la synchronisation des organisations")
             ->addArgument("connectorname", InputArgument::REQUIRED, "Connector (rest)")
+            ->addOption('fullrepport', 's', InputOption::VALUE_NONE, "Rapport complet")
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Forcer la mise à jour')
             ->addOption(
                 'no-rebuild',
@@ -60,6 +61,7 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
         $connectorName = $input->getArgument('connectorname');
         $noRebuild = $input->getOption('no-rebuild');
         $force = $input->getOption('force');
+        $fullRepport = $input->getOption('fullrepport');
 
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
@@ -78,8 +80,12 @@ class OscarOrganizationsSyncCommand extends OscarCommandAbstract
             foreach ($repport->getRepportStates() as $type => $out) {
                 $short = substr($type, 0, 3);
                 $io->section("Opération " . strtoupper($type));
-                foreach ($out as $line) {
-                    $io->writeln("$short\t " . date('Y-m-d H:i:s', $line['time']) . " " . $line['message']);
+                if( $fullRepport === false && !in_array($type, ['errors', 'warnings']) ){
+                    $io->writeln("Nbr d'opération : " . count($out));
+                } else {
+                    foreach ($out as $line) {
+                        $io->writeln("$short\t " . date('Y-m-d H:i:s', $line['time']) . " " . $line['message']);
+                    }
                 }
             }
         } catch (\Exception $e) {
