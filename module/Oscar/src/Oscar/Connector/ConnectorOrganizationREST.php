@@ -97,6 +97,11 @@ class ConnectorOrganizationREST extends AbstractConnector
         return $this->getOrganizationService()->getLoggerService();
     }
 
+    private function errorOut(ConnectorRepport $repport, string $message):void {
+        $repport->adderror($message);
+        $this->getLogger()->error($message);
+    }
+
     /**
      * @param OrganizationRepository $repository
      * @param bool $force
@@ -111,12 +116,9 @@ class ConnectorOrganizationREST extends AbstractConnector
         $url = $this->getParameter('url_organizations');
         $repport->addnotice("URL : $url");
 
-        /////////////////////////////////////
-        ////// Patch 2.7 "Lewis" GIT#286 ////
         try {
             $json = $this->getAccessStrategy()->getDataAll();
             $exist = $repository->getUidsConnector($this->getName());
-            $jsonDatas = null;
 
             if( is_object($json) && property_exists($json, 'organizations') ){
                 $jsonDatas = $json->organizations;
@@ -144,7 +146,13 @@ class ConnectorOrganizationREST extends AbstractConnector
                     $organization = $repository->newPersistantObject();
                     $action = "add";
                 } catch (NonUniqueResultException $e){
-                    $this->getLogger()->error("L'organisation avec le code '$organisationId' n'est pas unique.");
+                    $message = "L'organisation avec le code '$organisationId' n'est pas unique.";
+                    $this->getLogger()->error($message);
+                    $repport->adderror($message);
+                    continue;
+                } catch (\Exception $e) {
+                    $this->errorOut($repport, "Problème inconnue avec '$organisationId' : ".$e->getMessage());
+                    continue;
                 }
                 if( !property_exists($data, 'dateupdated') ){
                     $dateupdated = date('Y-m-d H:i:s');
@@ -153,34 +161,75 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
 
                 if($organization->getDateUpdated() < new \DateTime($dateupdated) || $force == true ){
+                    try {
+                        $organization = $this->hydrateWithDatas($organization, $data);
+                        if( property_exists($data, 'type') ){
+                            try {
+                                $type = $repository->getTypeObjByLabel($data->type);
+                                $organization->setTypeObj($type);
+                            } catch (\Exception $e){
+                                $this->errorOut($repport, "Impossible de mettre à jour le type pour $organisationId, le type '".$data->type."' n'a pas été trouvédans Oscar : " . $e->getMessage());
+                            }
+                        }
 
-                    $organization = $this->hydrateWithDatas($organization, $data);
-                    if( property_exists($data, 'type') )
-                        $organization->setTypeObj($repository->getTypeObjByLabel($data->type));
-
-                    $organization->setDateUpdated(new \DateTime($dateupdated));
-                    $repository->flush($organization);
+                        $organization->setDateUpdated(new \DateTime($dateupdated));
+                        $repository->flush($organization);
+                    } catch (\Exception $e){
+                        $this->errorOut($repport, "Impossible de mettre à jour les données de base de '$organisationId' : " . $e->getMessage());
+                        continue;
+                    }
 
                     if( $organization->hasUpdatedParentInCycle() ){
+
+                        $this->getLogger()->debug("Mise à jour PARENT");
                         try {
                             $newParentCode = $organization->getUpdatedParentInCycle();
                             if( $newParentCode ){
-                                $parent = $this->getOrganizationService()->getOrganizationRepository()->getOrganisationByCode($newParentCode)->getId();
-                                $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
+                                $parent = null;
+                                try {
+                                    $parent = $this->getOrganizationService()
+                                        ->getOrganizationRepository()
+                                        ->getOrganisationByCode($newParentCode)
+                                        ->getId();
+                                } catch (\Exception $e) {
+                                    $message = "Impossible d'ajouter le parent '$newParentCode' pour l'organisation '$organisationId', le parent n'existe pas dans OSCAR";
+                                    $repport->addwarning($message);
+                                    $this->getLogger()->warning("$message : " . $e->getMessage());
+                                }
+                                if( $parent ){
+                                    try {
+                                        $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
+                                    }catch (\Exception $e) {
+                                        $this->errorOut("Un problème est survenu lors de l'enregistrement du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
+                                        continue;
+                                    }
+
+                                }
                             } else {
-                                $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
+                                try {
+                                    $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
+                                } catch (\Exception $e) {
+                                    $this->errorOut("Un problème est survenu lors de la suppression du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
+                                    continue;
+                                }
                             }
                             $repository->flush($organization);
                         } catch (\Exception $e) {
-                            $this->getLogger()->error("Erreur : " . $e->getMessage());
+                            $this->getLogger()->error("Erreur inconnue : " . $e->getMessage());
                         }
                     }
 
                     if( $action == 'add' ){
-                        $this->getLogger()->info("Organisation '$organisationId' ajoutée");
+                        $message = "Organisation '$organisationId' ajoutée";
+                        $this->getLogger()->info($message);
+                        $repport->addadded($message);
                     } else {
-                        $this->getLogger()->info("Organisation '$organisationId' mise à jour");
+                        $message = "Organisation '$organisationId' mise à jour";
+                        $this->getLogger()->info($message);
+                        $repport->addupdated($message);
                     }
+                } else {
+                    $repport->addnothing("Organisation '$organisationId' déjà à jour");
                 }
             }
 
@@ -192,13 +241,14 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
                 try {
                     $organization = $repository->getObjectByConnectorID($this->getName(), $uid);
-                    $this->getLogger()->info("'$organization' n'est plus présent dans les données du connecteur");
 
                     if ($this->getOptionPurge()) {
                         $idsToDelete[] = $organization->getId();
+                    } else {
+                        $repport->addnotice("'$uid' n'est plus dans le connecteur");
                     }
                 } catch (\Exception $e) {
-                    $this->getLogger()->error($e->getMessage());
+                    $this->errorOut("Problème avec l'organisation $uid : " . $e->getMessage());
                 }
             }
             foreach ($idsToDelete as $id) {
@@ -211,11 +261,12 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
             }
         } catch (\Exception $e ){
-            $repport->adderror($e->getMessage());
+            $this->errorOut("Erreur inattendue : " . $e->getMessage());
             throw $e;
         }
 
         $repport->addnotice("FIN du traitement...");
+        $repport->addnotice("DUREE : " . $repport->getDuration() . " secondes");
         return $repport;
     }
 

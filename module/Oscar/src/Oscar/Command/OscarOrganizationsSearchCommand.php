@@ -68,8 +68,10 @@ class OscarOrganizationsSearchCommand extends OscarCommandAbstract
                                      $organisation->getFullName(),
                                      $organisation->getCode()));
             }
+            return self::SUCCESS;
         } catch (\Exception $e ){
             $io->error($e->getMessage() . "\n" . $e->getTraceAsString());
+            return self::FAILURE;
         }
     }
 }
