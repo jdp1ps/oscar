@@ -809,6 +809,11 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
     public function getSearchQuery($search, $filter)
     {
+        // Path 2024/12/09
+        if( !array_key_exists('sort', $filter )){
+            $filter['sort'] = 'hit';
+        }
+
         $qb = $this->getBaseQuery();
 
         if ($search != "") {
