@@ -1,7 +1,6 @@
 <template>
   <div style="position: relative;">
 
-    ITEMS : {{ items }}
     <loader :visible="loading" :text="loading"></loader>
 
     <modal title="Erreur" :visible="error">
@@ -269,6 +268,7 @@ import Loader from "../components/Loader.vue";
 import OrganizationAutoCompleter from "../components/OrganizationAutoComplete.vue";
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import Modal from "../components/Modal.vue";
+import {standalone} from "poi/lib/webpack/css-loaders.js";
 
 export default {
   components: {
@@ -280,11 +280,14 @@ export default {
   },
 
   props: {
-    url: {required: true},
+    urlNew: {required: true, type: String},
+    url: {required: true, type: String},
     title: {required: true},
-    items: { required: true, default: []},
-    entityLinkShow: { default: false },
-    manage: { default: false }
+    items: {required: true},
+    roles: {required: true},
+    entityLinkShow: {required: true, default: false},
+    manage: {required: true, default: true, type: Boolean},
+    standalone: {required: true, default: true, type: Boolean},
   },
 
   data() {
@@ -298,9 +301,8 @@ export default {
       loading: false,
       editMode: false,
 
-      urlNew: "",
-      manage: false,
-      roles: [],
+      standalone_items: [],
+      standalone_roles: [],
 
       // Utils
       toPaste: null
@@ -308,16 +310,18 @@ export default {
   },
 
   computed: {
-    entities(){
-      return this.items;
+    entities() {
+      if( this.items )
+        return this.items;
+      else return [];
     },
     sortedFull() {
-      return this.entities.sort((a, b) => a.enrolled - b.enrolled)
+      return this.items.sort((a, b) => a.enrolled - b.enrolled)
     },
 
     stacked() {
       let stacks = {};
-      if( this.items ){
+      if (this.items) {
         this.items.forEach(i => {
           let id = i.enrolled;
           if (!stacks.hasOwnProperty(id)) {
@@ -462,24 +466,44 @@ export default {
 
     fetch() {
       this.loading = "Chargement des données";
+      console.log("fetch");
       axios.get(this.url).then(ok => {
-            if (ok.data.roles) {
-              this.roles = ok.data.roles;
-            }
-            if (ok.data.manage) {
-              this.manage = ok.data.manage;
-            }
-            if (ok.data.urlNew) {
-              this.urlNew = ok.data.urlNew;
-            }
-            if (ok.data.persons) {
-              this.entities = ok.data.persons;
-            } else if (ok.data.organizations) {
-              this.entities = ok.data.organizations;
+        console.log(ok);
+            if (this.standalone) {
+              if (ok.data.roles) {
+                this.roles = ok.data.roles;
+              }
+              if (ok.data.manage) {
+                this.manage = ok.data.manage;
+              }
+              if (ok.data.urlNew) {
+                this.urlNew = ok.data.urlNew;
+              }
+              if (ok.data.persons) {
+                this.entities = ok.data.persons;
+              } else if (ok.data.organizations) {
+                this.entities = ok.data.organizations;
+              } else {
+                this.entities = ok.data;
+              }
             } else {
-              this.entities = ok.data;
+              console.log("MODE NON-STANDALONE");
+              let items = null;
+              if (ok.data.persons) {
+                items = ok.data.persons;
+              } else if (ok.data.organizations) {
+                items = ok.data.organizations;
+              } else {
+                items = ok.data;
+              }
+              this.$emit('Updated', {
+                datas: {
+                  items: items,
+                  urlNew: ok.data.urlNew,
+                  manage: ok.data.manage,
+                }
+              });
             }
-            this.$emit('Updated', {entries: this.entities});
           },
           ko => {
             this.error = "Erreur : " + ko.body;
@@ -516,7 +540,9 @@ export default {
   },
 
   mounted() {
-    //this.fetch();
+    if( this.standalone ){
+      this.fetch();
+    }
   }
 }
 

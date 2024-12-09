@@ -1,4 +1,4 @@
-import {createApp} from "vue";
+import { createApp } from "vue";
 import momentFilter from "./utils/MomentFilter.js";
 import filesize from "./utils/Filesize.js";
 import money from "./utils/MoneyFilter.js";
@@ -11,6 +11,7 @@ const app = createApp(Activity, {
     "debug-enabled": elemDatas.dataset.debugEnabled,
     "manage": elemDatas.dataset.manage
 });
+
 
 app.config.globalProperties.$filters = {
     timeAgo(date) {

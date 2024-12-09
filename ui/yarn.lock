@@ -489,6 +489,11 @@
     sass "^1.18.0"
     stylus "^0.54.5"
 
+"@vue/devtools-api@^6.0.0-beta.11":
+  version "6.6.4"
+  resolved "https://registry.yarnpkg.com/@vue/devtools-api/-/devtools-api-6.6.4.tgz#cbe97fe0162b365edc1dba80e173f90492535343"
+  integrity sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==
+
 "@vue/reactivity-transform@3.2.47":
   version "3.2.47"
   resolved "https://registry.yarnpkg.com/@vue/reactivity-transform/-/reactivity-transform-3.2.47.tgz"
@@ -2107,6 +2112,13 @@ vue@^3.2:
     "@vue/runtime-dom" "3.2.47"
     "@vue/server-renderer" "3.2.47"
     "@vue/shared" "3.2.47"
+
+vuex@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/vuex/-/vuex-4.0.2.tgz#f896dbd5bf2a0e963f00c67e9b610de749ccacc9"
+  integrity sha512-M6r8uxELjZIK8kTKDGgZTYX/ahzblnzC4isU1tpmEuOIIKmV+TRdc+H4s8ds2NuZ7wpUTdGRzJRtoj+lI+pc0Q==
+  dependencies:
+    "@vue/devtools-api" "^6.0.0-beta.11"
 
 w3c-xmlserializer@^5.0.0:
   version "5.0.0"
