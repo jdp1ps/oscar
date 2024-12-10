@@ -23,6 +23,8 @@ use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
 use Oscar\Traits\UseJsonFormatterService;
 use Oscar\Traits\UseJsonFormatterServiceTrait;
+use Oscar\Traits\UseProjectGrantApiService;
+use Oscar\Traits\UseProjectGrantApiServiceTrait;
 use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\FileSystemUtils;
@@ -38,10 +40,10 @@ use UnicaenSignature\Utils\SignatureConstants;
  * Class ContractDocumentController
  * @package Oscar\Controller
  */
-class ContractDocumentController extends AbstractOscarController implements UseServiceContainer, UseJsonFormatterService
+class ContractDocumentController extends AbstractOscarController implements UseServiceContainer, UseJsonFormatterService, UseProjectGrantApiService
 {
 
-    use UseServiceContainerTrait, UseJsonFormatterServiceTrait;
+    use UseServiceContainerTrait, UseJsonFormatterServiceTrait, UseProjectGrantApiServiceTrait;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES ACCESS
 
@@ -88,6 +90,8 @@ class ContractDocumentController extends AbstractOscarController implements UseS
     {
         return $this->getService($this->getServiceContainer(), ContractDocumentService::class);
     }
+
+
 
     /**
      * @return VersionnedDocumentService
@@ -555,11 +559,14 @@ class ContractDocumentController extends AbstractOscarController implements UseS
 
     public function activityAction(): JsonModel|Response
     {
+
         try {
             $id = $this->params()->fromRoute('activity_id');
 
             /** @var Activity $entity */
             $activity = $this->getActivityService()->getActivityById($id, true);
+
+            //return new JsonModel($this->getProjectGrantApiService()->getDocumentsActivity($activity->getId(), $this->url));
 
             $out = $this->baseJsonResponse();
 

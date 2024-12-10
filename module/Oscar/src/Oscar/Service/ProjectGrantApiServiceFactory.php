@@ -20,6 +20,7 @@ class ProjectGrantApiServiceFactory implements FactoryInterface
         $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $s->setProjectGrantService($container->get(ProjectGrantService::class));
         $s->setSpentService($container->get(SpentService::class));
+        $s->setServiceContainer($container);
         $s->setLoggerService($container->get('Logger'));
 
         return $s;

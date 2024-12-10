@@ -14,17 +14,38 @@ export default {
             return ko.message ? ko.message : "Erreur inconnue";
         }
     },
-    manageErrorResponse: function (response){
-        console.log(response.response.data);
+    manageErrorResponse: function (err){
+        console.log(err.response.data);
         let code = 500;
         let message = null;
-        if( response && response.response ){
-            code = response.response.status;
-            if( response.response.data ){
-                message = response.response.data.error ? response.response.data.error : response.response.data;
-            }
-            if( code === 403 ){
-                message = ERROR_MESSAGE_DISCONNECTED;
+
+        if( err && err.response ){
+
+            // Technique de Jean Baptiste pour récupérer les erreurs HTML
+            if (err.response.headers.get('content-type').includes('text/html')) {
+                var el = document.createElement('html');
+                el.innerHTML = err.response.data;
+                let errorHTML = el.querySelector('[id="oscar_fatal_error"]');
+                console.log(errorHTML);
+
+                if( !errorHTML ){
+                    errorHTML = el.querySelector('[id="contenu-principal"]');
+                }
+
+                if (!errorHTML) {
+                    errorHTML = el.querySelector('body');
+                }
+
+                message = errorHTML.innerHTML;
+            } else {
+                // Erreur JSON "clean"
+                code = err.response.status;
+                if( err.response.data ){
+                    message = err.response.data.error ? err.response.data.error : err.response.data;
+                }
+                if( code === 403 ){
+                    message = ERROR_MESSAGE_DISCONNECTED;
+                }
             }
         }
         return {

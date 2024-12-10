@@ -708,6 +708,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
         return false;
     }
 
+    private $_currentPerson = false;
     /**
      * Retourne la personne en fonction de l'authentification active.
      *
@@ -715,38 +716,52 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
      */
     public function getCurrentPerson()
     {
-        try {
-            $person = null;
-            if ($this->getUserContext()->getLdapUser()) {
-                // PATCH : Ensam (Matthieu MARC), 2020-08
-                $attribute = $this->getOscarConfigurationService()->getServiceLocator()->get(
-                    'Config'
-                )['unicaen-auth']['ldap_username'];
-                if (isset($attribute)) {
-                    $pseudo = $this->getUserContext()->getLdapUser()->getData($attribute);
+        if( $this->_currentPerson === false ){
+            try {
+                $person = null;
+                if ($this->getUserContext()->getLdapUser()) {
+                    // PATCH : Ensam (Matthieu MARC), 2020-08
+                    $attribute = $this->getOscarConfigurationService()->getServiceLocator()->get(
+                        'Config'
+                    )['unicaen-auth']['ldap_username'];
+                    if (isset($attribute)) {
+                        $pseudo = $this->getUserContext()->getLdapUser()->getData($attribute);
+                    }
+
+                    // PATCH Limoges
+                    // au cas ou le supannAliasLogin n'est pas fournis...
+                    if (!$pseudo) {
+                        $pseudo = $this->getUserContext()->getLdapUser()->getUid();
+                    }
+
+                    $person = $this->getPersonService()->getPersonByLdapLogin($pseudo);
+                }
+                elseif ($this->getUserContext()->getDbUser()) {
+                    $person = $this->getPersonService()->getPersonByLdapLogin(
+                        $this->getUserContext()->getDbUser()->getUsername()
+                    );
+                }
+                if ($person && !$person->isLdapActive()) {
+                    session_destroy();
+                    throw new OscarException(OscarException::ACCOUNT_DISABLED);
                 }
 
-                // PATCH Limoges
-                // au cas ou le supannAliasLogin n'est pas fournis...
-                if (!$pseudo) {
-                    $pseudo = $this->getUserContext()->getLdapUser()->getUid();
-                }
+                $this->getLoggerService()->debug("Calcule de la personne");
 
-                $person = $this->getPersonService()->getPersonByLdapLogin($pseudo);
+                $this->_currentPerson = $person;
+            } catch (NoResultException $ex) {
+                // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
+                // ... can happening with users stored in database directly
             }
-            elseif ($this->getUserContext()->getDbUser()) {
-                $person = $this->getPersonService()->getPersonByLdapLogin(
-                    $this->getUserContext()->getDbUser()->getUsername()
-                );
-            }
-            if ($person && !$person->isLdapActive()) {
-                session_destroy();
-                throw new OscarException(OscarException::ACCOUNT_DISABLED);
-            }
-            return $person;
-        } catch (NoResultException $ex) {
-            // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
-            // ... can happening with users stored in database directly
+            $this->_currentPerson = null;
+        }
+        return $this->_currentPerson;
+    }
+
+    public function getCurrentPersonId() :?int {
+        $currentPerson = $this->getCurrentPerson();
+        if( $this->getCurrentPerson() ){
+            return $this->getCurrentPerson()->getId();
         }
         return null;
     }

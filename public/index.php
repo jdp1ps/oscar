@@ -164,7 +164,7 @@ function oscar_exception($errno , $errstr, $errfile="UnknowFile", $errline=0, $e
                         Erreur d'execution PHP : <?= $msg ?>
                     </h1>
 
-                    <pre><?= $errorDisplayed ?></pre>
+                    <pre id="oscar_fatal_error"><?= $errorDisplayed ?></pre>
                     <p>
                         <small>Vous pouvez transmettre ce message à l'administateur Oscar pour l'aider à résoudre le
                             problème.

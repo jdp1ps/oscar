@@ -170,16 +170,15 @@
             <i class="icon-cubes"></i> :
             <em v-if="core.project === null">Aucun Projet</em>
             <span v-else>
-              {{ core.project }}
+              <a v-if="credentials.project.read" :href="core.project.url_show">
+                <strong v-if="core.project.acronym">{{ core.project.acronym }}&nbsp;</strong>
+                <em>{{ core.project.label }}</em>
+              </a>
+              <span v-else>
+                <strong>{{ core.project.acronym }} </strong>
+                <em>{{ core.project.label }}</em>
+              </span>
             </span>
-            <span :class="core.project.url_show ? 'link' : ''" @click="handlerShowProject()"
-                  v-if="core.project">
-              <strong v-if="core.project.acronym">{{ core.project.acronym }}</strong>
-              <em>&nbsp;{{ core.project.label }}</em>
-            </span>
-            <em v-else>
-              Aucun projet
-            </em>
           </h4>
 
           <h3>
@@ -279,7 +278,7 @@
           <h4><i class="icon-briefcase"></i>Numérotations</h4>
           <p class="texthighlight baseline">
             N° Oscar" : <strong>{{ core.numOscar }}</strong><br/>
-            Numéro financier : <strong v-if="core.PFI">{{ core.PFI }}</strong><strong
+            Numéro financier : <strong v-if="core.pfi">{{ core.pfi }}</strong><strong
               v-else>AUCUN</strong> -
             Ouverture du PFI le
             <time>{{ $filters.dateFull(core.dateOpened) }}</time>
@@ -364,35 +363,31 @@
                           :url-new="organizationsUrlNew"
                           @updated="handlerUpdateOrganizations"
           />
-          <!--           <EntityWithRole title="Organisation" :url="organizations.url"/> -->
         </section>
 
-        <!--
-        <section class="section-infos" id="documents" v-if="activity.documents.readable">
+        <section class="section-infos" id="documents" v-if="credentials.documents.read && documents">
           <h2><i class="icon-book"></i>Documents</h2>
           <activity-document
               @debug="handlerDebug"
               :debug-enabled="debugEnabled"
-              :url="activity.documents.url"
-              :url-upload-new-doc="activity.documents.url_upload_new_doc"
-              :url-sign-document="activity.documents.url_sign_document"
+              :url="documents.url"
+              :url-upload-new-doc="documents.url_upload_new_doc"
+              :url-sign-document="documents.url_sign_document"
           />
         </section>
-        -->
 
-        <!--
-        <section class="section-infos" id="notes" v-if="activity.notes.readable">
+        <section class="section-infos" id="notes" v-if="credentials.notes.read">
           <h2><i class="icon-comment"></i>Notes</h2>
           <activity-notes
-              :url="activity.notes.url"
-              :showallowed="activity.notes.readable"
-              :manageuserallowed="activity.notes.editable"
-              :manageadminallowed="activity.notes.manage"
-              :activityid="core.id"
-              :userid="activity.notes.personid"
+              :url="notes_url"
+              :showallowed="credentials.notes.read"
+              :manageuserallowed="credentials.notes.edit"
+              :manageadminallowed="credentials.notes.manage"
+              :items="notes"
+              @update="handlerUpdateNotes"
           />
         </section>
-        -->
+
         <!--
         <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
           <h2><i class="icon-book"></i>Feuille de temps</h2>
@@ -578,6 +573,9 @@ export default {
       budget: null,
       core: null,
       credentials: null,
+      documents: null,
+      notes: null,
+      notes_url: null,
       persons: null,
       personsUrl: null,
       personsUrlNew: null,
@@ -637,7 +635,11 @@ export default {
       this.error = err.message;
     },
 
-    handlerPaymentsUpdate(p) {
+    handlerUpdateNotes(d){
+      this.notes = d.entities;
+    },
+
+    handlerUpdatePayments(p) {
       this.payments = p;
     },
 
@@ -702,6 +704,11 @@ export default {
         this.budget = response.data.activity.datas.budget;
         this.core = response.data.activity.datas.core;
         this.persons = response.data.activity.datas.persons.entities;
+        this.documents = response.data.activity.datas.documents;
+
+        this.notes = response.data.activity.datas.notes.entities;
+        this.notes_url = response.data.activity.datas.notes.url;
+
         this.personsUrlNew = response.data.activity.datas.persons.urlNew;
         this.personsUrl = response.data.activity.datas.persons.url;
         this.rolesPersons = response.data.activity.datas.persons.roles;

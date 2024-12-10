@@ -1,5 +1,6 @@
 <template>
-  <section>
+  <section style="position: relative;">
+    <Loader :visible="loading" :text="loading" />
     <!-- ERREUR -->
     <div class="overlay" v-if="error" style="z-index: 101">
       <div class="overlay-content" style="max-width: 50%">
@@ -18,36 +19,34 @@
       </div>
     </div>
 
-    <!-- LOADING -->
-    <transition name="fade">
-        <div class="pending overlay" v-if="loading">
-            <div class="overlay-content">
-                <i class="icon-spinner animate-spin"></i>
-                {{ loading }}
-            </div>
-        </div>
-    </transition>
-    
     <!-- LISTE DES NOTES -->
     <nav class="admin-bar text-right">
       <a class="btn btn-default btn-xs" v-if="manageadminallowed || manageuserallowed" @click="handlerNew()"><i class="icon-doc-add"></i> Nouvelle </a>
+      <a class="btn btn-default btn-xs" @click="fetch()">
+        <i class="icon-ref"></i> Reload
+      </a>
     </nav>
-    <div class="note" v-for="c in notes" v-if="showallowed">
-        <div style="margin-bottom: 1em; display: flex; justify-content: space-between">
+    <div class="note" v-for="c in items">
+        <header class="note-header">
           <div>
             <span>
-              <i class="icon-calendar"></i> {{ $filters.dateFull(c.date_updated) }}
+              <i class="icon-calendar"></i> {{ $filters.dateFull(c.dateRef) }}
             </span>
             <span>
-              <i class="icon-user"></i> {{ c.created_by.first_name + ' ' +c.created_by.last_name }}
+              <i class="icon-user"></i> {{ c.createdBy.username }}
             </span>
           </div>
-          <div v-if="manageadminallowed || (manageuserallowed && c.created_by.id == this.userid)">
-            <button type="button" class="btn btn-danger" @click="handlerDelete(c.id)" style="margin-right: 1em;"><i class="icon-trash" style="background: transparent;"></i> Supprimer</button>
-            <button type="button" class="btn btn-default" @click="handleModify(c)"><i class="icon-pencil"></i> Modifier</button>
+          <div v-if="manageadminallowed || c.mine && manageuserallowed">
+            <button type="button" class="btn-xs btn btn-danger" @click="handlerDelete(c.id)" style="margin-right: 1em;">
+              <i class="icon-trash" style="background: transparent;"></i> Supprimer</button>
+            <button type="button" class="btn btn-xs btn-default" @click="handleModify(c)">
+              <i class="icon-pencil"></i> Modifier
+            </button>
           </div>
+        </header>
+        <div class="note-content">
+          {{ c.content }}
         </div>
-        <div style="white-space: pre; border: solid thin #999; padding: 0.8em;">{{ c.content }}</div>
     </div>
 
     <!-- Formulaire Modification/Version/Nouveau -->
@@ -88,6 +87,7 @@
 <script>
 
 import axios from 'axios';
+import Loader from '../components/Loader.vue';
 
 export default {
   directives: {
@@ -95,13 +95,16 @@ export default {
     focus: (el) => el.focus()
   },
 
+  components: {
+    Loader
+  },
+
   props: {
-    activityid: {default: null},
     url: {default: null},
     showallowed: { default: false },
     manageuserallowed: { default:false },
     manageadminallowed: { default:false },
-    userid: { default: null }
+    items: { default: [] }
   },
 
   data() {
@@ -125,7 +128,7 @@ export default {
 
     applyEdit() {
       this.loading = "Enregistrement en cours";
-      axios.post(this.url + "?activityid=" + this.activityid, { action: this.mode, note_id: this.editedNote.id, content: this.editedNote.content, activity_id: this.activityid }).then(
+      axios.post(this.url, { action: this.mode, note_id: this.editedNote.id, content: this.editedNote.content }).then(
           () => {
             this.fetch();
           }, err => {
@@ -138,16 +141,20 @@ export default {
     },
 
     fetch() {
-      axios.get(this.url + "?activityid=" + this.activityid).then(ok => {
-        this.notes = ok.data.notes;
+      this.loading = "Chargement des notes";
+      axios.get(this.url).then(ok => {
+        console.log("Update note", ok);
+        this.$emit("update", ok.data);
+        this.loading = null;
       }, err => {
         this.handleError(err);
+        this.loading = null;
       });
     },
 
     handlerDelete(noteID) {
       this.loading = "Suppression en cours";
-      axios.post(this.url + "?activityid=" + this.activityid, { action: "delete", note_id: noteID } ).then(
+      axios.post(this.url, { action: "delete", note_id: noteID } ).then(
           () => {
             this.fetch();
           }, err => {
@@ -179,21 +186,10 @@ export default {
       
       this.error = err.response.data;
     },
-
-    format(isodate) {
-      return new Intl.DateTimeFormat(
-          undefined,
-          {
-              dateStyle: 'short',
-              timeStyle: 'medium',
-          }).format(Date.parse(isodate));
-    }
   },
 
   mounted() {
-    if (this.showallowed) {
-      this.fetch();
-    }
+
   }
 
 }
@@ -203,8 +199,21 @@ export default {
 
 .note {
   background-color: white;
-  margin: 1em;
-  padding: 1em;
+  margin: 0 0 .5em;
+  padding: 0em;
+  .note-header {
+    padding: .2em 1em;
+    border-bottom: solid thin #DDD;
+    display: flex;
+    justify-content: space-between;
+  }
+  .note-content {
+    padding: .2em 1em;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
 }
+
+
 
 </style>

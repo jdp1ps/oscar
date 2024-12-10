@@ -9,10 +9,14 @@ use Laminas\View\Model\JsonModel;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityNote;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ProjectGrantApiService;
+use Oscar\Traits\UseProjectGrantApiService;
+use Oscar\Traits\UseProjectGrantApiServiceTrait;
 use Throwable;
 
-class ActivityNotesController extends AbstractOscarController
+class ActivityNotesController extends AbstractOscarController implements UseProjectGrantApiService
 {
+    use UseProjectGrantApiServiceTrait;
 
     public function apiAction()
     {
@@ -68,50 +72,52 @@ class ActivityNotesController extends AbstractOscarController
 
     private function getNotes() {
         $activity_id = $this->getRequest()->getQuery('activityid');
-        if (!$activity_id) {
-            throw new \Exception("activityid query param mandatory");
-        }
-
-        /** @var Activity $activity */
-        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
-        if (!$activity) {
-            throw new \Exception("activityid not found in DB");
-        }
-
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTES_SHOW, $activity);
-
-        $allNotes = $this->getEntityManager()
-                ->getRepository(ActivityNote::class)
-                ->createQueryBuilder('activitynotes')
-                ->select('activitynotes')
-                ->where('activitynotes.activity = :activity_id')
-                ->addOrderBy('COALESCE(activitynotes.dateUpdated, activitynotes.dateCreated)', 'DESC')
-                ->setParameter('activity_id', $activity_id)
-                ->getQuery()
-                ->getResult();
-
-        $json = [
-            'notes' => []
-        ];
-
-        /** @var ActivityNote $note */
-        foreach ($allNotes as $note) {
-            $date_updated = $note->getDateCreated()->format(DateTime::ATOM);
-            if ($note->getDateUpdated() != NULL) {
-                $date_updated = $note->getDateUpdated()->format(DateTime::ATOM);
-            }
-
-            $json['notes'][] = [
-                'id'          => $note->getId(),
-                'content'     => $note->getContent(),
-                'date_updated' => $date_updated,
-                'created_by' => [
-                    'id' => $note->getCreatedBy() ? $note->getCreatedBy()->getId() : -1,
-                    'first_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getFirstName() : "",
-                    'last_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getLastName() : "",
-                ],
-            ];
-        }
+//        if (!$activity_id) {
+//            throw new \Exception("activityid query param mandatory");
+//        }
+//
+//
+//        /** @var Activity $activity */
+//        $activity = $this->getEntityManager()->getRepository(Activity::class)->find($activity_id);
+//        if (!$activity) {
+//            throw new \Exception("activityid not found in DB");
+//        }
+//
+//        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_NOTES_SHOW, $activity);
+//
+//        $allNotes = $this->getEntityManager()
+//                ->getRepository(ActivityNote::class)
+//                ->createQueryBuilder('activitynotes')
+//                ->select('activitynotes')
+//                ->where('activitynotes.activity = :activity_id')
+//                ->addOrderBy('COALESCE(activitynotes.dateUpdated, activitynotes.dateCreated)', 'DESC')
+//                ->setParameter('activity_id', $activity_id)
+//                ->getQuery()
+//                ->getResult();
+//
+//        $json = [
+//            'notes' => []
+//        ];
+//
+//        /** @var ActivityNote $note */
+//        foreach ($allNotes as $note) {
+//            $date_updated = $note->getDateCreated()->format(DateTime::ATOM);
+//            if ($note->getDateUpdated() != NULL) {
+//                $date_updated = $note->getDateUpdated()->format(DateTime::ATOM);
+//            }
+//
+//            $json['notes'][] = [
+//                'id'          => $note->getId(),
+//                'content'     => $note->getContent(),
+//                'date_updated' => $date_updated,
+//                'created_by' => [
+//                    'id' => $note->getCreatedBy() ? $note->getCreatedBy()->getId() : -1,
+//                    'first_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getFirstName() : "",
+//                    'last_name'      => $note->getCreatedBy() ? $note->getCreatedBy()->getLastName() : "",
+//                ],
+//            ];
+//        }
+        $json = $this->getProjectGrantApiService()->getNotesActivity($activity_id, $this->url(), $this->getOscarUserContextService());
 
         $response = new JsonModel();
         $response->setVariables($json);

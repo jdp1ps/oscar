@@ -15,6 +15,7 @@ use Oscar\Service\JsonFormatterService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Oscar\Service\ProjectGrantApiService;
 
 class ContractDocumentControllerFactory implements FactoryInterface
 {
@@ -25,6 +26,7 @@ class ContractDocumentControllerFactory implements FactoryInterface
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setEntityManager($container->get(EntityManager::class));
+        $c->setProjectGrantApiService($container->get(ProjectGrantApiService::class));
         $c->setServiceContainer($container);
         $c->setJsonFormatterService($container->get(JsonFormatterService::class));
         return $c;

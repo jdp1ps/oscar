@@ -49,7 +49,7 @@
             <td>{{ item.enrolledLabel }}</td>
             <td>
               <select name="role" class=" form-control" v-model="item.roleId">
-                <option :value="role.id" v-for="role in roles">
+                <option :value="role.id" v-for="role in rolesList">
                   {{ role.label }}
                 </option>
               </select>
@@ -93,7 +93,7 @@
               <div class="form-group">
                 <label class=" control-label" for="role">Rôle</label>
                 <select name="role" class=" form-control" v-model="entityEdited.roleId">
-                  <option :value="role.id" v-for="role in roles">
+                  <option :value="role.id" v-for="role in rolesList">
                     {{ role.label }}
                   </option>
                 </select>
@@ -144,7 +144,7 @@
                             {{ entityNew.enroledLabel }}
                             <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
                             <span class="addon" v-if="entityNew.role">
-                                {{ roles[entityNew.role] }}
+                                {{ rolesList[entityNew.role] }}
                             </span>
                         </span>
             <div class="form-group" v-else>
@@ -157,7 +157,7 @@
             <div class="form-group">
               <label class=" control-label" for="role">Rôle</label>
               <select name="role" class=" form-control" v-model="entityNew.role">
-                <option :value="role.id" v-for="role in roles">
+                <option :value="role.id" v-for="role in rolesList">
                   {{ role.label }}
                 </option>
               </select>
@@ -303,6 +303,8 @@ export default {
 
       standalone_items: [],
       standalone_roles: [],
+      standalone_manage: false,
+      standalone_urlNew: null,
 
       // Utils
       toPaste: null
@@ -310,19 +312,31 @@ export default {
   },
 
   computed: {
+    rolesList(){
+      return this.standalone ? this.standalone_roles : this.roles;
+    },
+
+    urlNewUse(){
+      return this.standalone ? this.standalone_urlNew : this.urlNew;
+    },
+
     entities() {
-      if( this.items )
-        return this.items;
-      else return [];
+      if( this.standalone ){
+        return this.standalone_items;
+      } else {
+        if( this.items )
+          return this.items;
+        else return [];
+      }
     },
     sortedFull() {
-      return this.items.sort((a, b) => a.enrolled - b.enrolled)
+      return this.entities.sort((a, b) => a.enrolled - b.enrolled)
     },
 
     stacked() {
       let stacks = {};
-      if (this.items) {
-        this.items.forEach(i => {
+      if (this.entities) {
+        this.entities.forEach(i => {
           let id = i.enrolled;
           if (!stacks.hasOwnProperty(id)) {
             stacks[id] = {
@@ -436,7 +450,7 @@ export default {
       data.append('enroled', enroled);
       this.entityNew = null;
 
-      axios.post(this.urlNew + '/' + enroled, data).then(ok => {
+      axios.post(this.urlNewUse + '/' + enroled, data).then(ok => {
 
       }, ko => {
         this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
@@ -453,7 +467,7 @@ export default {
       data.append('action', 'multi');
       data.append('json', json);
 
-      axios.post(this.urlNew, data).then(ok => {
+      axios.post(this.urlNewUse, data).then(ok => {
 
       }, ko => {
         this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
@@ -471,20 +485,20 @@ export default {
         console.log(ok);
             if (this.standalone) {
               if (ok.data.roles) {
-                this.roles = ok.data.roles;
+                this.standalone_roles = ok.data.roles;
               }
               if (ok.data.manage) {
-                this.manage = ok.data.manage;
+                this.standalone_manage = ok.data.manage;
               }
               if (ok.data.urlNew) {
-                this.urlNew = ok.data.urlNew;
+                this.standalone_urlNew = ok.data.urlNew;
               }
               if (ok.data.persons) {
-                this.entities = ok.data.persons;
+                this.standalone_items = ok.data.persons;
               } else if (ok.data.organizations) {
-                this.entities = ok.data.organizations;
+                this.standalone_items = ok.data.organizations;
               } else {
-                this.entities = ok.data;
+                this.standalone_items = ok.data;
               }
             } else {
               console.log("MODE NON-STANDALONE");
@@ -536,7 +550,6 @@ export default {
         })
       }
     },
-
   },
 
   mounted() {
