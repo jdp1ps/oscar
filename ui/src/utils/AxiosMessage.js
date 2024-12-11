@@ -16,11 +16,11 @@ export default {
     },
     manageErrorResponse: function (err){
         console.log(err.response.data);
-        let code = 500;
+        let code = 504;
         let message = null;
 
-        if( err && err.response ){
-
+        if( err && err.response && err.response.data ){
+            code = err.response.status;
             // Technique de Jean Baptiste pour récupérer les erreurs HTML
             if (err.response.headers.get('content-type').includes('text/html')) {
                 var el = document.createElement('html');
@@ -35,11 +35,9 @@ export default {
                 if (!errorHTML) {
                     errorHTML = el.querySelector('body');
                 }
-
                 message = errorHTML.innerHTML;
             } else {
                 // Erreur JSON "clean"
-                code = err.response.status;
                 if( err.response.data ){
                     message = err.response.data.error ? err.response.data.error : err.response.data;
                 }
@@ -47,6 +45,8 @@ export default {
                     message = ERROR_MESSAGE_DISCONNECTED;
                 }
             }
+        } else {
+            message = err;
         }
         return {
             message: message,

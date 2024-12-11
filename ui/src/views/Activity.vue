@@ -388,24 +388,64 @@
           />
         </section>
 
+        <section id="timesheets" class="section-infos" v-if="credentials.timesheets.read">
+          <h2><i class="icon-book"></i>Feuille de temps</h2>
+
+          <h3>Général</h3>
+          <a :href="timesheetsUrl"
+             class="btn btn-primary">
+            <i class="icon-calendar"></i>
+            Informations générales et lots de travails
+          </a>
+
+          <a :href="timesheetsUrlSynthesis"
+             class="btn btn-primary">
+            <i class="icon-book"></i>
+            Résumé et documents
+          </a>
+
+          <section v-if="workpackages">
+            <h3>Déclarants</h3>
+            <a :href="d.url_details" v-for="d in timesheetsDeclarers" class="btn"
+               :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
+              {{ d.fullname }}
+            </a>
+
+            <h3>Valideurs</h3>
+            <div class="row">
+              <div class="col-md-4">
+                <h4>Validation projet</h4>
+                <span class="cartouche primary" v-for="p in timesheetsValidators.prj">
+                  {{ p.fullname }}
+                </span>
+              </div>
+              <div class="col-md-4">
+                <h4>Validation scientifique</h4>
+                <span class="cartouche primary" v-for="p in timesheetsValidators.sci">
+                  {{ p.fullname }}
+                </span>
+              </div>
+              <div class="col-md-4">
+                <h4>Validation administrative</h4>
+                <span class="cartouche primary" v-for="p in timesheetsValidators.adm">
+                  {{ p.fullname }}
+                </span>
+              </div>
+            </div>
+            <hr>
+            EDIT: {{ credentials.workpackages.edit }}
+            <workpackages-activity
+                :editable="credentials.workpackages.edit"
+                :workpackages="workpackages"
+                :url="workpackagesUrl"
+                :persons="persons"/>
+          </section>
+
+        </section>
         <!--
         <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
           <h2><i class="icon-book"></i>Feuille de temps</h2>
           <section id="timesheets" v-if="activity.timesheets.enabled">
-            <section v-if="activity.timesheets.declarers.length">
-              <h3>Général</h3>
-              <a :href="activity.timesheets.url_global"
-                 class="btn btn-primary">
-                <i class="icon-calendar"></i>
-                Informations générales
-              </a>
-              <a :href="activity.timesheets.url_synthesis"
-                 class="btn btn-primary">
-                <i class="icon-book"></i>
-                Résumé et documents
-              </a>
-            </section>
-
             <section class="declarers">
               <h3>Déclarants</h3>
               <div v-if="activity.timesheets.declarers.length">
@@ -535,8 +575,7 @@ import Milestones from "./Milestones.vue";
 import Modal from "../components/Modal.vue";
 import Payments from "./Payments.vue";
 import PersonCartouche from "../components/PersonCartouche.vue";
-import Workpackage from "./Workpackage.vue";
-import WorkpackageUI from "./WorkpackageUI.vue";
+import WorkpackagesActivity from "./WorkpackagesActivity.vue";
 import AxiosMessage from "../utils/AxiosMessage.js";
 import ActivityNotes from "./ActivityNotes.vue";
 
@@ -559,8 +598,7 @@ export default {
     PersonCartouche,
     Milestones,
     Modal,
-    Workpackage,
-    WorkpackageUI,
+    WorkpackagesActivity
   },
 
   props: {
@@ -573,18 +611,35 @@ export default {
       budget: null,
       core: null,
       credentials: null,
+
       documents: null,
+
+      milestones: null,
+      milestonesUrl: null,
+
       notes: null,
       notes_url: null,
+
       persons: null,
       personsUrl: null,
       personsUrlNew: null,
+
       payments: null,
+
       rolesOrganizations: null,
       rolesPersons: null,
+
+      timesheetsDeclarers: null,
+      timesheetsValidators: null,
+      timesheetsUrl: null,
+      timesheetsUrlSynthesis: null,
+
       organizations: null,
       organizationsUrl: null,
       organizationsUrlNew: null,
+
+      workpackages: null,
+      workpackagesUrl: null,
 
 
       activity: {},
@@ -635,7 +690,7 @@ export default {
       this.error = err.message;
     },
 
-    handlerUpdateNotes(d){
+    handlerUpdateNotes(d) {
       this.notes = d.entities;
     },
 
@@ -712,10 +767,28 @@ export default {
         this.personsUrlNew = response.data.activity.datas.persons.urlNew;
         this.personsUrl = response.data.activity.datas.persons.url;
         this.rolesPersons = response.data.activity.datas.persons.roles;
+
         this.organizations = response.data.activity.datas.organizations.entities;
         this.organizationsUrl = response.data.activity.datas.organizations.url;
         this.organizationsUrlNew = response.data.activity.datas.organizations.urlNew;
         this.rolesOrganizations = response.data.activity.datas.organizations.roles;
+
+        if (response.data.activity.datas.timesheets) {
+          this.timesheetsValidators = response.data.activity.datas.timesheets.validators;
+          this.timesheetsDeclarers = response.data.activity.datas.timesheets.declarers;
+          this.timesheetsUrl = response.data.activity.datas.timesheets.url;
+          this.timesheetsUrlSynthesis = response.data.activity.datas.timesheets.urlSynthesis;
+        } else {
+          console.log("pas de donnée FEUILLE DE TEMPS");
+        }
+
+        if (response.data.activity.datas.workpackages) {
+          this.workpackages = response.data.activity.datas.workpackages.entities;
+          this.workpackagesUrl = response.data.activity.datas.workpackages.url;
+        } else {
+          console.log("pas de donnée LOTS DE TRAVAIL");
+        }
+
         this.credentials = response.data.activity.credentials;
 
       }, error => {

@@ -88,6 +88,7 @@
 
 import axios from 'axios';
 import Loader from '../components/Loader.vue';
+import AxiosMessage from "../utils/AxiosMessage.js";
 
 export default {
   directives: {
@@ -183,8 +184,8 @@ export default {
           return;
         }
       }
-      
-      this.error = err.response.data;
+
+      this.error = AxiosMessage.manageErrorResponse(err);
     },
   },
 

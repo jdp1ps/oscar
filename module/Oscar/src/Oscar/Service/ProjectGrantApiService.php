@@ -13,9 +13,12 @@ use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\OrganizationRole;
+use Oscar\Entity\Person;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
 use Oscar\Entity\Role;
+use Oscar\Entity\WorkPackage;
+use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
@@ -48,34 +51,42 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return [
             'read'           => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity),
             'edit'           => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity),
+            'administration' => [
+                'read' => $oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN),
+            ],
+            'budget'         => [
+                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
+                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity),
+            ],
             'core'           => [
                 'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
                 'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
             ],
-            'project'        => [
-                'read' => $oscarUserContext->hasPrivileges(Privileges::PROJECT_SHOW, $activity->getProject()),
-                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT, $activity),
-            ],
             'documents'      => [
                 'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_DOCUMENT_SHOW, $activity->getProject()),
             ],
-            'persons'        => [
-                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
-                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
-                'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
+            'notes'          => [
+                'read'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity),
+                'edit'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity),
+                'manage' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity),
+            ],
+            'milestones'     => [
+                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity),
+                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity),
             ],
             'organizations'  => [
                 'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity),
                 'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity),
                 'show' => $oscarUserContext->hasPrivileges(Privileges::ORGANIZATION_SHOW),
             ],
-            'milestones'     => [
-                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity),
-                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity),
+            'persons'        => [
+                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
+                'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
             ],
-            'budget'         => [
-                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
-                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity),
+            'project'        => [
+                'read' => $oscarUserContext->hasPrivileges(Privileges::PROJECT_SHOW, $activity->getProject()),
+                'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT, $activity),
             ],
             'spents'         => [
                 'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
@@ -88,58 +99,169 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     $activity
                 ),
             ],
-            'notes'          => [
-                'read'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity),
-                'edit'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity),
-                'manage' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_ADMIN, $activity),
-            ],
-            'administration' => [
-                'read' => $oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN),
+            'workpackages'   => [
+                'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_SHOW, $activity),
+                'edit' => $oscarUserContext->hasPrivileges(
+                    Privileges::ACTIVITY_WORKPACKAGE_MANAGE,
+                    $activity
+                ),
             ]
         ];
     }
 
-    public function getActivityJson(int $id, ?Url $urlPlugin = null, ?OscarUserContext $oscarUserContext = null): array
-    {
+    public function getActivityJson(
+        int $id,
+        ?Url $urlPlugin = null,
+        ?OscarUserContext $oscarUserContext = null,
+        ?string $perimeter = null
+    ): array {
         $credentials = $this->getActivityJsonCredentials($id, $oscarUserContext);
+
+        $out = [
+            'date'        => date('Y-m-d H:i:s'),
+            'error'       => null,
+            'warnings'    => null,
+            'perimeter'   => $perimeter,
+            'credentials' => null,
+            'datas'       => null
+        ];
+
         if ($credentials['read'] !== true) {
-            return [];
+            $out['error'] = 'access denied';
+            return $out;
         }
         else {
-            $datas = $this->getActivityJsonDatas($id, $urlPlugin);
-            $datas['credentials'] = $credentials;
-            foreach ($datas['datas'] as $key => $content) {
+            $out['credentials'] = $credentials;
+            $out['datas'] = $this->getActivityJsonDatas($id, $urlPlugin, $perimeter);
+            foreach ($out['datas'] as $key => $content) {
                 if (!array_key_exists($key, $credentials)) {
-                    unset($datas['datas'][$key]);
+                    unset($out['datas'][$key]);
                 }
                 else {
                     if ($credentials[$key]['read'] !== true) {
-                        unset($datas['datas'][$key]);
+                        unset($out['datas'][$key]);
                     }
                 }
             }
-            return $datas;
+            return $out;
         }
+    }
+
+    const PERIMETER_ADMINISTRATION = 'administration';
+    const PERIMETER_BUDGET = 'budget';
+    const PERIMETER_CORE = 'core';
+    const PERIMETER_DOCUMENTS = 'documents';
+    const PERIMETER_NOTES = 'notes';
+    const PERIMETER_MILESTONES = 'milestones';
+    const PERIMETER_ORGANIZATIONS = 'organizations';
+    const PERIMETER_PERSONS = 'persons';
+    const PERIMETER_PROJECT = 'project';
+    const PERIMETER_SPENTS = 'spents';
+    const PERIMETER_TIMESHEETS = 'timesheets';
+    const PERIMETER_WORKPACKAGES = 'workpackages';
+
+
+    public function getPerimetersKeys(): array
+    {
+        return [
+            self::PERIMETER_ADMINISTRATION,
+            self::PERIMETER_BUDGET,
+            self::PERIMETER_CORE,
+            self::PERIMETER_DOCUMENTS,
+            self::PERIMETER_MILESTONES,
+            self::PERIMETER_NOTES,
+            self::PERIMETER_ORGANIZATIONS,
+            self::PERIMETER_PROJECT,
+            self::PERIMETER_PERSONS,
+            self::PERIMETER_SPENTS,
+            self::PERIMETER_TIMESHEETS,
+            self::PERIMETER_WORKPACKAGES,
+        ];
     }
 
 
     public function getActivityJsonDatas(
         int $id,
         ?Url $urlPlugin = null,
+        ?string $perimeters = null
     ): array {
+        if ($perimeters !== null) {
+            $perimeters = array_intersect(explode(',', $perimeters), $this->getPerimetersKeys());
+        }
+        else {
+            $perimeters = $this->getPerimetersKeys();
+        }
+
         /** @var Activity $activity */
         $activity = $this->getActivityRepository()->find($id);
 
         /** @var OscarUserContext $oscarUserContext */
         $oscarUserContext = $this->getServiceContainer()->get(OscarUserContext::class);
-        $currentUserId = -1;
-        if ($oscarUserContext->getCurrentPerson()) {
-            $currentUserId = $oscarUserContext->getCurrentPerson()->getId();
+
+        $currentUserId = $oscarUserContext->getCurrentPersonId() ?: -1;
+
+        $datas = [
+            "api" => "Oscar Activity API"
+        ];
+
+        foreach ($perimeters as $perimeter) {
+            switch ($perimeter) {
+                case self::PERIMETER_ADMINISTRATION:
+                    $datas[self::PERIMETER_ADMINISTRATION] = [];
+                    break;
+                case self::PERIMETER_BUDGET:
+                    $datas[self::PERIMETER_BUDGET] = $this->getBudgetActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_CORE:
+                    $datas[self::PERIMETER_CORE] = $this->getCoreActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_DOCUMENTS:
+                    $datas[self::PERIMETER_DOCUMENTS] = $this->getDocumentsActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_MILESTONES:
+                    $datas[self::PERIMETER_MILESTONES] = $this->getMilestonesActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_NOTES:
+                    $datas[self::PERIMETER_NOTES] = $this->getNotesActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_ORGANIZATIONS:
+                    $datas[self::PERIMETER_ORGANIZATIONS] = $this->getOrganizationsActivity(
+                        $activity->getId(),
+                        $urlPlugin
+                    );
+                    break;
+                case self::PERIMETER_PERSONS:
+                    $datas[self::PERIMETER_PERSONS] = $this->getPersonsActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_TIMESHEETS:
+                    $datas[self::PERIMETER_TIMESHEETS] = $this->getTimesheetsActivity($activity->getId(), $urlPlugin);
+                    break;
+                case self::PERIMETER_WORKPACKAGES:
+                    $datas[self::PERIMETER_WORKPACKAGES] = $this->getWorkpackagesActivity(
+                        $activity->getId(),
+                        $urlPlugin
+                    );
+                    break;
+            }
         }
+
+        return $datas;
+    }
+
+    protected function getContractDocumentService(): ContractDocumentService
+    {
+        return $this->getServiceContainer()->get(ContractDocumentService::class);
+    }
+
+    public function getCoreActivity(int $id, ?Url $urlPlugin): array
+    {
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
 
         $types = $this->getProjectGrantService()->getActivityTypeService()->getActivityTypeChain(
             $activity->getActivityType()
         );
+
         if (count($types) > 0 && $types[0]->getLabel() === 'ROOT') {
             array_shift($types);
         }
@@ -159,65 +281,53 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'url_show'    => $urlPlugin->fromRoute('project/show', ['id' => $activity->getProject()->getId()])
             ];
         }
-
-        // TODO (Récupération du cache)
-        $datas = [
-            'id'          => $activity->getId(),
-            'dateCache'   => $this->formatDateTime($activity->getDateCache()),
-            'credentials' => [],
-            'datas'       => [
-                'core'          => [
-                    'id'           => $activity->getId(),
-                    'label'        => $activity->getLabel(),
-                    'numOscar'     => $activity->getOscarNum(),
-                    'status'       => $activity->getStatus(),
-                    'status_label' => $activity->getStatusLabel(),
-                    'pfi'          => $activity->getCodeEOTP(),
-                    'acronym'      => $activity->getAcronym(),
-                    'project'      => $project,
-                    'disciplines'  => $activity->getDisciplinesArray(),
-                    'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
-                    'type_chain'   => $typesJson,
-                    'type_id'      => $activity->getActivityType() ? $activity->getActivityType()->getId() : null,
-                    'dateStart'    => $this->formatDateTime($activity->getDateStart()),
-                    'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
-                    'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
-                    'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
-                    'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
-                    'urls'         => [
-                        'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
-                    ],
-                    'userid'       => $currentUserId,
-                ],
-                'budget'        => [
-                    'amount'                         => $activity->getAmount(),
-                    'montant'                        => $activity->getAmount(),
-                    'currency'                       => $activity->getCurrency()->toJson(),
-                    'fraisDeGestion'                 => $activity->getFraisDeGestionDisplay(),
-                    'fraisDeGestionPartHebergeur'    => $activity->getFraisDeGestionPartHebergeurDisplay(),
-                    'fraisDeGestionPartUnite'        => $activity->getFraisDeGestionPartUniteDisplay(),
-                    'fraisDeGestionPartGestionnaire' => $activity->getFraisDeGestionPartGestionnaireDisplay(),
-                    'tva'                            => (string)$activity->getTva(),
-                    'assietteSubventionnable'        => $activity->getAssietteSubventionnable(),
-                ],
-                'persons'       => $this->getPersonsActivity($activity->getId(), $urlPlugin),
-                'organizations' => $this->getOrganizationsActivity($activity->getId(), $urlPlugin),
-                'milestones'    => $this->getMilestonesActivity($activity->getId(), $urlPlugin),
-                'documents'     => $this->getDocumentsActivity($activity->getId(), $urlPlugin),
-                'notes'         => $this->getNotesActivity($activity->getId(), $urlPlugin, $oscarUserContext),
+        return [
+            'id'           => $activity->getId(),
+            'label'        => $activity->getLabel(),
+            'numOscar'     => $activity->getOscarNum(),
+            'status'       => $activity->getStatus(),
+            'status_label' => $activity->getStatusLabel(),
+            'pfi'          => $activity->getCodeEOTP(),
+            'acronym'      => $activity->getAcronym(),
+            'project'      => $project,
+            'disciplines'  => $activity->getDisciplinesArray(),
+            'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
+            'type_chain'   => $typesJson,
+            'type_id'      => $activity->getActivityType() ? $activity->getActivityType()->getId() : null,
+            'dateStart'    => $this->formatDateTime($activity->getDateStart()),
+            'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
+            'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
+            'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
+            'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
+            'urls'         => [
+                'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
             ]
         ];
-
-        return $datas;
     }
 
-    protected function getContractDocumentService(): ContractDocumentService
+    public function getBudgetActivity(int $id, ?Url $urlPlugin): array
     {
-        return $this->getServiceContainer()->get(ContractDocumentService::class);
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
+
+        return [
+            'amount'                         => $activity->getAmount(),
+            'montant'                        => $activity->getAmount(),
+            'currency'                       => $activity->getCurrency()->toJson(),
+            'fraisDeGestion'                 => $activity->getFraisDeGestionDisplay(),
+            'fraisDeGestionPartHebergeur'    => $activity->getFraisDeGestionPartHebergeurDisplay(),
+            'fraisDeGestionPartUnite'        => $activity->getFraisDeGestionPartUniteDisplay(),
+            'fraisDeGestionPartGestionnaire' => $activity->getFraisDeGestionPartGestionnaireDisplay(),
+            'tva'                            => (string)$activity->getTva(),
+            'assietteSubventionnable'        => $activity->getAssietteSubventionnable(),
+        ];
     }
 
     public function getDocumentsActivity(int $id, ?Url $urlPlugin = null): array
     {
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
+
         $out = [
             'url'                => $urlPlugin->fromRoute('contractdocument/activity', ['activity_id' => $id]),
             'url_upload_new_doc' => $urlPlugin->fromRoute('contractdocument/upload', ['idactivity' => $id]),
@@ -445,15 +555,15 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 $createdBy_username = $note->getCreatedBy()->getFullname();
             }
             $notes[] = [
-                'id'             => $note->getId(),
-                'content'        => $note->getContent(),
-                'dateCreated'    => $this->formatDateTime($note->getDateCreated()),
-                'dateUpdated'    => $this->formatDateTime($note->getDateUpdated()),
-                'dateRef'    => $note->getDateUpdated() ?
+                'id'          => $note->getId(),
+                'content'     => $note->getContent(),
+                'dateCreated' => $this->formatDateTime($note->getDateCreated()),
+                'dateUpdated' => $this->formatDateTime($note->getDateUpdated()),
+                'dateRef'     => $note->getDateUpdated() ?
                     $this->formatDateTime($note->getDateUpdated()) :
                     $this->formatDateTime($note->getDateCreated()),
-                'mine'           => $oscarUserContext ? $oscarUserContext->getCurrentPersonId() == $createdBy_id : false,
-                'createdBy'      => [
+                'mine'        => $oscarUserContext ? $oscarUserContext->getCurrentPersonId() == $createdBy_id : false,
+                'createdBy'   => [
                     'id'       => $createdBy_id,
                     'username' => $createdBy_username,
                 ]
@@ -642,6 +752,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'enrollerLabel' => $activity->getLabel(),
                 'enrolled'      => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
+                'displayname'   => $activityPerson->getPerson()->getDisplayName(),
                 'start'         => $this->formatDateTime($activityPerson->getDateStart()),
                 'end'           => $this->formatDateTime($activityPerson->getDateEnd()),
             ];
@@ -677,5 +788,106 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     function getActivityRepository()
     {
         return $this->getEntityManager()->getRepository('Oscar\Entity\Activity');
+    }
+
+    public function getWorkpackagesActivity(int $id, ?Url $urlPlugin = null): array
+    {
+        $out = [
+            'entities' => []
+        ];
+
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
+
+        /** @var WorkPackage $workPackage */
+        foreach ($activity->getWorkPackages() as $workPackage) {
+            $wp = $workPackage->toArray();
+//            $wp = [
+//                'id'    => $workPackage->getId(),
+//                'label' => $workPackage->getLabel(),
+//                'code' => $workPackage->getCode(),
+//                'description' => $workPackage->getDescription(),
+//                'persons' => []
+//            ];
+//
+//            /** @var WorkPackagePerson $personWorkpackage */
+//            foreach ($workPackage->getPersons() as $personWorkpackage) {
+//                $wp['persons'][] = [
+//                    'id'    => $personWorkpackage->getId(),
+//                    'fullname' => $personWorkpackage->getPerson()->getFullname(),
+//                    'duration' => $personWorkpackage->getDuration()
+//                ];
+//            }
+            $out['entities'][] = $wp;
+        }
+        return $out;
+    }
+
+    public function getTimesheetsActivity(
+        int $id,
+        ?Url $urlPlugin = null,
+        ?OscarUserContext $oscarUserContext = null
+    ): array {
+        /** @var Activity $activity */
+        $activity = $this->getActivityRepository()->find($id);
+
+        $out = [
+            'declarers'    => null,
+            'validators'   => [
+                'prj' => [],
+                'sci' => [],
+                'adm' => [],
+            ],
+            'url'          => $urlPlugin->fromRoute('contract/timesheet', ['id' => $activity->getId()]),
+            'urlSynthesis' => $urlPlugin->fromRoute(
+                    'timesheet/synthesis'
+                ) . '?activity_id=' . $activity->getId(),
+        ];
+
+
+        /** @var TimesheetService $timesheetService */
+        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
+
+        ////////////////////////////////////////////////////////////////////////////////// Validateurs
+        /** @var Person $validator */
+        foreach ($timesheetService->getValidatorsPrj($activity) as $validator) {
+            $out['validators']['prj'][] = [
+                'id'       => $validator->getId(),
+                'fullname' => $validator->getFullname(),
+            ];
+        }
+
+        foreach ($timesheetService->getValidatorsSci($activity) as $validator) {
+            $out['validators']['sci'][] = [
+                'id'       => $validator->getId(),
+                'fullname' => $validator->getFullname(),
+            ];
+        }
+
+        foreach ($timesheetService->getValidatorsAdm($activity) as $validator) {
+            $out['validators']['adm'][] = [
+                'id'       => $validator->getId(),
+                'fullname' => $validator->getFullname(),
+            ];
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////// Déclarants
+        $declarers = [];
+        foreach ($activity->getPersonsDeep() as $personActivity) {
+            if ($activity->hasDeclarant($personActivity->getPerson())) {
+                $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($activity);
+                $declarers[] = [
+                    'id'             => $personActivity->getPerson()->getId(),
+                    'fullname'       => $personActivity->getPerson()->getFullname(),
+                    'hasDeclaration' => $hasDeclaration,
+                    'url_details'    => $urlPlugin->fromRoute('timesheet/resume')
+                        . '?person_id='
+                        . $personActivity->getPerson()->getId(),
+                ];
+            }
+        }
+        $out['declarers'] = $declarers;
+
+        return $out;
     }
 }
