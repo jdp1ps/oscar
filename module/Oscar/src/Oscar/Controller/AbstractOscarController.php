@@ -299,4 +299,9 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
         $input = json_decode($inputJSON, TRUE);
         return $input;
     }
+
+    protected function getJsonREST()
+    {
+        return $this->getJsonPosted();
+    }
 }

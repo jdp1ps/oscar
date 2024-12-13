@@ -746,14 +746,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     throw new OscarException(OscarException::ACCOUNT_DISABLED);
                 }
 
-                $this->getLoggerService()->debug("Calcule de la personne");
+                $this->getLoggerService()->debug("Calcule de la personne : $person");
 
                 $this->_currentPerson = $person;
             } catch (NoResultException $ex) {
                 // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
                 // ... can happening with users stored in database directly
             }
-            $this->_currentPerson = null;
         }
         return $this->_currentPerson;
     }

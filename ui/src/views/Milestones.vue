@@ -182,15 +182,13 @@
       </div>
     </transition>
 
-    <section class="list" v-if="jalons != null">
-      <nav class="text-right">
-        <a href="#" @click.prevent="handlerNew" v-show="creatable" class="btn btn-xs btn-default">
-          <i class="icon-calendar-plus-o"></i>
-          Nouveau Jalon
-        </a>
-
-      </nav>
-
+    <nav class="admin-bar" v-if="manage">
+      <a href="#" @click.prevent="handlerNew" class="btn btn-xs btn-default">
+        <i class="icon-calendar-plus-o"></i>
+        Nouveau Jalon
+      </a>
+    </nav>
+    <section class="list" v-if="milestones != null">
       <milestone :milestone="m" v-for="m in milestones" :key="m.id"
                  @valid="handlerValid"
                  @unvalid="handlerUnvalid"
@@ -201,15 +199,13 @@
                  @edit="handlerEdit"
       />
     </section>
-
-    <nav class="text-right">
-
-    </nav>
+    <div class="alert" v-else>
+      Aucun jalon
+    </div>
   </section>
 
 </template>
 <script>
-// nodejs node_modules/.bin/poi watch --format umd --moduleName  Milestones --filename.js Milestones.js --dist public/js/oscar/dist public/js/oscar/src/Milestones.vue
 
 //////////////////////////////////////////////////////////////
 import MilestoneItem from './MilestoneItem.vue'
@@ -221,7 +217,10 @@ import axios from 'axios';
 export default {
   props: {
     'url': {'required': true},
+    'manage': {'required': true},
     // Payements chargés depuis un autre composant
+    'items' : { default: [], type: Array },
+    'types' : { default: [], type: Array },
     'payments': {'required': false, default: [], type: Array}
   },
 
@@ -235,7 +234,6 @@ export default {
       formData: null,
       pendingMsg: "",
       creatable: false,
-      manage: false,
       deleteMilestone: null,
       editMilestone: null,
       validMilestone: null,
@@ -249,10 +247,6 @@ export default {
       actionMessage: "",
       actionMilestone: null,
       model: {},
-
-      // données chargées
-      jalons: [],
-      types: []
     }
   },
 
@@ -311,13 +305,13 @@ export default {
         });
       });
 
-      this.jalons.forEach(milestone => {
+      this.items.forEach(milestone => {
         milestones.push(milestone);
       });
 
       milestones.sort((a, b) => {
-        let vA = moment(a.dateStart.date).unix();
-        let vB = moment(b.dateStart.date).unix();
+        let vA = moment(a.dateStart).unix();
+        let vB = moment(b.dateStart).unix();
         return vA - vB;
       });
 
@@ -415,7 +409,7 @@ export default {
       this.formData = {
         id: 0,
         type: JSON.parse(JSON.stringify(this.types[0])),
-        dateStart: this.getMoment()().format('YYYY-MM-DD'),
+        dateStart: moment().format('Y-M-D HH:mm:ss'),
         comment: ""
       };
     },
@@ -533,7 +527,7 @@ export default {
      */
     getMilestones() {
       this.pendingMsg = "Chargement des jalons : " + this.url;
-
+      /*
       axios.get(this.url).then(
           success => {
             console.log('milestones', success);
@@ -548,24 +542,13 @@ export default {
       ).then(n => {
         this.pendingMsg = "";
       });
-    },
 
-    ////////////////////////////////////////////////////////////////
-    //
-    // DEPENDENCIES
-    //
-    ////////////////////////////////////////////////////////////////
-
-    /**
-     * @return moment
-     */
-    getMoment() {
-      return moment;
+       */
     },
   },
 
   mounted() {
-    this.getMilestones()
+
   }
 }
 </script>

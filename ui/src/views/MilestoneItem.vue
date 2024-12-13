@@ -1,13 +1,13 @@
 <template>
   <article class="card xs jalon" :class="cssClass">
-    <strong> {{ statutText }}</strong>
+    <strong v-if="statutText">&nbsp;{{ statutText }}</strong>
     <time :datetime="milestone.dateStart" class="time-value">
-      {{ $filters.date(milestone.dateStart.date) }}
+      {{ $filters.date(milestone.dateStart) }}
       <span class="ago">
-       ({{ $filters.timeAgo(milestone.dateStart.date) }})
+       &nbsp;({{ $filters.timeAgo(milestone.dateStart) }})
       </span>
     </time>
-    <strong class="card-title">
+    <strong class="card-title" :class="{'text-private': milestone.isPayment}">
       {{ milestone.type.label }}
       <small v-if="inProgress"> (En cours par <strong>{{ finishedPerson }}</strong>)</small>
     </strong>
@@ -58,6 +58,7 @@
         <i class="icon-edit"></i>
       </a>
     </nav>
+
   </article>
 </template>
 <script>

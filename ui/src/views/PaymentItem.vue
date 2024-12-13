@@ -1,7 +1,7 @@
 <template>
     <article class="card xs payment" :class="cssClass">
         <div class="heading">
-            <strong class="amount">
+            <strong class="amount text-private">
                 <i class="icon-attention-1" v-if="late" title="Ce versement prévisionnel est en retard" style="color: darkred"></i>
                 {{ $filters.money(payment.amount) }} {{ payment.currency.symbol }}
                 <div v-if="payment.currency.symbol !== '€'">
@@ -13,7 +13,7 @@
                 Écart de paiement
             </div>
             <div class="date" v-else>
-                    <time v-if="useDate" :datetime="useDate.date" class="date">
+                    <time v-if="useDate" :datetime="useDate" class="date">
                         <i class="icon-calendar"></i> {{ $filters.dateFull(useDate) }}</time>
                     <span class="error" v-else>
                         Problème avec la date <code>{{ useDate }}</code>
@@ -50,7 +50,7 @@ import moment from "moment";
                 if( this.payment.status === 1 ){
                     if( !this.payment.datePredicted ) return true;
                     let now = moment().unix();
-                    let predicted = moment(this.payment.datePredicted.date).unix();
+                    let predicted = moment(this.payment.datePredicted).unix();
                     return predicted < now;
                 }
                 return false;
@@ -59,10 +59,10 @@ import moment from "moment";
             useDate(){
                 // Payment réalisé
                 if( this.payment.status === 2 ){
-                    return this.payment.datePayment.date;
+                    return this.payment.datePayment;
                 }
                 if( this.payment.status === 1){
-                    return this.payment.datePredicted.date;
+                    return this.payment.datePredicted;
                 }
                 return null;
             },

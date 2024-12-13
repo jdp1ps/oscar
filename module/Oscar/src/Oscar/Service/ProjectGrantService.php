@@ -2525,45 +2525,6 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getEntityManager()->getRepository(ActivityPayment::class)->find($idActivityPayment);
     }
 
-    /**
-     * @param ActivityPayment $activityPayment
-     * @param bool|true $throw
-     * @return bool
-     * @throws \Exception
-     */
-    public function deleteActivityPayment(ActivityPayment $activityPayment, $throw = true)
-    {
-        try {
-            $activityPayment->getActivity()->touch();
-            $this->getEntityManager()->remove($activityPayment);
-            $this->getEntityManager()->flush();
-
-            $this->getActivityLogService()->addUserInfo(
-                sprintf(
-                    "a supprimer le verserment de %s %s sur l'activité %s",
-                    $activityPayment->getAmount(),
-                    $activityPayment->getCurrency(),
-                    $activityPayment->getActivity()->log()
-                ),
-                LogActivity::CONTEXT_ACTIVITY,
-                $activityPayment->getActivity()->getId()
-
-            );
-
-            $this->getNotificationService()->jobUpdateNotificationsActivity($activityPayment->getActivity());
-
-            return true;
-        } catch (\Exception $e) {
-            $this->getLoggerService()->error($e->getMessage());
-            if ($throw) {
-                throw new OscarException(
-                    sprintf("Impossible de supprimer le versement '%s'.", $activityPayment->getId())
-                );
-            }
-            return false;
-        }
-    }
-
     public function updateActivityPayment($data)
     {
         /** @var ActivityPayment $payment */

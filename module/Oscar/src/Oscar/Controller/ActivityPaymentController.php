@@ -10,17 +10,23 @@ namespace Oscar\Controller;
 
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPayment;
+use Oscar\Exception\OscarException;
 use Oscar\Form\ActivityPaymentForm;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityPaymentService;
 use Oscar\Service\NotificationService;
 use Oscar\Service\PersonService;
+use Oscar\Service\ProjectGrantApiService;
 use Oscar\Service\ProjectGrantService;
 use Laminas\Http\Request;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 
-class ActivityPaymentController extends AbstractOscarController
+class ActivityPaymentController extends AbstractOscarController implements UseServiceContainer
 {
+    use UseServiceContainerTrait;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
     /** @var ProjectGrantService */
@@ -83,9 +89,6 @@ class ActivityPaymentController extends AbstractOscarController
     /////////////////////////////////////////////////////////////////////////////////////////////////////////// SERVICES
 
 
-
-
-
     /**
      * Retourne les versements à venir dans les 15 jours à venir.
      */
@@ -94,7 +97,7 @@ class ActivityPaymentController extends AbstractOscarController
         $payments = $this->getProjectGrantService()->getPaymentsIncoming();
         return [
             'payments' => $payments,
-            'getDate' => 'getDatePredicted'
+            'getDate'  => 'getDatePredicted'
         ];
     }
 
@@ -106,7 +109,7 @@ class ActivityPaymentController extends AbstractOscarController
         $payments = $this->getProjectGrantService()->getPaymentsLate();
         return [
             'payments' => $payments,
-            'getDate' => 'getDatePredicted'
+            'getDate'  => 'getDatePredicted'
         ];
     }
 
@@ -118,10 +121,9 @@ class ActivityPaymentController extends AbstractOscarController
         $payments = $this->getProjectGrantService()->getPaymentsDifference();
         return [
             'payments' => $payments,
-            'getDate' => 'getDatePredicted'
+            'getDate'  => 'getDatePredicted'
         ];
     }
-
 
 
     /**
@@ -134,26 +136,33 @@ class ActivityPaymentController extends AbstractOscarController
 
         // Appel avec une idActivity => appel ajax depuis la fiche détaillée de
         // l'activité.
-        if( $idActivity ) {
+        if ($idActivity) {
             $activity = $this->getProjectGrantService()->getActivityById($idActivity);
             $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_SHOW, $activity);
 
             $method = $this->getHttpXMethod();
 
-            if( $method != "GET" && !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity) ){
+            if ($method != "GET" && !$this->getOscarUserContextService()->hasPrivileges(
+                    Privileges::ACTIVITY_PAYMENT_MANAGE,
+                    $activity
+                )) {
                 $this->getResponseBadRequest("Vous ne disposez pas des droits suffisants pour gérer les versements");
             }
 
-            switch($method){
+            switch ($method) {
                 case 'DELETE':
                     try {
                         /** @var ActivityPayment $payment */
-                        $payment = $this->getProjectGrantService()->getActivityPaymentById($this->params()->fromQuery('id'));
+                        $payment = $this->getProjectGrantService()->getActivityPaymentById(
+                            $this->params()->fromQuery('id')
+                        );
                         $this->getProjectGrantService()->deleteActivityPayment($payment);
                         return $this->getResponseOk("Le versement a bien été supprimé");
-                    } catch ( \Exception $e ){
+                    } catch (\Exception $e) {
                         $this->getLoggerService()->error($e->getTraceAsString());
-                        return $this->getResponseInternalError(sprintf(_("Impossible de supprimer le payment : %s"), $e->getMessage()));
+                        return $this->getResponseInternalError(
+                            sprintf(_("Impossible de supprimer le payment : %s"), $e->getMessage())
+                        );
                     }
 
 
@@ -165,35 +174,39 @@ class ActivityPaymentController extends AbstractOscarController
                     $action = $this->params()->fromPost('action');
 
                     $postedDatas = [
-                        'amount'            => $this->params()->fromPost('amount'),
-                        'activity'          => $activity,
-                        'comment'           => $this->params()->fromPost('comment'),
-                        'codeTransaction'   => $this->params()->fromPost('codeTransaction'),
-                        'currencyId'        => $this->params()->fromPost('currencyId'),
-                        'status'            => $this->params()->fromPost('status'),
-                        'rate'              => $this->params()->fromPost('rate'),
-                        'datePredicted'     => $this->params()->fromPost('datePredicted'),
-                        'datePayment'       => $this->params()->fromPost('datePayment'),
+                        'amount'          => $this->params()->fromPost('amount'),
+                        'activity'        => $activity,
+                        'comment'         => $this->params()->fromPost('comment'),
+                        'codeTransaction' => $this->params()->fromPost('codeTransaction'),
+                        'currencyId'      => $this->params()->fromPost('currencyId'),
+                        'status'          => $this->params()->fromPost('status'),
+                        'rate'            => $this->params()->fromPost('rate'),
+                        'datePredicted'   => $this->params()->fromPost('datePredicted'),
+                        'datePayment'     => $this->params()->fromPost('datePayment'),
                     ];
 
 
-                    if( $action == 'create' ){
+                    if ($action == 'create') {
                         try {
                             $this->getProjectGrantService()->addNewActivityPayment($postedDatas);
                             return $this->getResponseOk("Le versement a bien été ajouté");
-                        } catch ( \Exception $e ){
+                        } catch (\Exception $e) {
                             $this->getLoggerService()->error($e->getTraceAsString());
-                            return $this->getResponseInternalError(sprintf(_("Impossible d'ajouter le payment : %s"), $e->getMessage()));
+                            return $this->getResponseInternalError(
+                                sprintf(_("Impossible d'ajouter le payment : %s"), $e->getMessage())
+                            );
                         }
                     }
 
-                    elseif ($action == 'update' ){
+                    elseif ($action == 'update') {
                         try {
                             $postedDatas['id'] = $this->params()->fromPost('id');
                             $this->getProjectGrantService()->updateActivityPayment($postedDatas);
                             return $this->getResponseOk("Le versement a bien été modifié");
-                        } catch ( \Exception $e ){
-                            return $this->getResponseInternalError(sprintf(_("Impossible de modifier le payment : %s"), $e->getMessage()));
+                        } catch (\Exception $e) {
+                            return $this->getResponseInternalError(
+                                sprintf(_("Impossible de modifier le payment : %s"), $e->getMessage())
+                            );
                         }
                     }
 
@@ -212,67 +225,73 @@ class ActivityPaymentController extends AbstractOscarController
             $search = $this->params()->fromQuery('q', '');
             return $this->getProjectGrantService()->getListActivityPayment($search, $page);
         }
-
-    }
-    public function restAction(){
-        //var_dump($this->getRequest());
-        /** @var Request $request */
-        $request = $this->getRequest();
-        $response = new JsonModel();
-
-        /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
-        if( !$entity ){
-            return $this->getResponseNotFound("Activité non trouvée");
-        }
-
-        $versement = $this->getEntityManager()->getRepository(ActivityPayment::class)->find($this->params()->fromRoute('id'));
-        if( !$entity ){
-            return $this->getResponseNotFound("Versement non trouvée");
-        }
-
-        switch( $this->getHttpXMethod() ){
-            case 'DELETE' :
-                return $this->getResponseOk('Le versement %s a bien été supprimé');
-                break;
-            case 'PUT' :
-                var_dump($request->getPost());
-//                return $this->getResponseOk('Le versement %s a bien été supprimé');
-                break;
-        }
-
-        return $this->getResponseBadRequest("test");
-
-        return $response;
     }
 
-    public function indexRestAction(){
+    public function restAction()
+    {
+        // Deprecated
+    }
+
+    /**
+     * @return ActivityPaymentService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    private function getActivityPaymentService(): ActivityPaymentService
+    {
+        return $this->getServiceContainer()->get(ActivityPaymentService::class);
+    }
+
+    public function indexRestAction()
+    {
         /** @var Request $request */
         $request = $this->getRequest();
-        $response = new JsonModel();
 
-        /** @var Activity $entity */
-        $entity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
-        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity);
+        $activity = $this->getProjectGrantService()->getActivityById($this->params()->fromRoute('idactivity', null));
 
-        if( !$entity ){
-            return $this->getResponseNotFound("Activité non trouvée");
+        $method = $request->getMethod();
+
+        try {
+            switch ($method) {
+                case 'GET':
+                    /** @var ProjectGrantApiService $projectGrantApiService */
+                    $projectGrantApiService = $this->getServiceContainer()->get(ProjectGrantApiService::class);
+                    $data = $projectGrantApiService->getActivityJson(
+                        $activity->getId(),
+                        $this->url(),
+                        $this->getOscarUserContextService(),
+                        'payments'
+                    );
+                    return $this->jsonOutput($data);
+
+                case 'DELETE':
+                    $this->getActivityPaymentService()->deletePayment($this->getActivityPaymentFromQuery());
+                    return $this->getResponseOk("Versement supprimé");
+
+                case 'PUT':
+                    $this->getActivityPaymentService()->createPayment($this->getJsonREST(), $activity);
+                    return $this->getResponseOk("Versement ajouté");
+
+                case 'POST':
+                    $this->getActivityPaymentService()->updatePayment($this->getJsonREST(), $activity);
+                    return $this->getResponseOk("Versement modifié");
+
+                default:
+                    throw new \Exception("Action inconnue");
+            }
+        } catch (\Exception $exception) {
+            return $this->jsonError($exception->getMessage());
         }
+    }
 
-        // Récupération des payements
-        $payments = [];
-        /** @var ActivityPayment $payment */
-        foreach( $entity->getPayments() as $payment ){
-            $payments[] = $payment->json();
-        }
+    protected function getActivityPaymentFromQuery( string $field = 'id') :ActivityPayment
+    {
+       $id = $this->params()->fromQuery($field, null);
+       if( $id == null ){
+           throw new \Exception("ID obligatoire");
+       }
 
-        $response->setVariable('method', $request->getMethod())
-            ->setVariable('payments_status', ActivityPayment::getStatusPayments())
-            ->setVariable('currencies', $this->getProjectGrantService()->getCurrencies(true))
-            ->setVariable('payments', $payments);
-
-        return $response;
+       return $this->getActivityPaymentService()->getPaymentById($id);
     }
 
     public function changeAction()
@@ -286,34 +305,25 @@ class ActivityPaymentController extends AbstractOscarController
 
         $this->getOscarUserContextService()->check(Privileges::ACTIVITY_PAYMENT_MANAGE, $entity->getActivity());
 
-        if( $request->getMethod() === "DELETE" ){
-            try {
-                $entity->getActivity()->touch();
-                $this->getProjectGrantService()->deleteActivityPayment($entity);
-                $this->getEntityManager()->flush();
-
-                $this->getActivityLogService()->addUserInfo(
-                    sprintf(" a supprimé un %s dans l'activité %s", $entity, $entity->getActivity()->log()),
-                    'Activity',
-                    $entity->getActivity()->getId()
-                );
-            }
-            catch( \Exception $e ){
-                $this->getResponse()->setStatusCode(500);
-                $response->setVariable('error', 'Impossible de supprimer cette échéance');
-            }
-            return $response;
+        if ($request->getMethod() === "DELETE") {
+            throw new \Exception("DEPRECATED");
         }
         else {
             /** @var ActivityPaymentForm $form */
             $form = new ActivityPaymentForm();
-            $form->setAttribute('action', $this->url()->fromRoute(null, ['idactivity' => $entity->getActivity()->getId(), 'id' => $entity->getId()]));
+            $form->setAttribute(
+                'action',
+                $this->url()->fromRoute(
+                    null,
+                    ['idactivity' => $entity->getActivity()->getId(), 'id' => $entity->getId()]
+                )
+            );
             $form->setProjectGrantService($this->getProjectGrantService());
             $form->init();
             $form->bind($entity);
-            if( $request->isPost() ){
+            if ($request->isPost()) {
                 $form->setData($request->getPost());
-                if($form->isValid()){
+                if ($form->isValid()) {
                     $entity->getActivity()->touch();
 
                     $this->getProjectGrantService()->getEntityManager()->flush();
@@ -327,11 +337,11 @@ class ActivityPaymentController extends AbstractOscarController
             }
 
             $view = new ViewModel([
-                'payment' => $entity,
-                'activity' => $entity->getActivity(),
-                'form' => $form,
-            ]);
-            if( $request->isXmlHttpRequest() ){
+                                      'payment'  => $entity,
+                                      'activity' => $entity->getActivity(),
+                                      'form'     => $form,
+                                  ]);
+            if ($request->isXmlHttpRequest()) {
                 $view->setTerminal(true);
             }
             $view->setTemplate('oscar/activity-payment/form.phtml');

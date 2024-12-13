@@ -228,7 +228,7 @@
       </div>
     </div>
 
-    <nav v-if="debugEnabled" class="text-right">
+    <nav v-if="debugEnabled" class="admin-bar">
       <button v-on:click="handlerDebug" class="btn btn-xs btn-danger">
         <i class="icon-bug"></i>
         Voir le modèle

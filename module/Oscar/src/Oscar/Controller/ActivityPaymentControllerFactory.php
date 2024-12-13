@@ -23,6 +23,7 @@ class ActivityPaymentControllerFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $c = new ActivityPaymentController();
+        $c->setServiceContainer($container);
         $c->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $c->setLoggerService($container->get('Logger'));
         $c->setActivityLogService($container->get(ActivityLogService::class));

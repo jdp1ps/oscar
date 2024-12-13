@@ -24,6 +24,15 @@
       </div>
     </transition>
 
+    <nav class="buttons">
+      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">
+        <i class="icon-book"></i>
+        Nouveau lot</a>
+      <a href="" class="btn btn-info" @click.prevent="fetch" v-if="debugEnabled">
+        <i class="icon-bug"></i>
+        fetch</a>
+    </nav>
+
     <section class="workpackages">
       <workpackage v-for="wp in workpackages"
                    v-bind:key="wp.id"
@@ -39,20 +48,13 @@
                    @workpackagecancelnew="handlerWorkPackageCancelNew"
       ></workpackage>
     </section>
-    <nav class="buttons">
-      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">
-        <i class="icon-book"></i>
-        Nouveau lot</a>
-    </nav>
   </section>
-  <pre>
-    EDIT : {{ editable }}
-  </pre>
 </template>
 <script>
 
 import axios from "axios";
 import Workpackage from "./Workpackage.vue";
+import AxiosMessage from "../utils/AxiosMessage.js";
 
 export default {
   components: {
@@ -68,17 +70,18 @@ export default {
       confirm: null,
       confirmData: null,
       confirmHandler: null,
-      editedWorlpackage:null
+      editedWorlpackage: null
     }
   },
 
   props: {
     url: {required: true},
-    editable: { required: false, default: false },
+    editable: {required: false, default: false},
     isValidateur: {required: true},
     outsidePerson: {required: true},
     persons: {required: true},
-    workpackages: {required: true}
+    workpackages: {required: true},
+    debugEnabled: {default: false},
   },
 
   methods: {
@@ -161,7 +164,7 @@ export default {
             }
         );
       } else {
-        console.log("NOUVEAU du LOT");
+        console.log("NOUVEAU du LOT ", this.url);
         let dataSend = JSON.parse(JSON.stringify(workPackageData));
         dataSend.workpackageid = -1;
         axios.put(this.url, dataSend).then(
@@ -208,17 +211,20 @@ export default {
 
     fetch() {
       this.loading = "Chargement des lots de travails";
-      axios.get(this.url).then(
+      console.log(this.url);
+      axios.get(this.url + "?v=2").then(
           (res) => {
             console.log("Chargement des lots de travail : ", res);
-            this.workpackages = res.data.workpackages;
-            /*this.persons = res.data.persons;
-            this.editable = res.data.editable;
-            this.isDeclarant = res.data.isDeclarant;
-            this.isValidateur = res.data.isValidateur;*/
+            try {
+              let datas = res.data.datas.workpackages;
+              this.$emit('update', datas);
+            } catch (err) {
+              this.errors.push("UI ERROR " + err);
+            }
           },
           (err) => {
-            this.errors.push("Impossible de charger les lots de travail : " + err.body);
+
+            this.errors.push(AxiosMessage.manageErrorResponse(err).message);
           }
       ).then(() => this.loading = false);
 

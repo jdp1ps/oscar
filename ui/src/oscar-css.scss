@@ -1,3 +1,64 @@
 body {
 
 }
+
+$colorGreyM: #999;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// General
+body {
+  background-color: rgba(210,210,210,1);
+  background-blend-mode: lighten;
+}
+body:not(.privatize){
+  #btn-toggle-private {
+    .on {
+      display: inline-block;
+    }
+  }
+}
+
+#btn-toggle-private {
+  .on, .off {
+    display: none;
+  }
+}
+
+.privatize {
+  .text-private {
+    filter: blur(8px) !important;
+  }
+  #btn-toggle-private {
+    .off {
+      display: inline-block;
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+.admin-bar {
+  padding: .3em .3em;
+  position: relative;
+  left: -10px;
+  transition: all .2s linear;
+  text-align: right;
+  //border-bottom: $colorGreyM solid thin;
+  &:before {
+    text-shadow: -1px 1px 1px rgba(0,0,0,.3); //, 1px -1px 1px white ;
+    display: inline-block;
+    padding: 0 .3em 0 0;
+    font-family: 'fontello';
+    content: '\e86e';
+    color: #eee;
+  }
+  opacity: .4;
+  filter: grayscale(.5);
+
+  &:hover{
+    left: 0;
+    filter: grayscale(0);
+    opacity: 1;
+  }
+}
+

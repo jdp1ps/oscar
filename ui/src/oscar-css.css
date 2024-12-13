@@ -1,3 +1,45 @@
+@charset "UTF-8";
+body {
+  background-color: #d2d2d2;
+  background-blend-mode: lighten;
+}
 
+body:not(.privatize) #btn-toggle-private .on {
+  display: inline-block;
+}
+
+#btn-toggle-private .on, #btn-toggle-private .off {
+  display: none;
+}
+
+.privatize .text-private {
+  filter: blur(8px) !important;
+}
+.privatize #btn-toggle-private .off {
+  display: inline-block;
+}
+
+.admin-bar {
+  padding: 0.3em 0.3em;
+  position: relative;
+  left: -10px;
+  transition: all 0.2s linear;
+  text-align: right;
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+.admin-bar:before {
+  text-shadow: -1px 1px 1px rgba(0, 0, 0, 0.3);
+  display: inline-block;
+  padding: 0 0.3em 0 0;
+  font-family: "fontello";
+  content: "";
+  color: #eee;
+}
+.admin-bar:hover {
+  left: 0;
+  filter: grayscale(0);
+  opacity: 1;
+}
 
 /*# sourceMappingURL=oscar-css.css.map */

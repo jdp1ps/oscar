@@ -47,11 +47,11 @@ export default defineConfig({
       },
     },
   },
-  resolve: {
-    alias: {
-      'vue': '/node_modules/vue/dist/vue.runtime.esm-browser.js'
-    }
-  },
+  // resolve: {
+  //   alias: {
+  //     'vue': '/node_modules/vue/dist/vue.runtime.esm-browser.js'
+  //   }
+  // },
   test:{
     globals: true,
     environment: "jsdom",

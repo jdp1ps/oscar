@@ -11,272 +11,368 @@ $this->headScript();
 ?>
 
 <html lang="fr">
-    <head>
-        <!-- Meta -->
-        <meta charset="utf-8">
-        <?php echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0')
-                                    ->appendName('description', '')
-                                    ->appendHttpEquiv("X-UA-Compatible", "IE=edge,chrome=1") ?>
+<head>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <?php
+    echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0')
+        ->appendName('description', '')
+        ->appendHttpEquiv("X-UA-Compatible", "IE=edge,chrome=1") ?>
 
-        <!-- Title -->
-        <?php echo $this->headTitle($this->appInfos()->nom)->setSeparator(' - ')->setAutoEscape(false) ?>
+    <!-- Title -->
+    <?php
+    echo $this->headTitle($this->appInfos()->nom)->setSeparator(' - ')->setAutoEscape(false) ?>
 
-        <!-- Links -->
-        <link rel="icon" type="image/png" href="<?= $this->basePath() ?>/favicon.png" />
-        <link rel="stylesheet" href="<?= $this->basePath() . '/css/unicaen.css' ?>">
-        <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/fontello.css' ?>">
-        <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/animation.css' ?>">
+    <!-- Links -->
+    <link rel="icon" type="image/png" href="<?= $this->basePath() ?>/favicon.png"/>
+    <link rel="stylesheet" href="<?= $this->basePath() . '/css/unicaen.css' ?>">
+    <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/fontello.css' ?>">
+    <link rel="stylesheet" href="<?= $this->basePath() . '/css/fontello/css/animation.css' ?>">
 
-        <link rel="stylesheet" href="<?= $this->basePath() . '/css/'. $this->options()->theme() .'.css' ?>">
-        <?php if( file_exists(__DIR__.'/../../../../public/custom/custom.css')): ?>
+    <link rel="stylesheet" href="<?= $this->basePath() . '/css/' . $this->options()->theme() . '.css' ?>">
+    <?php
+    if (file_exists(__DIR__ . '/../../../../public/custom/custom.css')): ?>
         <link rel="stylesheet" href="<?= $this->basePath() . '/custom/custom.css' ?>">
-        <?php endif; ?>
-        <?php /* echo $this->headLink(array(
-            'rel'  => 'shortcut icon',
-            'type' => 'image/vnd.microsoft.icon',
-            'href' => '//www.unicaen.fr/images/favicon.ico')) */?>
+    <?php
+    endif; ?>
+    <?php
+    /* echo $this->headLink(array(
+               'rel'  => 'shortcut icon',
+               'type' => 'image/vnd.microsoft.icon',
+               'href' => '//www.unicaen.fr/images/favicon.ico')) */ ?>
 
-        <?php if( getenv('APPLICATION_ENV') != 'production' ): ?>
-            <style>/*#navbar{background-color: #330000 !important; }body {background-color: #eedddd;}*/</style>
-            <script>
-                window.MODE_DEV = true;
-                console.log("OSCAR (Mode développement activé)")
-            </script>
-        <?php endif; ?>
+    <?php
+    if (getenv('APPLICATION_ENV') != 'production'): ?>
+        <style>/*#navbar{background-color: #330000 !important; }body {background-color: #eedddd;}*/</style>
+        <script>
+            window.MODE_DEV = true;
+            console.log("OSCAR (Mode développement activé)")
+        </script>
+    <?php
+    endif; ?>
 
-        <!-- Scripts -->
-        <script src="<?= $this->basePath() . '/js/initer.js' ?>"></script>
-        <script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>"></script>
-        <script src="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>
+    <!-- Scripts -->
+    <script src="<?= $this->basePath() . '/js/initer.js' ?>"></script>
+    <script src="<?= $this->basePath() . '/js/vendor/requirejs/require.js' ?>"></script>
+    <script src="<?= $this->basePath() . '/js/oscar-config.js' ?>"></script>
 
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-          <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <!--        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />-->
 
-    </head>
+    <?= $this->Vite()->addJs('src/oscar-css.js'); ?>
 
-    <body class="<?php echo getenv('APPLICATION_ENV') ?: 'development' ?>">
+</head>
 
-        <!--[if lt IE 7]>
-            <p class="chromeframe">Vous utilisez un navigateur internet hors d'âge. Veuillez le mettre à jour, svp.</p>
-        <![endif]-->
-        <div id="navbar" class="navbar navbar-primary navbar-main navbar-fixed-top" role="navigation">
-            <div class="container">
+<body class="privatize <?php
+echo getenv('APPLICATION_ENV') ?: 'development' ?>">
 
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".bs-navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
+<!--[if lt IE 7]>
+<p class="chromeframe">Vous utilisez un navigateur internet hors d'âge. Veuillez le mettre à jour, svp.</p>
+<![endif]-->
+<div id="navbar" class="navbar navbar-primary navbar-main navbar-fixed-top" role="navigation">
+    <div class="container">
 
-                    <?php echo $this->appLink('<img src="/images/oscar-white.png" alt="" style="height: 32px; margin-right: 4px; position: relative; top: -3px; opacity: .5" />'.$this->appInfos()->nom) ?>
-                    <?php if (getenv('APPLICATION_ENV') && getenv('APPLICATION_ENV') != 'production'): ?>
-                        <span
-                            class="beta-stick"><?= getenv('APPLICATION_ENV') ?></span>
-                    <?php endif; ?>
-                </div>
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
 
-                <div class="navbar-collapse bs-navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                    <?php if( $this->grant()->connected() ): ?>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                               data-toggle="dropdown" role="button"
-                               aria-expanded="false">
-                                <i class="icon-wristwatch"></i> <?= $this->translate('Accueil') ?><span
+            <?php
+            echo $this->appLink(
+                '<img src="/images/oscar-white.png" alt="" style="height: 32px; margin-right: 4px; position: relative; top: -3px; opacity: .5" />' . $this->appInfos(
+                )->nom
+            ) ?>
+            <?php
+            if (getenv('APPLICATION_ENV') && getenv('APPLICATION_ENV') != 'production'): ?>
+                <span
+                        class="beta-stick"><?= getenv('APPLICATION_ENV') ?></span>
+            <?php
+            endif; ?>
+        </div>
+
+        <div class="navbar-collapse bs-navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <?php
+                if ($this->grant()->connected()): ?>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"
+                           data-toggle="dropdown" role="button"
+                           aria-expanded="false">
+                            <i class="icon-wristwatch"></i> <?= $this->translate('Accueil') ?><span
                                     class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu" role="menu">
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
 
-                                <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Mes recherches</li>
+                            <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Mes recherches
+                            </li>
 
-                                <li><a href="<?= $this->url('project/mine') ?>"><i class="icon-cubes"></i> <?= $this->translate('Mes projets') ?></a></li>
-                                <?php if( $this->grant()->isBoss() ): ?>
-                                <li><a href="<?= $this->url('project/structure') ?>"><i class="icon-building-filled"></i> <?= $this->translate('Mes structures') ?></a></li>
-                                <?php endif; ?>
-                                <?php if( $this->grant()->hasPersonnelAccess() ): ?>
-                                    <li><a href="<?= $this->url('person/personnel') ?>"><i class="icon-group"></i> <?= $this->translate('Personnel') ?></a></li>
-                                <?php endif; ?>
+                            <li><a href="<?= $this->url('project/mine') ?>"><i
+                                            class="icon-cubes"></i> <?= $this->translate('Mes projets') ?></a></li>
+                            <?php
+                            if ($this->grant()->isBoss()): ?>
+                                <li><a href="<?= $this->url('project/structure') ?>"><i
+                                                class="icon-building-filled"></i> <?= $this->translate(
+                                            'Mes structures'
+                                        ) ?></a></li>
+                            <?php
+                            endif; ?>
+                            <?php
+                            if ($this->grant()->hasPersonnelAccess()): ?>
+                                <li><a href="<?= $this->url('person/personnel') ?>"><i
+                                                class="icon-group"></i> <?= $this->translate('Personnel') ?></a></li>
+                            <?php
+                            endif; ?>
 
-                                <?php if( $this->grant()->hasSignaturePersonalAccess()): ?>
+                            <?php
+                            if ($this->grant()->hasSignaturePersonalAccess()): ?>
                                 <li>
-                                    <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i class="icon-edit"></i> <?= $this->translate('Mes visas de document') ?></a>
+                                    <a href="<?= $this->url('unicaen-signature/my-documents') ?>"><i
+                                                class="icon-edit"></i> <?= $this->translate('Mes visas de document') ?>
+                                    </a>
                                 </li>
 
                                 <li>
-                                    <a href="<?= $this->url('contractdocument/documents-observed') ?>"><i class="icon-eye"></i> <?= $this->translate('Suivi des circuits de signature') ?></a>
+                                    <a href="<?= $this->url('contractdocument/documents-observed') ?>"><i
+                                                class="icon-eye"></i> <?= $this->translate(
+                                            'Suivi des circuits de signature'
+                                        ) ?></a>
                                 </li>
-                                <?php endif; ?>
+                            <?php
+                            endif; ?>
 
-                                <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) ): ?>
-                                    <li><a href="<?= $this->url('requestactivity') ?>"><i class="icon-cube"></i> <?= $this->translate("Demande d'activité") ?></a></li>
-                                <?php endif; ?>
-
-                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_CREATE) || $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
-                                    <li role="presentation" class="dropdown-header"><i class="icon-cog"></i> Gestions des activités</li>
-                                <?php endif; ?>
-                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_CREATE)) : ?>
-                                    <li><a href="<?= $this->url('contract/new') ?>"><i class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a></li>
-                                <?php endif; ?>
-                                <?php if( $this->grant()->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::PROJECT_CREATE)) : ?>
-                                    <li><a href="<?= $this->url('project/new') ?>"><i class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a></li>
-                                <?php endif; ?>
-
-                                <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Divers</li>
-                                <li>
-                                    <a href="<?= $this->url('administrativedocument') ?>"><i class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
+                            <?php
+                            if ($this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_REQUEST) || $this->grant(
+                                )->hasPrivilegeInOrganizations(\Oscar\Provider\Privileges::ACTIVITY_REQUEST)): ?>
+                                <li><a href="<?= $this->url('requestactivity') ?>"><i
+                                                class="icon-cube"></i> <?= $this->translate("Demande d'activité") ?></a>
                                 </li>
-                            </ul>
-                        </li>
-                    <?php endif; ?>
+                            <?php
+                            endif; ?>
 
-
-
-                    <?php include __DIR__ . '/../partials/menu-project-activity.phtml' ?>
-                    <?php include __DIR__ . '/../partials/menu-administration.phtml' ?>
-
-                        <?php if($this->usurpation()->isEnabled()): ?>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                               data-toggle="dropdown" role="button"
-                               aria-expanded="false">
-                                <i class="icon-wristwatch"></i> <?= $this->translate('Usurpation') ?><span
-                                        class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li>
-                                    <?php echo $this->usurpation()->renderAsTextfield(); ?>
+                            <?php
+                            if ($this->grant()->hasPrivilegeInOrganizations(
+                                    \Oscar\Provider\Privileges::ACTIVITY_CREATE
+                                ) || $this->grant()->hasPrivilegeInOrganizations(
+                                    \Oscar\Provider\Privileges::PROJECT_CREATE
+                                )) : ?>
+                                <li role="presentation" class="dropdown-header"><i class="icon-cog"></i> Gestions des
+                                    activités
                                 </li>
-                            </ul>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
-                    <?php if( $this->grant()->connected() ): ?>
-                        <p class="navbar-text navbar-right" id="notifications-area" ></p>
-                    <?php endif; ?>
-                    <p class="navbar-text navbar-right">
-                        <a href="<?= $this->url('user_parameters') ?>">
-                            <i class="icon-cog"></i></a> |
+                            <?php
+                            endif; ?>
+                            <?php
+                            if ($this->grant()->hasPrivilegeInOrganizations(
+                                \Oscar\Provider\Privileges::ACTIVITY_CREATE
+                            )) : ?>
+                                <li><a href="<?= $this->url('contract/new') ?>"><i
+                                                class="icon-cube"></i> <?= $this->translate("Nouvelle activité") ?></a>
+                                </li>
+                            <?php
+                            endif; ?>
+                            <?php
+                            if ($this->grant()->hasPrivilegeInOrganizations(
+                                \Oscar\Provider\Privileges::PROJECT_CREATE
+                            )) : ?>
+                                <li><a href="<?= $this->url('project/new') ?>"><i
+                                                class="icon-cubes"></i> <?= $this->translate("Nouveau projet") ?></a>
+                                </li>
+                            <?php
+                            endif; ?>
 
-                        <?php echo $this->appConnection(); ?>
-                    </p>
-                </div><!--/.nav-collapse -->
+                            <li role="presentation" class="dropdown-header"><i class="icon-cube"></i> Divers</li>
+                            <li>
+                                <a href="<?= $this->url('administrativedocument') ?>"><i
+                                            class="icon-book"></i> <?= $this->translate('Documents pratiques') ?></a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php
+                endif; ?>
+
+
+
+                <?php
+                include __DIR__ . '/../partials/menu-project-activity.phtml' ?>
+                <?php
+                include __DIR__ . '/../partials/menu-administration.phtml' ?>
+
+                <?php
+                if ($this->usurpation()->isEnabled()): ?>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"
+                           data-toggle="dropdown" role="button"
+                           aria-expanded="false">
+                            <i class="icon-wristwatch"></i> <?= $this->translate('Usurpation') ?><span
+                                    class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>
+                                <?php
+                                echo $this->usurpation()->renderAsTextfield(); ?>
+                            </li>
+                        </ul>
+                    </li>
+                <?php
+                endif; ?>
+            </ul>
+            <?php
+            if ($this->grant()->connected()): ?>
+                <p class="navbar-text navbar-right" id="notifications-area"></p>
+            <?php
+            endif; ?>
+            <p class="navbar-text navbar-right">
+                <a href="<?= $this->url('user_parameters') ?>">
+                    <i class="icon-cog"></i></a> |
+
+                <?php
+                echo $this->appConnection(); ?>
+            </p>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container flash-messages" id="flash-messages" style="opacity: 0"><?php
+    $types = ['error', 'info', 'default', 'success', 'warning'];
+    foreach ($types as $type): ?>
+        <?php
+        if ($this->flashMessenger()->hasMessages($type)): ?>
+            <div class="flashmsg flashmsg-<?= $type ?>">
+                <i class="icon-<?= $type ?>"></i>
+                <i class=" icon-cancel-outline"></i>
+                <?= $this->flashMessenger()->render($type, []) ?>
+            </div>
+        <?php
+        endif; ?>
+    <?php
+    endforeach; ?></div>
+
+
+<div id="contenu-principal" class="" style="padding-bottom: 50px">
+    <?php
+    if (($menuSecondaire = $this->navigation()->menuSecondaire('navigation')->render())): ?>
+        <div class="row">
+            <div id="sidebar" class="col-xs-6 col-md-2" role="navigation">
+                <?php
+                echo $menuSecondaire; ?>
+            </div>
+            <div id="content" class="col-xs-12 col-md-10">
+                <?php
+                echo $this->content; ?>
             </div>
         </div>
+    <?php
+    else: ?>
+        <?php
+        echo $this->content; ?>
+    <?php
+    endif; ?>
+</div>
 
-        <div class="container flash-messages" id="flash-messages" style="opacity: 0"><?php
-            $types = ['error', 'info', 'default', 'success', 'warning'];
-            foreach( $types as $type ): ?>
-                <?php if( $this->flashMessenger()->hasMessages($type) ): ?>
-                <div class="flashmsg flashmsg-<?= $type ?>">
-                    <i class="icon-<?= $type ?>"></i>
-                    <i class=" icon-cancel-outline"></i>
-                    <?= $this->flashMessenger()->render($type, []) ?>
-                </div>
-                <?php endif; ?>
-            <?php endforeach; ?></div>
-
-
-        <div id="contenu-principal" class="" style="padding-bottom: 50px">
-            <?php if (($menuSecondaire = $this->navigation()->menuSecondaire('navigation')->render())): ?>
-                <div class="row">
-                    <div id="sidebar" class="col-xs-6 col-md-2" role="navigation">
-                        <?php echo $menuSecondaire; ?>
-                    </div>
-                    <div id="content" class="col-xs-12 col-md-10">
-                        <?php echo $this->content; ?>
-                    </div>
-                </div>
-            <?php else: ?>
-                <?php echo $this->content; ?>
-            <?php endif; ?>
+<footer class="site-footer bg-primary">
+    <div class="container">
+        <div class="col-md-4">
+            <a href="https://www.unicaen.fr">
+                <img src="/images/logo-ucbn.png" alt="" class="footer-logo" height="20" style="display: inline"/>
+                Université de Caen Normandie &copy; 2015-<?= date('Y') ?>
+            </a>
         </div>
+        <div class="col-md-4">
+            <?php
+            if ($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX)): ?>
+                <span id="connected"></span>
+            <?php
+            endif; ?>
+            <strong><?= $this->appInfos()->nom ?></strong><sup>&copy;</sup> - <em><?= $this->appInfos(
+                )->desc ?></em><br>
+            Version : <a href="<?= $this->url('gitlog') ?>">
+                <strong><?= \Oscar\OscarVersion::getBuild() ?></strong>
+            </a> / Thème : <strong><?= $this->options()->theme() ?></strong>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-xs btn-primary" id="btn-toggle-private">
+                <span class="off">
+                    <i class="icon-valid"></i>
+                    Mode privé <small> (activé)</small>
+                </span>
+                <span class="on">
+                    <i class="icon-block"></i>
+                    Mode privé <small> (désactivé)</small>
+                </span>
+            </button>
+        </div>
+    </div>
+</footer>
+<a href="#" class="scrollup" title="Remonter en haut de cette page"><img alt="Remonter" src="<?php
+    echo $this->basePath('/css/icon-top.png') ?>"/></a>
+<script>
 
-        <footer class="site-footer bg-primary">
-            <div class="container">
-                <div class="col-md-6">
-                    <a href="https://www.unicaen.fr">
-                        <img src="/images/logo-ucbn.png" alt="" class="footer-logo" height="20" style="display: inline"/>
-                        Université de Caen Normandie (c) 2015-<?= date('Y') ?>
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <?php if( $this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_INDEX) ): ?>
-                    <span id="connected"></span>
-                    <?php endif; ?>
-                        <strong><?= $this->appInfos()->nom ?></strong><sup>&copy</sup> - <em><?= $this->appInfos()->desc ?></em><br>
-                    <a href="<?= $this->url('gitlog') ?>">
-                        <small><?= \Oscar\OscarVersion::getBuild() ?></small>
-                    </a><br>
-                    Thème : <strong><?= $this->options()->theme() ?></strong>
-                </div>
-            </div>
-        </footer>
-        <a href="#" class="scrollup" title="Remonter en haut de cette page"><img alt="Remonter" src="<?php echo $this->basePath('/css/icon-top.png') ?>"/></a>
-	<script>
-        window.flashMessage = function(type, content){
-            var message = $('<div class="flashmsg flashmsg-'+type+'">'
-                +'<i class="icon-'+type+'"></i>'
-                +'<i class=" icon-cancel-outline"></i>'
-                +content
-                +'</div>');
-          $('#flash-messages').append(message.fadeIn(500));
-            if( type == "success" ){
-                message.delay(3000).fadeOut();
-            }
-        };
-	(function(){
-		require(['jquery'], function($){
+    window.flashMessage = function (type, content) {
+        var message = $('<div class="flashmsg flashmsg-' + type + '">'
+            + '<i class="icon-' + type + '"></i>'
+            + '<i class=" icon-cancel-outline"></i>'
+            + content
+            + '</div>');
+        $('#flash-messages').append(message.fadeIn(500));
+        if (type == "success") {
+            message.delay(3000).fadeOut();
+        }
+    };
+    (function () {
+        require(['jquery'], function ($) {
 
-			var reloadUi = function(){
-				document.location.reload();
-			};
+            var reloadUi = function () {
+                document.location.reload();
+            };
 
-			$('body').on('click','.user-profile-select-input', function(){
-				setTimeout(reloadUi, 900);
-			});
+            $('body').on('click', '.user-profile-select-input', function () {
+                setTimeout(reloadUi, 900);
+            });
 
-            $('#flash-messages').on('click', '.icon-cancel-outline', function(){
+            $('#flash-messages').on('click', '.icon-cancel-outline', function () {
                 $(this).parent().fadeOut();
             });
 
 
-            if( !$('#flash-messages').is(':empty') ){
+            if (!$('#flash-messages').is(':empty')) {
                 //$('#flash-messages .flashmsg').delay(10000).fadeOut();
-                $('#flash-messages').css({'top':250, 'opacity':0}).animate({top: 60, opacity: 1});
+                $('#flash-messages').css({'top': 250, 'opacity': 0}).animate({top: 60, opacity: 1});
             }
-		});
-	})();
-	</script>
+        });
+    })();
+</script>
 
-        <?php if( $this->grant()->getCurrentPerson() ): ?>
-        <script>
-		    var socket, notifications;
-	
-            require(['vue', 'mm', 'vue-resource', 'notifications'], function(Vue, moment, VueResource, notifications) {
-                Vue.use(VueResource);
-                Vue.filter('displayDate', function( data ){
-                    let m = moment(data);
-                    return m.format('dddd D MMMM YYYY') + ", " + m.fromNow();
-                });
-                new Vue({
-                    render: function (h) {
-                        return h(notifications.default, {
-                            props: {
-                                urlHistory: '<?= $this->url('notification/history') ?>',
-                                url: '/notification'
-                            }
-                        })
-                    }
-                }).$mount('#notifications-area');
+<?php
+if ($this->grant()->getCurrentPerson()): ?>
+    <script>
+        var socket, notifications;
+
+        require(['vue', 'mm', 'vue-resource', 'notifications'], function (Vue, moment, VueResource, notifications) {
+            Vue.use(VueResource);
+            Vue.filter('displayDate', function (data) {
+                let m = moment(data);
+                return m.format('dddd D MMMM YYYY') + ", " + m.fromNow();
             });
-        </script>
-        <?php endif; ?>
-    </body>
+            new Vue({
+                render: function (h) {
+                    return h(notifications.default, {
+                        props: {
+                            urlHistory: '<?= $this->url('notification/history') ?>',
+                            url: '/notification'
+                        }
+                    })
+                }
+            }).$mount('#notifications-area');
+        });
+    </script>
+<?php
+endif; ?>
+</body>
 </html>

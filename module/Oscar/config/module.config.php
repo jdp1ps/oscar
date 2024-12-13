@@ -562,6 +562,7 @@ return array(
 
         'factories' => array(
             \Oscar\Service\ActivityLogService::class => \Oscar\Service\ActivityLogServiceFactory::class,
+            \Oscar\Service\ActivityPaymentService::class => \Oscar\Service\ActivityPaymentServiceFactory::class,
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
             \Oscar\Service\ActivityTypeService::class => \Oscar\Service\ActivityTypeServiceFactory::class,
             \Oscar\Service\AdministrativeDocumentService::class => \Oscar\Service\AdministrativeDocumentServiceFactory::class,

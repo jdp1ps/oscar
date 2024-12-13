@@ -3,7 +3,7 @@
   <loader text="Chargement de l'activité" :visible="loading"/>
 
   <modal title="Debugger" title-icon="icon-bug" :visible="debug_displayed" @modal-cancel="debug_displayed = false">
-    <pre>{{ debug_content }}</pre>
+    <VueJsonPretty :data="debug_content"/>
     <template #buttons>
       <button class="btn btn-default" @click="handlerDebugHide">FERMER</button>
     </template>
@@ -16,7 +16,7 @@
     </template>
   </modal>
 
-  <div class="overlay" v-if="duplicateDatas">
+  <div class="overlay" v-if="duplicateDatas != null">
     <div class="overlay-content">
       <h1 class="overlay-title">Dupliquer cette activité</h1>
       <a class="overlay-closer" @click="duplicateDatas = null">x</a>
@@ -166,8 +166,8 @@
     <header class="jumbotron activity-header oscar-header" style="margin-top: 60px">
       <div class="row line-bottom">
         <div class="col-md-9">
-          <h4>
-            <i class="icon-cubes"></i> :
+          <h4 class="activity-project">
+            <i class="icon-cubes"></i>&nbsp;
             <em v-if="core.project === null">Aucun Projet</em>
             <span v-else>
               <a v-if="credentials.project.read" :href="core.project.url_show">
@@ -182,18 +182,19 @@
           </h4>
 
           <h3>
-            <span class="picto status-" :class="'status-'+core.statut">
-              <i class="icon"></i>
-              {{ core.statut_label }}
+            <span class="picto status-" :class="'status-'+core.status">
+              <i class="icon" :class="'icon-'+core.status"></i>
+              {{ core.status_label }}
             </span>
-            :::
-
-            <span class="type-chain">
-            <i :class="core.type_slug"></i>
-            <span v-for="t in core.type_chain">
-              {{ t.label }}
+            <span class="activity-type">
+              <i class="icon-tag"></i>
+              <span class="type-chain">
+                <i :class="core.type_slug"></i>
+                <span v-for="t in core.type_chain">
+                  {{ t.label }}
+                </span>
+              </span>
             </span>
-          </span>
           </h3>
 
           <h1>
@@ -203,45 +204,39 @@
         <div class="col-md-3">
           <div class="budget" v-if="budget && credentials.budget.read">
             <em>Montant</em>
-            <strong>{{ $filters.money(budget.montant) }} {{ budget.currency.symbol }}</strong>
+            <strong class="text-private amount">{{ $filters.money(budget.montant) }} {{ budget.currency.symbol }}</strong>
             <div class="details">
               <small>
                 Frais de gestion :
-                <b>{{ budget.fraisDeGestion }}</b>
+                <b class="text-private">{{ budget.fraisDeGestion }}</b>
               </small>
 
               <small>
                 Part unité :
-                <b v-if="budget.fraisDeGestionPartUnite">
+                <b v-if="budget.fraisDeGestionPartUnite" class="text-private">
                   {{ budget.fraisDeGestionPartUnite }}
                 </b>
-                <i v-else>
-                  ~
-                </i>
               </small>
 
               <small>
                 Part hébergeur :
-                <b>
+                <b class="text-private">
                   {{ budget.fraisDeGestionPartHebergeur }}
                 </b>
               </small>
 
               <small>
                 Part Gestionnaire :
-                <b>
+                <b class="text-private">
                   {{ budget.fraisDeGestionPartGestionnaire }}
                 </b>
               </small>
 
               <small>
                 TVA :
-                <b>{{ budget.tva }}</b>
+                <b class="text-private">{{ budget.tva }}</b>
               </small>
             </div>
-          </div>
-          <div v-else>
-            Budget: {{ budget }}
           </div>
         </div>
       </div>
@@ -278,13 +273,14 @@
           <h4><i class="icon-briefcase"></i>Numérotations</h4>
           <p class="texthighlight baseline">
             N° Oscar" : <strong>{{ core.numOscar }}</strong><br/>
-            Numéro financier : <strong v-if="core.pfi">{{ core.pfi }}</strong><strong
-              v-else>AUCUN</strong> -
+            Numéro financier :
+            <strong v-if="core.pfi" class="text-private">{{ core.pfi }}</strong>
+            <strong class="text-private" v-else>AUCUN</strong> -
             Ouverture du PFI le
             <time>{{ $filters.dateFull(core.dateOpened) }}</time>
             <br>
           </p>
-          <p class="texthighlight baseline" v-for="n, label in core.numeros">
+          <p class="texthighlight baseline" v-for="(n, label) in core.numeros">
             {{ label }} : <strong>{{ n }}</strong>
           </p>
         </div>
@@ -303,7 +299,7 @@
 
       <div class="row">
         <div class="col-md-12">
-          <nav class="buttons xs">
+          <nav class="admin-bar">
             <a class="btn btn-primary btn-xs" v-if="core.urls.edit" :href="core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
@@ -320,11 +316,11 @@
               <i class="icon-paste"></i>
               Dupliquer</a>
 
-            <a class="btn btn-xs btn-danger" v-if="debugEnabled" @click="handlerDebugShow($data)">
+            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="handlerDebugShow($data)">
               <i class="icon-bug"></i>
               Afficher le modèle</a>
 
-            <a class="btn btn-xs btn-danger" v-if="debugEnabled" @click="fetch">
+            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="fetch">
               <i class="icon-bug"></i>
               Recharger le modèle</a>
           </nav>
@@ -432,121 +428,65 @@
                 </span>
               </div>
             </div>
-            <hr>
-            EDIT: {{ credentials.workpackages.edit }}
+
+            <h3>Lots de travail</h3>
             <workpackages-activity
+                :debug-enabled="debugEnabled"
                 :editable="credentials.workpackages.edit"
                 :workpackages="workpackages"
                 :url="workpackagesUrl"
-                :persons="persons"/>
+                :persons="personsWP"
+                @update="handlerUpdateWorkpackages"
+            />
           </section>
-
         </section>
-        <!--
-        <section id="timesheets" class="section-infos" v-if="activity.timesheets.readable">
-          <h2><i class="icon-book"></i>Feuille de temps</h2>
-          <section id="timesheets" v-if="activity.timesheets.enabled">
-            <section class="declarers">
-              <h3>Déclarants</h3>
-              <div v-if="activity.timesheets.declarers.length">
-                <div class="alert alert-info">
-                  <i class="icon-info-outline"></i> Pour nommer un déclarant, affectez un membre de l'activité à un des
-                  lots de travail.
-                </div>
-                <a :href="d.url_details" v-for="d in activity.timesheets.declarers" class="btn"
-                   :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
-                  {{ d.label }}
-                </a>
-              </div>
-              <div v-else class="alert alert-info">
-                Aucun déclarant désigné sur un lot de travail
-              </div>
-            </section>
-
-            <section class="validators">
-              <h3>Validateurs</h3>
-              <div class="row">
-                <div class="col-md-4">
-                  <h4><i class="icon-cube"></i>Validation PROJET</h4>
-                  <section class="persons" v-if="activity.timesheets.validators.prj.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.prj"
-                                     class="cartouche primary"/>
-                  </section>
-                  <div class="alert alert-warning" v-else>
-                    Aucun validateur désigné pour cette étape
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <h4><i class="icon-beaker"></i>Validation SCIENTIFIQUE</h4>
-                  <section class="persons" v-if="activity.timesheets.validators.sci.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.sci"
-                                     class="cartouche primary"/>
-                  </section>
-                  <div class="alert alert-warning" v-else>
-                    Aucun validateur désigné pour cette étape
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <h4><i class="icon-hammer"></i>Validation ADMINISTRATIVE</h4>
-                  <section class="persons" v-if="activity.timesheets.validators.adm.length">
-                    <PersonCartouche :person="p" v-for="p in activity.timesheets.validators.adm"
-                                     class="cartouche primary"/>
-                  </section>
-                  <div class="alert alert-warning" v-else>
-                    Aucun validateur désigné pour cette étape
-                  </div>
-                </div>
-              </div>
-            </section>
-                    <section class="lots">
-                      <h3>Lots de travail</h3>
-                      <WorkpackageUI :url="activity.workpackages.url" :outsidePerson="persons"/>
-                    </section>
-                  </section>
-                  <div class="alert alert-warning" v-else>
-                    {{ activity.timesheets.enabled_details }}
-                  </div>
-                </section>
-
-              -->
       </div>
+
       <aside class="col-md-4">
-        Credentials:
-        <pre>Credentials: {{ credentials }}</pre>
-        <!--
-        <section id="milestones" class="section-infos">
+        <section id="milestones" class="section-infos" v-if="credentials.milestones.read">
           <h2><i class="icon-calendar"></i>Jalons</h2>
-          <Milestones :url="activity.milestones.url" :editable="activity.milestones.editable" :payments="payments"/>
-          <a v-if="activity.milestones.url_notifications" :href="activity.milestones.url_notifications"
+
+          <Milestones :url="milestonesUrl"
+                      :manage="credentials.milestones.edit"
+                      :payments="payments"
+                      :items="milestones"
+                      :types="milestonesTypes"
+          />
+
+          <a v-if="milestonesUrlNotifications" :href="milestonesUrlNotifications"
              class="btn btn-primary">
             <i class="icon-bell"></i>
             Voir les notifications planifiées
           </a>
         </section>
 
-        <section id="payments" class="section-infos" v-if="activity.payments.readable">
+        <section id="payments" class="section-infos" v-if="credentials.payments.read">
           <h2><i class="icon-bank"></i>Versements</h2>
-          <Payments :url="activity.payments.url" :manage="activity.payments.editable"
-                    :amount="core.amount"
-                    @update="handlerPaymentsUpdate"
+          <Payments :url="paymentsUrl"
+                    :manage="credentials.payments.edit"
+                    :amount="budget.amount"
+                    :payments="payments"
+                    @debug="handlerDebugShow"
+                    @update="handlerUpdatePayments"
           />
         </section>
 
-        <section id="spents" class="section-infos" v-if="activity.spents.readable">
-          <h2><i class="icon-bank"></i>Dépenses</h2>
-          <ActivitySpentSynthesis :url="activity.spents.url"/>
+
+        <section id="spents" class="section-infos" v-if="credentials.spents.read">
+          <h2><i class="icon-bank"></i>Dépenses </h2>
+          <ActivitySpentSynthesis :url="spentsUrl"/>
           <nav class="buttons xs">
-            <a :href="activity.spents.url_details" class="btn btn-primary btn" v-if="activity.spents.url_details">
+            <a :href="spentsUrlDetails" class="btn btn-primary btn" v-if="credentials.spents.details">
               <i class="icon-file-excel"></i>
               Détails des dépenses</a>
-            <a :href="activity.spents.url_previsionnel" class="btn btn-primary btn"
-               v-if="activity.spents.url_previsionnel">
+            <a :href="spentsUrlPrevisionnel" class="btn btn-primary btn"
+               v-if="credentials.spents.previsionnel">
               <i class="icon-file-excel"></i>
               Dépenses prévisionnelles (beta)</a>
           </nav>
 
         </section>
-        -->
+
       </aside>
 
     </div>
@@ -561,23 +501,27 @@
       </div>
     </div>
   </div>
-  <div v-else>Données inaccessibles <br> core : {{ core }}<br>Credentials: {{ credentials }}</div>
+  <div v-else>
+    Données inaccessibles
+  </div>
 </template>
 <script>
 
-import axios from 'axios';
 import ActivityDocument from "./ActivityDocument.vue";
 import ActivityLogs from "./ActivityLogs.vue";
+import ActivityNotes from "./ActivityNotes.vue";
 import ActivitySpentSynthesis from "./ActivitySpentSynthesis.vue";
+import axios from 'axios';
+import AxiosMessage from "../utils/AxiosMessage.js";
 import EntityWithRole from "./EntityWithRole.vue";
 import Loader from "../components/Loader.vue";
 import Milestones from "./Milestones.vue";
 import Modal from "../components/Modal.vue";
 import Payments from "./Payments.vue";
 import PersonCartouche from "../components/PersonCartouche.vue";
+import VueJsonPretty from 'vue-json-pretty';
 import WorkpackagesActivity from "./WorkpackagesActivity.vue";
-import AxiosMessage from "../utils/AxiosMessage.js";
-import ActivityNotes from "./ActivityNotes.vue";
+import 'vue-json-pretty/lib/styles.css';
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -598,6 +542,7 @@ export default {
     PersonCartouche,
     Milestones,
     Modal,
+    VueJsonPretty,
     WorkpackagesActivity
   },
 
@@ -612,19 +557,22 @@ export default {
       core: null,
       credentials: null,
 
-      documents: null,
+      documents: [],
 
-      milestones: null,
+      milestones: [],
+      milestonesTypes: [],
       milestonesUrl: null,
+      milestonesUrlNotifications: null,
 
       notes: null,
       notes_url: null,
 
+      payments: [],
+      paymentsUrl: null,
+
       persons: null,
       personsUrl: null,
       personsUrlNew: null,
-
-      payments: null,
 
       rolesOrganizations: null,
       rolesPersons: null,
@@ -655,9 +603,27 @@ export default {
   },
 
   computed: {
+    personsWP() {
+      if (!this.persons) {
+        return [];
+      } else {
+        let out = {};
+        this.persons.forEach(person => {
+          if (!out.hasOwnProperty(person.enrolled)) {
+            out[person.enrolled] = {
+              id: person.enrolled,
+              displayname: person.enrolledLabel,
+            };
+          }
+        });
+        return Object.values(out);
+      }
+    },
+
     storage() {
       return localStorage.getItem(storage_key);
     },
+
     isSticky() {
       return this.sticky.find(item => item.id == this.core.id);
     },
@@ -690,21 +656,24 @@ export default {
       this.error = err.message;
     },
 
+    handlerUpdateWorkpackages(d) {
+      this.workpackages = d.entities;
+    },
+
     handlerUpdateNotes(d) {
       this.notes = d.entities;
     },
 
     handlerUpdatePayments(p) {
-      this.payments = p;
+      console.log("updatePayments", p);
+      this.payments = p.entities;
     },
 
     handlerUpdatePersons(d) {
-      console.log("Update persons", d);
       this.persons = d.datas.items;
     },
 
     handlerUpdateOrganizations(d) {
-      console.log("Update organizations", d);
       this.organizations = d.datas.items;
     },
 
@@ -756,22 +725,42 @@ export default {
       this.loading = true;
       axios.get(this.url).then(response => {
         console.log(response.data);
+
+
         this.budget = response.data.activity.datas.budget;
         this.core = response.data.activity.datas.core;
         this.persons = response.data.activity.datas.persons.entities;
         this.documents = response.data.activity.datas.documents;
 
-        this.notes = response.data.activity.datas.notes.entities;
-        this.notes_url = response.data.activity.datas.notes.url;
+        if (response.data.activity.datas.notes) {
+          this.notes = response.data.activity.datas.notes.entities;
+          this.notes_url = response.data.activity.datas.notes.url;
+        }
 
-        this.personsUrlNew = response.data.activity.datas.persons.urlNew;
-        this.personsUrl = response.data.activity.datas.persons.url;
-        this.rolesPersons = response.data.activity.datas.persons.roles;
+        if (response.data.activity.datas.milestones) {
+          this.milestones = response.data.activity.datas.milestones.entities;
+          this.milestonesTypes = response.data.activity.datas.milestones.types;
+          this.milestonesUrl = response.data.activity.datas.milestones.url;
+          this.milestonesUrlNotifications = response.data.activity.datas.milestones.urlNotifications;
+        }
 
-        this.organizations = response.data.activity.datas.organizations.entities;
-        this.organizationsUrl = response.data.activity.datas.organizations.url;
-        this.organizationsUrlNew = response.data.activity.datas.organizations.urlNew;
-        this.rolesOrganizations = response.data.activity.datas.organizations.roles;
+        if (response.data.activity.datas.organizations) {
+          this.organizations = response.data.activity.datas.organizations.entities;
+          this.organizationsUrl = response.data.activity.datas.organizations.url;
+          this.organizationsUrlNew = response.data.activity.datas.organizations.urlNew;
+          this.rolesOrganizations = response.data.activity.datas.organizations.roles;
+        }
+
+        if (response.data.activity.datas.payments) {
+          this.payments = response.data.activity.datas.payments.entities;
+          this.paymentsUrl = response.data.activity.datas.payments.url;
+        }
+
+        if (response.data.activity.datas.persons) {
+          this.personsUrlNew = response.data.activity.datas.persons.urlNew;
+          this.personsUrl = response.data.activity.datas.persons.url;
+          this.rolesPersons = response.data.activity.datas.persons.roles;
+        }
 
         if (response.data.activity.datas.timesheets) {
           this.timesheetsValidators = response.data.activity.datas.timesheets.validators;
@@ -907,8 +896,25 @@ export default {
   }
 }
 
+.activity-project {
+  padding: .25em 1em .25em .25em;
+  border-bottom: #eee solid thin;
+}
+
+.activity-type {
+  background: #EEE;
+  padding: .25em 1em .25em .25em;
+  .icon-tag {
+    color: #999;
+  }
+}
+
+.type-chain span {
+  font-weight: 400
+}
+
 .type-chain span:last-child {
-  font-weight: bold
+  font-weight: 700
 }
 
 .type-chain span:last-child:after {
@@ -921,6 +927,7 @@ export default {
 
 .type-chain span:after {
   content: ' > ';
+  color: #CCC;
 }
 
 .buttons {
@@ -959,6 +966,11 @@ header {
 
 .budget {
   border-left: #dee2ea thin solid;
+  .amount {
+    font-size: 1.4em;
+    border-top: solid thin #EEE;
+    border-bottom: solid thin #EEE;
+  }
 
   .details {
     font-size: .8em;

@@ -154,10 +154,14 @@
       </div>
     </transition>
 
-    <nav class="text-right" v-if="manage">
-        <a href="#" @click.prevent="handlerNewPayment" class="btn btn-default btn-xs">
-          <i class="icon-bank"></i>
-          Nouveau versement</a>
+    <nav class="admin-bar" v-if="manage">
+      <a href="#" @click.prevent="handlerNewPayment" class="btn btn-default btn-xs">
+        <i class="icon-bank"></i>
+        Nouveau versement</a>
+      <button class="btn btn-warning btn-xs" @click.prevent="fetch">
+        <i class="icon-bug"></i>
+        fetch
+      </button>
     </nav>
     <payment v-for="p in payments" :payment="p" :key="p.id" :manage="manage"
              @delete="handlerDelete"
@@ -165,11 +169,11 @@
 
     <article class="payment total">
       <div class="heading">
-        <strong class="amount">
+        <strong class="amount text-private">
           {{ $filters.money(total)}} €
         </strong>
         <span class="date">/
-                  <strong>{{ $filters.money(amount)}} €</strong>
+                  <strong class="text-private">{{ $filters.money(amount)}} €</strong>
                 </span>
       </div>
     </article>
@@ -194,15 +198,15 @@ import Payment from './PaymentItem.vue';
 import Datepicker from './../components/Datepicker.vue';
 import axios from "axios";
 import moment from "moment";
+import AxiosMessage from "../utils/AxiosMessage.js";
 
 export default {
-  props: ['url', 'amount', 'currency', 'currencies', 'manage'],
+  props: ['url', 'amount', 'currency', 'currencies', 'manage', 'payments'],
 
   data() {
     return {
       formData: null,
       deletePayment: null,
-      payments: [],
       error: "",
       pendingMsg: ""
     }
@@ -273,8 +277,6 @@ export default {
     handlerEdit(payment) {
       this.formData = JSON.parse(JSON.stringify(payment));
       this.formData.currencyId = payment.currency.id;
-      console.log("datePayment", payment.datePayment ? payment.datePayment.date : "vide");
-      console.log("datePredicted", payment.datePredicted ? payment.datePredicted.date : "vide");
       this.formData.datePayment = payment.datePayment ? moment(payment.datePayment.date).format('YYYY-MM-DD') : "";
       this.formData.datePredicted = payment.datePredicted ? moment(payment.datePredicted.date).format('YYYY-MM-DD') : "";
       this.formData.currencyId = payment.currency.id;
@@ -297,36 +299,34 @@ export default {
      */
     performSave() {
 
+      this.loading = "Enregistrement du paiement";
+
       if (this.formHasError) {
         return;
       }
 
-      var datas = new FormData();
-      datas.append('id', this.formData.id);
-      datas.append('amount', this.formData.amount.toString().replace(',', '.'));
-      datas.append('currencyId', this.formData.currencyId);
-      datas.append('rate', this.formData.rate);
-      datas.append('datePredicted', this.formData.datePredicted ? this.formData.datePredicted : "");
-      datas.append('status', this.formData.status);
-      datas.append('datePayment', this.formData.datePayment ? this.formData.datePayment : "");
-      datas.append('codeTransaction', this.formData.codeTransaction);
-      datas.append('comment', this.formData.comment);
-
-      this.pendingMsg = "Enregistrement du versement";
-      datas.append('action', this.formData.id ? 'update' : 'create');
-
-
-      axios.post(this.url, datas).then(
-          success => {
-            this.fetch();
-          },
-          fail => {
-            this.error = fail.body;
-          }
-      ).then(() => {
-        this.pendingMsg = "";
-        this.formData = null;
-      })
+      if (this.formData.id) {
+        axios.post(this.url, this.formData).then(
+            (response) => {
+              this.formData = null;
+              this.fetch();
+            },
+            (error) => {
+              this.error = AxiosMessage.manageErrorResponse(error);
+            }
+        )
+      } else {
+        console.log('CREATE');
+        axios.put(this.url, this.formData).then(
+            (response) => {
+              this.formData = null;
+              this.fetch();
+            },
+            (error) => {
+              this.error = AxiosMessage.manageErrorResponse(error);
+            }
+        )
+      }
     },
 
     /**
@@ -338,7 +338,7 @@ export default {
             this.fetch();
           },
           (fail) => {
-            this.error = "Impossible de supprimer le versement : " + fail.body;
+            this.error = "Impossible de supprimer le versement : " + AxiosMessage.manageErrorResponse(fail).message;
           }
       ).then(() => {
         this.deletePayment = null;
@@ -349,20 +349,21 @@ export default {
      * Chargement des versements depuis l'API
      */
     fetch() {
+      this.loading = "Chargement des versements";
       axios.get(this.url).then(
           (success) => {
-            this.payments = success.data;
-            this.$emit('update', this.payments);
+            console.log(success);
+            this.$emit('update', success.data.datas.payments);
           },
           (fail) => {
-            this.error = "Impossible de charger les versements : " + fail.body;
+            this.error = AxiosMessage.manageErrorResponse(fail);
           }
-      );
+      ).finally(f => this.loading = null);
     }
   },
 
   mounted() {
-    this.fetch()
+    // this.fetch()
   }
 }
 </script>

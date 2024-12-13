@@ -14046,6 +14046,10 @@ article.wp h3 {
   text-decoration: line-through;
 }
 
+.admin-bar {
+  padding: 0.3em 0;
+}
+
 .div-connexion .card {
   background-color: transparent;
   box-shadow: none;

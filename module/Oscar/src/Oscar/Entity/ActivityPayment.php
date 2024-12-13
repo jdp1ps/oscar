@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Dates des Activités (Jalons)
  *
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\Repository\ActivityPaymentRepository")
  */
 class ActivityPayment implements ITrackable
 {
@@ -23,7 +24,7 @@ class ActivityPayment implements ITrackable
     const STATUS_ECART          = 3;
 
     /**
-     * Retourne le liste des status disponibles.
+     * Retourne la liste des status disponibles.
      *
      * @return array
      */

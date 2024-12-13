@@ -15,6 +15,7 @@ class ActivityNotesControllerFactory implements FactoryInterface
         $c = new ActivityNotesController();
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
+        $c->setLoggerService($container->get('Logger'));
         $c->setProjectGrantApiService($container->get(ProjectGrantApiService::class));
         return $c;
     }

@@ -19,6 +19,9 @@ use Oscar\Hydrator\WorkPackageHydrator;
 use Oscar\Provider\Privileges;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Oscar\Service\ProjectGrantApiService;
+use Oscar\Traits\UseServiceContainer;
+use Oscar\Traits\UseServiceContainerTrait;
 
 
 /**
@@ -26,8 +29,11 @@ use Laminas\View\Model\ViewModel;
  *
  * @package Oscar\Controller
  */
-class WorkPackageController extends AbstractOscarController
+class WorkPackageController extends AbstractOscarController implements UseServiceContainer
 {
+
+    use UseServiceContainerTrait;
+
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -235,6 +241,27 @@ class WorkPackageController extends AbstractOscarController
         ////////////////////////////////////////////// Aggrègation des personnes/rôles
         ///
         try {
+            // PATCH v2
+            if( $this->getRequest()->getQuery()->get('v') == '2' ){
+                try {
+                    /** @var ProjectGrantApiService $projectGrantApiService */
+                    $projectGrantApiService = $this->getServiceContainer()->get(ProjectGrantApiService::class);
+
+                    $datas = $projectGrantApiService->getActivityJson(
+                        $activity->getId(),
+                        $this->url(),
+                        $this->getOscarUserContextService(),
+                        ProjectGrantApiService::PERIMETER_WORKPACKAGES
+                    );
+
+                    return $this->jsonOutput($datas);
+
+                } catch ( \Exception $e ){
+                    return $this->jsonError($e->getMessage());
+                }
+
+                throw new OscarException("TRAVAUX en COURS");
+            }
             $persons = [];
             /** @var Person $person */
             foreach( $activity->getPersonsDeep() as $person ){
