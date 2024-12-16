@@ -115,14 +115,13 @@
 
         <div class="row">
           <div class="col-md-6">
-
-                        <span v-if="entityNew.enroledLabel" class="cartouche">
-                            {{ entityNew.enroledLabel }}
-                            <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
-                            <span class="addon" v-if="entityNew.role">
-                                {{ roles[entityNew.role] }}
-                            </span>
-                        </span>
+            <span v-if="entityNew.enroledLabel" class="cartouche">
+                {{ entityNew.enroledLabel }}
+                <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
+                <span class="addon" v-if="entityNew.role">
+                    {{ getRoleById(entityNew.role).label }}
+                </span>
+            </span>
             <div class="form-group" v-else>
               <label class=" control-label" for="enroled">{{ title }}</label>
               <personselector @change="handlerEnrolledSelectedPerson($event)" v-if="title == 'Personne'"
@@ -350,6 +349,10 @@ export default {
         this.loading = false;
         this.fetch();
       })
+    },
+
+    getRoleById(id){
+      return this.roles.find(i => i.id === id);
     },
 
     performEdit() {
