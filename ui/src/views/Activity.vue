@@ -474,7 +474,10 @@
 
         <section id="spents" class="section-infos" v-if="credentials.spents.read">
           <h2><i class="icon-bank"></i>Dépenses </h2>
-          <ActivitySpentSynthesis :url="spentsUrl"/>
+          <ActivitySpentSynthesis
+              :standalone="false"
+              :datas="spents"
+          />
           <nav class="buttons xs">
             <a :href="spentsUrlDetails" class="btn btn-primary btn" v-if="credentials.spents.details">
               <i class="icon-file-excel"></i>
@@ -588,6 +591,8 @@ export default {
 
       workpackages: null,
       workpackagesUrl: null,
+
+      spents: null,
 
 
       activity: {},
@@ -725,12 +730,19 @@ export default {
       this.loading = true;
       axios.get(this.url).then(response => {
         console.log(response.data);
+        // TODO tester la clef activity.datas
 
 
         this.budget = response.data.activity.datas.budget;
         this.core = response.data.activity.datas.core;
-        this.persons = response.data.activity.datas.persons.entities;
-        this.documents = response.data.activity.datas.documents;
+
+        if (response.data.activity.datas.spents) {
+          this.spents = response.data.activity.datas.spents;
+        }
+
+        if (response.data.activity.datas.documents) {
+          this.documents = response.data.activity.datas.documents;
+        }
 
         if (response.data.activity.datas.notes) {
           this.notes = response.data.activity.datas.notes.entities;
@@ -757,6 +769,7 @@ export default {
         }
 
         if (response.data.activity.datas.persons) {
+          this.persons = response.data.activity.datas.persons.entities;
           this.personsUrlNew = response.data.activity.datas.persons.urlNew;
           this.personsUrl = response.data.activity.datas.persons.url;
           this.rolesPersons = response.data.activity.datas.persons.roles;

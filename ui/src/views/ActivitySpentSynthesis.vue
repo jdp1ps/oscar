@@ -62,7 +62,7 @@
       </thead>
 
       <tbody>
-      <tr v-for="dt,key in synthesis.masses">
+      <tr v-for="(dt,key) in synthesis.masses">
         <th>
           <small>{{ dt }}</small>
           <a class="label label-info xs" :href="'#repport-' + key">{{ synthesis.synthesis[key].nbr_effectue }} /
@@ -91,9 +91,9 @@
       </tbody>
     </table>
 
-    <div v-if="manageRecettes">
+    <div>
       <h3><i class="icon-calculator"></i>Recettes</h3>
-      <table class="table table-condensed card synthesis" v-if="spentlines">
+      <table class="table table-condensed card synthesis">
         <tbody>
         <tr>
           <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
@@ -126,6 +126,7 @@
       Données mise à jour :
       <strong v-if="dateUpdated">{{ $filters.fullDate(dateUpdated.date) }}</strong>
     </small>
+
   </section>
 </template>
 <script>
@@ -133,14 +134,18 @@ import axios from "axios";
 
 export default {
   props: {
-    url: {
-      required: true
-    }
+    url: { default: "" },
+    standalone: { default: true },
+    datas: { default: {} }
   },
 
   computed:{
     synthesis(){
-      return this.infos
+      if( this.standalone ){
+        return this.infos;
+      } else {
+        return this.datas;
+      }
     }
   },
 
@@ -149,8 +154,7 @@ export default {
       infos: null,
       pendingMsg: null,
       showCuration: false,
-      masses: [],
-      synthesis: null
+      masses: []
     }
   },
 
@@ -159,7 +163,7 @@ export default {
       this.pendingMsg = "Chargement des données financières";
       axios.get(this.url).then(
           ok => {
-            this.synthesis = ok.data.synthesis;
+            this.infos = ok.data.synthesis;
             this.masses = ok.data.masses;
           },
           ko => {

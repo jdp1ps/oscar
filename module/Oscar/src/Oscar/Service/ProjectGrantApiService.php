@@ -991,21 +991,15 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'pfi' => $pfis
         ];
         try {
-            $masses = $this->getOscarConfigurationService()->getMasses();
-
             if (count($pfis) == 0) {
                 return $this->getResponseInternalError("Pas de numéro financier");
             }
-
-
-            // Construction des données de dépense
-            $out['masses'] = $masses;
-            $out['dateUpdated'] = $activity->getDateTotalSpent();
-            $out['synthesis'] = $this->getSpentService()->getSynthesisDatasPFI(
+            $out = $this->getSpentService()->getSynthesisDatasPFI(
                 $pfis,
                 true,
                 'basic'
             );
+            $out['dateUpdated'] = $activity->getDateTotalSpent();
         } catch (Exception $e) {
             return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
         }
