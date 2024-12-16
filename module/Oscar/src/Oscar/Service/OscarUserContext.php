@@ -697,11 +697,13 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
             $person = $this->getCurrentPerson();
         }
 
-        $rolesLead = $this->getRoleIdPrimary();
-        /** @var OrganizationPerson $affectation */
-        foreach ($person->getOrganizations() as $affectation) {
-            if (!$affectation->isOutOfDate() && in_array($affectation->getRole(), $rolesLead)) {
-                return true;
+        if( $person ){
+            $rolesLead = $this->getRoleIdPrimary();
+            /** @var OrganizationPerson $affectation */
+            foreach ($person->getOrganizations() as $affectation) {
+                if (!$affectation->isOutOfDate() && in_array($affectation->getRole(), $rolesLead)) {
+                    return true;
+                }
             }
         }
 
@@ -746,10 +748,14 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     throw new OscarException(OscarException::ACCOUNT_DISABLED);
                 }
 
-                $this->getLoggerService()->debug("Calcule de la personne : $person");
+                $this->getLoggerService()->debug("Calcule de la personne : " . ($person ? $person->getFullName() : 'nop'));
 
+                if( $person === false ){
+                    $person = null;
+                }
                 $this->_currentPerson = $person;
             } catch (NoResultException $ex) {
+                $this->_currentPerson = null;
                 // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
                 // ... can happening with users stored in database directly
             }
@@ -1247,7 +1253,7 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
     /**
      * Retourne la liste des rôles actifs de la personne dans l'activité donnée.
      *
-     * @param Person $person
+     * @param Person|null $person
      * @param Activity $activity
      * @return mixed
      */
