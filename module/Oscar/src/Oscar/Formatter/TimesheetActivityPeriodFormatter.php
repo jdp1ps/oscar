@@ -262,10 +262,10 @@ class TimesheetActivityPeriodFormatter
 
         $wpWidth = count($datas['wps']);
         $ceWidth = count($datas['ces']);
-        $educationWidth = count($datas['othersGroups']['education']);
-        $absWidth = count($datas['othersGroups']['abs']);
-        $otherWidth = count($datas['othersGroups']['other']);
-        $researchWidth = count($datas['othersGroups']['research']);
+        $educationWidth = $datas['othersGroups']['education'] ? count($datas['othersGroups']['education']) : 0;
+        $absWidth = $datas['othersGroups']['abs'] ? count($datas['othersGroups']['abs']) : 0;
+        $otherWidth = $datas['othersGroups']['other'] ? count($datas['othersGroups']['other']) : 0;
+        $researchWidth = $datas['othersGroups']['research'] ? count($datas['othersGroups']['research']) : 0;
 
         $fullWidth = $wpWidth + $ceWidth + $educationWidth + $absWidth + $otherWidth + $researchWidth + 5;
 
@@ -610,21 +610,21 @@ class TimesheetActivityPeriodFormatter
             foreach ($datas['othersGroups']['education'] as $r) {
                 $this->drawCell($r['label'], 0, true, 'headEducation');
             }
-            if( count($datas['othersGroups']['education']) > 1 ){
+            if( $datas['othersGroups']['education'] && count($datas['othersGroups']['education']) > 1 ){
                 $this->drawCell("Total Enseignement", 0, true, 'headEducation');
             }
 
             foreach ($datas['othersGroups']['abs'] as $r) {
                 $this->drawCell($r['label'], 0, true, 'headAbs');
             }
-            if( count($datas['othersGroups']['abs']) > 1 ){
+            if( $datas['othersGroups']['abs'] && count($datas['othersGroups']['abs']) > 1 ){
                 $this->drawCell("Total absent", 0, true, 'headAbs');
             }
 
             foreach ($datas['othersGroups']['other'] as $r) {
                 $this->drawCell($r['label'], 0, true, 'headOther');
             }
-            if( count($datas['othersGroups']['other']) > 1 ){
+            if( $datas['othersGroups']['other'] && count($datas['othersGroups']['other']) > 1 ){
                 $this->drawCell("Total autre", 0, true, 'headOther');
             }
 
