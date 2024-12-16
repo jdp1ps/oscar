@@ -62,7 +62,7 @@
         </table>
 
         <nav class="admin-bar">
-          <button class="btn btn-default button-back" @click="toPaste = null">
+          <button class="btn btn-default button-back" @click="error = ''">
             <i class="icon-angle-left"></i>
             Annuler
           </button>
@@ -139,14 +139,13 @@
 
         <div class="row">
           <div class="col-md-6">
-
-                        <span v-if="entityNew.enroledLabel" class="cartouche">
-                            {{ entityNew.enroledLabel }}
-                            <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
-                            <span class="addon" v-if="entityNew.role">
-                                {{ rolesList[entityNew.role] }}
-                            </span>
-                        </span>
+            <span v-if="entityNew.enroledLabel" class="cartouche">
+                {{ entityNew.enroledLabel }}
+                <i class="icon-cancel-alt icon-clickable" @click="handlerCancel"></i>
+                <span class="addon" v-if="entityNew.role">
+                    {{ getRoleById(entityNew.role).label }}
+                </span>
+            </span>
             <div class="form-group" v-else>
               <label class=" control-label" for="enroled">{{ title }}</label>
               <personselector @change="handlerEnrolledSelectedPerson($event)" v-if="title == 'Personne'"
@@ -420,6 +419,10 @@ export default {
       })
     },
 
+    getRoleById(id){
+      return this.roles.find(i => i.id === id);
+    },
+
     performEdit() {
       this.loading = "Enregistrement des modifications";
       let data = new FormData();
@@ -482,7 +485,6 @@ export default {
       this.loading = "Chargement des données";
       console.log("fetch");
       axios.get(this.url).then(ok => {
-        console.log(ok);
             if (this.standalone) {
               if (ok.data.roles) {
                 this.standalone_roles = ok.data.roles;
@@ -501,7 +503,6 @@ export default {
                 this.standalone_items = ok.data;
               }
             } else {
-              console.log("MODE NON-STANDALONE");
               let items = null;
               if (ok.data.persons) {
                 items = ok.data.persons;
