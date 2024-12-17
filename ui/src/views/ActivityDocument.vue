@@ -229,20 +229,24 @@
     </div>
 
     <nav v-if="debugEnabled" class="admin-bar">
-      <button v-on:click="handlerDebug" class="btn btn-xs btn-danger">
+      <button v-on:click="handlerDebug" class="btn btn-xs btn-warning">
         <i class="icon-bug"></i>
         Voir le modèle
       </button>
+      <button v-on:click="fetch" class="btn btn-xs btn-warning">
+        <i class="icon-bug"></i>
+        Fetch
+      </button>
     </nav>
     <!-- ############################### TAB : INFORMATIONS PAR DOCUMENT LISTING PAR ONGLET ASSOCIÉ ######################################################-->
+    <Loader :visible="loading" :text="loading" />
     <section class="documents-content">
-      <Loader :visible="loading" :text="loading" />
       <div class="tabs">
         <div class="tab" :class="{'selected': selectedTabId === tab.id }"
              v-for="tab in packedDocuments"
              @click.prevent="handlerSelectTab(tab)">
           {{ tab.label }}
-          <sup class="label label-default">{{ tab.total }}</sup>
+          <sup class="label label-default">{{ countDocs(tab) }}</sup>
         </div>
         <div class="tab" :class="{'selected': displayComputed }" @click.prevent="handlerSelectTab('computed')">
           Documents générés
@@ -267,16 +271,21 @@
           </nav>
         </article>
       </div>
-      <div class="tab-content" v-for="tab in packedDocuments" v-show="selectedTabId === tab.id">
-        <nav v-if="tab.manage" class="text-right">
-          <button v-on:click="handlerNew(tab.id)" class="btn btn-xs btn-default" v-if="tab.manage">
+
+     <div class="tab-content" v-for="tab in packedDocuments" v-show="selectedTabId === tab.id">
+        <nav class="admin-bar">
+          <button v-on:click="handlerNew(tab.id)" class="btn btn-xs btn-default" v-if="saCredentials.tabs[tab.id].edit" >
             <i class="icon-download"></i>
             Téléverser un document
+          </button>
+          <button v-if="debugEnabled" class="btn btn-xs btn-warning" @click.prevent="$emit('debug', tab)">
+            Informations
           </button>
         </nav>
         <document-list
             :documents="tab.documents"
             :tabs="tabsWithDocuments"
+            :manage="saCredentials.tabs[tab.id].edit"
             :types="typesDocuments"
             :sign-process="signProcess"
             :display-activity="false"
@@ -295,6 +304,7 @@ import moment from 'moment';
 import 'moment/locale/fr';
 import DocumentsList from "./DocumentsList.vue";
 import Loader from "../components/Loader.vue";
+import AxiosMessage from "../utils/AxiosMessage.js";
 
 // Traitement spécifique de l'onglet Privé
 const PRIVATE = "private";
@@ -313,7 +323,14 @@ export default {
     urlUploadNewDoc: {required: true},
     urlSignDocument: {required: false},
     debugEnabled: {default: false},
-    url: {required: true}
+    url: {required: true},
+    standalone: {default: false},
+    saTabs: {default: null},
+    saTypes: {default: null},
+    saGeneratedDocuments: {default: null},
+    saComputedDocuments: {default: null},
+    saProcessDatas: {default: null},
+    saCredentials: {default: null},
   },
 
   data() {
@@ -385,47 +402,12 @@ export default {
   },
 
   computed: {
-    currentFlow() {
-      if (this.editedDocument.category.id) {
-        let category = this.typesDocuments.find(i => i.id == this.editedDocument.category.id);
-        if (category.flow) {
-          return category.flow.signatureflow;
-        }
-      }
-      return false;
-    },
-    selectedTypeDocument() {
-      if (this.selectedIdTypeDocument) {
-        return this.typesDocuments.find(item => item.id == this.selectedIdTypeDocument);
-      }
-      return null;
-    },
-    /**
-     * Retourne les documents triés A REVOIR ENTIEREMENT.
-     * @returns {Array}
-     */
-    documentsPacked() {
-      let out = [];
-      if (this.documents) {
-        let documents = this.documents;
-        out = documents.sort(function (a, b) {
-          if (a[this.sortField] < b[this.sortField])
-            return -1 * this.sortDirection;
-          if (a[this.sortField] > b[this.sortField])
-            return 1 * this.sortDirection;
-          return 0;
-        }.bind(this));
-      }
-      ;
-      return out;
-    },
-
 
     packedDocuments() {
       let packed = {};
 
-      if (this.tabsWithDocuments) {
-        for (const [i, tab] of Object.entries(this.tabsWithDocuments)) {
+      if (this.saTabs) {
+        for (const [i, tab] of Object.entries(this.saTabs)) {
           let documents = {};
           for (const [j, doc] of Object.entries(tab.documents)) {
             let docKey = doc.fileName;
@@ -454,6 +436,9 @@ export default {
   },
 
   methods: {
+    countDocs(tab){
+      return Object.keys(tab.documents).length;
+    },
 
     handlerDebug(){
       let data = JSON.parse(JSON.stringify(this.$data));
@@ -710,7 +695,7 @@ export default {
         url = this.editedDocument.urlReupload;
       } else if (this.mode === 'new') {
         formData.append('action', 'new');
-        formData.append('flow', ''); //JSON.stringify(this.currentFlow));
+        formData.append('flow', '');
         url = this.urlUploadNewDoc;
       } else if (this.mode === 'edit') {
         formData.append('action', 'edit');
@@ -730,7 +715,7 @@ export default {
         this.editedDocument = null;
         this.fetch();
       }, ko => {
-        this.error = ko.response && ko.response.data ? ko.response.data : ko;
+        this.error = AxiosMessage.manageErrorResponse(ko).message;
       })
     },
 
@@ -826,10 +811,6 @@ export default {
           if (this.selectedTabId == null) {
             this.selectedTabId = selectedTab ? selectedTab : defaultTab;
           }
-          //   // if( this.tabsWithDocuments[i].documents.length ){
-          //   //   this.selectedTabId = this.tabsWithDocuments[i].id;
-          //   // }
-          // }
 
           if (this.tabsWithDocuments.unclassified && this.tabsWithDocuments.unclassified.documents.length) {
             this.selectedTab = this.tabsWithDocuments.unclassified;
@@ -854,6 +835,7 @@ export default {
         this.displayComputed = false;
         this.selectedTab = tab;
         this.selectedTabId = tab.id;
+        localStorage.setItem("documentTab", tab.id);
       }
     },
 
@@ -861,17 +843,30 @@ export default {
     fetch() {
       this.loading = "Chargement des documents...";
       axios.get(this.url).then(ok => {
-        this.handlerSuccess(ok)
+        this.$emit('updated', ok.data.datas);
       }, ko => {
-        this.error = ko.response.data ? ko.response.data : ko;
+        this.error = AxiosMessage.manageErrorResponse(ko).message;
       }).finally(t=>this.loading = false);
     }
   },
 
   mounted() {
-    // Au chargement du module dans la page appel méthode initialisation -> fetch()
-    // Récupération des données documents par rapport à l'id de l'activité
-    this.fetch();
+    let selectedTabMemorize = parseInt(localStorage.getItem("documentTab"));
+    let first = 0;
+    let selectedTab = null;
+    if( this.packedDocuments ){
+      Object.keys(this.packedDocuments).forEach((key) => {
+        let tab = this.packedDocuments[key];
+        if( first === 0 ) first = tab.id;
+        if( selectedTabMemorize === tab.id) selectedTab = tab.id;
+      });
+      if( selectedTab === null ){
+        selectedTab = first;
+      }
+      this.selectedTabId = selectedTab;
+    } else {
+      this.selectedTabId = 0;
+    }
   }
 }
 </script>

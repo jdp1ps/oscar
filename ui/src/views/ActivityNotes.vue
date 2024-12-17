@@ -33,7 +33,11 @@
               <i class="icon-calendar"></i> {{ $filters.dateFull(c.dateRef) }}
             </span>
             <span>
-              <i class="icon-user"></i> {{ c.createdBy.username }}
+              <i class="icon-user"></i>
+              <PersonDisplay :person="c.createdBy" v-if="c.createdBy.id"/>
+              <em v-else>
+                {{ c.createdBy.username ? c.createdBy.username : 'Inconnu' }}
+              </em>
             </span>
           </div>
           <div v-if="manageadminallowed || c.mine && manageuserallowed">
@@ -89,6 +93,7 @@
 import axios from 'axios';
 import Loader from '../components/Loader.vue';
 import AxiosMessage from "../utils/AxiosMessage.js";
+import PersonDisplay from "../components/PersonDisplay.vue";
 
 export default {
   directives: {
@@ -97,6 +102,7 @@ export default {
   },
 
   components: {
+    PersonDisplay,
     Loader
   },
 

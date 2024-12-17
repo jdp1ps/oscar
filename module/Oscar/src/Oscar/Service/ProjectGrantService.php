@@ -8,6 +8,7 @@
 namespace Oscar\Service;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Laminas\Mvc\Controller\Plugin\Url;
@@ -723,21 +724,17 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
      *
      * @param bool $asArray
      * @return array|TypeDocument[]
+     * @throws NotSupported
      */
     public function getTypesDocuments($asArray = true)
     {
-        $types = $this->getEntityManager()->getRepository(TypeDocument::class)->findBy([], ['label' => 'ASC']);
+
         if ($asArray) {
-            $documentTypes = [];
-            /** @var TypeDocument $type */
-            foreach ($types as $type) {
-                $documentTypes[$type->getId()] = $type->getLabel();
-            }
+            return $this->getEntityManager()->getRepository(TypeDocument::class)->getTypesArrayFlat();
         }
         else {
-            $documentTypes = $types;
+            return $this->getEntityManager()->getRepository(TypeDocument::class)->getTypes();
         }
-        return $documentTypes;
     }
 
     /**

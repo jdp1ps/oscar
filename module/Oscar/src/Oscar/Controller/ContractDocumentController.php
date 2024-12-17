@@ -19,6 +19,7 @@ use Oscar\Service\ActivityLogService;
 use Oscar\Service\ContractDocumentService;
 use Oscar\Service\JsonFormatterService;
 use Oscar\Service\NotificationService;
+use Oscar\Service\ProjectGrantApiService;
 use Oscar\Service\ProjectGrantService;
 use Oscar\Service\VersionnedDocumentService;
 use Oscar\Traits\UseJsonFormatterService;
@@ -566,162 +567,167 @@ class ContractDocumentController extends AbstractOscarController implements UseS
             /** @var Activity $entity */
             $activity = $this->getActivityService()->getActivityById($id, true);
 
-            //return new JsonModel($this->getProjectGrantApiService()->getDocumentsActivity($activity->getId(), $this->url));
+            /** @var ProjectGrantApiService $projectGrantApiService */
+            $projectGrantApiService = $this->getServiceContainer()->get(ProjectGrantApiService::class);
 
-            $out = $this->baseJsonResponse();
-
-            // ID des tabs (onglets pour ranger les documents)
-            $arrayTabs = [];
-            $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
-
-            $rolesMerged = $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
-                $this->getCurrentPerson(),
-                $activity
-            );
-
-            if (!$this->getOscarUserContextService()->getAccessActivityDocument($activity)['read']) {
-                $this->getLoggerService()->error("Accès non authorisé");
-                return $this->getResponseUnauthorized();
-            }
-
-            foreach ($entitiesTabs as $tabDocument) {
-                // Traitement final attendu sur les rôles
-                $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
-                if ($access['read']) {
-                    $tabId = $tabDocument->getId();
-                    $arrayTabs[$tabId] = $tabDocument->toJson();
-                    $arrayTabs[$tabId]["documents"] = [];
-                    $arrayTabs[$tabId]['manage'] = $access['write'] == true;
-                }
-            }
-
-            //Onglet non classé
-            $unclassifiedTab = [
-                "id"        => "unclassified",
-                "label"     => "Non-classés",
-                "manage"    => false,
-                "documents" => []
-            ];
-
-            $allowPrivate = true;
-
-            //Onglet privé
-            $privateTab = [
-                "id"        => "private",
-                "label"     => "Documents privés",
-                "documents" => [],
-                "manage"    => $allowPrivate
-            ];
-
-            $currentPerson = $this->getCurrentPerson();
-            /** @var JsonFormatterService $jsonFormatterService */
-            $jsonFormatterService = $this->getServiceLocator()->get(JsonFormatterService::class);
-            $jsonFormatterService->setUrlHelper($this->url());
-
-            //$documents = $this->getContractDocumentService()->getDocumentsActivity($activity->getId());
-            //Docs reliés à une activité
-            /** @var ContractDocument $doc */
-            foreach ($activity->getDocuments() as $doc) {
-                if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
-                    continue;
-                }
-
-                $docAdded = $jsonFormatterService->contractDocument($doc, true);
-
-                if (is_null($doc->getTabDocument())) {
-                    if ($doc->isPrivate() === true) {
-                        // Droits sur les documents privés utilisateur courant associé ou non au document
-                        $personsDoc = $doc->getPersons();
-                        $isPresent = false;
-                        foreach ($personsDoc as $person) {
-                            if ($person === $currentPerson) {
-                                $isPresent = true;
-                            }
-                        }
-
-                        if (true === $isPresent) {
-                            $docAdded['urlDelete'] = $this->url()->fromRoute(
-                                'contractdocument/delete',
-                                ['id' => $doc->getId()]
-                            );
-                            $docAdded['urlDownload'] = $this->url()->fromRoute(
-                                'contractdocument/download',
-                                ['id' => $doc->getId()]
-                            );
-                            $docAdded['urlReupload'] = $this->url()->fromRoute(
-                                'contractdocument/upload',
-                                [
-                                    'idactivity' => $activity->getId(),
-                                    'idtab'      => 'private',
-                                    'id'         => $doc->getId()
-                                ]
-                            );
-                            $docAdded['urlPerson'] = false;
-                        }
-                        $privateTab ["documents"] [] = $docAdded;
-                    }
-                    else {
-                        $unclassifiedTab ["documents"] [] = $docAdded;
-                    }
-                }
-                else {
-                    if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
-                        continue;
-                    }
-                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
-                }
-            }
-
-            if ($privateTab && $privateTab['documents']) {
-                $arrayTabs['private'] = $privateTab;
-            }
-
-            $generatedDocuments = $this->getOscarConfigurationService()->getConfiguration(
-                'generated-documents.activity'
-            );
-            $generatedDocumentsJson = [];
-            foreach ($generatedDocuments as $key => $infos) {
-                $generatedDocumentsJson[] = [
-                    'url'   => $this->url()->fromRoute(
-                        'contract/generatedocument',
-                        ['id' => $activity->getId(), 'doc' => $key]
-                    ),
-                    'label' => $infos['label']
-                ];
-            }
-
-            $typesDocuments = [];
-            $signatureFlowParams = [];
-            $typesDocumentsDatas = $this->getActivityService()->getTypesDocuments(false);
-
-            // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
-            $processDatas = [];
-            $signatureService = $this->getContractDocumentService()->getSignatureService();
-
-            foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
-                $flowId = $flow['id'];
-                $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
-                    "",
-                    $flowId,
-                    ['activity_id' => $activity->getId()]
-                );
-                $processDatas[] = $signatureFlowDatas['signatureflow'];
-            }
-
-            // Types de document
-            foreach ($typesDocumentsDatas as $typeDocument) {
-                $typeDatas = $typeDocument->toArray();
-                $typeDatas['flow'] = false;
-                $typesDocuments[] = $typeDatas;
-            }
-
-            $out['process_datas'] = $processDatas;
-            $out['tabsWithDocuments'] = $arrayTabs;
-            $out['typesDocuments'] = $typesDocuments;
-            $out['idCurrentPerson'] = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : null;
-            $out['computedDocuments'] = $generatedDocumentsJson;
-
+            $out = $projectGrantApiService->getActivityJson($activity->getId(), $this->url(), $this->getOscarUserContextService(), "documents");
             return new JsonModel($out);
+//            //return new JsonModel($this->getProjectGrantApiService()->getDocumentsActivity($activity->getId(), $this->url));
+//
+//            $out = $this->baseJsonResponse();
+//
+//            // ID des tabs (onglets pour ranger les documents)
+//            $arrayTabs = [];
+//            $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
+//
+//            $rolesMerged = $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
+//                $this->getCurrentPerson(),
+//                $activity
+//            );
+//
+//            if (!$this->getOscarUserContextService()->getAccessActivityDocument($activity)['read']) {
+//                $this->getLoggerService()->error("Accès non authorisé");
+//                return $this->getResponseUnauthorized();
+//            }
+//
+//            foreach ($entitiesTabs as $tabDocument) {
+//                // Traitement final attendu sur les rôles
+//                $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
+//                if ($access['read']) {
+//                    $tabId = $tabDocument->getId();
+//                    $arrayTabs[$tabId] = $tabDocument->toJson();
+//                    $arrayTabs[$tabId]["documents"] = [];
+//                    $arrayTabs[$tabId]['manage'] = $access['write'] == true;
+//                }
+//            }
+//
+//            //Onglet non classé
+//            $unclassifiedTab = [
+//                "id"        => "unclassified",
+//                "label"     => "Non-classés",
+//                "manage"    => false,
+//                "documents" => []
+//            ];
+//
+//            $allowPrivate = true;
+//
+//            //Onglet privé
+//            $privateTab = [
+//                "id"        => "private",
+//                "label"     => "Documents privés",
+//                "documents" => [],
+//                "manage"    => $allowPrivate
+//            ];
+//
+//            $currentPerson = $this->getCurrentPerson();
+//            /** @var JsonFormatterService $jsonFormatterService */
+//            $jsonFormatterService = $this->getServiceLocator()->get(JsonFormatterService::class);
+//            $jsonFormatterService->setUrlHelper($this->url());
+//
+//            //$documents = $this->getContractDocumentService()->getDocumentsActivity($activity->getId());
+//            //Docs reliés à une activité
+//            /** @var ContractDocument $doc */
+//            foreach ($activity->getDocuments() as $doc) {
+//                if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
+//                    continue;
+//                }
+//
+//                $docAdded = $jsonFormatterService->contractDocument($doc, true);
+//
+//                if (is_null($doc->getTabDocument())) {
+//                    if ($doc->isPrivate() === true) {
+//                        // Droits sur les documents privés utilisateur courant associé ou non au document
+//                        $personsDoc = $doc->getPersons();
+//                        $isPresent = false;
+//                        foreach ($personsDoc as $person) {
+//                            if ($person === $currentPerson) {
+//                                $isPresent = true;
+//                            }
+//                        }
+//
+//                        if (true === $isPresent) {
+//                            $docAdded['urlDelete'] = $this->url()->fromRoute(
+//                                'contractdocument/delete',
+//                                ['id' => $doc->getId()]
+//                            );
+//                            $docAdded['urlDownload'] = $this->url()->fromRoute(
+//                                'contractdocument/download',
+//                                ['id' => $doc->getId()]
+//                            );
+//                            $docAdded['urlReupload'] = $this->url()->fromRoute(
+//                                'contractdocument/upload',
+//                                [
+//                                    'idactivity' => $activity->getId(),
+//                                    'idtab'      => 'private',
+//                                    'id'         => $doc->getId()
+//                                ]
+//                            );
+//                            $docAdded['urlPerson'] = false;
+//                        }
+//                        $privateTab ["documents"] [] = $docAdded;
+//                    }
+//                    else {
+//                        $unclassifiedTab ["documents"] [] = $docAdded;
+//                    }
+//                }
+//                else {
+//                    if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
+//                        continue;
+//                    }
+//                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
+//                }
+//            }
+//
+//            if ($privateTab && $privateTab['documents']) {
+//                $arrayTabs['private'] = $privateTab;
+//            }
+//
+//            $generatedDocuments = $this->getOscarConfigurationService()->getConfiguration(
+//                'generated-documents.activity'
+//            );
+//            $generatedDocumentsJson = [];
+//            foreach ($generatedDocuments as $key => $infos) {
+//                $generatedDocumentsJson[] = [
+//                    'url'   => $this->url()->fromRoute(
+//                        'contract/generatedocument',
+//                        ['id' => $activity->getId(), 'doc' => $key]
+//                    ),
+//                    'label' => $infos['label']
+//                ];
+//            }
+//
+//            $typesDocuments = [];
+//            $signatureFlowParams = [];
+//            $typesDocumentsDatas = $this->getActivityService()->getTypesDocuments(false);
+//
+//            // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
+//            $processDatas = [];
+//            $signatureService = $this->getContractDocumentService()->getSignatureService();
+//
+//            foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
+//                $flowId = $flow['id'];
+//                $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
+//                    "",
+//                    $flowId,
+//                    ['activity_id' => $activity->getId()]
+//                );
+//                $processDatas[] = $signatureFlowDatas['signatureflow'];
+//            }
+//
+//            // Types de document
+//            foreach ($typesDocumentsDatas as $typeDocument) {
+//                $typeDatas = $typeDocument->toArray();
+//                $typeDatas['flow'] = false;
+//                $typesDocuments[] = $typeDatas;
+//            }
+//
+//            $out['process_datas'] = $processDatas;
+//            $out['tabsWithDocuments'] = $arrayTabs;
+//            $out['typesDocuments'] = $typesDocuments;
+//            $out['idCurrentPerson'] = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : null;
+//            $out['computedDocuments'] = $generatedDocumentsJson;
+//
+//            return new JsonModel($out);
         } catch (Exception $e) {
             return $this->jsonError("Impossible de charger les documents : " . $e->getMessage());
         }

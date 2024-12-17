@@ -14,6 +14,7 @@ use UnicaenSignature\Entity\Db\SignatureFlow;
  * Class TypeDocument
  * @package Oscar\Entity
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\Repository\TypeDocumentRepository")
  */
 class TypeDocument implements ITrackable
 {

@@ -221,7 +221,8 @@
         <div class="col-md-6">
           <i class="icon-cube" v-if="e.context == 'activity'"></i>
           <i class="icon-cubes" v-else></i>
-          <strong>{{ e.enrolledLabel }}</strong>
+            <PersonDisplay :person="e" v-if="e.firstname" />
+            <strong>{{ e.enrolledLabel }}</strong>
           <small>
             (<span v-if="e.context == 'activity'">
                 <i class="icon-cube"></i>
@@ -247,9 +248,21 @@
     </section>
     <section v-else>
       <span class="cartouche" v-for="e in stacked" :class="{
+        'person' : title == 'Personne',
+        'organization' : title == 'Organisation',
         'primary': e.hasPrimary, 'default': !e.hasPrimary}">
-        <a :href="e.urlShow" v-if="e.urlShow">{{ e.enrolledLabel }}</a>
-        <span v-else>{{ e.enrolledLabel }}</span>
+        <a :href="e.urlShow" v-if="entityLinkShow">
+          <PersonDisplay :person="e" v-if="title == 'Personne'" />
+          <span v-else>
+            {{ e.enrolledlabel }}
+          </span>
+        </a>
+        <span v-else>
+          <PersonDisplay :person="e" v-if="title == 'Personne'" />
+          <span v-else>
+            {{ e.enrolledLabel }}
+          </span>
+        </span>
         <span class="addon principal">
           <span v-for="r in e.roles" class="addon-module" :class="{'primary': r.rolePrincipal}">
             {{ r.role }}
@@ -268,9 +281,11 @@ import OrganizationAutoCompleter from "../components/OrganizationAutoComplete.vu
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import Modal from "../components/Modal.vue";
 import {standalone} from "poi/lib/webpack/css-loaders.js";
+import PersonDisplay from "../components/PersonDisplay.vue";
 
 export default {
   components: {
+    PersonDisplay,
     Modal,
     datepicker: Datepicker,
     Loader,
@@ -339,6 +354,8 @@ export default {
           let id = i.enrolled;
           if (!stacks.hasOwnProperty(id)) {
             stacks[id] = {
+              firstname: i.firstName,
+              lastname: i.lastName,
               enrolled: i.enrolled,
               urlShow: i.urlShow,
               enrolledLabel: i.enrolledLabel,

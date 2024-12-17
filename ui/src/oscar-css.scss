@@ -26,11 +26,25 @@ body:not(.privatize){
 
 .privatize {
   .text-private {
+    transition: .3s;
     filter: blur(8px) !important;
   }
+  .person .text-private {
+    filter: blur(3px) !important;
+  }
+
   #btn-toggle-private {
     .off {
       display: inline-block;
+    }
+  }
+}
+
+.cartouche {
+  &.person {
+
+    .lastname {
+      font-weight: 600;
     }
   }
 }

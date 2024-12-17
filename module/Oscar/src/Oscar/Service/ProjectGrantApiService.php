@@ -12,14 +12,18 @@ use Oscar\Entity\ActivityNoteRepository;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
+use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\ContractDocumentRepository;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\ProjectMember;
 use Oscar\Entity\ProjectPartner;
+use Oscar\Entity\Repository\TypeDocumentRepository;
 use Oscar\Entity\Role;
+use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
@@ -38,6 +42,8 @@ use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
+use UnicaenSignature\Provider\SignaturePrivileges;
+use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Utils\SignatureConstants;
 
 class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseOscarConfigurationService,
@@ -127,10 +133,29 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     if ($credentials[$key]['read'] !== true) {
                         unset($out['datas'][$key]);
                     }
+                    else {
+                        // Traitement des onglets de documents
+                        if ($key === 'documents') {
+                            foreach ($credentials[$key]['tabs'] as $tabId => $tabAccess) {
+                                if ($tabAccess['read'] !== true) {
+                                    unset($out['datas'][$key]['tabs'][$tabId]);
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return $out;
         }
+    }
+
+
+    protected function getRolesCurrentPersonActivity(OscarUserContext $oscarUserContext, Activity $activity): array
+    {
+        return $oscarUserContext->getRolesPersonInActivityDeep(
+            $oscarUserContext->getCurrentPerson(),
+            $activity
+        );
     }
 
     public function getActivityJsonCredentials(
@@ -167,12 +192,43 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     break;
 
                 case 'documents':
+
+                    $read = $oscarUserContext->hasPrivileges(
+                        Privileges::ACTIVITY_DOCUMENT_SHOW,
+                        $activity->getProject()
+                    );
                     $credentials['documents'] = [
-                        'read' => $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_DOCUMENT_SHOW,
-                            $activity->getProject()
-                        ),
+                        'read' => $read
                     ];
+
+                    $entitiesTabs = $this->getContractDocumentRepository()->getTabDocuments();
+                    $rolesMerged = $this->getRolesCurrentPersonActivity($oscarUserContext, $activity);
+                    $arrayTabs = [];
+                    foreach ($entitiesTabs as $tabDocument) {
+                        $tabId = $tabDocument->getId();
+                        $access = $oscarUserContext->getAccessTabDocument($tabDocument, $rolesMerged);
+                        $arrayTabs[$tabId] = [
+                            'id'    => $tabDocument->getId(),
+                            'label' => $tabDocument->getLabel(),
+                            'read'  => $access['read'],
+                            'edit'  => $access['write'],
+                        ];
+                    }
+
+                    $credentials['documents']['tabs'] = $arrayTabs;
+                    $credentials['documents']['process_start'] = $oscarUserContext->hasPrivileges(
+                        SignaturePrivileges::SIGNATURE_CREATE,
+                        $activity
+                    );
+                    $credentials['documents']['process_manage'] = $oscarUserContext->hasPrivileges(
+                        SignaturePrivileges::SIGNATURE_DELETE,
+                        $activity
+                    );
+                    $credentials['documents']['process_admin'] = $oscarUserContext->hasPrivileges(
+                        SignaturePrivileges::SIGNATURE_ADMIN,
+                        $activity
+                    );
+
                     break;
 
                 case 'notes':
@@ -309,7 +365,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     break;
 
                 case self::PERIMETER_SPENTS:
-                    $datas[self::PERIMETER_SPENTS] = $this->getSpentssActivity($activity, $urlPlugin);
+                    $datas[self::PERIMETER_SPENTS] = $this->getSpentsActivity($activity, $urlPlugin);
                     break;
 
                 case self::PERIMETER_TIMESHEETS:
@@ -427,174 +483,169 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             ),
             'url_sign_document'  => "/url_sign_document",
             'entities'           => [],
-            'typesDocuments'     => []
+            'typesDocuments'     => [],
+            'tabs'               => []
         ];
+
+        /////// DOCUMENTS des ONGLETS
+        $entitiesTabs = $this->getContractDocumentRepository()->getTabDocuments();
+        $arrayTabs = [];
+        foreach ($entitiesTabs as $tabDocument) {
+            $tabId = $tabDocument->getId();
+            $arrayTabs[$tabId] = $tabDocument->toJson();
+            $arrayTabs[$tabId]["documents"] = [];
+        }
+
+        /** @var ContractDocument $doc */
+        foreach ($activity->getDocuments() as $doc) {
+            $process = $doc->getProcess();
+            $tabId = $doc->getTabDocument()->getId();
+
+            $allowRead = true;
+            $allowManage = true;
+            $allowDownload = $allowRead;
+            $allowReUpload = $allowManage;
+            $allowDelete = $allowManage;
+            $allowEdit = $allowManage;
+
+            $process_update_url = null;
+            $process_delete_url = null;
+
+            $allowProcessCreate = false;
+            $allowProcessDelete = false;
+            $allowProcessUpdate = false;
+
+            // Il y a un processus en cours
+            if ($process) {
+                $allowReUpload = false;
+
+                $allowProcessUpdate = true;
+
+                if ($process->isFinished()) {
+                    $allowProcessUpdate = false;
+                    $allowDelete = true;
+                }
+                else {
+                    $allowDelete = true;
+                }
+
+                if ($allowProcessUpdate) {
+                    $process_update_url = $urlPlugin->fromRoute(
+                        'contractdocument/process',
+                        ['id' => $doc->getId()]
+                    );
+                }
+            }
+            else {
+                $allowProcessCreate = true;
+            }
+
+            // Accès aux fonctionnalités du document.
+            $docAdded = $doc->toJson();
+
+            $docAdded['activity'] = $activity->toJson();
+
+            if ($allowRead) {
+                $download_url = $urlPlugin->fromRoute('contractdocument/download', ['id' => $doc->getId()]);
+            }
+
+            if ($allowDelete) {
+                $delete_url = $urlPlugin->fromRoute('contractdocument/delete', ['id' => $doc->getId()]);
+            }
+
+            if ($allowEdit) {
+                $edit_url = $urlPlugin->fromRoute('contractdocument/edit', ['document_id' => $doc->getId()]);
+            }
+
+            if ($allowProcessCreate) {
+                $process_create_url = $urlPlugin->fromRoute(
+                    'contractdocument/process-create',
+                    ['document_id' => $doc->getId()]
+                );
+            }
+
+            if ($allowProcessDelete) {
+                $process_delete_url = $urlPlugin->fromRoute(
+                    'contractdocument/process-delete',
+                    ['document_id' => $doc->getId()]
+                );
+            }
+
+            if ($allowReUpload) {
+                $reupload_url = $urlPlugin->fromRoute('contractdocument/reupload', [
+                    'document_id' => $doc->getId()
+                ]);
+            }
+            $docAdded['uploader'] = $doc->getPerson() ? [
+                'id'        => $doc->getPerson()->getId(),
+                'firstname' => $doc->getPerson()->getFirstname(),
+                'lastname'  => $doc->getPerson()->getLastname(),
+            ] : null;
+            $docAdded['urlProcessDelete'] = $process_delete_url;
+            $docAdded['urlProcessCreate'] = $process_create_url;
+            $docAdded['urlProcessUpdate'] = $process_update_url;
+            $docAdded['urlDownload'] = $download_url;
+            $docAdded['urlReupload'] = $reupload_url;
+            $docAdded['urlDelete'] = $delete_url;
+            $docAdded['urlEdit'] = $edit_url;
+
+            $arrayTabs[$tabId]["documents"][] = $docAdded;
+        }
+
+        $out['tabs'] = $arrayTabs;
+
+        /////// Documents générés
+        $generatedDocuments = $this->getOscarConfigurationService()->getConfiguration(
+            'generated-documents.activity'
+        );
+        $generatedDocumentsJson = [];
+        foreach ($generatedDocuments as $key => $infos) {
+            $generatedDocumentsJson[] = [
+                'url'   => $urlPlugin->fromRoute(
+                    'contract/generatedocument',
+                    ['id' => $activity->getId(), 'doc' => $key]
+                ),
+                'label' => $infos['label']
+            ];
+        }
+        $out['generatedDocuments'] = $generatedDocumentsJson;
+
+        /////// TYPES de DOCUMENT
+        $typesDocuments = [];
+
+
+        /////// CIRCUITS de SIGNATURE
+        $signatureFlowParams = [];
+        $typesDocumentsDatas = $this->getTypeDocumentRepository()->getTypes();
+
+        // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
+        $processDatas = [];
+
+        /** @var SignatureService $signatureService */
+        $signatureService = $this->getServiceContainer()->get(SignatureService::class);
+
+        foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
+            $flowId = $flow['id'];
+            $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
+                "",
+                $flowId,
+                ['activity_id' => $activity->getId()]
+            );
+            $processDatas[] = $signatureFlowDatas['signatureflow'];
+        }
+
+        // Types de document
+        foreach ($typesDocumentsDatas as $typeDocument) {
+            $typeDatas = $typeDocument->toArray();
+            $typeDatas['flow'] = false;
+            $typesDocuments[] = $typeDatas;
+        }
+
+        $out['processDatas'] = $processDatas;
+        $out['typesDocuments'] = $typesDocuments;
+        $out['computedDocuments'] = $generatedDocumentsJson;
+
         return $out;
-        // TODO
-//        try {
-//
-//            /** @var Activity $entity */
-//            $activity = $this->getActivityService()->getActivityById($id, true);
-//
-//
-//            $out = [];
-//
-//            $contractDocumentService = $this->get
-//            // ID des tabs (onglets pour ranger les documents)
-//            $arrayTabs = [];
-//            $entitiesTabs = $this->getContractDocumentService()->getContractTabDocuments();
-//
-//            $rolesMerged = $this->getOscarUserContextService()->getRolesPersonInActivityDeep(
-//                $this->getCurrentPerson(),
-//                $activity
-//            );
-//
-//            if (!$this->getOscarUserContextService()->getAccessActivityDocument($activity)['read']) {
-//                $this->getLoggerService()->error("Accès non authorisé");
-//                return $this->getResponseUnauthorized();
-//            }
-//
-//            foreach ($entitiesTabs as $tabDocument) {
-//                // Traitement final attendu sur les rôles
-//                $access = $this->getOscarUserContextService()->getAccessTabDocument($tabDocument, $rolesMerged);
-//                if ($access['read']) {
-//                    $tabId = $tabDocument->getId();
-//                    $arrayTabs[$tabId] = $tabDocument->toJson();
-//                    $arrayTabs[$tabId]["documents"] = [];
-//                    $arrayTabs[$tabId]['manage'] = $access['write'] == true;
-//                }
-//            }
-//
-//            //Onglet non classé
-//            $unclassifiedTab = [
-//                "id"        => "unclassified",
-//                "label"     => "Non-classés",
-//                "manage"    => false,
-//                "documents" => []
-//            ];
-//
-//            $allowPrivate = true;
-//
-//            //Onglet privé
-//            $privateTab = [
-//                "id"        => "private",
-//                "label"     => "Documents privés",
-//                "documents" => [],
-//                "manage"    => $allowPrivate
-//            ];
-//
-//            $currentPerson = $this->getCurrentPerson();
-//            /** @var JsonFormatterService $jsonFormatterService */
-//            $jsonFormatterService = $this->getServiceLocator()->get(JsonFormatterService::class);
-//            $jsonFormatterService->setUrlHelper($this->url());
-//
-//            //$documents = $this->getContractDocumentService()->getDocumentsActivity($activity->getId());
-//            //Docs reliés à une activité
-//            /** @var ContractDocument $doc */
-//            foreach ($activity->getDocuments() as $doc) {
-//                if (!$this->getOscarUserContextService()->contractDocumentRead($doc)) {
-//                    continue;
-//                }
-//
-//                $docAdded = $jsonFormatterService->contractDocument($doc, true);
-//
-//                if (is_null($doc->getTabDocument())) {
-//                    if ($doc->isPrivate() === true) {
-//                        // Droits sur les documents privés utilisateur courant associé ou non au document
-//                        $personsDoc = $doc->getPersons();
-//                        $isPresent = false;
-//                        foreach ($personsDoc as $person) {
-//                            if ($person === $currentPerson) {
-//                                $isPresent = true;
-//                            }
-//                        }
-//
-//                        if (true === $isPresent) {
-//                            $docAdded['urlDelete'] = $this->url()->fromRoute(
-//                                'contractdocument/delete',
-//                                ['id' => $doc->getId()]
-//                            );
-//                            $docAdded['urlDownload'] = $this->url()->fromRoute(
-//                                'contractdocument/download',
-//                                ['id' => $doc->getId()]
-//                            );
-//                            $docAdded['urlReupload'] = $this->url()->fromRoute(
-//                                'contractdocument/upload',
-//                                [
-//                                    'idactivity' => $activity->getId(),
-//                                    'idtab'      => 'private',
-//                                    'id'         => $doc->getId()
-//                                ]
-//                            );
-//                            $docAdded['urlPerson'] = false;
-//                        }
-//                        $privateTab ["documents"] [] = $docAdded;
-//                    }
-//                    else {
-//                        $unclassifiedTab ["documents"] [] = $docAdded;
-//                    }
-//                }
-//                else {
-//                    if (!array_key_exists($doc->getTabDocument()->getId(), $arrayTabs)) {
-//                        continue;
-//                    }
-//                    $arrayTabs[$doc->getTabDocument()->getId()]["documents"] [] = $docAdded;
-//                }
-//            }
-//
-//            if ($privateTab && $privateTab['documents']) {
-//                $arrayTabs['private'] = $privateTab;
-//            }
-//
-//            $generatedDocuments = $this->getOscarConfigurationService()->getConfiguration(
-//                'generated-documents.activity'
-//            );
-//            $generatedDocumentsJson = [];
-//            foreach ($generatedDocuments as $key => $infos) {
-//                $generatedDocumentsJson[] = [
-//                    'url'   => $this->url()->fromRoute(
-//                        'contract/generatedocument',
-//                        ['id' => $activity->getId(), 'doc' => $key]
-//                    ),
-//                    'label' => $infos['label']
-//                ];
-//            }
-//
-//            $typesDocuments = [];
-//            $signatureFlowParams = [];
-//            $typesDocumentsDatas = $this->getActivityService()->getTypesDocuments(false);
-//
-//            // Signatures disponibles (avec les personnes associées dans le contexte de l'activité)
-//            $processDatas = [];
-//            $signatureService = $this->getContractDocumentService()->getSignatureService();
-//
-//            foreach ($signatureService->getSignatureFlows(SignatureConstants::FORMAT_DEFAULT, true) as $flow) {
-//                $flowId = $flow['id'];
-//                $signatureFlowDatas = $signatureService->createSignatureFlowDatasById(
-//                    "",
-//                    $flowId,
-//                    ['activity_id' => $activity->getId()]
-//                );
-//                $processDatas[] = $signatureFlowDatas['signatureflow'];
-//            }
-//
-//            // Types de document
-//            foreach ($typesDocumentsDatas as $typeDocument) {
-//                $typeDatas = $typeDocument->toArray();
-//                $typeDatas['flow'] = false;
-//                $typesDocuments[] = $typeDatas;
-//            }
-//
-//            $out['process_datas'] = $processDatas;
-//            $out['tabsWithDocuments'] = $arrayTabs;
-//            $out['typesDocuments'] = $typesDocuments;
-//            $out['idCurrentPerson'] = $this->getCurrentPerson() ? $this->getCurrentPerson()->getId() : null;
-//            $out['computedDocuments'] = $generatedDocumentsJson;
-//
-//            return new JsonModel($out);
-//        } catch (Exception $e) {
-//            return $this->jsonError("Impossible de charger les documents : " . $e->getMessage());
-//        }
     }
 
     /**
@@ -671,8 +722,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         foreach ($notesActivityRepository->getNotesActivity($activity->getId()) as $note) {
             $createdBy_id = -1;
             $createdBy_username = "Anonymous";
+            $createdBy_firstname = "";
+            $createdBy_lastname = "";
             if ($note->getCreatedBy()) {
                 $createdBy_id = $note->getCreatedBy()->getId();
+                $createdBy_firstname = $note->getCreatedBy()->getFirstname();
+                $createdBy_lastname = $note->getCreatedBy()->getLastname();
                 $createdBy_username = $note->getCreatedBy()->getFullname();
             }
             $notes[] = [
@@ -685,6 +740,8 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     $this->formatDateTime($note->getDateCreated()),
                 'createdBy'   => [
                     'id'       => $createdBy_id,
+                    'firstname' => $createdBy_firstname,
+                    'lastname' => $createdBy_lastname,
                     'username' => $createdBy_username,
                 ]
             ];
@@ -799,8 +856,6 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     public function getPersonsActivity(Activity $activity, ?Url $urlPlugin = null): array
     {
         $output = [];
-
-
         $roles = [];
 
         foreach (
@@ -862,7 +917,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'enrollerLabel' => $activity->getLabel(),
                 'enrolled'      => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
-                'displayname'   => $activityPerson->getPerson()->getDisplayName(),
+                'firstName'     => $activityPerson->getPerson()->getFirstname(),
+                'firstname'     => $activityPerson->getPerson()->getFirstname(),
+                'lastName'      => $activityPerson->getPerson()->getLastname(),
+                'lastname'      => $activityPerson->getPerson()->getLastname(),
                 'start'         => $this->formatDateTime($activityPerson->getDateStart()),
                 'end'           => $this->formatDateTime($activityPerson->getDateEnd()),
             ];
@@ -891,6 +949,14 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $out;
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     * @throws OscarException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function getTimesheetsActivity(
         Activity $activity,
         ?Url $urlPlugin = null
@@ -916,22 +982,28 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         /** @var Person $validator */
         foreach ($timesheetService->getValidatorsPrj($activity) as $validator) {
             $out['validators']['prj'][] = [
-                'id'       => $validator->getId(),
-                'fullname' => $validator->getFullname(),
+                'id'        => $validator->getId(),
+                'firstname' => $validator->getFirstname(),
+                'lastname'  => $validator->getLastname(),
+                'fullname'  => $validator->getFullname(),
             ];
         }
 
         foreach ($timesheetService->getValidatorsSci($activity) as $validator) {
             $out['validators']['sci'][] = [
-                'id'       => $validator->getId(),
-                'fullname' => $validator->getFullname(),
+                'id'        => $validator->getId(),
+                'firstname' => $validator->getFirstname(),
+                'lastname'  => $validator->getLastname(),
+                'fullname'  => $validator->getFullname(),
             ];
         }
 
         foreach ($timesheetService->getValidatorsAdm($activity) as $validator) {
             $out['validators']['adm'][] = [
-                'id'       => $validator->getId(),
-                'fullname' => $validator->getFullname(),
+                'id'        => $validator->getId(),
+                'firstname' => $validator->getFirstname(),
+                'lastname'  => $validator->getLastname(),
+                'fullname'  => $validator->getFullname(),
             ];
         }
 
@@ -943,6 +1015,8 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 $declarers[$personActivity->getPerson()->getId()] = [
                     'id'             => $personActivity->getPerson()->getId(),
                     'fullname'       => $personActivity->getPerson()->getFullname(),
+                    'firstname'      => $personActivity->getPerson()->getFirstname(),
+                    'lastname'       => $personActivity->getPerson()->getLastname(),
                     'hasDeclaration' => $hasDeclaration,
                     'url_details'    => $urlPlugin->fromRoute('timesheet/resume')
                         . '?person_id='
@@ -955,44 +1029,56 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $out;
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     */
     private function getPaymentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
         $entities = [];
 
         /** @var ActivityPayment $payment */
-        foreach( $activity->getPayments() as $payment ){
+        foreach ($activity->getPayments() as $payment) {
             $entities[] = [
-                'id' => $payment->getId(),
-                'activity_id' => $activity->getId(),
-                'datePayment' => $this->formatDateTime($payment->getDatePayment()),
-                'datePredicted' => $this->formatDateTime($payment->getDatePredicted()),
-                'amount' => $payment->getAmount(),
-                'rate' => $payment->getRate(),
-                'currency' => $payment->getCurrency() ? $payment->getCurrency()->asArray() : null,
+                'id'              => $payment->getId(),
+                'activity_id'     => $activity->getId(),
+                'datePayment'     => $this->formatDateTime($payment->getDatePayment()),
+                'datePredicted'   => $this->formatDateTime($payment->getDatePredicted()),
+                'amount'          => $payment->getAmount(),
+                'rate'            => $payment->getRate(),
+                'currency'        => $payment->getCurrency() ? $payment->getCurrency()->asArray() : null,
                 'codeTransaction' => $payment->getCodeTransaction(),
-                'comment' => $payment->getComment(),
-                'status' => $payment->getStatus(),
-                'statusLabel' => $payment->getStatusLabel(),
-                'late' => $payment->isLate()
+                'comment'         => $payment->getComment(),
+                'status'          => $payment->getStatus(),
+                'statusLabel'     => $payment->getStatusLabel(),
+                'late'            => $payment->isLate()
             ];
         }
 
         return [
-            'url' => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
+            'url'      => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
             'entities' => $entities
         ];
     }
 
-    private function getSpentssActivity(Activity $activity, ?Url $urlPlugin)
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     */
+    private function getSpentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
-
         $pfis = [$activity->getCodeEOTP()];
         $out = [
-            'pfi' => $pfis
+            'pfi'     => $pfis,
+            'warning' => "",
+            'error'   => "",
         ];
         try {
             if (count($pfis) == 0) {
-                return $this->getResponseInternalError("Pas de numéro financier");
+                $out['warning'] = "Aucun numéro financier pour cette activité";
+                return $out;
             }
             $out = $this->getSpentService()->getSynthesisDatasPFI(
                 $pfis,
@@ -1000,8 +1086,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'basic'
             );
             $out['dateUpdated'] = $activity->getDateTotalSpent();
-        } catch (Exception $e) {
-            return $this->getResponseInternalError("Impossible de charger les dépenses pour la/les activité(s)");
+        } catch (\Exception $e) {
+            $msg = "Impossible de charger la synthèse financière pour '$activity'";
+            $this->getLoggerService()->error("$msg : " . $e->getMessage());
+            $out['error'] = $msg;
         }
         return $out;
     }
@@ -1013,8 +1101,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
      * @param string $format
      * @return string|null
      */
-    private
-    function formatDateTime(
+    private function formatDateTime(
         ?\DateTime $datetime,
         string $format = 'Y-m-d H:i:s'
     ): ?string {
@@ -1026,11 +1113,42 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
     }
 
-    public
-    function getActivityRepository()
+    /**
+     * @return ActivityRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getActivityRepository(): ActivityRepository
     {
-        return $this->getEntityManager()->getRepository('Oscar\Entity\Activity');
+        return $this->getEntityManager()->getRepository(Activity::class);
     }
 
+    /**
+     * @return ContractDocumentRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getContractDocumentRepository(): ContractDocumentRepository
+    {
+        return $this->getEntityManager()->getRepository(ContractDocument::class);
+    }
 
+    /**
+     * @return TypeDocumentRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getTypeDocumentRepository(): TypeDocumentRepository
+    {
+        return $this->getEntityManager()->getRepository(TypeDocument::class);
+    }
+
+    /**
+     * @return JsonFormatterService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    private function getJsonFormatterService(Url $urlHelper): JsonFormatterService
+    {
+        $formatter = $this->getServiceContainer()->get(JsonFormatterService::class);
+        $formatter->setUrlHelper($urlHelper);
+        return $formatter;
+    }
 }

@@ -313,22 +313,23 @@
       </div>
     </div>
   </div>
-  <article class="card xs" v-for="doc in documents" :key="doc.id" :class="{'private-document': doc.private }">
+
+  <!-- Liste des documents -->
+  <article class="card xs" v-for="doc in documents" :key="doc.id">
     <div class="card-title">
-      <i class="picto icon-anchor-outline" v-if="doc.location == 'link'"></i>
-      <i class="picto icon-doc" :class="'doc' + doc.extension" v-else></i>
+      <i class="picto icon-doc" :class="'doc' + doc.extension" ></i>
       <small class="text-light">{{ doc.category.label }} ~ </small>
       <strong>{{doc.fileName}}</strong>
       <small class="text-light" :title="doc.fileSize + ' octet(s)'" v-if="doc.location != 'url'">&nbsp;
         Version {{ doc.version }}
       </small>
     </div>
-    <small>
-      <i class="icon-briefcase"></i> Taille <strong>{{ $filters.filesize(doc.fileSize) }}</strong>
-      <i class="icon-calendar"></i> Envoyé <strong>{{ $filters.timeAgo(doc.dateSend) }}</strong>
-      <i class="icon-calendar"></i> Déposé <strong>{{ $filters.dateFull(doc.dateDeposit) }}</strong>
-      <i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong>
-      <i class="icon-user"></i> par <strong v-if="doc.uploader">{{ doc.uploader.displayname }}</strong><em v-else>Inconnu</em>
+    <small class="document-metas">
+      <span class="meta"><i class="icon-briefcase"></i> Taille <strong>{{ $filters.filesize(doc.fileSize) }}</strong></span>
+      <span class="meta"><i class="icon-calendar"></i> Envoyé <strong>{{ $filters.timeAgo(doc.dateSend) }}</strong></span>
+      <span class="meta"><i class="icon-calendar"></i> Déposé <strong>{{ $filters.dateFull(doc.dateDeposit) }}</strong></span>
+      <span class="meta"><i class="icon-calendar"></i> Uploadé <strong>{{ $filters.dateFull(doc.dateUpload) }}</strong></span>
+      <span class="meta"><i class="icon-user"></i> par <PersonDisplay :person="doc.uploader" /></span>
     </small>
     <p>{{ doc.information }}</p>
     <section v-if="doc.private">
@@ -339,7 +340,6 @@
                 </span>
     </section>
     <div class="card-content">
-<!--      <pre>{{ doc }}</pre>-->
       <section v-if="doc.process" class="alert"
                :class="{'alert-success':doc.process.status == 201,
                               'alert-danger':doc.process.status >= 400,
@@ -387,8 +387,8 @@
           version <em>{{ sub.version }} </em>,
           téléchargé <time>{{ $filters.dateFull(sub.dateUpload) }}</time>
           <span v-if="sub.uploader">
-                        par <strong>{{ sub.uploader.displayname }}</strong>
-                        </span>
+           par <PersonDisplay :person="sub" />
+          </span>
 
           <a :href="sub.urlDownload">
             <i class="icon-download-outline"></i>
@@ -418,18 +418,17 @@
         </a>
 
         <button v-on:click="handlerNewVersion(doc)" class="btn btn-default btn-xs"
-                v-if="doc.urlReupload">
+                v-if="manage">
           <i class="icon-download-outline"></i>
           Nouvelle Version
         </button>
 
-        <a class="btn btn-default btn-xs" @click.prevent="handlerDeleteDocument(doc)" v-if="doc.urlDelete">
+        <a class="btn btn-danger btn-xs" @click.prevent="handlerDeleteDocument(doc)" v-if="manage">
           <i class="icon-trash"></i>
           Supprimer
         </a>
 
-        <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)"
-           v-if="doc.urlEdit">
+        <a class="btn btn-xs btn-default" href="#" @click.prevent="handlerEdit(doc)" v-if="manage">
           <i class="icon-pencil"></i>
           Modifier
         </a>
@@ -442,15 +441,18 @@ import axios from "axios";
 import Datepicker from '../components/Datepicker.vue';
 import PersonAutoCompleter from '../components/PersonAutoCompleter.vue';
 import AxiosMessage from "../utils/AxiosMessage.js";
+import PersonDisplay from "../components/PersonDisplay.vue";
 
 export default {
   components: {
+    PersonDisplay,
     'date-picker': Datepicker,
     'person-auto-completer': PersonAutoCompleter
   },
 
   props: {
     editable: {default: false},
+    manage: {default: false},
     displayActivity: {default: false},
     documents: {default: []},
     signProcess: {default: null},
@@ -662,6 +664,14 @@ export default {
   border: thin solid #aaa;
   border-top: none;
   padding: 1em;
+}
+
+.document-metas {
+  display: flex;
+  justify-content: space-between;
+  >* {
+    flex: auto;
+  }
 }
 
 .card .alert {

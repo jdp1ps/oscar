@@ -334,7 +334,6 @@
           <h2>
             <i class="icon-group"></i>Membres
           </h2>
-
           <EntityWithRole title="Personne"
                           :standalone="false"
                           :entity-link-show="credentials.persons.show"
@@ -365,7 +364,16 @@
           <h2><i class="icon-book"></i>Documents</h2>
           <activity-document
               @debug="handlerDebug"
+              @updated="handlerUpdateDocuments"
               :debug-enabled="debugEnabled"
+
+              :standalone="true"
+              :sa-tabs="documents.tabs"
+              :sa-types="documents.types"
+              :sa-generated-documents="documents.generatedDocuments"
+              :sa-computed-documents="documents.computedDocuments"
+              :sa-process-datas="documents.processDatas"
+              :sa-credentials="credentials.documents"
               :url="documents.url"
               :url-upload-new-doc="documents.url_upload_new_doc"
               :url-sign-document="documents.url_sign_document"
@@ -404,27 +412,33 @@
             <h3>Déclarants</h3>
             <a :href="d.url_details" v-for="d in timesheetsDeclarers" class="btn"
                :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
-              {{ d.fullname }}
+              <PersonDisplay :person="d" />
+              <small v-if="d.hasDeclaration == false">
+                (Aucune déclaration)
+              </small>
             </a>
 
             <h3>Valideurs</h3>
             <div class="row">
               <div class="col-md-4">
                 <h4>Validation projet</h4>
-                <span class="cartouche primary" v-for="p in timesheetsValidators.prj">
-                  {{ p.fullname }}
+                <span class="cartouche primary person" v-for="p in timesheetsValidators.prj">
+                  {{ p.firstname }}
+                  <span class="lastname text-private">{{ p.lastname }}</span>
                 </span>
               </div>
               <div class="col-md-4">
                 <h4>Validation scientifique</h4>
-                <span class="cartouche primary" v-for="p in timesheetsValidators.sci">
-                  {{ p.fullname }}
+                <span class="cartouche person primary" v-for="p in timesheetsValidators.sci">
+                  {{ p.firstname }}
+                  <span class="lastname text-private">{{ p.lastname }}</span>
                 </span>
               </div>
               <div class="col-md-4">
                 <h4>Validation administrative</h4>
-                <span class="cartouche primary" v-for="p in timesheetsValidators.adm">
-                  {{ p.fullname }}
+                <span class="cartouche person primary" v-for="p in timesheetsValidators.adm">
+                  {{ p.firstname }}
+                  <span class="lastname text-private">{{ p.lastname }}</span>
                 </span>
               </div>
             </div>
@@ -525,6 +539,7 @@ import PersonCartouche from "../components/PersonCartouche.vue";
 import VueJsonPretty from 'vue-json-pretty';
 import WorkpackagesActivity from "./WorkpackagesActivity.vue";
 import 'vue-json-pretty/lib/styles.css';
+import PersonDisplay from "../components/PersonDisplay.vue";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -535,6 +550,7 @@ export default {
   name: 'Activity',
 
   components: {
+    PersonDisplay,
     ActivityNotes,
     ActivityLogs,
     ActivityDocument,
@@ -682,6 +698,11 @@ export default {
       this.organizations = d.datas.items;
     },
 
+    handlerUpdateDocuments(res){
+      console.log("updateDocuments", res);
+      this.documents = res.documents;
+    },
+
     ////////////////////////////////////////// Système d'épingle
     handlerPurgeSticky() {
       this.sticky = [];
@@ -741,7 +762,7 @@ export default {
         }
 
         if (response.data.activity.datas.documents) {
-          this.documents = response.data.activity.datas.documents;
+          this.handlerUpdateDocuments(response.data.activity.datas);
         }
 
         if (response.data.activity.datas.notes) {

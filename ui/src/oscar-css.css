@@ -13,10 +13,18 @@ body:not(.privatize) #btn-toggle-private .on {
 }
 
 .privatize .text-private {
+  transition: 0.3s;
   filter: blur(8px) !important;
+}
+.privatize .person .text-private {
+  filter: blur(3px) !important;
 }
 .privatize #btn-toggle-private .off {
   display: inline-block;
+}
+
+.cartouche.person .lastname {
+  font-weight: 600;
 }
 
 .admin-bar {
