@@ -1360,6 +1360,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $project = null;
         }
 
+        $organizationsCount = 0;
         if (!$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_CREATE)) {
             if (!$this->getOscarUserContextService()->hasPrivilegeInOrganizations(
                 Privileges::ACTIVITY_CREATE
@@ -1369,7 +1370,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $organisationsUser = $this->getOscarUserContextService()->getCurrentUserOrganisationWithPrivilege(
                 Privileges::ACTIVITY_CREATE
             );
-            if (count($organisationsUser)) {
+            $organizationsCount = count($organisationsUser);
+            if ($organizationsCount) {
                 $withOrganization = $organisationsUser;
                 $rolesOrganizations = [];
                 /** @var OrganizationRole $role */
@@ -1493,7 +1495,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'numerotationKeys'   => $numerotationKeys,
                 'numbers_keys'       => $numerotationKeys,
                 'allowNodeSelection' => $this->getOscarConfigurationService()->isAllowNodeSelection(),
-                "tree"               => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree()
+                "tree"               => $this->getPersonService()->getProjectGrantService()->getActivityTypesTree(),
+                'organizationsCount' => $organizationsCount,
             ]
         );
 

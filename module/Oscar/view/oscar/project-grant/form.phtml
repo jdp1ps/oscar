@@ -37,7 +37,7 @@
             <p class="alert alert-danger"><?= $errorRoles ?></p>
             <?php endif; ?>
             <p class="alert alert-info">
-                <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", count($organizations)) ?><br>
+                <?= ngettext("Choisissez un rôle pour votre structure.", "Choisisser au moins un rôle pour une de vos structures", $organizationsCount) ?><br>
             </p>
             <?php foreach ($withOrganization as $org): ?>
                 <label for="organization[<?= $org->getId() ?>]"><?= $org ?></label>
