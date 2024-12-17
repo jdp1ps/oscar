@@ -68,15 +68,15 @@
           <a class="label label-info xs" :href="'#repport-' + key">{{ synthesis.synthesis[key].nbr_effectue }} /
             {{ synthesis.synthesis[key].nbr_engage }}</a>
         </th>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis[key].total_engage) }}</td>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis[key].total_effectue) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_engage) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_effectue) }}</td>
       </tr>
       </tbody>
       <tbody>
       <tr class="total">
         <th>Total</th>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis.totaux.engage) }}</td>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis.totaux.effectue) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.engage) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.effectue) }}</td>
       </tr>
       </tbody>
       <tbody>
@@ -85,8 +85,8 @@
           <small><i class="icon-attention"></i> Hors-masse</small>
           <a href="#repport-nb" class="label label-info">{{ synthesis.synthesis['N.B'].nbr}}</a>
         </th>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis['N.B'].total_engage) }}</td>
-        <td style="text-align: right">{{ $filters.money(synthesis.synthesis['N.B'].total_effectue) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_engage) }}</td>
+        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_effectue) }}</td>
       </tr>
       </tbody>
     </table>
@@ -97,7 +97,7 @@
         <tbody>
         <tr>
           <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
-          <td style="text-align: right">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
+          <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
         </tr>
         </tbody>
       </table>
@@ -116,7 +116,7 @@
             Ignorées
             <a class="label label-info" href="#repport-0">{{ synthesis.synthesis['0'].nbr}}</a>
           </th>
-          <td style="text-align: right">{{ $filters.money(synthesis.synthesis['0'].total)}}</td>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['0'].total)}}</td>
         </tr>
         </tbody>
       </table>
