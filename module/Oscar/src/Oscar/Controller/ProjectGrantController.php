@@ -844,10 +844,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
      */
     public function editAction()
     {
+
         $id = $this->params()->fromRoute('id');
         $numerotationKeys = $this->getEditableConfKey('numerotation', []);
         $numerotationEditable = $this->getOscarConfigurationService()->getNumerotationEditable();
         $projectGrant = $this->getProjectGrantService()->getGrant($id);
+        $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $projectGrant);
         $hidden = $this->getOscarConfigurationService()->getConfiguration('activity_hidden_fields');
 
         //////////////////////////////////////////////////////
@@ -2404,6 +2406,8 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 'editable'      => $editable,
                 'deletable'     => $deletable,
                 'enrolled'      => $activityPerson->getPerson()->getId(),
+                'firstname'      => $activityPerson->getPerson()->getFirstname(),
+                'lastname'      => $activityPerson->getPerson()->getLastname(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
                 'start'         => DateTimeUtils::toStr($activityPerson->getDateStart(), 'Y-m-d'),
                 'end'           => DateTimeUtils::toStr($activityPerson->getDateEnd(), 'Y-m-d'),

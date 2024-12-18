@@ -300,7 +300,7 @@
       <div class="row">
         <div class="col-md-12">
           <nav class="admin-bar">
-            <a class="btn btn-primary btn-xs" v-if="core.urls.edit" :href="core.urls.edit">
+            <a class="btn btn-primary btn-xs" v-if="credentials.core.edit" :href="core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
 
@@ -342,6 +342,7 @@
                           :items="persons"
                           :url-new="personsUrlNew"
                           :url="personsUrl"
+                          :debug-enabled="debugEnabled"
                           @updated="handlerUpdatePersons"
           />
         </section>
@@ -350,7 +351,8 @@
           <h2><i class="icon-building-filled"></i>Partenaires</h2>
           <EntityWithRole title="Organisation"
                           :standalone="false"
-                          :entity-link-show="false"
+                          :debug-enabled="debugEnabled"
+                          :entity-link-show="credentials.organizations.show"
                           :manage="credentials.organizations.edit"
                           :roles="rolesOrganizations"
                           :items="organizations"

@@ -70,7 +70,8 @@ $this->headScript();
 
 <body class="privatize <?php
 echo getenv('APPLICATION_ENV') ?: 'development' ?>">
-
+<div id="oscar-core" data-tooltip="on" data-url-person="<?= $this->url('person/info') ?>"></div>
+<div id="oscar-errors"></div>
 <!--[if lt IE 7]>
 <p class="chromeframe">Vous utilisez un navigateur internet hors d'âge. Veuillez le mettre à jour, svp.</p>
 <![endif]-->

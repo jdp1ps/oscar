@@ -59,6 +59,34 @@ class PersonController extends AbstractOscarController
 {
     use UsePersonServiceTrait, UseTimesheetServiceTrait, UseProjectServiceTrait, UseProjectGrantServiceTrait, UseNotificationServiceTrait, UseUserParametersServiceTrait;
 
+    public function infoAction() :JsonModel|Response
+    {
+        try {
+            $this->getOscarUserContextService()->check(Privileges::PERSON_SHOW);
+            $id = $this->params()->fromRoute('id');
+            if( !$id ){
+                throw new OscarException("ID de la personne manquant");
+            }
+            $person = $this->getPersonService()->getPerson($id);
+            if( !$person ){
+                throw new OscarException("Personne '$id' n'existe pas'");
+            }
+
+            $personJson = [
+                "id" => $person->getId(),
+                'firstname' => $person->getFirstname(),
+                "lastname" => $person->getLastname(),
+                "affectation" => $person->getLdapAffectation(),
+                "location" => $person->getLdapSiteLocation(),
+                "email" => $person->getEmail(),
+            ];
+
+            return $this->jsonOutput($personJson);
+
+        } catch (\Exception $e) {
+            return $this->jsonError($e->getMessage());
+        }
+    }
     public function deleteAction(): array
     {
         $method = $this->getHttpXMethod();

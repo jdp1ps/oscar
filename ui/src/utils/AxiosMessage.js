@@ -1,5 +1,5 @@
 const ERROR_MESSAGE_DEFAULT = "Erreur inconnue";
-const ERROR_MESSAGE_DISCONNECTED = "Vous vous êtes déconnecté";
+const ERROR_MESSAGE_DISCONNECTED = "Vous n'êtes pas autorisé à accéder à ces données";
 
 export default {
     error(ko){
@@ -15,23 +15,22 @@ export default {
         }
     },
     manageErrorResponse: function (err){
-        console.log(err.response.data);
-        let code = 504;
+        let code = err.response.status;
         let message = null;
 
-        if( err && err.response && err.response.data ){
+        if( code === 403 ){
+            message = ERROR_MESSAGE_DISCONNECTED;
+        }
+        else if( err && err.response && err.response.data ){
             code = err.response.status;
             // Technique de Jean Baptiste pour récupérer les erreurs HTML
             if (err.response.headers.get('content-type').includes('text/html')) {
                 var el = document.createElement('html');
                 el.innerHTML = err.response.data;
                 let errorHTML = el.querySelector('[id="oscar_fatal_error"]');
-                console.log(errorHTML);
-
                 if( !errorHTML ){
                     errorHTML = el.querySelector('[id="contenu-principal"]');
                 }
-
                 if (!errorHTML) {
                     errorHTML = el.querySelector('body');
                 }
@@ -40,9 +39,6 @@ export default {
                 // Erreur JSON "clean"
                 if( err.response.data ){
                     message = err.response.data.error ? err.response.data.error : err.response.data;
-                }
-                if( code === 403 ){
-                    message = ERROR_MESSAGE_DISCONNECTED;
                 }
             }
         } else {

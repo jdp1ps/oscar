@@ -627,6 +627,13 @@ person:
         defaults:
           action: show
 
+    info:
+      type: segment
+      options:
+        route: '/info/[:id]'
+        defaults:
+          action: info
+
     delete:
       type: segment
       options:

@@ -362,7 +362,7 @@ return array(
                 ///////////////////////////////////////////////////////////////
                 [
                     'controller' => 'Person',
-                    'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search', 'declarers'],
+                    'action' => ['personnel', 'access', 'delete', 'index', 'show', 'search', 'declarers', 'info'],
                     'roles' => ['user']
                 ],
                 [

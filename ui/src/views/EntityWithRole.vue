@@ -209,6 +209,10 @@
         <i class="icon-paste"></i>
         Coller
       </a>
+      <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="fetch()">
+        <i class="icon-bug"></i>
+        Fetch
+      </a>
     </nav>
 
     <section v-if="editMode">
@@ -252,13 +256,13 @@
         'organization' : title == 'Organisation',
         'primary': e.hasPrimary, 'default': !e.hasPrimary}">
         <a :href="e.urlShow" v-if="entityLinkShow">
-          <PersonDisplay :person="e" v-if="title == 'Personne'" />
+          <PersonDisplay :person="e" v-if="title == 'Personne'" :allow-tooltip="entityLinkShow"/>
           <span v-else>
-            {{ e.enrolledlabel }}
+            {{ e.enrolledLabel }}
           </span>
         </a>
         <span v-else>
-          <PersonDisplay :person="e" v-if="title == 'Personne'" />
+          <PersonDisplay :person="e" v-if="title == 'Personne'" :allow-tooltip="entityLinkShow"/>
           <span v-else>
             {{ e.enrolledLabel }}
           </span>
@@ -283,6 +287,7 @@ import Modal from "../components/Modal.vue";
 import {standalone} from "poi/lib/webpack/css-loaders.js";
 import PersonDisplay from "../components/PersonDisplay.vue";
 
+
 export default {
   components: {
     PersonDisplay,
@@ -299,9 +304,10 @@ export default {
     title: {required: true},
     items: {required: true},
     roles: {required: true},
-    entityLinkShow: {required: true, default: false},
+    entityLinkShow: {default: false},
     manage: {required: true, default: true, type: Boolean},
     standalone: {required: true, default: true, type: Boolean},
+    debugEnabled: {default: false, type: Boolean},
   },
 
   data() {
@@ -354,8 +360,9 @@ export default {
           let id = i.enrolled;
           if (!stacks.hasOwnProperty(id)) {
             stacks[id] = {
-              firstname: i.firstName,
-              lastname: i.lastName,
+              id: id,
+              firstname: i.firstname,
+              lastname: i.lastname,
               enrolled: i.enrolled,
               urlShow: i.urlShow,
               enrolledLabel: i.enrolledLabel,
@@ -528,7 +535,8 @@ export default {
               } else {
                 items = ok.data;
               }
-              this.$emit('Updated', {
+              console.log("emit", items);
+              this.$emit('update', {
                 datas: {
                   items: items,
                   urlNew: ok.data.urlNew,
