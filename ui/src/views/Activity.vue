@@ -204,7 +204,8 @@
         <div class="col-md-3">
           <div class="budget" v-if="budget && credentials.budget.read">
             <em>Montant</em>
-            <strong class="text-private amount">{{ $filters.money(budget.montant) }} {{ budget.currency.symbol }}</strong>
+            <strong class="text-private amount">{{ $filters.money(budget.montant) }} {{ budget.currency.symbol
+              }}</strong>
             <div class="details">
               <small>
                 Frais de gestion :
@@ -304,11 +305,11 @@
               <i class="icon-pencil"></i>
               Modifier les informations</a>
 
-            <a class="btn btn-xs btn-default" v-if="core.urls.change_project" :href="core.urls.change_project">
+            <a class="btn btn-xs btn-default" v-if="credentials.core.change_project" :href="core.urls.change_project">
               <i class="icon-cubes"></i>
               Modifier le projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="core.urls.new_project" :href="core.urls.new_project">
+            <a class="btn btn-xs btn-default" v-if="credentials.core.new_project" :href="core.urls.new_project">
               <i class="icon-cubes"></i>
               Créer un nouveau projet</a>
 
@@ -343,7 +344,7 @@
                           :url-new="personsUrlNew"
                           :url="personsUrl"
                           :debug-enabled="debugEnabled"
-                          @updated="handlerUpdatePersons"
+                          @update="handlerUpdatePersons"
           />
         </section>
 
@@ -358,11 +359,10 @@
                           :items="organizations"
                           :url="organizationsUrl"
                           :url-new="organizationsUrlNew"
-                          @updated="handlerUpdateOrganizations"
+                          @update="handlerUpdateOrganizations"
           />
         </section>
-
-        <section class="section-infos" id="documents" v-if="credentials.documents.read && documents">
+        <section class="section-infos" id="documents" v-if="credentials.documents.read">
           <h2><i class="icon-book"></i>Documents</h2>
           <activity-document
               @debug="handlerDebug"
@@ -371,7 +371,7 @@
 
               :standalone="true"
               :sa-tabs="documents.tabs"
-              :sa-types="documents.types"
+              :sa-types="documents.typesDocuments"
               :sa-generated-documents="documents.generatedDocuments"
               :sa-computed-documents="documents.computedDocuments"
               :sa-process-datas="documents.processDatas"
@@ -397,65 +397,119 @@
         <section id="timesheets" class="section-infos" v-if="credentials.timesheets.read">
           <h2><i class="icon-book"></i>Feuille de temps</h2>
 
-          <h3>Général</h3>
-          <a :href="timesheetsUrl"
-             class="btn btn-primary">
-            <i class="icon-calendar"></i>
-            Informations générales et lots de travails
-          </a>
+          <div v-if="!timesheets.enabled" class="alert alert-info">
+            Feuilles de temps non-disponible pour cette activité :
+            <strong>{{ timesheets.informations }}</strong>
+          </div>
+          <div v-else>
 
-          <a :href="timesheetsUrlSynthesis"
-             class="btn btn-primary">
-            <i class="icon-book"></i>
-            Résumé et documents
-          </a>
+            <section class="oscar-section">
+              <h3 class="oscar-section-title">
+                <span><i class="icon-calendar"></i>Général</span>
+              </h3>
+              <div class="oscar-section-content">
+                <a :href="timesheets.url"
+                   class="btn btn-primary">
+                  <i class="icon-calendar"></i>
+                  Informations générales et lots de travails
+                </a>
 
-          <section v-if="workpackages">
-            <h3>Déclarants</h3>
-            <a :href="d.url_details" v-for="d in timesheetsDeclarers" class="btn"
-               :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
-              <PersonDisplay :person="d" />
-              <small v-if="d.hasDeclaration == false">
-                (Aucune déclaration)
-              </small>
-            </a>
-
-            <h3>Valideurs</h3>
-            <div class="row">
-              <div class="col-md-4">
-                <h4>Validation projet</h4>
-                <span class="cartouche primary person" v-for="p in timesheetsValidators.prj">
-                  {{ p.firstname }}
-                  <span class="lastname text-private">{{ p.lastname }}</span>
-                </span>
+                <a :href="timesheets.urlSynthesis"
+                   class="btn btn-default">
+                  <i class="icon-book"></i>
+                  Résumé et documents
+                </a>
               </div>
-              <div class="col-md-4">
-                <h4>Validation scientifique</h4>
-                <span class="cartouche person primary" v-for="p in timesheetsValidators.sci">
-                  {{ p.firstname }}
-                  <span class="lastname text-private">{{ p.lastname }}</span>
-                </span>
-              </div>
-              <div class="col-md-4">
-                <h4>Validation administrative</h4>
-                <span class="cartouche person primary" v-for="p in timesheetsValidators.adm">
-                  {{ p.firstname }}
-                  <span class="lastname text-private">{{ p.lastname }}</span>
-                </span>
-              </div>
-            </div>
+            </section>
 
-            <h3>Lots de travail</h3>
-            <workpackages-activity
-                :debug-enabled="debugEnabled"
-                :editable="credentials.workpackages.edit"
-                :workpackages="workpackages"
-                :url="workpackagesUrl"
-                :persons="personsWP"
-                @update="handlerUpdateWorkpackages"
-            />
-          </section>
+            <section v-if="workpackages">
+
+              <div class="oscar-section">
+                <h3 class="oscar-section-title"><span><i class="icon-group"></i>Déclarants</span></h3>
+                <div class="oscar-section-content">
+                  <div v-if="timesheets.declarers.length">
+                    <a :href="d.url_details" v-for="d in timesheetsDeclarers" class="btn"
+                       :class="d.hasDeclaration ? 'btn-primary':'btn-default'">
+                      <PersonDisplay :person="d" :allow-tooltip="credentials.persons.show"/>
+                      <small v-if="d.hasDeclaration == false">
+                        (Aucune déclaration)
+                      </small>
+                    </a>
+                  </div>
+                  <div v-else class="alert-warning alert">
+                    Pour ajouter des déclarants, créez des <strong>Lots de travail</strong> puis identifier
+                    les déclarants parmis les membres
+                  </div>
+                </div>
+              </div>
+
+              <div class="oscar-section">
+                <h3 class="oscar-section-title">
+                  <span class="text">
+                    <i class="icon-user-md"></i>
+                    Valideurs
+                  </span>
+                  <nav>
+                    <a :href="timesheets.url +'#validators'"
+                       class="btn btn-primary btn-xs">
+                      <i class="icon-user-md"></i>
+                      Désigner des validateurs
+                    </a>
+                  </nav>
+                </h3>
+                <div class="row oscar-section-content">
+                  <div class="col-md-4">
+                    <h4><i class="icon-cube"></i>Validation projet</h4>
+                    <div v-if="timesheets.validators.prj.length === 0" class="alert alert-warning">
+                      Aucun validateur pour cette étape
+                    </div>
+                    <div>
+                      <span class="cartouche primary person" v-for="p in timesheetsValidators.prj">
+                        <PersonDisplay :person="p" :allow-tooltip="credentials.persons.show"/>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <h4><i class="icon-beaker"></i>Validation scientifique</h4>
+                    <div v-if="timesheets.validators.sci.length === 0" class="alert alert-warning">
+                      Aucun validateur pour cette étape
+                    </div>
+                    <span class="cartouche person primary" v-for="p in timesheetsValidators.sci">
+                      <PersonDisplay :person="p" :allow-tooltip="credentials.persons.show"/>
+                    </span>
+                  </div>
+                  <div class="col-md-4">
+                    <h4><i class="icon-book"></i>Validation administrative</h4>
+                    <div v-if="timesheets.validators.adm.length === 0" class="alert alert-warning">
+                      Aucun validateur pour cette étape
+                    </div>
+                    <span class="cartouche person primary" v-for="p in timesheetsValidators.adm">
+                      <PersonDisplay :person="p" :allow-tooltip="credentials.persons.show"/>
+                      <span class="addon">
+                        {{ p }}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="oscar-section">
+                <h3 class="oscar-section-title"><span><i class="icon-archive"></i>Lots de travail</span></h3>
+                <div class="oscar-section-content">
+                  <workpackages-activity
+                      :debug-enabled="debugEnabled"
+                      :editable="credentials.workpackages.edit"
+                      :workpackages="workpackages"
+                      :url="workpackagesUrl"
+                      :persons="personsWP"
+                      @update="handlerUpdateWorkpackages"
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
         </section>
+
+
       </div>
 
       <aside class="col-md-4">
@@ -598,6 +652,7 @@ export default {
       rolesOrganizations: null,
       rolesPersons: null,
 
+      timesheets: null,
       timesheetsDeclarers: null,
       timesheetsValidators: null,
       timesheetsUrl: null,
@@ -693,6 +748,7 @@ export default {
     },
 
     handlerUpdatePersons(d) {
+      console.log("Activity.handlerUpdatePersons", d);
       this.persons = d.datas.items;
     },
 
@@ -700,9 +756,8 @@ export default {
       this.organizations = d.datas.items;
     },
 
-    handlerUpdateDocuments(res){
-      console.log("updateDocuments", res);
-      this.documents = res.documents;
+    handlerUpdateDocuments(res) {
+      this.documents = res;
     },
 
     ////////////////////////////////////////// Système d'épingle
@@ -764,7 +819,7 @@ export default {
         }
 
         if (response.data.activity.datas.documents) {
-          this.handlerUpdateDocuments(response.data.activity.datas);
+          this.handlerUpdateDocuments(response.data.activity.datas.documents);
         }
 
         if (response.data.activity.datas.notes) {
@@ -799,6 +854,7 @@ export default {
         }
 
         if (response.data.activity.datas.timesheets) {
+          this.timesheets = response.data.activity.datas.timesheets;
           this.timesheetsValidators = response.data.activity.datas.timesheets.validators;
           this.timesheetsDeclarers = response.data.activity.datas.timesheets.declarers;
           this.timesheetsUrl = response.data.activity.datas.timesheets.url;
@@ -940,6 +996,7 @@ export default {
 .activity-type {
   background: #EEE;
   padding: .25em 1em .25em .25em;
+
   .icon-tag {
     color: #999;
   }
@@ -1002,6 +1059,7 @@ header {
 
 .budget {
   border-left: #dee2ea thin solid;
+
   .amount {
     font-size: 1.4em;
     border-top: solid thin #EEE;

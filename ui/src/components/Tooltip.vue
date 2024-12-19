@@ -1,5 +1,5 @@
 <template>
-  <transition name="fade" mode="out-in">
+  <transition name="fade" mode="out">
   <div class="oscar-tooltip" v-if="displayed" :style="{left: x, top: y}" @mouseenter="handlerInside" @mouseleave="handlerOutside">
     <div v-if="tooltipInfo && tooltipInfo.type === 'person'">
       <h3>
@@ -12,23 +12,24 @@
         </span>
       </h3>
       <div class="content">
-        <div class="email">
+        <div class="email" v-if="tooltipInfo.email">
           <i class="icon-mail"></i>
-          {{ tooltipInfo.email }}
+          <span class="text-private">
+            {{ tooltipInfo.email }}
+          </span>
         </div>
-        <div class="location">
+        <div class="location" v-if="tooltipInfo.location">
           <i class="icon-location"></i>
-          {{ tooltipInfo.location || 'Inconnue' }}
+          {{ tooltipInfo.location }}
         </div>
-        <div class="email">
+        <div class="affectation" v-if="tooltipInfo.affectation">
           <i class="icon-building-filled"></i>
-          {{ tooltipInfo.affectation || 'Inconnue' }}
-        </div>
-        <div>
-          SHOW : {{ show }}<br>
-          DISPLAYED : {{ displayed }}
+          {{ tooltipInfo.affectation }}
         </div>
       </div>
+      <nav>
+        <a class="btn btn-default btn-xs" :href="tooltipInfo.url_show" v-if="tooltipInfo.url_show">Voir la fiche</a>
+      </nav>
     </div>
   </div>
   </transition>
@@ -57,7 +58,7 @@ export default {
 
     display(){
       if(!this.tooltipInfo ) {
-        return true;
+        return false;
       }
       else {
         return this.tooltipInfo.display;
@@ -84,6 +85,7 @@ export default {
   watch: {
     // Système de delay pour cacher la tooltip
     show(){
+      console.log("show:", this.show);
       if( this.show ){
         this.displayed = true;
         clearTimeout(tempoHide);
@@ -101,18 +103,21 @@ export default {
 
 .oscar-tooltip {
   position: absolute;
-  background: rgba(0,0,0,.5);
+  background: rgba(225,225,225,.8);
   box-shadow: none;
-  color: #fff;
+  color: #111;
   z-index: 9000;
   width: auto;
   height: auto;
+  border: solid thin #ddd;
+  box-shadow: -2px 2px 8px rgba(0,0,0,.3);
+  border-radius: 4px;
   h3 {
     margin: 0;
     padding: 0 1em 0 0;
     display: flex;
     align-items: center;
-    background: rgba(0,0,0,.75);
+    background: white;
     img {
       height: 60px;
       width: 60px;

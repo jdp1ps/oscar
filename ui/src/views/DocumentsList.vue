@@ -48,9 +48,6 @@
         <span v-else>
             Nouveau document dans <strong>{{ editedDocument.tabDocument.label }}</strong>
           </span>
-        <span>
-            ({{ mode }})
-          </span>
         <span class="overlay-closer" @click="editedDocument = null">X</span>
       </h2>
       <div class="row">
@@ -60,7 +57,6 @@
             <label for="file">Fichier</label>
             <input @change="handlerChangeFile" type="file" class="form-control" name="file" id="file"/>
           </div>
-
           <div>
             <label for="dateDeposit">Date de dépôt</label>
             <date-picker v-model="editedDocument.dateDeposit" id="dateDeposit"/>
@@ -82,7 +78,6 @@
               </select>
             </div>
           </div>
-
           <div v-if="mode != 'version'">
             <label for="typedocument">Type de document</label>
             <div class="alert alert-warning" v-if="editedDocument.process">

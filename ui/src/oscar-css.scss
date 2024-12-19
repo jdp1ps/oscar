@@ -18,6 +18,22 @@ body:not(.privatize){
   }
 }
 
+.oscar-section {
+  background-color: white;
+  h3 {
+    border-bottom: solid thin #ddd;
+    padding: .25em;
+  }
+  .oscar-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .oscar-section-content {
+    padding: .25em;
+  }
+}
+
 #btn-toggle-private {
   .on, .off {
     display: none;
@@ -66,8 +82,8 @@ body:not(.privatize){
     content: '\e86e';
     color: #eee;
   }
-  opacity: .4;
-  filter: grayscale(.5);
+  opacity: .7;
+  filter: grayscale(.7);
 
   &:hover{
     left: 0;

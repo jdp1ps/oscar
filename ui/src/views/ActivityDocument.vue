@@ -132,7 +132,7 @@
               <div>
                 <select name="tabdocument" id="tabdocument" v-model="editedDocument.tabDocument.id"
                         class="form-control">
-                  <option :value="id" v-for="(tabDoc, id) in tabsWithDocuments" :key="id">{{ tabDoc.label }}</option>
+                  <option :value="id" v-for="(tabDoc, id) in saTabs" :key="id">{{ tabDoc.label }}</option>
                 </select>
               </div>
             </div>
@@ -144,7 +144,7 @@
               </div>
               <div v-else>
                 <select class="form-control" name="type" id="typedocument" v-model="editedDocument.category.id">
-                  <option :value="t.id" v-for="(t, id) in typesDocuments" :key="t.id"
+                  <option :value="t.id" v-for="(t, id) in saTypes" :key="t.id"
                           :disabled="t.flow && editedDocument.id > 0">
                     {{ t.label }} {{ t.flow && editedDocument.id ? '(signature)':'' }}
                   </option>
@@ -254,7 +254,7 @@
       </div>
 
       <div class="tab-content" v-show="displayComputed">
-        <article class="card xs" v-for="doc in computedDocuments" :key="doc.key">
+        <article class="card xs" v-for="doc in saGeneratedDocuments" :key="doc.key">
           <div class="">
             <i class="picto icon-doc"></i>
             <strong>{{doc.label}}</strong>
@@ -770,7 +770,7 @@ export default {
     },
 
     getTabById(tabId) {
-      let tab = this.tabsWithDocuments[tabId];
+      let tab = this.saTabs[tabId];
       return {
         "id": tab.id,
         "label": tab.label
@@ -841,9 +841,11 @@ export default {
 
     // Recup datas Docs
     fetch() {
+      console.log("fetch");
       this.loading = "Chargement des documents...";
       axios.get(this.url).then(ok => {
-        this.$emit('updated', ok.data.datas);
+        console.log(ok.data.datas.documents);
+        this.$emit('updated', ok.data.datas.documents);
       }, ko => {
         this.error = AxiosMessage.manageErrorResponse(ko).message;
       }).finally(t=>this.loading = false);

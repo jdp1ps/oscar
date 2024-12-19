@@ -1,1 +1,1 @@
-const u={money(t){t=parseFloat(t);for(var s=t.toFixed(2),e="",a=!1,n=0,e=[],r=s.length-1;r>=0;r--){var o=s[r];o=="."?(e.push(","),a=!0):(e.push(o),a==!0&&o!="-"&&r>0&&(n++,n%3==0&&e.push(" ")))}return e.reverse().join("")}};export{u as M};
+const u={money(t){t=parseFloat(t);for(var s=t.toFixed(2),e="",a=!1,n=0,e=[],r=s.length-1;r>=0;r--){var o=s[r];o=="."?(e.push(","),a=!0):(e.push(o),a==!0&&o!="-"&&r>0&&(n++,n%3==0&&e.push(" ")))}return e.reverse().join("")}};export{u as m};

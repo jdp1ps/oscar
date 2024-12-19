@@ -15,7 +15,8 @@ export default {
         }
     },
     manageErrorResponse: function (err){
-        let code = err.response.status;
+
+        let code = err.response ? err.response.status : '500';
         let message = null;
 
         if( code === 403 ){

@@ -24,11 +24,11 @@
       </div>
     </transition>
 
-    <nav class="buttons">
-      <a href="" class="btn btn-primary" @click.prevent="handlerWorkPackageNew">
+    <nav class="admin-bar">
+      <a href="" class="btn btn-primary btn-xs" @click.prevent="handlerWorkPackageNew">
         <i class="icon-book"></i>
         Nouveau lot</a>
-      <a href="" class="btn btn-info" @click.prevent="fetch" v-if="debugEnabled">
+      <a href="" class="btn btn-warning btn-xs" @click.prevent="fetch" v-if="debugEnabled">
         <i class="icon-bug"></i>
         fetch</a>
     </nav>

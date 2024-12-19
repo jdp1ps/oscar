@@ -27,6 +27,7 @@ use Oscar\Entity\TypeDocument;
 use Oscar\Entity\WorkPackage;
 use Oscar\Entity\WorkPackagePerson;
 use Oscar\Exception\OscarException;
+use Oscar\Formatter\Person\PersonFormatterArray;
 use Oscar\Provider\Privileges;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
@@ -186,8 +187,22 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                 case 'core':
                     $credentials['core'] = [
-                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+                        'read'           => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_PERSON_SHOW,
+                            $activity
+                        ),
+                        'edit'           => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_PERSON_MANAGE,
+                            $activity
+                        ),
+                        'change_project' => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_CHANGE_PROJECT,
+                            $activity
+                        ),
+                        'new_project'    => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_CHANGE_PROJECT,
+                            $activity
+                        ),
                     ];
                     break;
 
@@ -435,7 +450,9 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
             'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
             'urls'         => [
-                'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
+                'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
+                'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
+                'new_project'    => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
             ]
         ];
     }
@@ -739,10 +756,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     $this->formatDateTime($note->getDateUpdated()) :
                     $this->formatDateTime($note->getDateCreated()),
                 'createdBy'   => [
-                    'id'       => $createdBy_id,
+                    'id'        => $createdBy_id,
                     'firstname' => $createdBy_firstname,
-                    'lastname' => $createdBy_lastname,
-                    'username' => $createdBy_username,
+                    'lastname'  => $createdBy_lastname,
+                    'username'  => $createdBy_username,
                 ]
             ];
         }
@@ -962,69 +979,84 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ?Url $urlPlugin = null
     ): array {
         $out = [
-            'declarers'    => null,
-            'validators'   => [
+            'enabled'      => false,
+            'informations' => ""
+        ];
+
+        if (!$activity->getProject()) {
+            $out['informations'] = "Cette activité doit avoir un projet";
+        }
+        elseif (!$activity->getProject()->getAcronym()) {
+            $out['informations'] = "Le projet de cette activité doit avoir un acronyme";
+        }
+        else {
+            $out['enabled'] = true;
+            $out['url'] = $urlPlugin->fromRoute('contract/timesheet', ['id' => $activity->getId()]);
+            $out['urlSynthesis'] = $urlPlugin->fromRoute('timesheet/synthesis') . '?activity_id=' . $activity->getId();
+
+            /** @var TimesheetService $timesheetService */
+            $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
+
+            ////////////////////////////////////////////////////////////////////////////////// Validateurs
+            $out['validators'] = [
                 'prj' => [],
                 'sci' => [],
                 'adm' => [],
-            ],
-            'url'          => $urlPlugin->fromRoute('contract/timesheet', ['id' => $activity->getId()]),
-            'urlSynthesis' => $urlPlugin->fromRoute(
-                    'timesheet/synthesis'
-                ) . '?activity_id=' . $activity->getId(),
-        ];
-
-
-        /** @var TimesheetService $timesheetService */
-        $timesheetService = $this->getServiceContainer()->get(TimesheetService::class);
-
-        ////////////////////////////////////////////////////////////////////////////////// Validateurs
-        /** @var Person $validator */
-        foreach ($timesheetService->getValidatorsPrj($activity) as $validator) {
-            $out['validators']['prj'][] = [
-                'id'        => $validator->getId(),
-                'firstname' => $validator->getFirstname(),
-                'lastname'  => $validator->getLastname(),
-                'fullname'  => $validator->getFullname(),
             ];
-        }
 
-        foreach ($timesheetService->getValidatorsSci($activity) as $validator) {
-            $out['validators']['sci'][] = [
-                'id'        => $validator->getId(),
-                'firstname' => $validator->getFirstname(),
-                'lastname'  => $validator->getLastname(),
-                'fullname'  => $validator->getFullname(),
-            ];
-        }
+//            $out['validatorsDefault'] = [
+//                'prj' => [],
+//                'sci' => [],
+//                'adm' => [],
+//            ];
 
-        foreach ($timesheetService->getValidatorsAdm($activity) as $validator) {
-            $out['validators']['adm'][] = [
-                'id'        => $validator->getId(),
-                'firstname' => $validator->getFirstname(),
-                'lastname'  => $validator->getLastname(),
-                'fullname'  => $validator->getFullname(),
-            ];
-        }
+            $personFormatter = new PersonFormatterArray($urlPlugin);
 
-        ////////////////////////////////////////////////////////////////////////////////// Déclarants
-        $declarers = [];
-        foreach ($activity->getPersonsDeep() as $personActivity) {
-            if ($activity->hasDeclarant($personActivity->getPerson())) {
-                $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($activity);
-                $declarers[$personActivity->getPerson()->getId()] = [
-                    'id'             => $personActivity->getPerson()->getId(),
-                    'fullname'       => $personActivity->getPerson()->getFullname(),
-                    'firstname'      => $personActivity->getPerson()->getFirstname(),
-                    'lastname'       => $personActivity->getPerson()->getLastname(),
-                    'hasDeclaration' => $hasDeclaration,
-                    'url_details'    => $urlPlugin->fromRoute('timesheet/resume')
-                        . '?person_id='
-                        . $personActivity->getPerson()->getId(),
-                ];
+//            /** @var Person $validator */
+//            foreach ($timesheetService->getValidatorsPrj($activity, true) as $validator) {
+//                $out['validatorsDefault']['prj'][] = $personFormatter->format($validator);
+//            }
+//
+//            foreach ($timesheetService->getValidatorsSci($activity, true) as $validator) {
+//                $out['validatorsDefault']['sci'][] = $personFormatter->format($validator);
+//            }
+//
+//            foreach ($timesheetService->getValidatorsAdm($activity, true) as $validator) {
+//                $out['validatorsDefault']['adm'][] = $personFormatter->format($validator);
+//            }
+
+            /** @var Person $validator */
+            foreach ($activity->getValidatorsPrj() as $validator) {
+                $out['validators']['prj'][] = $personFormatter->format($validator);
             }
+
+            foreach ($activity->getValidatorsSci() as $validator) {
+                $out['validators']['sci'][] = $personFormatter->format($validator);
+            }
+
+            foreach ($activity->getValidatorsAdm() as $validator) {
+                $out['validators']['adm'][] = $personFormatter->format($validator);
+            }
+
+            ////////////////////////////////////////////////////////////////////////////////// Déclarants
+            $declarers = [];
+            foreach ($activity->getPersonsDeep() as $personActivity) {
+                if ($activity->hasDeclarant($personActivity->getPerson())) {
+                    $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($activity);
+                    $declarers[$personActivity->getPerson()->getId()] = [
+                        'id'             => $personActivity->getPerson()->getId(),
+                        'fullname'       => $personActivity->getPerson()->getFullname(),
+                        'firstname'      => $personActivity->getPerson()->getFirstname(),
+                        'lastname'       => $personActivity->getPerson()->getLastname(),
+                        'hasDeclaration' => $hasDeclaration,
+                        'url_details'    => $urlPlugin->fromRoute('timesheet/resume')
+                            . '?person_id='
+                            . $personActivity->getPerson()->getId(),
+                    ];
+                }
+            }
+            $out['declarers'] = array_values($declarers);
         }
-        $out['declarers'] = array_values($declarers);
 
         return $out;
     }

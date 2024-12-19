@@ -28,8 +28,6 @@ const globalStore = createStore({
         },
         tooltipPersonPreShooting({state}, data){
             if(state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === data.id){
-                console.log(data.event);
-                console.log("Réactivation de l'aide");
                 state.tooltip.display = true;
                 state.tooltip.x = data.event.pageX;
                 state.tooltip.y = data.event.pageY;
@@ -39,7 +37,7 @@ const globalStore = createStore({
         },
         tooltipPerson({state, commit, dispatch}, tooltipInfos){
             if(state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === tooltipInfos.id){
-                console.log("Réactivation de l'aide");
+                console.log("Réactivation de la tooltip");
                 state.tooltip.display = true;
                 return true;
             } else {
@@ -52,6 +50,9 @@ const globalStore = createStore({
                 }
                 if( tooltipInfos && tooltipInfos.type === 'person' ){
                     let url = state.urlPerson + tooltipInfos.id;
+
+                    // TODO Système de cache
+
                     axios.get(url).then((response) => {
                         commit('setTooltip', {
                             type: tooltipInfos.type,
@@ -61,6 +62,8 @@ const globalStore = createStore({
                             lastname: response.data.lastname,
                             affectation: response.data.affectation,
                             location: response.data.location,
+                            gravatar: response.data.gravatar,
+                            url_show: response.data.url_show,
                             email: response.data.email,
                             display: true,
                             x: posX,

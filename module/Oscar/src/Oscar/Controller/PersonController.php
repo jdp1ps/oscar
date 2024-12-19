@@ -30,6 +30,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Form\MergeForm;
 use Oscar\Form\PersonForm;
 use Oscar\Formatter\OscarFormatterConst;
+use Oscar\Formatter\Person\PersonFormatterArray;
 use Oscar\Hydrator\PersonFormHydrator;
 use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityRequestService;
@@ -72,14 +73,16 @@ class PersonController extends AbstractOscarController
                 throw new OscarException("Personne '$id' n'existe pas'");
             }
 
-            $personJson = [
-                "id" => $person->getId(),
-                'firstname' => $person->getFirstname(),
-                "lastname" => $person->getLastname(),
-                "affectation" => $person->getLdapAffectation(),
-                "location" => $person->getLdapSiteLocation(),
-                "email" => $person->getEmail(),
-            ];
+            // à garder, on peut imaginer de rendre accessible la visualisation
+            // des informations sur une personne (mais avec restriction)
+            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::PERSON_SHOW)){
+                $url = $this->url();
+            } else {
+                $url = null;
+            }
+            $personFormatter = new PersonFormatterArray($url);
+
+            $personJson = $personFormatter->format($person);
 
             return $this->jsonOutput($personJson);
 

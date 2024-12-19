@@ -341,13 +341,13 @@ class Activity implements ResourceInterface
      * @var boolean
      * @ORM\Column(type="boolean", options={"default": false})
      */
-    private bool $cacheLocked;
+    private bool $cacheLocked = false;
 
     /**
      * Cache
      *
      * @var string
-     * @ORM\Column(type="string", options={"default": ""})
+     * @ORM\Column(type="string",nullable=true, options={"default": ""})
      */
     private string $cacheLockedReason;
 
