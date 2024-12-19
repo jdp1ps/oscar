@@ -333,7 +333,7 @@ class Activity implements ResourceInterface
      * Cache
      *
      * @var string
-     * @ORM\Column(type="text", options={"default": ""})
+     * @ORM\Column(type="text", nullable=true, options={"default": ""})
      */
     private string $cache;
 
