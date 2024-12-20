@@ -193,7 +193,6 @@
       </a>
 
     </nav>
-    {{ progression }}
     <section class="list" v-if="milestones != null">
       <milestone :milestone="m" v-for="m in milestones" :key="m.id"
                  :manage="manage"
@@ -211,7 +210,6 @@
       Aucun jalon
     </div>
   </section>
-
 </template>
 <script>
 
@@ -561,3 +559,9 @@ export default {
   }
 }
 </script>
+
+<style>
+.list {
+  margin: 1em 0;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
     <article class="workpackage-person">
         <div class="displayname">
-            <strong>{{ person.person.displayname }}</strong>
+          <PersonDisplay :person="person.person" :allow-tooltip="allowTooltip"/>
             <a href="#" @click.prevent="handlerRemove(person)" class="link" v-if="editable && mode == 'read'" title="Supprimer ce déclarant"><i class="icon-trash"></i></a>
         </div>
         <div class="tempsdeclare temps">
@@ -27,10 +27,14 @@
     </article>
 </template>
 <script>
+    import PersonDisplay from "../components/PersonDisplay.vue";
+
     export default {
+      components: {PersonDisplay},
         props: {
             'person': { default: function(){ return {} } },
-            'editable': false
+            'editable': false,
+            'allowTooltip' : { default: false },
         },
         computed: {
             duration(){

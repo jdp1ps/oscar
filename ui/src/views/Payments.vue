@@ -184,8 +184,8 @@
         semble pas correspondre avec le montant prévu
         initialement, Somme des versements :</p>
       <ul>
-        <li><strong class="amountPrevu">{{ $filters.money(total) }} {{ currencySymbol }}</strong> en versement,</li>
-        <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>">
+        <li><strong class="amountPrevu text-private">{{ $filters.money(total) }} {{ currencySymbol }}</strong> en versement,</li>
+        <li><strong title="Valeur exacte : <?= $entity->getAmount() ?>" class="text-private">
           {{ $filters.money(amount)}} {{ currencySymbol }}</strong> prévu
         </li>
       </ul>

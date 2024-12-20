@@ -500,9 +500,11 @@
               </div>
               <div class="oscar-section">
                 <h3 class="oscar-section-title"><span><i class="icon-archive"></i>Lots de travail</span></h3>
+                {{ personWP }}
                 <div class="oscar-section-content">
                   <workpackages-activity
                       :debug-enabled="debugEnabled"
+                      :allow-tooltip="credentials.persons.show"
                       :editable="credentials.workpackages.edit"
                       :workpackages="workpackages"
                       :url="workpackagesUrl"
@@ -552,20 +554,24 @@
 
         <section id="spents" class="section-infos" v-if="credentials.spents.read">
           <h2><span><i class="icon-bank"></i>Dépenses</span></h2>
-          <ActivitySpentSynthesis
-              :standalone="false"
-              :datas="spents"
-          />
-          <nav class="buttons xs">
-            <a :href="spentsUrlDetails" class="btn btn-primary btn" v-if="credentials.spents.details">
-              <i class="icon-file-excel"></i>
-              Détails des dépenses</a>
-            <a :href="spentsUrlPrevisionnel" class="btn btn-primary btn"
-               v-if="credentials.spents.previsionnel">
-              <i class="icon-file-excel"></i>
-              Dépenses prévisionnelles (beta)</a>
-          </nav>
-
+          <div v-if="!spents.enabled" class="alert alert-warning">
+            Dépenses indisponibles : {{ spents.enabled_reason }}
+          </div>
+          <div v-else>
+            <ActivitySpentSynthesis
+                :standalone="false"
+                :datas="spents"
+            />
+            <nav class="buttons xs">
+              <a :href="spentsUrlDetails" class="btn btn-primary btn" v-if="credentials.spents.details">
+                <i class="icon-file-excel"></i>
+                Détails des dépenses</a>
+              <a :href="spentsUrlPrevisionnel" class="btn btn-primary btn"
+                 v-if="credentials.spents.previsionnel">
+                <i class="icon-file-excel"></i>
+                Dépenses prévisionnelles (beta)</a>
+            </nav>
+          </div>
         </section>
 
       </aside>
@@ -575,8 +581,12 @@
       <div class="row">
         <div class="col-md-12">
           <h2>
-            <span><i class="icon-cog"></i>Technique</span></h2>
+            <span><i class="icon-cog"></i>Technique</span>
+          </h2>
           <ActivityLogs :url="administration.url_logs" />
+          <button class="btn btn-default" @click="testError">
+            ERROR TEST
+          </button>
         </div>
       </div>
     </div>
@@ -700,6 +710,8 @@ export default {
             out[person.enrolled] = {
               id: person.enrolled,
               displayname: person.enrolledLabel,
+              firstname: person.firstname,
+              lastname: person.lastname,
             };
           }
         });
@@ -725,6 +737,10 @@ export default {
   },
 
   methods: {
+    testError(evt, err = "Une erreur affichée"){
+      GlobalModel.commit("addError", err);
+    },
+
     handlerHelp(tag){
       GlobalModel.dispatch('displayHelp', tag);
     },

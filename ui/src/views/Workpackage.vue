@@ -35,6 +35,7 @@
         <h4><i class="icon-calendar"></i>Déclarants </h4>
         <workpackageperson v-for="person in workpackage.persons"
                            :key="person.id"
+                           :allow-tooltip="allowTooltip"
                            :person="person"
                            :editable="editable"
                            @workpackagepersondelete="handlerDelete"
@@ -98,7 +99,8 @@ export default {
       }
     },
     'editable': false,
-    'isValidateur': false
+    'isValidateur': false,
+    'allowTooltip' : { default: false },
   },
 
   watch: {},

@@ -91,10 +91,10 @@ const globalStore = createStore({
     },
     mutations: {
         addError(state, msg){
-            state.errors.push(msg);
+            state.errors.unshift(errorFormat(msg));
         },
         addErrorAxios(state, err){
-            state.errors.push(AxiosMessage.manageErrorResponse(err).message);
+            state.errors.unshift(errorFormat(AxiosMessage.manageErrorResponse(err).message));
         },
         setTooltip(state, tooltipInfos) {
             if( tooltipInfos ){
@@ -103,7 +103,19 @@ const globalStore = createStore({
                 state.tooltip = null;
             }
         }
+    },
+
+    errorFormat(msg){
     }
+
 });
+
+let errorFormat = function(msg){
+    return {
+        time: new Date().toISOString(),
+        message: msg,
+        type: 'error'
+    };
+};
 
 export default globalStore;

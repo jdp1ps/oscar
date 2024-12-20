@@ -918,7 +918,9 @@ class Person implements ResourceInterface
     {
         return array(
             'id'                   => $this->getId(),
+            'firstname'            => $this->getFirstname(),
             'firstName'            => $this->getFirstname(),
+            'lastname'             => $this->getLastname(),
             'lastName'             => $this->getLastname(),
             'displayname'          => $this->getDisplayName(),
             'login'                => $this->getLadapLogin(),

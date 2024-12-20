@@ -1,12 +1,15 @@
 <template>
-  <article class="card xs jalon" :class="cssClass">
-    <strong v-if="statutText">&nbsp;{{ statutText }}</strong>
-    <time :datetime="milestone.dateStart" class="time-value">
-      {{ $filters.date(milestone.dateStart) }}
-      <span class="ago">
-       &nbsp;({{ $filters.timeAgo(milestone.dateStart) }})
-      </span>
-    </time>
+  <article class="jalon" :class="cssClass">
+
+    <span class="main">
+      <strong v-if="statutText">&nbsp;{{ statutText }}</strong>
+      <time :datetime="milestone.dateStart" class="time-value">
+        {{ $filters.date(milestone.dateStart) }}
+        <span class="ago">
+         &nbsp;({{ $filters.timeAgo(milestone.dateStart) }})
+        </span>
+      </time>
+    </span>
     <strong class="card-title" :class="{'text-private': milestone.isPayment}">
       {{ milestone.type.label }}
       <small v-if="inProgress"> (En cours par <strong>{{ finishedPerson }}</strong>)</small>
@@ -15,7 +18,7 @@
     <p class="details" v-if="milestone.comment">
       {{ milestone.comment }}
     </p>
-    <nav>
+    <nav v-if="!milestone.isPayment">
       <a href="#" v-if="cancelFinish"
          title="Réinitialiser la progression"
          @click.prevent="$emit('unvalid', milestone)">
@@ -157,6 +160,7 @@ export default {
         'finishable': this.finishable,
         'finished': this.finished || this.milestone.done,
         'late': this.late || this.milestone.late,
+        'payment': this.milestone.isPayment,
         'inprogress': this.inProgress,
         'canceled': this.milestone.finished == 200,
         'refused': this.milestone.finished == 400,
@@ -171,6 +175,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.jalon {
+  background: white;
+  padding: .25em 1em;
+  margin-bottom: .2em;
+  .main {
+    display: inline-block;
+    font-size: 1.2em;
+    text-align: left;
+    border-bottom: solid thin #ddd;
+    padding: .1em .5em;
+  }
+  &.payment {
+    background: rgba(255,255,255,.7);
+  }
+}
 .time-value {
   font-weight: 600;
   .ago {

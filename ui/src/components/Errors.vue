@@ -14,7 +14,11 @@
     </h3>
     <ul class="errors">
       <li v-for="(err, i) in errors" class="error">
-        {{ err }} <i class="icon-cancel-outline" @click="handlerRemoveError(i)"></i>
+        <time class="time">{{ err.time }}</time>
+        <span class="message">
+        {{ err.message }}
+        </span>
+        <i class="icon-cancel-outline" @click="handlerRemoveError(i)"></i>
       </li>
     </ul>
   </div>
@@ -64,14 +68,18 @@ export default {
 .oscar-errors {
   transition: bottom .25s ease-in-out;
   position: fixed;
-  bottom: -50vh;
+  bottom: -30vh;
   left: 0px;
   background: rgba(129, 10, 10, 0.7);
   color: #fff;
   z-index: 9000;
-  width: 75vw;
-  overflow-y: scroll;
-  height: calc(50vh + 40px);
+  width: 60vw;
+  height: calc(30vh + 40px);
+  .errors {
+    height: 30vw;
+    overflow-y: scroll;
+  }
+
   h3 {
     height: 40px;
     display: flex;
@@ -79,7 +87,7 @@ export default {
     justify-content: space-between;
     font-weight: 600;
     margin: 0;
-    padding: .25em .25em;
+    padding: .25em 1em .25em .25em;
     border-bottom: solid 1px rgba(129, 10, 10, 0.7);
     background: rgba(129, 10, 10, 0.7);
     .links {
@@ -90,15 +98,36 @@ export default {
       }
     }
   }
+  .errors {
+    list-style: none;
+    padding: .25em 1em;
+  }
   .error {
+      border-bottom: 1px solid rgba(129, 10, 10, 1);
+    .time {
+      flex: 0 0;
+      line-height: 1.8em;
+      font-size: .75em;
+      padding-right: 1em;
+    }
+    .message {
+      flex: 1;
+    }
+    display: flex;
+    justify-content: space-between;
+    padding: .25em 1em;
+    &:nth-child(even){
+      background-color: rgba(129, 10, 10, .5);
+    }
     opacity: .7;
     &:hover {
       opacity: 1;
+      background-color: rgba(129, 10, 10, 1);
     }
   }
 
   &.full {
-    bottom: 0;
+    bottom: 0px;
   }
 }
 

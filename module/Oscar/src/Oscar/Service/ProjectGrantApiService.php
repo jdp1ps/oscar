@@ -1103,12 +1103,24 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
      */
     private function getSpentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
-        $pfis = [$activity->getCodeEOTP()];
+        $pfis = [];
+        if( $activity->getCodeEOTP() ){
+            $pfis[] = $activity->getCodeEOTP();
+        }
+
         $out = [
+            'enabled'=>false,
+            'enabled_reason'=>'',
             'pfi'     => $pfis,
             'warning' => "",
             'error'   => "",
         ];
+
+        if( !count($pfis) ){
+            $out['enabled_reason'] = "L'activité doit avoir un numéro financier";
+            return $out;
+        }
+
         try {
             if (count($pfis) == 0) {
                 $out['warning'] = "Aucun numéro financier pour cette activité";
@@ -1119,6 +1131,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 true,
                 'basic'
             );
+            $out['enabled'] = true;
             $out['dateUpdated'] = $activity->getDateTotalSpent();
         } catch (\Exception $e) {
             $msg = "Impossible de charger la synthèse financière pour '$activity'";

@@ -36,6 +36,7 @@
     <section class="workpackages">
       <workpackage v-for="wp in workpackages"
                    v-bind:key="wp.id"
+                   :allow-tooltip="allowTooltip"
                    :workpackage="wp"
                    :persons="persons"
                    :editable="editable"
@@ -77,6 +78,7 @@ export default {
   props: {
     url: {required: true},
     editable: {required: false, default: false},
+    allowTooltip: { default: false},
     isValidateur: {required: true},
     outsidePerson: {required: true},
     persons: {required: true},
