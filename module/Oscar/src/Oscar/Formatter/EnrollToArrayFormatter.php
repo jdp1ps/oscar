@@ -36,6 +36,13 @@ class EnrollToArrayFormatter
             $output = [];
         }
 
+        $firstname = "";
+        $lastname = "";
+        if( get_class($affectation) == ActivityPerson::class || get_class($affectation) == ProjectMember::class ){
+            $firstname = $affectation->getPerson()->getFirstname();
+            $lastname = $affectation->getPerson()->getLastname();
+        }
+
         if( $options == null ){
             $options = [];
         }
@@ -53,6 +60,8 @@ class EnrollToArrayFormatter
         $output['id'] = $affectation->getId();
         $output['enrolledLabel'] = $affectation->getEnrolled()->__toString();
         $output['enrolled'] = $affectation->getEnrolled()->getId();
+        $output['firstname'] = $firstname;
+        $output['lastname'] = $lastname;
         $output['roleLabel'] = $affectation->getRoleObj()->getRoleId();
         $output['rolePrincipal'] = $affectation->getRoleObj()->isPrincipal();
         $output['roleId'] = $affectation->getRoleObj()->getId();

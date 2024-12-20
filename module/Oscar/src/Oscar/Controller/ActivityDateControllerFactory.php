@@ -11,15 +11,18 @@ namespace Oscar\Controller;
 
 use Interop\Container\ContainerInterface;
 use Oscar\Service\ActivityLogService;
+use Oscar\Service\LoggerService;
 use Oscar\Service\MilestoneService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
 use Laminas\ServiceManager\Factory\FactoryInterface;
-class ActivityDateControllerFactory implements FactoryInterface
+class ActivityDateControllerFactory extends AbstractOscarController
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $c = new ActivityDateController();
+        $c->setServiceContainer($container);
+        $c->setLoggerService($container->get('Logger'));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setProjectGrantService($container->get(ProjectGrantService::class));
         $c->setMilestoneService($container->get(MilestoneService::class));

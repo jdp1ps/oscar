@@ -261,6 +261,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     $credentials['milestones'] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity),
                         'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity),
+                        'progression' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity),
                     ];
                     break;
 
@@ -341,7 +342,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         foreach ($perimeters as $perimeter) {
             switch ($perimeter) {
                 case self::PERIMETER_ADMINISTRATION:
-                    $datas[self::PERIMETER_ADMINISTRATION] = [];
+                    $datas[self::PERIMETER_ADMINISTRATION] = $this->getAdministrationActivity($activity, $urlPlugin);
                     break;
 
                 case self::PERIMETER_BUDGET:
@@ -720,6 +721,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'type'      => $typesArr[$data->getType()->getId()],
                 'type_id'   => $data->getType()->getId(),
                 'finished'  => $data->getFinished(),
+                'validable' => $data->getType()->isFinishable()
                 //'hasProgression' => $data->getProgressInfo()
             ];
             $out['entities'][] = $data;
@@ -1182,5 +1184,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         $formatter = $this->getServiceContainer()->get(JsonFormatterService::class);
         $formatter->setUrlHelper($urlHelper);
         return $formatter;
+    }
+
+    private function getAdministrationActivity(Activity $activity, ?Url $urlPlugin)
+    {
+        return [
+            "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
+        ];
     }
 }

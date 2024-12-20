@@ -12,9 +12,10 @@
       <small v-if="inProgress"> (En cours par <strong>{{ finishedPerson }}</strong>)</small>
     </strong>
     <p v-if="finished"><strong>{{ finishedPerson }}</strong> a complété ce jalon</p>
-    <p class="details" v-if="milestone.comment">{{ milestone.comment }}</p>
+    <p class="details" v-if="milestone.comment">
+      {{ milestone.comment }}
+    </p>
     <nav>
-
       <a href="#" v-if="cancelFinish"
          title="Réinitialiser la progression"
          @click.prevent="$emit('unvalid', milestone)">
@@ -48,17 +49,16 @@
       <a href="#"
          title="Supprimer ce jalon"
          @click.prevent="$emit('remove', milestone)"
-         v-if="milestone.deletable">
+         v-if="manage">
         <i class="icon-trash"></i>
       </a>
       <a href="#"
          title="Modifier ce jalon"
          @click.prevent="$emit('edit', milestone)"
-         v-if="milestone.editable">
+         v-if="manage">
         <i class="icon-edit"></i>
       </a>
     </nav>
-
   </article>
 </template>
 <script>
@@ -71,7 +71,9 @@ export default {
   props: {
     milestone: {
       required: true
-    }
+    },
+    manage: { default: false },
+    progression: { default: false },
   },
 
   computed: {
@@ -121,15 +123,15 @@ export default {
     },
 
     finishable() {
-      return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished < 100;
+      return this.progression && this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished < 100;
     },
 
     cancelFinish() {
-      return this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished > 0
+      return this.progression && this.milestone.validable && this.milestone.type.finishable == true && this.milestone.finished > 0
     },
 
     progressable() {
-      return this.milestone.validable && this.milestone.type.finishable == true &&
+      return this.progression && this.milestone.validable && this.milestone.type.finishable == true &&
           (this.milestone.finished == null || this.milestone.finished == 0 || this.milestone.finished == 100);
     },
 

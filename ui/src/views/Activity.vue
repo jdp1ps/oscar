@@ -122,6 +122,7 @@
           <ul class="nav navbar-nav">
             <li><a href="#members" v-if="credentials.persons.read">Membres</a></li>
             <li><a href="#partners" v-if="credentials.organizations.read">Partenaires</a></li>
+            <li><a href="#documents" v-if="credentials.documents.read">Documents</a></li>
             <li><a href="#milestones" v-if="credentials.milestones.read">Jalons</a></li>
             <li><a href="#notes" v-if="credentials.notes.read">Notes</a></li>
             <li><a href="#payments" v-if="credentials.budget.read">Versements</a></li>
@@ -333,7 +334,7 @@
       <div class="col-md-8">
         <section class="section-infos" id="members" v-if="credentials.persons.read">
           <h2>
-            <i class="icon-group"></i>Membres
+            <span><i class="icon-group"></i>Membres</span>
           </h2>
           <EntityWithRole title="Personne"
                           :standalone="false"
@@ -349,7 +350,9 @@
         </section>
 
         <section class="section-infos" id="partners" v-if="credentials.organizations.read">
-          <h2><i class="icon-building-filled"></i>Partenaires</h2>
+          <h2>
+            <span><i class="icon-building-filled"></i>Partenaires</span>
+          </h2>
           <EntityWithRole title="Organisation"
                           :standalone="false"
                           :debug-enabled="debugEnabled"
@@ -363,7 +366,7 @@
           />
         </section>
         <section class="section-infos" id="documents" v-if="credentials.documents.read">
-          <h2><i class="icon-book"></i>Documents</h2>
+          <h2><span><i class="icon-book"></i>Documents</span></h2>
           <activity-document
               @debug="handlerDebug"
               @updated="handlerUpdateDocuments"
@@ -383,7 +386,7 @@
         </section>
 
         <section class="section-infos" id="notes" v-if="credentials.notes.read">
-          <h2><i class="icon-comment"></i>Notes</h2>
+          <h2><span><i class="icon-comment"></i>Notes</span></h2>
           <activity-notes
               :url="notes_url"
               :showallowed="credentials.notes.read"
@@ -395,7 +398,10 @@
         </section>
 
         <section id="timesheets" class="section-infos" v-if="credentials.timesheets.read">
-          <h2><i class="icon-book"></i>Feuille de temps</h2>
+          <h2 class="section-title">
+            <span><i class="icon-book"></i>Feuille de temps</span>
+            <span><a href="#" @click.prevent="handlerHelp('timesheets')" class="btn-help">Aide</a></span>
+          </h2>
 
           <div v-if="!timesheets.enabled" class="alert alert-info">
             Feuilles de temps non-disponible pour cette activité :
@@ -514,13 +520,15 @@
 
       <aside class="col-md-4">
         <section id="milestones" class="section-infos" v-if="credentials.milestones.read">
-          <h2><i class="icon-calendar"></i>Jalons</h2>
+          <span><h2><i class="icon-calendar"></i>Jalons</h2></span>
 
           <Milestones :url="milestonesUrl"
                       :manage="credentials.milestones.edit"
+                      :progression="credentials.milestones.progression"
                       :payments="payments"
                       :items="milestones"
                       :types="milestonesTypes"
+                      @update="handlerUpdateMilestones"
           />
 
           <a v-if="milestonesUrlNotifications" :href="milestonesUrlNotifications"
@@ -531,7 +539,7 @@
         </section>
 
         <section id="payments" class="section-infos" v-if="credentials.payments.read">
-          <h2><i class="icon-bank"></i>Versements</h2>
+          <h2><span><i class="icon-bank"></i>Versements</span></h2>
           <Payments :url="paymentsUrl"
                     :manage="credentials.payments.edit"
                     :amount="budget.amount"
@@ -543,7 +551,7 @@
 
 
         <section id="spents" class="section-infos" v-if="credentials.spents.read">
-          <h2><i class="icon-bank"></i>Dépenses </h2>
+          <h2><span><i class="icon-bank"></i>Dépenses</span></h2>
           <ActivitySpentSynthesis
               :standalone="false"
               :datas="spents"
@@ -567,9 +575,8 @@
       <div class="row">
         <div class="col-md-12">
           <h2>
-            <i class="icon-cog"></i>
-            Technique</h2>
-          <ActivityLogs :url="core.urls.logs" @error="handlerError"/>
+            <span><i class="icon-cog"></i>Technique</span></h2>
+          <ActivityLogs :url="administration.url_logs" />
         </div>
       </div>
     </div>
@@ -587,6 +594,7 @@ import ActivitySpentSynthesis from "./ActivitySpentSynthesis.vue";
 import axios from 'axios';
 import AxiosMessage from "../utils/AxiosMessage.js";
 import EntityWithRole from "./EntityWithRole.vue";
+import GlobalModel from "../models/GlobalModel.js";
 import Loader from "../components/Loader.vue";
 import Milestones from "./Milestones.vue";
 import Modal from "../components/Modal.vue";
@@ -628,6 +636,7 @@ export default {
 
   data() {
     return {
+      administration: null,
       budget: null,
       core: null,
       credentials: null,
@@ -716,6 +725,10 @@ export default {
   },
 
   methods: {
+    handlerHelp(tag){
+      GlobalModel.dispatch('displayHelp', tag);
+    },
+
     handlerDebug(debugData) {
       this.debug_content = debugData;
       this.debug_displayed = true;
@@ -745,6 +758,9 @@ export default {
     handlerUpdatePayments(p) {
       console.log("updatePayments", p);
       this.payments = p.entities;
+    },
+    handlerUpdateMilestones(milestones) {
+      this.milestones = milestones;
     },
 
     handlerUpdatePersons(d) {
@@ -816,6 +832,10 @@ export default {
 
         if (response.data.activity.datas.spents) {
           this.spents = response.data.activity.datas.spents;
+        }
+
+        if (response.data.activity.datas.administration) {
+          this.administration = response.data.activity.datas.administration;
         }
 
         if (response.data.activity.datas.documents) {
@@ -948,6 +968,9 @@ export default {
     border-bottom: 1px solid #a2a7af;
     margin: 0;
     padding: .2em 0;
+    display: flex;
+    justify-content: left;
+    justify-content: space-between;
   }
 }
 

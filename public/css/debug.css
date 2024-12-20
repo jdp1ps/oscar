@@ -8623,14 +8623,6 @@ body::-webkit-scrollbar-thumb {
   display: none;
 }
 
-.section-title {
-  font-weight: 100;
-  color: #290671;
-}
-.section-title i {
-  opacity: 0.75;
-}
-
 .link {
   color: #ff13b9;
   font-weight: 600;
@@ -8674,36 +8666,6 @@ body::-webkit-scrollbar-thumb {
 
 .thin {
   font-weight: 100;
-}
-
-.timeline {
-  font-size: 14px;
-}
-
-.timeline-item {
-  margin-left: 2em;
-  position: relative;
-  padding-left: 6.1em;
-  margin-bottom: 0.5rem;
-}
-.timeline-item time {
-  font-size: 1em;
-  line-height: 1em;
-  position: absolute;
-  left: 0;
-  top: 0.25em;
-  max-width: 6em;
-  text-align: right;
-}
-.timeline-item time .duration {
-  font-weight: 100;
-  font-size: 0.75em;
-}
-.timeline-item .content {
-  border-bottom: solid 1px rgba(100, 129, 122, 0.5);
-  border-left: solid 0.5em #9d9d9d;
-  font-size: 1em;
-  padding: 0.5em 1em;
 }
 
 .tw-control {
@@ -9767,21 +9729,6 @@ hr.separator {
   padding-right: 0.25em;
 }
 .oscar-title .baseline {
-  font-size: 0.4em;
-  display: block;
-  text-shadow: 1px -1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.section-title {
-  font-weight: 100;
-  color: #777;
-  margin: 1em 0 0 0;
-  padding-bottom: 0.25em;
-  border-bottom: dotted 2px #BBB;
-}
-.section-title .baseline {
-  padding-left: 72px;
-  font-weight: 100;
   font-size: 0.4em;
   display: block;
   text-shadow: 1px -1px 0 rgba(255, 255, 255, 0.5);

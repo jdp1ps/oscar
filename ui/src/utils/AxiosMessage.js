@@ -15,9 +15,8 @@ export default {
         }
     },
     manageErrorResponse: function (err){
-
         let code = err.response ? err.response.status : '500';
-        let message = null;
+        let message = err;
 
         if( code === 403 ){
             message = ERROR_MESSAGE_DISCONNECTED;

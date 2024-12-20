@@ -27,6 +27,7 @@
 import axios from "axios";
 import Modal from "../components/Modal.vue";
 import AxiosMessage from "../utils/AxiosMessage.js";
+import GlobalModel from "../models/GlobalModel.js";
 export default {
   name: 'ActivityLogs',
   components: {Modal},
@@ -43,16 +44,16 @@ export default {
   },
   methods: {
     fetch(){
+      console.log(this.url);
       this.pending = true;
       this.modal = true;
       axios.get(this.url).then(response => {
         this.traces = response.data.traces;
         this.pending = false;
       }, error => {
-        console.log(AxiosMessage.manageErrorResponse(error));
         this.pending = false;
         this.modal = false;
-        this.$emit('error', AxiosMessage.manageErrorResponse(error));
+        GlobalModel.commit("addError", AxiosMessage.manageErrorResponse(error));
       });
     },
     handlerClickClose(){
@@ -61,3 +62,30 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.timeline-item {
+
+  margin-left: 2em;
+  position: relative;
+  margin-bottom: .5rem;
+  display: flex;
+
+  time {
+    font-size: 1em;
+    line-height: 1em;
+    text-align: right;
+    padding: .5em;
+    .duration {
+      font-weight: 100;
+      font-size: .75em;
+    }
+  }
+  .content {
+    border-bottom: solid 1px rgba(#EEE, .5);
+    border-left: solid .5em #9d9d9d;
+    font-size: 1em;
+    padding: .5em 1em;
+  }
+}
+</style>

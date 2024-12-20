@@ -103,7 +103,7 @@ export default {
 
 .oscar-tooltip {
   position: absolute;
-  background: rgba(225,225,225,.8);
+  background: rgba(255,255,255,.8);
   box-shadow: none;
   color: #111;
   z-index: 9000;

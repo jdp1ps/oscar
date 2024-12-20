@@ -21,6 +21,12 @@ const globalStore = createStore({
         },
     },
     actions: {
+        /// AIDE
+        displayHelp(tag){
+
+        },
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         tooltipReset({state}){
             if(state.tooltip){
                 state.tooltip.display = false;
@@ -86,6 +92,9 @@ const globalStore = createStore({
     mutations: {
         addError(state, msg){
             state.errors.push(msg);
+        },
+        addErrorAxios(state, err){
+            state.errors.push(AxiosMessage.manageErrorResponse(err).message);
         },
         setTooltip(state, tooltipInfos) {
             if( tooltipInfos ){

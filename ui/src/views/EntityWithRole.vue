@@ -444,7 +444,7 @@ export default {
     },
 
     getRoleById(id){
-      return this.roles.find(i => i.id === id);
+      return this.rolesList.find(i => i.id === id);
     },
 
     performEdit() {

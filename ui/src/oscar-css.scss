@@ -28,6 +28,7 @@ body:not(.privatize){
     display: flex;
     align-items: center;
     justify-content: space-between;
+
   }
   .oscar-section-content {
     padding: .25em;
@@ -63,6 +64,10 @@ body:not(.privatize){
       font-weight: 600;
     }
   }
+}
+
+.btn-help {
+  font-size: .75em;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

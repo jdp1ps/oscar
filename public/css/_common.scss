@@ -1137,13 +1137,13 @@ body::-webkit-scrollbar-thumb {
   display: none;
 }
 
-.section-title {
-  font-weight: 100;
-  color: $brand-secondary1;
-  i {
-    opacity: .75;
-  }
-}
+//.section-title {
+//  font-weight: 100;
+//  color: $brand-secondary1;
+//  i {
+//    opacity: .75;
+//  }
+//}
 
 .link {
   color: lighten(saturate($brand-primary, 50%), 25%);
@@ -1202,40 +1202,6 @@ body::-webkit-scrollbar-thumb {
 ////////////////////////////////////////////////////////////////////////////////
 // 3. Activity
 ////////////////////////////////////////////////////////////////////////////////
-
-// Largeur de l'encard contenant la date
-$timeWidth: 6em;
-
-.timeline {
-  font-size: 14px;
-}
-
-.timeline-item {
-
-  margin-left: 2em;
-  position: relative;
-  padding-left: $timeWidth + .1em;
-  margin-bottom: .5rem;
-  time {
-    font-size: 1em;
-    line-height: 1em;
-    position: absolute;
-    left: 0;
-    top: .25em;
-    max-width: $timeWidth;
-    text-align: right;
-    .duration {
-      font-weight: 100;
-      font-size: .75em;
-    }
-  }
-  .content {
-    border-bottom: solid 1px rgba($colorMedium, .5);
-    border-left: solid .5em #9d9d9d;
-    font-size: 1em;
-    padding: .5em 1em;
-  }
-}
 
 $borderTwControl: solid 1px rgba($grey, 0);
 .tw-control {
@@ -2413,20 +2379,20 @@ hr.separator {
   }
 }
 
-.section-title {
-  font-weight: 100;
-  color: #777;
-  margin: 1em 0 0 0;
-  padding-bottom: .25em;
-  border-bottom: dotted 2px #BBB;
-  .baseline {
-    padding-left: 72px;
-    font-weight: 100;
-    font-size: .4em;
-    display: block;
-    text-shadow: 1px -1px 0 rgba(255, 255, 255, .5);
-  }
-}
+//.section-title {
+//  font-weight: 100;
+//  color: #777;
+//  margin: 1em 0 0 0;
+//  padding-bottom: .25em;
+//  border-bottom: dotted 2px #BBB;
+//  .baseline {
+//    padding-left: 72px;
+//    font-weight: 100;
+//    font-size: .4em;
+//    display: block;
+//    text-shadow: 1px -1px 0 rgba(255, 255, 255, .5);
+//  }
+//}
 
 .project-full, .activity-full {
   section > h2 {

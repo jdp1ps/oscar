@@ -43,4 +43,15 @@ class LoggerService extends Logger
             throw new $class($errorFront);
         }
     }
+
+    public function throw(\Exception $exception, string $publicMessage = "", $isCritical = false )
+    {
+        $msgLogged = $exception->getMessage();
+        if( $isCritical ){
+            $this->critical($msgLogged);
+        } else {
+            $this->error($msgLogged);
+        }
+        throw new OscarException($publicMessage);
+    }
 }

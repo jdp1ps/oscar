@@ -187,9 +187,17 @@
         <i class="icon-calendar-plus-o"></i>
         Nouveau Jalon
       </a>
+      <a href="#" @click.prevent="fetch" class="btn btn-xs btn-warning">
+        <i class="icon-bug"></i>
+        fetch
+      </a>
+
     </nav>
+    {{ progression }}
     <section class="list" v-if="milestones != null">
       <milestone :milestone="m" v-for="m in milestones" :key="m.id"
+                 :manage="manage"
+                 :progression="progression"
                  @valid="handlerValid"
                  @unvalid="handlerUnvalid"
                  @inprogress="handlerInProgress"
@@ -212,12 +220,14 @@ import MilestoneItem from './MilestoneItem.vue'
 import Datepicker from './../components/Datepicker.vue'
 import moment from 'moment';
 import axios from 'axios';
+import GlobalModel from "../models/GlobalModel.js";
 
 
 export default {
   props: {
     'url': {'required': true},
     'manage': {'required': true},
+    'progression': { default: false },
     // Payements chargés depuis un autre composant
     'items' : { default: [], type: Array },
     'types' : { default: [], type: Array },
@@ -398,7 +408,7 @@ export default {
         type: milestone.type,
         id: milestone.id,
         comment: milestone.comment,
-        dateStart: this.getMoment()(milestone.dateStart.date).format('YYYY-MM-DD'),
+        dateStart: moment(milestone.dateStart).format('YYYY-MM-DD'),
       };
     },
 
@@ -428,10 +438,10 @@ export default {
       this.pendingMsg = "Suppression du jalon";
       axios.delete(this.url + "?id=" + this.deleteMilestone.id).then(
           success => {
-            this.getMilestones();
+            this.fetch();
           },
           error => {
-            this.error = "Impossible de supprimer le jalon " + error.body;
+            GlobalModel.commit("addErrorAxios", error);
           }
       ).then(foo => {
         this.pendingMsg = null;
@@ -443,8 +453,7 @@ export default {
      * Marquer le jalon comme terminé.
      */
     performValid(action) {
-      var datas = new FormData(),
-          milestone;
+      var datas = {}, milestone;
 
       switch (action) {
         case 'valid':
@@ -473,19 +482,19 @@ export default {
           break;
       }
 
-      datas.append('id', milestone.id)
-      datas.append('action', action)
+      datas.id = milestone.id;
+      datas.action = action;
 
       this.action = null;
       this.actionMessage = "";
       this.actionMilestone = null;
 
-      axios.post(this.url, datas).then(
+      axios.put(this.url, datas).then(
           success => {
-            this.getMilestones();
+            this.fetch();
           },
           error => {
-            this.error = "Impossible de modifier l'état du jalon : " + error.body;
+            GlobalModel.commit("addErrorAxios", error);
           }
       ).then(foo => {
         this.pendingMsg = null;
@@ -499,41 +508,43 @@ export default {
      * Enregistrement des données (Création ou édition)
      */
     performSave() {
-      var datas = new FormData();
-
-      datas.append('id', this.formData.id)
-      datas.append('type', this.formData.type.id)
-      datas.append('comment', this.formData.comment)
-      datas.append('dateStart', this.formData.dateStart)
-      datas.append('action', this.formData.id ? 'update' : 'create')
-
       this.pendingMsg = this.formData.id ? "Enregistrement des modifications" : "Création du nouveau jalon";
 
-      axios.post(this.url, datas).then(
-          success => {
-            this.getMilestones();
-          },
-          error => {
-            this.error = "Impossible d'enregistrer le jalon " + error;
-          }
-      ).then(foo => {
-        this.pendingMsg = null;
-        this.formData = null;
-      })
+      if( this.formData.id ) {
+        axios.put(this.url, this.formData).then(
+            success => {
+              this.fetch();
+            },
+            error => {
+              GlobalModel.commit("addErrorAxios", error);
+            }
+        ).then(foo => {
+          this.pendingMsg = null;
+          this.formData = null;
+        });
+      } else {
+        axios.post(this.url, this.formData).then(
+            success => {
+              this.fetch();
+            },
+            error => {
+              GlobalModel.commit("addErrorAxios", error);
+            }
+        ).then(foo => {
+          this.pendingMsg = null;
+          this.formData = null;
+        });
+      }
     },
 
     /**
      * Chargement des jalons depuis l'API
      */
-    getMilestones() {
+    fetch() {
       this.pendingMsg = "Chargement des jalons : " + this.url;
-      /*
       axios.get(this.url).then(
           success => {
-            console.log('milestones', success);
-            this.jalons = success.data.milestones;
-            this.types = success.data.types;
-            this.creatable = success.data.creatable;
+            this.$emit('update', success.data.datas.milestones.entities);
           },
           error => {
             console.log(error);
@@ -542,8 +553,6 @@ export default {
       ).then(n => {
         this.pendingMsg = "";
       });
-
-       */
     },
   },
 
