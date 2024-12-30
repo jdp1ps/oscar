@@ -39,16 +39,17 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
 
 
     public function hydrateWithDatas($object, $ldapData, $connectorName = null)
-    {
-        $codeAffectation = $this->getFieldValue($ldapData, 'supannentiteaffectationprincipale');
-        $object->setFirstname($this->getFieldValue($ldapData, 'givenname'))
-            ->setLastname($this->getFieldValue($ldapData, 'sn'))
-            ->setLadapLogin($this->getFieldValue($ldapData, 'uid'))
-            ->setCodeHarpege($this->getFieldValue($ldapData, 'supannempid'))
-            ->setEmail($this->getFieldValue($ldapData, 'mail'))
-            ->setPhone($this->getFieldValue($ldapData, 'telephonenumber'))
-            ->setLdapSiteLocation($this->getFieldValue($ldapData, 'buildingname'))
-            ->setDateSyncLdap(new \DateTime());
+{
+    $codeAffectation = $this->ensureSingleValue($this->getFieldValue($ldapData, 'supannentiteaffectationprincipale'));
+
+    $object->setFirstname($this->ensureSingleValue($this->getFieldValue($ldapData, 'givenname')))
+        ->setLastname($this->ensureSingleValue($this->getFieldValue($ldapData, 'sn')))
+        ->setLadapLogin($this->ensureSingleValue($this->getFieldValue($ldapData, 'uid')))
+        ->setCodeHarpege($this->ensureSingleValue($this->getFieldValue($ldapData, 'supannempid')))
+        ->setEmail($this->ensureSingleValue($this->getFieldValue($ldapData, 'mail')))
+        ->setPhone($this->ensureSingleValue($this->getFieldValue($ldapData, 'telephonenumber')))
+        ->setLdapSiteLocation($this->ensureSingleValue($this->getFieldValue($ldapData, 'buildingname')))
+        ->setDateSyncLdap(new \DateTime());
 
         $object->setLdapMemberOf($this->getFieldValue($ldapData, 'memberof', []));
         $organizationAffectation = null;
@@ -110,5 +111,12 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
 
 
         return $object;
+    }
+    private function ensureSingleValue($value)
+    {
+        if (is_array($value)) {
+            return !empty($value) ? $value[0] : null;
+        }
+        return $value;
     }
 }
