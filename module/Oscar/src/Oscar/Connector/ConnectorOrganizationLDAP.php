@@ -8,6 +8,7 @@ namespace Oscar\Connector;
 
 use Oscar\Connector\Access\IConnectorAccess;
 use Oscar\Entity\Organization;
+use Oscar\Factory\JsonToOrganization;
 use Oscar\Factory\LdapToOrganization;
 
 class ConnectorOrganizationLDAP extends ConnectorOrganizationREST
@@ -15,7 +16,7 @@ class ConnectorOrganizationLDAP extends ConnectorOrganizationREST
     /**
      * @return LdapToOrganization
      */
-    protected function factory()
+    protected function factory(): JsonToOrganization
     {
         static $factory;
         if ($factory === null) {
