@@ -11,6 +11,7 @@ use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRepository;
 use Oscar\Entity\Person;
 use Oscar\Exception\OscarException;
+use Oscar\Factory\JsonToObject;
 use Oscar\Factory\JsonToOrganization;
 use Oscar\Service\OrganizationService;
 
@@ -82,7 +83,7 @@ class ConnectorOrganizationREST extends AbstractConnector
     /**
      * @return JsonToOrganization
      */
-    protected function factory() :JsonToOrganization
+    protected function factory() :JsonToObject
     {
         static $factory;
         if( $factory === null ) {
