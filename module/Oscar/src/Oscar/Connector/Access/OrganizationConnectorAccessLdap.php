@@ -10,7 +10,7 @@ use Oscar\Connector\IConnector;
 use Oscar\Mapper\Ldap\OrganizationLdap;
 use UnicaenApp\Mapper\Ldap\AbstractMapper;
 use UnicaenApp\Options\ModuleOptions;
-use Zend\Ldap\Ldap;
+use Laminas\Ldap\Ldap;
 
 /**
  * Accès aux données des organisations via le client LDAP

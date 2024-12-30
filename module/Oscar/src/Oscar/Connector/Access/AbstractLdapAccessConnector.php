@@ -9,7 +9,7 @@ namespace Oscar\Connector\Access;
 use Oscar\Connector\IConnector;
 use UnicaenApp\Mapper\Ldap\AbstractMapper;
 use UnicaenApp\Options\ModuleOptions;
-use Zend\Ldap\Ldap;
+use Laminas\Ldap\Ldap;
 
 /**
  * Accès aux données via le client LDAP
