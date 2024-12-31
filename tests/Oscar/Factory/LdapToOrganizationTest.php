@@ -8,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 class LdapToOrganizationTest extends TestCase
 {
+
+    private LdapToOrganization $factory;
+
     protected function setUp(): void
     {
         parent::setUp();

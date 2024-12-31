@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 class LdapToPersonTest extends TestCase
 {
+
+    private LdapToPerson $factory;
+
     protected function setUp(): void
     {
         parent::setUp();

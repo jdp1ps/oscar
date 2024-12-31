@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 class LdapAddressParserTest extends TestCase
 {
+
+    private LdapAddressParser $parser;
+    
     protected function setUp(): void
     {
         $this->parser = new LdapAddressParser();
