@@ -19,14 +19,14 @@ class LdapToPersonTest extends TestCase
         $organizationRepository = $this->createMock(OrganizationRepository::class);
         $organizationRepository->expects($this->any())
             ->method('getOrganisationByCode')
-            ->will($this->returnCallback(function ($code) {
+            ->willReturnCallback(function ($code) {
                 if ($code == 'UO2') {
                     throw new \Exception('No organization found');
                 }
                 $organization = new Organization();
                 $organization->setShortName('Laboratoire économique');
                 return $organization;
-            }));
+            });
 
 
         $this->factory = new LdapToPerson($rolesMapping, $organizationRepository);
