@@ -99,7 +99,7 @@ class LdapToPerson extends JsonToObject implements IJsonToPerson
                         $object->setLdapAffectation($organizationAffectation->getShortName());
                     }
                 } catch (\Exception $e) {
-                    echo "Can't create or get Org $affectation \n";
+                    echo "Can't create or get Org $affectation for person " . $object->getLadapLogin() . PHP_EOL;
                 }
             }
         }
