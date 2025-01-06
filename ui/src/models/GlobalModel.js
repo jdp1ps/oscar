@@ -9,7 +9,8 @@ const globalStore = createStore({
             tooltip: null,
             urlPerson: null,
             errors: [
-            ]
+            ],
+            cachePersons:{}
         };
     },
     getters: {
@@ -57,30 +58,34 @@ const globalStore = createStore({
                 if( tooltipInfos && tooltipInfos.type === 'person' ){
                     let url = state.urlPerson + tooltipInfos.id;
 
-                    // TODO Système de cache
-
-                    axios.get(url).then((response) => {
-                        commit('setTooltip', {
-                            type: tooltipInfos.type,
-                            id: tooltipInfos.id,
-                            url: state.urlPerson + tooltipInfos.id,
-                            firstname: response.data.firstname,
-                            lastname: response.data.lastname,
-                            affectation: response.data.affectation,
-                            location: response.data.location,
-                            gravatar: response.data.gravatar,
-                            url_show: response.data.url_show,
-                            email: response.data.email,
-                            display: true,
-                            x: posX,
-                            y: posY,
+                    if( state.cachePersons.hasOwnProperty(tooltipInfos.id) ) {
+                        state.cachePersons[tooltipInfos.id].display = true;
+                        commit('setTooltip', state.cachePersons[tooltipInfos.id]);
+                    } else {
+                        axios.get(url).then((response) => {
+                            let tooltipDatas = {
+                                type: tooltipInfos.type,
+                                id: tooltipInfos.id,
+                                url: state.urlPerson + tooltipInfos.id,
+                                firstname: response.data.firstname,
+                                lastname: response.data.lastname,
+                                affectation: response.data.affectation,
+                                location: response.data.location,
+                                gravatar: response.data.gravatar,
+                                url_show: response.data.url_show,
+                                email: response.data.email,
+                                display: true,
+                                x: posX,
+                                y: posY,
+                            };
+                            state.cachePersons[tooltipInfos.id] = tooltipDatas;
+                            commit('setTooltip', tooltipDatas);
+                        }, ko => {
+                            commit('addError', AxiosMessage.manageErrorResponse(ko).message);
                         });
-                    }, ko => {
-                        commit('addError', AxiosMessage.manageErrorResponse(ko).message);
-                    });
+                    }
                 }
             }
-
         },
         removeError({state}){
             state.errors.splice(state, 1);
