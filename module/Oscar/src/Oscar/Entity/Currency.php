@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Class Currency
  * @package Oscar\Entity
- * @Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\Repository\CurrencyRepository")
  */
 class Currency
 {

@@ -84,8 +84,7 @@
               <div class="col-xs-6">
                 <div class="form-group  ">
                   <label class=" control-label">Date prévue</label>
-                  <datepicker :moment="moment"
-                              v-model="formData.datePredicted"
+                  <datepicker v-model="formData.datePredicted"
                               @input="value => {formData.datePredicted = value}"/>
 
                   <div class="oscar-form-message error" v-if="formData.status == 1 && !formData.datePredicted">
@@ -221,13 +220,15 @@ export default {
 
     total() {
       let total = 0.0;
-      this.payments.forEach(payment => {
-        let rate = 1;
-        if (payment.currency) {
-          rate = payment.rate;
-        }
-        total += payment.amount / rate;
-      })
+      if( this.payments ){
+        this.payments.forEach(payment => {
+          let rate = 1;
+          if (payment.currency) {
+            rate = payment.rate;
+          }
+          total += payment.amount / rate;
+        })
+      }
       return Math.round(total * 100) / 100;
     },
 
@@ -283,7 +284,7 @@ export default {
     },
 
     /**
-     * En cas de changment de devise, on actualise automatiquement le taux de conversion en EURO.
+     * En cas de changement de devise, on actualise automatiquement le taux de conversion en EURO.
      */
     handlerFormUpdateRate() {
       let currency = this.currencies.find((c) => {
@@ -316,7 +317,6 @@ export default {
             }
         )
       } else {
-        console.log('CREATE');
         axios.put(this.url, this.formData).then(
             (response) => {
               this.formData = null;
@@ -352,7 +352,6 @@ export default {
       this.loading = "Chargement des versements";
       axios.get(this.url).then(
           (success) => {
-            console.log(success);
             this.$emit('update', success.data.datas.payments);
           },
           (fail) => {

@@ -16,6 +16,7 @@ use Oscar\Entity\ActivityRepository;
 use Oscar\Entity\ActivityType;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
+use Oscar\Entity\Currency;
 use Oscar\Entity\DateType;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -1092,6 +1093,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
         return [
             'url'      => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
+            'currencies' => $this->getCurrencies(),
             'entities' => $entities
         ];
     }
@@ -1204,5 +1206,11 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return [
             "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
         ];
+    }
+
+    private function getCurrencies()
+    {
+        $currencies = $this->getEntityManager()->getRepository(Currency::class)->getCurrenciesArray();
+        return $currencies;
     }
 }

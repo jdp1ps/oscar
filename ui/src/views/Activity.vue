@@ -400,7 +400,9 @@
         <section id="timesheets" class="section-infos" v-if="credentials.timesheets.read">
           <h2 class="section-title">
             <span><i class="icon-book"></i>Feuille de temps</span>
+            <!-- TODO Mise en place de l'aide contextuelle
             <span><a href="#" @click.prevent="handlerHelp('timesheets')" class="btn-help">Aide</a></span>
+            -->
           </h2>
 
           <div v-if="!timesheets.enabled" class="alert alert-info">
@@ -546,6 +548,7 @@
                     :manage="credentials.payments.edit"
                     :amount="budget.amount"
                     :payments="payments"
+                    :currencies="currencies"
                     @debug="handlerDebugShow"
                     @update="handlerUpdatePayments"
           />
@@ -651,6 +654,7 @@ export default {
       core: null,
       credentials: null,
 
+      currencies: [],
       documents: [],
 
       milestones: [],
@@ -772,15 +776,15 @@ export default {
     },
 
     handlerUpdatePayments(p) {
-      console.log("updatePayments", p);
       this.payments = p.entities;
+      this.currencies = p.currencies;
+      this.paymentsUrl = p.url;
     },
     handlerUpdateMilestones(milestones) {
       this.milestones = milestones;
     },
 
     handlerUpdatePersons(d) {
-      console.log("Activity.handlerUpdatePersons", d);
       this.persons = d.datas.items;
     },
 
@@ -839,9 +843,6 @@ export default {
     fetch() {
       this.loading = true;
       axios.get(this.url).then(response => {
-        console.log(response.data);
-        // TODO tester la clef activity.datas
-
 
         this.budget = response.data.activity.datas.budget;
         this.core = response.data.activity.datas.core;
@@ -878,8 +879,7 @@ export default {
         }
 
         if (response.data.activity.datas.payments) {
-          this.payments = response.data.activity.datas.payments.entities;
-          this.paymentsUrl = response.data.activity.datas.payments.url;
+          this.handlerUpdatePayments(response.data.activity.datas.payments);
         }
 
         if (response.data.activity.datas.persons) {
