@@ -748,8 +748,6 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                     throw new OscarException(OscarException::ACCOUNT_DISABLED);
                 }
 
-                $this->getLoggerService()->debug("Calcule de la personne : " . ($person ? $person->getFullName() : 'nop'));
-
                 if( $person === false ){
                     $person = null;
                 }
