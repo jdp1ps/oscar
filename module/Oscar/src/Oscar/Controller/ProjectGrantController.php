@@ -1788,16 +1788,21 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     return $this->jsonOutput($datas);
                 }
                 elseif ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
-                    $perimeter = $this->getRequest()->getQuery('p', null);
-                    $datas = [
-                        'activity' => $this->getProjectGrantApiService()->getActivityJson(
-                                $entity->getId(),
-                                $this->url(),
-                                $this->getOscarUserContextService(),
-                                $perimeter
-                        ),
-                    ];
-                    return $this->jsonOutput($datas);
+                    try {
+                        $perimeter = $this->getRequest()->getQuery('p', null);
+                        $datas = [
+                            'activity' => $this->getProjectGrantApiService()->getActivityJson(
+                                    $entity->getId(),
+                                    $this->url(),
+                                    $this->getOscarUserContextService(),
+                                    $perimeter
+                            ),
+                        ];
+                        return $this->jsonOutput($datas);
+                    } catch (\Exception $e) {
+                        $this->getLoggerService()->error($e->getMessage());
+                        return $this->jsonError("Impossible de charger l'activité '$id'");
+                    }
                 }
                 else {
                     return [

@@ -347,11 +347,11 @@
           <i class="icon-help-circled"></i>
           Détails
         </button>
-        <button class="btn btn-xs btn-danger"  v-if="doc.urlProcessDelete" @click="handlerDeleteProcess(doc)">
+        <button class="btn btn-xs btn-danger"  v-if="processManage && doc.urlProcessDelete" @click="handlerDeleteProcess(doc)">
           <i class="icon-trash"></i>
           Annuler la procédure
         </button>
-        <button class="btn btn-default btn-xs" v-if="doc.urlProcessUpdate" @click="handlerProcessReload(doc)">
+        <button class="btn btn-default btn-xs" v-if="processManage && doc.urlProcessUpdate" @click="handlerProcessReload(doc)">
           <i class="icon-cw-outline"></i>
           Actualiser
         </button>
@@ -391,7 +391,6 @@
           </a>
         </article>
       </div>
-
       <nav class="text-right show-over">
         <a class="btn btn-default btn-xs"
            :href="doc.basename"
@@ -401,7 +400,7 @@
         </a>
 
         <a class="btn btn-default btn-xs"
-           href="#" v-if="doc.process_triggerable && displayButtonSign" @click.prevent="handlerProcessInit(doc)">
+           href="#" v-if="doc.process_triggerable && processStart" @click.prevent="handlerProcessInit(doc)">
           <i class="icon-bank"></i>
           Signer ce document
         </a>
@@ -453,7 +452,10 @@ export default {
     signProcess: {default: null},
     tabs: {default: []},
     types: {default: []},
-    displayButtonSign: {default: true}
+    displayButtonSign: {default: true},
+    processManage: { default: false},
+    processAdmin: { default: false},
+    processStart: { default: false}
   },
 
   data() {

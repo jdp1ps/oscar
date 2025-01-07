@@ -793,6 +793,7 @@ export default {
     },
 
     handlerUpdateDocuments(res) {
+      console.log(res);
       this.documents = res;
     },
 

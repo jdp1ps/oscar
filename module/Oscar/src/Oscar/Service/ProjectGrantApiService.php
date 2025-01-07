@@ -2,6 +2,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\Query;
 use Laminas\Mvc\Controller\Plugin\Url;
 use Laminas\View\Model\JsonModel;
@@ -44,6 +45,8 @@ use Oscar\Traits\UseServiceContainer;
 use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Traits\UseSpentService;
 use Oscar\Traits\UseSpentServiceTrait;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use UnicaenSignature\Provider\SignaturePrivileges;
 use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Utils\SignatureConstants;
@@ -211,7 +214,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                     $read = $oscarUserContext->hasPrivileges(
                         Privileges::ACTIVITY_DOCUMENT_SHOW,
-                        $activity->getProject()
+                        $activity
                     );
                     $credentials['documents'] = [
                         'read' => $read
@@ -219,6 +222,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                     $entitiesTabs = $this->getContractDocumentRepository()->getTabDocuments();
                     $rolesMerged = $this->getRolesCurrentPersonActivity($oscarUserContext, $activity);
+//                    var_dump($rolesMerged); die();
                     $arrayTabs = [];
                     foreach ($entitiesTabs as $tabDocument) {
                         $tabId = $tabDocument->getId();
@@ -331,10 +335,6 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ?Url $urlPlugin = null,
         ?array $perimeters = null
     ): array {
-        /** @var OscarUserContext $oscarUserContext */
-        $oscarUserContext = $this->getServiceContainer()->get(OscarUserContext::class);
-
-        $currentUserId = $oscarUserContext->getCurrentPersonId() ?: -1;
 
         $datas = [
             "api" => "Oscar Activity API"
@@ -445,7 +445,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'disciplines'  => $activity->getDisciplinesArray(),
             'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
             'type_chain'   => $typesJson,
-            'type_id'      => $activity->getActivityType() ? $activity->getActivityType()->getId() : null,
+            'type_id'      => $activity->getActivityType()?->getId(),
             'dateStart'    => $this->formatDateTime($activity->getDateStart()),
             'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
             'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
@@ -542,9 +542,11 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                 if ($process->isFinished()) {
                     $allowProcessUpdate = false;
+                    $allowProcessDelete = false;
                     $allowDelete = true;
                 }
                 else {
+                    $allowProcessDelete = true;
                     $allowDelete = true;
                 }
 
@@ -600,6 +602,8 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'firstname' => $doc->getPerson()->getFirstname(),
                 'lastname'  => $doc->getPerson()->getLastname(),
             ] : null;
+
+            $docAdded['process_triggerable'] = $allowProcessCreate;
             $docAdded['urlProcessDelete'] = $process_delete_url;
             $docAdded['urlProcessCreate'] = $process_create_url;
             $docAdded['urlProcessUpdate'] = $process_update_url;
@@ -673,7 +677,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
      * @param Activity $activity
      * @param Url|null $urlPlugin
      * @return array
-     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws NotSupported
      */
     public function getMilestonesActivity(Activity $activity, ?Url $urlPlugin = null): array
     {
@@ -954,6 +958,11 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ];
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     */
     public function getWorkpackagesActivity(Activity $activity, ?Url $urlPlugin = null): array
     {
         $out = [
@@ -974,8 +983,8 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
      * @param Url|null $urlPlugin
      * @return array
      * @throws OscarException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function getTimesheetsActivity(
         Activity $activity,
@@ -1007,26 +1016,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'adm' => [],
             ];
 
-//            $out['validatorsDefault'] = [
-//                'prj' => [],
-//                'sci' => [],
-//                'adm' => [],
-//            ];
-
             $personFormatter = new PersonFormatterArray($urlPlugin);
-
-//            /** @var Person $validator */
-//            foreach ($timesheetService->getValidatorsPrj($activity, true) as $validator) {
-//                $out['validatorsDefault']['prj'][] = $personFormatter->format($validator);
-//            }
-//
-//            foreach ($timesheetService->getValidatorsSci($activity, true) as $validator) {
-//                $out['validatorsDefault']['sci'][] = $personFormatter->format($validator);
-//            }
-//
-//            foreach ($timesheetService->getValidatorsAdm($activity, true) as $validator) {
-//                $out['validatorsDefault']['adm'][] = $personFormatter->format($validator);
-//            }
 
             /** @var Person $validator */
             foreach ($activity->getValidatorsPrj() as $validator) {
@@ -1068,6 +1058,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
      * @param Activity $activity
      * @param Url|null $urlPlugin
      * @return array
+     * @throws NotSupported
      */
     private function getPaymentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
@@ -1124,10 +1115,6 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
 
         try {
-            if (count($pfis) == 0) {
-                $out['warning'] = "Aucun numéro financier pour cette activité";
-                return $out;
-            }
             $out = $this->getSpentService()->getSynthesisDatasPFI(
                 $pfis,
                 true,
@@ -1162,9 +1149,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Repository shortcut
+
     /**
      * @return ActivityRepository
-     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws NotSupported
      */
     public function getActivityRepository(): ActivityRepository
     {
@@ -1173,7 +1163,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
     /**
      * @return ContractDocumentRepository
-     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws NotSupported
      */
     public function getContractDocumentRepository(): ContractDocumentRepository
     {
@@ -1182,7 +1172,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
     /**
      * @return TypeDocumentRepository
-     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws NotSupported
      */
     public function getTypeDocumentRepository(): TypeDocumentRepository
     {
@@ -1190,9 +1180,19 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     }
 
     /**
+     * @throws NotSupported
+     * @return array
+     */
+    private function getCurrencies() :array
+    {
+        return $this->getEntityManager()->getRepository(Currency::class)->getCurrenciesArray();
+    }
+
+    /**
+     * @param Url $urlHelper
      * @return JsonFormatterService
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function getJsonFormatterService(Url $urlHelper): JsonFormatterService
     {
@@ -1201,16 +1201,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $formatter;
     }
 
-    private function getAdministrationActivity(Activity $activity, ?Url $urlPlugin)
+    private function getAdministrationActivity(Activity $activity, ?Url $urlPlugin): array
     {
         return [
             "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
         ];
-    }
-
-    private function getCurrencies()
-    {
-        $currencies = $this->getEntityManager()->getRepository(Currency::class)->getCurrenciesArray();
-        return $currencies;
     }
 }

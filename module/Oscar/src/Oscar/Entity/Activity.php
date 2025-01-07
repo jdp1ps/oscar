@@ -1259,7 +1259,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return datetime
+     * @return \DateTime
      */
     public function getDateOpened()
     {
@@ -1320,7 +1320,7 @@ class Activity implements ResourceInterface
     }
 
     /**
-     * @return datetime
+     * @return \DateTime
      */
     public function getDateSigned()
     {

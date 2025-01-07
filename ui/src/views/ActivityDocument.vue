@@ -286,8 +286,11 @@
             :documents="tab.documents"
             :tabs="tabsWithDocuments"
             :manage="saCredentials.tabs[tab.id].edit"
+            :process-start="saCredentials.process_start"
+            :process-manage="saCredentials.process_manage"
+            :process-admin="saCredentials.process_admin"
             :types="typesDocuments"
-            :sign-process="signProcess"
+            :sign-process="useProcessDatas"
             :display-activity="false"
             @fetch="fetch"
         />
@@ -402,6 +405,13 @@ export default {
   },
 
   computed: {
+    useProcessDatas(){
+      if( this.standalone ){
+        return this.saProcessDatas;
+      } else {
+        return this.signProcess;
+      }
+    },
 
     packedDocuments() {
       let packed = {};
@@ -806,7 +816,7 @@ export default {
           });
           this.tabsWithDocuments = documents;
           this.computedDocuments = success.data.computedDocuments;
-          this.signProcess = success.data.process_datas;
+          this.signProcess = success.data.processDatas;
           this.typesDocuments = success.data.typesDocuments;
           if (this.selectedTabId == null) {
             this.selectedTabId = selectedTab ? selectedTab : defaultTab;
