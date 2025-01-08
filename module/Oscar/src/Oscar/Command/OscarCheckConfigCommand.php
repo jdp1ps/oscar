@@ -80,10 +80,20 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $parser = new Parser();
                 $paramsPhp = $parser->parse(file_get_contents($fileYml));
                 foreach ($paramsPhp as $paramKey => $paramValue) {
-                    $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                    if (is_array($paramValue))
+                        $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, '...'));
+                    else
+                        $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
                 }
-
-                $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
+                if ($key == 'ldap') {
+                    $io->newLine();
+                    $io->write(sprintf('* Stratégie d\'accès <bold>%s</bold>', $paramsPhp['access_strategy']));
+                    $io->newLine();
+                } else {
+                    $io->newLine();
+                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_persons']));
+                    $io->newLine();
+                }
 
                 $checkResult = $class->checkAccess();
                 if ($checkResult) {
@@ -127,11 +137,21 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $parser = new Parser();
                 $paramsPhp = $parser->parse(file_get_contents($fileYml));
                 foreach ($paramsPhp as $paramKey => $paramValue) {
-                    $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                    if (is_array($paramValue))
+                        $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, '...'));
+                    else
+                        $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
                 }
-
-                $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organization']));
-
+                if ($key == 'ldap') {
+                    $io->newLine();
+                    $io->write(sprintf('* Stratégie d\'accès <bold>%s</bold>', $paramsPhp['access_strategy']));
+                    $io->write(sprintf('* Parseur d\'adresses <bold>%s</bold>', $paramsPhp['address_parser']));
+                    $io->newLine();
+                } else {
+                    $io->newLine();
+                    $io->write(sprintf('* Accès au connecteur <bold>%s</bold>', $paramsPhp['url_organization']));
+                    $io->newLine();
+                }
                 $checkResult = $class->checkAccess();
                 if ($checkResult) {
                     $io->write(" <green>OK</green>");

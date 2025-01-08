@@ -1,0 +1,25 @@
+#filtre LDAP pour les structures
+access_strategy: 'Oscar\Connector\Access\OrganizationConnectorAccessLdap'
+address_parser: 'Oscar\Connector\Parser\LdapAddressParser'
+organisation_ldap_filters:
+  # toutes strutures où une personne est susceptible d'être affectée
+  - '&(objectClass=supannEntite)(supannTypeEntite={SUPANN}S*)(!(businessCategory=organization))'
+organisation_types:
+  - name: 'Association'
+    codes: [ ]
+  - name: 'Collectivité territoriale'
+    codes: [ ]
+  - name: 'Composante'
+    codes: [ '{SUPANN}S311','{SUPANN}S252','{SUPANN}S205','{SUPANN}S204','{SUPANN}S201','{SUPANN}S200' ]
+  - name: 'Établissement publique'
+    codes: [ '{SUPANN}S108','{SUPANN}S107','{SUPANN}S106','{SUPANN}S105','{SUPANN}S104','{SUPANN}S103','{SUPANN}S102','{SUPANN}S101' ]
+  - name: "Groupement d'intérêt économique"
+    codes: [ ]
+  - name: 'Inconnue'
+    codes: [ ]
+  - name: 'Institution'
+    codes: [ ]
+  - name: 'Laboratoire'
+    codes: [ '{SUPANN}S312','{SUPANN}S310','{SUPANN}S203' ]
+  - name: 'Plateau technique'
+    codes: [ '{SUPANN}S340' ]
