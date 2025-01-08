@@ -231,8 +231,9 @@ class ConnectorPersonHydrator
                 } catch (NoResultException $e) {
                     $this->repport->addwarning(
                         sprintf(
-                            "Impossible de charger l'organisation avec le code '%s'.",
-                            $organizationCode
+                            "Impossible de charger l'organisation avec le code '%s' pour la personne %s",
+                            $organizationCode,
+                            $personOscar->getLadapLogin()
                         )
                     );
                 } catch (NonUniqueResultException $e) {

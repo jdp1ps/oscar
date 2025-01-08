@@ -96,8 +96,18 @@ abstract class AbstractConnector implements IConnector
 
         /** @var IConnectorAccess $access */
         $access = new $accessStrategy($this);
-
+        $this->customizeStrategy($access);
         return $access;
+    }
+
+    protected function customizeStrategy(IConnectorAccess $access) {
+        //Implement in subclasses if necessary
+    }
+    protected function getHydratorClass()  {
+        //Implement in subclasses if necessary
+    }
+    protected function customizeHydrator($hydrator)  {
+        //Implement in subclasses if necessary
     }
 
     /**
@@ -106,7 +116,7 @@ abstract class AbstractConnector implements IConnector
      * @param ServiceManager $sm
      * @param $configFilePath
      */
-    public function init( ServiceManager $sm, string $configPath, string $shortName) :void
+    public function init(ServiceManager $sm, string $configPath, string $shortName): void
     {
         $this->serviceManager = $sm;
         $this->loadParameters($configPath);
