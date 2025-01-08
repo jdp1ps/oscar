@@ -9,8 +9,6 @@ namespace Oscar\Connector;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Oscar\Connector\DataAccessStrategy\HttpBasicStrategy;
-use Oscar\Connector\DataAccessStrategy\IDataAccessStrategy;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 use Oscar\Exception\ConnectorException;
@@ -32,7 +30,7 @@ class ConnectorPersonREST extends AbstractConnector
     private $options;
 
     /** @var  ConnectorPersonHydrator */
-    private $personHydrator = null;
+    protected $personHydrator = null;
 
     public function setEditable($editable)
     {
@@ -66,15 +64,22 @@ class ConnectorPersonREST extends AbstractConnector
         return $this->syncPersons($personRepository, $force);
     }
 
+    protected function getHydratorClass()
+    {
+        return ConnectorPersonHydrator::class;
+    }
+
     /**
      * @return ConnectorPersonHydrator
      */
     public function getPersonHydrator()
     {
+        $connectorClass = $this->getHydratorClass();
         if ($this->personHydrator === null) {
-            $this->personHydrator = new ConnectorPersonHydrator(
+            $this->personHydrator = new $connectorClass(
                 $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
             );
+            $this->customizeHydrator($this->personHydrator);
             $this->personHydrator->setPurge($this->getOptionPurge());
         }
         return $this->personHydrator;

@@ -167,10 +167,10 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
     public function saveOrganizationPerson(Person $person, Organization $organisation, $roleOscarId)
     {
         $personOrganization = new OrganizationPerson();
-        $this->getEntityManager()->persist($personOrganization);
         $personOrganization->setPerson($person)
             ->setOrganization($organisation)
             ->setRoleObj($this->getEntityManager()->getRepository(Role::class)->find($roleOscarId));
+        $this->getEntityManager()->persist($personOrganization);
         $this->getEntityManager()->flush($personOrganization);
     }
 
@@ -220,9 +220,13 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      */
     public function getObjectByConnectorID($connectorName, $connectorID)
     {
-        return $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
+        $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
+        if($result == null){
+            var_dump($result);
+        }
+        return is_array($result) ? $result[0] : $result;
     }
 
     /**
