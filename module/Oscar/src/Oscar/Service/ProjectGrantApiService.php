@@ -443,6 +443,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'acronym'      => $activity->getAcronym(),
             'project'      => $project,
             'disciplines'  => $activity->getDisciplinesArray(),
+            'motscles'     => $activity->getMotsclesArray(),
             'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
             'type_chain'   => $typesJson,
             'type_id'      => $activity->getActivityType()?->getId(),

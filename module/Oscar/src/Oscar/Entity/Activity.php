@@ -390,6 +390,14 @@ class Activity implements ResourceInterface
     protected $disciplines;
 
     /**
+     * Mots clés
+     *
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="ActivityMotCle", cascade={"detach"}, inversedBy="activities")
+     */
+    protected $motscles;
+
+    /**
      * Liste des personnes impliquées dans cette activité
      *
      * @var ArrayCollection
@@ -1469,6 +1477,7 @@ class Activity implements ResourceInterface
         $this->milestones = new ArrayCollection();
         $this->payments = new ArrayCollection();
         $this->disciplines = new ArrayCollection();
+        $this->motscles = new ArrayCollection();
         $this->estimatedSpentLines = new ArrayCollection();
         $this->timesheetFormat = TimeSheet::TIMESHEET_FORMAT_NONE;
         $this->validatorsPrj = new ArrayCollection();
@@ -1652,6 +1661,73 @@ class Activity implements ResourceInterface
             $this->addDiscipline($d);
         }
         return $this;
+    }
+
+    /**
+     * @param ActivityMotCle $motcle
+     * @return bool
+     */
+    public function hasMotcle(ActivityMotCle $motcle)
+    {
+        return $this->motscles->contains($motcle);
+    }
+
+    /**
+     * @param ActivityMotCle $motcle
+     * @return $this
+     */
+    public function addMotcle(ActivityMotCle $motcle)
+    {
+        if (!$this->hasMotcle($motcle)) {
+            $this->motscles->add($motcle);
+        }
+        return $this;
+    }
+
+    /**
+     * Retourne la liste des mots clés sous la forme d'un tableau de chaînes.
+     *
+     * @return array
+     */
+    public function getMotsclesArray()
+    {
+        $motscles = [];
+        foreach ($this->getMotscles() as $m) {
+            $motscles[] = (string)$m;
+        }
+        return $motscles;
+    }
+
+    /**
+     * @return self
+     */
+    public function setMotscles($motsclesparam)
+    {
+        $this->motscles = new ArrayCollection();
+        foreach ($motsclesparam as $m) {
+            $this->addMotcle($m);
+        }
+        return $this;
+    }
+
+    /**
+     * @return integer[]
+     */
+    public function getMotsclesIds()
+    {
+        $ids = [];
+        foreach ($this->getMotscles() as $motcle) {
+            $ids[] = $motcle->getId();
+        }
+        return $ids;
+    }
+
+    /**
+     * @return ActivityMotCle[]
+     */
+    public function getMotscles()
+    {
+        return $this->motscles;
     }
 
     public function newPerson(Person $person, $role, $start = null, $to = null)

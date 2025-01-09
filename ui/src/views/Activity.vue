@@ -248,7 +248,7 @@
         <small>{{ core.description }}</small>
       </p>
 
-      <div class="row line-bottom">
+      <div class="row">
         <div class="col-md-4">
           <h4><i class="icon-calendar"></i>Dates</h4>
           <p class="texthighlight baseline">
@@ -263,11 +263,6 @@
             Signé le :
             <time>{{ $filters.dateFull(core.dateSigned) }}</time>
             <small class="aggo"> ({{ $filters.timeAgo(core.dateSigned) }})</small>
-          </p>
-          <h4><i class="icon-tags"></i>Métas-données</h4>
-          <p class="texthighlight baseline">
-            Disciplines :
-            <span class="cartouche xs" v-for="d in core.disciplines">{{ d }}</span>
           </p>
         </div>
 
@@ -295,6 +290,23 @@
             <br>
             Dernière MAJ
             <time>{{ $filters.dateFull(core.dateUpdated) }}</time>
+          </p>
+        </div>
+      </div>
+
+      <div class="row line-bottom">
+        <div class="col-md-4">
+          <h4><i class="icon-tags"></i>Métas-données</h4>
+          <p class="texthighlight baseline">
+            Disciplines :
+            <span class="cartouche xs" v-for="d in core.disciplines">{{ d }}</span>
+          </p>
+        </div>
+        <div class="col-md-4">
+          <h4><i class="icon-tags"></i>Mots clés</h4>
+          <p class="texthighlight baseline">
+            Mots clés :
+            <span class="cartouche xs" v-for="m in core.motscles">{{ m }}</span>
           </p>
         </div>
       </div>

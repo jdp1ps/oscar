@@ -102,6 +102,11 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
         } else {
             $object->setDisciplines([]);
         }
+        if (isset($data['motscles'])) {
+            $object->setMotscles($this->getMotscles($data['motscles']));
+        } else {
+            $object->setMotscles([]);
+        }
         return $object;
     }
 
@@ -118,6 +123,11 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
     protected function getDisciplines( $disciplinesId )
     {
         return $this->getProjectGrantService()->getDisciplinesById($disciplinesId);
+    }
+
+    protected function getMotscles( $motsclesId )
+    {
+        return $this->getProjectGrantService()->getMotsclesById($motsclesId);
     }
 
     protected function getTVA( $id )
@@ -181,6 +191,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             'tva' => $object->getTva() ? $object->getTva()->getId() : -1,
             'codeEOTP' => $object->getCodeEOTP(),
             'disciplines' => $object->getDisciplinesIds(),
+            'motscles' => $object->getMotsclesIds(),
             'amount' => $object->getAmount(),
             'fraisDeGestion' => $object->getFraisDeGestion(),
             'fraisDeGestionPartHebergeur' => $object->getFraisDeGestionPartHebergeur(),

@@ -357,6 +357,12 @@ return array(
                     'roles' => ['user'],
                 ],
 
+                [
+                    'controller' => 'ActivityMotsCles',
+                    'action' => ['api'],
+                    'roles' => ['user'],
+                ],
+
                 ////////////////////////////////////////////////////////////////
                 // PERSON
                 ///////////////////////////////////////////////////////////////
@@ -612,6 +618,7 @@ return array(
         'factories' => [
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
+            'ActivityMotsCles' => \Oscar\Controller\ActivityMotsClesControllerFactory::class,
             'ActivityNotes' => \Oscar\Controller\ActivityNotesControllerFactory::class,
             'ActivityPayment' => \Oscar\Controller\ActivityPaymentControllerFactory::class,
             'ActivityType' => \Oscar\Controller\ActivityTypeControllerFactory::class,

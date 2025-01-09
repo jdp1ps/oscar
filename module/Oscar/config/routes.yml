@@ -2156,3 +2156,18 @@ activity-notes:
         route: /api
         defaults:
           action: api
+
+activity-mots-cles:
+  type: literal
+  options:
+    route: /activity-mots-cles
+    defaults:
+      controller: ActivityMotsCles
+  may_terminate: false
+  child_routes:
+    api:
+      type: segment
+      options:
+        route: /api
+        defaults:
+          action: api

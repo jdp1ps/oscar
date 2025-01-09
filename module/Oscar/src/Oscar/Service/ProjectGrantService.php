@@ -14,6 +14,7 @@ use Doctrine\ORM\QueryBuilder;
 use Laminas\Mvc\Controller\Plugin\Url;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityDateRepository;
+use Oscar\Entity\ActivityMotCle;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\ActivityPerson;
@@ -1350,6 +1351,12 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         $datas['infos']['disciplines'] = [];
         foreach ($activity->getDisciplines() as $discipline) {
             $datas['infos']['disciplines'][] = $discipline->getLabel();
+        }
+
+        //// ------- MOTS CLÉS
+        $datas['infos']['motscles'] = [];
+        foreach ($activity->getMotscles() as $motcle) {
+            $datas['infos']['motscles'][] = $motcle->getLabel();
         }
 
         //// ------- NUMEROTATIONS
@@ -3008,6 +3015,38 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
                 ->getResult() as $discipline
         ) {
             $array[$discipline->getId()] = strval($discipline);
+        }
+        return $array;
+    }
+
+    /**
+     * @param integer[] $ids
+     */
+    public function getMotsclesById($ids)
+    {
+        return $this->getEntityManager()->getRepository(ActivityMotCle::class)->createQueryBuilder('m')
+            ->select('m')
+            ->where('m.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return ActivityMotCle[]
+     */
+    public function getMotscles()
+    {
+        $array = [];
+        foreach (
+            $this->getEntityManager()
+                ->createQueryBuilder()
+                ->select('m')
+                ->from(ActivityMotCle::class, 'm')
+                ->getQuery()
+                ->getResult() as $motcle
+        ) {
+            $array[$motcle->getId()] = strval($motcle);
         }
         return $array;
     }
