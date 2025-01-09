@@ -1,0 +1,6 @@
+http_proxy=
+https_proxy=
+HTTP_PROXY=
+HTTPS_PROXY=
+no_proxy=127.0.0.1,localhost,oscar_ripley,oscar_ripley_gearman,oscar_ripley_elasticsearch,oscar_ripley_postgresql
+NO_PROXY=127.0.0.1,localhost,oscar_ripley,oscar_ripley_gearman,oscar_ripley_elasticsearch,oscar_ripley_postgresql

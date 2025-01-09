@@ -1,0 +1,4 @@
+server.publicBaseUrl: "http://localhost:5601"
+server.name: kibana
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["http://oscar_ripley_elasticsearch:9200"]
