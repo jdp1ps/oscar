@@ -2012,14 +2012,21 @@ class TimesheetController extends AbstractOscarController
     public function resumeAction()
     {
         $personId = $this->params()->fromQuery('person_id', null);
+        $url = $this->url()->fromRoute('timesheet/resume').'?f=json';
         if ($personId) {
+            $url .= '&person_id=' . $personId;
             $person = $this->getPersonService()->getPerson($personId);
         } else {
             $person = $this->getCurrentPerson();
         }
 
+        if( $this->isAjax() || $this->getRequest()->getQuery('f') == 'json' ){
+            $datas = $this->getTimesheetService()->getResumePerson($person);
+            return $this->jsonOutput($datas);
+        }
+
         return [
-            'datas' => $this->getTimesheetService()->getResumePerson($person),
+            'url' => $url,
             'person' => $personId ? $person : null
         ];
     }

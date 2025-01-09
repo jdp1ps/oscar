@@ -2684,6 +2684,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                             'current' => $period == $periodNow,
                             'futur' => $period > $periodNow,
                             'activities_id' => [],
+                            'activities_details' => [],
                             'workpackages_id' => [],
                             'unexpected' => false,
                             'total' => 0.0,
@@ -2724,6 +2725,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'year' => $year,
                     'periodDuration' => $this->getPeriodDuration($person, $year, $month),
                     'activities_id' => [],
+                    'activities_details' => [],
                     'workpackages_id' => [],
                     'unexpected' => true,
                     'total' => 0.0,
@@ -2732,12 +2734,34 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'validations_id' => []
                 ];
             }
+
+            $day = $timesheet->getDateFrom()->format('d');
             $total = $timesheet->getDuration();
 
             $periodsDetails[$period]['total'] += $total;
             if ($timesheet->getActivity()) {
+                $activityId = $timesheet->getActivity()->getId();
+                if(!array_key_exists($activityId, $periodsDetails[$period]['activities_details'])) {
+                    $periodsDetails[$period]['activities_details'][$activityId] = [
+                        'total' => 0.0,
+                        'days' => [],
+                        'events' => 0
+                    ];
+                }
+//                if(!array_key_exists($day, $periodsDetails[$period]['activities_details'])) {
+//                    $periodsDetails[$period]['activities_details'][$day] = [
+//                        'total' => 0.0,
+//                        'events' => 0
+//                    ];
+//                }
                 $periodsDetails[$period]['total_activities'] += $total;
                 $periodsDetails[$period]['total_activities_details'][$timesheet->getActivity()->getId()] += $total;
+                $periodsDetails[$period]['activities_details'][$activityId]['total'] += $total;
+                $periodsDetails[$period]['activities_details'][$activityId]['events']++;
+                if( !in_array($day, $periodsDetails[$period]['activities_details'][$activityId]['days']) ){
+                    $periodsDetails[$period]['activities_details'][$activityId]['days'][] = $day;
+                }
+
             } else {
                 $periodsDetails[$period]['total_horslots'] += $total;
             }

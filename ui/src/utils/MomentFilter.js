@@ -72,5 +72,12 @@ export default {
     },
     dateFull(date, nullDisplay = 'Non définie') {
         return date ? (this.date(date) + " (" + this.timeAgo(date) + ")") : nullDisplay;
+    },
+    period(str){
+        let s = str.split('-');
+        let y = s[0];
+        let m = parseInt(s[1]) - 1;
+        let mn = moment.months()[m];
+        return mn +" " +y;
     }
 }
