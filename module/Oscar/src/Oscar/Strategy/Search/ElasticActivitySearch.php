@@ -72,6 +72,7 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
             'acronym'      => $activity->getAcronym(),
             'activity_id'  => $activity->getId(),
             'disciplines'  => $activity->getDisciplinesArray(),
+            'motscles'     => $activity->getMotsclesArray(),
             'members'      => $members,
             'partners'     => $partners,
             'project_id'   => $project_id,
@@ -112,8 +113,8 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
         $wordsNbr = 1;
 
         // Détection des recherches strictes
-        if(preg_match_all('/^"(.*)"$/', $search, $matches, PREG_SET_ORDER)) {
-            if( count($matches) == 1 && array_key_exists(1, $matches[0])) {
+        if (preg_match_all('/^"(.*)"$/', $search, $matches, PREG_SET_ORDER)) {
+            if (count($matches) == 1 && array_key_exists(1, $matches[0])) {
                 $andQuery = $matches[0][0];
                 $wordsNbr = 2;
             }
@@ -126,14 +127,14 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
 //            }
 //        }
 
-        if(preg_match_all('/^(.*)\*$/', $search, $matches, PREG_SET_ORDER)) {
-            if( count($matches) == 1 && array_key_exists(1, $matches[0])) {
+        if (preg_match_all('/^(.*)\*$/', $search, $matches, PREG_SET_ORDER)) {
+            if (count($matches) == 1 && array_key_exists(1, $matches[0])) {
                 $andQuery = $matches[0][0];
                 $wordsNbr = 2;
             }
         }
 
-        if( $andQuery === null ){
+        if ($andQuery === null) {
             $words = explode(" ", $search);
             $wordsNbr = count($words);
             $andQuery = implode(" AND ", $words);
@@ -158,7 +159,6 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
 
         // TODO si plusieurs mots, ajouter une règle spécifique
         if ($wordsNbr > 1) {
-
             $query["bool"]["should"][] = [
                 "query_string" => [
                     "query"  => $andQuery,
@@ -167,6 +167,7 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
                         'eotp^20',
                         'acronym^15',
                         'numbers^10',
+                        'motscles^7',
                         'disciplines^7',
                         'label^5',
                         'project^5',
@@ -180,17 +181,18 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
         }
         else {
             $query["bool"]["should"] = [
-                ["match" => [ "oscar" => ["query" => $andQuery, "boost" => 20]]],
-                ["match" => [ "eotp" => ["query" => $andQuery, "boost" => 20]]],
-                ["match" => [ "acronym" => ["query" => $andQuery, "boost" => 15]]],
-                ["match" => [ "numbers" => ["query" => $andQuery, "boost" => 10]]],
-                ["match" => [ "disciplines" => ["query" => $andQuery, "boost" => 7]]],
-                ["match" => [ "label" => ["query" => $andQuery, "boost" => 5]]],
-                ["match" => [ "activitytype" => ["query" => $andQuery, "boost" => 3]]],
-                ["match" => [ "project" => ["query" => $andQuery, "boost" => 5]]],
-                ["match" => [ "description" => ["query" => $andQuery, "boost" => 1]]],
-                ["match" => [ "partners" => ["query" => $andQuery, "boost" => 1]]],
-                ["match" => [ "members" => ["query" => $andQuery, "boost" => 1]]],
+                ["match" => ["oscar" => ["query" => $andQuery, "boost" => 20]]],
+                ["match" => ["eotp" => ["query" => $andQuery, "boost" => 20]]],
+                ["match" => ["acronym" => ["query" => $andQuery, "boost" => 15]]],
+                ["match" => ["numbers" => ["query" => $andQuery, "boost" => 10]]],
+                ["match" => ["motscles" => ["query" => $andQuery, "boost" => 7]]],
+                ["match" => ["disciplines" => ["query" => $andQuery, "boost" => 7]]],
+                ["match" => ["label" => ["query" => $andQuery, "boost" => 5]]],
+                ["match" => ["activitytype" => ["query" => $andQuery, "boost" => 3]]],
+                ["match" => ["project" => ["query" => $andQuery, "boost" => 5]]],
+                ["match" => ["description" => ["query" => $andQuery, "boost" => 1]]],
+                ["match" => ["partners" => ["query" => $andQuery, "boost" => 1]]],
+                ["match" => ["members" => ["query" => $andQuery, "boost" => 1]]],
             ];
         }
 
