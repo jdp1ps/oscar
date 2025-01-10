@@ -1,7 +1,7 @@
 <template>
-    <button class="btn btn-primary" @click="fetch">
-      FETCH
-    </button>
+  <button class="btn btn-primary" @click="fetch">
+    FETCH
+  </button>
   <div v-if="datas">
 
     <h1>Vos déclarations</h1>
@@ -18,7 +18,6 @@
         <th>Période</th>
         <th>Déclarations</th>
         <th>Activité</th>
-        <th>Total activité</th>
         <th>Total hors-activité</th>
         <th>Total</th>
         <th>Actions</th>
@@ -92,26 +91,69 @@
           </td>
 
           <td>
-            <div v-for="activityId in p.activities_id">
-              <i class="icon-cube"></i>
-              <strong :title="datas.activities[activityId].acronym +' : ' +datas.activities[activityId].label">{{
-                datas.activities[activityId].acronym }}</strong>
-              <span v-if="p.total_activities_details">&nbsp;
-                                {{  $filters.formatDuration(p.total_activities_details[activityId]) }} heure(s)
-                <em v-if="p.activities_details && p.activities_details[activityId]">
-                  sur {{ p.activities_details[activityId].days.length }} jour(s)
-                  <small> / {{ p.activities_details[activityId].events }} créneau(x)</small>
-                </em>
-                            </span>
-              <em v-else>Rien</em>
-            </div>
+            <table class="table-condensed table">
+              <tbody>
+              <tr v-for="activityId in p.activities_id">
+                <th>
+                  <i class="icon-cube"></i>
+                  <strong :title="datas.activities[activityId].acronym +' : ' +datas.activities[activityId].label">{{
+                    datas.activities[activityId].acronym }}</strong>
+                </th>
+                <td>
+                  <em v-if="p.activities_details && p.activities_details[activityId]">
+                    {{ p.activities_details[activityId].days.length }} jr(s)
+                  </em>
+                  <small v-else>
+                    Rien
+                  </small>
+                </td>
+                <td>
+                  <em v-if="p.activities_details && p.activities_details[activityId]">
+                    {{ p.activities_details[activityId].events }} elem(s)
+                  </em>
+                  <small v-else>
+                    Rien
+                  </small>
+                </td>
+                <td class="text-right">
+                  <strong>
+                    {{ $filters.formatDuration(p.total_activities_details[activityId]) }}
+                  </strong>
+                </td>
+              </tr>
+              <tr v-if="p.activities_details && Object.keys(p.activities_details).length > 1">
+                <th>Total</th>
+                <td colspan="3" class="text-right">
+                  <strong>
+                    {{ $filters.formatDuration(p.total_activities) }}
+                  </strong>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </td>
 
-          <td class="soustotal text-right">{{ p.total_activities | heures }}</td>
-          <td class="soustotal text-right">{{ p.total_horslots | heures }}</td>
+          <td class="soustotal text-right">
+            <table class="table-condensed table" v-if="p.horslots_details && Object.keys(p.horslots_details).length">
+              <tr v-for="(details, lot) in p.horslots_details">
+                <th>{{ datas.horslots[lot].label }}</th>
+                <td>{{ $filters.formatDuration(details.total) }}</td>
+              </tr>
+              <tfoot v-if="p.horslots_details && Object.keys(p.horslots_details).length > 1">
+              <tr>
+                <th>Total</th>
+                <td>{{ $filters.formatDuration(p.total_horslots) }}</td>
+              </tr>
+              </tfoot>
+            </table>
+            <small v-else>
+              Vide
+            </small>
+          </td>
           <td class="total text-right">
             <i class="icon-time icon-clock"></i>
-            <strong>{{ p.total | heures }}</strong> <small>/ {{ p.periodDuration | heures }}</small></td>
+            <strong>{{ $filters.formatDuration(p.total) }}</strong> <small>/ {{
+            $filters.formatDuration(p.periodDuration) }}</small></td>
           <td class="total text-right">
             <em class="text-danger">{{p.error}}</em>
             <span v-if="datas.owner">
@@ -141,14 +183,54 @@
             </a>
           </td>
         </tr>
-        <tr>
-          <th>Total {{ year }}</th>
-          <th>&nbsp;</th>
-          <th>&nbsp;</th>
-          <th class="text-right">{{ yeardatas.total_activities | heures }}</th>
-          <th class="text-right">{{ yeardatas.total_horslots | heures }}</th>
-          <th class="text-right"><strong>{{ yeardatas.total | heures }}</strong><small>/ {{ yeardatas.periodDuration |
-            heures }}</small></th>
+        <tr class="line-total">
+          <th>
+            Total <strong>{{ year }}</strong>
+          </th>
+          <th>-&nbsp;</th>
+          <th>
+            <table class="table-condensed table">
+              <tr v-for="(activitiesDetails,activityId) in yeardatas.total_activities_details">
+                <th><i class="icon-cube"></i>{{ datas.activities[activityId].acronym }}</th>
+                <td><small>{{ activitiesDetails.days }} jr(s)</small></td>
+                <td><small>{{ activitiesDetails.events }} elem(s)</small></td>
+                <td class="text-right">{{ $filters.formatDuration(activitiesDetails.total) }}</td>
+              </tr>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <td>-</td>
+                  <td>-</td>
+                  <td class="text-right">
+                    <strong>{{ $filters.formatDuration(yeardatas.total_activities) }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </th>
+          <th class="text-right">
+            <table class="table-condensed table">
+              <tr v-for="(horslotsDetails,horslots) in yeardatas.total_horslots_details">
+                <th>{{ datas.horslots[horslots].label }}</th>
+                <td><small>{{ horslotsDetails.days }} jr(s)</small></td>
+                <td><small>{{ horslotsDetails.events }} elem(s)</small></td>
+                <td class="text-right">{{ $filters.formatDuration(horslotsDetails.total) }}</td>
+              </tr>
+              <tfoot>
+              <tr>
+                <th>Total</th>
+                <td>-</td>
+                <td>-</td>
+                <td class="text-right">
+                  <strong>{{ $filters.formatDuration(yeardatas.total_horslots) }}</strong>
+                </td>
+              </tr>
+              </tfoot>
+            </table>
+          </th>
+          <th class="text-right">
+            <strong>{{ $filters.formatDuration(yeardatas.total) }}</strong>
+            <small>/ {{ $filters.formatDuration(yeardatas.periodDuration) }}</small></th>
           <th>&nbsp;</th>
         </tr>
         </tbody>
@@ -187,6 +269,9 @@ export default {
       let out = {};
       Object.keys(this.datas.periods).forEach(periodKey => {
         if (!this.datas.periods[periodKey].futur) {
+
+          let period = this.datas.periods[periodKey];
+
           let split = periodKey.split('-');
           let year = split[0];
           let month = split[1];
@@ -196,15 +281,53 @@ export default {
               total: 0.0,
               periodDuration: 0.0,
               total_activities: 0.0,
-              total_horslots: 0.0
+              total_horslots: 0.0,
+              total_activities_details: {},
+              total_horslots_details: {}
             }
           }
 
-          out[year].periods[periodKey] = this.datas.periods[periodKey];
-          out[year].total += this.datas.periods[periodKey].total;
-          out[year].periodDuration += this.datas.periods[periodKey].periodDuration;
-          out[year].total_activities += this.datas.periods[periodKey].total_activities;
-          out[year].total_horslots += this.datas.periods[periodKey].total_horslots;
+          let outYear = out[year];
+
+          outYear.periods[periodKey] = period;
+          outYear.total += period.total;
+          outYear.periodDuration += period.periodDuration;
+          outYear.total_activities += period.total_activities;
+          outYear.total_horslots += period.total_horslots;
+
+          // détails hors-lots
+          if( period.horslots_details	){
+            console.log('horslots', JSON.stringify(period.horslots_details));
+            Object.keys(period.horslots_details).forEach(horslot => {
+              if (!outYear.total_horslots_details.hasOwnProperty(horslot)) {
+                outYear.total_horslots_details[horslot] = {
+                  total: 0.0,
+                  days: 0.0,
+                  events: 0.0
+                }
+              }
+              outYear.total_horslots_details[horslot].total += period.horslots_details[horslot].total;
+            });
+          }
+
+          if (period.activities_details) {
+            Object.keys(period.activities_details).forEach(activity => {
+              let infosActivityPeriod = period.activities_details[activity];
+              if (!outYear.total_activities_details.hasOwnProperty(activity)) {
+                outYear.total_activities_details[activity] = {
+                  total: 0.0,
+                  days: 0.0,
+                  events: 0.0
+                }
+              }
+
+              outYear.total_activities_details[activity].total += period.activities_details[activity].total;
+              outYear.total_activities_details[activity].days += period.activities_details[activity].days.length;
+              outYear.total_activities_details[activity].events += period.activities_details[activity].events;
+
+              console.log(infosActivityPeriod)
+            });
+          }
         }
       });
       return out;
@@ -240,3 +363,28 @@ export default {
   }
 }
 </script>
+
+<style>
+
+.table {
+  td {
+    border: 0;
+  }
+
+}
+
+.table td .table, .table th .table {
+    background: rgba(255, 255, 255, .7) !important;
+
+}
+
+tr.line-total {
+  background: rgba(31, 68, 192, 0.1);
+  border-top: 2px solid #777;
+  font-size: 1.1em;
+}
+
+tr.line-total th {
+  font-weight: normal;
+}
+</style>

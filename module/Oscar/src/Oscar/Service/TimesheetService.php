@@ -2685,6 +2685,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                             'futur' => $period > $periodNow,
                             'activities_id' => [],
                             'activities_details' => [],
+                            'horslots_details' => [],
                             'workpackages_id' => [],
                             'unexpected' => false,
                             'total' => 0.0,
@@ -2726,6 +2727,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     'periodDuration' => $this->getPeriodDuration($person, $year, $month),
                     'activities_id' => [],
                     'activities_details' => [],
+                    'horslots_details' => [],
                     'workpackages_id' => [],
                     'unexpected' => true,
                     'total' => 0.0,
@@ -2764,6 +2766,13 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
             } else {
                 $periodsDetails[$period]['total_horslots'] += $total;
+                $lot = $timesheet->getLabel();
+                if( !array_key_exists($lot, $periodsDetails[$period]['horslots_details']) ){
+                    $periodsDetails[$period]['horslots_details'][$lot] = [
+                        'total' => 0.0,
+                    ];
+                }
+                $periodsDetails[$period]['horslots_details'][$lot]['total'] += $total;
             }
         }
 
