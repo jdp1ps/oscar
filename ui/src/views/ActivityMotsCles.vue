@@ -47,7 +47,6 @@
             <template v-for="m in touslesmotscles">
               <li v-if="m.label.toLocaleLowerCase().includes(userInput.toLocaleLowerCase())" class="undetouslesmotscles" :class="{ selected: m.selected }" @click="m.selected = (m.selected ? false : true); affichertouslesmotscles = false; userInput = '';">{{ m.label }}</li>
             </template>
-            <!-- <li v-if="aucunMotCleNeCorrespond" @click="créerMotClé" class="undetouslesmotscles" style="white-space: preserve-spaces;">Cliquez ici pour créer le nouveau mot clé "{{ userInput.trim() }}"</li> -->
             <li v-if="aucunMotCleNeCorrespond" style="padding: 6px;">Aucun mot clé existant correspondant</li>
           </ul>
         </span>
