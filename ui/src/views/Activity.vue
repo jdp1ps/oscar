@@ -301,9 +301,6 @@
             Disciplines :
             <span class="cartouche xs" v-for="d in core.disciplines">{{ d }}</span>
           </p>
-        </div>
-        <div class="col-md-4">
-          <h4><i class="icon-tags"></i>Mots clés</h4>
           <p class="texthighlight baseline">
             Mots clés :
             <span class="cartouche xs" v-for="m in core.motscles">{{ m }}</span>
