@@ -144,14 +144,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-31c658c2.css",
+    "file": "assets/Activity-40477c3c.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-31c658c2.css"
+      "assets/Activity-40477c3c.css"
     ],
-    "file": "assets/activity-71a18304.js",
+    "file": "assets/activity-86d52d86.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -187,6 +187,23 @@
     ],
     "isEntry": true,
     "src": "src/ActivityDocuments.js"
+  },
+  "src/ActivityMotsCles.css": {
+    "file": "assets/ActivityMotsCles-04ab9d89.css",
+    "src": "src/ActivityMotsCles.css"
+  },
+  "src/ActivityMotsCles.js": {
+    "css": [
+      "assets/ActivityMotsCles-04ab9d89.css"
+    ],
+    "file": "assets/activitymotscles-e5fdd857.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor10.js",
+      "_vendor7.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivityMotsCles.js"
   },
   "src/ActivityNotes.js": {
     "file": "assets/activitynotes-64a5ce37.js",

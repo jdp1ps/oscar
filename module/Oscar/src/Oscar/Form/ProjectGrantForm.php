@@ -109,6 +109,19 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                        'type'       => 'Select'
                    ]);
 
+        $this->add([
+                       'name'       => 'motscles',
+                       'options'    => [
+                           'label'         => _('Mots clés'),
+                           'value_options' => $this->getProjectGrantService()->getMotscles()
+                       ],
+                       'attributes' => [
+                           'class'    => 'form-control select2',
+                           'multiple' => 'multiple'
+                       ],
+                       'type'       => 'Select'
+                   ]);
+
         // Status
         $this->add([
                        'name'       => 'status',
@@ -444,6 +457,10 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
             ],
 
             'disciplines' => [
+                'required' => false,
+            ],
+
+            'motscles' => [
                 'required' => false,
             ],
 

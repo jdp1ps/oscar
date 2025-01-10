@@ -30,6 +30,25 @@
         <?= $this->formControlGroup($form->get('label')); ?>
         <?= $this->formControlGroup($form->get('description')); ?>
 
+        <div class="row">
+            <div class="col-md-6">
+                <div id="activity-mots-cles"
+                     data-url="<?= $this->url('activity-mots-cles/api') ?>"
+                     data-motsclesselectionnes="<?php 
+                            echo '[';
+                            $count = count($activity->getMotscles());
+                            for($i = 0; $i < $count; $i++) {
+                                if ($i > 0) {
+                                    echo ',';
+                                }
+                                echo $activity->getMotscles()[$i]->getId();
+                            }
+                            echo ']';
+                        ?>" >
+                </div>
+                <?php echo $this->Vite()->addJs('src/ActivityMotsCles.js'); ?>
+            </div>
+        </div>
 
         <?php if( $withOrganization ): ?>
             <h3><?= $this->translate("Rôle de votre structure") ?></h3>
