@@ -13,11 +13,20 @@ class ActivityMotCleRepository extends EntityRepository
      *
      * @return array
      */
-    public function getAll(){
+    public function getAll() {
         $query = $this->createQueryBuilder('m')
             ->select('m')
             ->orderBy('m.label', 'ASC');
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Retourne la liste des mots clés avec le comptage des projets.
+     */
+    public function getMotsClesCounted() {
+        $dql = "SELECT m.id, m.label, count(a.id) as activity_count FROM Oscar\Entity\ActivityMotCle m LEFT JOIN m.activities a GROUP BY m.id ORDER BY m.label";
+        $query = $this->getEntityManager()->createQuery($dql);
+        return $query->getArrayResult();
     }
 
 }

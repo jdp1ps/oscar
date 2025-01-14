@@ -26,6 +26,7 @@ export default defineConfig({
         activity: resolve(__dirname, 'src/Activity.js'),
         activitydocuments: resolve(__dirname, 'src/ActivityDocuments.js'),
         activitymotscles: resolve(__dirname, 'src/ActivityMotsCles.js'),
+        activitymotsclesadmin: resolve(__dirname, 'src/ActivityMotsClesAdmin.js'),
         activitynotes: resolve(__dirname, 'src/ActivityNotes.js'),
         activityspentdetails: resolve(__dirname, 'src/ActivitySpentDetails.js'),
         activityspentsynthesis: resolve(__dirname, 'src/ActivitySpentSynthesis.js'),

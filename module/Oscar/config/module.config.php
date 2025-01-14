@@ -64,6 +64,7 @@ return array(
                         'index',
                         'logs',
                         'messages',
+                        'motscles',
                         'organizationRole',
                         'organizationRoleApi',
                         'organizationType',

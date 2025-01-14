@@ -303,7 +303,7 @@
           </p>
           <p class="texthighlight baseline">
             Mots clés :
-            <span class="cartouche xs" v-for="m in core.motscles">{{ m }}</span>
+            <span class="cartouche xs" style="line-break: anywhere;" v-for="m in core.motscles">{{ m }}</span>
           </p>
         </div>
       </div>

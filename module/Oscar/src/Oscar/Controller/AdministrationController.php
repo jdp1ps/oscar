@@ -764,6 +764,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $datas;
     }
 
+    public function motsclesAction()
+    {
+        return [];
+    }
 
     /**
      * Reconstruction de l'index de recherche.
