@@ -274,8 +274,15 @@
                     <i class="icon-tags"></i>
                     Mots clés
                 </strong>
+                <?php
+                if ($this->grant()->privilege(\Oscar\Provider\Privileges::MAINTENANCE_DISCIPLINE_MANAGE)): ?>
                     <a href="<?= $this->url('administration/motscles') ?>" class="right"><i
                                 class="icon-cog"></i><?= _("Configurer") ?></a>
+                <?php
+                else: ?>
+                    <em><i class="icon-lock"></i> Privilège insuffisant</em>
+                <?php
+                endif; ?>
             </h3>
             <p>Permet de gérer les mots clés disponibles.</p>
         </article>
