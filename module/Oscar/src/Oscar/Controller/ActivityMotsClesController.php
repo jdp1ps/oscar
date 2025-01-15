@@ -5,6 +5,7 @@ namespace Oscar\Controller;
 use Laminas\Http\Response;
 use Laminas\View\Model\JsonModel;
 use Oscar\Entity\ActivityMotCle;
+use Oscar\Provider\Privileges;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Throwable;
@@ -15,6 +16,7 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
 
     public function apiAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
         try {
 
             if ($this->getRequest()->getMethod() == "GET") {
@@ -59,6 +61,8 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
 
     private function getMotsCles($includeCount) {
 
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+
         /** @var ActivityMotCleRepository $activityMotCleRepository */
         $activityMotCleRepository = $this->getEntityManager()->getRepository(ActivityMotCle::class);
 
@@ -89,6 +93,8 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
 
     private function createMotCle($action_mot_cle_json) {
 
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+
         $this->getLoggerService()->info("createMotCle");
         $this->getLoggerService()->info("by: " . $this->getCurrentPerson());
         $motCle = new ActivityMotCle();
@@ -103,6 +109,8 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
     }
 
     private function deleteMotCle($action_mot_cle_json) {
+
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
 
         $this->getLoggerService()->info("deleteMotCle");
         $this->getLoggerService()->info("by: " . $this->getCurrentPerson());
@@ -124,6 +132,8 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
 
     private function updateMotCle($action_mot_cle_json) {
 
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+
         $this->getLoggerService()->info("updateMotCle");
         $this->getLoggerService()->info("by: " . $this->getCurrentPerson());
 
@@ -144,6 +154,8 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
     }
 
     private function fusionnerMotsCles($action_mot_cle_json) {
+
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
 
         $this->getLoggerService()->info("fusionMotCle");
         $this->getLoggerService()->info("by: " . $this->getCurrentPerson());

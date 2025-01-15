@@ -766,6 +766,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
     public function motsclesAction()
     {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
         return [];
     }
 
