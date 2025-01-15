@@ -209,6 +209,27 @@
         </article>
     </script>
 
+    <script type="text/x-handlebars" id="tags-criteria-tpl">
+        <article class="criteria criteria-type card">
+            <div class="icon-tags"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_tags" multiple>
+                <option></option>
+        <?php foreach ($tags as $id => $label): ?>
+                    <option
+                        value="<?= $id ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+        </select>
+        <nav>
+            <a href="#" class="delete">
+                <i class="icon-cancel-outline"></i>
+            </a>
+        </nav>
+    </article>
+    </script>
+
     <script type="text/x-handlebars" id="country-tpl">
         <article class="criteria criteria-country card">
             <div class="icon-tag"></div>
@@ -904,6 +925,9 @@
                     else if(datas.type == 'ds'){
                         dom = $(tplDiscipline(datas));
                     }
+                    else if(datas.type == 'tg'){
+                        dom = $(tplTags(datas));
+                    }
                     else {
                         console.error("le type", datas.type, "n'est pas pris en charge", datas);
                         return;
@@ -1165,6 +1189,7 @@
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),
+                    tplTags = Handlebars.compile($('#tags-criteria-tpl').html()),
                     tplStatic = Handlebars.compile($('#static-criteria-tpl').html()),
                     tplNumber = Handlebars.compile($('#number-criteria-tpl').html()),
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),

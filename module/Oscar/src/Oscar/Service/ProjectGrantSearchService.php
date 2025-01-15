@@ -6,6 +6,8 @@ use Doctrine\ORM\Exception\NotSupported;
 use Exception;
 use Laminas\Http\Request;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityMotCle;
+use Oscar\Entity\ActivityMotCleRepository;
 use Oscar\Entity\DateType;
 use Oscar\Entity\Person;
 use Oscar\Entity\Project;
@@ -63,6 +65,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
     const FILTER_ACTIVITY_MILESTONE = 'aj';
     const FILTER_ACTIVITY_ACCOUNT = 'cb';
     const FILTER_ACTIVITY_NUMBERS = 'num';
+    const FILTER_ACTIVITY_TAGS = 'tg';
     const SORT_HIT = 'hit';
     const SORT_DATE_CREATED = 'dateCreated';
     const SORT_DATE_START = 'dateStart';
@@ -104,6 +107,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             self::FILTER_ACTIVITY_TYPE                  => 'Type - est de type',
             self::FILTER_ACTIVITY_TYPE_OUT              => 'Type - n\'est pas de type',
             self::FILTER_ACTIVITY_DISCIPLINE            => 'Ayant pour discipline',
+            self::FILTER_ACTIVITY_TAGS                  => 'Ayant pour mot-clef',
             self::FILTER_ACTIVITY_MILESTONE             => 'Ayant le jalon',
             self::FILTER_ACTIVITY_DOCUMENT_TYPE         => 'Ayant ce type de document',
             self::FILTER_ACTIVITY_TIMESHEET             => 'Activités soumise à feuille de temps',
@@ -270,7 +274,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     }
                     $param['val1'] = $value1;
                     break;
-
+                case 'tg' :
                 case 'om' :
                     // TODO extraction d'un tableau d'entiers positifs
                     $value1 = explode(',', $filterParams[1]);
@@ -769,6 +773,17 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                             $filter['error'] = "Impossible de filtrer sur les disciplines";
                         }
                         break;
+                    case 'tg' :
+
+                        try {
+                            $filteredIds = $this->getProjectGrantService()->getActivityRepository()->getIdsMotclefs(
+                                $value1
+                            );
+                        } catch (Exception $e) {
+                            $this->getLoggerService()->warning($e->getMessage());
+                            $filter['error'] = "Impossible de filtrer sur les mots-clefs";
+                        }
+                        break;
 
                     ///////////////////////////////// ACTIVITE / JALON
                     case 'aj':
@@ -1058,7 +1073,8 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             }
             $activities = $json;
         }
-
+//        var_dump($this->getFilterOptionsTags());
+//        die();
         $output = [
             "params_requested"       => $params,
             "errors"                 => null,
@@ -1080,6 +1096,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             'sortDirection'          => $params['sortDirection'],
             'sortIgnoreNull'         => $params['sortIgnoreNull'],
             // Valeurs pour les champs de formulaire
+            'tags'                   => $this->getFilterOptionsTags(),
             'filtersType'            => $this->getFiltersTypes(),
             'fieldsCSV'              => $this->getFilterOptionsFieldCSV(),
             'typeorgas'              => $this->getFilterOptionsOrganizationTypes(),
@@ -1246,5 +1263,12 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
     public function getOrganizationService(): OrganizationService
     {
         return $this->getProjectGrantService()->getOrganizationService();
+    }
+
+    private function getFilterOptionsTags()
+    {
+        /** @var ActivityMotCleRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(ActivityMotCle::class);
+        return $repo->getAllArray();
     }
 }

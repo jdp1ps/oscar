@@ -11,7 +11,7 @@ class ActivityMotCleRepository extends EntityRepository
     /**
      * Retourne tous les mots clés
      *
-     * @return array
+     * @return ActivityMotCle[]
      */
     public function getAll(){
         $query = $this->createQueryBuilder('m')
@@ -20,4 +20,14 @@ class ActivityMotCleRepository extends EntityRepository
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * @return array
+     */
+    public function getAllArray(){
+        $out = [];
+        foreach ($this->getAll() as $activityMotCle) {
+            $out[$activityMotCle->getId()] = $activityMotCle->getLabel();
+        }
+        return $out;
+    }
 }
