@@ -74,6 +74,7 @@ export default {
 
   props: {
     url: {default: null},
+    activityid: {default: null},
     motsclesselectionnes: {default: []},
   },
 
@@ -111,7 +112,7 @@ export default {
 
       this.affichertouslesmotscles = false;
       this.loading = "Création du mot clé";
-      axios.post(this.url, { action: "create", label: this.userInput.trim() }).then(
+      axios.post(this.url + '?activity_id=' + this.activityid, { action: "create", label: this.userInput.trim() }).then(
           (ok) => {
             let nouveauMotCle = ok.data;
             nouveauMotCle.selected = true;
@@ -151,7 +152,7 @@ export default {
 
     fetch() {
       this.loading = "Chargement des mots clés";
-      axios.get(this.url).then(ok => {
+      axios.get(this.url + '?activity_id=' + this.activityid).then(ok => {
         this.touslesmotscles = ok.data.motscles;
         const dejaSelectionnes = JSON.parse(this.motsclesselectionnes);
         for (let unMotCle of this.touslesmotscles) {
@@ -178,6 +179,11 @@ export default {
         const errorHTML = el.querySelector('[id="contenu-principal"]');
         if (errorHTML) {
           this.error = errorHTML.innerHTML;
+          return;
+        }
+        const contentLength = err.response.headers.get('content-length');
+        if (contentLength && (typeof contentLength == "string") && !isNaN(contentLength) && Number(contentLength) < 1000) {
+          this.error = err.response.data;
           return;
         }
       }

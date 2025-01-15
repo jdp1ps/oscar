@@ -6,6 +6,7 @@ use Laminas\Http\Response;
 use Laminas\View\Model\JsonModel;
 use Oscar\Entity\ActivityMotCle;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ProjectGrantService;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Throwable;
@@ -14,23 +15,44 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
 {
     use UseLoggerServiceTrait;
 
+    /**
+     * @return ProjectGrantService
+     */
+    public function getActivityService(): ProjectGrantService
+    {
+        return $this->activityService;
+    }
+
+    /**
+     * @param ProjectGrantService $activityService
+     */
+    public function setActivityService(ProjectGrantService $activityService): void
+    {
+        $this->activityService = $activityService;
+    }
+
     public function apiAction()
     {
-        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
         try {
+
+            $activity = NULL;
+            $activityId = $this->params()->fromQuery('activity_id');
+            if ($activityId) {
+                $activity = $this->getActivityService()->getGrant($activityId);
+            }
 
             if ($this->getRequest()->getMethod() == "GET") {
                 $includeActivityCountQueryParam = $this->params()->fromQuery('include_activity_count');
                 $includeActivityCount = $includeActivityCountQueryParam && $includeActivityCountQueryParam === "true";
 
-                return $this->getMotsCles($includeActivityCount);
+                return $this->getMotsCles($includeActivityCount, $activity);
             }
 
             if ($this->getRequest()->getMethod() == "POST") {
                 $action_mot_cle_json = json_decode($this->getRequest()->getContent());
 
                 if ($action_mot_cle_json->action == "create") {
-                    return $this->createMotCle($action_mot_cle_json);
+                    return $this->createMotCle($action_mot_cle_json, $activity);
                 }
 
                 if ($action_mot_cle_json->action == "delete") {
@@ -59,9 +81,13 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
         }
     }
 
-    private function getMotsCles($includeCount) {
+    private function getMotsCles($includeCount, $activity) {
 
-        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+        if ($activity) {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
+        } else {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_CREATE);
+        }
 
         /** @var ActivityMotCleRepository $activityMotCleRepository */
         $activityMotCleRepository = $this->getEntityManager()->getRepository(ActivityMotCle::class);
@@ -91,9 +117,13 @@ class ActivityMotsClesController extends AbstractOscarController implements UseL
         return $response;
     }
 
-    private function createMotCle($action_mot_cle_json) {
+    private function createMotCle($action_mot_cle_json, $activity) {
 
-        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+        if ($activity) {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_EDIT, $activity);
+        } else {
+            $this->getOscarUserContextService()->check(Privileges::ACTIVITY_CREATE);
+        }
 
         $this->getLoggerService()->info("createMotCle");
         $this->getLoggerService()->info("by: " . $this->getCurrentPerson());
