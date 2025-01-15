@@ -43,7 +43,7 @@
         </span>
 
         <span v-if="affichertouslesmotscles" style="background-color: white; border: 1px solid #aaa; border-radius: 4px; border-top-left-radius: 0; border-top-right-radius: 0; position: absolute; z-index: 1051; width: 50%;" >
-          <ul style="margin: 0; padding: 0; width: 100%; max-height: 200px; overflow-y: auto;" >
+          <ul class="listeDeTousLesMotsCles" >
             <template v-for="m in touslesmotscles">
               <li v-if="m.label.toLocaleLowerCase().includes(userInput.toLocaleLowerCase())" class="undetouslesmotscles" :class="{ selected: m.selected }" @click="m.selected = (m.selected ? false : true); affichertouslesmotscles = false; userInput = '';">{{ m.label }}</li>
             </template>
@@ -63,6 +63,7 @@
 <script>
 
 import axios from 'axios';
+import AxiosMessage from "../utils/AxiosMessage.js";
 import Loader from '../components/Loader.vue';
 
 export default {
@@ -142,7 +143,8 @@ export default {
 
     onMouseDown(e) {
       if (!e.target.classList.contains("undetouslesmotscles")
-          && !e.target.classList.contains("inputNouveauMotCle")) {
+          && !e.target.classList.contains("inputNouveauMotCle")
+          && !e.target.classList.contains("listeDeTousLesMotsCles")) {
         this.affichertouslesmotscles = false;
       }
     },
@@ -212,6 +214,7 @@ li {
   margin-top: 5px;
   padding: 0 5px;
   cursor: default;
+  line-break: anywhere;
 }
 
 .selectedmotcle > span{
@@ -264,4 +267,11 @@ li {
   border-color: #ccc;
 }
 
+.listeDeTousLesMotsCles {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
 </style>

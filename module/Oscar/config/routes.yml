@@ -2005,6 +2005,15 @@ administration:
         route: /discipline
         defaults:
           action: discipline
+
+    motscles:
+      type: segment
+      may_terminate: true
+      options:
+        route: /motscles
+        defaults:
+          action: motscles
+
     tva:
       type: segment
       may_terminate: true
