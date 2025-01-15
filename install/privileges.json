@@ -103,6 +103,14 @@
     "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
     "fullcode": "ACTIVITY-EDIT"
   },
+  "ACTIVITY-EDIT_LOCKED": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "EDIT_LOCKED",
+    "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9 VEROUILLEE",
+    "fullcode": "ACTIVITY-EDIT_LOCKED"
+  },
   "ACTIVITY-PCRU": {
     "category_id": 2,
     "spot": 7,

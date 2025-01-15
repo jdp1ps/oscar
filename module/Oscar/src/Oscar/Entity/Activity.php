@@ -351,6 +351,11 @@ class Activity implements ResourceInterface
      */
     private string $cacheLockedReason;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private bool $locked = false;
 
     /**
      * Incidence financière.
@@ -3072,5 +3077,16 @@ class Activity implements ResourceInterface
             }
         }
         return $this->_noTimesheetReason;
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked;
+    }
+
+    public function setLocked(bool $locked): self
+    {
+        $this->locked = $locked;
+        return $this;
     }
 }

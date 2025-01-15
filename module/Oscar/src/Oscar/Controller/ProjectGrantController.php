@@ -1810,6 +1810,38 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                     ];
                 }
                 break;
+                case 'POST' :
+                    $datas = $this->getJsonREST();
+                    $action = $datas['action'];
+                    $this->getLoggerService()->debug("ACTION (POST) : $action");
+                    switch ($action) {
+                        case 'lock':
+                            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $entity) ){
+                                try {
+                                    $this->getProjectGrantService()->lockActivity($entity);
+                                    return $this->getResponseOk("Activité verrouillée");
+                                } catch (\Exception $e) {
+                                    return $this->jsonError("Erreur de verrouillage");
+                                }
+                            } else {
+                                return $this->jsonError("Verrouillage non-authorisée (Droits insuffisants)");
+                            }
+                        case 'unlock':
+                            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $entity) ){
+                                try {
+                                    $this->getProjectGrantService()->unlockActivity($entity);
+                                    return $this->getResponseOk("Activité déverrouillée");
+                                } catch (\Exception $e) {
+                                    return $this->jsonError("Erreur de déverrouillage");
+                                }
+                            } else {
+                                return $this->jsonError("Déverrouillage non-authorisée (Droits insuffisants)");
+                            }
+                        default:
+                            return $this->jsonError("Action '$action' inconnue");
+
+                    }
+                    break;
             default :
                 return $this->getResponseBadRequest('Bad Method ' . $method);
         }

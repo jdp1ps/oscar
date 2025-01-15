@@ -309,8 +309,21 @@
       </div>
 
       <div class="row">
+
+        <div class="col-md-12">
+          <strong v-if="credentials.lock">VERROUILLEE</strong>
+        </div>
         <div class="col-md-12">
           <nav class="admin-bar">
+            <template v-if="credentials.lock_edit">
+            <a class="btn btn-primary btn-xs" v-if="credentials.lock" @click="handlerLock()">
+              <i class="icon-lock-open"></i>
+              Déverrouiller</a>
+            <a class="btn btn-primary btn-xs" v-else  @click="handlerUnlock()">
+              <i class="icon-lock"></i>
+              Vérrouiller</a>
+            </template>
+
             <a class="btn btn-primary btn-xs" v-if="credentials.core.edit" :href="core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
@@ -341,6 +354,9 @@
 
     <div class="container-fluid">
       <div class="col-md-8">
+        <section class="section-infos" id="avenants" v-if="credentials.avenants.read">
+          <activity-avenants :avenants="avenants" />
+        </section>
         <section class="section-infos" id="members" v-if="credentials.persons.read">
           <h2>
             <span><i class="icon-group"></i>Membres</span>
@@ -608,7 +624,7 @@
   </div>
 </template>
 <script>
-
+import ActivityAvenants from "./ActivityAvenants.vue";
 import ActivityDocument from "./ActivityDocument.vue";
 import ActivityLogs from "./ActivityLogs.vue";
 import ActivityNotes from "./ActivityNotes.vue";
@@ -636,7 +652,7 @@ export default {
   name: 'Activity',
 
   components: {
-    PersonDisplay,
+    ActivityAvenants,
     ActivityNotes,
     ActivityLogs,
     ActivityDocument,
@@ -645,6 +661,7 @@ export default {
     Loader,
     Payments,
     PersonCartouche,
+    PersonDisplay,
     Milestones,
     Modal,
     VueJsonPretty,
@@ -659,6 +676,7 @@ export default {
   data() {
     return {
       administration: null,
+      avenants:null,
       budget: null,
       core: null,
       credentials: null,
@@ -750,6 +768,22 @@ export default {
   },
 
   methods: {
+    performLock(action){
+      axios.post(this.url, {'action': action}).then((response) => {
+        this.fetch();
+      }, (err) => {
+        let error = AxiosMessage.manageErrorResponse(err).message;
+        GlobalModel.commit("addError", error);
+      })
+    },
+    handlerUnlock(){
+      this.performLock('lock');
+    },
+
+    handlerLock(){
+      this.performLock('unlock');
+    },
+
     testError(evt, err = "Une erreur affichée"){
       GlobalModel.commit("addError", err);
     },

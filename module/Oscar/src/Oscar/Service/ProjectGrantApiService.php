@@ -59,6 +59,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////// PERIMETRES
     const PERIMETER_ADMINISTRATION = 'administration';
+    const PERIMETER_AVENANTS = 'avenants';
     const PERIMETER_BUDGET = 'budget';
     const PERIMETER_CORE = 'core';
     const PERIMETER_DOCUMENTS = 'documents';
@@ -77,6 +78,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     {
         return [
             self::PERIMETER_ADMINISTRATION,
+            self::PERIMETER_AVENANTS,
             self::PERIMETER_BUDGET,
             self::PERIMETER_CORE,
             self::PERIMETER_DOCUMENTS,
@@ -168,10 +170,20 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         OscarUserContext $oscarUserContext,
         array $perimeters
     ): array {
+
+        $locked = $activity->isLocked();
+        $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
+        $lockEditable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $activity);
+        if( $locked ) {
+            $editable = false;
+        }
+
         $credentials = [
             'currentPersonId' => $oscarUserContext->getCurrentPersonId() ?: -1,
             'read'            => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity),
-            'edit'            => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity),
+            'edit'            => $editable,
+            'lock'            => $locked,
+            'lock_edit'       => $lockEditable,
         ];
 
         foreach ($perimeters as $perimeter) {
@@ -179,6 +191,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 case 'administration':
                     $credentials['administration'] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN),
+                    ];
+                    break;
+                case self::PERIMETER_AVENANTS:
+                    $credentials[self::PERIMETER_AVENANTS] = [
+                        'read' => true,
+                        'edit' => false,
                     ];
                     break;
 
@@ -195,15 +213,15 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                             Privileges::ACTIVITY_PERSON_SHOW,
                             $activity
                         ),
-                        'edit'           => $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_PERSON_MANAGE,
+                        'edit'           => $editable && $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_EDIT,
                             $activity
                         ),
-                        'change_project' => $oscarUserContext->hasPrivileges(
+                        'change_project' => !$locked && $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_CHANGE_PROJECT,
                             $activity
                         ),
-                        'new_project'    => $oscarUserContext->hasPrivileges(
+                        'new_project'    => !$locked && $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_CHANGE_PROJECT,
                             $activity
                         ),
@@ -222,7 +240,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                     $entitiesTabs = $this->getContractDocumentRepository()->getTabDocuments();
                     $rolesMerged = $this->getRolesCurrentPersonActivity($oscarUserContext, $activity);
-//                    var_dump($rolesMerged); die();
+
                     $arrayTabs = [];
                     foreach ($entitiesTabs as $tabDocument) {
                         $tabId = $tabDocument->getId();
@@ -272,7 +290,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                 case 'organizations':
                     $credentials['organizations'] = [
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::ORGANIZATION_SHOW),
                     ];
@@ -286,7 +304,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     break;
                 case 'persons':
                     $credentials['persons'] = [
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
                     ];
