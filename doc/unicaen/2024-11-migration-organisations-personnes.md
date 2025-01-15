@@ -246,6 +246,13 @@ WHERE
 	AND ladaplogin != '';
 ```
 
+
+> Pour un changement de nom de connecteur (de 'rest' vers 'db'), il faut mettre à jour la table 'organizationperson' (champ origin - valeur rest > db)
+ 
+```sql
+UPDATE organizationperson SET origin = 'db' WHERE origin = 'rest';
+```
+
 Enfin, lancer la synchronisation des personnes :
 
 ```bash
