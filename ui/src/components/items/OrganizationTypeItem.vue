@@ -3,11 +3,13 @@
 
         <h3 class="card-title">
           <span class="">
+            <code>[{{ organizationtype.id }}]</code>
             {{ organizationtype.label }}
-            <span class="sup-info" :class="organizationtype.count ? 'primary' : 'neutral'">{{ organizationtype.count }}</span>
+            <span class="sup-info" :class="organizationtype.count ? 'primary' : 'neutral'">{{ organizationtype.id }}</span>
           </span>
           <nav class="text-right">
             <small>
+              <a :href="'/organization?t[]='+organizationtype.id">Voir les organisations</a>
                 <a href="#" @click.prevent="$emit('edit', organizationtype)"><i class="icon-floppy"></i> Modifier</a>
                 <a href="#" @click.prevent="$emit('remove', organizationtype)"><i class="icon-trash"></i> Supprimer</a>
             </small>
