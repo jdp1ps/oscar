@@ -97,3 +97,23 @@ body:not(.privatize){
   }
 }
 
+// ITEMS
+
+.sup-info {
+  position: relative;
+  border-radius: .5em;
+  display: inline-block;
+  padding: .2em .3em;
+  line-height: 1em;
+  font-size: .7em;
+  bottom: .6em;
+  &.primary {
+    background-color: #0a53be;
+    color: white;
+  }
+  &.neutral {
+    background-color: #9baab2;
+    color: #314752;
+  }
+}
+

@@ -132,18 +132,26 @@ class OrganizationType implements ITrackable
         return $this->getLabel();
     }
 
-    function toJson(){
+    function toJson(?array $counted = null): array
+    {
         $children = [];
         foreach ($this->getChildren() as $c ){
-            $children[] = $c->toJson();
+            $children[] = $c->toJson($counted);
         }
-        return [
+
+        $out = [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
             'description' => $this->getDescription(),
             'root_id' => $this->getRoot() ? $this->getRoot()->getId() : null,
             'children' => $children
         ];
+
+        if( $counted ){
+            $out['count'] = $counted[$this->getId()];
+        }
+
+        return $out;
     }
 
 }
