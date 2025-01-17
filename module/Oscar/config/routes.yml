@@ -237,12 +237,20 @@ timesheet:
         route: /import-ical
         defaults:
           action: importIcal
+
     declarant:
       type: segment
       options:
         route: /declarant
         defaults:
           action: declarant
+
+    declarant2:
+      type: segment
+      options:
+        route: /declarant2
+        defaults:
+          action: declarant2
 
     checkperiod:
       type: segment

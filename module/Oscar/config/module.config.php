@@ -308,6 +308,7 @@ return array(
                         'excel',
                         'organizationLeader',
                         'declarant',
+                        'declarant2',
                         'declarantAPI',
                         'validationActivity',
                         'validationActivity2',

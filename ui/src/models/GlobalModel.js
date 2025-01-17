@@ -8,6 +8,7 @@ const globalStore = createStore({
             rollPersonId: null,
             tooltip: null,
             urlPerson: null,
+            pending:[],
             errors: [
             ],
             cachePersons:{}
@@ -20,6 +21,9 @@ const globalStore = createStore({
         errors(state){
             return state.errors;
         },
+        pending(state){
+          return state.pending;
+        }
     },
     actions: {
         /// AIDE
@@ -95,6 +99,16 @@ const globalStore = createStore({
         }
     },
     mutations: {
+        addPending(state, message){
+            state.pending.push(message);
+        },
+        stopPending(state, message){
+            let i = state.pending.indexOf(message);
+            if(i >= 0){
+                state.pending.splice(i, 1);
+            }
+        },
+
         addError(state, msg){
             state.errors.unshift(errorFormat(msg));
         },

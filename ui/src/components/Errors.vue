@@ -22,15 +22,20 @@
       </li>
     </ul>
   </div>
+  <div class="oscar-pending">
+    <div v-for="p in pending">
+      <i class="icon-spinner animate-spin"></i>
+      {{ p }}
+    </div>
+  </div>
 </template>
 
 <script>
 import GlobalModel from "../models/GlobalModel.js";
+
 export default {
   name: 'oscar-error',
-  props: {
-
-  },
+  props: {},
 
   data() {
     return {
@@ -39,24 +44,27 @@ export default {
   },
 
   computed: {
-    errors(){
+    errors() {
       return GlobalModel.getters.errors;
+    },
+    pending() {
+      return GlobalModel.getters.pending;
     }
   },
   watch: {
-    errors(){
+    errors() {
       console.log("update", GlobalModel.getters.errors);
       this.display = true;
     }
   },
   methods: {
-    handlerRemoveError(index){
-      GlobalModel.dispatch('removeError',index);
+    handlerRemoveError(index) {
+      GlobalModel.dispatch('removeError', index);
     },
-    handlerPurge(){
+    handlerPurge() {
       GlobalModel.dispatch('removeErrors');
     },
-    handlerReduce(){
+    handlerReduce() {
       this.display = false;
     }
   }
@@ -64,6 +72,21 @@ export default {
 </script>
 
 <style scoped>
+.oscar-pending {
+  background: white;
+  font-size: 1em;
+  position: fixed;
+  z-index: 10000;
+  bottom: 0;
+  right: 0;
+  padding: .3em 1em;
+  border-radius: 8px 0 0 0;
+  transition: bottom .25s ease-in-out;
+  background: rgba(224, 226, 238, 1);
+  color: #333;
+  width: 25vw;
+  height: auto;
+}
 
 .oscar-errors {
   transition: bottom .25s ease-in-out;
@@ -75,6 +98,7 @@ export default {
   z-index: 9000;
   width: 60vw;
   height: calc(30vh + 40px);
+
   .errors {
     height: 30vw;
     overflow-y: scroll;
@@ -90,36 +114,46 @@ export default {
     padding: .25em 1em .25em .25em;
     border-bottom: solid 1px rgba(129, 10, 10, 0.7);
     background: rgba(129, 10, 10, 0.7);
+
     .links {
       display: flex;
+
       a {
         color: white;
         margin-left: 1em;
       }
     }
   }
+
   .errors {
     list-style: none;
     padding: .25em 1em;
   }
+
   .error {
-      border-bottom: 1px solid rgba(129, 10, 10, 1);
+    border-bottom: 1px solid rgba(129, 10, 10, 1);
+
     .time {
       flex: 0 0;
       line-height: 1.8em;
       font-size: .75em;
       padding-right: 1em;
     }
+
     .message {
       flex: 1;
     }
+
     display: flex;
     justify-content: space-between;
     padding: .25em 1em;
-    &:nth-child(even){
+
+    &:nth-child(even) {
       background-color: rgba(129, 10, 10, .5);
     }
+
     opacity: .7;
+
     &:hover {
       opacity: 1;
       background-color: rgba(129, 10, 10, 1);
