@@ -347,7 +347,6 @@
           </small>
         </h2>
 
-
         <h3 class="periode">Période
           <a href="#" @click.prevent="prevMonth"><i class="icon-angle-left"/></a>
           <strong @click.shift="debug = ts">{{ mois }}</strong>
@@ -363,8 +362,8 @@
               Vous ne pouvez pas importer pour une période en cours/déjà envoyée
             </small>
           </a>
-
         </h3>
+
         <div class="month">
           <header class="month-header">
             <strong>Lundi</strong>
@@ -386,9 +385,9 @@
                           :title="(week.total > week.weekExcess)?
                                                 'Les heures excédentaires risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                    <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{
-                    week.total | duration2(week.weekLength) }}</strong>
-
+                    <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>
+                    {{ $filters.duration2(week.total,week.weekLength) }}
+                  </strong>
                 </small>
               </header>
               <div class="days">
@@ -396,7 +395,7 @@
                                    :class="selectedDay == day ? 'selected':''"
                                    :others="ts.otherWP"
                                    :projectscolors="_colorsProjects"
-                                   @selectDay="handlerSelectData(day)"
+                                   @selectDay="handlerSelectDay(day)"
                                    @daymenu="handlerDayMenu"
                                    @debug="debug = $event"
                                    :day="day"
@@ -407,7 +406,6 @@
         </div>
       </div>
       <section class="col-lg-4">
-
         <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
         <timesheetmonthdaydetails v-if="selectedDay"
                                   :day="selectedDay"
@@ -421,7 +419,7 @@
                                   @debug="debug = $event"
                                   @copy="handlerCopyDay"
                                   @paste="handlerPasteDay"
-                                  @cancel="selectedDay = null"
+                                  @cancel="selectedDayData = null"
                                   @removetimesheet="deleteTimesheet"
                                   @edittimesheet="editTimesheet"
                                   @addtowp="handlerWpFromDetails($event)"
@@ -450,24 +448,24 @@
           <article class="card xs total repport-item"
                    :class="{ 'locked': d.locked, 'closed': d.closed, 'excess': d.duration > ts.dayExcess }"
                    v-for="d in selectedWeek.days"
-                   @click="handlerSelectData(d)">
+                   @click="handlerSelectDay(d)">
             <div class="week-header" :class="{ 'text-thin' : d.closed || d.locked }">
-                                <span class="">
-                                    <i class="icon-calendar"></i>
-                                    <i class="icon-minus-circled" v-if="d.closed"></i>
-                                    <i class="icon-lock" v-else-if="d.locked"></i>
-                                    <i class="icon-ok-circled"
-                                       v-else-if="d.total > d.amplitudemin && d.total < d.amplitudemax "
-                                       style="color: #2d7800"></i>
-                                    <i class="icon-help-circled" v-else style="color: #777777"></i>
+              <span class="">
+                  <i class="icon-calendar"></i>
+                  <i class="icon-minus-circled" v-if="d.closed"></i>
+                  <i class="icon-lock" v-else-if="d.locked"></i>
+                  <i class="icon-ok-circled"
+                     v-else-if="d.total > d.amplitudemin && d.total < d.amplitudemax "
+                     style="color: #2d7800"></i>
+                  <i class="icon-help-circled" v-else style="color: #777777"></i>
 
-                                    {{ d.data | datefull }}
+                  {{ $filters.date(d.data) }}
 
-                                    <i class="icon-attention-circled" style="color: red"
-                                       title="Les heures déclarées dépassent la limite légales"></i>
-                                </span>
+                  <i class="icon-attention-circled" style="color: red"
+                     title="Les heures déclarées dépassent la limite légales"></i>
+              </span>
               <small>
-                <strong class="text-large">{{ d.duration | duration2(d.dayLength) }}</strong>
+                <strong class="text-large">{{ $filters.duration2(d.duration,d.dayLength) }}</strong>
                 <!-- <span class="heure-total">{{ d.dayLength | duration }}</span>-->
               </small>
             </div>
@@ -538,22 +536,23 @@
 
           <section v-for="week in weeks" v-if="ts" class="card xs">
             <header class="week-header" @click="selectWeek(week)">
-                                <span>
-                                    Semaine {{ week.label }}
-                                    <i class="icon-ok-circled" style="color: #999"
-                                       v-if="week.total < week.weekLength"></i>
-                                    <i class="icon-attention-circled" style="color: #993d00"
-                                       v-else-if="week.total > week.weekExcess"
-                                       title="La déclaration est incomplète pour cette période"></i>
-                                    <i class="icon-ok-circled" style="color: #2d7800" v-else></i>
-                                </span>
+              <span>
+                  Semaine {{ week.label }}
+                  <i class="icon-ok-circled" style="color: #999"
+                     v-if="week.total < week.weekLength"></i>
+                  <i class="icon-attention-circled" style="color: #993d00"
+                     v-else-if="week.total > week.weekExcess"
+                     title="La déclaration est incomplète pour cette période"></i>
+                  <i class="icon-ok-circled" style="color: #2d7800" v-else></i>
+              </span>
               <small>
                 <strong :class="(week.total > week.weekExcess)?'has-titled-error':''"
                         :title="(week.total > week.weekExcess)?
                                                 'Les décalarations dépassent la limite légales et risques d\'être ignorées lors d\'une justification financière dans le cadre des projets soumis aux feuilles de temps'
                                                 :''">
-                  <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>{{ week.total |
-                  duration2(week.weekLength) }}</strong>
+                  <i class="icon-attention-1" v-if="week.total > week.weekExcess"></i>
+                  {{ $filters.duration2(week.total,week.weekLength) }}
+                </strong>
               </small>
             </header>
           </section>
@@ -562,7 +561,7 @@
             <div class="week-header">
               <span class="text-big text-xxl">Total</span>
               <small>
-                <strong class="text-large">{{ ts.total | duration2(monthLength) }}</strong>
+                <strong class="text-large">{{ $filters.duration2(ts.total,monthLength) }}</strong>
               </small>
             </div>
           </section>
@@ -578,12 +577,58 @@
           <pre>
             debug
           </pre>
-          <!--
-          <section class="card xs" v-for="a in ts.otherWP" v-if="a.total > 0">
+
+          <section class="card xs" v-for="(wpInfo, i) in ts.otherWP">
             <div class="week-header">
               <span>
-                  <i :class="'icon-'+a.code"></i>
-                  {{ a.label }}
+                  <i :class="'icon-'+wpInfo.code"></i>
+                  {{ wpInfo.label }}
+                  <i v-if="wpInfo.validation_state == null"></i>
+                  <i class="icon-cube" v-else-if="wpInfo.validation_state.status == 'send-prj'"
+                     title="Validation projet en attente"></i>
+                  <i class="icon-beaker" v-else-if="wpInfo.validation_state.status == 'send-sci'"
+                     title="Validation scientifique en attente"></i>
+                  <i class="icon-hammer" v-else-if="wpInfo.validation_state.status == 'send-adm'"
+                     title="Validation administrative en attente"></i>
+                  <i class="icon-minus-circled" v-else-if="wpInfo.validation_state.status == 'conflict'"
+                     title="Il y'a un problème dans la déclaration"></i>
+                  <i class="icon-ok-circled" v-else-if="wpInfo.validation_state.status == 'valid'"
+                     title="Cette déclaration est valide"></i>
+                  <br>
+                  <em class="text-thin">{{ wpInfo.description }}</em>
+                   <button class="btn btn-default btn-xs"
+                           @click.prevent.default="handledEditComment('hl', wpInfo)">
+                      <i class="icon-chat-alt"></i>
+                      Commentaire
+                  </button>
+              </span>
+              <small>
+                <strong class="text-large">{{ $filters.duration2(wpInfo.total, monthLength) }}</strong>
+              </small>
+            </div>
+          </section>
+
+
+          <section class="card xs total interaction-off">
+            <div class="week-header">
+              <span class="text-big text-xxl">Total</span>
+              <small>
+                <strong class="text-large">{{ $filters.duration2(totalWP, monthLength) }}</strong>
+              </small>
+            </div>
+          </section>
+
+          <h4><i class="icon-cubes"></i> Activités pour cette période</h4>
+          <p class="alert alert-info" v-if="ts.activities.length == 0">
+            Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
+            vous semble anormale, prenez contact avec votre responsable scientifique.
+          </p>
+          <section class="card xs" v-for="a in ts.activities" v-else>
+            <div class="week-header">
+              <span>
+                  <strong>{{ a.acronym }}</strong>
+                  <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }"
+                        @click="configureColor = true">&nbsp;</span>
                   <i v-if="a.validation_state == null"></i>
                   <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
                      title="Validation projet en attente"></i>
@@ -596,60 +641,13 @@
                   <i class="icon-ok-circled" v-else-if="a.validation_state.status == 'valid'"
                      title="Cette déclaration est valide"></i>
                   <br>
-                  <em class="text-thin">{{ a.description }}</em>
+                  <em class="text-thin">{{ a.label }}</em>
                    <button class="btn btn-default btn-xs"
-                           @click.prevent.default="handledEditComment('hl', a)">
+                           @click.prevent.default="handledEditComment('prj', a)">
                       <i class="icon-chat-alt"></i>
                       Commentaire
                   </button>
               </span>
-              <small>
-                <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
-              </small>
-            </div>
-          </section>
-          -->
-
-          <section class="card xs total interaction-off">
-            <div class="week-header">
-              <span class="text-big text-xxl">Total</span>
-              <small>
-                <strong class="text-large">{{ totalWP | duration2(monthLength) }}</strong>
-              </small>
-            </div>
-          </section>
-
-          <h4><i class="icon-cubes"></i> Activités pour cette période</h4>
-          <p class="alert alert-info" v-if="ts.activities.length == 0">
-            Vous n'être identifié comme déclarant sur aucune activité pour cette période. Si cette situation
-            vous semble anormale, prenez contact avec votre responsable scientifique.
-          </p>
-          <section class="card xs" v-for="a in ts.activities" v-else>
-            <div class="week-header">
-
-                                <span>
-                                    <strong>{{ a.acronym }}</strong>
-                                    <span class="icon-tag" :style="{'color': _colorsProjects[a.acronym] }"
-                                          @click="configureColor = true">&nbsp;</span>
-                                    <i v-if="a.validation_state == null"></i>
-                                    <i class="icon-cube" v-else-if="a.validation_state.status == 'send-prj'"
-                                       title="Validation projet en attente"></i>
-                                    <i class="icon-beaker" v-else-if="a.validation_state.status == 'send-sci'"
-                                       title="Validation scientifique en attente"></i>
-                                    <i class="icon-hammer" v-else-if="a.validation_state.status == 'send-adm'"
-                                       title="Validation administrative en attente"></i>
-                                    <i class="icon-minus-circled" v-else-if="a.validation_state.status == 'conflict'"
-                                       title="Il y'a un problème dans la déclaration"></i>
-                                    <i class="icon-ok-circled" v-else-if="a.validation_state.status == 'valid'"
-                                       title="Cette déclaration est valide"></i>
-                                    <br>
-                                    <em class="text-thin">{{ a.label }}</em>
-                                     <button class="btn btn-default btn-xs"
-                                             @click.prevent.default="handledEditComment('prj', a)">
-                                        <i class="icon-chat-alt"></i>
-                                        Commentaire
-                                    </button>
-                                </span>
               <small class="subtotal">
                 <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
               </small>
@@ -657,13 +655,14 @@
           </section>
           <section class="card xs total interaction-off">
             <div class="week-header">
-                                <span>
-                                    <strong class="text-big text-xxl">Total</strong><br>
-                                    <small>Pour les activités soumises aux déclarations</small>
-                                </span>
+              <span>
+                  <strong class="text-big text-xxl">Total</strong><br>
+                  <small>Pour les activités soumises aux déclarations</small>
+              </span>
               <small>
-                <strong class="text-large">{{ ts.periodDeclarations | duration2(monthLength)
-                  }}</strong>
+                <strong class="text-large">
+                  {{ $filters.duration2(ts.periodDeclarations,monthLength) }}
+                </strong>
               </small>
             </div>
           </section>
@@ -697,14 +696,12 @@
           </button>
 
           <span v-else>
-                        Vous ne pouvez pas soumettre cette période<br>
-                        <small>{{ ts.submitableInfos }}</small>
-                    </span>
+              Vous ne pouvez pas soumettre cette période<br>
+              <small>{{ ts.submitableInfos }}</small>
+          </span>
         </nav>
       </section>
-
     </section>
-
   </section>
 </template>
 
@@ -800,7 +797,8 @@ export default {
 
       rejectPeriod: null,
 
-      selectedDay: null,
+      selectedDayData: null,
+      // selectedDay: null,
       dayMenuLeft: 50,
       dayMenuTop: 50,
       dayMenu: 'none',
@@ -831,6 +829,21 @@ export default {
   },
 
   computed: {
+
+    /**
+     * Retourne le jour selectionné.
+     * @returns {*|null}
+     */
+    selectedDay(){
+      if( this.ts && this.ts.days ){
+        for (let day in this.ts.days) {
+          if(this.ts.days[day].data === this.selectedDayData){
+            return this.ts.days[day];
+          }
+        }
+      }
+      return null;
+    },
 
     projectsColors() {
       return this._colorsProjects;
@@ -1195,7 +1208,8 @@ export default {
       console.log('editTimesheet', timesheet.duration);
       this.editedTimesheet = timesheet;
       this.commentaire = timesheet.comment;
-      this.selectedDay = day;
+      this.selectedDayData = day.data;
+      // this.selectedDay = day;
       this.dayMenuTime = timesheet.duration;
       if (timesheet.wp_id) {
         this.selectionWP = this.getWorkpackageById(timesheet.wp_id);
@@ -1352,7 +1366,8 @@ export default {
     },
 
     selectWeek(week) {
-      this.selectedDay = null;
+      this.selectedDayData = null;
+      // this.selectedDay = null;
       this.selectedWeek = week;
     },
 
@@ -1505,11 +1520,14 @@ export default {
       this.dayMenuLeft = event.clientX;
       this.dayMenuTop = event.clientY;
       this.dayMenu = 'block';
-      this.selectedDay = day;
+      this.selectedDayData = day.data;
+      // this.selectedDay = day;
     },
 
-    handlerSelectData(day) {
-      this.selectedDay = day;
+    handlerSelectDay(day) {
+      console.log("Selection du jour", day.data);
+      this.selectedDayData = day.data;
+      //this.selectedDay = day;
     },
 
     /**
@@ -1553,7 +1571,8 @@ export default {
 
     fetch(clear = true) {
       if (clear) {
-        this.selectedDay = null;
+        this.selectedDayData = null;
+//        this.selectedDay = null;
         this.selectedWeek = null;
       }
 

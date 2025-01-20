@@ -4,7 +4,7 @@
 
 
       <div class="overlay-content">
-        <p>Choississez un type de créneau : </p>
+        <p>Choisissez un type de créneau : </p>
 
         <div class="row">
           <div class="col-md-6">
@@ -12,7 +12,7 @@
             <article class="timesheet-item" v-for="w in workpackages" @click.prevent="handlerSelectWP(w)"
                      :class="{ 'selected' : selection && selection.id == w.id, 'disabled': !w.validation_up }">
               <abbr :title="project" class="project-acronym"><i class="icon-cube"></i> {{ w.acronym }}</abbr>
-              <span class="activity-label">{{ w.activity }}</span>
+              <span class="activity-label" :title="w.activity">{{ $filters.strReduce(w.activity) }}</span>
               <strong class="workpackage-infos">
                 <span class="code">{{ w.code }}</span>
                 <small class="workpackage-label">{{ w.label }}</small>
@@ -41,8 +41,8 @@
       <button class="btn-lg btn btn-default dropdown-toggle" type="button" @click.prevent="showSelector = true">
                 <span v-if="hasSelected" class="info">
                     <i :class=" selectedIcon ? 'icon-' +selectedIcon : 'icon-archive'"></i>
-                    <strong>{{selectedCode}}</strong> <em>{{ selectedLabel }}</em><br/>
-                    <small class="text-light">{{ selectedDescription }}</small>
+                    <strong>{{selectedCode}}</strong> <em>{{ $filters.strReduce(selectedLabel) }}</em><br/>
+                    <small class="text-light">{{ $filters.strReduce(selectedDescription) }}</small>
                 </span>
         <em v-else class="info">Lot de travail/Activité...</em>
         <span class="caret"></span>
