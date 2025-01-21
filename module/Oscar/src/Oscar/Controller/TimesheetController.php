@@ -2323,7 +2323,6 @@ class TimesheetController extends AbstractOscarController
 
         // JOUR
         $datas = $this->getJsonREST();
-        $this->getLoggerService()->info("sendTimesheet", json_encode($datas));
         $timesheetsDatas = $datas['timesheets'];
         $timesheets = [];
         $action = $datas['action'];

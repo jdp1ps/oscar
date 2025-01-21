@@ -376,7 +376,7 @@
           </header>
           <div class="weeks">
             <section v-for="week in weeks" v-if="ts" class="week"
-                     :class="selectedWeek == week ? 'selected' : ''">
+                     :class="selectedWeek.label == week.label ? 'selected' : ''">
               <header class="week-header" @click="selectWeek(week)">
                 <span>Semaine {{ week.label }}</span>
                 <small>
@@ -481,7 +481,7 @@
                                     </small>
                                 </span>
               <small class="text-big">
-                <strong>{{ selectedWeek.total | duration2(selectedWeek.weekLength) }}</strong>
+                <strong>{{ $filters.duration2(selectedWeek.total,selectedWeek.weekLength) }}</strong>
               </small>
             </div>
           </article>
@@ -1362,7 +1362,6 @@ export default {
 
     selectWeek(week) {
       this.selectedDayData = null;
-      // this.selectedDay = null;
       this.selectedWeek = week;
     },
 
