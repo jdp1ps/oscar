@@ -2606,6 +2606,7 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     if (!$datas->from || !$datas->to) {
+                        $this->getLoggerService()->info("FOO : " . json_encode($datas));
                         return $this->getResponseInternalError("La période soumise est incomplète");
                     }
 
@@ -2730,7 +2731,7 @@ class TimesheetController extends AbstractOscarController
                     $comments = $posted['comments'];
 
                     if ($comments) {
-                        throw new OscarException("A corriger");
+                        //throw new OscarException("A corriger");
                     }
 
                     // Ajout des créneaux
@@ -2759,12 +2760,13 @@ class TimesheetController extends AbstractOscarController
                         return $this->getResponseBadRequest('Problème de transmission des données');
                     }
 
-                    if (!$datas->from || !$datas->to) {
+                    if (!$datas['from'] || !$datas['to']) {
                         return $this->getResponseInternalError("La période soumise est incomplète");
                     }
 
                     try {
-                        $firstDay = new \DateTime($datas->from);
+                        $firstDay = new \DateTime($datas['from']);
+                        $this->getLoggerService()->info("Premier jour : " . $firstDay->format('Y-m-d H:i:s'));
                         $this->getTimesheetService()->verificationPeriod(
                             $currentPerson,
                             $firstDay->format('Y'),
@@ -2775,8 +2777,8 @@ class TimesheetController extends AbstractOscarController
                     }
 
                     try {
-                        $from = new \DateTime($datas->from);
-                        $to = new \DateTime($datas->to);
+                        $from = new \DateTime($datas['from']);
+                        $to = new \DateTime($datas['to']);
                         $timesheetService->sendPeriod($from, $to, $currentPerson, $comments);
                         return $this->getResponseOk();
                     } catch (\Exception $e) {

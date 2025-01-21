@@ -67,21 +67,21 @@
                   <i class="icon-archive"></i> {{ wp.label }}
                 </th>
                 <td v-for="d in ts.days">
-                  <strong v-if="wp.days[d.i]">{{ wp.days[d.i] | duration2(d.dayLength) }}</strong>
+                  <strong v-if="wp.days[d.i]">{{ $filters.duration2(wp.days[d.i],d.dayLength) }}</strong>
                   <small v-else>-</small>
                 </td>
                 <th class="total">
-                  {{ wp.total | duration2(monthLength) }}
+                  {{ $filters.duration2(wp.total,monthLength) }}
                 </th>
               </tr>
 
               <tr class="activity-line-total">
                 <th colspan="2">Total</th>
                 <td v-for="d in ts.days">
-                  <strong v-if="activity.days[d.i]">{{ activity.days[d.i] | duration2(d.dayLength) }}</strong>
+                  <strong v-if="activity.days[d.i]">{{ $filters.duration2(activity.days[d.i],d.dayLength) }}</strong>
                   <small v-else>-</small>
                 </td>
-                <th class="total">{{ activity.total | duration2(monthLength) }}</th>
+                <th class="total">{{ $filters.duration2(activity.total,monthLength) }}</th>
               </tr>
 
             </template>
@@ -106,11 +106,11 @@
                 &nbsp;
               </td>
               <td v-for="d in ts.days">
-                <strong v-if="hl.days[d.i]">{{ hl.days[d.i] | duration2(d.dayLength) }}</strong>
+                <strong v-if="hl.days[d.i]">{{ $filters.duration2(hl.days[d.i],d.dayLength) }}</strong>
                 <small v-else>-</small>
               </td>
               <th class="total">
-                {{ hl.total | duration2(monthLength) }}
+                {{ $filters.duration2(hl.total,monthLength) }}
               </th>
             </tr>
             </tbody>
@@ -127,11 +127,11 @@
                 =
               </th>
               <td v-for="d in ts.days">
-                <strong v-if="d.total">{{ d.total | duration2(d.dayLength) }}</strong>
+                <strong v-if="d.total">{{ $filters.duration2(d.total,d.dayLength) }}</strong>
                 <small v-else>-</small>
               </td>
               <th class="total">
-                {{ ts.total | duration2(monthLength) }}
+                {{ $filters.duration2(ts.total,monthLength) }}
               </th>
             </tr>
             </tbody>
@@ -376,7 +376,7 @@
           </header>
           <div class="weeks">
             <section v-for="week in weeks" v-if="ts" class="week"
-                     :class="selectedWeek.label == week.label ? 'selected' : ''">
+                     :class="selectedWeek && selectedWeek.label == week.label ? 'selected' : ''">
               <header class="week-header" @click="selectWeek(week)">
                 <span>Semaine {{ week.label }}</span>
                 <small>
@@ -1229,20 +1229,14 @@ export default {
      * Déclenchement de la validation côté serveur pour vérifier si les créneaux saisis sont conformes.
      */
     validateMonth(action = "sendmonth") {
-      this.loading = true;
-      this.$http.get(this.urlValidation + '?year=' + this.ts.year + '&month=' + this.ts.month).then(
+      AxiosOscar.get(this.urlValidation + '?year=' + this.ts.year + '&month=' + this.ts.month).then(
           ok => {
-            console.log("OK");
             this.sendMonth(action);
-          },
-          ko => {
-            console.log(ko);
+          }).catch(ko => {
             this.error = ko.body;
-          }
-      ).then(foo => {
-        this.selectedWeek = null;
-        this.loading = false;
-      });
+          }).then(foo => {
+            this.selectedWeek = null;
+          });
     },
 
 
@@ -1316,27 +1310,19 @@ export default {
     sendMonthProceed() {
 
       // Données à envoyer
-      var datas = new FormData();
-      datas.append('action', this.sendaction);
-      datas.append('comments', JSON.stringify(this.screensend));
-      datas.append('datas', JSON.stringify({
-        from: this.ts.from,
-        to: this.ts.to
-      }));
 
-      this.loading = true;
+      var datas = {};
+      datas.action = this.sendaction;
+      datas.comments = this.screensend;
+      datas.from = this.ts.from;
+      datas.to = this.ts.to;
 
-      this.$http.post('', datas).then(
-          ok => {
-            this.fetch();
-          },
-          ko => {
-            this.error = AjaxResolve.resolve('Impossible d\'envoyer la période', ko);
-          }
-      ).then(foo => {
+      AxiosOscar.post(this.url, datas).then(res => {
+        console.log("ENVOI OK")
         this.selectedWeek = null;
         this.screensend = null;
         this.loading = false;
+        this.fetch();
       });
     },
 
