@@ -408,21 +408,21 @@
       <section class="col-lg-4">
         <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
         <timesheetmonthdaydetails v-if="selectedDay"
-                                  :day="selectedDay"
-                                  :workPackages="ts.workpackages"
-                                  :others="ts.otherWP"
-                                  :selection="selectionWP"
-                                  :editable="ts.editable"
-                                  :label="dayLabel"
-                                  :day-excess="ts.dayExcess"
-                                  :copiable="clipboardDataDay"
-                                  @debug="debug = $event"
-                                  @copy="handlerCopyDay"
-                                  @paste="handlerPasteDay"
-                                  @cancel="selectedDayData = null"
-                                  @removetimesheet="deleteTimesheet"
-                                  @edittimesheet="editTimesheet"
-                                  @addtowp="handlerWpFromDetails($event)"
+            :day="selectedDay"
+            :workPackages="ts.workpackages"
+            :others="ts.otherWP"
+            :selection="selectionWP"
+            :editable="ts.editable"
+            :label="dayLabel"
+            :day-excess="ts.dayExcess"
+            :copiable="clipboardDataDay"
+            @debug="debug = $event"
+            @copy="handlerCopyDay"
+            @paste="handlerPasteDay"
+            @cancel="selectedDayData = null"
+            @removetimesheet="deleteTimesheet"
+            @edittimesheet="editTimesheet"
+            @addtowp="handlerWpFromDetails($event)"
         />
 
         <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS SEMAINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -649,7 +649,7 @@
                   </button>
               </span>
               <small class="subtotal">
-                <strong class="text-large">{{ a.total | duration2(monthLength) }}</strong>
+                <strong class="text-large">{{ $filters.duration2(a.total, monthLength) }}</strong>
               </small>
             </div>
           </section>
@@ -1085,12 +1085,8 @@ export default {
   },
 
   methods: {
-    duration2(val) {
-      return "duration2:" + val;
-    },
 
     handledEditComment(type, data) {
-      console.log("handledEditComment", type, data);
       this.commentEditedLabel = data.label;
       this.commentEdited = data;
       this.commentEditedContent = data.comment;
@@ -1108,20 +1104,19 @@ export default {
           code = this.commentEdited.code;
           id = "";
         }
-        var formData = new FormData();
-        formData.append('action', 'comment');
-        formData.append('period', this.ts.period);
-        formData.append('type', type);
-        formData.append('id', id);
-        formData.append('code', code);
-        formData.append('content', this.commentEditedContent);
 
-        this.$http.post('', formData).then(
+        let formData = {
+          'action': 'comment',
+          'period': this.ts.period,
+          'type': type,
+          'id': id,
+          'code': code,
+          'content': this.commentEditedContent
+        };
+
+        AxiosOscar.post(this.url, formData).then(
             ok => {
               this.fetch();
-            },
-            ko => {
-              this.error = AjaxResolve.resolve("Impossible d'enregistrer le commentaire", ko);
             }
         ).then(foo => {
           this.selectedWeek = null;

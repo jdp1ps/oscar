@@ -2319,8 +2319,11 @@ class TimesheetController extends AbstractOscarController
 
     public function sendTimesheet(Person $person)
     {
+
+
         // JOUR
         $datas = $this->getJsonREST();
+        $this->getLoggerService()->info("sendTimesheet", json_encode($datas));
         $timesheetsDatas = $datas['timesheets'];
         $timesheets = [];
         $action = $datas['action'];
@@ -2742,7 +2745,7 @@ class TimesheetController extends AbstractOscarController
 
                     if ($action == 'comment') {
                         try {
-                            $timesheetService->saveCommentFromPost($currentPerson, $_POST);
+                            $timesheetService->saveCommentFromPost($currentPerson, $posted);
                             return $this->getResponseOk();
                         } catch (OscarException $e) {
                             return $this->getResponseInternalError($e->getMessage());
