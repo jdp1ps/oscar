@@ -22,9 +22,7 @@
             </span>
         </span>
 
-
-
-        <span >
+        <span>
             <span v-for="other in day.othersWP" class="cartouche xs" :class="other.code">
                 <i v-if="other.validations == null" class="icon-draft"></i>
                 <i :class="'icon-' + other.status_id" v-else></i>

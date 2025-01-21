@@ -19,6 +19,14 @@ const app = createApp(TimesheetDeclaration, {
     "declarationInHours": elemDatas.dataset.declarationInHours,
 });
 
+const statusValidation = {
+    'send-prj': 'Validation projet',
+    'send-sci': 'Validation scientifique',
+    'send-adm': 'Validation administrative',
+    'conflict': 'Conflit',
+    'valid': 'Validé'
+};
+
 // Filtres
 app.config.globalProperties.$filters = {
     timeAgo(date) {
@@ -50,6 +58,12 @@ app.config.globalProperties.$filters = {
             return str.substring(0, 17) + '...';
         }
         return str;
+    },
+    statusLabel(statusId){
+        if( statusValidation.hasOwnProperty(statusId) ){
+            return statusValidation[statusId];
+        }
+        return "Brouillon";
     }
 };
 

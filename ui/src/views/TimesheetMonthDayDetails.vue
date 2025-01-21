@@ -202,18 +202,7 @@ export default {
     }
   },
 
-  filters: {
-    heures(v) {
-      let heures = Math.floor(v);
-      let minutes = Math.round((v - heures) * 60);
-      if (minutes < 10) minutes = '0' + minutes;
-      console.log(v, ' => ', heures, 'h', minutes);
-      return heures + ":" + minutes;
-    }
-  },
-
   computed: {
-
     isExceed() {
       return this.total > this.day.dayLength;
     },

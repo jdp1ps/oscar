@@ -10,7 +10,7 @@
             <small><i class="icon-cubes"></i> {{ d.label }}</small>
 
             <div class="status">
-                <i :class="'icon-'+d.status_id"></i> {{ d.status_id | status }}
+                <i :class="'icon-'+d.status_id"></i> {{ $filters.statusLabel(d.status_id) }}
                 <span v-if="d.validations.conflict" class="text-danger">
                     {{ d.validations.conflict }}
                 </span>
@@ -31,15 +31,6 @@
         props: {
             'd': { required: true },
             'dayLength': { required: true }
-        },
-        filters: {
-            heures(v){
-                let heures = Math.floor(v);
-                let minutes = Math.round((v - heures)*60);
-                if( minutes < 10 ) minutes = '0'+minutes;
-                console.log(v, ' => ',heures,'h',minutes);
-                return heures+":"+minutes;
-            }
         }
     }
 </script>
