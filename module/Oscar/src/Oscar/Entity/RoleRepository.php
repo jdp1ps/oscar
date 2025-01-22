@@ -239,11 +239,11 @@ class RoleRepository extends EntityRepository
 
     /**
      * @param string $roleId
-     * @return array
+     * @return Role
      * @throws NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getRoleByRoleId(string $roleId): array
+    public function getRoleByRoleId(string $roleId): Role
     {
         $queryRole = $this->createQueryBuilder('r')
             ->from(Role::class, 'role')
