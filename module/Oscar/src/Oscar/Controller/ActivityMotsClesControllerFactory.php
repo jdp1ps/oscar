@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Oscar\Service\OscarUserContext;
+use Oscar\Service\ProjectGrantService;
 
 class ActivityMotsClesControllerFactory implements FactoryInterface
 {
@@ -15,6 +16,7 @@ class ActivityMotsClesControllerFactory implements FactoryInterface
         $c->setEntityManager($container->get(EntityManager::class));
         $c->setOscarUserContextService($container->get(OscarUserContext::class));
         $c->setLoggerService($container->get('Logger'));
+        $c->setActivityService($container->get(ProjectGrantService::class));
         return $c;
     }
 }

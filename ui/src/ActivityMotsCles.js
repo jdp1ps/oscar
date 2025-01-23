@@ -8,6 +8,7 @@ let elemDatas = document.querySelector(elemId);
 // Création de l'App
 const app = createApp(ActivityMotsCles, {
     "url": elemDatas.dataset.url,
+    "activityid": elemDatas.dataset.activityid,
     "motsclesselectionnes": elemDatas.dataset.motsclesselectionnes
 });
 
