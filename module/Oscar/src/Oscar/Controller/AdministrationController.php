@@ -764,6 +764,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
         return $datas;
     }
 
+    public function motsclesAction()
+    {
+        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_DISCIPLINE_MANAGE);
+        return [];
+    }
 
     /**
      * Reconstruction de l'index de recherche.
@@ -796,7 +801,7 @@ class AdministrationController extends AbstractOscarController implements UsePro
             return $this->getResponseBadRequest();
         }
 
-        if ($this->isAjax()) {
+        if ($this->isAjax() || $this->getRequest()->getQuery('f') === 'json') {
             $method = $this->getHttpXMethod();
             try {
                 switch ($method) {
@@ -806,12 +811,13 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
                     case 'DELETE' :
                         $id = $this->params()->fromRoute('id');
+                        $this->getLoggerService()->info("Suppression de $id");
                         $this->getOrganizationService()->removeOrganizationType($id);
                         return $this->getResponseOk("Type d'organisation supprimée");
 
                     case 'POST' :
                         $type = $this->getOrganizationService()->updateOrCreateOrganizationType(
-                            $this->params()->fromPost()
+                           $this->getJsonREST()
                         );
                         return $this->ajaxResponse([$type->toJson()]);
 

@@ -195,7 +195,6 @@
             <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
             <small>{{typeLabel}}</small>
             <select class="select2 form-control val1 changer types" id="filter_discipline" multiple>
-                <option></option>
                 <?php foreach ($disciplines as $id => $label): ?>
                     <option
                         value="<?= $id ?>"><?= $label ?></option>
@@ -207,6 +206,26 @@
                 </a>
             </nav>
         </article>
+    </script>
+
+    <script type="text/x-handlebars" id="tags-criteria-tpl">
+        <article class="criteria criteria-type card">
+            <div class="icon-tags"></div>
+            {{#if error}}<strong class="text-danger"><i class="icon-attention-1"></i> {{error}}</strong>{{/if}}
+            <input type="hidden" name="criteria[]" class="criteria" value="{{criteria}}"/>
+            <small>{{typeLabel}}</small>
+            <select class="select2 form-control val1 changer types" id="filter_tags" multiple>
+                <?php foreach ($tags as $id => $label): ?>
+                    <option
+                        value="<?= $id ?>"><?= $label ?></option>
+                <?php endforeach; ?>
+        </select>
+        <nav>
+            <a href="#" class="delete">
+                <i class="icon-cancel-outline"></i>
+            </a>
+        </nav>
+    </article>
     </script>
 
     <script type="text/x-handlebars" id="country-tpl">
@@ -830,10 +849,9 @@
                     console.log("DATAS:", datas);
                     datas.typeLabel = (labelsType[datas.type]);
                     datas.criteria = datas.type + ";" + datas.val1 + ";" + datas.val2;
+                    console.log("DATAS:", datas.criteria);
 
                     var dom, applyChange;
-
-
 
                     if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
                         dom = $(tpl(datas));
@@ -904,6 +922,9 @@
                     else if(datas.type == 'ds'){
                         dom = $(tplDiscipline(datas));
                     }
+                    else if(datas.type == 'tg'){
+                        dom = $(tplTags(datas));
+                    }
                     else {
                         console.error("le type", datas.type, "n'est pas pris en charge", datas);
                         return;
@@ -939,7 +960,6 @@
                         var checkboxs = filter.find('.val2[type="checkbox"]');
 
                         if( checkboxs.length > 1 ){
-                            console.log("VAL2 CHECKBOX x BEAUCOUP");
                             var values = [];
                             checkboxs.each(i => {
                                 var checkbox = checkboxs[i];
@@ -949,12 +969,10 @@
                             });
                             val2 = values.join(',');
                         } else if (checkboxs.length == 1){
-                            console.log("VAL2 CHECKBOX x 1");
                             var val2Elem = filter.find('.val2');
                             if( val2Elem ){
                                 val2 = val2Elem[0].checked ? "1" : "0";
                             }
-                            console.log('Val2', val2);
                         }
 
                         // Select
@@ -1074,8 +1092,6 @@
 
                     if(datas.type == 'td' && datas.val2 != null ){
                         if( datas.val2 == "1" ){
-                            console.log('VAL2', datas.val2);
-                            console.log('>>>>', dom.find('.val2'), dom.find('.val2').checked);
                             dom.find('.val2')[0].checked = true;
                         }
                     }
@@ -1165,6 +1181,7 @@
                     tplFinance = Handlebars.compile($('#finance-criteria-tpl').html()),
                     tplType = Handlebars.compile($('#type-criteria-tpl').html()),
                     tplDiscipline = Handlebars.compile($('#discipline-criteria-tpl').html()),
+                    tplTags = Handlebars.compile($('#tags-criteria-tpl').html()),
                     tplStatic = Handlebars.compile($('#static-criteria-tpl').html()),
                     tplNumber = Handlebars.compile($('#number-criteria-tpl').html()),
                     tplPersons = Handlebars.compile($('#persons-criteria-tpl').html()),
@@ -1179,7 +1196,7 @@
                         id: id++,
                         type: $(this).val(),
                         typeLabel: labelsType[$(this).val()],
-                        val1: null,
+                        val1: "",
                         labelVal1: null,
                         val2: null,
                         labelVal2: null

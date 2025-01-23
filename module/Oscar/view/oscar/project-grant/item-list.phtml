@@ -100,9 +100,20 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
                 <?php if ($activity->getDisciplines()->count()): ?>
                     <div>
                         <i class="icon-tags"></i>
+                        Disciplines :
                         <?php foreach ($activity->getDisciplines() as $discipline): ?>
                             <span
                                 class="discipline tag"><?= $discipline ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($activity->getMotscles()->count()): ?>
+                    <div>
+                        <i class="icon-tags"></i>
+                        Mot-clefs :
+                        <?php foreach ($activity->getMotscles() as $motclef): ?>
+                            <span
+                                    class="discipline tag"><?= $motclef->getLabel() ?></span>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>

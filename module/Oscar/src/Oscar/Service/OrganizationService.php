@@ -600,20 +600,20 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     }
 
 
-    public function getOrganizationTypes()
+    public function getOrganizationTypes(?int $root = null, ?array $types = null): array
     {
         $types = [];
-        $result = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy(
-            ['root' => null],
-            ['label' => 'DESC']
-        );
+        $counted = $this->getEntityManager()->getRepository(OrganizationType::class)->getCountedTypes();
+        $types = $this->getEntityManager()->getRepository(OrganizationType::class)->findBy([], ['label' => 'ASC']);
 
-        /** @var OrganizationType $type */
-        foreach ($result as $type) {
-            $types[$type->getId()] = $type->toJson();
+        $out = [];
+        foreach ($types as $type) {
+            if( !$type->getRoot() ){
+                $out[] = $type->toJson($counted);
+            }
         }
 
-        return $types;
+        return $out;
     }
 
     public function getTypes()
@@ -810,7 +810,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
     public function getSearchQuery($search, $filter)
     {
         // Path 2024/12/09
-        if( !array_key_exists('sort', $filter )){
+        if (!array_key_exists('sort', $filter)) {
             $filter['sort'] = 'hit';
         }
 
@@ -822,8 +822,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
             // ORDER BY de LREM
             // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
-            if (count($ids) > 1 ) {
-                if( $filter['sort'] == 'hit' ){
+            if (count($ids) > 1) {
+                if ($filter['sort'] == 'hit') {
                     $sortSize = 25; // On ne trie que les 25 premiers
                     $this->getLoggerService()->debug("SORT BY HIT (elastic IDS)");
 
@@ -844,13 +844,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
             }
         }
 
-        if( $filter['sort'] != 'hit' ){
+        if ($filter['sort'] != 'hit') {
             $field = $filter['sort'];
             $direction = $filter['direction'];
             $this->getLoggerService()->debug("TRIE $field/$direction");
             $qb->addSelect("CASE WHEN o.$field IS NULL THEN 0 ELSE 1 END as HIDDEN null_value");
             $qb->addOrderBy('null_value', 'DESC');
-            if( $field != 'dateUpdated' && $field != 'dateEnd' && $field != 'dateCreated'){
+            if ($field != 'dateUpdated' && $field != 'dateEnd' && $field != 'dateCreated') {
                 $qb->addSelect("CASE WHEN o.$field =  '' THEN 0 ELSE 1 END as HIDDEN zero_value");
                 $qb->addOrderBy('zero_value', 'DESC');
             }
@@ -875,8 +875,6 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                     $qb->addOrderBy('o.dateCreated', $direction);
                     break;
             }
-
-
         }
 //        else {
 //            $qb->addOrderBy('o.dateEnd', 'DESC')->addOrderBy('o.dateUpdated', 'DESC');

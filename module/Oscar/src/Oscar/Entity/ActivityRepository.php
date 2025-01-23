@@ -1191,4 +1191,15 @@ class ActivityRepository extends EntityRepository
         }
         return array_map('current', $qb->getQuery()->getResult());
     }
+
+    public function getIdsMotclefs(mixed $motclefsIds)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->select('DISTINCT c.id')
+            ->from(Activity::class, 'c')
+            ->innerJoin('c.motscles', 'm')
+            ->where('m IN (:motcles)')
+            ->setParameter('motcles', $motclefsIds);
+        return array_map('current', $qb->getQuery()->getResult());
+    }
 }

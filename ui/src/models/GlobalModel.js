@@ -8,33 +8,44 @@ const globalStore = createStore({
             rollPersonId: null,
             tooltip: null,
             urlPerson: null,
-            errors: [
-            ],
-            cachePersons:{}
+            pendingFullScreen: false,
+            errorFullScreen: false,
+            pending: [],
+            errors: [],
+            cachePersons: {}
         };
     },
     getters: {
-      tooltipInfos(state){
-          return state.tooltip;
-      },
-        errors(state){
+        tooltipInfos(state) {
+            return state.tooltip;
+        },
+        errors(state) {
             return state.errors;
         },
+        pending(state) {
+            return state.pending;
+        },
+        pendingFullScreen(state) {
+            return state.pendingFullScreen;
+        },
+        errorFullScreen(state){
+            return state.errorFullScreen;
+        }
     },
     actions: {
         /// AIDE
-        displayHelp(tag){
+        displayHelp(tag) {
 
         },
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        tooltipReset({state}){
-            if(state.tooltip){
+        tooltipReset({state}) {
+            if (state.tooltip) {
                 state.tooltip.display = false;
             }
         },
-        tooltipPersonPreShooting({state}, data){
-            if(state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === data.id){
+        tooltipPersonPreShooting({state}, data) {
+            if (state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === data.id) {
                 state.tooltip.display = true;
                 state.tooltip.x = data.event.pageX;
                 state.tooltip.y = data.event.pageY;
@@ -42,23 +53,22 @@ const globalStore = createStore({
             }
             return false;
         },
-        tooltipPerson({state, commit, dispatch}, tooltipInfos){
-            if(state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === tooltipInfos.id){
-                console.log("Réactivation de la tooltip");
+        tooltipPerson({state, commit, dispatch}, tooltipInfos) {
+            if (state.tooltip && state.tooltip.type === 'person' && state.tooltip.id === tooltipInfos.id) {
                 state.tooltip.display = true;
                 return true;
             } else {
 
                 let posX = 0;
                 let posY = 0;
-                if( tooltipInfos.event ){
+                if (tooltipInfos.event) {
                     posX = tooltipInfos.event.pageX;
                     posY = tooltipInfos.event.pageY;
                 }
-                if( tooltipInfos && tooltipInfos.type === 'person' ){
+                if (tooltipInfos && tooltipInfos.type === 'person') {
                     let url = state.urlPerson + tooltipInfos.id;
 
-                    if( state.cachePersons.hasOwnProperty(tooltipInfos.id) ) {
+                    if (state.cachePersons.hasOwnProperty(tooltipInfos.id)) {
                         state.cachePersons[tooltipInfos.id].display = true;
                         commit('setTooltip', state.cachePersons[tooltipInfos.id]);
                     } else {
@@ -87,22 +97,48 @@ const globalStore = createStore({
                 }
             }
         },
-        removeError({state}){
+        removeError({state}) {
             state.errors.splice(state, 1);
         },
-        removeErrors({state}){
+        removeErrors({state}) {
             state.errors = [];
         }
     },
     mutations: {
-        addError(state, msg){
+        pendingFullScreen(state, bool) {
+            state.pendingFullScreen = bool === true;
+        },
+
+        addPending(state, message) {
+            state.pending.push(message);
+        },
+
+        stopPending(state, message) {
+            let i = state.pending.indexOf(message);
+            if (i >= 0) {
+                state.pending.splice(i, 1);
+            }
+        },
+
+        addError(state, msg) {
             state.errors.unshift(errorFormat(msg));
         },
-        addErrorAxios(state, err){
+
+        removeErrorFullScreen(state){
+            state.errorFullScreen = false;
+        },
+
+        addErrorFullScreen(state, msg){
+            state.errors.unshift(errorFormat(msg));
+            state.errorFullScreen = msg;
+        },
+
+        addErrorAxios(state, err) {
             state.errors.unshift(errorFormat(AxiosMessage.manageErrorResponse(err).message));
         },
+
         setTooltip(state, tooltipInfos) {
-            if( tooltipInfos ){
+            if (tooltipInfos) {
                 state.tooltip = tooltipInfos;
             } else {
                 state.tooltip = null;
@@ -110,12 +146,12 @@ const globalStore = createStore({
         }
     },
 
-    errorFormat(msg){
+    errorFormat(msg) {
     }
 
 });
 
-let errorFormat = function(msg){
+let errorFormat = function (msg) {
     return {
         time: new Date().toISOString(),
         message: msg,

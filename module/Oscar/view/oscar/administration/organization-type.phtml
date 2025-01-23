@@ -3,9 +3,14 @@
         <i class="icon-building-filled"></i>
         Gestion des types d'oganisation
     </h1>
-    <div id="app"></div>
+    <div id="admintypeorganization"
+         data-url="<?= $this->url('administration/organizationtype') ?>"
+         data-manage="true"
+    ></div>
+    <?php echo $this->Vite()->addJs('src/AdminTypeOrganization.js') ?>
 </section>
 <script>
+    /****
     require(["vue", "vue-resource", 'OrganizationType'], function(Vue, VueResource, OrganizationType){
         Vue.use(VueResource);
         Vue.http.options.emulateJSON = true;
@@ -23,4 +28,5 @@
             }
        }).$mount('#app')
     });
+    /****/
 </script>

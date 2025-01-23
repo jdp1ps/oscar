@@ -1,0 +1,1 @@
+const n={percent(r){return""+(Math.round(r*10)/10).toFixed(1)},round1(r){return r.toFixed(1)},formatDuration(r){var o=Math.floor(r),t=Math.round((r-o)*60);return o+":"+(t<10?"0"+t:t)}};export{n as D};

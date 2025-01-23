@@ -34,6 +34,7 @@
             <div class="col-md-6">
                 <div id="activity-mots-cles"
                      data-url="<?= $this->url('activity-mots-cles/api') ?>"
+                     data-activityid="<?= $activity->getId() ?>"
                      data-motsclesselectionnes="<?php 
                             echo '[';
                             $count = count($activity->getMotscles());

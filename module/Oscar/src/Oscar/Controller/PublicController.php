@@ -203,20 +203,20 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         ];
     }
 
+    /**
+     * @throws OscarException
+     */
     public function testAction()
     {
         if (DEBUG_OSCAR) {
-//            $createRoot = new ActivityType();
-//            $this->getEntityManager()->persist($createRoot);
-//            $createRoot->setLft(1);
-//            $createRoot->setRgt(2);
-//            $createRoot->setLabel('ROOT');
-//
-//            $this->getLoggerService()->info("-----------------------------------------------------------");
-//            $this->getLoggerService()->info("Création du Noeud ROOT : " . $createRoot->trac());
-//
-//            $this->getEntityManager()->flush($createRoot);
-
+            if( $this->isAjax() ){
+                $sleep = $this->getRequest()->getQuery('sleep');
+                if( $sleep ){
+                    sleep($sleep);
+                    throw new OscarException("SLEEP : $sleep");
+                }
+            }
+            return [];
         }
         die("DEV ONLY");
     }
@@ -225,6 +225,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
      * Page d'accueil.
      *
      * @return ViewModel
+     * @throws OscarException
      */
     public function indexAction()
     {

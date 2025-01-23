@@ -237,6 +237,7 @@ timesheet:
         route: /import-ical
         defaults:
           action: importIcal
+
     declarant:
       type: segment
       options:
@@ -2005,6 +2006,15 @@ administration:
         route: /discipline
         defaults:
           action: discipline
+
+    motscles:
+      type: segment
+      may_terminate: true
+      options:
+        route: /motscles
+        defaults:
+          action: motscles
+
     tva:
       type: segment
       may_terminate: true

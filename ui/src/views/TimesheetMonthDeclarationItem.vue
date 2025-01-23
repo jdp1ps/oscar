@@ -1,0 +1,36 @@
+<template>
+    <article class="card card-xs xs wp-duration" :class="'status-' + d.status_id">
+        <span class="infos">
+            <strong>
+                <i class="icon-archive"></i>
+                <abbr :title="d.project">{{ d.acronym }}</abbr>
+                <i class="icon-angle-right"></i> {{ d.wpCode }}
+                <i class="icon-comment" :class="d.comment ? 'with-comment' : ''" :title="d.comment"></i>
+            </strong><br>
+            <small><i class="icon-cubes"></i> {{ d.label }}</small>
+
+            <div class="status">
+                <i :class="'icon-'+d.status_id"></i> {{ $filters.statusLabel(d.status_id) }}
+                <span v-if="d.validations.conflict" class="text-danger">
+                    {{ d.validations.conflict }}
+                </span>
+             </div>
+        </span>
+        <div class="total">
+          {{ $filters.duration2(d.duration) }}
+        </div>
+       <div class="left buttons-icon">
+            <i class="icon-trash" @click="$emit('removetimesheet', d)" :class="d.credentials.deletable != true ? 'disabled':''"></i>
+            <i class="icon-edit" @click="$emit('edittimesheet', d)"  :class="d.credentials.editable != true ? 'disabled':''"></i>
+        </div>
+    </article>
+</template>
+<script>
+    export default {
+        name: 'TimesheetMonthDeclarationItem',
+        props: {
+            'd': { required: true },
+            'dayLength': { required: true }
+        }
+    }
+</script>

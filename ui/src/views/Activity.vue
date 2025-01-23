@@ -303,7 +303,7 @@
           </p>
           <p class="texthighlight baseline">
             Mots clés :
-            <span class="cartouche xs" v-for="m in core.motscles">{{ m }}</span>
+            <span class="cartouche xs" style="line-break: anywhere;" v-for="m in core.motscles">{{ m }}</span>
           </p>
         </div>
       </div>
@@ -518,9 +518,6 @@
                     </div>
                     <span class="cartouche person primary" v-for="p in timesheetsValidators.adm">
                       <PersonDisplay :person="p" :allow-tooltip="credentials.persons.show"/>
-                      <span class="addon">
-                        {{ p }}
-                      </span>
                     </span>
                   </div>
                 </div>
@@ -602,6 +599,15 @@
           </div>
         </section>
 
+        <section class="section-infos">
+          <h2>PCRU</h2>
+          <a :href="core.urls.pcru"
+             class="btn btn-primary btn-xs">
+            Accès aux informations PCRU
+          </a>
+
+        </section>
+
       </aside>
 
     </div>
@@ -612,9 +618,6 @@
             <span><i class="icon-cog"></i>Technique</span>
           </h2>
           <ActivityLogs :url="administration.url_logs" />
-          <button class="btn btn-default" @click="testError">
-            ERROR TEST
-          </button>
         </div>
       </div>
     </div>

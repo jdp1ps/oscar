@@ -43,7 +43,7 @@
         </span>
 
         <span v-if="affichertouslesmotscles" style="background-color: white; border: 1px solid #aaa; border-radius: 4px; border-top-left-radius: 0; border-top-right-radius: 0; position: absolute; z-index: 1051; width: 50%;" >
-          <ul style="margin: 0; padding: 0; width: 100%; max-height: 200px; overflow-y: auto;" >
+          <ul class="listeDeTousLesMotsCles" >
             <template v-for="m in touslesmotscles">
               <li v-if="m.label.toLocaleLowerCase().includes(userInput.toLocaleLowerCase())" class="undetouslesmotscles" :class="{ selected: m.selected }" @click="m.selected = (m.selected ? false : true); affichertouslesmotscles = false; userInput = '';">{{ m.label }}</li>
             </template>
@@ -63,6 +63,7 @@
 <script>
 
 import axios from 'axios';
+import AxiosMessage from "../utils/AxiosMessage.js";
 import Loader from '../components/Loader.vue';
 
 export default {
@@ -73,6 +74,7 @@ export default {
 
   props: {
     url: {default: null},
+    activityid: {default: null},
     motsclesselectionnes: {default: []},
   },
 
@@ -110,7 +112,7 @@ export default {
 
       this.affichertouslesmotscles = false;
       this.loading = "Création du mot clé";
-      axios.post(this.url, { action: "create", label: this.userInput.trim() }).then(
+      axios.post(this.url + '?activity_id=' + this.activityid, { action: "create", label: this.userInput.trim() }).then(
           (ok) => {
             let nouveauMotCle = ok.data;
             nouveauMotCle.selected = true;
@@ -142,14 +144,15 @@ export default {
 
     onMouseDown(e) {
       if (!e.target.classList.contains("undetouslesmotscles")
-          && !e.target.classList.contains("inputNouveauMotCle")) {
+          && !e.target.classList.contains("inputNouveauMotCle")
+          && !e.target.classList.contains("listeDeTousLesMotsCles")) {
         this.affichertouslesmotscles = false;
       }
     },
 
     fetch() {
       this.loading = "Chargement des mots clés";
-      axios.get(this.url).then(ok => {
+      axios.get(this.url + '?activity_id=' + this.activityid).then(ok => {
         this.touslesmotscles = ok.data.motscles;
         const dejaSelectionnes = JSON.parse(this.motsclesselectionnes);
         for (let unMotCle of this.touslesmotscles) {
@@ -176,6 +179,11 @@ export default {
         const errorHTML = el.querySelector('[id="contenu-principal"]');
         if (errorHTML) {
           this.error = errorHTML.innerHTML;
+          return;
+        }
+        const contentLength = err.response.headers.get('content-length');
+        if (contentLength && (typeof contentLength == "string") && !isNaN(contentLength) && Number(contentLength) < 1000) {
+          this.error = err.response.data;
           return;
         }
       }
@@ -212,6 +220,7 @@ li {
   margin-top: 5px;
   padding: 0 5px;
   cursor: default;
+  line-break: anywhere;
 }
 
 .selectedmotcle > span{
@@ -264,4 +273,11 @@ li {
   border-color: #ccc;
 }
 
+.listeDeTousLesMotsCles {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
 </style>

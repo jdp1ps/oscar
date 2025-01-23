@@ -474,6 +474,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
                 'new_project'    => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
+                'pcru' => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
             ]
         ];
     }
