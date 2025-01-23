@@ -85,7 +85,6 @@ export default {
   watch: {
     // Système de delay pour cacher la tooltip
     show(){
-      console.log("show:", this.show);
       if( this.show ){
         this.displayed = true;
         clearTimeout(tempoHide);
