@@ -4226,7 +4226,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $submitable = false;
         $submitableInfos = "Vous ne pouvez pas soumettre cette période pour une raison inconnue";
         $importEnable = $this->getOscarConfigurationService()->getConfiguration('importEnable');
-
         $hasConflict = false;
 
         $editable = false;

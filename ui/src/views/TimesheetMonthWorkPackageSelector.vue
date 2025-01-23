@@ -1,8 +1,6 @@
 <template>
   <div>
     <div class="overlay" v-if="showSelector">
-
-
       <div class="overlay-content">
         <p>Choisissez un type de créneau : </p>
 
@@ -114,12 +112,14 @@ export default {
 
 <style scoped lang="scss">
 
+@use "sass:color";
+
 $baseColor: #0088cc;
-$offColor: desaturate($baseColor, 90%);
-$onColor: saturate($baseColor, 25%);
+$offColor: color.adjust($baseColor, $saturation: -90%);
+$onColor: color.adjust($baseColor, $saturation: 25%);
 
 .timesheet-item {
-  background: lighten($offColor, 60%);
+  background: color.adjust($offColor, $lightness: 50%);
   cursor: pointer;
   border: thin $offColor solid;
   margin: .3em 0;
@@ -138,7 +138,7 @@ $onColor: saturate($baseColor, 25%);
     display: inline-block;
     padding-right: .8em;
     padding-left: .8em;
-    color: lighten($offColor, 30%);
+    color: color.adjust($offColor,$lightness: 30%);
     background: $offColor;
     text-shadow: -1px 1px 0 rgba(0, 0, 0, .3);
     font-weight: 700;
@@ -163,8 +163,8 @@ $onColor: saturate($baseColor, 25%);
     display: inline-block;
     padding-left: 1em;
     padding-right: 1em;
-    background: lighten($offColor, 30%);
-    color: darken($offColor, 30%);
+    background: color.adjust($offColor,$lightness: 30%);
+    color: color.adjust($offColor, $lightness: -30%);
     font-size: .8em;
     line-height: 2em;
 
@@ -192,7 +192,7 @@ $onColor: saturate($baseColor, 25%);
       content: " ";
       width: 1em;
       height: 1em;
-      background: lighten($offColor, 30%);
+      background: color.adjust($offColor,$lightness: 30%);
       transform: rotate(45deg);
       position: absolute;
       left: -.6em;
@@ -202,18 +202,18 @@ $onColor: saturate($baseColor, 25%);
   }
 
   &.selected, &:hover {
-    background: lighten($baseColor, 60%);
+    background: color.adjust($baseColor,$lightness: 60%);
     border: thin $baseColor solid;
     color: $baseColor;
 
     .project-acronym {
-      color: lighten($baseColor, 40%);
+      color: color.adjust($baseColor,$lightness: 40%);
       background: $baseColor;
     }
 
     .activity-label {
-      background: lighten($baseColor, 30%);
-      color: darken($baseColor, 30%);
+      background: color.adjust($baseColor,$lightness: 30%);
+      color: color.adjust($baseColor, $lightness:- 30%);
 
       &:before {
         background: $baseColor;
@@ -222,7 +222,7 @@ $onColor: saturate($baseColor, 25%);
 
     .workpackage-infos {
       &:before {
-        background: lighten($baseColor, 30%);
+        background: color.adjust($baseColor,$lightness: 30%);
       }
     }
   }

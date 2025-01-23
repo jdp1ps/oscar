@@ -39,14 +39,16 @@
 
           <table class="table table-bordered table-recap">
             <thead>
-            <th colspan="2">&nbsp;</th>
-            <th v-for="d in ts.days">
-              <small>{{ d.label }}</small><br>
-              <strong>{{ d.i }}</strong>
-            </th>
-            <th>
-              Total
-            </th>
+              <tr>
+                <th colspan="2">&nbsp;</th>
+                <th v-for="d in ts.days">
+                  <small>{{ d.label }}</small><br>
+                  <strong>{{ d.i }}</strong>
+                </th>
+                <th>
+                  Total
+                </th>
+              </tr>
             </thead>
             <tbody v-for="project in recapsend.lot">
             <template v-for="activity in project.activities">
@@ -164,11 +166,13 @@
             <i class="icon-tags"></i> Couleurs des activités
           </h2>
 
-          <p>Les options ajustables ici pemettent uniquement</p>
+          <p class="alert alert-help">
+            Vous pouvez ici modifier les couleurs de projets affichés dans le calendrier
+          </p>
 
           <article v-for="a in ts.activities">
             <strong class="cartouche " :style="{ 'background-color': getAcronymColor(a.acronym) }">{{ a.acronym }}
-              <em class="addon">{{ a.label }}</em>
+              <em class="addon">{{ $filters.strReduce(a.label, 50) }}</em>
             </strong>
             <input type="color" @change="handlerChangeColor(a.acronym, $event)" v-model="_colorsProjects[a.acronym]">
           </article>
@@ -352,8 +356,8 @@
           <strong @click.shift="debug = ts">{{ mois }}</strong>
           <a href="#" @click.prevent="nextMonth"><i class="icon-angle-right"/></a>
 
-          <a class="btn btn-default" :href="urlimport+'&period=' + periodCode "
-             v-if="urlimport"
+          <a class="btn btn-default" :href="urlImport+'&period=' + periodCode "
+             v-if="urlImport"
              :title="!ts.submitable ? 'Vous ne pouvez pas importer pour cette période' : ''"
              :class="{ 'disabled': !ts.submitable }">
             <i class="icon-calendar"></i>
@@ -408,21 +412,21 @@
       <section class="col-lg-4">
         <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS JOUR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
         <timesheetmonthdaydetails v-if="selectedDay"
-            :day="selectedDay"
-            :workPackages="ts.workpackages"
-            :others="ts.otherWP"
-            :selection="selectionWP"
-            :editable="ts.editable"
-            :label="dayLabel"
-            :day-excess="ts.dayExcess"
-            :copiable="clipboardDataDay"
-            @debug="debug = $event"
-            @copy="handlerCopyDay"
-            @paste="handlerPasteDay"
-            @cancel="selectedDayData = null"
-            @removetimesheet="deleteTimesheet"
-            @edittimesheet="editTimesheet"
-            @addtowp="handlerWpFromDetails($event)"
+                                  :day="selectedDay"
+                                  :workPackages="ts.workpackages"
+                                  :others="ts.otherWP"
+                                  :selection="selectionWP"
+                                  :editable="ts.editable"
+                                  :label="dayLabel"
+                                  :day-excess="ts.dayExcess"
+                                  :copiable="clipboardDataDay"
+                                  @debug="debug = $event"
+                                  @copy="handlerCopyDay"
+                                  @paste="handlerPasteDay"
+                                  @cancel="selectedDayData = null"
+                                  @removetimesheet="deleteTimesheet"
+                                  @edittimesheet="editTimesheet"
+                                  @addtowp="handlerWpFromDetails($event)"
         />
 
         <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VUE DETAILS SEMAINE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -574,10 +578,6 @@
 
           <hr>
           <h4><i class="icon-tags"></i> Hors-lot</h4>
-          <pre>
-            debug
-          </pre>
-
           <section class="card xs" v-for="(wpInfo, i) in ts.otherWP">
             <div class="week-header">
               <span>
@@ -834,10 +834,10 @@ export default {
      * Retourne le jour selectionné.
      * @returns {*|null}
      */
-    selectedDay(){
-      if( this.ts && this.ts.days ){
+    selectedDay() {
+      if (this.ts && this.ts.days) {
         for (let day in this.ts.days) {
-          if(this.ts.days[day].data === this.selectedDayData){
+          if (this.ts.days[day].data === this.selectedDayData) {
             return this.ts.days[day];
           }
         }
@@ -1233,10 +1233,10 @@ export default {
           ok => {
             this.sendMonth(action);
           }).catch(ko => {
-            this.error = ko.body;
-          }).then(foo => {
-            this.selectedWeek = null;
-          });
+        this.error = ko.body;
+      }).then(foo => {
+        this.selectedWeek = null;
+      });
     },
 
 
@@ -1439,7 +1439,6 @@ export default {
       send.action = 'add';
       AxiosOscar.post(this.url, send).then(
           () => {
-            console.log("fetch");
             this.fetch(false);
           }
       ).finally(() => {
@@ -1457,7 +1456,7 @@ export default {
      */
     performDelete(ids) {
       this.loading = "Suppression des créneaux";
-      AxiosOscar.delete(this.url + '&id=' + ids.join(','), "Suppression de créneau")
+      AxiosOscar.delete(this.url + '&id=' + ids.join(','), {pendingMsg:"Suppression de créneau"})
           .then(() => {
             this.fetch(false);
           })
@@ -1561,7 +1560,7 @@ export default {
       if (this.selectedDay)
         daySelected = this.selectedDay.i;
 
-      AxiosOscar.get(this.url + '&month=' + this.month + '&year=' + this.year, {}, "Chargement de la période de déclaration").then(
+      AxiosOscar.get(this.url + '&month=' + this.month + '&year=' + this.year, {pendingMsg: "Chargement de la période de déclaration"}).then(
           ok => {
             this.dayLength = ok.data.dayLength;
             if (daySelected) {
@@ -1571,7 +1570,6 @@ export default {
             this.selectionWP = null;
             this.fillSelectedWP = null;
             this.ts = ok.data
-            console.log(this.ts.otherWP);
           }
       )
     }

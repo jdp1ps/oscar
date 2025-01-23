@@ -21,7 +21,7 @@
 
 
     <div class="alert alert-danger" v-show="day.locked">
-      <i class="icon-attention"></i> Cette journée est verrouillé <strong>{{ day.lockedReason }}</strong>
+      <i class="icon-attention"></i> Cette journée est verrouillée <strong>{{ day.lockedReason }}</strong>
     </div>
 
     <div class="alert alert-danger" v-show="day.total > day.maxLength">

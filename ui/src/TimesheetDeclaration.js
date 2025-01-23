@@ -8,6 +8,7 @@ import traces from "./utils/Traces.js";
 // éléments dans le DOM
 let elemId = '#timesheet-declaration';
 let elemDatas = document.querySelector(elemId);
+const declarationInHours = elemDatas.dataset.declarationInHours === 'true';
 
 // Création de l'App
 const app = createApp(TimesheetDeclaration, {
@@ -16,7 +17,7 @@ const app = createApp(TimesheetDeclaration, {
     "url-import": elemDatas.dataset.urlImport,
     "default-year": elemDatas.dataset.defaultYear,
     "default-month": elemDatas.dataset.defaultMonth,
-    "declarationInHours": elemDatas.dataset.declarationInHours,
+    "declaration-in-hours": declarationInHours
 });
 
 const statusValidation = {
@@ -45,17 +46,22 @@ app.config.globalProperties.$filters = {
         return money.money(amount);
     },
     duration2(val, lng) {
-        // durée en heure
-        let totalminutes = 60 * val;
-        let hours = Math.floor(totalminutes / 60);
-        let minutes = totalminutes % 60;
-        if( minutes < 10 ) minutes = "0" + minutes;
-        return `${hours}:${minutes}`;
+        if( declarationInHours ){
+            // durée en heure
+            let totalminutes = 60 * val;
+            let hours = Math.floor(totalminutes / 60);
+            let minutes = totalminutes % 60;
+            if( minutes < 10 ) minutes = "0" + minutes;
+            return `${hours}:${minutes}`;
+        } else {
+            if( lng === undefined ) return val;
+            if( val === 0 ) return 0.0;
+            return Math.round(100/lng*val)+"%";
+        }
     },
-    strReduce(str){
-        if( str.length > 20 ){
-            console.log(str);
-            return str.substring(0, 17) + '...';
+    strReduce(str, length = 20){
+        if( str.length > length ){
+            return str.substring(0, length-3) + '...';
         }
         return str;
     },

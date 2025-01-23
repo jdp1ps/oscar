@@ -2,59 +2,86 @@ import axios from "axios";
 import AxiosMessage from "./AxiosMessage.js";
 import GlobalModel from "../models/GlobalModel.js";
 
+
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
 const log = function(){
     let params = ['[AxiosOscar]'];
     params.push(arguments);
     console.log.apply(params);
 };
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const pendingOn = function(options){
+    if( options.hasOwnProperty('pendingBack') && options.pendingBack === true ){
+        console.log("FULLSCREEN FALSE");
+        GlobalModel.commit('pendingFullScreen', false);
+    } else {
+        console.log("FULLSCREEN TRUE");
+        GlobalModel.commit('pendingFullScreen', true);
+    }
+    let message = "Chargement des données";
+    if( options.hasOwnProperty('pendingMsg') ){
+        message = options.pendingMsg;
+    }
+
+    GlobalModel.commit('addPending', message);
+};
+
+const pendingOff = function(options){
+    let message = "Chargement des données";
+    if( options.hasOwnProperty('pendingMsg') ){
+        message = options.pendingMsg;
+    }
+    GlobalModel.commit('stopPending', message);
+};
+
 export default {
 
-    get: (url, params = {}, pendingmsg = "chargement") => {
-        log('GET', url, params, pendingmsg);
-        GlobalModel.commit('addPending', pendingmsg);
-        let response = axios.get(url, params);
+    get: (url, options = {}) => {
+        pendingOn(options);
+
+        let response = axios.get(url);
 
         response.catch((error) => {
             GlobalModel.commit('addError', AxiosMessage.manageErrorResponse(error).message);
         }).finally(() => {
-            GlobalModel.commit('stopPending', pendingmsg);
+            pendingOff(options);
         });
 
         return response;
+
     },
 
-    post: (url, params = {}, pendingmsg = "Envoi des données") => {
-        log('POST', url, params, pendingmsg);
-        GlobalModel.commit('addPending', pendingmsg);
+    post: (url, params = {}, options = {}) => {
+        pendingOn(options);
         let response = axios.post(url, params);
         response.catch((error) => {
             GlobalModel.commit('addError', AxiosMessage.manageErrorResponse(error).message);
         }).finally(() => {
-            GlobalModel.commit('stopPending', pendingmsg);
+            pendingOff(options);
         });
         return response;
     },
 
-    put: (url, params = {}) => {
-        log('PUT', url, params, pendingmsg);
-        GlobalModel.commit('addPending', pendingmsg);
+    put: (url, params = {}, options = {}) => {
+        pendingOn(options);
         let response = axios.put(url, params);
         response.catch((error) => {
             GlobalModel.commit('addError', AxiosMessage.manageErrorResponse(error).message);
         }).finally(() => {
-            GlobalModel.commit('stopPending', pendingmsg);
+            pendingOff(options);
         });
         return response;
     },
-    delete: (url, pendingmsg) => {
-        log('DELETE', url, pendingmsg);
-        GlobalModel.commit('addPending', pendingmsg);
+    delete: (url, options = {}) => {
+        pendingOn(options);
         let response = axios.delete(url);
         response.catch((error) => {
             GlobalModel.commit('addError', AxiosMessage.manageErrorResponse(error).message);
         }).finally(() => {
-            GlobalModel.commit('stopPending', pendingmsg);
+            pendingOff(options);
         });
         return response;
     }

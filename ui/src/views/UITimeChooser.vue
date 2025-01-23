@@ -26,7 +26,8 @@
   </div>
   <div>
     duration: {{ duration }} -
-    defaultDuration: {{ defaultDuration }}
+    defaultDuration: {{ defaultDuration }} -
+    declarationInHours: {{ declarationInHours }}
   </div>
 </template>
 
@@ -35,7 +36,7 @@ export default {
   props: {
     defaultDuration: {default: 7},
     baseTime: {default: 7.5},
-    declarationInHours: {required: true},
+    declarationInHours: {required: true, default: false},
     // PAS en minutes
     pas: {default: 10},
     fill: {default: 0},

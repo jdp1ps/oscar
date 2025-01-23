@@ -22,6 +22,25 @@
       </li>
     </ul>
   </div>
+  <div class="oscar-error-fullscreen" v-if="errorFullScreen">
+    <div class="content">
+      <h3>
+        <span><i class="icon-attention-circled"></i>Erreur</span>
+        <nav>
+          <a href="#" @click.prevent="handlerCloseErrorFullScreen">X</a>
+        </nav>
+      </h3>
+      <pre>{{ errorFullScreen }}</pre>
+    </div>
+  </div>
+  <div class="oscar-pending-fullscreen" v-if="pendingFullScreen && pending && pending.length">
+    <div class="content">
+      <div v-for="p in pending">
+        <i class="icon-spinner animate-spin"></i>
+        {{ p }}
+      </div>
+    </div>
+  </div>
   <div class="oscar-pending">
     <div v-for="p in pending">
       <i class="icon-spinner animate-spin"></i>
@@ -49,14 +68,24 @@ export default {
     },
     pending() {
       return GlobalModel.getters.pending;
+    },
+    pendingFullScreen() {
+      return GlobalModel.getters.pendingFullScreen;
+    },
+    errorFullScreen() {
+      return GlobalModel.getters.errorFullScreen;
     }
   },
+
   watch: {
     errors() {
-      console.log("update", GlobalModel.getters.errors);
       this.display = true;
+    },
+    errorFullScreen() {
+      this.display = false;
     }
   },
+
   methods: {
     handlerRemoveError(index) {
       GlobalModel.dispatch('removeError', index);
@@ -66,12 +95,79 @@ export default {
     },
     handlerReduce() {
       this.display = false;
+    },
+    handlerCloseErrorFullScreen(){
+      GlobalModel.commit('removeErrorFullScreen');
     }
   }
 }
 </script>
 
 <style scoped>
+.oscar-pending-fullscreen {
+  background: rgba(255,255,255,.9);
+  font-size: 1em;
+  position: fixed;
+  z-index: 20000;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+  padding: .3em 1em;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .content {
+    border: none;
+  }
+}
+.oscar-error-fullscreen {
+  background: rgba(255,255,255,.9);
+  font-size: 1em;
+  position: fixed;
+  z-index: 20000;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+  padding: .3em 1em;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .content {
+    min-width: 50vw;
+    max-width: 80vw;
+    color: white;
+    background: #b40a0a;
+    box-shadow: 0 0 .2em rgba(0, 0, 0, 0.5);
+    padding: 0;
+    h3 {
+      margin: 0;
+      border-bottom: white thin solid;
+      font-weight: 700;
+      padding: .3em;
+      display: flex;
+      span {
+        flex: 1;
+      }
+
+      nav {
+        flex: 0;
+        text-align: right;
+        a {
+          font-size: .8em;
+          color: white;
+        }
+      }
+    }
+    pre {
+      padding: 0;
+      margin: .3em 1em;
+    }
+  }
+}
 .oscar-pending {
   background: white;
   font-size: 1em;

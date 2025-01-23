@@ -66,12 +66,13 @@ export default {
 <style scoped lang="scss">
 .timeline-item {
 
-  margin-left: 2em;
+  margin-left: 1em;
   position: relative;
   margin-bottom: .5rem;
   display: flex;
 
   time {
+    width: 150px;
     font-size: 1em;
     line-height: 1em;
     text-align: right;

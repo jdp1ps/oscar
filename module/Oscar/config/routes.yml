@@ -245,13 +245,6 @@ timesheet:
         defaults:
           action: declarant
 
-    declarant2:
-      type: segment
-      options:
-        route: /declarant2
-        defaults:
-          action: declarant2
-
     checkperiod:
       type: segment
       options:

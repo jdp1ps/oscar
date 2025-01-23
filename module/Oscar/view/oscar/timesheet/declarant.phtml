@@ -1,9 +1,18 @@
-<link rel="stylesheet" href="/js/oscar/dist/timesheetmonth.css" type="text/css" />
-<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthday.css" type="text/css" />
-<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthdaydetails.css" type="text/css" />
-<link rel="stylesheet" href="/js/oscar/dist/timesheetmonthworkpackageselector.css" type="text/css" />
-<link rel="stylesheet" href="/js/oscar/dist/uitimechooser.css" type="text/css" />
+<div class="flex-container">
+    <div id="timesheet-declaration"
+         data-declaration-in-hours="<?= $declarationInHours ? 'true' : 'false' ?>"
+         data-default-year="<?= $year ?>"
+         data-default-month="<?= $month ?>"
+         data-url="<?= $this->url('timesheet/declarant').($usurpation?"?person=$usurpation":"?") ?>"
+         data-url-validation="<?= $this->url('timesheet/checkperiod')  ?>"
+         data-url-import="<?= $this->options()->importEnable() ?
+             $this->url('timesheet/import_ical'). ($usurpation?"?person=$usurpation":"?") : '' ?>"
+    ></div>
+</div>
 
+<?php echo $this->Vite()->addJs('src/TimesheetDeclaration.js'); ?>
+
+<?php /***
 <div class="flex-container">
     <div id="app"></div>
 </div>
@@ -34,7 +43,7 @@
         Vue.filter('duration', function(duree, total){
             if( duree == 0 ) return 0.0;
             return Math.round( 100 / total * duree) + "%";
-        });*/ ?>
+        });***** ?>
 
         var status = {
           '<?= \Oscar\Entity\ValidationPeriod::STATUS_STEP1 ?>': 'validation projet',
@@ -67,4 +76,4 @@
             }
         }).$mount('#app');
     })
-</script>
+</script> *****/ ?>
