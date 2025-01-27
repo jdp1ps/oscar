@@ -163,6 +163,7 @@ export default {
       this.showSelector = false;
       this.expression = "";
       this.$emit('change', data);
+      this.$emit('personSelected', data);
     }
   }
 }

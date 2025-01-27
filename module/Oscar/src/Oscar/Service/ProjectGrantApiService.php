@@ -7,6 +7,7 @@ use Doctrine\ORM\Query;
 use Laminas\Mvc\Controller\Plugin\Url;
 use Laminas\View\Model\JsonModel;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityAvenant;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNote;
 use Oscar\Entity\ActivityNoteRepository;
@@ -362,6 +363,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             switch ($perimeter) {
                 case self::PERIMETER_ADMINISTRATION:
                     $datas[self::PERIMETER_ADMINISTRATION] = $this->getAdministrationActivity($activity, $urlPlugin);
+                    break;
+
+                case self::PERIMETER_AVENANTS:
+                    $datas[self::PERIMETER_AVENANTS] = $this->getAvenantsActivity($activity, $urlPlugin);
                     break;
 
                 case self::PERIMETER_BUDGET:
@@ -1225,6 +1230,26 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     {
         return [
             "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
+        ];
+    }
+
+    private function getAvenantsActivity(Activity $activity, ?Url $urlPlugin)
+    {
+        $result = $this->getEntityManager()->getRepository(ActivityAvenant::class)
+            ->getByActivityId($activity->getId());
+        $out = [];
+        /** @var ActivityAvenant $item */
+        foreach ($result as $item) {
+            $out[] = [
+              'id' => $item->getId(),
+              'comment' => $item->getComment(),
+              'filename' => $item->getFilename(),
+              'date' => $item->getDateAvenant()->format('Y-m-d')
+            ];
+        }
+        return [
+            'url_api' => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
+            'avenants' => $out
         ];
     }
 }

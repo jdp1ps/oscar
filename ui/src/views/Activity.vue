@@ -355,7 +355,18 @@
     <div class="container-fluid">
       <div class="col-md-8">
         <section class="section-infos" id="avenants" v-if="credentials.avenants.read">
-          <activity-avenants :avenants="avenants" />
+          <h2>
+            <span>
+              <i class="icon-hammer"></i>
+              Avenants
+            </span>
+          </h2>
+          <activity-avenants :avenants="avenants"
+                             :roles-person="rolesPersons"
+                             :roles-organization="rolesOrganizations"
+                             :current-persons="persons"
+                             @update="handlerUpdateAvenants"
+          />
         </section>
         <section class="section-infos" id="members" v-if="credentials.persons.read">
           <h2>
@@ -843,6 +854,11 @@ export default {
       this.documents = res;
     },
 
+    handlerUpdateAvenants(avenants){
+      console.log("AVENANTS", avenants);
+      this.avenants = avenants;
+    },
+
     ////////////////////////////////////////// Système d'épingle
     handlerPurgeSticky() {
       this.sticky = [];
@@ -896,6 +912,10 @@ export default {
 
         if (response.data.activity.datas.spents) {
           this.spents = response.data.activity.datas.spents;
+        }
+
+        if (response.data.activity.datas.avenants) {
+          this.handlerUpdateAvenants(response.data.activity.datas.avenants);
         }
 
         if (response.data.activity.datas.administration) {

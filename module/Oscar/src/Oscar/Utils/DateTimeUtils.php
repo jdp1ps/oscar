@@ -8,6 +8,7 @@
 namespace Oscar\Utils;
 
 
+use DateTime;
 use Oscar\Exception\OscarException;
 
 class DateTimeUtils
@@ -16,26 +17,26 @@ class DateTimeUtils
      * Retourne la date au format $format, si la date est NULL, retourne une
      * chaîne vide.
      *
-     * @param \DateTime $datetime
+     * @param DateTime $datetime
      * @param string $format
      * @return string
      */
-    public static function toStr(\DateTime $datetime = null, $format = 'Y-m-d H:i:s')
+    public static function toStr(DateTime $datetime = null, $format = 'Y-m-d H:i:s')
     {
         return $datetime ? $datetime->format($format) : '';
     }
 
-    public static function periodInside($periodStr, \DateTime $from, \DateTime $to)
+    public static function periodInside($periodStr, DateTime $from, DateTime $to)
     {
-        $start = new \DateTime($from->format(\DateTime::W3C));
+        $start = new DateTime($from->format(DateTime::W3C));
         $start->setTime(0, 0, 0);
         $startInt = $start->getTimestamp();
 
-        $end = new \DateTime($to->format(\DateTime::W3C));
+        $end = new DateTime($to->format(DateTime::W3C));
         $end->setTime(23, 59, 59);
         $endInt = $end->getTimestamp();
 
-        $period = new \DateTime($periodStr . '-15 12:00:00');
+        $period = new DateTime($periodStr . '-15 12:00:00');
         $periodInt = $period->getTimestamp();
 
         $test = $periodInt >= $startInt && $periodInt <= $endInt;
@@ -45,7 +46,7 @@ class DateTimeUtils
         return $test;
     }
 
-    public static function humanDate(\DateTime $date, string $format = '')
+    public static function humanDate(DateTime $date, string $format = '')
     {
         $fmt = datefmt_create(
             'fr_FR',
@@ -83,11 +84,11 @@ class DateTimeUtils
 
     public static function periodBounds($period, $daysDetails = false)
     {
-        $dateRef = new \DateTime(sprintf('%s-01', $period));
+        $dateRef = new DateTime(sprintf('%s-01', $period));
         $nbr = cal_days_in_month(CAL_GREGORIAN, (int)$dateRef->format('m'), (int)$dateRef->format(('Y')));
         $dateFin = $dateRef->format('Y-m-' . $nbr);
         $startLabel = self::humanDate($dateRef);
-        $endLabel = self::humanDate((new \DateTime($dateFin)));
+        $endLabel = self::humanDate((new DateTime($dateFin)));
         $periodLabel = self::humanDate($dateRef, 'MMM yyyy');
 
         $datas = [
@@ -108,7 +109,7 @@ class DateTimeUtils
         $days = [];
 
         for ($i = 1; $i < $nbr; $i++) {
-            $forDay = new \DateTime($period . '-' . $i);
+            $forDay = new DateTime($period . '-' . $i);
             $days[$i] = $daysLabel[$forDay->format('N')];
         }
 
@@ -119,7 +120,7 @@ class DateTimeUtils
 
     public static function getPeriodStrFromDateStr($dateStr)
     {
-        $date = new \DateTime($dateStr);
+        $date = new DateTime($dateStr);
         return $date->format('Y-m');
     }
 
@@ -132,15 +133,15 @@ class DateTimeUtils
      */
     public static function allperiodsBetweenTwo($from, $to)
     {
-        if (is_object($from) && get_class($from) == \DateTime::class) {
+        if (is_object($from) && get_class($from) == DateTime::class) {
             $from = $from->format('Y-m');
         }
-        if (is_object($to) && get_class($to) == \DateTime::class) {
+        if (is_object($to) && get_class($to) == DateTime::class) {
             $to = $to->format('Y-m');
         }
 
-        $start = new \DateTime($from . '-01');
-        $end = new \DateTime($to . '-01');
+        $start = new DateTime($from . '-01');
+        $end = new DateTime($to . '-01');
 
         $startYear = (int)$start->format('Y');
         $startMonth = (int)$start->format('m');
@@ -183,13 +184,34 @@ class DateTimeUtils
         return $out;
     }
 
+    /**
+     * @param string $str
+     * @return DateTime
+     * @throws DateMalformedStringException
+     */
+    public static function getDateTimeFromStr(string $str) : DateTime {
+        // Expression régulière pour le format YYYY-MM-DD
+        $pattern = '/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/';
+
+        // Vérifie si le format est correct
+        if (preg_match($pattern, $str)) {
+            // Vérifie si la date est valide (ex : pas le 2023-02-30)
+            $parts = explode('-', $str);
+            if( checkdate($parts[1], $parts[2], $parts[0] ) ){
+                return new DateTime($str);
+            }
+        }
+
+        throw new \Exception("La date string '$str' n'est pas valide");
+    }
+
     public static function toDatetime($value)
     {
         if ($value == null /*|| $value == 'null'*/) {
             return null;
         } else {
             try {
-                return new \DateTime($value);
+                return new DateTime($value);
             } catch (\Exception $e) {
                 return null;
             }
@@ -224,7 +246,7 @@ class DateTimeUtils
             );
 
 
-            $dateRef = new \DateTime(sprintf('%s-%s-01', $year, $month));
+            $dateRef = new DateTime(sprintf('%s-%s-01', $year, $month));
             $periodLabel = $fmt->format($dateRef);
 
             return [

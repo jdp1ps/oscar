@@ -1,0 +1,30 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bouvry
+ * Date: 27/09/19
+ * Time: 15:50
+ */
+
+namespace Oscar\Controller;
+
+
+use Interop\Container\ContainerInterface;
+use Oscar\Service\ActivityAvenantsService;
+use Oscar\Service\ActivityLogService;
+use Oscar\Service\LoggerService;
+use Oscar\Service\MilestoneService;
+use Oscar\Service\OscarUserContext;
+use Oscar\Service\ProjectGrantService;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+class ActivityAvenantsControllerFactory extends AbstractOscarController
+{
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $c = new ActivityAvenantsController();
+        $c->setActivityAvenantsService(ActivityAvenantsService::class);
+        $c->setLoggerService($container->get('Logger'));
+        $c->setOscarUserContextService($container->get(OscarUserContext::class));
+        return $c;
+    }
+}

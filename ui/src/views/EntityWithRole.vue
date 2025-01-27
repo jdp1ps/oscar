@@ -37,28 +37,25 @@
 
         <table class="table-bordered table-borderless table-responsive-md">
           <thead>
-          <tr>
-            <th>#</th>
-            <th>{{ title }}</th>
-            <td>Rôle</td>
-          </tr>
+            <tr>
+              <th>#</th>
+              <th>{{ title }}</th>
+              <td>Rôle</td>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for="item in toPaste">
-            <td><input type="checkbox" v-model="item.selected"/></td>
-            <td>{{ item.enrolledLabel }}</td>
-            <td>
-              <select name="role" class=" form-control" v-model="item.roleId">
-                <option :value="role.id" v-for="role in rolesList">
-                  {{ role.label }}
-                </option>
-              </select>
-            </td>
-          </tr>
+            <tr v-for="item in toPaste">
+              <td><input type="checkbox" v-model="item.selected"/></td>
+              <td>{{ item.enrolledLabel }}</td>
+              <td>
+                <select name="role" class=" form-control" v-model="item.roleId">
+                  <option :value="role.id" v-for="role in rolesList">
+                    {{ role.label }}
+                  </option>
+                </select>
+              </td>
+            </tr>
           </tbody>
-          <tr>
-
-          </tr>
         </table>
 
         <nav class="admin-bar">
@@ -284,7 +281,6 @@ import Loader from "../components/Loader.vue";
 import OrganizationAutoCompleter from "../components/OrganizationAutoComplete.vue";
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import Modal from "../components/Modal.vue";
-import {standalone} from "poi/lib/webpack/css-loaders.js";
 import PersonDisplay from "../components/PersonDisplay.vue";
 
 
@@ -349,6 +345,7 @@ export default {
         else return [];
       }
     },
+
     sortedFull() {
       return this.entities.sort((a, b) => a.enrolled - b.enrolled)
     },

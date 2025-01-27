@@ -290,6 +290,12 @@ return array(
                     'action' => ['csv', 'csvPayments'],
                     'roles' => ['user'],
                 ],
+                // AVENANTS
+                [
+                    'controller' => 'ActivityAvenants',
+                    'action' => ['api'],
+                    'roles' => ['user'],
+                ],
 
                 // TIMESHEET
                 [
@@ -569,6 +575,7 @@ return array(
         ],
 
         'factories' => array(
+            \Oscar\Service\ActivityAvenantsService::class => \Oscar\Service\ActivityAvenantsServiceFactory::class,
             \Oscar\Service\ActivityLogService::class => \Oscar\Service\ActivityLogServiceFactory::class,
             \Oscar\Service\ActivityPaymentService::class => \Oscar\Service\ActivityPaymentServiceFactory::class,
             \Oscar\Service\ActivityRequestService::class => \Oscar\Service\ActivityRequestServiceFactory::class,
@@ -619,6 +626,7 @@ return array(
     'controllers' => array(
         'factories' => [
             'Activity' => \Oscar\Controller\ProjectGrantControllerFactory::class,
+            'ActivityAvenants' => \Oscar\Controller\Factory\ActivityAvenantsControllerFactory::class,
             'ActivityDate' => \Oscar\Controller\ActivityDateControllerFactory::class,
             'ActivityMotsCles' => \Oscar\Controller\ActivityMotsClesControllerFactory::class,
             'ActivityNotes' => \Oscar\Controller\ActivityNotesControllerFactory::class,

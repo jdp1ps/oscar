@@ -767,6 +767,20 @@ member:
 
 
 
+avenant:
+  type: literal
+  options:
+    route: /avenant
+    defaults:
+      controller: ActivityAvenants
+  child_routes:
+    api:
+      type: segment
+      options:
+        route: '/fiche/:activity_id[/:avenant_id]'
+        defaults:
+          action: api
+      may_terminate: false
 
 
 ################################################################################

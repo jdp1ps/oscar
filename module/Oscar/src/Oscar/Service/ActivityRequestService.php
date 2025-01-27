@@ -402,6 +402,4 @@ class ActivityRequestService implements UseEntityManager, UsePersonService, UseO
             return "Status inconnu";
         }
     }
-
-
 }
