@@ -411,6 +411,14 @@ class Activity implements ResourceInterface
     protected $persons;
 
     /**
+     * Liste des avenants
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityAvenant", mappedBy="activity", cascade={"remove"})
+     */
+    protected $avenants;
+
+    /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesPrj")
      * @ORM\JoinTable (name="person_activity_validator_prj")
@@ -705,6 +713,17 @@ class Activity implements ResourceInterface
     public function getDateCache() :?\DateTime
     {
         return $this->dateCached;
+    }
+
+    public function getAvenants(): ArrayCollection
+    {
+        return $this->avenants;
+    }
+
+    public function setAvenants($avenants): self
+    {
+        $this->avenants = $avenants;
+        return $this;
     }
 
     /**
@@ -1480,6 +1499,7 @@ class Activity implements ResourceInterface
         $this->persons = new ArrayCollection();
         $this->organizations = new ArrayCollection();
         $this->milestones = new ArrayCollection();
+        $this->avenants = new ArrayCollection();
         $this->payments = new ArrayCollection();
         $this->disciplines = new ArrayCollection();
         $this->motscles = new ArrayCollection();

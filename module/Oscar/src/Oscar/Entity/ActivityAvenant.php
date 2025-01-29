@@ -12,6 +12,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ActivityAvenant
 {
+
+    const STATUS_DRAFT = 100;
+
+    const STATUS_ACTIVE = 200;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -27,7 +32,7 @@ class ActivityAvenant
 
     /**
      * @var Activity
-     * @ORM\ManyToOne(targetEntity="Activity")
+     * @ORM\ManyToOne(targetEntity="Activity", inversedBy="avenants")
      */
     private Activity $activity;
 
@@ -42,6 +47,12 @@ class ActivityAvenant
      * @ORM\Column(type="string")
      */
     private string $comment;
+
+    /**
+     * @var int
+     * @ORM\Column(type="integer", options={"default": "100"})
+     */
+    private int $status;
 
     /**
      * @return mixed
@@ -95,8 +106,47 @@ class ActivityAvenant
         return $this;
     }
 
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function getStatusLabel() :string
+    {
+        return self::getStatusText($this->getStatus());
+    }
+
+    public function setStatus(int $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
     public function getResourceId()
     {
         return self::class;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getStatusList() :array
+    {
+        return [
+          self::STATUS_DRAFT => 'Brouillon',
+          self::STATUS_ACTIVE => 'Effectif',
+        ];
+    }
+
+    /**
+     * @param int $status
+     * @return string
+     */
+    public function getStatusText( int $status ) :string
+    {
+        if( !array_key_exists($status, self::getStatusList()) ){
+            return "Inconnue";
+        }
+        return self::getStatusList()[$status];
     }
 }

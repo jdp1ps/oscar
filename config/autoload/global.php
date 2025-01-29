@@ -315,7 +315,7 @@ return array(
         // %s ID de l'activité
         // %s Date de l'avenant (YYYY-MM-DD)
         // %s uniqid
-        'avenant_filename' => 'avenant_%s_%s_%s.pdf',
+        'avenant_filename' => 'avenant_%s_%s_%s',
 
         'generated-documents' => [
             'activity' => []

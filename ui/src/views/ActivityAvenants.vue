@@ -74,10 +74,18 @@
   <section class="avenants">
     <article class="avenant card" v-for="a in avenants.avenants">
       <h3>
-        {{ $filters.dateFull(a.date) }}
-        <a href="#" class="btn btn-xs btn-primary">
-          <i class="icon-file-pdf"></i>
-          Télécharger le fichier</a>
+        <span>
+          {{ $filters.dateFull(a.date) }}
+        </span>
+        <nav>
+          <a :href="a.url_download" class="btn btn-xs btn-primary">
+            <i class="icon-file-pdf"></i>
+            Télécharger</a>
+          <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerDelete(a)">
+            <i class="icon-trash"></i>
+            Supprimer</a>
+
+        </nav>
       </h3>
       <p>{{ a.comment }}</p>
       <section class="modification">
@@ -169,8 +177,22 @@ export default {
 
     handlerSave(){
       console.log("SAVE", this.avenants.url_api);
-      AxiosOscar.post(this.avenants.url_api, this.edit).then(response => {
-        console.log(response);
+      let formData = new FormData();
+      formData.append("id", this.edit.id);
+      formData.append("dateAvenant", this.edit.dateAvenant);
+      formData.append("comment", this.edit.comment);
+      formData.append("file", this.edit.file);
+      formData.append("changes", JSON.stringify(this.edit.change));
+      AxiosOscar.post(this.avenants.url_api, formData).then(response => {
+        this.edit = null;
+        this.fetch();
+      })
+    },
+
+    handlerDelete(avenant){
+      console.log("SAVE", avenant.url_api);
+      AxiosOscar.delete(avenant.url_api, {pendingMsg: "Suppression de l'avenant"}).then(response => {
+        this.fetch();
       })
     },
 
@@ -224,7 +246,7 @@ export default {
         this.edit.file = null;
         return;
       }
-      this.edit.file = await readFileAsText(event.target.files[0]);
+      this.edit.file = event.target.files[0];
     },
 
     fetch(){

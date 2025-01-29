@@ -766,7 +766,8 @@ member:
 
 
 
-
+################################################################################
+# AVENANTS des CONTRACTS
 avenant:
   type: literal
   options:
@@ -774,12 +775,23 @@ avenant:
     defaults:
       controller: ActivityAvenants
   child_routes:
+
+    # API [GET,PUT,POST,DELETE]
     api:
       type: segment
       options:
         route: '/fiche/:activity_id[/:avenant_id]'
         defaults:
           action: api
+      may_terminate: false
+
+    # Téléchargement de l'avenant
+    download:
+      type: segment
+      options:
+        route: '/download/:avenant_id'
+        defaults:
+          action: download
       may_terminate: false
 
 

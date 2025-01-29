@@ -293,7 +293,7 @@ return array(
                 // AVENANTS
                 [
                     'controller' => 'ActivityAvenants',
-                    'action' => ['api'],
+                    'action' => ['api', 'download'],
                     'roles' => ['user'],
                 ],
 

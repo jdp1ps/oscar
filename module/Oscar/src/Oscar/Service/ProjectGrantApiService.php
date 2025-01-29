@@ -1244,7 +1244,16 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
               'id' => $item->getId(),
               'comment' => $item->getComment(),
               'filename' => $item->getFilename(),
-              'date' => $item->getDateAvenant()->format('Y-m-d')
+              'date' => $item->getDateAvenant()->format('Y-m-d'),
+              'status' => $item->getStatus(),
+              'status_text' => $item->getStatusLabel(),
+              'url_api' => $urlPlugin->fromRoute('avenant/api', [
+                  'activity_id' => $activity->getId(),
+                  'avenant_id' => $item->getId()
+              ]),
+              'url_download' => $urlPlugin->fromRoute('avenant/download', [
+                  'avenant_id' => $item->getId()
+              ]),
             ];
         }
         return [
