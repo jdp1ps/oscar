@@ -709,6 +709,20 @@ class ActivityRepository extends EntityRepository
         );
     }
 
+    public function getActivityIdsWithAvenants(): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->innerJoin('a.avenants', 'av');
+
+        return array_map(
+            'current',
+            $qb
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
     public function getQueryActivityIdsWithWorkpackage(): QueryBuilder
     {
         $qb = $this->createQueryBuilder('a')
