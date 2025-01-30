@@ -71,19 +71,31 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
                 } catch (\Exception $e) {
                     return $this->jsonError("Impossible de charger les avenants");
                 }
-                break;
 
             case 'POST':
                 // TODO Tester les droits d'accès
                 $datas = $_POST;
-                try {
-                    $datas['file'] = $this->fileAvenantDrop($activity);
-                    $datas['status'] = ActivityAvenant::STATUS_DRAFT;
-                    $this->getLoggerService()->debug(print_r($datas, true));
-                    $this->getActivityAvenantsService()->createAvenantFromArray($activity, $datas);
-                    return $this->getResponseOk("Avenant ajouté");
-                } catch (\Exception $e) {
-                    return $this->jsonError("Impossible d'ajouter l'avenant : " . $e->getMessage());
+                $action = $_POST['action'];
+                switch($action){
+                    case "create":
+                        try {
+                            $datas['status'] = ActivityAvenant::STATUS_DRAFT;
+                            $this->getActivityAvenantsService()->saveAvenantFromArray($activity, $datas);
+                            return $this->getResponseOk("Avenant ajouté");
+                        } catch (\Exception $e) {
+                            return $this->jsonError("Impossible d'ajouter l'avenant : " . $e->getMessage());
+                        }
+                    case "update":
+                        try {
+                            $this->getActivityAvenantsService()->saveAvenantFromArray($activity, $datas);
+                            return $this->getResponseOk("Avenant modifié");
+
+                        } catch (\Exception $e) {
+                            return $this->jsonError("Impossible de mettre à jour l'avenant : " . $e->getMessage());
+                        }
+                    default:
+                        return $this->jsonError("Action non reconnue");
+
                 }
 
             case 'DELETE':
@@ -149,35 +161,6 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
             return $this->getEntityManager()->getRepository(Activity::class)->find($idActivity);
         } catch (\Exception $e) {
             throw new OscarException("Impossible de charger l'activité $idActivity");
-        }
-    }
-
-    private function fileAvenantDrop( Activity $activity ) :string
-    {
-        if( !array_key_exists('file', $_FILES) ){
-            $this->getLoggerService()->error("Aucun fichier d'avenant envoyé");
-            throw new OscarException("Fichier manquant");
-        }
-        try {
-            $uploader = new FileUploadStandard();
-            $avenant_directory = $this->getOscarConfigurationService()->getDocumentDropLocation();
-            $filename_pattern = $this->getOscarConfigurationService()->getConfiguration('avenant_filename');
-            $filename = sprintf(
-                $filename_pattern,
-                $activity->getId(),
-                (new \DateTime())->format('Y-m-d'),
-                uniqid()
-            );
-            $mimes = ["application/pdf" => "pdf"];
-            $uploader->setDestination($avenant_directory)
-                ->setFilename($filename)
-                ->setMimesAllowed($mimes);
-            $uploader->updoad($_FILES['file']);
-            $this->getLoggerService()->info("Upload ok");
-            return $uploader->getUploadName();
-        } catch (\Exception $e){
-            $this->getLoggerService()->error($e->getMessage());
-            throw new OscarException("Impossible de téléverser le fichier de l'avenant : " . $e->getMessage());
         }
     }
 }

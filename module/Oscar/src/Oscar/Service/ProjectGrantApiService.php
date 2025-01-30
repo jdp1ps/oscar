@@ -171,11 +171,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         OscarUserContext $oscarUserContext,
         array $perimeters
     ): array {
-
         $locked = $activity->isLocked();
         $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
         $lockEditable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $activity);
-        if( $locked ) {
+        if ($locked) {
             $editable = false;
         }
 
@@ -215,17 +214,17 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                             $activity
                         ),
                         'edit'           => $editable && $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_EDIT,
-                            $activity
-                        ),
+                                Privileges::ACTIVITY_EDIT,
+                                $activity
+                            ),
                         'change_project' => !$locked && $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_CHANGE_PROJECT,
-                            $activity
-                        ),
+                                Privileges::ACTIVITY_CHANGE_PROJECT,
+                                $activity
+                            ),
                         'new_project'    => !$locked && $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_CHANGE_PROJECT,
-                            $activity
-                        ),
+                                Privileges::ACTIVITY_CHANGE_PROJECT,
+                                $activity
+                            ),
                     ];
                     break;
 
@@ -283,15 +282,27 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                 case 'milestones':
                     $credentials['milestones'] = [
-                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity),
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity),
-                        'progression' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity),
+                        'read'        => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_SHOW,
+                            $activity
+                        ),
+                        'edit'        => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_MANAGE,
+                            $activity
+                        ),
+                        'progression' => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_PROGRESSION,
+                            $activity
+                        ),
                     ];
                     break;
 
                 case 'organizations':
                     $credentials['organizations'] = [
-                        'edit' => !$locked && $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                                $activity
+                            ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::ORGANIZATION_SHOW),
                     ];
@@ -305,7 +316,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     break;
                 case 'persons':
                     $credentials['persons'] = [
-                        'edit' => !$locked && $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_PERSON_MANAGE,
+                                $activity
+                            ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
                     ];
@@ -354,7 +368,6 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ?Url $urlPlugin = null,
         ?array $perimeters = null
     ): array {
-
         $datas = [
             "api" => "Oscar Activity API"
         ];
@@ -479,7 +492,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
                 'new_project'    => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
-                'pcru' => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
+                'pcru'           => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
             ]
         ];
     }
@@ -1108,9 +1121,9 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
 
         return [
-            'url'      => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
+            'url'        => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
             'currencies' => $this->getCurrencies(),
-            'entities' => $entities
+            'entities'   => $entities
         ];
     }
 
@@ -1122,19 +1135,19 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     private function getSpentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
         $pfis = [];
-        if( $activity->getCodeEOTP() ){
+        if ($activity->getCodeEOTP()) {
             $pfis[] = $activity->getCodeEOTP();
         }
 
         $out = [
-            'enabled'=>false,
-            'enabled_reason'=>'',
-            'pfi'     => $pfis,
-            'warning' => "",
-            'error'   => "",
+            'enabled'        => false,
+            'enabled_reason' => '',
+            'pfi'            => $pfis,
+            'warning'        => "",
+            'error'          => "",
         ];
 
-        if( !count($pfis) ){
+        if (!count($pfis)) {
             $out['enabled_reason'] = "L'activité doit avoir un numéro financier";
             return $out;
         }
@@ -1205,10 +1218,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     }
 
     /**
-     * @throws NotSupported
      * @return array
+     * @throws NotSupported
      */
-    private function getCurrencies() :array
+    private function getCurrencies(): array
     {
         return $this->getEntityManager()->getRepository(Currency::class)->getCurrenciesArray();
     }
@@ -1240,24 +1253,30 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         $out = [];
         /** @var ActivityAvenant $item */
         foreach ($result as $item) {
+            $modifications = [];
+            foreach ($item->getModifications() as $modification) {
+                $modifications[] = $modification->toJson();
+            }
+
             $out[] = [
-              'id' => $item->getId(),
-              'comment' => $item->getComment(),
-              'filename' => $item->getFilename(),
-              'date' => $item->getDateAvenant()->format('Y-m-d'),
-              'status' => $item->getStatus(),
-              'status_text' => $item->getStatusLabel(),
-              'url_api' => $urlPlugin->fromRoute('avenant/api', [
-                  'activity_id' => $activity->getId(),
-                  'avenant_id' => $item->getId()
-              ]),
-              'url_download' => $urlPlugin->fromRoute('avenant/download', [
-                  'avenant_id' => $item->getId()
-              ]),
+                'id'           => $item->getId(),
+                'comment'      => $item->getComment(),
+                'filename'     => $item->getFilename(),
+                'date'         => $item->getDateAvenant()->format('Y-m-d'),
+                'status'       => $item->getStatus(),
+                'status_text'  => $item->getStatusLabel(),
+                'modifications'      => $modifications,
+                'url_api'      => $urlPlugin->fromRoute('avenant/api', [
+                    'activity_id' => $activity->getId(),
+                    'avenant_id'  => $item->getId()
+                ]),
+                'url_download' => $urlPlugin->fromRoute('avenant/download', [
+                    'avenant_id' => $item->getId()
+                ]),
             ];
         }
         return [
-            'url_api' => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
+            'url_api'  => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
             'avenants' => $out
         ];
     }

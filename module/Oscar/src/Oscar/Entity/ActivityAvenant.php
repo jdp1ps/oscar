@@ -3,6 +3,8 @@
 namespace Oscar\Entity;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -37,6 +39,14 @@ class ActivityAvenant
     private Activity $activity;
 
     /**
+     * Liste des modifications
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityAvenantModification", mappedBy="avenant", cascade={"remove"})
+     */
+    protected $modifications;
+
+    /**
      * @var string
      * @ORM\Column(type="string")
      */
@@ -53,6 +63,11 @@ class ActivityAvenant
      * @ORM\Column(type="integer", options={"default": "100"})
      */
     private int $status;
+
+    public function __construct()
+    {
+        $this->modifications = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -119,6 +134,20 @@ class ActivityAvenant
     public function setStatus(int $status): self
     {
         $this->status = $status;
+        return $this;
+    }
+
+    /**
+     * @return ActivityAvenantModification[]
+     */
+    public function getModifications()
+    {
+        return $this->modifications;
+    }
+
+    public function setModifications($modifications): self
+    {
+        $this->modifications = $modifications;
         return $this;
     }
 
