@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-09-23 13:54
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
@@ -37,7 +37,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
 
         $uids = [];
         foreach ($qb->getQuery()->getArrayResult() as $a) {
-            if( array_key_exists('connectors', $a) && $a['connectors'][$connectorName]) {
+            if (array_key_exists('connectors', $a) && $a['connectors'][$connectorName]) {
                 $uids[] = $a['connectors'][$connectorName];
             }
         }
@@ -223,7 +223,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $result = $this->getOrganizationByConnectorQuery($connectorName, $connectorID)
             ->getQuery()
             ->getSingleResult();
-        if($result == null){
+        if ($result == null) {
             var_dump($result);
         }
         return is_array($result) ? $result[0] : $result;
@@ -362,7 +362,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
      * @param OrganizationRole $from
      * @return array
      */
-    public function getOrganizationsIdWithRole(OrganizationRole $from) :array
+    public function getOrganizationsIdWithRole(OrganizationRole $from): array
     {
         $qb = $this->createQueryBuilder('o')
             ->select('o.id')

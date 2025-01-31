@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-10-10 14:48
@@ -154,6 +155,4 @@ class ActivityNotification
     {
         return $this->dateEffective;
     }
-
-
 }

@@ -10,7 +10,7 @@ class ActivityNoteRepository extends EntityRepository
      * @param int $activityId
      * @return ActivityNote[]
      */
-    public function getNotesActivity(int $activityId) : array
+    public function getNotesActivity(int $activityId): array
     {
         $qb = $this->createQueryBuilder('n')
             ->where('n.activity = :activityId');

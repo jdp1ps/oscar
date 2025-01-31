@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-09-23 13:54
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -29,7 +29,7 @@ class PcruTypeContractRepository extends EntityRepository
      * @param string $label
      * @return PcruTypeContract
      */
-    public function getPcruTypeContratByLabel( string $label ): ?PcruTypeContract
+    public function getPcruTypeContratByLabel(string $label): ?PcruTypeContract
     {
         return $this->findOneBy(['label' => $label]);
     }
@@ -42,7 +42,7 @@ class PcruTypeContractRepository extends EntityRepository
         foreach ($query->getQuery()->getResult() as $pcruTypeContract) {
             $activityTypeLabel = "";
             $activityTypeId = null;
-            if( $pcruTypeContract->getActivityType() ){
+            if ($pcruTypeContract->getActivityType()) {
                 $activityTypeLabel = $pcruTypeContract->getActivityType()->getLabel();
                 $activityTypeId = $pcruTypeContract->getActivityType()->getId();
             }
@@ -64,7 +64,7 @@ class PcruTypeContractRepository extends EntityRepository
      * @return string|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getPcruContractByActivityType( ActivityType $activityType ): ?PcruTypeContract
+    public function getPcruContractByActivityType(ActivityType $activityType): ?PcruTypeContract
     {
         try {
             $query = $this->createQueryBuilder('ptc')
@@ -73,7 +73,6 @@ class PcruTypeContractRepository extends EntityRepository
                 ->getQuery();
 
             return $query->getSingleResult();
-
         } catch (NoResultException $exception) {
             return null;
         }
@@ -86,15 +85,15 @@ class PcruTypeContractRepository extends EntityRepository
      * @return string|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getPcruContractForActivityTypeChained( ActivityType $activityType) : ?PcruTypeContract
+    public function getPcruContractForActivityTypeChained(ActivityType $activityType): ?PcruTypeContract
     {
         $labelPcru = $this->getPcruContractByActivityType($activityType);
 
-        if( $labelPcru == null ){
+        if ($labelPcru == null) {
             $typeChain = $this->getEntityManager()->getRepository(ActivityType::class)->getChainFromActivityType($activityType);
             foreach ($typeChain as $type) {
                 $type = $this->getPcruContractByActivityType($type);
-                if( $type ){
+                if ($type) {
                     return $type;
                 }
             }

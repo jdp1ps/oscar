@@ -11,6 +11,8 @@ use Oscar\Entity\ActivityAvenantModification;
 use Oscar\Entity\ActivityPayment;
 use Oscar\Entity\Currency;
 use Oscar\Entity\LogActivity;
+use Oscar\Entity\Organization;
+use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
 use Oscar\Entity\Repository\ActivityPaymentRepository;
 use Oscar\Entity\Role;
@@ -86,9 +88,6 @@ class ActivityAvenantsService implements
      */
     public function saveAvenantFromArray(Activity $activity, array $datas): void
     {
-        $this->getLoggerService()->debug(__METHOD__);
-        $this->getLoggerService()->debug(json_encode($datas));
-
         if ($datas['id']) {
             $mode = "update";
             $avenant = $this->getEntityManager()->getRepository(ActivityAvenant::class)->find($datas['id']);
@@ -322,6 +321,16 @@ class ActivityAvenantsService implements
                 $person = $this->getEntityManager()->getRepository(Person::class)->find($newValue1);
                 $role = $this->getEntityManager()->getRepository(Role::class)->find($newValue2);
                 $msg = "Ajout de $person ($role)";
+                break;
+            case ActivityAvenantModification::TYPE_ORGANIZATION_ADD:
+                $organization = $this->getEntityManager()->getRepository(Organization::class)->find($newValue1);
+                $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($newValue2);
+                $msg = "Ajout de $organization ($role)";
+                break;
+            case ActivityAvenantModification::TYPE_ORGANIZATION_DEL:
+                $person = $this->getEntityManager()->getRepository(Organization::class)->find($newValue1);
+                $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($newValue2);
+                $msg = "Suppression de $person ($role)";
                 break;
         }
 

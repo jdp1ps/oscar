@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -13,7 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RecallException
 {
-
     const TYPE_EXCLUDED = 'excluded';
     const TYPE_INCLUDED = 'included';
 

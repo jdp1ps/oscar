@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 27/01/16 16:15
@@ -38,7 +39,7 @@ class ActivityDate implements ITrackable
     /**
      * @return string[]
      */
-    static public function progressLabels() :array
+    public static function progressLabels(): array
     {
         return [
             self::VALUE_TODO => "A faire",
@@ -52,7 +53,7 @@ class ActivityDate implements ITrackable
     /**
      * @return string[]
      */
-    static public function progressCodes() :array
+    public static function progressCodes(): array
     {
         return [
             self::VALUE_TODO => self::PROGRESSION_TODO,
@@ -63,19 +64,19 @@ class ActivityDate implements ITrackable
         ];
     }
 
-    static public function progressInfoCode( int $finishedValue ) :string
+    public static function progressInfoCode(int $finishedValue): string
     {
         $codes = self::progressCodes();
-        if( array_key_exists($finishedValue, $codes) ){
+        if (array_key_exists($finishedValue, $codes)) {
             return $codes[$finishedValue];
         }
         return "";
     }
 
-    static public function progressInfoLabel( int $finishedValue ): string
+    public static function progressInfoLabel(int $finishedValue): string
     {
         $states = self::progressLabels();
-        if( array_key_exists($finishedValue, $states) ){
+        if (array_key_exists($finishedValue, $states)) {
             return $states[$finishedValue];
         }
         return "UNKNOW";
@@ -144,7 +145,7 @@ class ActivityDate implements ITrackable
     /***
      * @return bool
      */
-    public function isFinishable() :bool
+    public function isFinishable(): bool
     {
         if ($this->getType()) {
             return $this->getType()->isFinishable();
@@ -152,10 +153,10 @@ class ActivityDate implements ITrackable
         return false;
     }
 
-    public function getFinishState() :?array
+    public function getFinishState(): ?array
     {
 
-        if( $this->isFinishable() ){
+        if ($this->isFinishable()) {
             $finishedValueLabel = $this->getFinished() != null ? $this->getFinished() : self::VALUE_TODO;
             return [
                 'finish' => $this->getFinished(),
@@ -167,23 +168,21 @@ class ActivityDate implements ITrackable
         return null;
     }
 
-    public function getStateCssClass() :string
+    public function getStateCssClass(): string
     {
-        if( $this->isFinishable() ){
+        if ($this->isFinishable()) {
             $finishedValueLabel = $this->getFinished() != null ? $this->getFinished() : self::VALUE_TODO;
-            if( $this->isLate() ){
+            if ($this->isLate()) {
                 return 'progress-item-late';
             } else {
-                return 'progress-item-'.self::progressInfoCode($finishedValueLabel);
+                return 'progress-item-' . self::progressInfoCode($finishedValueLabel);
             }
         } else {
-            if( $this->isToday() ){
+            if ($this->isToday()) {
                 return 'progress-item-today';
-            }
-            elseif ( $this->isFutur() ){
+            } elseif ($this->isFutur()) {
                 return 'progress-item-futur';
-            }
-            else {
+            } else {
                 return 'progress-item-past';
             }
         }
@@ -191,9 +190,9 @@ class ActivityDate implements ITrackable
 
 
 
-    public function getProgressInfo() :string
+    public function getProgressInfo(): string
     {
-        if( $this->isFinishable() ){
+        if ($this->isFinishable()) {
             return self::getProgressInfo()[$this->getFinished()];
         }
     }
@@ -224,7 +223,7 @@ class ActivityDate implements ITrackable
     /**
      * Retourne TRUE sie le jalon doit être complété et qu'il est en retard.
      */
-    public function isLate( DateTime $now = new DateTime()) :bool
+    public function isLate(DateTime $now = new DateTime()): bool
     {
         return $this->isFinishable() && !$this->isFinished() && ($now > $this->getDateStart());
     }
@@ -298,7 +297,7 @@ class ActivityDate implements ITrackable
     /**
      * @return DateTime
      */
-    public function getDateStart() : DateTime
+    public function getDateStart(): DateTime
     {
         return $this->dateStart;
     }
@@ -335,8 +334,7 @@ class ActivityDate implements ITrackable
     public function setType($type)
     {
         $this->type = $type;
-        if( $type && $type->isFinishable() ){
-
+        if ($type && $type->isFinishable()) {
         }
 
         return $this;
@@ -383,12 +381,12 @@ class ActivityDate implements ITrackable
         return $this->getDateStart()->format('d M Y') . ' (' . $this->getType() . ')';
     }
 
-    public function isToday( DateTime $dateRef = new DateTime() ):bool
+    public function isToday(DateTime $dateRef = new DateTime()): bool
     {
         return $this->getDateStart()->format('Y-m-d') == $dateRef->format('Y-m-d');
     }
 
-    public function isFutur( DateTime $dateRef = new DateTime() ):bool
+    public function isFutur(DateTime $dateRef = new DateTime()): bool
     {
         return $this->getDateStart()->format('Y-m-d') > $dateRef->format('Y-m-d');
     }
@@ -428,5 +426,4 @@ class ActivityDate implements ITrackable
             'dateStart' => $this->getDateStartStr(),
         ];
     }
-
 }

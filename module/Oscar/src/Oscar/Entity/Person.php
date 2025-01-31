@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/06/15 13:54
@@ -415,7 +416,7 @@ class Person implements ResourceInterface
         $syncOrganizations = [];
         /** @var OrganizationPerson $organizationPerson */
         foreach ($this->getOrganizations() as $organizationPerson) {
-            if( $organizationPerson->isSync() ){
+            if ($organizationPerson->isSync()) {
                 $syncOrganizations[] = $organizationPerson;
             }
         }
@@ -614,7 +615,7 @@ class Person implements ResourceInterface
      * @param string|null $email
      * @return $this
      */
-    public function setEmail(?string $email) :self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -1015,7 +1016,7 @@ class Person implements ResourceInterface
     private $cGetDateCreated;
     private $cGetDateUpdated;
 
-    public function getDateCreatedStr( string $format = 'c' )
+    public function getDateCreatedStr(string $format = 'c')
     {
         if ($this->cGetDateCreated == null) {
             $this->cGetDateCreated = $this->getDateCreated() ? $this->getDateCreated()->format($format) : "";
@@ -1023,7 +1024,7 @@ class Person implements ResourceInterface
         return $this->cGetDateCreated;
     }
 
-    public function getDateUpdatedStr( string $format = 'c' )
+    public function getDateUpdatedStr(string $format = 'c')
     {
         if ($this->cGetDateUpdated == null) {
             $this->cGetDateUpdated = $this->getDateUpdated() ? $this->getDateUpdated()->format($format) : $this->getDateCreatedStr();
@@ -1031,7 +1032,7 @@ class Person implements ResourceInterface
         return $this->cGetDateUpdated;
     }
 
-    public function getDateCachedStr( string $format = 'c' )
+    public function getDateCachedStr(string $format = 'c')
     {
         return $this->getDateUpdatedStr($format);
     }
@@ -1069,5 +1070,4 @@ class Person implements ResourceInterface
         }
         return $this;
     }
-
 }

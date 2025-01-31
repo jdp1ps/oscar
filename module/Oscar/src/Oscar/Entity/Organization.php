@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 25/06/15 10:54
@@ -468,7 +469,7 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return ?Organization
      */
-    public function getParent() :?Organization
+    public function getParent(): ?Organization
     {
         return $this->parent;
     }
@@ -476,11 +477,11 @@ class Organization implements ResourceInterface, IConnectedObject
     /**
      * @return mixed
      */
-    public function getParents() :array
+    public function getParents(): array
     {
-        if( $this->hasParent() ){
+        if ($this->hasParent()) {
             $parents = [$this->getParent()];
-            if( $this->getParent()->hasParent() ){
+            if ($this->getParent()->hasParent()) {
                 $parents = array_merge($parents, $this->getParent()->getParents());
             }
             return $parents;
@@ -488,7 +489,7 @@ class Organization implements ResourceInterface, IConnectedObject
         return [];
     }
 
-    public function hasParent() :bool
+    public function hasParent(): bool
     {
         return $this->getParent() != null;
     }
@@ -657,14 +658,15 @@ class Organization implements ResourceInterface, IConnectedObject
         return false;
     }
 
-    public function getPersonRolesId( Person $person) {
+    public function getPersonRolesId(Person $person)
+    {
         $roleIds = [];
-        if( $this->hasPerson($person) ){
+        if ($this->hasPerson($person)) {
             /** @var OrganizationPerson $member */
             foreach ($this->getPersons() as $member) {
                 if ($member->getPerson()->getId() == $person->getId()) {
                     $roleId = $member->getRoleObj()->getRoleId();
-                    if( !in_array($roleId, $roleIds) ){
+                    if (!in_array($roleId, $roleIds)) {
                         $roleIds[] = $roleId;
                     }
                 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 12/06/15 12:53
@@ -17,8 +18,8 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ProjectMember implements ILoggable
 {
-
-    use TraitRole, TraitTrackable;
+    use TraitRole;
+    use TraitTrackable;
 
     public function isLeader()
     {
@@ -177,8 +178,12 @@ class ProjectMember implements ILoggable
 
     public function log()
     {
-        return sprintf("%s (%s) dans le projet %s)", $this->getPerson()->log(),
-            $this->getRole(), $this->getProject()->log());
+        return sprintf(
+            "%s (%s) dans le projet %s)",
+            $this->getPerson()->log(),
+            $this->getRole(),
+            $this->getProject()->log()
+        );
     }
 
     function toArray()

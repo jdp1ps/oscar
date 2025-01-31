@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Classe pour gérer les Avenants des activités de recherche.
+ *
+ * @category Class
+ * @package  Oscar\Entity
+ * @author   Stéphane Bouvry <stephane.bouvry@unicaen.fr>
+ */
+
 namespace Oscar\Entity;
 
 use DateTime;
@@ -8,62 +16,74 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Class ActivityMotCle
- * @package Oscar\Entity
  * @ORM\Entity(repositoryClass="Oscar\Entity\Repository\ActivityAvenantRepository")
  */
 class ActivityAvenant
 {
-
     const STATUS_DRAFT = 100;
 
     const STATUS_ACTIVE = 200;
 
     /**
+     * ID bdd
+     *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected ?int $id;
 
     /**
-     * @var DateTime
+     * Date de signature de l'avenant
+     *
      * @ORM\Column(type="datetime")
+     * @var ?DateTime
      */
-    private $dateAvenant;
+    protected ?DateTime $dateAvenant;
 
     /**
+     * Activité de l'avenant
+     *
      * @var Activity
      * @ORM\ManyToOne(targetEntity="Activity", inversedBy="avenants")
      */
-    private Activity $activity;
+    protected Activity $activity;
 
     /**
      * Liste des modifications
      *
-     * @var ArrayCollection
+     * @var Collection
      * @ORM\OneToMany(targetEntity="ActivityAvenantModification", mappedBy="avenant", cascade={"remove"})
      */
-    protected $modifications;
+    protected Collection $modifications;
 
     /**
+     * Nom du fichier stocké (l'emplacement du dossier est dans la configuration)
+     *
      * @var string
      * @ORM\Column(type="string")
      */
-    private string $filename;
+    protected string $filename;
 
     /**
-     * @var string
+     * Commentaire de l'utilisateur
+     *
+     * @var string Commentaire
      * @ORM\Column(type="string")
      */
-    private string $comment;
+    protected string $comment;
 
     /**
-     * @var int
+     * Status
+     *
+     * @var int ID
      * @ORM\Column(type="integer", options={"default": "100"})
      */
-    private int $status;
+    protected int $status;
 
+    /**
+     * Constructeur
+     */
     public function __construct()
     {
         $this->modifications = new ArrayCollection();
@@ -72,7 +92,7 @@ class ActivityAvenant
     /**
      * @return mixed
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -126,7 +146,7 @@ class ActivityAvenant
         return $this->status;
     }
 
-    public function getStatusLabel() :string
+    public function getStatusLabel(): string
     {
         return self::getStatusText($this->getStatus());
     }
@@ -138,14 +158,14 @@ class ActivityAvenant
     }
 
     /**
-     * @return ActivityAvenantModification[]
+     * @return ArrayCollection
      */
-    public function getModifications()
+    public function getModifications(): Collection
     {
         return $this->modifications;
     }
 
-    public function setModifications($modifications): self
+    public function setModifications(Collection $modifications): self
     {
         $this->modifications = $modifications;
         return $this;
@@ -159,11 +179,11 @@ class ActivityAvenant
     /**
      * @return string[]
      */
-    public static function getStatusList() :array
+    public static function getStatusList(): array
     {
         return [
-          self::STATUS_DRAFT => 'Brouillon',
-          self::STATUS_ACTIVE => 'Effectif',
+            self::STATUS_DRAFT  => 'Brouillon',
+            self::STATUS_ACTIVE => 'Effectif',
         ];
     }
 
@@ -171,9 +191,9 @@ class ActivityAvenant
      * @param int $status
      * @return string
      */
-    public function getStatusText( int $status ) :string
+    public function getStatusText(int $status): string
     {
-        if( !array_key_exists($status, self::getStatusList()) ){
+        if (!array_key_exists($status, self::getStatusList())) {
             return "Inconnue";
         }
         return self::getStatusList()[$status];

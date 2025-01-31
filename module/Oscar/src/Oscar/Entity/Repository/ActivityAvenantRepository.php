@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 12:01
@@ -11,7 +12,8 @@ use Doctrine\ORM\EntityRepository;
 
 class ActivityAvenantRepository extends EntityRepository
 {
-    public function getByActivityId(int $activityId):array {
+    public function getByActivityId(int $activityId): array
+    {
         return $this->createQueryBuilder('a')
             ->where('a.activity = :activityId')
             ->setParameter('activityId', $activityId)

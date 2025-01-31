@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 18/06/15 12:46
@@ -17,7 +18,6 @@ use UnicaenSignature\Entity\Db\SignatureFlow;
 
 class ContractDocumentRepository extends AbstractTreeDataRepository
 {
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// ONGLETS
     /**
@@ -73,8 +73,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         $result = $query->getQuery()->getOneOrNullResult();
         if ($result == null) {
             return 1;
-        }
-        else {
+        } else {
             return $result->getId() + 1;
         }
     }
@@ -186,8 +185,7 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
         if ($id == null) {
             $type = new TypeDocument();
             $this->getEntityManager()->persist($type);
-        }
-        else {
+        } else {
             $type = $this->getType($id);
         }
 
@@ -457,6 +455,5 @@ class ContractDocumentRepository extends AbstractTreeDataRepository
             ->setParameter('filename', $filename)
             ->getQuery()
             ->getResult();
-
     }
 }

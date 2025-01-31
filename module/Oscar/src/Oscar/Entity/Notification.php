@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 07/09/15 11:33
@@ -164,7 +165,7 @@ class Notification
      */
     public function addNotificationPerson(NotificationPerson $notificationPerson)
     {
-        if( !$this->persons->contains($notificationPerson) ){
+        if (!$this->persons->contains($notificationPerson)) {
             $this->persons->add($notificationPerson);
         }
         return $this;
@@ -174,10 +175,11 @@ class Notification
      * @param Person $person
      * @return $this|null
      */
-    public function addPerson( Person $person, EntityManager $em ){
+    public function addPerson(Person $person, EntityManager $em)
+    {
         /** @var NotificationPerson $notificationPerson */
-        foreach ( $this->persons as $notificationPerson ){
-            if( $notificationPerson->getPerson() == $person ){
+        foreach ($this->persons as $notificationPerson) {
+            if ($notificationPerson->getPerson() == $person) {
                 // $notificationPerson->setRead(null);
                 return null;
             }
@@ -191,9 +193,10 @@ class Notification
      * @param Person $person
      * @return $this|null
      */
-    public function addPersons( array $persons, EntityManager $em ){
+    public function addPersons(array $persons, EntityManager $em)
+    {
         /** @var Person $p */
-        foreach ( $persons as $p ){
+        foreach ($persons as $p) {
             $this->addPerson($p, $em);
         }
         return $this;
@@ -290,12 +293,12 @@ class Notification
     private ?string $_contextKey = null;
     private ?int $_contextId = null;
 
-    private function getContextDatas() :array
+    private function getContextDatas(): array
     {
-        if( $this->_contextKey === null ){
+        if ($this->_contextKey === null) {
             $contextData = explode(":", $this->getContext());
             $this->_contextKey = $contextData[0];
-            if( count($contextData) > 1 ){
+            if (count($contextData) > 1) {
                 $this->_contextId = $contextData[1];
             } else {
                 $this->_contextId = null;
@@ -303,29 +306,31 @@ class Notification
         }
         return [
             'key' => $this->_contextKey,
-            'id' =>$this->_contextId
+            'id' => $this->_contextId
         ];
     }
 
-    public function getContextKey() :string
+    public function getContextKey(): string
     {
         return $this->getContextDatas()['key'];
     }
 
-    public function getContextId() :?int
+    public function getContextId(): ?int
     {
         return $this->getContextDatas()['id'];
     }
 
-    public function isPayement() :bool
+    public function isPayement(): bool
     {
         return $this->getContextKey() == self::OBJECT_PAYMENT;
     }
 
 
-    public function getSubscribersIds() :array
+    public function getSubscribersIds(): array
     {
-        return array_map(function($p) { return $p->getPerson()->getId(); }, $this->getPersons()->toArray());
+        return array_map(function ($p) {
+            return $p->getPerson()->getId();
+        }, $this->getPersons()->toArray());
     }
 
 

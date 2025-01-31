@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
@@ -37,7 +38,7 @@ class ActivityPcruInfosRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getInfoActivity( int $activity_id ) :ActivityPcruInfos
+    public function getInfoActivity(int $activity_id): ActivityPcruInfos
     {
         $qb = $this->createQueryBuilder('i')
             ->where('i.activity = :activity_id')
@@ -46,7 +47,7 @@ class ActivityPcruInfosRepository extends EntityRepository
         return $qb->getQuery()->getSingleResult();
     }
 
-    public function getPcruInfoActivityFromOscarId( string $oscarId ) :ActivityPcruInfos
+    public function getPcruInfoActivityFromOscarId(string $oscarId): ActivityPcruInfos
     {
         $qb = $this->createQueryBuilder('i')
             ->where('i.numContratTutelleGestionnaire = :oscarid')

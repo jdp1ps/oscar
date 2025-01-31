@@ -34,7 +34,7 @@ class ActivityAvenantModification
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @var string
@@ -168,7 +168,8 @@ class ActivityAvenantModification
         return self::class;
     }
 
-    public function toJson() :array {
+    public function toJson(): array
+    {
         return [
             'id' => $this->getId(),
             'type' => $this->getType(),

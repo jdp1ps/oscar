@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: bouvry
@@ -8,16 +9,15 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 
 class ActivityRequestRepository extends EntityRepository
 {
-
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function getBaseQueryAdministration( $status ){
+    protected function getBaseQueryAdministration($status)
+    {
 
         $qb = $this->createQueryBuilder('ar')
             ->where('ar.status IN (:status)')
@@ -29,8 +29,11 @@ class ActivityRequestRepository extends EntityRepository
     /**
      * @return mixed
      */
-    public function getAll( $status ){
-        if( count($status) == 0 ) return [];
+    public function getAll($status)
+    {
+        if (count($status) == 0) {
+            return [];
+        }
         return $this->getBaseQueryAdministration($status)->getQuery()->getResult();
     }
 
@@ -38,9 +41,12 @@ class ActivityRequestRepository extends EntityRepository
      * @param $organizations
      * @return mixed
      */
-    public function getAllForOrganizations( $organizations, $status ){
+    public function getAllForOrganizations($organizations, $status)
+    {
 
-        if( count($status) == 0 ) return [];
+        if (count($status) == 0) {
+            return [];
+        }
 
         $qb = $this->getBaseQueryAdministration($status);
 
@@ -50,10 +56,11 @@ class ActivityRequestRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getAllForPerson( Person $person, $status = null ){
+    public function getAllForPerson(Person $person, $status = null)
+    {
 
         $mode = [ActivityRequest::STATUS_DRAFT, ActivityRequest::STATUS_SEND];
-        if( $status != null ){
+        if ($status != null) {
             $mode = $status;
         }
         $qb = $this->getBaseQueryAdministration($mode);
@@ -62,6 +69,5 @@ class ActivityRequestRepository extends EntityRepository
             ->setParameter('person', $person);
 
         return $qb->getQuery()->getResult();
-
     }
 }

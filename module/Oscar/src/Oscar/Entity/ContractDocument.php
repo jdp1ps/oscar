@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 23/10/15 10:02
@@ -20,7 +21,6 @@ use UnicaenSignature\Entity\Db\SignatureFlow;
  */
 class ContractDocument extends AbstractVersionnedDocument
 {
-
     const LOCATION_LOCAL_FILE = 'local';
     const LOCATION_URL = 'url';
 
@@ -374,7 +374,7 @@ class ContractDocument extends AbstractVersionnedDocument
      * @param $options
      * @return array
      */
-    public function toJson(bool $options = false) :array
+    public function toJson(bool $options = false): array
     {
         $defaultOptions = [
             'urlDelete'   => false,
@@ -396,7 +396,7 @@ class ContractDocument extends AbstractVersionnedDocument
 
         // process
         $process = false;
-        if($this->getProcess()){
+        if ($this->getProcess()) {
             $process = $this->getProcess()->toArray();
             $process_sendable = $this->getProcess()->isSendable();
         }
@@ -456,7 +456,7 @@ class ContractDocument extends AbstractVersionnedDocument
     }
 
 
-    public function generatePath() :string
+    public function generatePath(): string
     {
         return $this->generateName();
     }
@@ -466,13 +466,13 @@ class ContractDocument extends AbstractVersionnedDocument
      *
      * @return string
      */
-    public function generateName() :string
+    public function generateName(): string
     {
         $slugify = new Slugify();
         return sprintf("oscar-%s-%s-%s", $this->getGrant()->getId(), $this->getVersion(), $slugify->slugify($this->getFileName()));
     }
 
-    public function islink() :bool
+    public function islink(): bool
     {
         return $this->getLocation() == self::LOCATION_URL;
     }

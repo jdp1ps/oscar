@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 05/11/15 14:45
@@ -16,7 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class OrganizationPerson implements ILoggable
 {
-    use TraitRole, TraitTrackable;
+    use TraitRole;
+    use TraitTrackable;
 
     /**
      * @var Person
@@ -165,6 +167,4 @@ class OrganizationPerson implements ILoggable
             $this->getRoleObj()
         );
     }
-
-
 }

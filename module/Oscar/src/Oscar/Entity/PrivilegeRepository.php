@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-09-23 13:54
@@ -7,7 +8,6 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Exception\OscarException;
@@ -15,7 +15,8 @@ use Oscar\Provider\Privileges;
 
 class PrivilegeRepository extends EntityRepository
 {
-    public function getPrivilegeByCode( $code ){
+    public function getPrivilegeByCode($code)
+    {
 
         $privilegeQuery = $this->getEntityManager()->createQueryBuilder()
             ->select('p')
@@ -26,10 +27,9 @@ class PrivilegeRepository extends EntityRepository
 
         try {
             return $privilegeQuery->setParameter('code', $code)->getSingleResult();
-        }catch (NoResultException $e ){
+        } catch (NoResultException $e) {
             throw new OscarException("Privilege introuvable");
-        }
-        catch (\Exception $e ){
+        } catch (\Exception $e) {
             throw new OscarException("Erreur inattendue : " . $e->getMessage());
         }
     }

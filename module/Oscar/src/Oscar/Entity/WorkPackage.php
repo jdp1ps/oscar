@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: stephane
@@ -10,7 +11,6 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-
 use Oscar\Entity\Activity;
 use Oscar\Entity\TraitTrackable;
 
@@ -162,7 +162,7 @@ class WorkPackage
      */
     public function getDateStart()
     {
-        if( $this->dateStart == null ) {
+        if ($this->dateStart == null) {
             return $this->getActivity()->getDateStart();
         }
         return $this->dateStart;
@@ -182,7 +182,7 @@ class WorkPackage
      */
     public function getDateEnd()
     {
-        if( $this->dateEnd == null ) {
+        if ($this->dateEnd == null) {
             return $this->getActivity()->getDateEnd();
         }
         return $this->dateEnd;
@@ -215,9 +215,10 @@ class WorkPackage
         return $this;
     }
 
-    public function hasPerson( Person $person ){
-        foreach($this->getPersons() as $p ){
-            if( $p->getPerson()->getId() == $person->getId() ){
+    public function hasPerson(Person $person)
+    {
+        foreach ($this->getPersons() as $p) {
+            if ($p->getPerson()->getId() == $person->getId()) {
                 return true;
             }
         }
@@ -240,12 +241,13 @@ class WorkPackage
         return sprintf("%s/%s/%s %s", $project, $activity, $this->getCode(), $this->getLabel());
     }
 
-    public function toArray(){
+    public function toArray()
+    {
         $persons = [];
         $timesPersons = [];
         /** @var TimeSheet $timesheet */
-        foreach( $this->getTimesheets() as $timesheet ){
-            if( !array_key_exists($timesheet->getPerson()->getId(), $timesPersons) ){
+        foreach ($this->getTimesheets() as $timesheet) {
+            if (!array_key_exists($timesheet->getPerson()->getId(), $timesPersons)) {
                 $timesPersons[$timesheet->getPerson()->getId()] = [
                     'validating' => 0,
                     'conflicts' => 0,
@@ -255,7 +257,7 @@ class WorkPackage
             }
 
             $status = $timesheet->getValidationPeriod() ? $timesheet->getValidationPeriod()->getStatus() : null;
-            switch( $status ){
+            switch ($status) {
                 case ValidationPeriod::STATUS_STEP1:
                 case ValidationPeriod::STATUS_STEP2:
                 case ValidationPeriod::STATUS_STEP3:
@@ -276,7 +278,7 @@ class WorkPackage
         }
 
         /** @var WorkPackagePerson $person */
-        foreach( $this->getPersons() as $person ){
+        foreach ($this->getPersons() as $person) {
             $persons[] = [
                 'id' => $person->getId(),
                 'person' => $person->getPerson()->toArray(),

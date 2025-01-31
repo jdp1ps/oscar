@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 01/06/15 12:44
@@ -8,7 +9,6 @@
 namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-
 
 /**
  * Demande d'activité
@@ -79,10 +79,10 @@ class ActivityRequestFollow
 
     public function __construct()
     {
-
     }
 
-    public function toJson(){
+    public function toJson()
+    {
         return [
             'id' => $this->getId(),
             'statut' => $this->getStatus(),
@@ -95,5 +95,4 @@ class ActivityRequestFollow
             ]
         ];
     }
-
 }

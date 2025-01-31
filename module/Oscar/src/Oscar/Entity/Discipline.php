@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16/06/15 12:14
@@ -111,13 +112,14 @@ class Discipline
 
         return $this;
     }
-    
+
     public function __toString()
     {
         return (string) $this->getLabel();
     }
 
-    public function toJson(){
+    public function toJson()
+    {
         return [
             'id' => $this->getId(),
             'label' => $this->label,

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/06/15 12:01
@@ -15,7 +16,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ProjectPartner implements ILoggable
 {
-    use TraitRole, TraitTrackable;
+    use TraitRole;
+    use TraitTrackable;
 
     /**
      * Projet
@@ -55,8 +57,9 @@ class ProjectPartner implements ILoggable
         return $this;
     }
 
-    public function isPrincipal(){
-        if( $this->getRoleObj() ){
+    public function isPrincipal()
+    {
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->isPrincipal();
         }
         return false;
@@ -64,7 +67,7 @@ class ProjectPartner implements ILoggable
 
     public function getRole()
     {
-        if( $this->getRoleObj() ){
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->getLabel();
         }
         return "rôle inconnu";
@@ -133,7 +136,7 @@ class ProjectPartner implements ILoggable
 
     function __toString()
     {
-        return (string) $this->getOrganization() . '('.$this->getRole().')';
+        return (string) $this->getOrganization() . '(' . $this->getRole() . ')';
     }
 
     /**
@@ -143,7 +146,7 @@ class ProjectPartner implements ILoggable
      * @param \DateTime $date
      * @return ProjectPartner
      */
-    function fusionTo( Organization $organization, \DateTime $date )
+    function fusionTo(Organization $organization, \DateTime $date)
     {
         $new = new ProjectPartner();
         $new->setDateStart($date)
@@ -153,9 +156,8 @@ class ProjectPartner implements ILoggable
         return $new;
     }
 
-    function isActive() :bool
+    function isActive(): bool
     {
         return !$this->isOutOfDate() && !$this->getOrganization()->isClose();
     }
-
 }

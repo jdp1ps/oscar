@@ -41,7 +41,7 @@ class ActivityMotCle
      * @var Person
      * @ORM\ManyToOne(targetEntity="Person")
      */
-    private $createdBy;    
+    private $createdBy;
 
     /**
      * @return mixed
@@ -134,7 +134,8 @@ class ActivityMotCle
         return (string) $this->getLabel();
     }
 
-    public function toJson(){
+    public function toJson()
+    {
         return [
             'id' => $this->getId(),
             'label' => $this->label,

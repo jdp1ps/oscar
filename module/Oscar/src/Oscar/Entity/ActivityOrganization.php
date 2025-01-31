@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 05/11/15 14:45
@@ -16,7 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ActivityOrganization implements ILoggable
 {
-    use TraitRole, TraitTrackable;
+    use TraitRole;
+    use TraitTrackable;
 
     /**
      * @var Person
@@ -54,15 +56,17 @@ class ActivityOrganization implements ILoggable
         return $this;
     }
 
-    public function getRole(){
-        if( $this->getRoleObj() ){
+    public function getRole()
+    {
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->getLabel();
         }
         return "Unknow role";
     }
 
-    public function isPrincipal(){
-        if( $this->getRoleObj() ){
+    public function isPrincipal()
+    {
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->isPrincipal();
         }
         return false;
@@ -115,7 +119,8 @@ class ActivityOrganization implements ILoggable
     }
 
 
-    function fusionTo( Organization $organization, \DateTime $date ){
+    function fusionTo(Organization $organization, \DateTime $date)
+    {
         $new = new ActivityOrganization();
         $new->setDateStart($date)
             ->setActivity($this->getActivity())
@@ -124,7 +129,7 @@ class ActivityOrganization implements ILoggable
         return $new;
     }
 
-    function isActive() :bool
+    function isActive(): bool
     {
         return !$this->isOutOfDate() && !$this->getOrganization()->isClose();
     }

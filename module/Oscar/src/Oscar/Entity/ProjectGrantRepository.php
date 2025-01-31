@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 01/07/15 13:59
@@ -7,15 +8,14 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 
 /**
  * Class ProjectGrantRepository
  * @package Oscar\Entity
  */
-class ProjectGrantRepository extends EntityRepository{
-
+class ProjectGrantRepository extends EntityRepository
+{
     protected function getBaseQuery()
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
@@ -34,7 +34,7 @@ class ProjectGrantRepository extends EntityRepository{
      *
      * @return Activity[]
      */
-    public function getActivitiesWithDateEndUnrushed() :array
+    public function getActivitiesWithDateEndUnrushed(): array
     {
         $qb = $this->createQueryBuilder('a')
             ->createQueryBuilder('a')
@@ -44,16 +44,17 @@ class ProjectGrantRepository extends EntityRepository{
         return $qb->getQuery()->getResult();
     }
 
-    public function getAllByYear( $year=null ){
+    public function getAllByYear($year = null)
+    {
         $query = $this->getBaseQuery();
-        if( $year != null ){
+        if ($year != null) {
             $query->where('pg.dateStart LIKE :year')
                 ->setParameter('year', "$year-%");
         }
         return $query->orderBy('pg.dateStart', 'DESC')->getQuery()->getResult();
     }
 
-    public function getContractByNumConvention( $numConvention )
+    public function getContractByNumConvention($numConvention)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
 
@@ -71,12 +72,11 @@ class ProjectGrantRepository extends EntityRepository{
      * @param $idProject
      * @return \Doctrine\ORM\Query
      */
-    public function getOne( $idProject )
+    public function getOne($idProject)
     {
         $queryBuilder = $this->getBaseQuery();
         $queryBuilder->where('p.id = :idProject')
             ->setParameter('idProject', $idProject);
         return $queryBuilder->getQuery();
-
     }
 }

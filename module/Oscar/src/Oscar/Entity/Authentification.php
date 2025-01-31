@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 12/06/15 09:54
@@ -13,7 +14,6 @@ use Doctrine\ORM\Mapping as ORM;
 use UnicaenUtilisateur\Entity\Db\AbstractUser;
 use UnicaenUtilisateur\Entity\Db\RoleInterface;
 use UnicaenUtilisateur\Entity\Db\UserInterface;
-
 
 /**
  * User entity abstract mother class.
@@ -99,9 +99,8 @@ class Authentification extends AbstractUser
      * @param AbstractRole|null $lastRole
      * @return self
      */
-    public function setLastRole(RoleInterface $lastRole = null) :void
+    public function setLastRole(RoleInterface $lastRole = null): void
     {
-
     }
 
     /**
@@ -113,9 +112,10 @@ class Authentification extends AbstractUser
         $this->settings = [];
     }
 
-    public function hasRole( $roleId ){
-        foreach ($this->getRoles() as $role ){
-            if( $roleId == $role ){
+    public function hasRole($roleId)
+    {
+        foreach ($this->getRoles() as $role) {
+            if ($roleId == $role) {
                 return true;
             }
         }
@@ -134,7 +134,7 @@ class Authentification extends AbstractUser
         ];
 
         /** @var Role $role */
-        foreach( $this->getRoles() as $role ){
+        foreach ($this->getRoles() as $role) {
             $out['roles'][] = $role->getRoleId();
         }
         return $out;
@@ -336,17 +336,19 @@ class Authentification extends AbstractUser
         return $this;
     }
 
-    public function getSetting($key, $defaultValue){
+    public function getSetting($key, $defaultValue)
+    {
         $settings = $this->getSettings();
-        if( $settings && array_key_exists($key, $settings) ){
+        if ($settings && array_key_exists($key, $settings)) {
             return $settings[$key];
         }
         return $defaultValue;
     }
 
-    public function updateSetting( $key, $value ){
+    public function updateSetting($key, $value)
+    {
         $settings = $this->getSettings();
-        if( !is_array($settings) ){
+        if (!is_array($settings)) {
             $settings = [];
         }
         $settings[$key] = $value;
@@ -354,9 +356,10 @@ class Authentification extends AbstractUser
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    public function hasRolesIds( array $rolesIds ){
-        foreach ($this->getRoles() as $role ){
-            if( in_array($role->getRoleId(), $rolesIds) ){
+    public function hasRolesIds(array $rolesIds)
+    {
+        foreach ($this->getRoles() as $role) {
+            if (in_array($role->getRoleId(), $rolesIds)) {
                 return true;
             }
         }

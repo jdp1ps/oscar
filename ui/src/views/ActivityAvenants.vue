@@ -1,12 +1,21 @@
 <template>
   <modal title="Détails de l'avenant" :visible="edit" @modal-valid="handlerSave" @modal-cancel="handlerCancel">
     <form action="">
-      <div class="form-group">
-        <label for="name">Date (signature de l'avenant)</label>
-        <datepicker v-model="edit.dateAvenant"/>
+
+      <div class="alert alert-info">
+        Vous pourrez revenir modifier cet avenant plus tard tant qu'il est en mode <strong>brouillon</strong>.
       </div>
+
       <div class="form-group">
-        <label for="name">Modifications</label>
+        <label for="dateAvenant">Date : </label>
+        <div class="help">
+          Date de <strong>signature</strong> de l'avenant
+        </div>
+        <datepicker v-model="edit.dateAvenant" id="dateAvenant" />
+      </div>
+
+      <div class="form-group">
+        <label for="name" class="">Modifications : </label><br>
         <div class="btn-group">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
@@ -21,45 +30,77 @@
             <li><a href="#" @click.prevent="handlerAddChange('dateEnd')">Modification de la date de fin</a></li>
           </ul>
         </div>
-        <section class="modifications">
-          <article v-for="change in edit.modifications" class="change">
-            <div v-if="change.mode == 'new'">
-              <div v-if="change.type === 'dateEnd'">
-                <span class="text"> Date de fin : </span>
-                <span><Datepicker v-model="change.value1"/></span>
-              </div>
-              <div v-else-if="change.type === 'personDel'">
-                <span class="text">Suppression d'un membre</span>
-                <select name="" id="" @click.stop v-model="change.valueObj"
-                        @change="handlerSelectPersonDel(change, $event)">
-                  <option :value="p" v-for="(p,id) in persons">
-                    {{ p.firstName }} {{ p.lastName }}
-                  </option>
-                </select>
-                <select name="" id="" @click.stop v-model="change.value2" v-if="change.valueObj">
-                  <option :value="id" v-for="(role, id) in change.valueObj.roles">
-                    {{ role }}
-                  </option>
-                </select>
-              </div>
-              <div v-else-if="change.type === 'personAdd'">
-                <span class="text"> Ajout d'une personne : </span>
-                <span class="cartouche" v-if="change.valueObj">
-                  {{ change.valueObj.firstName }} {{ change.valueObj.lastName }}
-                  <i class="icon-cancel-alt" @click="change.valueObj = null"></i>
-                </span>
-                <person-auto-completer @personSelected="handlerUpdatePersonChange(change, $event)" v-else/>
-                <select name="rolesPerson" v-model="change.value2" class="form-control" @click.stop>
-                  <option :value="item.id" v-for="item in rolesPerson">{{ item.label }}</option>
-                </select>
-                {{ change }}
-              </div>
-              <div v-else>-> {{ change }}</div>
+        <section class="modifications unsaved">
+          <!-- UNSAVED -->
+          <article v-for="change in edit.modifications.filter(i => i.mode === 'new')" class="change">
+            <div v-if="change.type === 'dateEnd'">
+              <span class="text"> Date de fin : </span>
+              <span><Datepicker v-model="change.value1"/></span>
             </div>
-            <div v-else>
+            <div v-else-if="change.type === 'personDel'">
+              <span class="text">Suppression d'un membre</span>
+              <select name="" id="" @click.stop v-model="change.valueObj"
+                      @change="handlerSelectToDel(change, $event)">
+                <option :value="p" v-for="(p,id) in persons">
+                  {{ p.firstName }} {{ p.lastName }}
+                </option>
+              </select>
+              <select name="" id="" @click.stop v-model="change.value2" v-if="change.valueObj">
+                <option :value="id" v-for="(role, id) in change.valueObj.roles">
+                  {{ role }}
+                </option>
+              </select>
+            </div>
+            <div v-else-if="change.type === 'personAdd'">
+              <span class="text"> Ajout d'une personne : </span>
+              <span class="cartouche" v-if="change.valueObj">
+                {{ change.valueObj.firstName }} {{ change.valueObj.lastName }}
+                <i class="icon-cancel-alt" @click="change.valueObj = null"></i>
+              </span>
+              <person-auto-completer @personSelected="handlerUpdatePersonChange(change, $event)" v-else/>
+              <select name="rolesPerson" v-model="change.value2" class="form-control" @click.stop>
+                <option :value="item.id" v-for="item in rolesPerson">{{ item.label }}</option>
+              </select>
+            </div>
+            <div v-else-if="change.type === 'organizationDel'">
+              <span class="text"> Suppression d'une organisation : </span>
+              <select name="" id="" @click.stop v-model="change.valueObj"
+                      @change="handlerSelectToDel(change, $event)">
+                <option :value="p" v-for="(p,id) in organizations">
+                  {{ p.label }}
+                </option>
+              </select>
+              <select name="" id="" @click.stop v-model="change.value2" v-if="change.valueObj">
+                <option :value="id" v-for="(role, id) in change.valueObj.roles">
+                  {{ role }}
+                </option>
+              </select>
+            </div>
+            <div v-else-if="change.type === 'organizationAdd'">
+              <span class="text"> Ajout d'une organization : </span>
+              <organization-auto-complete @change="handlerUpdateOrganizationChange(change, $event)" />
+              <select name="rolesOrganization" v-model="change.value2" class="form-control" @click.stop>
+                <option :value="item.id" v-for="item in rolesOrganization">{{ item.label }}</option>
+              </select>
+              {{ change }}
+            </div>
+            <nav>
+              <button class="btn btn-xs btn-danger" @click.prevent="handlerRemoveChange(change)">
+                <i class="icon-trash"></i>
+              </button>
+            </nav>
+          </article>
+        </section>
+        <hr>
+        <section class="modifications saved">
+          <!-- SAVED -->
+          <article v-for="change in edit.modifications.filter(i => i.mode !== 'new')" class="change">
+            <div>
               <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
               <i class="icon-user" v-if="change.type === 'personAdd'"></i>
               <i class="icon-user text-danger" v-if="change.type === 'personDel'"></i>
+              <i class="icon-building-filled" v-if="change.type === 'organizationAdd'"></i>
+              <i class="icon-building-filled text-danger" v-if="change.type === 'organizationDel'"></i>
               <strong>
                 {{ change.info }}
               </strong>
@@ -105,6 +146,8 @@
           <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
           <i class="icon-user" v-if="change.type === 'personAdd'"></i>
           <i class="icon-user text-danger" v-if="change.type === 'personDel'"></i>
+          <i class="icon-building-filled" v-if="change.type === 'organizationAdd'"></i>
+          <i class="icon-building-filled text-danger" v-if="change.type === 'organizationDel'"></i>
           <span>
             {{ change.info }}
           </span>
@@ -144,26 +187,20 @@ import Datepicker from "../components/Datepicker.vue";
 import AvenantDate from "./Avenants/AvenantDate.vue";
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import AxiosOscar from "../utils/AxiosOscar.js";
+import OrganizationAutoComplete from "../components/OrganizationAutoComplete.vue";
 //import Test from "../../../vendor/unicaen/signature/public/src/views/SignatureFlows.vue";
-
-const readFileAsText = (file) => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = ({target}) => {
-    resolve(target.result);
-  };
-  reader.readAsText(file);
-});
 
 export default {
   name: 'ActivityAvenants',
   components: {
+    OrganizationAutoComplete,
     PersonAutoCompleter,
     AvenantDate,
     Datepicker,
     Modal
   },
 
-  props: ['roles-person', 'roles-organization', 'currentPersons', 'avenants'],
+  props: ['roles-person', 'roles-organization', 'currentPersons', 'currentOrganizations', 'avenants'],
 
   data() {
     return {
@@ -187,6 +224,25 @@ export default {
           }
           if (!out[person.enrolled].hasOwnProperty(person.roleId)) {
             out[person.enrolled].roles[person.roleId] = person.roleLabel;
+          }
+        });
+      }
+      return out;
+    },
+    organizations() {
+      let out = {};
+      if (this.currentOrganizations) {
+        this.currentOrganizations.forEach(organization => {
+          if (!out.hasOwnProperty(organization.enrolled)) {
+            console.log(organization);
+            out[organization.enrolled] = {
+              'id': organization.enrolled,
+              'label': organization.enrolledLabel,
+              'roles': {}
+            };
+          }
+          if (!out[organization.enrolled].hasOwnProperty(organization.roleId)) {
+            out[organization.enrolled].roles[organization.roleId] = organization.roleLabel;
           }
         });
       }
@@ -289,14 +345,25 @@ export default {
         firstName: event.firstName,
         lastName: event.lastName,
       };
+      change.value1 = event.valueObj.id;
+    },
+
+    handlerUpdateOrganizationChange(change, event) {
+      console.log(JSON.stringify(change));
+      change.valueObj = {
+        id: event.id,
+        label: event.label,
+      };
       change.value1 = event.id;
     },
 
-    handlerSelectPersonDel(change, event) {
+    handlerSelectToDel(change, event) {
       console.log("Changement de la personne à supprimer", change, event);
       change.value1 = change.valueObj.id;
       change.value2 = null;
     },
+
+
 
     async handlerSelectFile(event) {
       if (event.target.files.length === 0) {

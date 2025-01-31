@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 05/11/15 14:45
@@ -14,9 +15,10 @@ use Doctrine\ORM\Mapping as ORM;
  * @package Oscar\Entity
  * @ORM\Entity
  */
-class ActivityPerson  implements ILoggable
+class ActivityPerson implements ILoggable
 {
-    use TraitRole, TraitTrackable;
+    use TraitRole;
+    use TraitTrackable;
 
     /**
      * @var Person
@@ -36,8 +38,9 @@ class ActivityPerson  implements ILoggable
      */
     private $roleObj;
 
-    public function isPrincipal(){
-        if( $this->getRoleObj() ){
+    public function isPrincipal()
+    {
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->isPrincipal();
         }
         return false;
@@ -65,7 +68,7 @@ class ActivityPerson  implements ILoggable
 
     public function getRole()
     {
-        if( $this->getRoleObj() ){
+        if ($this->getRoleObj()) {
             return $this->getRoleObj()->getRoleId();
         }
         return "rôle inconnu";

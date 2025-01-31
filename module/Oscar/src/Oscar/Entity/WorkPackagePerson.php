@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/06/15 12:01
@@ -17,7 +18,8 @@ class WorkPackagePerson implements ILoggable
 {
     use TraitTrackable;
 
-    function log(){
+    function log()
+    {
         return sprintf("%s doit déclarer %s heures dans le lot %s.", $this->getPerson(), $this->getDuration(), $this->getWorkPackage());
     }
 

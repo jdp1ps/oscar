@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 12:01
@@ -12,7 +13,6 @@ use Oscar\Utils\UnicaenDoctrinePaginator;
 
 class ActivityLogRepository extends EntityRepository
 {
-
     /**
      * @param $message  Informations sur l'événement à inscrire.
      * @param int $level    Niveau de confidentialité
@@ -24,14 +24,14 @@ class ActivityLogRepository extends EntityRepository
      * @return LogActivity
      */
     public function addActivity(
-                $message,
-                $level = LogActivity::DEFAULT_LEVEL,
-                $type = LogActivity::DEFAULT_TYPE,
-                $context = LogActivity::DEFAULT_CONTEXT,
-                $contextId = LogActivity::DEFAULT_CONTEXTID,
-                $userId = LogActivity::DEFAULT_USER,
-                array $data = null)
-    {
+        $message,
+        $level = LogActivity::DEFAULT_LEVEL,
+        $type = LogActivity::DEFAULT_TYPE,
+        $context = LogActivity::DEFAULT_CONTEXT,
+        $contextId = LogActivity::DEFAULT_CONTEXTID,
+        $userId = LogActivity::DEFAULT_USER,
+        array $data = null
+    ) {
 
         $activity = new LogActivity();
         $activity->setMessage($message)
@@ -55,7 +55,7 @@ class ActivityLogRepository extends EntityRepository
      * @param int $limit
      * @return LogActivity[]
      */
-    public function getUserActivity($userId, $limit=20)
+    public function getUserActivity($userId, $limit = 20)
     {
         $qb = $this->createQueryBuilder('a')
             ->select('a')
@@ -74,7 +74,7 @@ class ActivityLogRepository extends EntityRepository
      * @param int $resultByPage
      * @return UnicaenDoctrinePaginator
      */
-    public function getActivitiesPaged( $page=1, $filter=array(), $resultByPage=50 )
+    public function getActivitiesPaged($page = 1, $filter = array(), $resultByPage = 50)
     {
         $qb = $this->createQueryBuilder('a')
             ->select('a')

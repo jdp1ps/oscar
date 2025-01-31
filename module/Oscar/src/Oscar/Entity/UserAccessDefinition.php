@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 23/02/16 14:56
@@ -132,6 +133,4 @@ class UserAccessDefinition
     {
         return $this->getLabel();
     }
-
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/11/15 10:09
@@ -135,7 +136,7 @@ class OrganizationType implements ITrackable
     function toJson(?array $counted = null): array
     {
         $children = [];
-        foreach ($this->getChildren() as $c ){
+        foreach ($this->getChildren() as $c) {
             $children[] = $c->toJson($counted);
         }
 
@@ -147,11 +148,10 @@ class OrganizationType implements ITrackable
             'children' => $children
         ];
 
-        if( $counted ){
+        if ($counted) {
             $out['count'] = $counted[$this->getId()];
         }
 
         return $out;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 08/02/16 13:23
@@ -7,10 +8,8 @@
 
 namespace Oscar\Entity;
 
-
 class OscarFacet
 {
-
     const FACET_GENERAL         = 'Général';
     const FACET_SCIENTIFIC      = 'Scientifique';
     const FACET_ADMINISTRATIVE  = 'Administratif';
@@ -23,7 +22,7 @@ class OscarFacet
     public static function getFacets()
     {
         static $facets;
-        if( $facets === null ){
+        if ($facets === null) {
             $facets = [
                 self::FACET_GENERAL,
                 self::FACET_SCIENTIFIC,
@@ -34,5 +33,4 @@ class OscarFacet
         }
         return $facets;
     }
-
 }

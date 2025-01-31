@@ -365,6 +365,7 @@
                              :roles-person="rolesPersons"
                              :roles-organization="rolesOrganizations"
                              :current-persons="persons"
+                             :current-organizations="organizations"
                              @update="handlerUpdateAvenants"
           />
         </section>

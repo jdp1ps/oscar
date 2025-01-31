@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-06-17 13:38
@@ -54,6 +55,4 @@ class AdministrativeDocument extends AbstractVersionnedDocument
     {
         return parent::__toString();
     }
-
-
 }
