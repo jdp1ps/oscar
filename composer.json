@@ -40,6 +40,7 @@
   "prefer-stable": true,
   "require-dev": {
     "phpunit/phpunit": "*",
+    "squizlabs/php_codesniffer": "@stable",
     "laminas/laminas-developer-tools": "^2.9"
   },
   "config": {
@@ -56,6 +57,7 @@
     }
   },
   "scripts": {
-    "test": "phpunit -c tests"
+    "test": "phpunit -c tests",
+    "phpcs": "phpcs --standard=PSR2"
   }
 }
