@@ -698,14 +698,13 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * Retourne le résultat de la recherche $search.
      *
      * @param string $search
-     *
+     * @param int $page
+     * @param array $filter
      * @return UnicaenDoctrinePaginator
      */
     public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []): UnicaenDoctrinePaginator
     {
         $qb = $this->getSearchQuery($search, $filter);
-
-        //die($qb->getDQL());
         return new UnicaenDoctrinePaginator($qb, $page);
     }
 
@@ -819,10 +818,9 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         if ($search != "") {
             $ids = $this->search($search, true);
 
-
             // ORDER BY de LREM
             // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
-            if (count($ids) > 1) {
+//            if (count($ids) > 0) {
                 if ($filter['sort'] == 'hit') {
                     $sortSize = 25; // On ne trie que les 25 premiers
                     $this->getLoggerService()->debug("SORT BY HIT (elastic IDS)");
@@ -841,7 +839,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                     $qb->orderBy('ORD', 'ASC');
                 }
                 $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
-            }
+//            }
         }
 
         if ($filter['sort'] != 'hit') {
