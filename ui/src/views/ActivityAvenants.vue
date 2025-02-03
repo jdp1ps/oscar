@@ -22,20 +22,26 @@
             Ajouter une modification <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a href="#" @click.prevent="handlerAddChange('personAdd')">Ajout d'une personne</a></li>
-            <li><a href="#" @click.prevent="handlerAddChange('personDel')">Suppression d'une personne</a></li>
-            <li><a href="#" @click.prevent="handlerAddChange('organizationAdd')">Ajout d'une organisation</a></li>
-            <li><a href="#" @click.prevent="handlerAddChange('organizationDel')">Suppression d'une organisation</a></li>
-            <li><a href="#" @click.prevent="handlerAddChange('up_amount')">Modification du montant</a></li>
-            <li><a href="#" @click.prevent="handlerAddChange('dateEnd')">Modification de la date de fin</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('personAdd')" :class="modificationsEnabled['personAdd'] ? '' : 'disabled'">Ajout d'une personne</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('personDel')" :class="modificationsEnabled['personDel'] ? '' : 'disabled'">Suppression d'une personne</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('organizationAdd')" :class="modificationsEnabled['organizationAdd'] ? '' : 'disabled'">Ajout d'une organisation</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('organizationDel')" :class="modificationsEnabled['organizationDel'] ? '' : 'disabled'">Suppression d'une organisation</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('changeAmount')" :class="modificationsEnabled['changeAmount'] ? '' : 'disabled'">Modification du montant</a></li>
+            <li><a href="#" @click.prevent="handlerAddChange('dateEnd')" :class="modificationsEnabled['dateEnd'] ? '' : 'disabled'">Modification de la date de fin</a></li>
           </ul>
         </div>
         <section class="modifications unsaved">
           <!-- UNSAVED -->
           <article v-for="change in edit.modifications.filter(i => i.mode === 'new')" class="change">
+            <!-- EDITION dateEnd : Date de fin -->
             <div v-if="change.type === 'dateEnd'">
               <span class="text"> Date de fin : </span>
               <span><Datepicker v-model="change.value1"/></span>
+            </div>
+            <!-- EDITION changeAmount : Montant -->
+            <div v-else-if="change.type === 'changeAmount'">
+              <span class="text">Nouveau montant : </span>
+              <Amount v-model="change.value1" />
             </div>
             <div v-else-if="change.type === 'personDel'">
               <span class="text">Suppression d'un membre</span>
@@ -64,13 +70,13 @@
             </div>
             <div v-else-if="change.type === 'organizationDel'">
               <span class="text"> Suppression d'une organisation : </span>
-              <select name="" id="" @click.stop v-model="change.valueObj"
+              <select name="" id="" @click.stop v-model="change.valueObj"  class="form-control"
                       @change="handlerSelectToDel(change, $event)">
                 <option :value="p" v-for="(p,id) in organizations">
                   {{ p.label }}
                 </option>
               </select>
-              <select name="" id="" @click.stop v-model="change.value2" v-if="change.valueObj">
+              <select name="" id="" @click.stop v-model="change.value2" v-if="change.valueObj" class="form-control">
                 <option :value="id" v-for="(role, id) in change.valueObj.roles">
                   {{ role }}
                 </option>
@@ -82,6 +88,8 @@
               <select name="rolesOrganization" v-model="change.value2" class="form-control" @click.stop>
                 <option :value="item.id" v-for="item in rolesOrganization">{{ item.label }}</option>
               </select>
+            </div>
+            <div v-else>
               {{ change }}
             </div>
             <nav>
@@ -98,6 +106,7 @@
             <div>
               <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
               <i class="icon-user" v-if="change.type === 'personAdd'"></i>
+              <i class="icon-bank" v-if="change.type === 'changeAmount'"></i>
               <i class="icon-user text-danger" v-if="change.type === 'personDel'"></i>
               <i class="icon-building-filled" v-if="change.type === 'organizationAdd'"></i>
               <i class="icon-building-filled text-danger" v-if="change.type === 'organizationDel'"></i>
@@ -127,7 +136,6 @@
         <label for="name">Commentaire</label>
         <textarea v-model="edit.comment" class="form-control"></textarea>
       </div>
-      <pre>{{ edit }}</pre>
     </form>
   </modal>
 
@@ -146,6 +154,7 @@
           <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
           <i class="icon-user" v-if="change.type === 'personAdd'"></i>
           <i class="icon-user text-danger" v-if="change.type === 'personDel'"></i>
+          <i class="icon-bank" v-if="change.type === 'changeAmount'"></i>
           <i class="icon-building-filled" v-if="change.type === 'organizationAdd'"></i>
           <i class="icon-building-filled text-danger" v-if="change.type === 'organizationDel'"></i>
           <span>
@@ -188,16 +197,18 @@ import AvenantDate from "./Avenants/AvenantDate.vue";
 import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import AxiosOscar from "../utils/AxiosOscar.js";
 import OrganizationAutoComplete from "../components/OrganizationAutoComplete.vue";
+import Amount from "../components/Amount.vue";
 //import Test from "../../../vendor/unicaen/signature/public/src/views/SignatureFlows.vue";
 
 export default {
   name: 'ActivityAvenants',
   components: {
-    OrganizationAutoComplete,
-    PersonAutoCompleter,
+    Amount,
     AvenantDate,
     Datepicker,
-    Modal
+    Modal,
+    OrganizationAutoComplete,
+    PersonAutoCompleter
   },
 
   props: ['roles-person', 'roles-organization', 'currentPersons', 'currentOrganizations', 'avenants'],
@@ -210,6 +221,18 @@ export default {
   },
 
   computed: {
+
+    modificationsEnabled(){
+      return {
+        'personAdd': true,
+        'personDel': true,
+        'organizationAdd': true,
+        'organizationDel': true,
+        'changeAmount': !this.edit.modifications.find( m => m.type == 'changeAmount'),
+        'dateEnd': !this.edit.modifications.find( m => m.type == 'dateEnd'),
+      }
+    },
+
     persons() {
       let out = {};
       if (this.currentPersons) {
@@ -363,8 +386,6 @@ export default {
       change.value2 = null;
     },
 
-
-
     async handlerSelectFile(event) {
       if (event.target.files.length === 0) {
         this.edit.file = null;
@@ -387,12 +408,30 @@ export default {
 </script>
 
 <style scoped>
+.disabled {
+  cursor: not-allowed;
+  color: #AAA;
+  text-decoration: line-through;
+}
 .change {
   border: 1px solid #CCC;
   padding: .3em;
   margin: .5em 0;
   border-left: solid #CCC 4px;
   display: flex;
+
+  > div {
+    flex: 1;
+    display: flex;
+    span.text {
+      flex: 0;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    select,div{
+      flex: 1;
+    }
+  }
 
   > i {
     flex: 0;

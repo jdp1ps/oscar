@@ -8,13 +8,9 @@ use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityAvenant;
 use Oscar\Entity\ActivityAvenantModification;
-use Oscar\Entity\ActivityPayment;
-use Oscar\Entity\Currency;
-use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
-use Oscar\Entity\Repository\ActivityPaymentRepository;
 use Oscar\Entity\Role;
 use Oscar\Exception\OscarException;
 use Oscar\Strategy\Upload\FileUploadStandard;
@@ -24,11 +20,8 @@ use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
-use Oscar\Traits\UseNotificationService;
-use Oscar\Traits\UseNotificationServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
-use Oscar\Traits\UseServiceContainerTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\FileSystemUtils;
 
@@ -84,7 +77,7 @@ class ActivityAvenantsService implements
      * @param Activity $activity
      * @param array $datas
      * @return void
-     * @throws OscarException
+     * @throws NotSupported|ORMException|OscarException
      */
     public function saveAvenantFromArray(Activity $activity, array $datas): void
     {
@@ -170,6 +163,13 @@ class ActivityAvenantsService implements
         }
     }
 
+    /**
+     * Procédure de téléversement du fichier d'avenant.
+     *
+     * @param Activity $activity
+     * @return string|null
+     * @throws OscarException
+     */
     private function uploadAvenantFile(Activity $activity): ?string
     {
         if (!array_key_exists('file', $_FILES)) {
@@ -200,6 +200,8 @@ class ActivityAvenantsService implements
     }
 
     /**
+     * Suppression du fichier d'avenant.
+     *
      * @param string $filename
      * @return bool
      */
@@ -271,6 +273,8 @@ class ActivityAvenantsService implements
     }
 
     /**
+     * Enregistrement d'un avenant.
+     *
      * @param ActivityAvenant $avenant
      * @param array $modification
      * @param bool $fetch
@@ -331,6 +335,10 @@ class ActivityAvenantsService implements
                 $person = $this->getEntityManager()->getRepository(Organization::class)->find($newValue1);
                 $role = $this->getEntityManager()->getRepository(OrganizationRole::class)->find($newValue2);
                 $msg = "Suppression de $person ($role)";
+                break;
+            case ActivityAvenantModification::TYPE_CHANGE_AMOUNT:
+                $oldValue1 = $avenant->getActivity()->getAmount();
+                $msg = "Modification du montant à $newValue1 (avant : $oldValue1)";
                 break;
         }
 
