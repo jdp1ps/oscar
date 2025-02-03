@@ -820,7 +820,7 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
 
             // ORDER BY de LREM
             // Permet de forcer le trie dans l'ordre des IDs fournit par Elastic Search
-//            if (count($ids) > 0) {
+            if (count($ids) > 0) {
                 if ($filter['sort'] == 'hit') {
                     $sortSize = 25; // On ne trie que les 25 premiers
                     $this->getLoggerService()->debug("SORT BY HIT (elastic IDS)");
@@ -839,7 +839,10 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
                     $qb->orderBy('ORD', 'ASC');
                 }
                 $qb->where('o.id IN(:ids)')->setParameter('ids', $ids);
-//            }
+            } else {
+                // Aucun résultat
+                return $qb->andWhere('o.id = -1');
+            }
         }
 
         if ($filter['sort'] != 'hit') {

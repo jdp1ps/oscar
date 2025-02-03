@@ -198,7 +198,7 @@ abstract class ElasticSearchEngine
 
         $ids = [];
         $idsProjects = [];
-        if ($response && $response['hits'] && $response['hits']['total'] > 0) {
+        if ($response && $response['hits']) {
             foreach ($response['hits']['hits'] as $hit) {
                 $ids[] = intval($hit["_id"]);
                 if( array_key_exists('project_ids', $hit['_source']) ) {
