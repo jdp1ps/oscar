@@ -226,7 +226,7 @@
           <i class="icon-cube" v-if="e.context == 'activity'"></i>
           <i class="icon-cubes" v-else></i>
             <PersonDisplay :person="e" v-if="e.firstname" />
-            <strong>{{ e.enrolledLabel }}</strong>
+            <strong v-else>{{ e.enrolledLabel }}</strong>
           <small>
             (<span v-if="e.context == 'activity'">
                 <i class="icon-cube"></i>
