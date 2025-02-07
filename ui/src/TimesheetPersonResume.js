@@ -5,7 +5,9 @@ import DurationFilter from "./utils/DurationFilter.js";
 
 let elemDatas = document.querySelector("#timesheet-resume");
 const app = createApp(TimesheetPersonResume, {
-    "url": elemDatas.dataset.url
+    "url": elemDatas.dataset.url,
+    "timesheetpreview": elemDatas.dataset.timesheetpreview,
+    "timesheetexcel": elemDatas.dataset.timesheetexcel,
 });
 
 app.config.globalProperties.$filters = {

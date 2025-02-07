@@ -41,6 +41,7 @@ export default defineConfig({
         organizationsuborganizations: resolve(__dirname, 'src/OrganizationSubOrganizations.js'),
         organizations_roled: resolve(__dirname, 'src/EntityWithRoleOrganizations.js'),
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),
+        ProjectActivityLogs: resolve(__dirname, 'src/ProjectActivityLogs.js'),
         timesheetpersonresume: resolve(__dirname, 'src/TimesheetPersonResume.js'),
         timesheetdeclarations: resolve(__dirname, 'src/TimesheetDeclaration.js'),
         persons_roled: resolve(__dirname, 'src/EntityWithRolePersons.js'),

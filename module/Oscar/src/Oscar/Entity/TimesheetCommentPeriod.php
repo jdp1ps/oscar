@@ -10,7 +10,7 @@ use Oscar\Utils\DateTimeUtil;
 
 /**
  * @package Oscar\Entity
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Oscar\Entity\Repository\TimesheetCommentPeriodRepository")
  */
 class TimesheetCommentPeriod
 {

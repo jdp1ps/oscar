@@ -158,7 +158,8 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
                         "match" => [
                             "connectors" => [
                                 "query" => $search,
-                                'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                                //'fuzziness' => "AUTO", // "Tolérance" aux fautes,
+                                "boost" => 9
                             ]
                         ]
                     ],
