@@ -33,15 +33,15 @@ class ActivityTypeHelper extends AbstractHtmlElement implements ServiceLocatorAw
                 array_shift($types);
             }
             if( count($types) > 1 ){
-                $label = $types[1];
+                $label = $types[count($types)-1];
 
             } else {
-                $label = $types[count($types)-1];
+                $label = $types[0];
             }
 
             $title = implode(' / ', $types);
 
-            return sprintf('<span title="%s">%s</span>', implode(' / ', $types), $label);
+            return sprintf('<span title="%s">%s</span>', $title, $label);
         }
     }
 }
