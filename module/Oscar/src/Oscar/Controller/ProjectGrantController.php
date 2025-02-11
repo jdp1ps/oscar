@@ -676,9 +676,9 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
 
                                 $this->getEntityManager()->flush();
 
-                                return [
+                                return $this->jsonOutput([
                                     'success' => "Votre demande a bien été envoyée"
-                                ];
+                                ]);
                             } catch (Exception $e) {
                                 $this->getLoggerService()->error(
                                     "Impossible d'enregistrer la demande d'activité : " . $e->getMessage()
