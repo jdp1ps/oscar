@@ -843,9 +843,7 @@ class ContractDocumentController extends AbstractOscarController implements UseS
         );
 
         try {
-            $content = FileSystemUtils::getInstance()->file_get_contents($sourceDoc);
-            //header('Content-Disposition: attachment; filename="' . $filename . '"');
-            //header('Content-type: ' . $doc->getFileTypeMime());
+            $filename = $doc->getFileName();
             header('Content-Type: ' . $doc->getFileTypeMime());
             header('Content-Transfer-Encoding: Binary');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
