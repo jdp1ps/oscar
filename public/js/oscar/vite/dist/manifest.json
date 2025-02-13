@@ -490,14 +490,14 @@
     "src": "src/Sticky.js"
   },
   "src/TimesheetDeclaration.css": {
-    "file": "assets/TimesheetDeclaration-e8a41aec.css",
+    "file": "assets/TimesheetDeclaration-d2772701.css",
     "src": "src/TimesheetDeclaration.css"
   },
   "src/TimesheetDeclaration.js": {
     "css": [
-      "assets/TimesheetDeclaration-e8a41aec.css"
+      "assets/TimesheetDeclaration-d2772701.css"
     ],
-    "file": "assets/timesheetdeclarations-121ae8a9.js",
+    "file": "assets/timesheetdeclarations-6897bac5.js",
     "imports": [
       "_vendor.js",
       "_vendor13.js",
