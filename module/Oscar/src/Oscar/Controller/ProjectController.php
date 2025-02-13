@@ -250,6 +250,7 @@ class ProjectController extends AbstractOscarController
                 }
             }
 
+
             return array(
                 'spentActivitiesIds' => $spentActivitiesIds,
                 'spentMissingAcces'  => $nbrSpentAllow < $nbrSpent,

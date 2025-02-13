@@ -213,9 +213,10 @@ h2.tv-serie-label { border-bottom: none; }
                     <h2><i class="icon-book"></i> Dépenses</h2>
 
                     <div id="depenses2"
-                         data-url="<?= $this->url('contract/spent-synthesis', ['id' => implode(',', $spentActivitiesIds)]) ?>">
+                         data-syncurl=""
+                         data-url="<?= $this->url('contract/spent-synthesis', ['id' => implode(',', $spentActivitiesIds)]) ?>">DEPENSES2
                     </div>
-                    <?= $this->Vite()->addJs('src/ActivitySpentSynthesis.js'); ?>
+                    <?= $this->Vite()->addJs('src/ProjectActivitySpentSynthesis.js'); ?>
 
                 </section>
             <?php endif; ?>

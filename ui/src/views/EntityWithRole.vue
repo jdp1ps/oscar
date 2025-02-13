@@ -507,7 +507,6 @@ export default {
 
     fetch() {
       this.loading = "Chargement des données";
-      console.log("fetch");
       axios.get(this.url).then(ok => {
             if (this.standalone) {
               if (ok.data.roles) {
