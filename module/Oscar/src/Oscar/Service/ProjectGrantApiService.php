@@ -300,8 +300,9 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     break;
                 case self::PERIMETER_SPENTS:
                     $credentials['spents'] = [
-                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity),
+                        'read' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_SHOW, $activity),
+                        'sync' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_SYNC, $activity),
+                        'details' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_DETAILS, $activity),
                     ];
                     break;
 
@@ -1105,6 +1106,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
         $out = [
             'enabled'=>false,
+            'url_sync' => '',
             'enabled_reason'=>'',
             'pfi'     => $pfis,
             'warning' => "",
@@ -1124,6 +1126,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             );
             $out['enabled'] = true;
             $out['dateUpdated'] = $activity->getDateTotalSpent();
+            $out['url_details'] = $urlPlugin->fromRoute('contract/list-spent', ['id' => $activity->getId()]);
         } catch (\Exception $e) {
             $msg = "Impossible de charger la synthèse financière pour '$activity'";
             $this->getLoggerService()->error("$msg : " . $e->getMessage());
