@@ -3,9 +3,9 @@
 
     <loader :visible="loading" :text="loading"></loader>
 
-    <modal title="Erreur" :visible="error">
+    <modal title="Erreur" :visible="error != null && error != false">
       <div class="alert alert-danger">
-        {{ error }}
+        ERREUR : {{ error }}
       </div>
     </modal>
 
@@ -56,13 +56,10 @@
             </td>
           </tr>
           </tbody>
-          <tr>
-
-          </tr>
         </table>
 
         <nav class="admin-bar">
-          <button class="btn btn-default button-back" @click="error = ''">
+          <button class="btn btn-default button-back" @click="toPaste = ''">
             <i class="icon-angle-left"></i>
             Annuler
           </button>
