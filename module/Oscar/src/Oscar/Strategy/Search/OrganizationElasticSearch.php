@@ -35,6 +35,10 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
         return $this->addItem($entity);
     }
 
+    /**
+     * @param Organization $object
+     * @return array
+     */
     public function getIndexableDatas(mixed $object): array
     {
         $projects = [];
@@ -78,6 +82,10 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
             'zipcode'     => $object->getZipCode(),
             'description' => $object->getDescription(),
             'siret'       => $object->getSiret(),
+            'duns'       => $object->getDuns(),
+            'rnsr'       => $object->getRnsr(),
+            'tvaintra'       => $object->getTvaintra(),
+            'labintel'       => $object->getLabintel(),
             'persons'     => $persons,
             'activities'  => $activities,
             'connectors'  => $connectors
@@ -154,15 +162,17 @@ class OrganizationElasticSearch extends ElasticSearchEngine implements IOrganiza
                             ]
                         ]
                     ],
-                    [
-                        "match" => [
-                            "connectors" => [
-                                "query" => $search,
-                                //'fuzziness' => "AUTO", // "Tolérance" aux fautes,
-                                "boost" => 9
-                            ]
-                        ]
-                    ],
+                    /**
+                     * 'duns'       => $object->getDuns(),
+                     * 'rnsr'       => $object->getRnsr(),
+                     * 'tvaintra'       => $object->getTvaintra(),
+                     * 'labintel'       => $object->getLabintel(),
+                     */
+                    ["match" => [ "connectors" => [ "query" => $search, "boost" => 9]]],
+                    ["match" => [ "duns" => [ "query" => $search, "boost" => 9]]],
+                    ["match" => [ "rnsr" => [ "query" => $search, "boost" => 9]]],
+                    ["match" => [ "tvaintra" => [ "query" => $search, "boost" => 9]]],
+                    ["match" => [ "labintel" => [ "query" => $search, "boost" => 9]]],
                     [
                         "match" => [
                             "zipcode" => [
