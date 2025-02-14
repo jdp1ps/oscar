@@ -11,6 +11,7 @@ use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\QueryBuilder;
 use Oscar\Connector\IConnectedRepository;
 use Oscar\Import\Data\DataExtractorFullname;
 use Oscar\Utils\DateTimeUtils;
@@ -411,14 +412,18 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     }
 
     /**
-     * @param $connector
-     * @param $value
-     * @return \Doctrine\ORM\QueryBuilder
+     * @param string $connector
+     * @param int|string $value
+     * @return QueryBuilder
      */
-    public function getPersonByConnectorQuery($connector, $value)
+    public function getPersonByConnectorQuery(string $connector, int|string $value) :QueryBuilder
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
-        $search = sprintf('s:%s:"%s";s:%s:"%s";', strlen($connector), $connector, strlen($value), str_replace('_', '\\_', $value));
+        if (is_int($value)) {
+            $search = sprintf('s:%s:"%s";i:%d;', strlen($connector), $connector, $value);
+        } else {
+            $search = sprintf('s:%s:"%s";s:%s:"%s";', strlen($connector), $connector, strlen($value), $value);
+        }
         $qb->select('p')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
@@ -426,7 +431,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
         return $qb;
     }
-
 
     public function getRolesLdapUsed()
     {
