@@ -480,6 +480,17 @@
     "isEntry": true,
     "src": "src/ProjectActivityLogs.js"
   },
+  "src/ProjectActivitySpentSynthesis.js": {
+    "file": "assets/ProjectActivitySpentSynthesis-f293b5f0.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor8.js",
+      "_vendor4.js",
+      "_vendor13.js"
+    ],
+    "isEntry": true,
+    "src": "src/ProjectActivitySpentSynthesis.js"
+  },
   "src/Sticky.js": {
     "file": "assets/sticky-97aacca9.js",
     "imports": [
