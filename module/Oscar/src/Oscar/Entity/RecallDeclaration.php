@@ -120,7 +120,7 @@ class RecallDeclaration
 
     public function getShipmentsLogs() :string
     {
-        return implode($this->getShipments(), "\n");
+        return implode( "\n", $this->getShipments() );
     }
 
     public function getPeriod() :string

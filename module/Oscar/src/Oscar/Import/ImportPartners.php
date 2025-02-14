@@ -78,7 +78,7 @@ class ImportPartners extends AbstractImportStrategy
                 'cleaner'   => function( $data ) { return $this->cleanBullshitStr($data);}
             ),
         ]);
-        $query = sprintf("SELECT CLEUNIK, TYPE, %s FROM OSCAR_PARTENAIRE_AVEC_UFR", implode($hydrator->listFields(), ','));
+        $query = sprintf("SELECT CLEUNIK, TYPE, %s FROM OSCAR_PARTENAIRE_AVEC_UFR", implode(',', $hydrator->listFields()));
         $this->getLogger()->info($query);
         $stid = oci_parse($c, $query);
         oci_execute($stid);
