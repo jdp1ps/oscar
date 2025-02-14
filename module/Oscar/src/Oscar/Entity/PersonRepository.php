@@ -418,7 +418,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     public function getPersonByConnectorQuery($connector, $value)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
-        $search = sprintf('s:%s:"%s";s:%s:"%s";', strlen($connector), $connector, strlen($value), $value);
+        $search = sprintf('s:%s:"%s";s:%s:"%s";', strlen($connector), $connector, strlen($value), str_replace('_', '\\_', $value));
         $qb->select('p')
             ->from(Person::class, 'p')
             ->where('p.connectors LIKE :search')
