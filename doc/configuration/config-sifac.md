@@ -1,17 +1,19 @@
 # Affichage des dépenses (SIFAC)
 
-Oscar permet de synchroniser depuis le SI(Système d'Information) **les dépenses** effectuées dans le cadre des activités de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC.
+Oscar permet de synchroniser depuis le SI(Système d'Information) **les dépenses** effectuées dans le cadre des activités
+de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC.
 
 > Vous pouvez gérer les accès à cette fonctionnalité depuis la gestion des privilèges.
 
 ## SIFAC
 
-Pour activer l'affichage des dépenses, vous devez accorder le privilège **Voir les dépenses**, configurer les masses et le plan comptable par défaut.
-
+Pour activer l'affichage des dépenses, vous devez accorder le privilège **Voir les dépenses**, configurer les masses et
+le plan comptable par défaut.
 
 ### Configurer les masses
 
-Vous devez commencer par spécifier les masses dans la configuration `config/autoload/local.php`. La configuration ci-dessous est celle généralement utilisée.
+Vous devez commencer par spécifier les masses dans la configuration `config/autoload/local.php`. La configuration
+ci-dessous est celle généralement utilisée.
 
 ```php
 <?php
@@ -30,10 +32,11 @@ return array(
 );
 ```
 
-
 ### Plan comptable initial
 
-Vous allez devoir préciser le plan comptable à utiliser. Complétez la configuration dans  `config/autoload/local.php` avec la clef **spenttypesource** pour indiquer le fichier contenant le plan comptable général officiel (le chemin de l'exemple est un plan valide).
+Vous allez devoir préciser le plan comptable à utiliser. Complétez la configuration dans  `config/autoload/local.php`
+avec la clef **spenttypesource** pour indiquer le fichier contenant le plan comptable général officiel (le chemin de
+l'exemple est un plan valide).
 
 ```php
 <?php
@@ -48,9 +51,11 @@ return array(
 );
 ```
 
-Vous pourrez ensuite vous rendre dans l'interface d'administration pour charger le plan comptable général en cliquant sur le bouton **Charger le Plan Comptable Général**.
+Vous pourrez ensuite vous rendre dans l'interface d'administration pour charger le plan comptable général en cliquant
+sur le bouton **Charger le Plan Comptable Général**.
 
-Puis, Vous pourrez ensuite compléter ce plan et spécifier les codes à utiliser ou pas ainsi que leur attribution dans les différentes masses configurées préalablement. 
+Puis, Vous pourrez ensuite compléter ce plan et spécifier les codes à utiliser ou pas ainsi que leur attribution dans
+les différentes masses configurées préalablement.
 
 ![Type de dépense et configuration des masses](../images/config-type-depenses.png)
 
@@ -58,25 +63,28 @@ Ce plan sera utilisé par la suite pour renseigner les dépenses prévisionnelle
 
 ### Gestion des masses utilisée
 
-Dans la partie **Administration > Types de dépenses > Gérer les masses des comptes utilisés**, un écran permet de visualiser les comptes dont l'utilisation est effective (Des lignes comptables ont été chargées pour des activités)
+Dans la partie **Administration > Types de dépenses > Gérer les masses des comptes utilisés**, un écran permet de
+visualiser les comptes dont l'utilisation est effective (Des lignes comptables ont été chargées pour des activités)
 
 ![Type de dépense et configuration des masses](../images/config-gestion-masses-utilisees.png)
 
-Cet écran permet : 
- - En cliquant sur le numéro de compte (à gauche) d'afficher les activités qui ont des dépenses liées à ce compte
- - De modifier la masse associées à un compte
- - D'identifier les comptes non-affectés à une masse budgétaire (les lignes rouges)
+Cet écran permet :
+
+- En cliquant sur le numéro de compte (à gauche) d'afficher les activités qui ont des dépenses liées à ce compte
+- De modifier la masse associées à un compte
+- D'identifier les comptes non-affectés à une masse budgétaire (les lignes rouges)
 
 ### Connector SIFAC (OCI)
 
 Le premier connecteur disponible est une connection directe à la base de donnée.
 
-SIFAC utilise une base de donnée ORACLE, il faudra donc installer les drivers OCI8 pour PHP pour permettre la connection à la base de données SIFAC. [Installer le drivers OCI8 pour PHP](../install-oracle.md).
-
+SIFAC utilise une base de donnée ORACLE, il faudra donc installer les drivers OCI8 pour PHP pour permettre la connection
+à la base de données SIFAC. [Installer le drivers OCI8 pour PHP](../install-oracle.md).
 
 ### Configuration de l'accès à la base de données SIFAC
 
-Les informations de connection doivent être renseignées dans le fichier de configuration Oscar `config/autoload/local.php` : 
+Les informations de connection doivent être renseignées dans le fichier de configuration Oscar
+`config/autoload/local.php` :
 
 ```php
 <?php
@@ -105,9 +113,11 @@ return array(
 );
 ```
 
-Une fois l'accès configuré, vous pourrez, depuis la fiche activité, accéder à l'écran de visualisation des dépenses pour charger les dépenses depuis SIFAC. **Les dépenses s'appuient sur le PFI uniquement**.
+Une fois l'accès configuré, vous pourrez, depuis la fiche activité, accéder à l'écran de visualisation des dépenses pour
+charger les dépenses depuis SIFAC. **Les dépenses s'appuient sur le PFI uniquement**.
 
-La liste des dépenses s'appuis sur le plan comptable pour gérer certains intitulés, si ce dernier est manquant ou incomplet, certaines informations peuvent être manquantes ou érronées.
+La liste des dépenses s'appuis sur le plan comptable pour gérer certains intitulés, si ce dernier est manquant ou
+incomplet, certaines informations peuvent être manquantes ou érronées.
 
 ### Exclure certains comptes des résultats depuis Oscar
 
@@ -119,50 +129,96 @@ Cette option va exclure certains résultats.
 
 ### Personnaliser la requète des dépenses
 
-Dans la configuration de l'accès SIFAC, vous pouvez personnaliser/adapter la requète de chargement des données. La requête initiale est formalisée ainsi par défaut : 
+Dans la configuration de l'accès SIFAC, vous pouvez personnaliser/adapter la requète de chargement des données. La
+requête initiale est formalisée ainsi par défaut :
 
 ```sql
-select  
-    MEASURE AS pfi,  
-    RLDNR as AB9, 
-    STUNR as idsync,  
-    awref AS numSifac, 
-    vrefbn as numCommandeAff, 
-    vobelnr as numPiece, 
-    LIFNR as numFournisseur, 
-    KNBELNR as pieceRef, 
-    fikrs AS codeSociete, 
-    BLART AS codeServiceFait, 
-    FAREA AS codeDomaineFonct, 
-    sgtxt AS designation, 
-    BKTXT as texteFacture, 
-    wrttp as typeDocument, 
-    TRBTR as montant, 
-    fistl as centreDeProfit, 
-    fipex as compteBudgetaire, 
-    prctr AS centreFinancier, 
-    HKONT AS compteGeneral, 
-    budat as datePiece, 
-    bldat as dateComptable, 
-    gjahr as dateAnneeExercice, 
-    zhldt AS datePaiement,  
-    PSOBT AS dateServiceFait 
-from sapsr3.v_fmifi 
-where 
-    measure = '%s' 
-    AND rldnr='9A' 
-    AND MANDT='430' 
-    AND BTART='0250'
+select MEASURE AS pfi,
+       RLDNR   as AB9,
+       STUNR   as idsync,
+       awref   AS numSifac,
+       vrefbn  as numCommandeAff,
+       vobelnr as numPiece,
+       LIFNR   as numFournisseur,
+       KNBELNR as pieceRef,
+       fikrs   AS codeSociete,
+       BLART   AS codeServiceFait,
+       FAREA   AS codeDomaineFonct,
+       sgtxt   AS designation,
+       BKTXT   as texteFacture,
+       wrttp   as typeDocument,
+       TRBTR   as montant,
+       fistl   as centreDeProfit,
+       fipex   as compteBudgetaire,
+       prctr   AS centreFinancier,
+       HKONT   AS compteGeneral,
+       budat   as datePiece,
+       bldat   as dateComptable,
+       gjahr   as dateAnneeExercice,
+       zhldt   AS datePaiement,
+       PSOBT   AS dateServiceFait
+from sapsr3.v_fmifi
+where measure = '%s'
+  AND rldnr = '9A'
+  AND MANDT = '430'
+  AND BTART = '0250'
 ```
 
 Il est possible qu'il faille modifier la clause `MANDT='430'` qui correspond à SIFAC formation.
 
+### Champs de la requête
+
+Si vous n'êtes pas sur SIFAC, voici la liste des champs utilisés.
+**Tous les champs doivent être présents**. Les champs marqués **n** peuvent être vides.
+Les champs **O** sont les champs utilisés pour l'affichage dans Oscar ou donnant lieux à des calculs pour
+réaliser la synthèse des dépenses.
+
+| Champs            | Description                                            | Requis | Type         |
+|-------------------|--------------------------------------------------------|--------|--------------|
+| AB9               | Numéro de ledger                                       | n      | varchar(255) |
+| PFI               | Numéro financier (PFI)                                 | O      | varchar(255) |
+| IDSYNC            | Identifiant unique de l'enregistrement                 | O      | varchar(255) |
+| NUMSIFAC          | ID de l'entrée                                         | O      | varchar(255) |
+| BTART             | Engagé (0100) ou payé(0250)                            | O      | varchar(255) |
+| NUMCOMMANDEAFF    | N° de commande                                         | n      | varchar(255) |
+| NUMPIECE          | N° de pièce (ID pour regrouper les lignes de dépenses) | O      | varchar(255) |
+| NUMFOURNISSEUR    | N° de fournisseur                                      | n      | varchar(255) |
+| PIECEREF          | Référence de la pièce                                  | n      | varchar(255) |
+| CODESOCIETE       | Code de la société                                     | n      | varchar(255) |
+| CODESERVICEFAIT   | Code pour service fait                                 | n      | varchar(255) |
+| CODEDOMAINEFONCT  | Domaine fonctionnel                                    | n      | varchar(255) |
+| DESIGNATION       | Designation/Description 1                              | O      | varchar(255) |
+| TEXTEFACTURE      | Texte de la facture/Description 2                      | O      | varchar(255) |
+| TYPEDOCUMENT      | Type de document                                       | O      | varchar(255) |
+| MONTANT           | Montant retenu pour la synthèse                        | O      | float8(17)   |
+| CENTREDEPROFIT    | Centre de profit                                       | O      | varchar(255) |
+| COMPTEBUDGETAIRE  | Compte budgétaire                                      | O      | varchar(255) |
+| CENTREFINANCIER   | Centre financier                                       | n      | varchar(255) |
+| COMPTEGENERAL     | Compte général                                         | O      | varchar(255) |
+| DATEPIECE         | Date de la ligne/pièce                                 | n      | varchar(255) |
+| DATECOMPTABLE     | Date comptable                                         | O      | varchar(255) |
+| DATEANNEEEXERCICE | Année d'exercice                                       | O      | varchar(255) |
+| DATEPAIEMENT      | Date du paiement                                       | O      | varchar(255) |
+| DATESERVICEFAIT   | Date du service fait                                   | n      | varchar(255) |
+
+- *PFI* Numéro financier renseigné dans la fiche activité
+- *IDSYNC* Numéro unique de la ligne (peut donner lieu à une optimisation de la synchronisation, on ne synchronisera que les lignes dont le IDSYNC est supérieur au dernier IDSYNC présent dans Oscar)
+- *NUMPIECE* Numéro utilisé pour regrouper les lignes
+- *BTART* Permet de distinguer l'engagé (0100) du payé (0250)
+- *MONTANT* Montant (en euro)
+- *COMPTEGENERAL* Compte de référence (doit être présent dans le plan comptable de Oscar), c'est cette information qui
+  permet à Oscar de déterminer dans quelle Masse comptabliliser la dépense
+- *COMPTEBUDGETAIRE* Compte budgetaire (FG, PG_COT_HCAS, etc...)
+
 ### Utilitaire en ligne de commande
 
-La commande Oscar **php bin/oscar.php** propose différentes commandes permettant de gérer / tester les données lièes au dépenses. Vous pouvez tester la synchronisation SIFAC depuis l'interface, mais également en utilisant la console en lançant la synchronisation des dépenses d'une activité de recherche avec la commande : 
+La commande Oscar **php bin/oscar.php** propose différentes commandes permettant de gérer / tester les données lièes au
+dépenses. Vous pouvez tester la synchronisation SIFAC depuis l'interface, mais également en utilisant la console en
+lançant la synchronisation des dépenses d'une activité de recherche avec la commande :
 
 ```bash
 php bin/oscar.php spent:sync <PFI>
 ```
 
-> Vous pouvez voir la liste des commandes liées aux dépenses dans la [Documentation des commandes](../commands/liste_des_commandes.md))
+> Vous pouvez voir la liste des commandes liées aux dépenses dans
+> la [Documentation des commandes](../commands/liste_des_commandes.md))
