@@ -31,15 +31,9 @@
         </h1>
         <div class="details row">
             <dl class="col-xs-8">
+
                 <dt>Code interne</dt>
                 <dd><?= $organization->getCode() ? $organization->getCode() : '<i class="missing-data">Aucun</i>' ?></dd>
-
-                <dt title="N° Labintel CNRS">Labintel</dt>
-                <dd><?= $organization->getLabintel() ? $organization->getLabintel() : '<i class="missing-data">Aucun</i>' ?></dd>
-
-                <dt title="Répertoire National des Structure de Recherche">RNSR</dt>
-                <dd><?= $organization->getRnsr() ? $organization->getRnsr() : '<i class="missing-data">Aucun</i>' ?></dd>
-
 
                 <dt>Nom d'usage (nom court)</dt>
                 <dd><?= $organization->getShortName() ? $organization->getShortName() : '<i class="missing-data">Aucun</i>' ?></dd>
@@ -47,14 +41,45 @@
                 <dt>Nom complet</dt>
                 <dd><?= $organization->getFullname() ? $organization->getFullname() : '<i class="missing-data">Aucun</i>' ?></dd>
 
+                <?php if($organization->getLabintel()): ?>
+                    <dt title="N° Labintel CNRS">Labintel</dt>
+                    <dd><?= $organization->getLabintel() ? $organization->getLabintel() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
+
+                <?php if($organization->getSiret()): ?>
+                    <dt title="">SIRET</dt>
+                    <dd><?= $organization->getSiret() ? $organization->getSiret() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
+
+                <?php if($organization->getRnsr()): ?>
+                    <dt title="Répertoire National des Structure de Recherche">RNSR</dt>
+                    <dd><?= $organization->getRnsr() ? $organization->getRnsr() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
+
+                <?php if($organization->getTvaintra()): ?>
+                    <dt>TVA Intra</dt>
+                    <dd><?= $organization->getTvaintra() ? $organization->getTvaintra() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
+
+                <?php if($organization->getDuns()): ?>
+                    <dt>DUNS</dt>
+                    <dd><?= $organization->getDuns() ? $organization->getDuns() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
+
+                <?php if($organization->getPhone()): ?>
                 <dt>Téléphone</dt>
                 <dd><?= $organization->getPhone() ? $organization->getPhone() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
 
+                <?php if($organization->getEmail()): ?>
                 <dt>Email</dt>
                 <dd><?= $organization->getEmail() ? $organization->getEmail() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
 
+                <?php if($organization->getUrl()): ?>
                 <dt>url</dt>
                 <dd><?= $organization->getUrl() ? $organization->getUrl() : '<i class="missing-data">Aucun</i>' ?></dd>
+                <?php endif; ?>
 
                 <dt>Adresse</dt>
                 <dd>
@@ -64,7 +89,7 @@
                         . $organization->getStreet3() . '<br/>'
                         . $organization->getZipcode() . ' '
                         . $organization->getCity()
-                        . ' (' . $organization->getCountry() . ')'
+                        . ($organization->getCountry()??' (' . $organization->getCountry() . ')')
                         ?>
                     </address>
                 </dd>

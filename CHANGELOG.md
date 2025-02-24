@@ -1,5 +1,22 @@
 # 📢 CHANGEMENTS
 
+## 2025
+
+### Février
+  - [Starling] MAJ de la fiche organisation (ajout et affichage conditionnel des informations)
+ - [Starling] Ajout des champs DUNS, RNSR, Labintel, TVA Intra dans la recherche textuelle pour les organisations
+ - [Starling] Recherche activité > Recherche strict sur les identifiants des connectors
+ - [Starling] Mise à jour de l'interface de déclaration de temps
+ - [Starling] Mise à jour des logs pour une activité/projet
+
+### Janvier
+ - [Starling] Ajout d'un lien dans la liste des types d'organisation vers le référentiel des organisations filtré sur le type
+ - [Starling] Ajout des mots-clefs pour la recherche textuelle, ajout d'un filtre pour les mots-clefs
+ - [Starling] Interface d'administration des mots-clefs
+ - [Starling] Synchronisation des personnes avec une valeur entière
+ - [Starling] Refonte de la synthèse des déclarations d'un déclarant (Ajout d'information sur le temps déclaré, commentaires sur la période, répartition sur le nombre de jour / nombre de créneaux)
+ - [Starling] Ajout de bulle d'information dans la fiche activité sur les personnes
+
 ## 2024
 
 ### Décembre

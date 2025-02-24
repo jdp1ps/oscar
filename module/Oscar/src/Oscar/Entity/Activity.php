@@ -12,6 +12,7 @@ use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
+use Laminas\Validator\Date;
 use Oscar\Import\Data\DataExtractorDate;
 use Oscar\Service\ActivityTypeService;
 use Doctrine\ORM\Mapping\OneToOne as OneToOne;
@@ -325,10 +326,18 @@ class Activity implements ResourceInterface
     /**
      * Date de la dernière mise en cache des données
      *
-     * @var datetime
+     * @var ?\DateTime
      * @ORM\Column(type="date", nullable=true)
      */
     private $dateCached;
+
+    /**
+     * Date de négociation
+     *
+     * @var ?\DateTime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $dateNegociation;
 
     /**
      * Cache
@@ -1303,6 +1312,32 @@ class Activity implements ResourceInterface
         $this->dateOpened = $dateOpened;
 
         return $this;
+    }
+
+
+    public function getDateNegociation(): ?\DateTime
+    {
+        return $this->dateNegociation;
+    }
+
+    public function setDateNegociation(?\DateTime $dateNegociation): self
+    {
+        $this->dateNegociation = $dateNegociation;
+        return $this;
+    }
+
+    /**
+     * @param staring $format
+     * @return string
+     */
+    public function getDateNegociationStr(string $format = 'Y-m-d'): string
+    {
+        if ($this->getDateNegociation()) {
+            return $this->getDateNegociation()->format($format);
+        }
+        else {
+            return "";
+        }
     }
 
     /**

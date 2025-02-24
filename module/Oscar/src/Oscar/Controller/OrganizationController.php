@@ -188,7 +188,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $error = "Le moteur de recherche est introuvable";
         } catch (\Exception $exception) {
             $this->getLoggerService()->error($exception->getMessage());
-            return $this->jsonError("Quelquechose c'est mal passé...");
+            return $this->jsonError("Quelquechose c'est mal passé... : " . $exception->getMessage());
         }
 
         if ($this->getRequest()->isXmlHttpRequest() || $this->params()->fromQuery('f') === 'json') {

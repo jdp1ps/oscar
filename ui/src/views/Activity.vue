@@ -263,6 +263,10 @@
             Signé le :
             <time>{{ $filters.dateFull(core.dateSigned) }}</time>
             <small class="aggo"> ({{ $filters.timeAgo(core.dateSigned) }})</small>
+            <br>
+            Date de début des négociations :
+            <time>{{ $filters.dateFull(core.dateNegociation	) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(core.dateNegociation	) }})</small>
           </p>
         </div>
 
@@ -600,7 +604,7 @@
                 :datas="spents"
             />
             <nav class="buttons xs">
-              <a :href="spentsUrlDetails" class="btn btn-primary btn" v-if="credentials.spents.details">
+              <a :href="spents.url_details" class="btn btn-primary btn" v-if="credentials.spents.details">
                 <i class="icon-file-excel"></i>
                 Détails des dépenses</a>
               <a :href="spentsUrlPrevisionnel" class="btn btn-primary btn"

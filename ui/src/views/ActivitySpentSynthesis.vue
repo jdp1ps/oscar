@@ -52,58 +52,60 @@
       </div>
     </transition>
 
-    <table class="table table-condensed card synthesis" v-if="synthesis">
-      <thead>
-      <tr>
-        <th>Masse</th>
-        <th style="text-align: right">Engagé</th>
-        <th style="text-align: right">Réalisé</th>
-      </tr>
-      </thead>
-
-      <tbody>
-      <tr v-for="(dt,key) in synthesis.masses">
-        <th>
-          <small>{{ dt }}</small>
-          <a class="label label-info xs" :href="'#repport-' + key">{{ synthesis.synthesis[key].nbr_effectue }} /
-            {{ synthesis.synthesis[key].nbr_engage }}</a>
-        </th>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_engage) }}</td>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_effectue) }}</td>
-      </tr>
-      </tbody>
-      <tbody>
-      <tr class="total">
-        <th>Total</th>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.engage) }}</td>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.effectue) }}</td>
-      </tr>
-      </tbody>
-      <tbody>
-      <tr v-if="synthesis.synthesis['N.B'].total != 0">
-        <th>
-          <small><i class="icon-attention"></i> Hors-masse</small>
-          <a href="#repport-nb" class="label label-info">{{ synthesis.synthesis['N.B'].nbr}}</a>
-        </th>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_engage) }}</td>
-        <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_effectue) }}</td>
-      </tr>
-      </tbody>
-    </table>
-
-    <div>
-      <h3><i class="icon-calculator"></i>Recettes</h3>
-      <table class="table table-condensed card synthesis">
-        <tbody>
+    <div v-if="synthesis">
+      <table class="table table-condensed card synthesis" v-if="synthesis">
+        <thead>
         <tr>
-          <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
-          <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
+          <th>Masse</th>
+          <th style="text-align: right">Engagé</th>
+          <th style="text-align: right">Réalisé</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr v-for="(dt,key) in synthesis.masses">
+          <th>
+            <small>{{ dt }}</small>
+            <a class="label label-info xs" :href="'#repport-' + key">{{ synthesis.synthesis[key].nbr_effectue }} /
+              {{ synthesis.synthesis[key].nbr_engage }}</a>
+          </th>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_engage) }}</td>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis[key].total_effectue) }}</td>
+        </tr>
+        </tbody>
+        <tbody>
+        <tr class="total">
+          <th>Total</th>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.engage) }}</td>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis.totaux.effectue) }}</td>
+        </tr>
+        </tbody>
+        <tbody>
+        <tr v-if="synthesis.synthesis['N.B'].total != 0">
+          <th>
+            <small><i class="icon-attention"></i> Hors-masse</small>
+            <a href="#repport-nb" class="label label-info">{{ synthesis.synthesis['N.B'].nbr}}</a>
+          </th>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_engage) }}</td>
+          <td style="text-align: right" class="text-private">{{ $filters.money(synthesis.synthesis['N.B'].total_effectue) }}</td>
         </tr>
         </tbody>
       </table>
+
+      <div>
+        <h3><i class="icon-calculator"></i>Recettes</h3>
+        <table class="table table-condensed card synthesis">
+          <tbody>
+          <tr>
+            <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
+            <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div v-if="manageIgnored && synthesis.synthesis['0'].total != 0">
+    <div v-if="manageIgnored && synthesis && synthesis.synthesis['0'].total != 0">
       <a href="#" @click.prevent="displayIgnored = !displayIgnored">
         <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
         <span v-else><i class="icon-eye"></i> Montrer</span>
@@ -121,12 +123,10 @@
         </tbody>
       </table>
     </div>
-
-    <small v-if="dateUpdated">
-      Données mise à jour :
-      <strong v-if="dateUpdated">{{ $filters.fullDate(dateUpdated.date) }}</strong>
-    </small>
-
+<!--    <small v-if="dateUpdated">-->
+<!--      Données mise à jour :-->
+<!--      <strong v-if="dateUpdated">{{ $filters.fullDate(dateUpdated.date) }}</strong>-->
+<!--    </small>-->
   </section>
 </template>
 <script>

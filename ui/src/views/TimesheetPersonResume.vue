@@ -1,7 +1,4 @@
 <template>
-  <button class="btn btn-primary" @click="fetch">
-    FETCH
-  </button>
   <div v-if="datas">
 
     <h1>Vos déclarations</h1>
@@ -17,8 +14,9 @@
       <tr>
         <th>Période</th>
         <th>Déclarations</th>
+        <th>Com</th>
         <th>Activité</th>
-        <th>Total hors-activité</th>
+        <th>Hors-lots</th>
         <th>Total</th>
         <th>Actions</th>
       </tr>
@@ -89,19 +87,28 @@
               Facultatif
             </em>
           </td>
-
           <td>
-            <table class="table-condensed table">
+            <p class="commentaires" v-if="p.commentaires && p.commentaires.length">
+              <span class="commentaire" v-for="commentaire in p.commentaires">
+                {{ commentaire }}
+              </span>
+            </p>
+            <em v-else>
+              Aucun
+            </em>
+          </td>
+          <td class="soustotal">
+            <table class="table-condensed table table-packed">
               <tbody>
               <tr v-for="activityId in p.activities_id">
                 <th>
                   <i class="icon-cube"></i>
-                  <strong :title="datas.activities[activityId].acronym +' : ' +datas.activities[activityId].label">{{
-                    datas.activities[activityId].acronym }}</strong>
+                  <span :title="datas.activities[activityId].acronym +' : ' +datas.activities[activityId].label">{{
+                    datas.activities[activityId].acronym }}</span>
                 </th>
                 <td>
                   <em v-if="p.activities_details && p.activities_details[activityId]">
-                    {{ p.activities_details[activityId].days.length }} jr(s)
+                    {{ p.activities_details[activityId].days.length }} jr
                   </em>
                   <small v-else>
                     Rien
@@ -109,7 +116,7 @@
                 </td>
                 <td>
                   <em v-if="p.activities_details && p.activities_details[activityId]">
-                    {{ p.activities_details[activityId].events }} elem(s)
+                    {{ p.activities_details[activityId].events }} cr
                   </em>
                   <small v-else>
                     Rien
@@ -121,28 +128,29 @@
                   </strong>
                 </td>
               </tr>
-              <tr v-if="p.activities_details && Object.keys(p.activities_details).length > 1">
-                <th>Total</th>
-                <td colspan="3" class="text-right">
-                  <strong>
-                    {{ $filters.formatDuration(p.total_activities) }}
-                  </strong>
-                </td>
-              </tr>
               </tbody>
+              <tfoot>
+                <tr v-if="p.activities_details && Object.keys(p.activities_details).length > 1">
+                  <th>Total</th>
+                  <td colspan="3" class="text-right">
+                    <strong>
+                      {{ $filters.formatDuration(p.total_activities) }}
+                    </strong>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </td>
-
           <td class="soustotal text-right">
             <table class="table-condensed table" v-if="p.horslots_details && Object.keys(p.horslots_details).length">
               <tr v-for="(details, lot) in p.horslots_details">
                 <th>{{ datas.horslots[lot].label }}</th>
-                <td>{{ $filters.formatDuration(details.total) }}</td>
+                <td><strong>{{ $filters.formatDuration(details.total) }}</strong></td>
               </tr>
               <tfoot v-if="p.horslots_details && Object.keys(p.horslots_details).length > 1">
               <tr>
                 <th>Total</th>
-                <td>{{ $filters.formatDuration(p.total_horslots) }}</td>
+                <td><strong>{{ $filters.formatDuration(p.total_horslots) }}</strong></td>
               </tr>
               </tfoot>
             </table>
@@ -150,33 +158,33 @@
               Vide
             </small>
           </td>
-          <td class="total text-right">
+          <td class="soustotal total text-right"  style="white-space: nowrap">
             <i class="icon-time icon-clock"></i>
             <strong>{{ $filters.formatDuration(p.total) }}</strong> <small>/ {{
             $filters.formatDuration(p.periodDuration) }}</small></td>
           <td class="total text-right">
             <em class="text-danger">{{p.error}}</em>
             <span v-if="datas.owner">
-                            <a class="xs btn btn-primary btn-xs"
-                               :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year"
-                               v-if="p.validation_state == 'conflict'">
-                                <i class="icon-edit"></i>
-                                Corriger
-                            </a>
-                            <a class="xs btn btn-default btn-xs"
-                               :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year"
-                               v-else-if="p.validations_id.length > 0">
-                                <i class="icon-zoom-in-outline"></i>
-                                Visualiser
-                            </a>
-                            <a class="xs btn btn-primary btn-xs"
-                               :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else>
-                                <i class="icon-calendar"></i>
-                                Déclarer
-                            </a>
-                        </span>
+              <a class="xs btn btn-primary btn-xs"
+                 :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year"
+                 v-if="p.validation_state == 'conflict'">
+                  <i class="icon-edit"></i>
+                  Corriger
+              </a>
+              <a class="xs btn btn-default btn-xs"
+                 :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year"
+                 v-else-if="p.validations_id.length > 0">
+                  <i class="icon-zoom-in-outline"></i>
+                  Visualiser
+              </a>
+              <a class="xs btn btn-primary btn-xs"
+                 :href="'/feuille-de-temps/declarant?month=' +p.month +'&year=' +p.year" v-else>
+                  <i class="icon-calendar"></i>
+                  Déclarer
+              </a>
+          </span>
 
-            <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.period +'&personid=' + p.person_id"
+            <a :href="'/feuille-de-temps/excel?action=export2&period=' +p.period +'&personid=' + datas.person_id"
                v-if="timesheetpreview && p.validation_state != 'valid'" class="btn btn-default btn-sm">
               <i class="icon-file-pdf"></i>
               Prévisualiser (PDF)
@@ -187,14 +195,17 @@
           <th>
             Total <strong>{{ year }}</strong>
           </th>
-          <th>-&nbsp;</th>
-          <th>
+          <th>-</th>
+          <th>-</th>
+          <th class="soustotal">
             <table class="table-condensed table">
               <tr v-for="(activitiesDetails,activityId) in yeardatas.total_activities_details">
                 <th><i class="icon-cube"></i>{{ datas.activities[activityId].acronym }}</th>
-                <td><small>{{ activitiesDetails.days }} jr(s)</small></td>
-                <td><small>{{ activitiesDetails.events }} elem(s)</small></td>
-                <td class="text-right">{{ $filters.formatDuration(activitiesDetails.total) }}</td>
+                <td><small>{{ activitiesDetails.days }} jr</small></td>
+                <td><small>{{ activitiesDetails.events }} cr</small></td>
+                <td class="text-right">
+                  <strong>{{ $filters.formatDuration(activitiesDetails.total) }}</strong>
+                </td>
               </tr>
               <tfoot>
                 <tr>
@@ -208,13 +219,15 @@
               </tfoot>
             </table>
           </th>
-          <th class="text-right">
+          <th class="text-right soustotal">
             <table class="table-condensed table">
               <tr v-for="(horslotsDetails,horslots) in yeardatas.total_horslots_details">
                 <th>{{ datas.horslots[horslots].label }}</th>
-                <td><small>{{ horslotsDetails.days }} jr(s)</small></td>
-                <td><small>{{ horslotsDetails.events }} elem(s)</small></td>
-                <td class="text-right">{{ $filters.formatDuration(horslotsDetails.total) }}</td>
+                <td><small>{{ horslotsDetails.days }} jr</small></td>
+                <td><small>{{ horslotsDetails.events }} cr</small></td>
+                <td class="text-right">
+                  <strong>{{ $filters.formatDuration(horslotsDetails.total) }}</strong>
+                </td>
               </tr>
               <tfoot>
               <tr>
@@ -228,21 +241,23 @@
               </tfoot>
             </table>
           </th>
-          <th class="text-right">
+          <th class="text-right soustotal">
             <strong>{{ $filters.formatDuration(yeardatas.total) }}</strong>
             <small>/ {{ $filters.formatDuration(yeardatas.periodDuration) }}</small></th>
           <th>&nbsp;</th>
         </tr>
         </tbody>
-
       </template>
     </table>
-
   </div>
+  <div v-else>
+    NO DATA {{ datas }}
+  </div>
+
 </template>
 <script>
 import axios from 'axios';
-import AxiosMessage from "../utils/AxiosMessage.js";
+import AxiosOscar from "../utils/AxiosOscar.js";
 
 export default {
   props: {
@@ -297,7 +312,6 @@ export default {
 
           // détails hors-lots
           if( period.horslots_details	){
-            console.log('horslots', JSON.stringify(period.horslots_details));
             Object.keys(period.horslots_details).forEach(horslot => {
               if (!outYear.total_horslots_details.hasOwnProperty(horslot)) {
                 outYear.total_horslots_details[horslot] = {
@@ -324,8 +338,6 @@ export default {
               outYear.total_activities_details[activity].total += period.activities_details[activity].total;
               outYear.total_activities_details[activity].days += period.activities_details[activity].days.length;
               outYear.total_activities_details[activity].events += period.activities_details[activity].events;
-
-              console.log(infosActivityPeriod)
             });
           }
         }
@@ -347,8 +359,7 @@ export default {
 
     },
     fetch() {
-      console.log("fetch", this.url);
-      axios.get(this.url).then(response => {
+      AxiosOscar.get(this.url, {'pendingMsg': "Chargement des feuilles de temps"}).then(response => {
         this.datas = response.data;
       }, error => {
         //console.log(error);
@@ -367,24 +378,143 @@ export default {
 <style>
 
 .table {
+  font-size: .9em;
   td {
     border: 0;
   }
-
 }
 
 .table td .table, .table th .table {
-    background: rgba(255, 255, 255, .7) !important;
+    background: rgba(255, 255, 255, .5) !important;
+  border-left: none;
+}
 
+.table .table tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, .5) !important;
+}
+
+.table tfoot {
+  background-color: rgba(115, 140, 204, 0.2) !important;
+}
+
+.table tr .soustotal {
+  display: table-cell;
+  vertical-align: bottom !important;
+}
+
+.table tbody th {
+  white-space: nowrap;
+  font-weight: normal;
 }
 
 tr.line-total {
   background: rgba(31, 68, 192, 0.1);
-  border-top: 2px solid #777;
+  border-top: 1px solid #333333;
+  border-left: none;
   font-size: 1.1em;
+}
+
+.table .table {
+  border-width: thin;
+  tr {
+    border-left-width: thin;
+  }
+  th,td {
+    border-left: none;
+    border-right: solid thin #eee;
+    padding: 2px;
+  }
 }
 
 tr.line-total th {
   font-weight: normal;
+}
+
+.commentaires .commentaire {
+  display: block;
+  font-size: .9em;
+}
+
+.declarations-resume {
+  .heading-year th {
+    font-size: 2em;
+    text-align: right;
+  }
+  thead th {
+    text-align: center;
+    background: #0b93d5;
+  }
+  .yearrow {
+    background: rgba(255,255,255,.8);
+  }
+
+  .icon-time {
+    display: none;
+  }
+  .valid-95 {
+    .icon-time {
+      display: inline-block; color: #00cc66;
+      &:before {
+        content: '\e840';
+      }
+    }
+  }
+
+  tbody tr {
+    border-left: solid 4px #eee;
+  }
+
+  .valid-105 {
+    .icon-time {
+      display: inline-block; color: #3fd53f;
+      &:before {
+        content: '\e843';
+      }
+    }
+  }
+
+  .error-95 {
+    .icon-time {
+      display: inline-block; color: #970000;
+      &:before {
+        content: '\e840';
+      }
+    }
+  }
+
+  .error-105 {
+    .icon-time {
+      display: inline-block; color: #9e0505;
+      &:before {
+        content: '\e843';
+      }
+    }
+
+  }
+
+  .valid-100 {
+    .icon-time {
+      display: inline-block; color: #00AA00;
+    }
+  }
+
+  tr.optionnal {
+    border-left-color: #5a5a5a;
+  }
+
+  tr.conflict {
+    border-left-color: #CC0000;
+    background: rgba(#990000, .10);
+  }
+
+  tr.validated {
+    border-left-color: #00AA00;
+    background: rgba(#00AA00, .10);
+  }
+
+  tr.validating {
+    border-left-color: #0b93d5;
+    background: rgba(#0b93d5, .10);
+  }
 }
 </style>

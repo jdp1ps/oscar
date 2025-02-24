@@ -44,7 +44,6 @@ export default {
   },
   methods: {
     fetch(){
-      console.log(this.url);
       this.pending = true;
       this.modal = true;
       axios.get(this.url).then(response => {
@@ -72,7 +71,7 @@ export default {
   display: flex;
 
   time {
-    width: 150px;
+    flex: 0 0 200px;
     font-size: 1em;
     line-height: 1em;
     text-align: right;

@@ -13,4 +13,5 @@ app.config.globalProperties.$filters = {
        return MoneyFilter.money(value);
    }
 };
+
 app.mount('#depenses2');

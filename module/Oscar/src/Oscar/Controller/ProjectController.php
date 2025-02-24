@@ -199,7 +199,29 @@ class ProjectController extends AbstractOscarController
             $entity = $this->getProjectService()->getProject($id, true);
             $this->getOscarUserContextService()->check(Privileges::PROJECT_SHOW, $entity);
 
-            if ($this->getRequest()->isXmlHttpRequest()) {
+            $format = $this->params()->fromQuery('f', null);
+            if ($this->getRequest()->isXmlHttpRequest() || $format === 'json') {
+                $perimeter = $this->params()->fromQuery('p', null);
+                if( $perimeter ){
+                    if( $perimeter == 'logs' ){
+                        $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_MENU_ADMIN);
+                        try {
+                            $datas = $this->getProjectService()->api(
+                                $entity->getId(),
+                                $this->url(),
+                                $this->getOscarUserContextService(),
+                                'logs'
+                            );
+                            return $this->jsonOutput($datas);
+                        } catch (\Exception $e) {
+                            return $this->jsonError($e->getMessage());
+                        }
+                    } else {
+                        throw new OscarException("Périmètre inconnu");
+                    }
+                }
+
+
                 return $this->htmlProjectDetail($entity);
             }
 
@@ -228,6 +250,7 @@ class ProjectController extends AbstractOscarController
                 }
             }
 
+
             return array(
                 'spentActivitiesIds' => $spentActivitiesIds,
                 'spentMissingAcces'  => $nbrSpentAllow < $nbrSpent,
@@ -235,8 +258,7 @@ class ProjectController extends AbstractOscarController
                 'documents'          => $documents,
                 'rolesOrganizations' => $rolesOrganizations,
                 'rolesPersons'       => $rolesPersons,
-                'logs'               => $this->getActivityLogService()->projectActivities($entity->getId())->getQuery(
-                )->getResult()
+                'logs_url'           => $this->url()->fromRoute('project/show', ['id' => $entity->getId()]).'?f=json&p=logs'
             );
         } catch (UnAuthorizedException $e) {
             throw $e;

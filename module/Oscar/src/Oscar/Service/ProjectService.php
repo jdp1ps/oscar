@@ -17,6 +17,7 @@ use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityOrganization;
 use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\ContractDocument;
+use Oscar\Entity\LogActivity;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -102,7 +103,36 @@ class ProjectService implements UseServiceContainer
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public function api(
+        int $projectId,
+        ?Url $urlPlugin = null,
+        ?OscarUserContext $oscarUserContext = null,
+        ?string $perimeters = null
+    ){
 
+        $output = [];
+        try {
+            $project = $this->getProjectRepository()->find($projectId);
+
+        } catch (\Exception $exception) {
+            throw new OscarException($exception->getMessage());
+        }
+
+
+        if( $perimeters === 'logs' ){
+            $output = $this->getEntityManager()->getRepository(LogActivity::class)->getLogsProject($project->getId());
+        }
+
+        $out = [
+            'date'        => date('Y-m-d H:i:s'),
+            'error'       => null,
+            'warnings'    => null,
+            'perimeter'   => $perimeters,
+            'credentials' => null,
+            'traces'       => $output
+        ];
+        return $out;
+    }
     public function fixMovePartnersToActivities(
         Project $project,
         $flush =

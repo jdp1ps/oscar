@@ -860,7 +860,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $masses = $this->getOscarConfigurationService()->getMasses();
 
         return [
-            'pfi' => $pfi,
+            'pfis' => $pfis,
             'masses' => $masses,
             'synthesis' => $this->getSpentDatasSynthesisBySpents($spents)
         ];

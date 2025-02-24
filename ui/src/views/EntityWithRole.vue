@@ -3,9 +3,9 @@
 
     <loader :visible="loading" :text="loading"></loader>
 
-    <modal title="Erreur" :visible="error">
+    <modal title="Erreur" :visible="error != null && error != false">
       <div class="alert alert-danger">
-        {{ error }}
+        ERREUR : {{ error }}
       </div>
     </modal>
 
@@ -59,7 +59,7 @@
         </table>
 
         <nav class="admin-bar">
-          <button class="btn btn-default button-back" @click="error = ''">
+          <button class="btn btn-default button-back" @click="toPaste = ''">
             <i class="icon-angle-left"></i>
             Annuler
           </button>
@@ -223,7 +223,7 @@
           <i class="icon-cube" v-if="e.context == 'activity'"></i>
           <i class="icon-cubes" v-else></i>
             <PersonDisplay :person="e" v-if="e.firstname" />
-            <strong>{{ e.enrolledLabel }}</strong>
+            <strong v-else>{{ e.enrolledLabel }}</strong>
           <small>
             (<span v-if="e.context == 'activity'">
                 <i class="icon-cube"></i>
@@ -504,7 +504,6 @@ export default {
 
     fetch() {
       this.loading = "Chargement des données";
-      console.log("fetch");
       axios.get(this.url).then(ok => {
             if (this.standalone) {
               if (ok.data.roles) {

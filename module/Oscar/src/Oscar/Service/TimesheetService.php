@@ -3,6 +3,7 @@
 namespace Oscar\Service;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Laminas\Mvc\Controller\Plugin\Url;
@@ -2649,10 +2650,39 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
     }
 
     /**
+     * Retourne les commentaires d'une personnes sous la forme :
+     * "YYYY-MM" => [
+     *  "commentaires => [ "comment1", "comment2" ]
+     * ]
+     *
+     * @param Person $person
+     * @return array
+     * @throws NotSupported
+     */
+    protected function getCommentairesPersonArray( Person $person ) :array {
+        $commentaires = $this->getEntityManager()->getRepository(TimesheetCommentPeriod::class)
+            ->getCommentairesPerson($person->getId());
+        $out = [];
+
+        /** @var TimesheetCommentPeriod $commentaire */
+        foreach ($commentaires as $commentaire) {
+
+            $period = DateTimeUtils::getCodePeriod($commentaire->getYear(), $commentaire->getMonth());
+            if( !array_key_exists($period, $out) ) {
+                $out[$period] = [];
+            }
+            if( strlen($commentaire->getComment()) > 0)
+            $out[$period][] = $commentaire->getComment();
+        }
+        return $out;
+    }
+
+    /**
      * Retourne le résumé complet des déclarations d'une personne.
      *
      * @param Person $person
      * @return array
+     * @throws OscarException
      */
     public function getResumePerson(Person $person)
     {
@@ -2665,6 +2695,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
 
         $datas = [
             'owner'       => $person == $this->getOscarUserContextService()->getCurrentPerson(),
+            'person_id'   => $person->getId(),
             'minDate'     => "",
             'maxDate'     => "",
             'periods'     => [],
@@ -2674,6 +2705,9 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         ];
 
         $periodsDetails = [];
+
+        // Commentaires
+        $commentaires = $this->getCommentairesPersonArray($person);
 
         foreach ($this->getOthersWP() as $hl) {
             $datas['horslots'][$hl['code']] = [
@@ -2725,7 +2759,6 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                             'month'                    => $month,
                             'year'                     => $year,
                             'periodDuration'           => $this->getPeriodDuration($person, $year, $month),
-                            //'periodValidation'  => $this->getPeriodValidation
                             'past'                     => $period < $periodNow,
                             'current'                  => $period == $periodNow,
                             'futur'                    => $period > $periodNow,
@@ -2739,7 +2772,8 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                             'total_activities_details' => [],
                             'total_horslots'           => 0.0,
                             'validation_state'         => 'none',
-                            'validations_id'           => []
+                            'validations_id'           => [],
+                            'commentaires'             => array_key_exists($period, $commentaires)?$commentaires[$period]:[],
                         ];
                     }
                     $periodsDetails[$period]['activities_id'][] = $activity->getId();
@@ -4179,7 +4213,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
      * @param $period
      * @return array
      * @throws OscarException
-     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws NotSupported
      */
     public function getTimesheetDatasPersonPeriod(Person $person, $period): array
     {

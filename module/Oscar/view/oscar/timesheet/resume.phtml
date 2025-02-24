@@ -6,7 +6,9 @@
         <?php endif; ?>
     </h1>
     <div class="timesheet-resume" id="timesheet-resume"
-        <?php if( DEBUG_OSCAR ) echo 'data-debug-enabled="true"' ?>
+        <?php if( DEBUG_OSCAR ) echo ' data-debug-enabled="true"' ?>
+         data-timesheetpreview="<?= $this->options()->hasTimesheetPreview() ? 'true':'false' ?>"
+         data-timesheetexcel="<?= $this->options()->allowTimesheetExcel() ? 'true':'false' ?>"
          data-url="<?= $url ?>"
     ></div>
     <?= $this->Vite()->addJs('src/TimesheetPersonResume.js'); ?>

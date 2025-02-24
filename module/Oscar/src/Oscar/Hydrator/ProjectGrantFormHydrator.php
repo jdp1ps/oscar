@@ -94,6 +94,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             ->setDateEnd(DateTimeUtils::toDatetime($data['dateEnd']))
             ->setDateSigned(DateTimeUtils::toDatetime($data['dateSigned']))
             ->setDateOpened(DateTimeUtils::toDatetime($data['dateOpened']))
+            ->setDateNegociation(DateTimeUtils::toDatetime($data['dateNegociation']))
             ->setPcruValidPoleCompetitivite($data['pcruValidPoleCompetitivite'] == "1")
             ->setNumbers(array_key_exists('numbers', $data) ? $data['numbers'] : [])
         ;
@@ -204,6 +205,7 @@ class ProjectGrantFormHydrator implements HydratorInterface, UseServiceContainer
             'dateEnd' => $object->getDateEnd()?$object->getDateEnd()->format('Y-m-d'):'',
             'dateSigned' => $object->getDateSigned()?$object->getDateSigned()->format('Y-m-d'):'',
             'dateOpened' => $object->getDateOpened()?$object->getDateOpened()->format('Y-m-d'):'',
+            'dateNegociation' => $object->getDateNegociation()?$object->getDateNegociation()->format('Y-m-d'):'',
             'currency' => $object->getCurrency() ? $object->getCurrency()->getId() : -1,
             'project' => $object->getProject(),
             'numbers' => $object->getNumbers(),

@@ -24,11 +24,6 @@
             </span>
     </div>
   </div>
-  <div>
-    duration: {{ duration }} -
-    defaultDuration: {{ defaultDuration }} -
-    declarationInHours: {{ declarationInHours }}
-  </div>
 </template>
 
 <script>
