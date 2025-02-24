@@ -139,6 +139,12 @@ $show = $this->grant()->privilege(\Oscar\Provider\Privileges::ACTIVITY_SHOW, $ac
                     </span>
                 <?php endforeach; ?>
                 </div>
+                <?php if ($activity->getDateNegociation()): ?>
+                    <div>
+                        Date de début des négociation :
+                        <time><?= $this->moment($activity->getDateNegociation())->full() ?></time>
+                    </div>
+                <?php endif; ?>
                 Dernière mise à jour : <time><?= $this->moment($activity->getDateUpdated())->full() ?></time>
             </div>
 

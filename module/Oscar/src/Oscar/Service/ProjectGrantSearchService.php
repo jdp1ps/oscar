@@ -57,6 +57,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
     const FILTER_ACTIVITY_DATE_END = 'adf';
     const FILTER_ACTIVITY_DATE_CREATED = 'adc';
     const FILTER_ACTIVITY_DATE_UPDATED = 'adm';
+    const FILTER_ACTIVITY_DATE_NEGOCIATION = 'adn';
     const FILTER_ACTIVITY_DATE_SIGNED = 'ads';
     const FILTER_ACTIVITY_DATE_FINANCIAL_OPENED = 'adp';
     const FILTER_ACTIVITY_NO_PROJECT = 'pp';
@@ -73,6 +74,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
     const SORT_DATE_UPDATED = 'dateUpdated';
     const SORT_DATE_SIGNED = 'dateSigned';
     const SORT_DATE_OPENED = 'dateOpened';
+    const SORT_DATE_NEGOCIATION = 'dateNegociation';
     const SORT_DIRECTION_DESC = 'desc';
     const SORT_DIRECTON_ASC = 'asc';
     const QUERY_PARAM_PAGE = 'page';
@@ -119,6 +121,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             self::FILTER_ACTIVITY_DATE_SIGNED           => 'Date de signature',
             self::FILTER_ACTIVITY_DATE_FINANCIAL_OPENED => 'Date d\'ouverture du numéro financier (' . $this->getOscarConfigurationService(
                 )->getFinancialLabel() . ')',
+            self::FILTER_ACTIVITY_DATE_NEGOCIATION      => 'Date de début des négociations',
             self::FILTER_ACTIVITY_NUMBERS               => 'Ayant une numérotation',
             // Finances
             self::FILTER_ACTIVITY_FINANCIAL_IMPACT      => 'Incidence financière - AVEC',
@@ -343,6 +346,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                     break;
 
                 case 'add' :
+                case 'adn' :
                 case 'adf' :
                 case 'adm' :
                 case 'adc' :
@@ -827,6 +831,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                     ///////////////////////////////// ACTIVITY / DATES
                     case 'add' :
+                    case 'adn' :
                     case 'adf' :
                     case 'adm' :
                     case 'adc' :
@@ -1223,6 +1228,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             'adc' => self::SORT_DATE_CREATED,
             'adf' => self::SORT_DATE_END,
             'adm' => self::SORT_DATE_UPDATED,
+            'adn' => self::SORT_DATE_NEGOCIATION,
             'ads' => self::SORT_DATE_SIGNED,
             'adp' => self::SORT_DATE_OPENED,
         ];

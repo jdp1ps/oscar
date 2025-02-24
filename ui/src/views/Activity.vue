@@ -263,6 +263,10 @@
             Signé le :
             <time>{{ $filters.dateFull(core.dateSigned) }}</time>
             <small class="aggo"> ({{ $filters.timeAgo(core.dateSigned) }})</small>
+            <br>
+            Date de début des négociations :
+            <time>{{ $filters.dateFull(core.dateNegociation	) }}</time>
+            <small class="aggo"> ({{ $filters.timeAgo(core.dateNegociation	) }})</small>
           </p>
         </div>
 

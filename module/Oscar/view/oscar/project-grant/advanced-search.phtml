@@ -856,7 +856,9 @@
                     if( datas.type == 'ap' || datas.type == 'sp' || datas.type == 'ao' || datas.type == 'so' ){
                         dom = $(tpl(datas));
                     }
-                    else if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
+                    else if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm'
+                        || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc'
+                        || datas.type == 'adn') {
                         dom = $(tplDate(datas));
                     }
                     else if(datas.type == 'as' || datas.type == 'ss' ) {
@@ -1127,7 +1129,7 @@
                         })
                     }
 
-                    if(datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
+                    if(datas.type == 'adn' || datas.type == 'add' || datas.type == 'adf' || datas.type == 'adm' || datas.type == 'ads' || datas.type == 'adp' || datas.type == 'adc') {
                         $('.datepicker').datepicker({
                             format: "yyyy-mm-dd",
                             todayBtn: "linked",

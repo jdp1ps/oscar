@@ -448,11 +448,13 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
             'type_chain'   => $typesJson,
             'type_id'      => $activity->getActivityType()?->getId(),
+            'dateCreated'    => $this->formatDateTime($activity->getDateCreated()),
             'dateStart'    => $this->formatDateTime($activity->getDateStart()),
             'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
             'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
             'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
             'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
+            'dateNegociation'   => $this->formatDateTime($activity->getDateNegociation()),
             'urls'         => [
                 'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),

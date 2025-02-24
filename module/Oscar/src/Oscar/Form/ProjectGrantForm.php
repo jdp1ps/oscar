@@ -27,7 +27,6 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
 
     private $numbers;
     private $editable;
-
     private $organizations = false;
     private $organizationRoles = null;
 
@@ -40,7 +39,7 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
     /**
      * @return ProjectGrantService
      */
-    public function getProjectGrantService()
+    public function getProjectGrantService() :ProjectGrantService
     {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
@@ -328,6 +327,18 @@ class ProjectGrantForm extends Form implements InputFilterProviderInterface, Use
                        'name'       => 'dateOpened',
                        'options'    => [
                            'label' => "Création du N°financier"
+                       ],
+                       'attributes' => [
+                           'class' => 'input-date form-control'
+                       ],
+                       'type'       => 'Text'
+                   ]);
+
+        // DateNegociation
+        $this->add([
+                       'name'       => 'dateNegociation',
+                       'options'    => [
+                           'label' => "Date de début des négociations"
                        ],
                        'attributes' => [
                            'class' => 'input-date form-control'
