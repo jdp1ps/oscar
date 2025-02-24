@@ -877,7 +877,7 @@ class PCRUService implements UseLoggerService, UseOscarConfigurationService, Use
         } else {
             foreach($json_errors->contratsWithErrors as $error){
                 $activityOscarId = $error->id;
-                $errors = implode($error->errors, ", ");
+                $errors = implode(', ', $error->errors );
                 $this->log("Activity mark as error '$activityOscarId' : '$errors'");
                 $pcruinfos = $this->getActivityPCRUInfoRepository()->getPcruInfoActivityFromOscarId($activityOscarId);
                 $pcruinfos->setErrorsRemote($errors)

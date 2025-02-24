@@ -282,7 +282,7 @@ class OrganizationRepository extends EntityRepository implements IConnectedRepos
         $qb->select('o')
             ->from(Organization::class, 'o')
             ->where('o.connectors LIKE :search')
-            ->setParameter('search', '%"' . $connector . '";s:' . strlen($value) . ':"' . $value . '";%');
+            ->setParameter('search', '%"' . $connector . '";s:' . strlen($value) . ':"' . str_replace('_', '\\_', $value) . '";%');
         return $qb;
     }
 
