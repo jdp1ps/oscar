@@ -187,14 +187,14 @@
     "file": "vendor9.js"
   },
   "src/Activity.css": {
-    "file": "assets/Activity-779edade.css",
+    "file": "assets/Activity-29c68331.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-779edade.css"
+      "assets/Activity-29c68331.css"
     ],
-    "file": "assets/activity-a7ccb9e4.js",
+    "file": "assets/activity-a66c697a.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
