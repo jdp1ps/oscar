@@ -48,7 +48,7 @@ abstract class ElasticSearchEngine
      * @return Client
      * @throws OscarException
      */
-    protected function getClient(): Client
+    public function getClient(): Client
     {
         try {
             if ($this->elasticSearchClient === null) {
@@ -56,12 +56,31 @@ abstract class ElasticSearchEngine
                     ->setHosts($this->getHosts())
                     ->build();
             }
+            if( !$this->elasticSearchClient->indices()->exists(['index' => $this->getIndex()]) ){
+                $this->loggerService->debug("INDEX CREATE " . $this->getIndex());
+                $this->elasticSearchClient->indices()->create(
+                    [
+                        'index' => $this->getIndex(),
+                        'body' => [
+                            'mappings' => [
+                                // Suppression de la détection des dates/nombres
+                                'date_detection' => false,
+                                'numeric_detection' => false,
+                            ]
+                        ]
+                    ]
+                );
+            }
             return $this->elasticSearchClient;
         } catch (\Exception $exception) {
             $msg = "Création du client impossible";
             $this->loggerService->critical("$msg : " . $exception->getMessage());
             throw new OscarException($msg);
         }
+    }
+
+    public function getMapping() :array {
+        return $this->getClient()->indices()->getMapping(['index' => $this->getIndex()]);
     }
 
     /**
@@ -72,6 +91,7 @@ abstract class ElasticSearchEngine
     public function addItem(mixed $object): callable|array
     {
         $client = $this->getClient();
+        $this->loggerService->debug("additem");
 
         try {
             $params = ['body' => []];
@@ -111,11 +131,13 @@ abstract class ElasticSearchEngine
         try {
             $i = 0;
             foreach ($items as $item) {
+                $this->loggerService->debug(" + bulk " . $item->getId());
+                $this->loggerService->debug(json_encode($this->getIndexableDatas($item)));
                 $i++;
                 $params['body'][] = [
                     'index' => [
                         '_index' => $this->getIndex(),
-                        '_type'  => $this->getType(),
+                        // '_type'  => $this->getType(),
                         '_id'    => $item->getId()
                     ]
                 ];
@@ -156,7 +178,7 @@ abstract class ElasticSearchEngine
 
         $query = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
+            //'type'  => $this->getType(),
             'body'  => [
                 'size'  => $limit,
                 "query" => $this->getFieldsSearchedWeighted($search)
@@ -246,7 +268,7 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
+//            'type'  => $this->getType(),
             'id'    => $item->getId(),
             'body'  => [
                 'doc' => $this->getIndexableDatas($item)
