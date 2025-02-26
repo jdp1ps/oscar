@@ -99,7 +99,6 @@ abstract class ElasticSearchEngine
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->getIndex(),
-                    '_type'  => $this->getType(),
                     '_id'    => $object->getId(),
                 ]
             ];
@@ -136,7 +135,6 @@ abstract class ElasticSearchEngine
                 $params['body'][] = [
                     'index' => [
                         '_index' => $this->getIndex(),
-                        // '_type'  => $this->getType(),
                         '_id'    => $item->getId()
                     ]
                 ];
