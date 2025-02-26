@@ -36,29 +36,36 @@ class OscarOrganizationsSearchCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Recherche dans les organisations")
-            ->addArgument("search", InputArgument::REQUIRED, "Expression à rechercher")
+            ->addArgument("search", InputArgument::OPTIONAL, "Expression à rechercher")
+            ->addOption("mapping", 'g',
+                        InputOption::VALUE_NONE,
+                        "Afficher le mappings")
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->addOutputStyle($output);
-
-        /** @var OscarUserContext $oscaruserContext */
-        $oscaruserContext = $this->getServicemanager()->get(OscarUserContext::class);
-
         $io = new SymfonyStyle($input, $output);
-
-        $io->title("Recherche dans les organisations");
-
-        /** @var OscarConfigurationService $oscarConfig */
-        $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
 
         /** @var OrganizationService $organisationService */
         $organisationService = $this->getServicemanager()->get(OrganizationService::class);
 
+        $mapping = $input->getOption("mapping");
+        if( $mapping ){
+            $map = $organisationService->getSearchEngineStrategy()->getMapping();
+            $output->write(json_encode($map, JSON_PRETTY_PRINT));
+            return self::SUCCESS;
+        }
+
+        $io->title("Recherche dans les organisations");
+
         try {
             $search = $input->getArgument('search');
+            if( !$search ){
+                $io->error("Précisez la recherche");
+                return self::INVALID;
+            }
             $organisations = $organisationService->search($search);
             /** @var Organization $organisation */
             foreach ($organisations as $organisation) {

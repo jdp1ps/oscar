@@ -121,7 +121,7 @@ abstract class ElasticSearchEngine
      */
     public function rebuildIndex(array $items): void
     {
-        $this->loggerService->debug('[elasticsearch] Rebuilding index...');
+        $this->loggerService->debug('[elasticsearch] Rebuilding index "'. $this->getIndex().'"...');
         try {
             $this->resetIndex();
         } catch (\Exception $exception) {
@@ -131,8 +131,7 @@ abstract class ElasticSearchEngine
         try {
             $i = 0;
             foreach ($items as $item) {
-                $this->loggerService->debug(" + bulk " . $item->getId());
-                $this->loggerService->debug(json_encode($this->getIndexableDatas($item)));
+                $this->loggerService->debug(" + prepare " . $item->getId());
                 $i++;
                 $params['body'][] = [
                     'index' => [
@@ -146,6 +145,7 @@ abstract class ElasticSearchEngine
 
                 // On envoie par paquet de 1000
                 if ($i % 1000 == 0) {
+                    $this->loggerService->debug(" + BULK ");
                     $responses = $this->getClient()->bulk($params);
 
                     // clean datas
@@ -155,6 +155,7 @@ abstract class ElasticSearchEngine
             }
 
             if (!empty($params['body'])) {
+                $this->loggerService->debug(" + BULK ");
                 $client->bulk($params);
             }
         } catch (\Exception $exception) {
@@ -253,7 +254,6 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
             'id'    => "$id"
         ];
         return $this->getClient()->delete($params);
@@ -268,7 +268,6 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-//            'type'  => $this->getType(),
             'id'    => $item->getId(),
             'body'  => [
                 'doc' => $this->getIndexableDatas($item)

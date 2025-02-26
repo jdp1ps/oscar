@@ -74,14 +74,7 @@ class OscarActivitySearchCommand extends OscarAdvancedCommandAbstract
         if( $mapping ){
             $map = $this->getProjectGrantService()->getSearchEngineStrategy()->getMapping();
             $output->write(json_encode($map, JSON_PRETTY_PRINT));
-//
-//            $params = ['format' => 'json'];
-//
-//            $indices = $map = $this->getProjectGrantService()->getSearchEngineStrategy()->getClient()->cat()->indices($params);
-//            var_dump($indices);
-
-            die();
-
+            return self::SUCCESS;
         }
         $filters = $filtersOption != "" ? explode('|', $filtersOption) : [];
 
