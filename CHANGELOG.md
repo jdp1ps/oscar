@@ -3,6 +3,11 @@
 
 ### Février
  - [fix] Erreur d'indexation lié au typage automatique des valeurs dans elasticsearch. La configuration du mapping a été modifié (**nécessite après mise à jour, une réindexation des activités, organisations et personnes**)
+ - [Starling] MAJ de la fiche organisation (ajout et affichage conditionnel des informations)
+ - [Starling] Ajout des champs DUNS, RNSR, Labintel, TVA Intra dans la recherche textuelle pour les organisations
+ - [Starling] Recherche activité > Recherche stricte sur les identifiants des connectors
+ - [Starling] Mise à jour de l'interface de déclaration de temps
+ - [Starling] Mise à jour des logs pour une activité/projet
  - [fix] Maj doc sur les champs utilisés dans les dépenses
  - [fix] Le nom du fichier est correctement repris lors du téléchargement d'un document
  - [fix] Erreur d'affichage du type d'activité dans certains cas précis
@@ -14,17 +19,6 @@
  - [fix] Connector : Erreur lorsque l'identifiant contient un "_"
  - [fix] Erreur lors de la création d'une activité
  - [fix] Implode
-
-## 2025
-
-### Février
-  - [Starling] MAJ de la fiche organisation (ajout et affichage conditionnel des informations)
- - [Starling] Ajout des champs DUNS, RNSR, Labintel, TVA Intra dans la recherche textuelle pour les organisations
- - [Starling] Recherche activité > Recherche strict sur les identifiants des connectors
- - [Starling] Mise à jour de l'interface de déclaration de temps
- - [Starling] Mise à jour des logs pour une activité/projet
-
-### Janvier
  - [Starling] Ajout d'un lien dans la liste des types d'organisation vers le référentiel des organisations filtré sur le type
  - [Starling] Ajout des mots-clefs pour la recherche textuelle, ajout d'un filtre pour les mots-clefs
  - [Starling] Interface d'administration des mots-clefs
