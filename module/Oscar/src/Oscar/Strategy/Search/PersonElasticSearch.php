@@ -35,19 +35,7 @@ class PersonElasticSearch extends ElasticSearchEngine implements IPersonISearchS
      */
     public function add(Person $person):callable|array
     {
-        $params = ['body' => []];
-
-        $params['body'][] = [
-            'index' => [
-                '_index' => $this->getIndex(),
-                '_type' => $this->getType(),
-                '_id' => $person->getId(),
-            ]
-        ];
-
-        $params['body'][] = $this->getIndexableDatas($person);
-
-        return $this->getClient()->bulk($params);
+        return $this->addItem($person);
     }
 
     public function getIndexableDatas(mixed $item) :array

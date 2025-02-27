@@ -34,7 +34,8 @@ class OscarPersonsSearchCommand extends OscarCommandAbstract
     {
         $this
             ->setDescription("Recherche dans l'index de recherche des personnes")
-            ->addArgument('search', InputArgument::REQUIRED, 'Expression de recherche')
+            ->addArgument('search', InputArgument::OPTIONAL, 'Expression de recherche')
+            ->addOption("mapping", 'g',InputOption::VALUE_NONE,"Afficher le mappings")
         ;
     }
 
@@ -52,7 +53,20 @@ class OscarPersonsSearchCommand extends OscarCommandAbstract
         /** @var PersonService $personService */
         $personService = $this->getServicemanager()->get(PersonService::class);
 
+        $mapping = $input->getOption("mapping");
+        if( $mapping ){
+            $map = $personService->getSearchEngineStrategy()->getMapping();
+            $output->write(json_encode($map, JSON_PRETTY_PRINT));
+            return self::SUCCESS;
+        }
+
         try {
+            $search = $input->getArgument('search');
+            if( !$search ){
+                $io->error("Précisez la recherche");
+                return self::INVALID;
+            }
+
             $ids = $personService->getSearchEngineStrategy()->search($search);
             if( count($ids) ){
                 $persons = $personService->getPersonsByIds($ids);

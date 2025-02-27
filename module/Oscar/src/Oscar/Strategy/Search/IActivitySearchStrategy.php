@@ -9,6 +9,7 @@
 namespace Oscar\Strategy\Search;
 
 
+use Elasticsearch\Client;
 use Oscar\Entity\Activity;
 
 interface IActivitySearchStrategy extends ISearchStrategyCore
@@ -18,9 +19,14 @@ interface IActivitySearchStrategy extends ISearchStrategyCore
      * Ajoute une activité au moteur de recherche.
      *
      * @param Activity $activity
-     * @return mixed
+     * @return callable|array
      */
     public function addActivity(Activity $activity): callable|array;
+
+    /**
+     * @return Client
+     */
+    public function getClient(): Client;
 
     /**
      * Recherche dans les projets.

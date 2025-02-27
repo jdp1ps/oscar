@@ -1,4 +1,19 @@
-# 📢 CHANGEMENTS
+# 📢 CHANGEMENTS (MASTER/RIPLEY)
+## 2025
+
+### Février
+ - [fix] Erreur d'indexation lié au typage automatique des valeurs dans elasticsearch. La configuration du mapping a été modifié (**nécessite après mise à jour, une réindexation des activités, organisations et personnes**)
+ - [fix] Maj doc sur les champs utilisés dans les dépenses
+ - [fix] Le nom du fichier est correctement repris lors du téléchargement d'un document
+ - [fix] Erreur d'affichage du type d'activité dans certains cas précis
+ - [fix] Erreur lors de la création d'une activité
+ - [fix] Recherche textuelle des organisations
+
+### Janvier
+ - [fix] Connector : Identifiant sous la forme d'entier pour les personnes
+ - [fix] Connector : Erreur lorsque l'identifiant contient un "_"
+ - [fix] Erreur lors de la création d'une activité
+ - [fix] Implode
 
 ## 2025
 
