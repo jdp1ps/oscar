@@ -1,7 +1,5 @@
 # Support Oracle OCI8 pour PHP
 
-> UPDATE : Debian bullseye / PHP7.4
-
 Procédure d'installation du **module PHP OCI8** afin de permettre d'utiliser les connexions à une base de données Oracle en PHP.
 
 Cette procédure se fait en 2 étapes, commencer par récupérer et installer les différents utilitaires pour la connexion à Oracle (utilitaires indépendants de PHP). Puis l'installation du module PHP OCI8.

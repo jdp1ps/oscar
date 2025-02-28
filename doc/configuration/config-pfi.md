@@ -1,4 +1,4 @@
-# Formalisme du PFI
+# Formalisme du PFI (numéro financier)
 
 Le formalisme du PFI peut être configuré depuis le menu **Administration** > **Options** (Onglet *Activités de recherche*).
 

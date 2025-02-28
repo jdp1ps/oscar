@@ -1,4 +1,4 @@
-# Modifier la requête SIFAC
+# Affichage des dépenses (SIFAC)
 
 Oscar permet de synchroniser depuis le SI **les dépenses** effectuées dans le cadre des activités
 de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC.
@@ -7,13 +7,13 @@ de recherche. Cette synchronisation s'appuie sur le journal des pièces de SIFAC
 ## Configurer l'accès à SIFAC
 
 ### Prérequis technique
- - Autoriser depuis SIFAC les accès
+ - Autoriser depuis SIFAC les accès (IP de votre machine Oscar)
  - Installer OCI8 pour PHP : [Installer OCI8/PHP](../technique/install-oracle.md)
 
 ### Configuration
 
 Les informations de connection doivent être renseignées dans le fichier de configuration Oscar
-`config/autoload/local.php`. SIFAC se base sur Oracle. Vous deverez donc installer le driver OCI8 pour PHP
+`config/autoload/local.php`.
 
 ```php
 <?php
@@ -41,7 +41,7 @@ return array(
     ]
 );
 ```
-> Note au technicien : Le champ `spent_query` référence une requête permettant d'obtenir les données. Mais les clauses WHERE peuvent varier d'un établissement à l'autre. Par défaut, la clause importante est `MANDT = '430'`, cette valeur peut changer.
+> Note au technicien : Le champ `spent_query` référence une requête permettant d'obtenir les données. Mais les clauses WHERE peuvent varier d'un établissement à l'autre. Par défaut, la clause importante est `MANDT = '430'`, cette valeur peut changer. [Modifier les requêtes des dépenses](../configuration/config-sifac-query.md)
 
 ## Configurer les dépenses
 
@@ -57,43 +57,12 @@ Par défault, les passes configurées sont :
  - **I** : Inverstissement
  - **P** : personnel
 
-Vous pouvez modifier cette configuration en éditant le fichier `config/autoload/local.php` : 
+[Modifier les masses par défault](#modifier-les-masses)
 
-```php
-<?php
-// config/autoload/local.php
-return array(
-    // ...
-    'oscar' => [
-        // ...
-        // Masses par défault
-        'spenttypeannexes' => [
-            "F" => "Fonctionnement",
-            "I" => "Investissement",
-            "P" => "Personnel"
-        ],
-    ]
-);
-```
 
 ### Plan comptable initial
 
-Vous allez devoir préciser le plan comptable à utiliser. Complétez la configuration dans  `config/autoload/local.php`
-avec la clef **spenttypesource** pour indiquer le fichier contenant le plan comptable général officiel (le chemin de
-l'exemple est un plan valide).
 
-```php
-<?php
-// config/autoload/local.php
-return array(
-    // ...
-    'oscar' => [
-        // ...
-        // Emplacement du plan comptable par défaut
-        'spenttypesource' => dirname(__DIR__).'/../install/plan-comptable.csv',
-    ]
-);
-```
 
 Vous pourrez ensuite vous rendre dans l'interface d'administration pour charger le plan comptable général en cliquant
 sur le bouton **Charger le Plan Comptable Général**.
@@ -221,3 +190,44 @@ php bin/oscar.php spent:sync <PFI>
 
 > Vous pouvez voir la liste des commandes liées aux dépenses dans
 > la [Documentation des commandes](../commands/liste_des_commandes.md))
+
+## Avancés
+
+### Modifier les masses
+Vous pouvez modifier cette configuration en éditant le fichier `config/autoload/local.php` :
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+        // ...
+        // Masses par défault
+        'spenttypeannexes' => [
+            "F" => "Fonctionnement",
+            "I" => "Investissement",
+            "P" => "Personnel"
+        ],
+    ]
+);
+```
+
+### Modifier le plan comptable par défault
+
+Le plan comptable par défault (Plan comptable général) est disponible dans `install/plan-comptable`. Si vous souhaitez le personnaliser (et pouvoir le réutiliser). Il vous faudra enregistrer un nouvel version du fichier CSV (et en respecter le formalisme).
+
+Puis modifier la configuration Oscar afin d'indiquer le nouveau CSV à utiliser : 
+
+```php
+<?php
+// config/autoload/local.php
+return array(
+    // ...
+    'oscar' => [
+        // ...
+        // Emplacement du plan comptable par défaut
+        'spenttypesource' => '/var/OscarApp/data/nouveau-plan-comptable.csv',
+    ]
+);
+```

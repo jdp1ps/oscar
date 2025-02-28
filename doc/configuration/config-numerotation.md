@@ -101,7 +101,7 @@ return array(
 );
 ```
 
-Cette ne configuration, une fois choisie ne doit pas être modifiée. Dans le cas contraire, il faudra penser à mettre à jour les numérotations des activités déjà enregistrées en base de données pour qu'elles respectent toutes le même formalisme.
+Cette configuration, une fois choisie **ne doit jamais être modifiée**. Dans le cas contraire, il faudra penser à mettre à jour les numérotations des activités déjà enregistrées en base de données pour qu'elles respectent toutes le même formalisme.
 
 ```sql
 -- Mettre à jour la numérotation sous la forme yyyyLABxxxxx

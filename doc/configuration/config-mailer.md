@@ -13,13 +13,17 @@ Par défaut, le système de mail utilise la configuration :
 ```php
 <?php
 return [
-    // ...
+    // config/autoload/local.php
     'oscar' => [
         'urlAbsolute' => 'http://localhost:8080',
         'mailer' => [
             'transport' => [
-                'type' => 'file',
-                'path' => realpath(__DIR__.'/../../data/mails'),
+                'type' => 'smtp',
+                'host' => 'smtp.domain.tld',
+                'port' => 465,
+                'username' => 'smithagent',
+                'password' => '@m4S!n9 P4$VV0rd',
+                'security' => 'ssl',
             ],
             'administrators' => [],
             'from' => [ 'oscar-bot@oscar.fr' => 'Oscar Bot'],
@@ -42,17 +46,16 @@ Ce paramètre permet de renseigner les adresses des administrateurs technique de
 return [
     // ...
     'oscar' => [
-        'urlAbsolute' => 'http://localhost:8080',
+        // ...
         'mailer' => [
             // (...)
             'administrators' => ['stephane.bouvry@unicaen.fr', 'karin.fery@unicaen.fr'],           
-            // (...)
         ],
     ]
 ];
 ```
 
-Ce paramètre est pour le moment utilisé par la commande `php pubic/index.php oscar test:mailer` pour distribuer un mail de test lors de la configuration du *mailer*.
+Ce paramètre est pour le moment utilisé par la commande `php bin/oscar.php check:mailer` pour distribuer un mail de test lors de la configuration du *mailer*.
 
 > Il sera probablement utilisé par la suite pour des outils de diagnostic
 
@@ -65,40 +68,29 @@ Le paramètre `òscar.mailer.subjectPrefix` permet d'indiquer un préfixe ajout�
 Le paramètre `òscar.mailer.copy` n'est pour le moment pas utilisé.
 
 
-### Gabarit
+### Modifier le gabarit des mails
 
-Dans la configuration `oscar.mailer`, la clef `template` permet spécifier le gabarit pour mettre en forme les emails.
+Dans la configuration `oscar.mailer`, la clef `template` permet spécifier le gabarit pour mettre en forme les emails. Le fichier par défaut est `module/Oscar/view/mail.phtml`.
 
-```php
-<body style="background:#EFEFEF; font-family: Helvetica, Arial, sans-serif">
-<table border="0" style="border: none; width: 90%; margin: 14px 5%; tab" cellpadding="0" cellspacing="0" width="90%">
-    <tr style="background: #455790">
-        <td width="32" style="border: none; padding: 8px">
-            <img src="https://oscar.unicaen.fr/images/oscar-white.png" alt="OSCAR" style="height: 32px;">
-        </td>
-        <td style="font-size: 22px;">
-            <span style="color: #EEE; text-shadow: -1px 1px 2px #000000"><?= $title ? : 'Rapport' ?></span>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" style="padding: 1em 4em; background: white"><?= $body ?></td>
-    </tr>
-
-    <tr>
-        <td colspan="2" style="padding: 2em 4em; background: white">
-            <div style="width: 75%; border-top: dotted 1px #999999; padding: .5em; font-size: .75em; color: #777777; margin: 0 auto; text-align: center">
-                <p>Ceci est un mail automatique, merci de <strong>ne pas y répondre.</strong>
-                Pour ne plus recevoir des notifications, vous pouvez vous rendre dans les paramètres de votre compte pour ajuster la fréquence des envois des courriels.</p>
-            </div>
-    </tr>
-
-    <tr style="background: #455790; font-size: 12px; color: #efefef;  text-shadow: -1px 1px 2px #000000">
-        <td colspan="2" style="padding: 1em 4em; text-align: center">Oscar<sup>©</sup>, 2015-2018 - Université de Normandie </td>
-    </tr>
-</table>
-</body>
+```bash
+cp module/Oscar/view/mail.phtml data/mail.phtml
 ```
 
+Puis indiquez dans la configuration l'emplacement du gabarit : 
+
+```php
+<?php
+return [
+    // config/autoload/local.php
+    'oscar' => [
+        // ...
+        'mailer' => [
+            '// ...
+            'template' => realpath(__DIR__.'/../../data/mail.phtml'),
+        ],
+    ]
+];
+```
 
 ### urlAbsolute : URL dans les mails
 
@@ -114,12 +106,6 @@ return array(
 
         // Utilisé pour la génération des URLs dans les mails en ligne de commande
         'urlAbsolute' => 'http://localhost:8080',
-
-        'mailer' => [
-            'transport' => [
-                // (...)
-            ],
-        ]
     ],
 );
 ```
@@ -212,6 +198,8 @@ Vous pouvez lancer le test de la configuration en tapant la commande :
 ```bash
 $ php public/index.php oscar test:mailer
 ```
+
+## Options de Test/Préprod
 
 Avant de passer en production, vous pouvez utiliser le paramètre `send` sur FALSE pour désactiver la distribution et utiliser le tableau `send_false_exception` pour renseigner les adresses à distribuer :
 wrap 

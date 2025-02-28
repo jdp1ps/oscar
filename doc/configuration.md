@@ -248,7 +248,7 @@ return array(
 
 Configuration des options pour la feuille de temps
 
-[Configurer les feuilles de temps](./timesheet.md)
+
 
 
 ## Numérotation automatique des activités de recherche
