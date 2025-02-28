@@ -1,9 +1,8 @@
 # OSCAR 2.13 "Ripley" (Documentation technique)
 
 ## Derniers changements
-
-- [Documentation technique](doc/index.md)
 - [Liste des changement (CHANGELOG)](./CHANGELOG.md)
+- [Documentation technique](doc/index.md)
 
 ## Versions
 

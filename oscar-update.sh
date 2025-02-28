@@ -8,8 +8,8 @@ echo "############################################### COMPOSER UPDATE"
 ${COMPOSER} install
 
 echo "############################################### MODEL UPDATE"
-## Mise à jour du modèle
-php vendor/bin/doctrine-module orm:schema-tool:update --force
+## Mise à jour du modèle (si besoin)
+php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 
 
 echo "############################################### CHECK PRIVILEGES"
