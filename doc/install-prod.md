@@ -415,13 +415,13 @@ Lors de l'étape de configuration de la base de donnée, vous avez créé un fic
 
 Ce fichier contient les paramètres métier de l'application. Ces paramètres sont détaillés dans les parties suivantes : 
 
-- [Configuration des documents](config-documents.md)
-- [Configuration du moteur de recherche](config-elasticsearch.md)
-- [Installation et configuration de Gearman (serveur de tâche)](config-gearman.md)
-- [Configuration du PFI](config-pfi.md)
-- [Configuration de la distribution des courriels](config-mailer.md)
-- [Configuration des notifications](config-notifications.md)
-- [Configuration de la numérotation OSCAR](config-numerotation.md)
+- [Configuration des documents](configuration/config-documents.md)
+- [Configuration du moteur de recherche](configuration/config-elasticsearch.md)
+- [Installation et configuration de Gearman (serveur de tâche)](configuration/config-gearman.md)
+- [Configuration du PFI](configuration/config-pfi.md)
+- [Configuration de la distribution des courriels](configuration/config-mailer.md)
+- [Configuration des notifications](configuration/config-notifications.md)
+- [Configuration de la numérotation OSCAR](configuration/config-numerotation.md)
 
 dans le fichier [Configuration métier](./configuration.md)
 
@@ -437,7 +437,7 @@ Puis donner les droits d'accès en écriture :
 chmod 777 config/autoload/oscar-editable.yml
 ```
 
-Ce fichier est utilisé pour les paramètres administrable depuis l'interface (Administration > Options). 
+Ce fichier est utilisé pour les paramètres administrables depuis l'interface (Administration > Options). 
 
 
 ### Tester la configuration
