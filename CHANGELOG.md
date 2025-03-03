@@ -1,6 +1,14 @@
 # 📢 CHANGEMENTS (MASTER/RIPLEY)
 ## 2025
 
+### Mars
+ - [fix] On force les types *long* en texte dans la recherche pour éviter l'erreur `fuzzy queries` - **Imporant** Ces modifications ne sont pas rétro-compatible avec Elasticsearch 6. Vous devez donc mettre à niveau Elasticsearch en désinstallant la version 6 (`apt remove elasticsearch --purge`), puis en installant la version 7 ([Installation de Elasticsearch](doc/install-elasticsearch.md#ajout-du-dépôt-officiel)). Enfin, pensez à réindexer les données : 
+  ```
+    php bin/oscar.php activity:search-rebuild
+    php bin/oscar.php oarganizations:search-rebuild
+    php bin/oscar.php persons:search-rebuild
+  ```
+
 ### Février
  - [fix] Erreur d'indexation lié au typage automatique des valeurs dans elasticsearch. La configuration du mapping a été modifié (**nécessite après mise à jour, une réindexation des activités, organisations et personnes**)
  - [Starling] MAJ de la fiche organisation (ajout et affichage conditionnel des informations)

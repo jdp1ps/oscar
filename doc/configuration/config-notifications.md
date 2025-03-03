@@ -31,7 +31,7 @@ return [
 La commande `php bin/oscar.php notifications:mails:persons` permet de déclencher la procédure d'envoi des mails : 
 
 ```bash
-$ php public/index.php oscar notifications:mails:persons
+$ php bin/oscar.php notifications:mails:persons
 > Notifications des inscrits à 'DayX'
  X personne(s) ont des notifications non-lues
 etc...

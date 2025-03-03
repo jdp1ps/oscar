@@ -196,8 +196,9 @@ return array(
 Vous pouvez lancer le test de la configuration en tapant la commande :
 
 ```bash
-$ php public/index.php oscar test:mailer
+$ php bin/oscar.php check:mailer
 ```
+Un mail de test sera envoyé via le `transport` configuré aux mails renseignés dans la clef `administrators`.
 
 ## Options de Test/Préprod
 
