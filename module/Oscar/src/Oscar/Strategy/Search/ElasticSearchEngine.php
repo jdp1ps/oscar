@@ -66,6 +66,16 @@ abstract class ElasticSearchEngine
                                 // Suppression de la détection des dates/nombres
                                 'date_detection' => false,
                                 'numeric_detection' => false,
+                                "dynamic_templates"=> [
+                                  [
+                                      "numerique_en_texte"=> [
+                                      "match_mapping_type"=> "long",
+                                      "mapping"=> [
+                                          "type"=> "text"
+                                      ]
+                                    ]
+                                  ]
+                                ]
                             ]
                         ]
                     ]
