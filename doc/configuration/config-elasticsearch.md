@@ -2,7 +2,7 @@
 
 Oscar dispose d'un moteur de recherche qui indexe les données les plus usuelles : Activités, Organisation et Personnes.
 
-Le système s'appuit sur **Elastic Search**. Vous devez commencer par installer **Elastic Search** : [Installation d'Elastic Search](./install-elasticsearch.md)
+Le système s'appuit sur **Elastic Search**. Vous devez commencer par installer **Elastic Search** : [Installation d'Elastic Search](../install-elasticsearch.md)
 
 ## Recherche des activité
 

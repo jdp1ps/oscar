@@ -48,7 +48,7 @@ abstract class ElasticSearchEngine
      * @return Client
      * @throws OscarException
      */
-    protected function getClient(): Client
+    public function getClient(): Client
     {
         try {
             if ($this->elasticSearchClient === null) {
@@ -56,12 +56,41 @@ abstract class ElasticSearchEngine
                     ->setHosts($this->getHosts())
                     ->build();
             }
+            if( !$this->elasticSearchClient->indices()->exists(['index' => $this->getIndex()]) ){
+                $this->loggerService->debug("INDEX CREATE " . $this->getIndex());
+                $this->elasticSearchClient->indices()->create(
+                    [
+                        'index' => $this->getIndex(),
+                        'body' => [
+                            'mappings' => [
+                                // Suppression de la détection des dates/nombres
+                                'date_detection' => false,
+                                'numeric_detection' => false,
+                                "dynamic_templates"=> [
+                                  [
+                                      "numerique_en_texte"=> [
+                                      "match_mapping_type"=> "long",
+                                      "mapping"=> [
+                                          "type"=> "text"
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                            ]
+                        ]
+                    ]
+                );
+            }
             return $this->elasticSearchClient;
         } catch (\Exception $exception) {
             $msg = "Création du client impossible";
             $this->loggerService->critical("$msg : " . $exception->getMessage());
             throw new OscarException($msg);
         }
+    }
+
+    public function getMapping() :array {
+        return $this->getClient()->indices()->getMapping(['index' => $this->getIndex()]);
     }
 
     /**
@@ -72,6 +101,7 @@ abstract class ElasticSearchEngine
     public function addItem(mixed $object): callable|array
     {
         $client = $this->getClient();
+        $this->loggerService->debug("additem");
 
         try {
             $params = ['body' => []];
@@ -79,7 +109,6 @@ abstract class ElasticSearchEngine
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->getIndex(),
-                    '_type'  => $this->getType(),
                     '_id'    => $object->getId(),
                 ]
             ];
@@ -101,7 +130,7 @@ abstract class ElasticSearchEngine
      */
     public function rebuildIndex(array $items): void
     {
-        $this->loggerService->debug('[elasticsearch] Rebuilding index...');
+        $this->loggerService->debug('[elasticsearch] Rebuilding index "'. $this->getIndex().'"...');
         try {
             $this->resetIndex();
         } catch (\Exception $exception) {
@@ -111,11 +140,11 @@ abstract class ElasticSearchEngine
         try {
             $i = 0;
             foreach ($items as $item) {
+                $this->loggerService->debug(" + prepare " . $item->getId());
                 $i++;
                 $params['body'][] = [
                     'index' => [
                         '_index' => $this->getIndex(),
-                        '_type'  => $this->getType(),
                         '_id'    => $item->getId()
                     ]
                 ];
@@ -124,6 +153,7 @@ abstract class ElasticSearchEngine
 
                 // On envoie par paquet de 1000
                 if ($i % 1000 == 0) {
+                    $this->loggerService->debug(" + BULK ");
                     $responses = $this->getClient()->bulk($params);
 
                     // clean datas
@@ -133,6 +163,7 @@ abstract class ElasticSearchEngine
             }
 
             if (!empty($params['body'])) {
+                $this->loggerService->debug(" + BULK ");
                 $client->bulk($params);
             }
         } catch (\Exception $exception) {
@@ -156,7 +187,7 @@ abstract class ElasticSearchEngine
 
         $query = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
+            //'type'  => $this->getType(),
             'body'  => [
                 'size'  => $limit,
                 "query" => $this->getFieldsSearchedWeighted($search)
@@ -231,7 +262,6 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
             'id'    => "$id"
         ];
         return $this->getClient()->delete($params);
@@ -246,7 +276,6 @@ abstract class ElasticSearchEngine
     {
         $params = [
             'index' => $this->getIndex(),
-            'type'  => $this->getType(),
             'id'    => $item->getId(),
             'body'  => [
                 'doc' => $this->getIndexableDatas($item)

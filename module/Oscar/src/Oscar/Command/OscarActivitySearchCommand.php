@@ -18,9 +18,8 @@ class OscarActivitySearchCommand extends OscarAdvancedCommandAbstract
 {
     protected static $defaultName = OscarCommandAbstract::COMMAND_ACTIVITY_SEARCH;
 
-
     const ARG_SEARCH = 'search';
-
+    const OPT_MAP = 'mapping';
     const OPT_PER = 'members';
     const OPT_ORG = 'organizations';
     const OPT_SRT = 'sort';
@@ -54,6 +53,9 @@ class OscarActivitySearchCommand extends OscarAdvancedCommandAbstract
             ->addOption(self::OPT_MUT, 'm',
                         InputOption::VALUE_NONE,
                         "N'affiche pas les activités")
+            ->addOption(self::OPT_MAP, 'g',
+                        InputOption::VALUE_NONE,
+                        "Afficher le mappings")
 
             ->addArgument(self::ARG_SEARCH)
         ;
@@ -68,7 +70,12 @@ class OscarActivitySearchCommand extends OscarAdvancedCommandAbstract
         $direction = $input->getOption(self::OPT_DIR);
         $filtersOption = $input->getOption(self::OPT_FIL);
         $muted = $input->getOption(self::OPT_MUT);
-
+        $mapping = $input->getOption(self::OPT_MAP);
+        if( $mapping ){
+            $map = $this->getProjectGrantService()->getSearchEngineStrategy()->getMapping();
+            $output->write(json_encode($map, JSON_PRETTY_PRINT));
+            return self::SUCCESS;
+        }
         $filters = $filtersOption != "" ? explode('|', $filtersOption) : [];
 
         $this->getIO()->title("Recherche '$search' (sort: $sort - dir: $direction)");

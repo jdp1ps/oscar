@@ -20,33 +20,36 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
  - [Gestion des documents](configuration/config-documents.md) : Configuration de la gestion des documents.
  - [Configuration du moteur de recherche (Elasticsearch)](configuration/config-elasticsearch.md)
  - [Configuration du serveur de tâche (Gearman)](configuration/config-gearman.md)
- - [Configuration du PFI](configuration/config-pfi.md)
  - [Configuration de la distribution des courriels](configuration/config-mailer.md)
+ - [Configuration du PFI](configuration/config-pfi.md)
  - [Configuration des notifications](configuration/config-notifications.md)
- - [Configuration de la numérotation automatique OSCAR](configuration/config-numerotation.md)
- - [Configuration des feuilles de temps](timesheet.md)
- - [Configuration des dépenses (SIFAC)](configuration/config-sifac.md)
- - [Configuation des signatures](./configuration/config-signature.md)
 
-### Synchronisation au Système d'Information
- - [Connectors Oscar](connectors.md) : Connecter Oscar au système d'information
- - [Importer des activités](activity-import.md) Synchroniser les activités de recherche depuis une source Excel.
+### Configuration spécifique
+ - **Activités de recherche**
+   * [Configuration des feuilles de temps](configuration/config-timesheet.md)
+   * [Dépenses (SIFAC)](configuration/config-sifac.md) : Configuration de la synchronisation des dépense via le PFI depuis SIFAC
+   * [Parapheur numérique](./configuration/config-signature.md) : Mise en place de la signature numérique de document avec ESUP
+ - **Général**
+   - [Demande d'activité](activity-request.md)
+ - **Synchronisation au Système d'Information**
+   - [Connectors Oscar](connectors.md) : Connecter Oscar au système d'information
+   - [Importer des activités](activity-import.md) Synchroniser les activités de recherche depuis une source Excel.
 
-### Utilitaires et utilisation avancée
+## Maintenance
  - [Administrer Oscar en ligne de commande](oscar-commands.md)
- - [Oscar API](config-api.md) Configurer Oscar pour permettre son accès via une API Rest
- - [Modifier la méthode de génération des PDF](configuration/config-docpdf.md) Permet un gain de performance pour la génération des *certains* documents
 
-## Fonctionnalités optionnelles
+## Autre configuration
 
- - [Demande d'activité](activity-request.md)
- - [Personnaliser l'export des activités](activities-export.md)
- - [Activier le mode ADAJ](adaj.md)
+- [Oscar API](config-api.md) Configurer Oscar pour permettre son accès via une API Rest
+- [Modifier la méthode de génération des PDF](configuration/config-docpdf.md) Permet un gain de performance pour la génération des *certains* documents
+- [Personnaliser l'export des activités](activities-export.md)
+- [Activier le mode ADAJ](adaj.md)
+- [Personnaliser le numéro OSCAR (20xxDRIxxxxxx)](configuration/config-numerotation.md) : Modifier le formalisme de la numérotation automatique de Oscar
+- [Export des activité - Champ calculé](./activities-export.md)
 
 
 # Développeurs
 
  - [Ajouter des actions,vues,controlleurs,service dans Zend Framework 3](devnote/mvc.md)
  - [Créer un composant d'interface VUEJS](devnote/vuejs.md)
- - [Installer les drivers Oracle OCI](install-oracle-pp.md)
  - [Modèle de données (version simplifiée)](images/oscar-database-simplified.png)

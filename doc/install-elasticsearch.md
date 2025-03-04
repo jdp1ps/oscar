@@ -2,17 +2,20 @@
 
 ## Installation sous DEBIAN
 
-Cette précédure d'installation a été téstée sur debian Stretch
+Cette procédure d'installation a été testée sur *Debian*
 
 ### Java 1.8.x
 
 Commencer par vérifier la présence de Java
 
 ```bash
-$ java -version
-openjdk version "1.8.0_162"
-OpenJDK Runtime Environment (build 1.8.0_162-8u162-b12-1~deb9u1-b12)
-OpenJDK 64-Bit Server VM (build 25.162-b12, mixed mode)
+java -version
+```
+```output
+> affiche 
+openjdk version "17.0.13" 2024-10-15
+OpenJDK Runtime Environment (build 17.0.13+11-Debian-2deb12u1)
+OpenJDK 64-Bit Server VM (build 17.0.13+11-Debian-2deb12u1, mixed mode, sharing)
 ```
 
 S'il n'est pas installé, vous devez **installer Java depuis les dépôts officiels** :
@@ -41,10 +44,11 @@ Installez d'abord *apt-transport-https* :
 apt-get install apt-transport-https
 ```
 
-Puis ajoutez la ligne au sourcelist :
+Puis ajoutez la ligne au *sourcelist* :
 
 ```bash
-echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-6.x.list
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main
+" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
 ```
 
 Et chargé la clef :
@@ -66,7 +70,7 @@ apt install elasticsearch
 
 ### Vérifier la présence de ElasticSearch
 
-La commande `service --status-all` va vous permettre de lister les services chargés par le système, vous devrier voir une ligne *ElasticSearch* :
+La commande `service --status-all` va vous permettre de lister les services chargés par le système, vous devriez voir une ligne *ElasticSearch* :
 
 ```
 [ - ] elasticsearch
@@ -147,16 +151,21 @@ Enfin, pour **tester si ElasticSearch réponds** :
 ```bash
 $ curl localhost:9200
 {
-  "name" : "HaShKey",
+  "name" : "n302z-ed0209",
   "cluster_name" : "elasticsearch",
-  "cluster_uuid" : "uidHash",
+  "cluster_uuid" : "3VGt35_MQXafo84MvtFARQ",
   "version" : {
-    "number" : "5.6.8",
-    "build_hash" : "688ecce",
-    "build_date" : "2018-02-16T16:46:30.010Z",
+    "number" : "7.17.27",
+    "build_flavor" : "default",
+    "build_type" : "deb",
+    "build_hash" : "0f88dde84795b30ca0d2c0c4796643ec5938aeb5",
+    "build_date" : "2025-01-09T14:09:01.578835424Z",
     "build_snapshot" : false,
-    "lucene_version" : "6.6.1"
+    "lucene_version" : "8.11.3",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
   },
   "tagline" : "You Know, for Search"
 }
+
 ```

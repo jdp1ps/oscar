@@ -1,12 +1,14 @@
 # Configurer le serveur web (Apache)
 
-Activer les modules Apache si besoin :
+## Modules Apache
 
 ```bash
 a2enmod rewrite
 a2enmod ssl
 service apache2 reload
 ```
+
+## Virtualhost 
 
 Éditer le fichier de configuration apache2 :
 
@@ -53,21 +55,10 @@ vi /etc/apache2/sites-available/000-default.conf
 </VirtualHost>
 ```
 
-On peut utiliser un lien symbolique pour simplifier les bascules
+## Droits d'écriture
 
-```bash
-cd /var/www
-ln -s ../path/to/oscar/public oscar
-```
+S'assurer que les dossiers sont accessibles au serveur :
 
-
-### Droits d'écriture
-
-S'assurer que les dossiers :
-
- - `./data/`
- - Le dossier choisi pour l'index Lucene (si c'est l'indexeur choisi)
- - Le dossier de stockage des documents
- - Le fichier de log
-
-Sont bien accessibles en écriture.
+ - `data/*`
+ - Le dossier de stockage des documents (`data/documents/*`)
+ - Les fichiers de log (`logs/*`)

@@ -138,13 +138,6 @@ class ElasticActivitySearch extends ElasticSearchEngine implements IActivitySear
             $words = explode(" ", $search);
             $wordsNbr = count($words);
             $andQuery = implode(" AND ", $words);
-
-            // TEST d'approximation
-//            $wordsUpdated = [];
-//            foreach ($words as $word) {
-//                $lng = (int)(strlen($word) / 4);
-//                $wordsUpdated[] = $word . ($lng > 0 ? "~$lng" : "");
-//            }
         }
 
 

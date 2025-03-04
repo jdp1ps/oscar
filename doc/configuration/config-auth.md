@@ -131,6 +131,26 @@ return array(
 
 > L'identifiant renseigné dans le tableau `usurpation_allowed_usernames` correspond à l'identifiant de connexion de l'usurpateur
 
+### Relation Person / Authentification
+
+Une option a été ajouté pour force Oscar à ignorer la casse lorsqu'il établit la relation entre l'identifiant de
+connexion et le login de la fiche personne. Par défaut cette option est ignorée, pour l'activer, éditer le fichier de
+configuration local :
+
+```php
+<?php
+// config/autoload.local.php
+// ...
+return array(
+    // ...
+    // Oscar
+    'oscar' => [
+        // ...
+        'authPersonNormalize' => true,
+    ]
+);
+```
+
 ### LDAP Non-Supann
 
 Pour les LDAP non-spann, il est possible que le champ utilisé pour l'autentification soit différent de **supannaliaslogin**, généralement le champ uid. Si c'est la cas, il faudra modifier le fichier **unicaen-app.local.php** : 
@@ -159,4 +179,4 @@ $settings = array(
 );
 ```
 
-vous pouvez éditer le fichier config/autoload/unicaen-auth.local.php en renseignant la clef ldap_username :
+vous pouvez éditer le fichier config/autoload/unicaen-auth.local.php en renseignant la clef ldap_username
