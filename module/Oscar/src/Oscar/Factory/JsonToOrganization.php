@@ -26,9 +26,9 @@ class JsonToOrganization extends JsonToObject implements IJsonToOrganisation
 
     private ?array $types;
 
-    protected function getTypeObj(string $typeLabel): ?OrganizationType
+    public function getTypeObj(?string $typeLabel = null): ?OrganizationType
     {
-        if (is_array($this->types) && array_key_exists($typeLabel, $this->types)) {
+        if (!is_null($typeLabel) && is_array($this->types) && array_key_exists($typeLabel, $this->types)) {
             return $this->types[$typeLabel];
         }
         return null;
