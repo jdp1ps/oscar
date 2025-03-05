@@ -5,6 +5,7 @@ namespace Oscar\Controller;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityAvenant;
 use Oscar\Exception\OscarException;
+use Oscar\Provider\Privileges;
 use Oscar\Service\ActivityAvenantsService;
 use Oscar\Service\ProjectGrantApiService;
 use Oscar\Strategy\Upload\FileUploadStandard;
@@ -58,6 +59,12 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
             return $this->jsonError($e->getMessage());
         }
 
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_AVENANTS_SHOW, $activity) ){
+            return $this->jsonError("Vous n'êtes pas autorisé à voir les avenants de cette activité");
+        }
+        $manage = $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_AVENANTS_MANAGE, $activity);
+
+
         switch ($this->getHttpXMethod()) {
             case 'GET':
                 try {
@@ -73,7 +80,9 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
                 }
 
             case 'POST':
-                // TODO Tester les droits d'accès
+                if( !$manage ){
+                    return $this->jsonError("Vous n'êtes pas autorisé à gérer les avenants de cette activité");
+                }
                 $datas = $_POST;
                 $action = $_POST['action'];
                 switch($action){
@@ -93,13 +102,24 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
                         } catch (\Exception $e) {
                             return $this->jsonError("Impossible de mettre à jour l'avenant : " . $e->getMessage());
                         }
+                    case "apply":
+                        try {
+                            $idAvenant = $_POST['id'];
+                            $this->getActivityAvenantsService()->applyAvenantById($idAvenant);
+                            return $this->getResponseOk("Avenant modifié");
+
+                        } catch (\Exception $e) {
+                            return $this->jsonError($e->getMessage());
+                        }
                     default:
                         return $this->jsonError("Action non reconnue");
 
                 }
 
             case 'DELETE':
-                // TODO Tester les droits d'accès
+                if( !$manage ){
+                    return $this->jsonError("Vous n'êtes pas autorisé à gérer les avenants de cette activité");
+                }
                 try {
                     $id = $this->params()->fromRoute("avenant_id");
                     $this->getActivityAvenantsService()->deleteAvenantById($id);
@@ -125,8 +145,10 @@ class ActivityAvenantsController extends AbstractOscarController implements UseL
             throw new OscarException("Impossible de charger l'avenant $idAvenant");
         }
 
-        // TODO check privileges
         $activity = $avenant->getActivity();
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_AVENANTS_SHOW, $activity) ){
+            return $this->jsonError("Vous n'êtes pas autorisé à voir les avenants de cette activité");
+        }
 
         try {
             $file_infos = $this->getActivityAvenantsService()->getFileInfos($avenant);

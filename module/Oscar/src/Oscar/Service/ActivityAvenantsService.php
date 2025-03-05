@@ -83,7 +83,12 @@ class ActivityAvenantsService implements
     {
         if ($datas['id']) {
             $mode = "update";
-            $avenant = $this->getEntityManager()->getRepository(ActivityAvenant::class)->find($datas['id']);
+            $avenant = $this->getEntityManager()
+                ->getRepository(ActivityAvenant::class)
+                ->find($datas['id']);
+            if( $avenant->getStatus() != ActivityAvenant::STATUS_DRAFT ){
+                throw new OscarException("Avenant appliqué (non modifiable)");
+            }
         }
         else {
             $mode = "create";
@@ -160,6 +165,43 @@ class ActivityAvenantsService implements
         } catch (\Exception $e) {
             $this->getLoggerService()->critical($e->getMessage());
             throw new OscarException("Impossible de supprimer l'avenant");
+        }
+    }
+
+    public function applyAvenantById(mixed $id): void
+    {
+        try {
+            $avenant = $this->getEntityManager()->getRepository(ActivityAvenant::class)->find($id);
+            if( !$avenant ) {
+                throw new OscarException("Impossible de trouver l'avenant");
+            }
+
+            if( $avenant->getStatus() != ActivityAvenant::STATUS_DRAFT) {
+                throw new OscarException("Avenant déjà appliqué");
+            }
+
+            $activity = $avenant->getActivity();
+
+
+            /** @var ActivityAvenantModification $modification */
+            foreach ($avenant->getModifications() as $modification) {
+                switch ($modification->getType()) {
+                    case ActivityAvenantModification::TYPE_DATE_END:
+                        $this->getLoggerService()->info($modification->getNewValue1());
+                        $modification->setOldValue1($activity->getDateEndStr());
+                        $activity->setDateEnd($modification->getNewValue1());
+                        break;
+                    default:
+                        throw new OscarException("Type de modification '".$modification->getType()."' non-traité");
+                }
+            }
+            $avenant->setStatus(ActivityAvenant::STATUS_ACTIVE);
+            $activity->setLocked(true);
+            $this->getEntityManager()->flush();
+
+        } catch (\Exception $e) {
+            $this->getLoggerService()->critical($e->getMessage());
+            throw new OscarException("Impossible d'appliquer l'avenant '$id' : " . $e->getMessage());
         }
     }
 

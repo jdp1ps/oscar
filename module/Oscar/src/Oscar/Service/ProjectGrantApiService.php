@@ -8,6 +8,7 @@ use Laminas\Mvc\Controller\Plugin\Url;
 use Laminas\View\Model\JsonModel;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityAvenant;
+use Oscar\Entity\ActivityAvenantModification;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNote;
 use Oscar\Entity\ActivityNoteRepository;
@@ -1258,6 +1259,8 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         /** @var ActivityAvenant $item */
         foreach ($result as $item) {
             $modifications = [];
+
+            /** @var ActivityAvenantModification $modification */
             foreach ($item->getModifications() as $modification) {
                 $modifications[] = $modification->toJson();
             }
@@ -1269,6 +1272,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                 'date'         => $item->getDateAvenant()->format('Y-m-d'),
                 'status'       => $item->getStatus(),
                 'status_text'  => $item->getStatusLabel(),
+                'editable'     => ActivityAvenant::STATUS_DRAFT === $item->getStatus(),
                 'modifications'      => $modifications,
                 'url_api'      => $urlPlugin->fromRoute('avenant/api', [
                     'activity_id' => $activity->getId(),

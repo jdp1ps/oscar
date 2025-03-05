@@ -142,6 +142,8 @@
   <section class="avenants">
     <article class="avenant card" v-for="a in avenants.avenants">
       <h3>
+        <i class="icon-ok-circled text-success" v-if="a.status == 200"></i>
+        <i class="icon-pencil" v-if="a.status == 100"></i>
         <strong>
           {{ $filters.dateFull(a.date) }}
         </strong>
@@ -149,6 +151,7 @@
           - {{ a.status_text }}
         </small>
       </h3>
+      {{ a }}
       <section class="modification">
         <article class="change" v-for="change in a.modifications">
           <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
@@ -170,11 +173,11 @@
         <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerDelete(a)" v-if="manage">
           <i class="icon-trash"></i>
           Supprimer</a>
-        <a href="#" class="btn btn-xs btn-default" @click.prevent="handlerEdit(a)" v-if="manage">
+        <a href="#" class="btn btn-xs btn-default" @click.prevent="handlerEdit(a)" v-if="manage && a.editable">
           <i class="icon-pencil"></i>
           Editer
         </a>
-        <a href="#" class="btn btn-xs btn-success" @click.prevent="handlerApply(a)" v-if="a.status === 100 && manage">
+        <a href="#" class="btn btn-xs btn-success" @click.prevent="handlerApplyAvenant(a)" v-if="a.status === 100 && manage">
           <i class="icon-valid"></i>
           Appliquer l'avenant
         </a>
@@ -302,9 +305,7 @@ export default {
     },
 
     handlerSave() {
-      console.log("SAVE", this.avenants.url_api);
       let formData = new FormData();
-      console.log(JSON.stringify(this.edit));
       formData.append("id", this.edit.id ?? "");
       formData.append("dateAvenant", this.edit.dateAvenant ?? "");
       formData.append("comment", this.edit.comment ?? "");
@@ -325,10 +326,22 @@ export default {
     },
 
     handlerDelete(avenant) {
-      console.log("SAVE", avenant.url_api);
       AxiosOscar.delete(avenant.url_api, {pendingMsg: "Suppression de l'avenant"}).then(response => {
         this.fetch();
       })
+    },
+
+    handlerApplyAvenant(avenant) {
+      console.log("Application de l'avenant");
+      let formData = new FormData();
+      formData.append("id", avenant.id);
+      formData.append("action", "apply");
+
+      let pending = "Application de l'avenant";
+
+      AxiosOscar.post(this.avenants.url_api, formData, {pendingMsg: pending, pendingBack: false}).then(response => {
+        document.location.reload();
+      });
     },
 
     handlerAddChange(type) {
