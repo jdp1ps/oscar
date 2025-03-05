@@ -193,10 +193,11 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                         'read' => $oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN),
                     ];
                     break;
+
                 case self::PERIMETER_AVENANTS:
                     $credentials[self::PERIMETER_AVENANTS] = [
-                        'read' => true,
-                        'edit' => false,
+                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_AVENANTS_SHOW, $activity),
+                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_AVENANTS_MANAGE, $activity),
                     ];
                     break;
 

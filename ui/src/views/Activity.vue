@@ -370,6 +370,7 @@
                              :roles-organization="rolesOrganizations"
                              :current-persons="persons"
                              :current-organizations="organizations"
+                             :manage="credentials.avenants.edit"
                              @update="handlerUpdateAvenants"
           />
         </section>

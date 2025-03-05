@@ -167,14 +167,14 @@
         <a :href="a.url_download" class="btn btn-xs btn-primary">
           <i class="icon-file-pdf"></i>
           Télécharger</a>
-        <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerDelete(a)">
+        <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerDelete(a)" v-if="manage">
           <i class="icon-trash"></i>
           Supprimer</a>
-        <a href="#" class="btn btn-xs btn-default" @click.prevent="handlerEdit(a)">
+        <a href="#" class="btn btn-xs btn-default" @click.prevent="handlerEdit(a)" v-if="manage">
           <i class="icon-pencil"></i>
           Editer
         </a>
-        <a href="#" class="btn btn-xs btn-success" @click.prevent="handlerApply(a)" v-if="a.status === 100">
+        <a href="#" class="btn btn-xs btn-success" @click.prevent="handlerApply(a)" v-if="a.status === 100 && manage">
           <i class="icon-valid"></i>
           Appliquer l'avenant
         </a>
@@ -182,7 +182,7 @@
     </article>
   </section>
 
-  <button class="btn btn-primary" @click="handlerNew">
+  <button class="btn btn-primary" @click="handlerNew" v-if="manage">
     Nouvel avenant
   </button>
   <button class="btn btn-primary" @click="fetch">
@@ -211,12 +211,12 @@ export default {
     PersonAutoCompleter
   },
 
-  props: ['roles-person', 'roles-organization', 'currentPersons', 'currentOrganizations', 'avenants'],
+  props: ['roles-person', 'roles-organization', 'currentPersons', 'currentOrganizations', 'avenants', 'manage'],
 
   data() {
     return {
       edit: null,
-      selectedPerson: null,
+      selectedPerson: null
     }
   },
 
