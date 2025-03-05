@@ -219,6 +219,7 @@ return [
                 'class'   => \UnicaenSignature\Strategy\Letterfile\InternalVisa\InternalVisaStrategy::class,
                 'url_recipient' => 'http://localhost/signature/my-documents',
                 'url_visa' => 'http://localhost/signature/my-documents',
+                'archive_exchange' => __DIR__.'/../../logs/signature_exchange',
                 'levels'  => [
                     'visa_hidden' => 'visa_hidden',
                 ],
