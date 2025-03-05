@@ -191,6 +191,11 @@ class ActivityAvenantsService implements
                         $modification->setOldValue1($activity->getDateEndStr());
                         $activity->setDateEnd($modification->getNewValue1());
                         break;
+                    case ActivityAvenantModification::TYPE_CHANGE_AMOUNT:
+                        $this->getLoggerService()->info($modification->getNewValue1());
+                        $modification->setOldValue1($activity->getAmount());
+                        $activity->setAmount($modification->getNewValue1());
+                        break;
                     default:
                         throw new OscarException("Type de modification '".$modification->getType()."' non-traité");
                 }
