@@ -919,7 +919,7 @@
     "category_id": 2,
     "root": "ACTIVITY-AVENANTS_SHOW",
     "code": "AVENANTS_MANAGE",
-    "libelle": "Créer/Modifier/Supprimer mes propres notes",
+    "libelle": "Créer/Modifier/Supprimer/Appliquer un avenant",
     "fullcode": "ACTIVITY-AVENANTS_MANAGE"
   },
   "ACTIVITY-NOTES_SHOW": {
