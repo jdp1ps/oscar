@@ -436,6 +436,14 @@ class Activity implements ResourceInterface
     private $validatorsPrj;
 
     /**
+     * Liste des notes
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityNote", mappedBy="activity", cascade={"remove"})
+     */
+    protected $notes;
+
+    /**
      * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Person", inversedBy="validatorActivitiesSci")
      * @ORM\JoinTable (name="person_activity_validator_sci")
@@ -1539,6 +1547,7 @@ class Activity implements ResourceInterface
         $this->validatorsPrj = new ArrayCollection();
         $this->validatorsSci = new ArrayCollection();
         $this->validatorsAdm = new ArrayCollection();
+        $this->notes = new ArrayCollection();
     }
 
     /**

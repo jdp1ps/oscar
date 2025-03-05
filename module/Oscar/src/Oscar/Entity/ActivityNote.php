@@ -28,7 +28,7 @@ class ActivityNote implements ResourceInterface
 
     /**
      * @var
-     * @ORM\ManyToOne(targetEntity="Activity")
+     * @ORM\ManyToOne(targetEntity="Activity", inversedBy="notes")
      */
     private $activity;
 

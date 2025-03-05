@@ -1,72 +1,10 @@
 [
   {
-    "uid": "ED209",
-    "code": "ED209",
-    "shortname": "Etude Directive 20 Al 9"
-  },
-  {
-    "uid": "ACME",
-    "code": "ACME",
-    "shortname": "ACME",
-    "longname": "ACME Corporation",
-    "type": "Corporation"
-  },
-  {
-    "uid": "Aperture",
-    "code": "Aperture",
-    "shortname": "Aperture",
-    "longname": "Aperture Science",
-    "type": "Laboratoire"
-  },
-  {
-    "uid": "BNL",
-    "code": "BNL",
-    "shortname": "BNL",
-    "longname": "Big And Large",
-    "type": "Corporation"
-  },
-  {
     "uid": "COGIP",
     "code": "COGIP",
     "shortname": "COGIP",
     "longname": "Bureau de la COGIP",
     "type": "Société"
-  },
-  {
-    "uid": "DICOC",
-    "code": "DICOC",
-    "shortname": "DINOCO"
-  },
-  {
-    "uid": "FONDA",
-    "code": "FONDA",
-    "shortname": "Fondation",
-    "type": "Fondation"
-  },
-  {
-    "uid": "GROUPW",
-    "code": "GROUPW",
-    "shortname": "Group W",
-    "longname": "Groupe Winch"
-  },
-  {
-    "uid": "LEXC",
-    "code": "LEXC",
-    "shortname": "LEX CORP",
-    "longname": "Lex Corporation"
-  },
-  {
-    "uid": "STARK",
-    "code": "STARK",
-    "shortname": "STARK",
-    "longname": "Stark Industries"
-  },
-  {
-    "uid": "UMBRE",
-    "code": "UMBRE",
-    "shortname": "Umbrella",
-    "longname": "Umbrella Corporation",
-    "type": "Corporation"
   },
   {
     "uid": "OSCORP",
@@ -80,12 +18,6 @@
     }
   },
   {
-    "uid": "BLACKM",
-    "code": "BLACKM",
-    "shortname": "BLACK MESSA",
-    "type": "Laboratoire"
-  },
-  {
     "uid": "WAYNE",
     "code": "WAYNE",
     "shortname": "WE",
@@ -93,20 +25,6 @@
     "address": {
       "city": "Gotham"
     },
-    "type": "Société"
-  },
-  {
-    "uid": "USR",
-    "code": "USR",
-    "shortname": "US Robots",
-    "labintel": "UMR USR1",
-    "type": "Société"
-  },
-  {
-    "uid": "CBD",
-    "code": "CBD",
-    "shortname": "Cyberdyne",
-    "longname": "Cyberdyne Systems",
     "type": "Société"
   },
   {
@@ -139,35 +57,6 @@
     "code": "UNIV2",
     "shortname": "USB",
     "longname": "Université des sciences de Berlin",
-    "type": "Établissement publique"
-  },
-  {
-    "uid" : "KWCODE",
-    "code" : "UNISCIENCE",
-    "shortname" : "KWCODE",
-    "longname" : "KWCODE Mot clef dans le code",
-    "type": "Établissement publique"
-  },
-  {
-    "uid" : "KWSNAME",
-    "code" : "UNIPHY",
-    "shortname" : "UNISCIENCE",
-    "longname" : "KWSNAME Mot clef dans le shortname",
-    "type": "Établissement publique"
-  },
-  {
-    "uid" : "KWLNAME",
-    "code" : "UNIBIO",
-    "shortname" : "UNIBIO",
-    "longname" : "UNISCIENCE Mot clef dans le longname",
-    "type": "Établissement publique"
-  },
-  {
-    "uid" : "KWDESC",
-    "code" : "UNIDESC",
-    "shortname" : "UNIDESC",
-    "longname" : "Mot clef dans la description",
-    "description" : "Vient de UNISCIENCE",
     "type": "Établissement publique"
   }
 ]
