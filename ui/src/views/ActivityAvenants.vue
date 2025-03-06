@@ -141,7 +141,7 @@
 
   <section class="avenants">
     <article class="avenant card" v-for="a in avenants.avenants">
-      <h3>
+      <h4>
         <i class="icon-ok-circled text-success" v-if="a.status == 200"></i>
         <i class="icon-pencil" v-if="a.status == 100"></i>
         <strong>
@@ -150,9 +150,8 @@
         <small>
           - {{ a.status_text }}
         </small>
-      </h3>
-      {{ a }}
-      <section class="modification">
+      </h4>
+      <section class="modification small">
         <article class="change" v-for="change in a.modifications">
           <i class="icon-calendar" v-if="change.type === 'dateEnd'"></i>
           <i class="icon-user" v-if="change.type === 'personAdd'"></i>
@@ -167,29 +166,43 @@
       </section>
       <p>{{ a.comment }}</p>
       <nav>
+
         <a :href="a.url_download" class="btn btn-xs btn-primary">
           <i class="icon-file-pdf"></i>
           Télécharger</a>
-        <a href="#" class="btn btn-xs btn-danger" @click.prevent="handlerDelete(a)" v-if="manage">
+
+        <ButtonConfirm @confirm="handlerDelete(a)"
+                       :class="'btn btn-xs btn-danger'"
+                       v-if="manage" :checkbox="true">
           <i class="icon-trash"></i>
-          Supprimer</a>
+          Supprimer
+          <template #message>
+            Supprimer <strong>définitivement</strong> cet avenant ?
+          </template>
+        </ButtonConfirm>
+
         <a href="#" class="btn btn-xs btn-default" @click.prevent="handlerEdit(a)" v-if="manage && a.editable">
           <i class="icon-pencil"></i>
           Editer
         </a>
-        <a href="#" class="btn btn-xs btn-success" @click.prevent="handlerApplyAvenant(a)" v-if="a.status === 100 && manage">
-          <i class="icon-valid"></i>
-          Appliquer l'avenant
-        </a>
+
+        <ButtonConfirm @confirm="handlerApplyAvenant(a)"
+                       :class="'btn btn-xs btn-success'"
+                       v-if="a.status === 100 && manage">
+          <i class="icon-trash"></i>
+          Appliquer
+          <template #message>
+            Confirmer l'application de l'avenant pour cette activité ?
+            <strong>L'activité sera verrouillée</strong>
+          </template>
+        </ButtonConfirm>
+
       </nav>
     </article>
   </section>
 
   <button class="btn btn-primary" @click="handlerNew" v-if="manage">
     Nouvel avenant
-  </button>
-  <button class="btn btn-primary" @click="fetch">
-    Fetch
   </button>
 </template>
 <script>
@@ -201,11 +214,13 @@ import PersonAutoCompleter from "../components/PersonAutoCompleter.vue";
 import AxiosOscar from "../utils/AxiosOscar.js";
 import OrganizationAutoComplete from "../components/OrganizationAutoComplete.vue";
 import Amount from "../components/Amount.vue";
+import ButtonConfirm from "../utils/ButtonConfirm.vue";
 //import Test from "../../../vendor/unicaen/signature/public/src/views/SignatureFlows.vue";
 
 export default {
   name: 'ActivityAvenants',
   components: {
+    ButtonConfirm,
     Amount,
     AvenantDate,
     Datepicker,
@@ -277,6 +292,16 @@ export default {
   },
 
   methods: {
+    handlerConfirm(message, handler, args){
+      console.log("confirm", message);
+      handler.call(this, args);
+    },
+
+    handlerOk(arg){
+      console.log(JSON.stringify(arg));
+      console.log(this.avenants.url_api);
+    },
+
     handlerNew() {
       this.edit = {
         id: null,
@@ -381,7 +406,7 @@ export default {
         firstName: event.firstName,
         lastName: event.lastName,
       };
-      change.value1 = event.valueObj.id;
+      change.value1 = event.id;
     },
 
     handlerUpdateOrganizationChange(change, event) {

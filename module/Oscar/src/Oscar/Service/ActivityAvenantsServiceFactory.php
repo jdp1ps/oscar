@@ -13,6 +13,7 @@ class ActivityAvenantsServiceFactory implements FactoryInterface
         $s->setEntityManager($container->get(EntityManager::class));
         $s->setOscarConfigurationService($container->get(OscarConfigurationService::class));
         $s->setLoggerService($container->get('Logger'));
+        $s->setProjectGrantService($container->get(ProjectGrantService::class));
         return $s;
     }
 }

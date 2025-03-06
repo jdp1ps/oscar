@@ -8,6 +8,8 @@ use Moment\Moment;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityAvenant;
 use Oscar\Entity\ActivityAvenantModification;
+use Oscar\Entity\ActivityOrganization;
+use Oscar\Entity\ActivityPerson;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationRole;
 use Oscar\Entity\Person;
@@ -22,20 +24,25 @@ use Oscar\Traits\UseLoggerService;
 use Oscar\Traits\UseLoggerServiceTrait;
 use Oscar\Traits\UseOscarConfigurationService;
 use Oscar\Traits\UseOscarConfigurationServiceTrait;
+use Oscar\Traits\UseProjectGrantService;
+use Oscar\Traits\UseProjectGrantServiceTrait;
 use Oscar\Utils\DateTimeUtils;
 use Oscar\Utils\FileSystemUtils;
 
 class ActivityAvenantsService implements
-    UseLoggerService,
-    UseEntityManager,
     UseActivityLogService,
-    UseOscarConfigurationService
+    UseEntityManager,
+    UseLoggerService,
+    UseOscarConfigurationService,
+    UseProjectGrantService
 {
 
-    use UseLoggerServiceTrait,
-        UseEntityManagerTrait,
+    use
         UseActivityLogServiceTrait,
-        UseOscarConfigurationServiceTrait;
+        UseEntityManagerTrait,
+        UseLoggerServiceTrait,
+        UseOscarConfigurationServiceTrait,
+        UseProjectGrantServiceTrait;
 
     /**
      * Création d'un nouvel avenant.
@@ -82,6 +89,7 @@ class ActivityAvenantsService implements
     public function saveAvenantFromArray(Activity $activity, array $datas): void
     {
         if ($datas['id']) {
+            $this->getLoggerService()->debug("UPDATE avenant");
             $mode = "update";
             $avenant = $this->getEntityManager()
                 ->getRepository(ActivityAvenant::class)
@@ -91,6 +99,7 @@ class ActivityAvenantsService implements
             }
         }
         else {
+            $this->getLoggerService()->debug("CREATE avenant");
             $mode = "create";
             $avenant = new ActivityAvenant();
             $avenant->setStatus(ActivityAvenant::STATUS_DRAFT);
@@ -191,12 +200,127 @@ class ActivityAvenantsService implements
                         $modification->setOldValue1($activity->getDateEndStr());
                         $activity->setDateEnd($modification->getNewValue1());
                         break;
+
                     case ActivityAvenantModification::TYPE_CHANGE_AMOUNT:
                         $this->getLoggerService()->info($modification->getNewValue1());
                         $modification->setOldValue1($activity->getAmount());
                         $activity->setAmount($modification->getNewValue1());
                         break;
+
+                    case ActivityAvenantModification::TYPE_PERSON_ADD:
+                        try {
+                            $person = $this->getEntityManager()
+                                ->getRepository(Person::class)
+                                ->find($modification->getNewValue1());
+                            $this->getLoggerService()->info('person: ' . $person);
+                            $role = $this->getEntityManager()
+                                ->getRepository(Role::class)
+                                ->find($modification->getNewValue2());
+                            $this->getLoggerService()->info('role: ' . $role);
+
+                            $this->getProjectGrantService()->getPersonService()->personActivityAdd(
+                                $activity,
+                                $person,
+                                $role);
+
+                        } catch (\Exception $e){
+                            $this->getLoggerService()->critical($e->getMessage());
+                            throw new OscarException("Impossible d'ajouter la personne dans l'activité");
+                        }
+                        break;
+
+                    case ActivityAvenantModification::TYPE_PERSON_DEL:
+                        try {
+                            $person = $this->getEntityManager()
+                                ->getRepository(Person::class)
+                                ->find($modification->getNewValue1());
+                            $this->getLoggerService()->info('person: ' . $person);
+                            $role = $this->getEntityManager()
+                                ->getRepository(Role::class)
+                                ->find($modification->getNewValue2());
+                            $this->getLoggerService()->info('role: ' . $role);
+
+                            /** @var ActivityPerson $repo */
+                            $affectations = $this->getEntityManager()
+                                ->getRepository(ActivityPerson::class)
+                                ->findBy([
+                                    'activity' => $activity,
+                                    'person' => $person,
+                                    'roleObj' => $role,
+                                         ]);
+
+                            if( count($affectations) === 0 ) {
+                                throw new OscarException("Affectation non-trouvée");
+                            }
+                            foreach ($affectations as $affectation) {
+                                $this->getProjectGrantService()
+                                    ->getPersonService()
+                                    ->personActivityRemove($affectation);
+                            }
+
+                        } catch (\Exception $e){
+                            $this->getLoggerService()->critical($e->getMessage());
+                            throw new OscarException("Impossible de supprimer la personne dans l'activité");
+                        }
+                        break;
+
+                    case ActivityAvenantModification::TYPE_ORGANIZATION_ADD:
+                        try {
+                            $organization = $this->getEntityManager()
+                                ->getRepository(Organization::class)
+                                ->find($modification->getNewValue1());
+                            $this->getLoggerService()->info('organization: ' . $organization);
+                            $role = $this->getEntityManager()
+                                ->getRepository(OrganizationRole::class)
+                                ->find($modification->getNewValue2());
+                            $this->getLoggerService()->info('role: ' . $role);
+
+                            $this->getProjectGrantService()->organizationActivityAdd(
+                                $organization,
+                                $activity,
+                                $role);
+
+                        } catch (\Exception $e){
+                            $this->getLoggerService()->critical($e->getMessage());
+                            throw new OscarException("Impossible d'ajouter l'organisation dans l'activité");
+                        }
+                        break;
+
+                    case ActivityAvenantModification::TYPE_ORGANIZATION_DEL:
+                        try {
+                            $organization = $this->getEntityManager()
+                                ->getRepository(Organization::class)
+                                ->find($modification->getNewValue1());
+                            $role = $this->getEntityManager()
+                                ->getRepository(OrganizationRole::class)
+                                ->find($modification->getNewValue2());
+
+                            /** @var ActivityPerson $repo */
+                            $affectations = $this->getEntityManager()
+                                ->getRepository(ActivityOrganization::class)
+                                ->findBy([
+                                             'activity' => $activity,
+                                             'organization' => $organization,
+                                             'roleObj' => $role,
+                                         ]);
+
+                            if( count($affectations) === 0 ) {
+                                throw new OscarException("Affectation non-trouvée");
+                            }
+                            foreach ($affectations as $affectation) {
+                                $this->getProjectGrantService()
+                                    ->activityOrganizationRemove($affectation);
+                            }
+
+                        } catch (\Exception $e){
+                            $this->getLoggerService()->critical($e->getMessage());
+                            throw new OscarException("Impossible de supprimer l'organisation dans l'activité");
+                        }
+                        break;
+
+
                     default:
+
                         throw new OscarException("Type de modification '".$modification->getType()."' non-traité");
                 }
             }
