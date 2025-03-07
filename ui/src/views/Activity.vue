@@ -315,42 +315,44 @@
       </div>
 
       <div class="row">
-
-        <div class="col-md-12">
-          <strong v-if="credentials.lock">VERROUILLEE</strong>
-        </div>
         <div class="col-md-12">
           <nav class="admin-bar">
             <template v-if="credentials.lock_edit">
-            <a class="btn btn-primary btn-xs" v-if="credentials.lock" @click="handlerLock()">
+            <a class="btn btn-info" v-if="credentials.lock" @click="handlerLock()">
               <i class="icon-lock-open"></i>
               Déverrouiller</a>
-            <a class="btn btn-primary btn-xs" v-else  @click="handlerUnlock()">
+            <a class="btn btn-info" v-else  @click="handlerUnlock()">
               <i class="icon-lock"></i>
               Vérrouiller</a>
             </template>
+            <span v-else-if="credentials.lock">
+              <strong v-if="credentials.lock" class="btn btn-default disabled">
+                <i class="icon-lock"></i>
+                VERROUILLEE
+              </strong>
+            </span>
 
-            <a class="btn btn-primary btn-xs" v-if="credentials.core.edit" :href="core.urls.edit">
+            <a class="btn btn-primary" v-if="credentials.core.edit" :href="core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
 
-            <a class="btn btn-xs btn-default" v-if="credentials.core.change_project" :href="core.urls.change_project">
+            <a class="btn btn-default" v-if="credentials.core.change_project" :href="core.urls.change_project">
               <i class="icon-cubes"></i>
               Modifier le projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="credentials.core.new_project" :href="core.urls.new_project">
+            <a class="btn btn-default" v-if="credentials.core.new_project" :href="core.urls.new_project">
               <i class="icon-cubes"></i>
               Créer un nouveau projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="core.urls.duplicate" @click="handlerDuplicate">
+            <a class="btn btn-default" v-if="core.urls.duplicate" @click="handlerDuplicate">
               <i class="icon-paste"></i>
               Dupliquer</a>
 
-            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="handlerDebugShow($data)">
+            <a class="btn btn-warning" v-if="debugEnabled" @click="handlerDebugShow($data)">
               <i class="icon-bug"></i>
               Afficher le modèle</a>
 
-            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="fetch">
+            <a class="btn btn-warning" v-if="debugEnabled" @click="fetch">
               <i class="icon-bug"></i>
               Recharger le modèle</a>
           </nav>
@@ -360,22 +362,6 @@
 
     <div class="container-fluid">
       <div class="col-md-8">
-        <section class="section-infos" id="avenants" v-if="credentials.avenants.read">
-          <h2>
-            <span>
-              <i class="icon-hammer"></i>
-              Avenants
-            </span>
-          </h2>
-          <activity-avenants :avenants="avenants"
-                             :roles-person="rolesPersons"
-                             :roles-organization="rolesOrganizations"
-                             :current-persons="persons"
-                             :current-organizations="organizations"
-                             :manage="credentials.avenants.edit"
-                             @update="handlerUpdateAvenants"
-          />
-        </section>
         <section class="section-infos" id="members" v-if="credentials.persons.read">
           <h2>
             <span><i class="icon-group"></i>Membres</span>
@@ -392,7 +378,6 @@
                           @update="handlerUpdatePersons"
           />
         </section>
-
         <section class="section-infos" id="partners" v-if="credentials.organizations.read">
           <h2>
             <span><i class="icon-building-filled"></i>Partenaires</span>
@@ -407,6 +392,22 @@
                           :url="organizationsUrl"
                           :url-new="organizationsUrlNew"
                           @update="handlerUpdateOrganizations"
+          />
+        </section>
+        <section class="section-infos" id="avenants" v-if="credentials.avenants.read">
+          <h2>
+            <span>
+              <i class="icon-hammer"></i>
+              Avenants
+            </span>
+          </h2>
+          <activity-avenants :avenants="avenants"
+                             :roles-person="rolesPersons"
+                             :roles-organization="rolesOrganizations"
+                             :current-persons="persons"
+                             :current-organizations="organizations"
+                             :manage="credentials.avenants.edit"
+                             @update="handlerUpdateAvenants"
           />
         </section>
         <section class="section-infos" id="documents" v-if="credentials.documents.read">

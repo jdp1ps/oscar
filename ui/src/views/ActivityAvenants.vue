@@ -145,7 +145,7 @@
         Nouvel avenant
       </button>
     </nav>
-    <article class="avenant card" v-for="a in avenants.avenants">
+    <article class="avenant card" :class="'status-' +a.status" v-for="a in avenants.avenants">
       <h4>
         <i class="icon-ok-circled text-success" v-if="a.status == 200"></i>
         <i class="icon-pencil" v-if="a.status == 100"></i>
@@ -169,7 +169,7 @@
           </span>
         </article>
       </section>
-      <p>{{ a.comment }}</p>
+      <p v-if="a.comment">{{ a.comment }}</p>
       <nav>
 
         <a :href="a.url_download" class="btn btn-xs btn-primary">
@@ -489,6 +489,13 @@ export default {
 }
 
 .avenant {
+  border-left: #CCC 4px solid;
+  &.status-100 {
+    border-color: #CCC;
+  }
+  &.status-200 {
+    border-color: #2d7800;
+  }
   p {
     border-top: solid #CCC 1px;
     padding: .5em 2em;
