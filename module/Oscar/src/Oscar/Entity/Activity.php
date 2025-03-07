@@ -2730,6 +2730,7 @@ class Activity implements ResourceInterface
             'ID Projet'                            => $this->getProject() ? $this->getProject()->getId() : 'N.D',
             'Acronyme'                             => $this->getAcronym(),
             'Projet'                               => $this->getProject() ? $this->getProject()->getLabel() : '',
+            'Avenants'                             => count($this->getAvenants()),
             'Intitulé'                             => $this->getLabel(),
             'N°Financier'                          => $this->getCodeEOTP(),
             'Date du N°Financier'                  => $this->getDateOpened() ? $this->getDateOpened()->format(
@@ -2750,6 +2751,9 @@ class Activity implements ResourceInterface
             'Date de signature'                    => $this->getDateSigned() ? $this->getDateSigned()->format(
                 $dateFormat
             ) : '',
+            'Date de début des négociations'       => $this->getDateNegociation() ? $this->getDateNegociation()->format(
+                $dateFormat
+            ) : '',
             'versement effectué'                   => number_format($this->getTotalPaymentReceived(), 2, ',', ''),
             'versement prévu'                      => number_format($this->getTotalPaymentProvided(), 2, ',', ''),
             'écart de paiement'                    => number_format($this->getEcartPaiement(), 2, ',', ''),
@@ -2761,9 +2765,14 @@ class Activity implements ResourceInterface
             'incidence financière'                 => $this->getIncidenceFinanciere(),
             'Assiette subventionnable'             => $this->getAssietteSubventionnable(),
             'Note'                                 => $this->getNoteFinanciere(),
+            'Description'                          => $this->getDescription(),
             'Disciplines'                          => $this->getDisciplines() ? implode(
                 ", ",
                 $this->getDisciplinesArray()
+            ) : "",
+            'Mots-clefs'                          => $this->getMotsclesArray() ? implode(
+                ", ",
+                $this->getMotsclesArray()
             ) : ""
         );
     }
@@ -2785,6 +2794,7 @@ class Activity implements ResourceInterface
             'ID Projet',
             'Acronyme',
             'Projet',
+            'Avenants',
             'Intitulé',
             'N°Financier',
             'Date du N°Financier',
@@ -2796,6 +2806,7 @@ class Activity implements ResourceInterface
             'Début',
             'Fin',
             'Date de signature',
+            'Date de début des négociations',
             'versement effectué',
             'versement prévu',
             'écart de paiement',
@@ -2807,7 +2818,9 @@ class Activity implements ResourceInterface
             'incidence financière',
             'Assiette subventionnable',
             'Note',
-            'Disciplines'
+            'Description',
+            'Disciplines',
+            'Mots-clefs'
         );
     }
 
