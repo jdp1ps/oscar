@@ -140,6 +140,11 @@
   </modal>
 
   <section class="avenants">
+    <nav class="admin-bar text-right">
+      <button class="btn btn-xs btn-default" @click="handlerNew" v-if="manage">
+        Nouvel avenant
+      </button>
+    </nav>
     <article class="avenant card" v-for="a in avenants.avenants">
       <h4>
         <i class="icon-ok-circled text-success" v-if="a.status == 200"></i>
@@ -200,10 +205,6 @@
       </nav>
     </article>
   </section>
-
-  <button class="btn btn-primary" @click="handlerNew" v-if="manage">
-    Nouvel avenant
-  </button>
 </template>
 <script>
 

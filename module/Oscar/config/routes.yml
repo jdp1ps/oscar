@@ -963,6 +963,7 @@ contract:
         route: /debug
         defaults:
           action: debug
+
     timesheet:
       type: segment
       options:
@@ -1019,12 +1020,14 @@ contract:
         route: /orphans
         defaults:
           action: orphans
+
     moveToProject:
       type: segment
       options:
         route: /modifier-projet/:id
         defaults:
           action: changeProject
+
     show-old:
       type: segment
       options:
@@ -1151,12 +1154,14 @@ contract:
         route: /edit/:id
         defaults:
           action: edit
+
     delete:
       type: segment
       options:
         route: /delete/:id
         defaults:
           action: delete
+
     duplicate:
       type: segment
       options:
@@ -1170,12 +1175,14 @@ contract:
         route: /makeproject/:id
         defaults:
           action: makeProject
+
     generatenotifications:
       type: segment
       options:
         route: /generer-notifications/:id
         defaults:
           action: generateNotifications
+
     csv:
       type: segment
       options:

@@ -10,6 +10,7 @@ namespace Oscar\Entity;
 
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Laminas\Validator\Date;
@@ -732,7 +733,7 @@ class Activity implements ResourceInterface
         return $this->dateCached;
     }
 
-    public function getAvenants(): ArrayCollection
+    public function getAvenants(): Collection
     {
         return $this->avenants;
     }

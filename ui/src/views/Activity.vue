@@ -307,7 +307,9 @@
           </p>
           <p class="texthighlight baseline">
             Mots clés :
-            <span class="cartouche xs" style="line-break: anywhere;" v-for="m in core.motscles">{{ m }}</span>
+            <span class="cartouche complementary" style="line-break: anywhere;" v-for="m in core.motscles">
+              <i class="icon-tag"></i> {{ m }}
+            </span>
           </p>
         </div>
       </div>

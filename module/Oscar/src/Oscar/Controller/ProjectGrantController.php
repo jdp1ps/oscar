@@ -52,6 +52,7 @@ use Oscar\Formatter\OscarFormatterConst;
 use Oscar\Hydrator\PcruInfosFormHydrator;
 use Oscar\OscarVersion;
 use Oscar\Provider\Privileges;
+use Oscar\Service\ActivityAvenantsService;
 use Oscar\Service\ActivityRequestService;
 use Oscar\Service\ActivityTypeService;
 use Oscar\Service\DocumentFormatterService;
@@ -1041,6 +1042,17 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             $project = $activity->getProject();
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            $avenants = $activity->getAvenants();
+            if (count($avenants)) {
+                /** @var ActivityAvenantsService $avenantService */
+                $avenantService = $this->getServiceContainer()->get(ActivityAvenantsService::class);
+
+                foreach ($avenants as $avenant) {
+                    $avenantService->deleteAvenantById($avenant->getId());
+                }
+            }
+
             // Récupération des informations annexes
             foreach ($activity->getPersons() as $activityPerson) {
                 $this->getPersonService()->personActivityRemove($activityPerson);
@@ -1079,7 +1091,6 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
                 }
                 $this->getEntityManager()->flush();
             }
-
 
             try {
                 $this->getActivityService()->searchDelete($activity->getId());
