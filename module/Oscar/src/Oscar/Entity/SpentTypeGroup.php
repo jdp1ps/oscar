@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 27/01/16 16:15
@@ -66,7 +67,8 @@ class SpentTypeGroup implements ITrackable
     /**
      * @return bool
      */
-    public function isLeaf(){
+    public function isLeaf()
+    {
         return $this->getLft() + 1 == $this->getRgt();
     }
 
@@ -75,7 +77,7 @@ class SpentTypeGroup implements ITrackable
      */
     public function getAnnexe()
     {
-        if( $this->getBlind() ){
+        if ($this->getBlind()) {
             return "0";
         }
         return $this->annexe;
@@ -234,7 +236,8 @@ class SpentTypeGroup implements ITrackable
     }
 
 
-    public function toJson(){
+    public function toJson()
+    {
         return [
             'id'    => $this->getId(),
             'label' => $this->getLabel(),
@@ -252,6 +255,4 @@ class SpentTypeGroup implements ITrackable
     {
         return sprintf("[%s] %s (%s, %s)", $this->getCode(), $this->getLabel(), $this->getLft(), $this->getRgt());
     }
-
-
 }

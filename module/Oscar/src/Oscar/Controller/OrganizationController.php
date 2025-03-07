@@ -137,7 +137,6 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
         $sort = $this->params()->fromQuery('sort', 'hit');
         $direction = $this->params()->fromQuery('direction', 'ASC');
         $error = null;
-        $organizations = null;
 
         $sorting = [
             'hit'         => 'Pertinence (recherche textuelle)',

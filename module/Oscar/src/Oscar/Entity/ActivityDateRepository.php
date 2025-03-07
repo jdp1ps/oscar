@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 12:01
@@ -39,7 +40,7 @@ class ActivityDateRepository extends EntityRepository
     /**
      * @return DateType[]
      */
-    public function getMilestoneTypes() :array
+    public function getMilestoneTypes(): array
     {
         $query = $this->getMilestoneTypeRepository()->createQueryBuilder('t')
             ->select('t');
@@ -88,7 +89,7 @@ class ActivityDateRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getMilestoneTypesRolesArray() :array
+    public function getMilestoneTypesRolesArray(): array
     {
         $output = [];
         foreach ($this->getMilestoneTypes() as $milestoneType) {

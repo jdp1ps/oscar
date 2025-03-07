@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: bouvry
@@ -8,7 +9,7 @@
 
 namespace Oscar\Entity;
 
-use \DateTime;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -34,8 +35,7 @@ class ActivityRepository extends EntityRepository
 
         if (count($numerotations) == 0 || (in_array('null', $numerotations) && count($numerotations) == 1)) {
             $queryBuilder->where('a.numbers = \'a:0:{}\' OR a.numbers = \'N;\' OR a.numbers IS NULL');
-        }
-        else {
+        } else {
             $where = [];
             foreach ($numerotations as $num) {
                 $where[] = 'a.numbers LIKE \'%s:' . strlen($num) . ':"' . $num . '"%\'';
@@ -393,8 +393,7 @@ class ActivityRepository extends EntityRepository
             $error = "Impossible de charger l'activité $numOscar : " . $exception->getMessage();
             if ($throw) {
                 throw new OscarException($error);
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -536,8 +535,7 @@ class ActivityRepository extends EntityRepository
                 . 'OR (prj_pers.person = :person AND prj_pers.roleObj = :role)'
             );
             $parameters['role'] = $idRole;
-        }
-        else {
+        } else {
             $qb->where('act_per.person = :person OR prj_pers.person = :person');
         }
 
@@ -672,8 +670,7 @@ class ActivityRepository extends EntityRepository
                 . 'OR (prj_org.organization = :organization AND prj_org.roleObj = :role)'
             );
             $parameters['role'] = $idRole;
-        }
-        else {
+        } else {
             $qb->where('act_org.organization = :organization OR prj_org.organization = :organization');
         }
 
@@ -704,6 +701,20 @@ class ActivityRepository extends EntityRepository
         return array_map(
             'current',
             $this->getQueryActivityIdsWithWorkpackage()
+                ->getQuery()
+                ->getResult()
+        );
+    }
+
+    public function getActivityIdsWithAvenants(): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->innerJoin('a.avenants', 'av');
+
+        return array_map(
+            'current',
+            $qb
                 ->getQuery()
                 ->getResult()
         );
@@ -843,16 +854,13 @@ class ActivityRepository extends EntityRepository
             );
             $parameters['role'] = $idRole;
             $parameters['person'] = $idPersons;
-        }
-        elseif (count($idPersons) > 0) {
+        } elseif (count($idPersons) > 0) {
             $qb->andWhere('act_per.person IN(:person) OR prj_pers.person IN(:person)');
             $parameters['person'] = $idPersons;
-        }
-        elseif ($idRole > 0) {
+        } elseif ($idRole > 0) {
             $qb->andWhere('act_per.roleObj = :role OR prj_pers.roleObj = :role');
             $parameters['role'] = $idRole;
-        }
-        else {
+        } else {
             throw new OscarException("Critère de requête incomplet");
         }
 
@@ -931,8 +939,7 @@ class ActivityRepository extends EntityRepository
             $results = $qb->getQuery()->getResult();
 
             return array_map('current', $results);
-        }
-        else {
+        } else {
             return [];
         }
     }
@@ -977,8 +984,7 @@ class ActivityRepository extends EntityRepository
             $results = $qb->getQuery()->getResult();
 
             return array_map('current', $results);
-        }
-        else {
+        } else {
             return [];
         }
     }
@@ -1128,8 +1134,7 @@ class ActivityRepository extends EntityRepository
 
         if ($inverse) {
             $q->andWhere('c.financialImpact != :param');
-        }
-        else {
+        } else {
             $q->where('c.financialImpact = :param');
         }
 
@@ -1147,7 +1152,8 @@ class ActivityRepository extends EntityRepository
         $qb = $this->createQueryBuilder('c')
             ->select('c.id')
             ->leftJoin('c.project', 'p')
-            ->where('c.project IS NULL');;
+            ->where('c.project IS NULL');
+        ;
         return array_map('current', $qb->getQuery()->getResult());
     }
 
@@ -1165,9 +1171,9 @@ class ActivityRepository extends EntityRepository
 
         if ($inverse === false) {
             $qb->where('c.activityType IN(:types)');
-        }
-        else {
-            $qb->where('c.activityType NOT IN (:types)');;
+        } else {
+            $qb->where('c.activityType NOT IN (:types)');
+            ;
         }
         return array_map('current', $qb->setParameter('types', $types)->getQuery()->getResult());
     }

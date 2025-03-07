@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-09-23 13:54
@@ -7,10 +8,8 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-
 
 class PcruSourceFinancementRepository extends EntityRepository
 {
@@ -26,7 +25,7 @@ class PcruSourceFinancementRepository extends EntityRepository
      * @param string $label
      * @return PcruSourceFinancement|null
      */
-    public function getByLabel( string $label ): ?PcruSourceFinancement
+    public function getByLabel(string $label): ?PcruSourceFinancement
     {
         return $this->findOneByLabel($label);
     }

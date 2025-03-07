@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-09-12 09:49
@@ -15,7 +16,8 @@ class DisciplineRepository extends EntityRepository
     /**
      * Retourne les disciplines.
      */
-    public function getDisciplines(){
+    public function getDisciplines()
+    {
         return $this->createQueryBuilder('d')
             ->select('d')
             ->from(Discipline::class)
@@ -26,10 +28,10 @@ class DisciplineRepository extends EntityRepository
     /**
      * Retourne la liste des disciplines avec le comptage des projets.
      */
-    public function getDisciplinesCounted(){
+    public function getDisciplinesCounted()
+    {
         $dql = "SELECT d.id, d.label, count(a.id) as activitiesLng FROM Oscar\Entity\Discipline d LEFT JOIN d.activities a GROUP BY d.id ORDER BY d.label";
         $query = $this->getEntityManager()->createQuery($dql);
         return $query->getArrayResult();
     }
-
 }

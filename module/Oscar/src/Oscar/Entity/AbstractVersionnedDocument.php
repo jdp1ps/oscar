@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-06-17 15:35
@@ -292,6 +293,4 @@ abstract class AbstractVersionnedDocument
     {
         return $this->getFileName();
     }
-
-
 }

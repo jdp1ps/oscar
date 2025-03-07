@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 01/06/15 12:44
@@ -182,9 +183,10 @@ class ActivityRequest
         return $this->getFiles();
     }
 
-    public function getFileInfosByFile( $file ){
+    public function getFileInfosByFile($file)
+    {
         foreach ($this->getFilesArray() as $f) {
-            if( $f['file'] == $file ){
+            if ($f['file'] == $file) {
                 return $f;
             }
         }
@@ -250,9 +252,10 @@ class ActivityRequest
         $this->follows = new ArrayCollection();
     }
 
-    public function getStatutText(){
+    public function getStatutText()
+    {
         static $statusText;
-        if( $statusText === null ){
+        if ($statusText === null) {
             $statusText = [
                 self::STATUS_DRAFT => "draft",
                 self::STATUS_SEND => "send",
@@ -263,7 +266,8 @@ class ActivityRequest
         return $statusText[$this->getStatus()];
     }
 
-    public function toJson(){
+    public function toJson()
+    {
 
         $follows = [];
         /** @var ActivityRequestFollow $f */
@@ -288,5 +292,4 @@ class ActivityRequest
             'suivi' => $follows
         ];
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 07/09/15 11:33
@@ -98,7 +99,7 @@ class LogActivity
     private $datas;
 
 
-    static public function getRemoteAddr()
+    public static function getRemoteAddr()
     {
         static $_remoteAddr;
         if ($_remoteAddr === null) {

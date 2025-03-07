@@ -11,8 +11,8 @@ namespace Oscar\Entity;
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
-trait RoleInTimeTrait {
-
+trait RoleInTimeTrait
+{
     /**
      * Début de l'association au projet
      * @ORM\Column(type="datetime", nullable=true)
@@ -28,53 +28,63 @@ trait RoleInTimeTrait {
     /**
      * @return \DateTime
      */
-    function getDateStart() {
+    function getDateStart()
+    {
         return $this->dateStart;
     }
 
-    function isCaduc(){
+    function isCaduc()
+    {
         return true;
     }
-    
+
     /**
      * @return \DateTime
      */
-    function getDateEnd() {
+    function getDateEnd()
+    {
         return $this->dateEnd;
     }
 
-    function setDateStart(\DateTime $dateStart = null) {
+    function setDateStart(\DateTime $dateStart = null)
+    {
         $this->dateStart = $dateStart;
         return $this;
     }
 
-    function setDateEnd(\DateTime $dateEnd = null) {
+    function setDateEnd(\DateTime $dateEnd = null)
+    {
         $this->dateEnd = $dateEnd;
         return $this;
     }
 
-    public function intersect(IRoleInTime $roleInTime) {
+    public function intersect(IRoleInTime $roleInTime)
+    {
         $aStart = $this->getDateStart() ? $this->getDateStart()->getTimestamp() : PHP_INT_MIN;
         $bStart = $roleInTime->getDateStart() ? $roleInTime->getDateStart()->getTimestamp() : PHP_INT_MIN;
         $aEnd = $this->getDateEnd() ? $this->getDateEnd()->getTimestamp() : PHP_INT_MAX;
         $bEnd = $roleInTime->getDateEnd() ? $roleInTime->getDateEnd()->getTimestamp() : PHP_INT_MAX;
-        
+
         return !($aStart >= $bEnd || $aEnd <= $bStart);
-        
     }
 
     /**
      * Etend le premier role avec le deuxième.
      */
-    public function extend(IRoleInTime $roleInTime){
+    public function extend(IRoleInTime $roleInTime)
+    {
         // Borne de début
-        if( $this->getDateStart() !== null &&
-                ($roleInTime->getDateStart() === null || $roleInTime->getDateStart() < $this->getDateStart())){
+        if (
+            $this->getDateStart() !== null &&
+                ($roleInTime->getDateStart() === null || $roleInTime->getDateStart() < $this->getDateStart())
+        ) {
             $this->setDateStart($roleInTime->getDateStart());
         }
         // Borne de fin
-        if( $this->getDateEnd() !== null &&
-                ($roleInTime->getDateEnd() === null || $roleInTime->getDateEnd() > $this->getDateEnd())){
+        if (
+            $this->getDateEnd() !== null &&
+                ($roleInTime->getDateEnd() === null || $roleInTime->getDateEnd() > $this->getDateEnd())
+        ) {
             $this->setDateEnd($roleInTime->getDateEnd());
         }
         return $this;

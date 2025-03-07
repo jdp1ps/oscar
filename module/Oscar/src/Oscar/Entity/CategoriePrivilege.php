@@ -48,7 +48,8 @@ class CategoriePrivilege implements PrivilegeCategorieInterface
     private $privilege;
 
 
-    public function toArray(){
+    public function toArray()
+    {
         return [
             'id' => $this->getId(),
             'libelle' => $this->getLibelle(),

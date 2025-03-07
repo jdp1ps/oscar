@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 05/11/15 14:53
@@ -7,10 +8,9 @@
 
 namespace Oscar\Entity;
 
-
 trait TraitHasPerson
 {
-    public function addPerson( Person $person )
+    public function addPerson(Person $person)
     {
         $this->persons->add($person);
         return $this;

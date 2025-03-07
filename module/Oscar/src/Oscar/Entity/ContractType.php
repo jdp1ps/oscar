@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 18/06/15 11:32
@@ -16,7 +17,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ContractType extends AbstractTreeData
 {
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -111,7 +111,4 @@ class ContractType extends AbstractTreeData
     {
         return sprintf('[%s] %s', $this->getCode(), $this->getLabel());
     }
-
-
-
 }

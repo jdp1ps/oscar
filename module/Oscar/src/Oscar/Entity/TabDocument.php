@@ -6,7 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-
 /**
  * Class TabDocument
  * @package Oscar\Entity
@@ -14,7 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TabDocument
 {
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -155,7 +153,7 @@ class TabDocument
     public function isManage(array $roleIds)
     {
         foreach ($this->getTabsDocumentsRoles() as $tabDocumentRole) {
-            if( in_array( $tabDocumentRole->getRole()->getRoleId(), $roleIds) && $tabDocumentRole->getAccess() == 2 ) {
+            if (in_array($tabDocumentRole->getRole()->getRoleId(), $roleIds) && $tabDocumentRole->getAccess() == 2) {
                 return true;
             }
         }
@@ -191,17 +189,17 @@ class TabDocument
         return $this->tabsDocumentsRoles;
     }
 
-    public function getRolesAccess() :array
+    public function getRolesAccess(): array
     {
         $rolesIds = [
             'read' => [],
             'write' => []
         ];
         foreach ($this->getTabsDocumentsRoles() as $tabsDocumentsRole) {
-            if( $tabsDocumentsRole->getAccess() > 0 ){
+            if ($tabsDocumentsRole->getAccess() > 0) {
                 $rolesIds['read'][] = $tabsDocumentsRole->getRole()->getRoleId();
             }
-            if( $tabsDocumentsRole->getAccess() > 1 ){
+            if ($tabsDocumentsRole->getAccess() > 1) {
                 $rolesIds['write'][] = $tabsDocumentsRole->getRole()->getRoleId();
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 10:10
@@ -13,7 +14,6 @@ use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Oscar\Utils\StringUtils;
 use phpDocumentor\Reflection\Types\Integer;
 use Laminas\Form\Annotation;
-
 
 /**
  * Class Project
@@ -189,10 +189,9 @@ class Project implements ResourceInterface
         $amount = 0.0;
         foreach ($this->getActivities() as $activity) {
             // PATCH : Lors du calcule du total d'un projet, les recettes sont ajoutées, les dépenses soustraites, et les autres sont ignorées.
-            if( $activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_TAKE ){
+            if ($activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_TAKE) {
                 $amount += $activity->getAmount();
-            }
-            elseif ($activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_COST ){
+            } elseif ($activity->getIncidenceFinanciere() == Activity::FINANCIAL_IMPACT_COST) {
                 $amount -= $activity->getAmount();
             }
         }
@@ -246,9 +245,11 @@ class Project implements ResourceInterface
         $result = [];
         foreach ($this->members as $member) {
             /** @var \Oscar\Entity\ProjectMember $member */
-            if ($member->getPerson()->getId() === $person->getId()
+            if (
+                $member->getPerson()->getId() === $person->getId()
                 &&
-                $member->getRole() === $role) {
+                $member->getRole() === $role
+            ) {
                 $result[] = $member;
             }
         }
@@ -267,7 +268,7 @@ class Project implements ResourceInterface
 
         foreach ($this->partners as $partner) {
             /** @var \Oscar\Entity\ProjectPartner $partner */
-            if( $partner->getRoleObj()->isPrincipal() ){
+            if ($partner->getRoleObj()->isPrincipal()) {
                 $rolesInPartner = $partner->getOrganization()->getPersonRolesId($person);
                 $roles = array_merge($roles, $rolesInPartner);
             }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 03/11/15 14:47
@@ -9,7 +10,6 @@ namespace Oscar\Entity;
 
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping as ORM;
-
 
 /**
  * @package Oscar\Entity
@@ -37,7 +37,7 @@ class PcruPoleCompetitivite
     /**
      * @return mixed
      */
-    public function getId() :int
+    public function getId(): int
     {
         return $this->id;
     }

@@ -19,7 +19,7 @@ trait UseOscarConfigurationServiceTrait
     private $oscarConfigurationService;
 
     /**
-     * @param OscarConfigurationService $s
+     * @param OscarConfigurationService $oscarConfigurationService
      */
     public function setOscarConfigurationService( OscarConfigurationService $oscarConfigurationService ) :void
     {

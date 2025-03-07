@@ -12,7 +12,7 @@ class ActivityTypeRepository extends EntityRepository
      * @param ActivityType $activityType
      * @return int|mixed|string
      */
-    public function getChainFromActivityType( ActivityType $activityType )
+    public function getChainFromActivityType(ActivityType $activityType)
     {
         $query = $this->createQueryBuilder('at')
             ->where('at.lft < :lft AND at.rgt > :rgt')

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 01/07/15 13:59
@@ -7,7 +8,6 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 use Oscar\Exception\OscarException;
 
@@ -15,12 +15,13 @@ use Oscar\Exception\OscarException;
  * Class SpentTypeGroupRepository
  * @package Oscar\Entity
  */
-class SpentTypeGroupRepository extends EntityRepository{
-
+class SpentTypeGroupRepository extends EntityRepository
+{
     /**
      * @return SpentTypeGroup
      */
-    public function getLastSpentTypeGroup(){
+    public function getLastSpentTypeGroup()
+    {
         $query = $this->createQueryBuilder('t')
             ->select('t')
             ->orderBy('t.rgt', 'DESC');
@@ -33,7 +34,8 @@ class SpentTypeGroupRepository extends EntityRepository{
      *
      * @return array
      */
-    public function getAll(){
+    public function getAll()
+    {
         $query = $this->createQueryBuilder('t')
             ->select('t')
             ->orderBy('t.lft', 'ASC');
@@ -47,7 +49,8 @@ class SpentTypeGroupRepository extends EntityRepository{
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function count(array $criteria){
+    public function count(array $criteria)
+    {
         $qb = $this->createQueryBuilder('t')
             ->select('count(t.id)');
 
@@ -61,17 +64,20 @@ class SpentTypeGroupRepository extends EntityRepository{
      * @param $rgt
      * @return mixed
      */
-    public function getBranchByBounds( $lft, $rgt ){
+    public function getBranchByBounds($lft, $rgt)
+    {
 
         $brancheDeplacee = $this->createQueryBuilder('t')
             ->where('t.lft >= :lft AND t.rgt <= :rgt ')
             ->setParameters(['lft' => $lft, 'rgt' => $rgt])
             ->getQuery();
 
-        return $brancheDeplacee->getResult();;
+        return $brancheDeplacee->getResult();
+        ;
     }
 
-    public function findOneByCode( $code ){
+    public function findOneByCode($code)
+    {
         return $this->createQueryBuilder('st')
             ->where('st.code = :code')
             ->setParameter('code', $code)
@@ -93,7 +99,7 @@ class SpentTypeGroupRepository extends EntityRepository{
         return array_map('current', $qb->getQuery()->getArrayResult());
     }
 
-    public function getPfiForCodesAccounts( $codes )
+    public function getPfiForCodesAccounts($codes)
     {
 
         $qb = $this->getEntityManager()->getRepository(SpentLine::class)

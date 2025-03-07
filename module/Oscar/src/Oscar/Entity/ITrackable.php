@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/11/15 08:57
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 interface ITrackable
 {

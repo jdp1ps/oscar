@@ -311,6 +311,12 @@ return array(
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
         ],
 
+        // Convention de nommage des Avenants
+        // %s ID de l'activité
+        // %s Date de l'avenant (YYYY-MM-DD)
+        // %s uniqid
+        'avenant_filename' => 'avenant_%s_%s_%s',
+
         'generated-documents' => [
             'activity' => []
         ],

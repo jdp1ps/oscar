@@ -1120,6 +1120,18 @@ class ProjectGrantService implements UseGearmanJobLauncherService, UseOscarConfi
         return $this->getActivityRepository()->getIdsInverse($idsActivitySearch);
     }
 
+    public function lockActivity(Activity $entity) :void
+    {
+        $entity->setLocked(true);
+        $this->getEntityManager()->flush($entity);
+    }
+
+    public function unlockActivity(?Activity $entity)
+    {
+        $entity->setLocked(false);
+        $this->getEntityManager()->flush($entity);
+    }
+
     protected function debug__displayIds(array $ids)
     {
         echo " = ";

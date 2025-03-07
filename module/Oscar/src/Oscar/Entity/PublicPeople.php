@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: jacksay
@@ -7,7 +8,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use UnicaenApp\Entity\Ldap\People;
 
@@ -21,7 +21,6 @@ use UnicaenApp\Entity\Ldap\People;
  */
 class PublicPeople
 {
-
     private $people;
 
     /**

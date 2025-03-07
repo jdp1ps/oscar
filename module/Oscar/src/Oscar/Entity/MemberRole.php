@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Rôle disponible dans un projet.
- * 
+ *
  * ORM\Entity
  */
 class MemberRole
@@ -56,8 +56,8 @@ class MemberRole
 
         return $this;
     }
-    
-    public function __toString() 
+
+    public function __toString()
     {
         return $this->getLabel();
     }

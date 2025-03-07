@@ -1,11 +1,11 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @copyright Certic (c) 2015
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
@@ -25,7 +25,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 {
     private $_cacheSelectebleRolesOrganisation;
 
-    public function removeOrganizationPersons( array $organizationsRoles ):void
+    public function removeOrganizationPersons(array $organizationsRoles): void
     {
         foreach ($organizationsRoles as $organizationsRole) {
             $this->getEntityManager()->remove($organizationsRole);
@@ -42,7 +42,6 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
             $results = $query->setParameter('person', $person)->getResult();
             return array_map('current', $results);
-
         } catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -65,11 +64,9 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             );
 
             $query->execute();
-
         } catch (\Exception $e) {
             die($e->getMessage());
         }
-
     }
 
 
@@ -107,7 +104,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function getPersonsByIds_idValue(array $ids) :array
+    public function getPersonsByIds_idValue(array $ids): array
     {
         $out = [];
         foreach ($this->getPersonsByIds($ids) as $person) {
@@ -523,7 +520,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * (ATTENTION : Si aucune déclaration n'a été envoyée, il n'y a pas de résultats)
      * @param int $personId
      */
-    public function getRepportDeclarationPerson( int $personId, bool $includenonActive = false )
+    public function getRepportDeclarationPerson(int $personId, bool $includenonActive = false)
     {
         $sql = "SELECT
             declarer_id AS declarer_id,
@@ -547,7 +544,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
 
         $result = $query->executeQuery([
             "person_id" => $personId
-]       );
+        ]);
 
         $datas = $result->fetchAllAssociative();
 
@@ -560,7 +557,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
      * @param string $period
      * @return array
      */
-    public function getIdsDeclarersBeforePeriod( string $period, bool $includeNonActive = false ): array
+    public function getIdsDeclarersBeforePeriod(string $period, bool $includeNonActive = false): array
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('DISTINCT(p.id) id')
@@ -579,7 +576,7 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
             'periodEnd' => $end
         ];
 
-        if( $includeNonActive == false ){
+        if ($includeNonActive == false) {
             $qb->andWhere('a.status = :status');
             $parametersQuery['status'] = Activity::STATUS_ACTIVE;
         }
@@ -661,6 +658,4 @@ class PersonRepository extends EntityRepository implements IConnectedRepository
     {
         return $this->newPersistantPerson();
     }
-
-
 }

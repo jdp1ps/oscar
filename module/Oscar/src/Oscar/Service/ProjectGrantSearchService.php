@@ -36,14 +36,15 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
     use UseEntityManagerTrait, UsePersonServiceTrait, UseOscarConfigurationServiceTrait, UseProjectGrantServiceTrait, UseLoggerServiceTrait, UseSpentServiceTrait;
 
+    const FILTER_ACTIVITY_STATUS = 'as';
+    const FILTER_ACTIVITY_STATUS_OUT = 'ss';
+    const FILTER_AVENANT = 'avn';
     const FILTER_PERSON_ROLLED = 'ap';
     const FILTER_PERSON_ROLLED_OUT = 'sp';
     const FILTER_PERSONS = 'pm';
     const FILTER_ORGANIZATION_ROLLED = 'ao';
     const FILTER_ORGANIZATION_ROLLED_OUT = 'so';
     const FILTER_ORGANIZATIONS = 'om';
-    const FILTER_ACTIVITY_STATUS = 'as';
-    const FILTER_ACTIVITY_STATUS_OUT = 'ss';
     const FILTER_ORGANIZATION_COUNTRY = 'cnt';
     const FILTER_ORGANIZATION_TYPE = 'tnt';
 
@@ -113,6 +114,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             self::FILTER_ACTIVITY_MILESTONE             => 'Ayant le jalon',
             self::FILTER_ACTIVITY_DOCUMENT_TYPE         => 'Ayant ce type de document',
             self::FILTER_ACTIVITY_TIMESHEET             => 'Activités soumise à feuille de temps',
+            self::FILTER_AVENANT                        => 'Activités ayant des avenants',
             // Dates
             self::FILTER_ACTIVITY_DATE_START            => 'Date de début',
             self::FILTER_ACTIVITY_DATE_END              => 'Date de fin',
@@ -824,9 +826,15 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
                         break;
 
                     ///////////////////////////////// ACTIVITY / FEUILLE de TEMPS
-                    case 'fdt' :
+                    case self::FILTER_ACTIVITY_TIMESHEET :
                         $filteredIds = $this->getProjectGrantService()
                             ->getActivityRepository()->getActivityIdsWithWorkpackage();
+                        break;
+
+                    ///////////////////////////////// AVENANT
+                    case self::FILTER_AVENANT :
+                        $filteredIds = $this->getProjectGrantService()
+                            ->getActivityRepository()->getActivityIdsWithAvenants();
                         break;
 
                     ///////////////////////////////// ACTIVITY / DATES

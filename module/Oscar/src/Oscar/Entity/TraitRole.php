@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Entity;
 
 /**
@@ -72,9 +73,9 @@ trait TraitRole
     /**
      * @return \DateTime
      */
-    public function getDateStart( $deep = false )
+    public function getDateStart($deep = false)
     {
-        if( $deep === true && !$this->dateStart ){
+        if ($deep === true && !$this->dateStart) {
             return $this->getEnroller()->getDateStart();
         }
         return $this->dateStart;
@@ -93,9 +94,9 @@ trait TraitRole
     /**
      * @return mixed
      */
-    public function getDateEnd( $deep = false )
+    public function getDateEnd($deep = false)
     {
-        if( $deep === true && !$this->dateEnd ){
+        if ($deep === true && !$this->dateEnd) {
             return $this->getEnroller()->getDateEnd();
         }
         return $this->dateEnd;
@@ -124,7 +125,8 @@ trait TraitRole
     abstract function getEnroller();
 
 
-    function log(){
+    function log()
+    {
         return sprintf("%s (%s) dans %s", $this->getEnrolled()->log(), $this->getRole(), $this->getEnroller()->log());
     }
 
@@ -132,9 +134,9 @@ trait TraitRole
      * @param null $at
      * @return bool
      */
-    public function isOutOfDate( \DateTime $at = null)
+    public function isOutOfDate(\DateTime $at = null)
     {
-        if( $at === null ){
+        if ($at === null) {
             $at = new \DateTime();
         }
         return !(($this->getDateStart() === null || $this->getDateStart() <= $at)
@@ -145,9 +147,9 @@ trait TraitRole
     /**
      * Si le rôle appartient au passé.
      */
-    public function isPast( \DateTime $at = null )
+    public function isPast(\DateTime $at = null)
     {
-        if( $at === null ){
+        if ($at === null) {
             $at = new \DateTime();
         }
         return !($this->getDateEnd() === null || $this->getDateEnd() > $at);
@@ -156,9 +158,9 @@ trait TraitRole
     /**
      * Si le rôle appartient au passé.
      */
-    public function isFuture( \DateTime $at = null )
+    public function isFuture(\DateTime $at = null)
     {
-        if( $at === null ){
+        if ($at === null) {
             $at = new \DateTime();
         }
         return !($this->getDateStart() === null || $this->getDateStart() < $at);

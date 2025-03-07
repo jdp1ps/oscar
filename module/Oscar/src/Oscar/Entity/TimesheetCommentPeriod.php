@@ -1,12 +1,11 @@
 <?php
-namespace Oscar\Entity;
 
+namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtil;
-
 
 /**
  * @package Oscar\Entity
@@ -195,6 +194,4 @@ class TimesheetCommentPeriod
         $this->year = $year;
         return $this;
     }
-
-
 }

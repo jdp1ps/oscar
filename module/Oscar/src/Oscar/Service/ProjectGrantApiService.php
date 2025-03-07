@@ -7,6 +7,8 @@ use Doctrine\ORM\Query;
 use Laminas\Mvc\Controller\Plugin\Url;
 use Laminas\View\Model\JsonModel;
 use Oscar\Entity\Activity;
+use Oscar\Entity\ActivityAvenant;
+use Oscar\Entity\ActivityAvenantModification;
 use Oscar\Entity\ActivityDate;
 use Oscar\Entity\ActivityNote;
 use Oscar\Entity\ActivityNoteRepository;
@@ -51,14 +53,26 @@ use UnicaenSignature\Provider\SignaturePrivileges;
 use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Utils\SignatureConstants;
 
-class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseOscarConfigurationService,
-                                        UseProjectGrantService, UseLoggerService, UseSpentService, UseServiceContainer
+class ProjectGrantApiService implements UseEntityManager,
+                                        UseLoggerService,
+                                        UseOscarConfigurationService,
+                                        UsePersonService,
+                                        UseProjectGrantService,
+                                        UseServiceContainer,
+                                        UseSpentService
 {
 
-    use UseEntityManagerTrait, UsePersonServiceTrait, UseOscarConfigurationServiceTrait, UseProjectGrantServiceTrait, UseLoggerServiceTrait, UseSpentServiceTrait, UseServiceContainerTrait;
+    use UseEntityManagerTrait,
+        UseLoggerServiceTrait,
+        UseOscarConfigurationServiceTrait,
+        UsePersonServiceTrait,
+        UseProjectGrantServiceTrait,
+        UseServiceContainerTrait,
+        UseSpentServiceTrait;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////// PERIMETRES
     const PERIMETER_ADMINISTRATION = 'administration';
+    const PERIMETER_AVENANTS = 'avenants';
     const PERIMETER_BUDGET = 'budget';
     const PERIMETER_CORE = 'core';
     const PERIMETER_DOCUMENTS = 'documents';
@@ -72,11 +86,14 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     const PERIMETER_TIMESHEETS = 'timesheets';
     const PERIMETER_WORKPACKAGES = 'workpackages';
 
-
+    /**
+     * @return string[]
+     */
     public function getPerimetersKeys(): array
     {
         return [
             self::PERIMETER_ADMINISTRATION,
+            self::PERIMETER_AVENANTS,
             self::PERIMETER_BUDGET,
             self::PERIMETER_CORE,
             self::PERIMETER_DOCUMENTS,
@@ -93,6 +110,18 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////// ENDPOINT
+
+    /**
+     * @param int $activityId
+     * @param Url|null $urlPlugin
+     * @param OscarUserContext|null $oscarUserContext
+     * @param string|null $perimeters
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws NotSupported
+     * @throws OscarException
+     */
     public function getActivityJson(
         int $activityId,
         ?Url $urlPlugin = null,
@@ -154,7 +183,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
     }
 
-
+    /**
+     * @param OscarUserContext $oscarUserContext
+     * @param Activity $activity
+     * @return array
+     * @throws OscarException
+     */
     protected function getRolesCurrentPersonActivity(OscarUserContext $oscarUserContext, Activity $activity): array
     {
         return $oscarUserContext->getRolesPersonInActivityDeep(
@@ -163,55 +197,78 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         );
     }
 
+    /**
+     * @param Activity $activity
+     * @param OscarUserContext $oscarUserContext
+     * @param array $perimeters
+     * @return array
+     * @throws NotSupported
+     * @throws OscarException
+     */
     public function getActivityJsonCredentials(
         Activity $activity,
         OscarUserContext $oscarUserContext,
         array $perimeters
     ): array {
+        $locked = $activity->isLocked();
+        $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
+        $lockEditable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $activity);
+        if ($locked) {
+            $editable = false;
+        }
+
         $credentials = [
             'currentPersonId' => $oscarUserContext->getCurrentPersonId() ?: -1,
             'read'            => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity),
-            'edit'            => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity),
+            'edit'            => $editable,
+            'lock'            => $locked,
+            'lock_edit'       => $lockEditable,
         ];
 
         foreach ($perimeters as $perimeter) {
             switch ($perimeter) {
-                case 'administration':
-                    $credentials['administration'] = [
+                case self::PERIMETER_ADMINISTRATION:
+                    $credentials[self::PERIMETER_ADMINISTRATION] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::MAINTENANCE_MENU_ADMIN),
                     ];
                     break;
 
-                case 'budget':
+                case self::PERIMETER_AVENANTS:
+                    $credentials[self::PERIMETER_AVENANTS] = [
+                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_AVENANTS_SHOW, $activity),
+                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_AVENANTS_MANAGE, $activity),
+                    ];
+                    break;
+
+                case self::PERIMETER_BUDGET:
                     $credentials['budget'] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
                         'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_MANAGE, $activity),
                     ];
                     break;
 
-                case 'core':
+                case self::PERIMETER_CORE:
                     $credentials['core'] = [
                         'read'           => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_PERSON_SHOW,
                             $activity
                         ),
-                        'edit'           => $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_PERSON_MANAGE,
-                            $activity
-                        ),
-                        'change_project' => $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_CHANGE_PROJECT,
-                            $activity
-                        ),
-                        'new_project'    => $oscarUserContext->hasPrivileges(
-                            Privileges::ACTIVITY_CHANGE_PROJECT,
-                            $activity
-                        ),
+                        'edit'           => $editable && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_EDIT,
+                                $activity
+                            ),
+                        'change_project' => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_CHANGE_PROJECT,
+                                $activity
+                            ),
+                        'new_project'    => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_CHANGE_PROJECT,
+                                $activity
+                            ),
                     ];
                     break;
 
-                case 'documents':
-
+                case self::PERIMETER_DOCUMENTS:
                     $read = $oscarUserContext->hasPrivileges(
                         Privileges::ACTIVITY_DOCUMENT_SHOW,
                         $activity
@@ -222,7 +279,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                     $entitiesTabs = $this->getContractDocumentRepository()->getTabDocuments();
                     $rolesMerged = $this->getRolesCurrentPersonActivity($oscarUserContext, $activity);
-//                    var_dump($rolesMerged); die();
+
                     $arrayTabs = [];
                     foreach ($entitiesTabs as $tabDocument) {
                         $tabId = $tabDocument->getId();
@@ -251,7 +308,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
 
                     break;
 
-                case 'notes':
+                case self::PERIMETER_NOTES:
                     $credentials['notes'] = [
                         'read'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity),
                         'edit'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity),
@@ -262,17 +319,29 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                     ];
                     break;
 
-                case 'milestones':
+                case self::PERIMETER_MILESTONES:
                     $credentials['milestones'] = [
-                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_SHOW, $activity),
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_MANAGE, $activity),
-                        'progression' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_MILESTONE_PROGRESSION, $activity),
+                        'read'        => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_SHOW,
+                            $activity
+                        ),
+                        'edit'        => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_MANAGE,
+                            $activity
+                        ),
+                        'progression' => $oscarUserContext->hasPrivileges(
+                            Privileges::ACTIVITY_MILESTONE_PROGRESSION,
+                            $activity
+                        ),
                     ];
                     break;
 
-                case 'organizations':
+                case self::PERIMETER_ORGANIZATIONS:
                     $credentials['organizations'] = [
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                                $activity
+                            ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::ORGANIZATION_SHOW),
                     ];
@@ -284,20 +353,25 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PAYMENT_SHOW, $activity),
                     ];
                     break;
-                case 'persons':
+
+                case self::PERIMETER_PERSONS:
                     $credentials['persons'] = [
-                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_MANAGE, $activity),
+                        'edit' => !$locked && $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_PERSON_MANAGE,
+                                $activity
+                            ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
                     ];
                     break;
 
-                case 'project':
+                case self::PERIMETER_PROJECT:
                     $credentials['project'] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::PROJECT_SHOW, $activity->getProject()),
                         'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_CHANGE_PROJECT, $activity),
                     ];
                     break;
+
                 case self::PERIMETER_SPENTS:
                     $credentials['spents'] = [
                         'read' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_SHOW, $activity),
@@ -331,12 +405,21 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $credentials;
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @param array|null $perimeters
+     * @return string[]
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws NotSupported
+     * @throws OscarException
+     */
     public function getActivityJsonDatas(
         Activity $activity,
         ?Url $urlPlugin = null,
         ?array $perimeters = null
     ): array {
-
         $datas = [
             "api" => "Oscar Activity API"
         ];
@@ -345,6 +428,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             switch ($perimeter) {
                 case self::PERIMETER_ADMINISTRATION:
                     $datas[self::PERIMETER_ADMINISTRATION] = $this->getAdministrationActivity($activity, $urlPlugin);
+                    break;
+
+                case self::PERIMETER_AVENANTS:
+                    $datas[self::PERIMETER_AVENANTS] = $this->getAvenantsActivity($activity, $urlPlugin);
                     break;
 
                 case self::PERIMETER_BUDGET:
@@ -448,18 +535,16 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
             'type_chain'   => $typesJson,
             'type_id'      => $activity->getActivityType()?->getId(),
-            'dateCreated'    => $this->formatDateTime($activity->getDateCreated()),
             'dateStart'    => $this->formatDateTime($activity->getDateStart()),
             'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
             'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
             'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
             'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
-            'dateNegociation'   => $this->formatDateTime($activity->getDateNegociation()),
             'urls'         => [
                 'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
                 'new_project'    => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
-                'pcru' => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
+                'pcru'           => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
             ]
         ];
     }
@@ -740,6 +825,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $out;
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     * @throws NotSupported
+     */
     public function getNotesActivity(
         Activity $activity,
         ?Url $urlPlugin = null
@@ -782,7 +873,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ];
     }
 
-
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     * @throws NotSupported
+     */
     public function getOrganizationsActivity(Activity $activity, ?Url $urlPlugin = null): array
     {
         $entities = [];
@@ -882,6 +978,12 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         ];
     }
 
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     * @throws NotSupported
+     */
     public function getPersonsActivity(Activity $activity, ?Url $urlPlugin = null): array
     {
         $output = [];
@@ -1088,9 +1190,9 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         }
 
         return [
-            'url'      => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
+            'url'        => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
             'currencies' => $this->getCurrencies(),
-            'entities' => $entities
+            'entities'   => $entities
         ];
     }
 
@@ -1102,7 +1204,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     private function getSpentsActivity(Activity $activity, ?Url $urlPlugin): array
     {
         $pfis = [];
-        if( $activity->getCodeEOTP() ){
+        if ($activity->getCodeEOTP()) {
             $pfis[] = $activity->getCodeEOTP();
         }
 
@@ -1115,7 +1217,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
             'error'   => "",
         ];
 
-        if( !count($pfis) ){
+        if (!count($pfis)) {
             $out['enabled_reason'] = "L'activité doit avoir un numéro financier";
             return $out;
         }
@@ -1137,7 +1239,7 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         return $out;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @param \DateTime|null $datetime
@@ -1154,6 +1256,64 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         else {
             return $datetime->format($format);
         }
+    }
+
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     */
+    private function getAdministrationActivity(Activity $activity, ?Url $urlPlugin): array
+    {
+        return [
+            "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
+        ];
+    }
+
+    /**
+     * @param Activity $activity
+     * @param Url|null $urlPlugin
+     * @return array
+     * @throws NotSupported
+     */
+    private function getAvenantsActivity(Activity $activity, ?Url $urlPlugin) :array
+    {
+        $result = $this->getEntityManager()
+            ->getRepository(ActivityAvenant::class)
+            ->getByActivityId($activity->getId());
+
+        $out = [];
+        /** @var ActivityAvenant $item */
+        foreach ($result as $item) {
+            $modifications = [];
+
+            /** @var ActivityAvenantModification $modification */
+            foreach ($item->getModifications() as $modification) {
+                $modifications[] = $modification->toJson();
+            }
+
+            $out[] = [
+                'id'           => $item->getId(),
+                'comment'      => $item->getComment(),
+                'filename'     => $item->getFilename(),
+                'date'         => $item->getDateAvenant()->format('Y-m-d'),
+                'status'       => $item->getStatus(),
+                'status_text'  => $item->getStatusLabel(),
+                'editable'     => ActivityAvenant::STATUS_DRAFT === $item->getStatus(),
+                'modifications'      => $modifications,
+                'url_api'      => $urlPlugin->fromRoute('avenant/api', [
+                    'activity_id' => $activity->getId(),
+                    'avenant_id'  => $item->getId()
+                ]),
+                'url_download' => $urlPlugin->fromRoute('avenant/download', [
+                    'avenant_id' => $item->getId()
+                ]),
+            ];
+        }
+        return [
+            'url_api'  => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
+            'avenants' => $out
+        ];
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1187,10 +1347,10 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
     }
 
     /**
-     * @throws NotSupported
      * @return array
+     * @throws NotSupported
      */
-    private function getCurrencies() :array
+    private function getCurrencies(): array
     {
         return $this->getEntityManager()->getRepository(Currency::class)->getCurrenciesArray();
     }
@@ -1206,12 +1366,5 @@ class ProjectGrantApiService implements UseEntityManager, UsePersonService, UseO
         $formatter = $this->getServiceContainer()->get(JsonFormatterService::class);
         $formatter->setUrlHelper($urlHelper);
         return $formatter;
-    }
-
-    private function getAdministrationActivity(Activity $activity, ?Url $urlPlugin): array
-    {
-        return [
-            "url_logs" => $urlPlugin->fromRoute('contract/traces', ['id' => $activity->getId()]),
-        ];
     }
 }

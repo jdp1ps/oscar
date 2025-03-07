@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: bouvry
@@ -12,7 +13,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Oscar\Exception\OscarException;
 use Oscar\Utils\DateTimeUtils;
-
 
 /**
  * @package Oscar\Entity
@@ -1536,6 +1536,4 @@ class ValidationPeriod
         $this->declarer = $declarer;
         return $this;
     }
-
-
 }

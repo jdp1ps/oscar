@@ -56,6 +56,7 @@ export default {
     },
 
     handlerValid() {
+      console.log("emit : modal-valid")
       this.$emit("modal-valid");
     }
   }

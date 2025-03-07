@@ -106,14 +106,15 @@ class TabsDocumentsRoles
      */
     public function __toString()
     {
-        return "Matrice droit : " . $this->getAccess()." Role : ".$this->getRole()->getRoleId(). " Onglet : " . $this->getTabDocument()->getLabel();
+        return "Matrice droit : " . $this->getAccess() . " Role : " . $this->getRole()->getRoleId() . " Onglet : " . $this->getTabDocument()->getLabel();
     }
 
     /**
      * Retourne TabsDocumentsRoles sous forme de tableau associatif clef/valeurs
      * @return array
      */
-    public function toArray():array{
+    public function toArray(): array
+    {
         return [
             'id' => $this->getId(),
             'tabDocumentLabel' => $this->getTabDocument()->getLabel(),
@@ -122,5 +123,4 @@ class TabsDocumentsRoles
             'role_id' => $this->getRole()->getId()
         ];
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: bouvry
@@ -10,7 +11,6 @@ namespace Oscar\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-
 
 /**
  * @ORM\Entity(repositoryClass="Oscar\Entity\AdministrativeDocumentSectionRepository")
@@ -116,6 +116,4 @@ class AdministrativeDocumentSection
     {
         return $this->getLabel();
     }
-
-
 }

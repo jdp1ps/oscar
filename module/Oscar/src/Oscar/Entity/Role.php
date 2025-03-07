@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 12/06/15 10:43
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -270,7 +270,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return int
      */
-    public function getId() :int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -282,7 +282,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return void
      */
-    public function setId($id) :void
+    public function setId($id): void
     {
         $this->id = $id;
     }
@@ -290,7 +290,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
     /**
      * @return string|null
      */
-    public function getDescription() :?string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -298,7 +298,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
     /**
      * @param string|null $description
      */
-    public function setDescription(?string $description) :void
+    public function setDescription(?string $description): void
     {
         $this->description = $description;
     }
@@ -356,7 +356,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return void
      */
-    public function setRoleId(?string $roleId) :void
+    public function setRoleId(?string $roleId): void
     {
         $this->roleId = (string)$roleId;
     }
@@ -380,7 +380,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      */
     public function setIsDefault($isDefault)
     {
-        $this->isDefault = (boolean)$isDefault;
+        $this->isDefault = (bool)$isDefault;
 
         return $this;
     }
@@ -390,7 +390,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return Role
      */
-    public function getParent() :?RoleInterface
+    public function getParent(): ?RoleInterface
     {
         return $this->parent;
     }
@@ -398,7 +398,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
     /**
      * @return string
      */
-    public function getLdapFilter() :?string
+    public function getLdapFilter(): ?string
     {
 
         return $this->ldapFilter;
@@ -407,7 +407,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
     /**
      * @param string $ldapFilter
      */
-    public function setLdapFilter(?string $ldapFilter) :void
+    public function setLdapFilter(?string $ldapFilter): void
     {
         $this->ldapFilter = $ldapFilter;
     }
@@ -423,7 +423,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return array
      */
-    public function getUsers() :Collection
+    public function getUsers(): Collection
     {
         return $this->users->getValues();
     }
@@ -435,7 +435,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return void
      */
-    public function addUser(UserInterface $user) :void
+    public function addUser(UserInterface $user): void
     {
         $this->users[] = $user;
     }
@@ -444,7 +444,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      *
      * @return string
      */
-    public function __toString() :string
+    public function __toString(): string
     {
         return $this->getRoleId();
     }
@@ -518,7 +518,7 @@ class Role extends AbstractRole implements HierarchicalRoleInterface
      * @param DateType $dateType
      * @return $this
      */
-    public function addDateType(DateType  $dateType): self
+    public function addDateType(DateType $dateType): self
     {
         if (!$this->datesType->contains($dateType)) {
             $this->datesType[] = $dateType;

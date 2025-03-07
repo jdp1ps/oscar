@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 12:01
@@ -15,7 +16,8 @@ class TypeDocumentRepository extends EntityRepository
      * Retourne les types de document sous la forme ID => LABEL
      * @return array
      */
-    public function getTypesArrayFlat() :array {
+    public function getTypesArrayFlat(): array
+    {
         $types = $this->getTypes();
         $out = [];
         foreach ($types as $type) {
@@ -27,8 +29,8 @@ class TypeDocumentRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getTypes() :array {
+    public function getTypes(): array
+    {
         return $this->findBy([], ['label' => 'ASC']);
     }
-
 }

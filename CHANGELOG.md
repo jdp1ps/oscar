@@ -2,7 +2,9 @@
 ## 2025
 
 ### Mars
- - [up] Le champs TYPE du connecteur des organisations ne provoque plus d'erreur si sa valeur est NULL
+ - [starling] Application d'un avenant
+ - [starling] Ajout des privilèges pour l'accès aux avenants
+ - [up] Le champ TYPE du connecteur des organisations ne provoque plus d'erreur si sa valeur est NULL
  - [doc/dist] Documentation mise à jour et ajout d'informations manquantes dans le fichier .dist de UnicaenSignature (warning sur la clef `archive_exchange`)
  - [fix] On force les types *long* en texte dans la recherche pour éviter l'erreur `fuzzy queries` - **Imporant** Ces modifications ne sont pas rétro-compatible avec Elasticsearch 6. Vous devez donc mettre à niveau Elasticsearch en désinstallant la version 6 (`apt remove elasticsearch --purge`), puis en installant la version 7 ([Installation de Elasticsearch](doc/install-elasticsearch.md#ajout-du-dépôt-officiel)). Enfin, pensez à réindexer les données : 
   ```

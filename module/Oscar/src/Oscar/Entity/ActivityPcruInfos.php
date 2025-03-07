@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityManager;
@@ -17,7 +16,6 @@ use Oscar\Utils\DateTimeUtils;
  */
 class ActivityPcruInfos
 {
-
     const VALIDATION_VALID = 'valid';
     const VALIDATION_DISABLED = 'disabled';
     const VALIDATION_ERROR = 'error';
@@ -277,9 +275,9 @@ class ActivityPcruInfos
 
     static ?array $status_str = null;
 
-    public static function statusStr( string $status ) :string
+    public static function statusStr(string $status): string
     {
-        if( self::$status_str == null ){
+        if (self::$status_str == null) {
             self::$status_str = [
                 self::STATUS_PREVIEW => "Aperçu",
                 self::STATUS_ERROR_DATA => "ERREUR (Oscar)",
@@ -306,7 +304,8 @@ class ActivityPcruInfos
 
     public function __toString()
     {
-        return sprintf("[%s] %s : %s (%s) - %s:%s",
+        return sprintf(
+            "[%s] %s : %s (%s) - %s:%s",
             $this->getNumContratTutelleGestionnaire(),
             $this->getAcronyme(),
             $this->getObjet(),
@@ -316,15 +315,15 @@ class ActivityPcruInfos
         );
     }
 
-    public function isWaiting() :bool
+    public function isWaiting(): bool
     {
         return $this->getStatus() == self::STATUS_FILE_READY;
     }
 
-    public function toArray(?EntityManager $entityManager = null) :array
+    public function toArray(?EntityManager $entityManager = null): array
     {
         $partenairePrincipal = "";
-        if( $this->getIdPartenairePrincipal() && $entityManager ){
+        if ($this->getIdPartenairePrincipal() && $entityManager) {
             $partenairePrincipal = $entityManager->getRepository(Organization::class)->getOrganizationByCodePCRU($this->getIdPartenairePrincipal());
         }
         $out = [];
@@ -363,7 +362,7 @@ class ActivityPcruInfos
         return $out;
     }
 
-    public function validation(OscarConfigurationService $oscarConfigurationService) :array
+    public function validation(OscarConfigurationService $oscarConfigurationService): array
     {
         $this->error = [];
         $this->warnings = [];
@@ -418,77 +417,96 @@ class ActivityPcruInfos
             $out[$unusedField] = self::VALIDATION_DISABLED;
         }
 
-        if( $datas['Objet'] )
+        if ($datas['Objet']) {
             $out['Objet'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['CodeUniteLabintel'] )
+        if ($datas['CodeUniteLabintel']) {
             $out['CodeUniteLabintel'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['SigleUnite'] )
+        if ($datas['SigleUnite']) {
             $out['SigleUnite'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['NumContratTutelleGestionnaire'] )
+        if ($datas['NumContratTutelleGestionnaire']) {
             $out['NumContratTutelleGestionnaire'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['NumContratTutelleGestionnaire'] )
+        if ($datas['NumContratTutelleGestionnaire']) {
             $out['NumContratTutelleGestionnaire'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['TypeContrat'] != 'Aucun' )
+        if ($datas['TypeContrat'] != 'Aucun') {
             $out['TypeContrat'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['Acronyme'] )
+        if ($datas['Acronyme']) {
             $out['Acronyme'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['ResponsableScientifique'] )
+        if ($datas['ResponsableScientifique']) {
             $out['ResponsableScientifique'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['EmployeurResponsableScientifique'] )
+        if ($datas['EmployeurResponsableScientifique']) {
             $out['EmployeurResponsableScientifique'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['PartenairePrincipal'] )
+        if ($datas['PartenairePrincipal']) {
             $out['PartenairePrincipal'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['SourceFinancement'] )
+        if ($datas['SourceFinancement']) {
             $out['SourceFinancement'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['LieuExecution'] )
+        if ($datas['LieuExecution']) {
             $out['LieuExecution'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['DateDerniereSignature'] )
+        if ($datas['DateDerniereSignature']) {
             $out['DateDerniereSignature'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['DateDebut'] )
+        if ($datas['DateDebut']) {
             $out['DateDebut'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['DateFin'] )
+        if ($datas['DateFin']) {
             $out['DateFin'] = self::VALIDATION_VALID;
+        }
 
-        if( $datas['MontantTotal'] )
+        if ($datas['MontantTotal']) {
             $out['MontantTotal'] = self::VALIDATION_VALID;
+        }
 
 
-        if( $datas['ValidePoleCompetivite'] == true ){
+        if ($datas['ValidePoleCompetivite'] == true) {
             $out['ValidePoleCompetivite'] = self::VALIDATION_VALID;
             $out['PoleCompetivite'] = self::VALIDATION_ERROR;
-            if( $out['PoleCompetivite'] ){
+            if ($out['PoleCompetivite']) {
                 $out['PoleCompetivite'] = self::VALIDATION_VALID;
             }
         }
 
-        if( $datas['Reference'] )
+        if ($datas['Reference']) {
             $out['Reference'] = self::VALIDATION_VALID;
+        }
 
 
-        if( $this->getDocumentId() ){
+        if ($this->getDocumentId()) {
             $out['document_signed'] = self::VALIDATION_VALID;
             $out['contrat_signed'] = self::VALIDATION_VALID;
         } else {
             $this->addError("Le document du contrat est indisponible");
         }
 
-        foreach ($out as $champ=>$state) {
-            if( $champ == 'contract_signed') continue;
-            if( $state == self::VALIDATION_ERROR ){
+        foreach ($out as $champ => $state) {
+            if ($champ == 'contract_signed') {
+                continue;
+            }
+            if ($state == self::VALIDATION_ERROR) {
                 $this->status = self::STATUS_ERROR_DATA;
                 $this->addError($this->getMessage($champ));
             }
@@ -497,11 +515,11 @@ class ActivityPcruInfos
         return $out;
     }
 
-    static private $messages;
+    private static $messages;
 
-    protected function getMessage( $champ )
+    protected function getMessage($champ)
     {
-        if( self::$messages === null ) {
+        if (self::$messages === null) {
             self::$messages = [];
             self::$messages['SourceFinancement'] = "La source de financement est manquante, vous pouvez la renseigner depuis la fiche activité";
             self::$messages['TypeContrat'] = "Le type de contrat est manquant. Vous pouvez automatiser la correspondance Oscar/PCRU depuis l'interface d'administration et éditer le type manuellement";
@@ -509,7 +527,7 @@ class ActivityPcruInfos
             self::$messages['CodeUniteLabintel'] = "Le code de l'unité de recherche (Labintel) est manquant, il peut être complété depuis la fiche organisation (type UMR XXXX)";
         }
 
-        if( array_key_exists($champ, self::$messages) ){
+        if (array_key_exists($champ, self::$messages)) {
             return self::$messages[$champ];
         } else {
             return sprintf("Le champ %s n'est pas renseigné.", $champ);
@@ -588,7 +606,8 @@ class ActivityPcruInfos
      */
     public function setSigleUnite(string $sigleUnite): self
     {
-        $this->sigleUnite = mb_substr($sigleUnite, 0, 20);;
+        $this->sigleUnite = mb_substr($sigleUnite, 0, 20);
+        ;
         return $this;
     }
 
@@ -600,7 +619,7 @@ class ActivityPcruInfos
         return $this->numContratTutelleGestionnaire;
     }
 
-    public function isSendable() :bool
+    public function isSendable(): bool
     {
         return $this->getStatus() == self::STATUS_SEND_READY;
     }
@@ -634,7 +653,7 @@ class ActivityPcruInfos
     /**
      * @return PcruTypeContract
      */
-    public function getTypeContrat() :?PcruTypeContract
+    public function getTypeContrat(): ?PcruTypeContract
     {
         return $this->typeContrat;
     }
@@ -642,7 +661,7 @@ class ActivityPcruInfos
     /**
      * @param PcruTypeContract $typeContrat
      */
-    public function setTypeContrat( ?PcruTypeContract $typeContrat): self
+    public function setTypeContrat(?PcruTypeContract $typeContrat): self
     {
         $this->typeContrat = $typeContrat;
         return $this;
@@ -826,7 +845,7 @@ class ActivityPcruInfos
         return $this->dateDerniereSignature;
     }
 
-    public function getDateDerniereSignatureStr() :string
+    public function getDateDerniereSignatureStr(): string
     {
         return $this->getDateDerniereSignature() ? $this->getDateDerniereSignature()->format('Y-m-d') : "";
     }
@@ -865,7 +884,7 @@ class ActivityPcruInfos
         return $this->dateDebut;
     }
 
-    public function getDateDebutStr() :string
+    public function getDateDebutStr(): string
     {
         return $this->getDateDebut() ? $this->getDateDebut()->format('Y-m-d') : "";
     }
@@ -887,7 +906,7 @@ class ActivityPcruInfos
         return $this->dateFin;
     }
 
-    public function getDateFinStr() :string
+    public function getDateFinStr(): string
     {
         return $this->getDateFin() ? $this->getDateFin()->format('Y-m-d') : "";
     }
@@ -1126,12 +1145,13 @@ class ActivityPcruInfos
 
     public function getSignedFileName()
     {
-        return $this->getNumContratTutelleGestionnaire().".pdf";
+        return $this->getNumContratTutelleGestionnaire() . ".pdf";
     }
 
     private $documentPath = null;
 
-    public function setDocumentPath($path){
+    public function setDocumentPath($path)
+    {
         $this->documentPath = $path;
         return $this;
     }
@@ -1174,7 +1194,7 @@ class ActivityPcruInfos
         return $this->error;
     }
 
-    public function addError( $errorMessage ) :self
+    public function addError($errorMessage): self
     {
         $this->error[] = $errorMessage;
         $this->setStatus(self::STATUS_ERROR_DATA);
@@ -1195,7 +1215,7 @@ class ActivityPcruInfos
         return $this->warnings;
     }
 
-    public function addWarning( string $warningMessage ) :self
+    public function addWarning(string $warningMessage): self
     {
         $this->warnings[] = $warningMessage;
         return $this;
@@ -1224,15 +1244,13 @@ class ActivityPcruInfos
         return $this;
     }
 
-    public function hasErrors() :bool
+    public function hasErrors(): bool
     {
         return $this->errorsRemote != null;
     }
 
-    public function clearErrors() :void
+    public function clearErrors(): void
     {
         $this->errorsRemote = null;
     }
-
-
 }

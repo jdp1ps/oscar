@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/11/15 10:09
@@ -120,7 +121,7 @@ class DateType implements ITrackable
         return $this->recursivity;
     }
 
-    public function setRecursivity( $value )
+    public function setRecursivity($value)
     {
         $this->recursivity = $value;
         return $this;
@@ -128,7 +129,7 @@ class DateType implements ITrackable
 
     public function getRecursivityArray()
     {
-        if( $this->recursivity ){
+        if ($this->recursivity) {
             return explode(',', $this->recursivity);
         } else {
             return [];
@@ -181,7 +182,8 @@ class DateType implements ITrackable
         return $this;
     }
 
-    function toArray(){
+    function toArray()
+    {
         return [
             'id' => $this->getId(),
             'label' => $this->getLabel(),
@@ -199,7 +201,8 @@ class DateType implements ITrackable
         return $this->roles;
     }
 
-    public function getRolesId() :array {
+    public function getRolesId(): array
+    {
         $roles = [];
         foreach ($this->getRoles() as $role) {
             $roles[] = $role->getId();
@@ -210,7 +213,7 @@ class DateType implements ITrackable
     /**
      * @return array
      */
-    public function getRolesIds() :array
+    public function getRolesIds(): array
     {
         $ids = [];
         foreach ($this->getRoles() as $r) {
@@ -249,7 +252,7 @@ class DateType implements ITrackable
     /**
      * @return $this
      */
-    public function resetRoles() :self
+    public function resetRoles(): self
     {
         $this->roles = new ArrayCollection();
         return $this;
@@ -258,10 +261,11 @@ class DateType implements ITrackable
 
     function __toString()
     {
-        return $this->getLabel() . ($this->getRecursivity() ? ' (' . $this->getRecursivity() .')' : "");
+        return $this->getLabel() . ($this->getRecursivity() ? ' (' . $this->getRecursivity() . ')' : "");
     }
 
-    function trac(){
+    function trac()
+    {
         return sprintf("%s (%s)", $this->getLabel(), $this->getDescription());
     }
 }

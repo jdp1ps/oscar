@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-09-12 09:49
@@ -33,14 +34,14 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function removeNotificationPersons( int $notificationId, array $personsIds ) :void
+    public function removeNotificationPersons(int $notificationId, array $personsIds): void
     {
         /** @var Notification $notification */
         $notification = $this->getEntityManager()->find(Notification::class, $notificationId);
 
         /** @var NotificationPerson $notificationPerson */
         foreach ($notification->getPersons() as $notificationPerson) {
-            if( in_array($notificationPerson->getPerson()->getId(), $personsIds) ){
+            if (in_array($notificationPerson->getPerson()->getId(), $personsIds)) {
                 $this->getEntityManager()->remove($notificationPerson);
             }
         }
@@ -132,7 +133,6 @@ class NotificationRepository extends EntityRepository
     {
         $dql = 'DELETE ' . Notification::class;
         $this->getEntityManager()->createQuery($dql)->getResult();
-
     }
 
     protected function getQueryBuilderDeleteBase()

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 19/11/15 10:09
@@ -88,7 +89,7 @@ class ActivityType implements ITrackable
     /**
      * @return integer
      */
-    public function getLft() :int
+    public function getLft(): int
     {
         return $this->lft;
     }
@@ -103,7 +104,7 @@ class ActivityType implements ITrackable
     /**
      * @return mixed
      */
-    public function getRgt() :int
+    public function getRgt(): int
     {
         return $this->rgt;
     }
@@ -193,7 +194,7 @@ class ActivityType implements ITrackable
         return $this;
     }
 
-    public function toJson() :array
+    public function toJson(): array
     {
         return [
             'id' => $this->getId(),
@@ -216,6 +217,4 @@ class ActivityType implements ITrackable
     {
         return $this->getRgt() - $this->getLft() !== 1;
     }
-
-
 }

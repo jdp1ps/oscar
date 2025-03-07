@@ -7,7 +7,6 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 const log = function(){
     let params = ['[AxiosOscar]'];
-    params.push(arguments);
     console.log.apply(params);
 };
 
@@ -15,10 +14,8 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const pendingOn = function(options){
     if( options.hasOwnProperty('pendingBack') && options.pendingBack === true ){
-        console.log("FULLSCREEN FALSE");
         GlobalModel.commit('pendingFullScreen', false);
     } else {
-        console.log("FULLSCREEN TRUE");
         GlobalModel.commit('pendingFullScreen', true);
     }
     let message = "Chargement des données";

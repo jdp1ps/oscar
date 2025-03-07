@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 16-04-25 11:13
@@ -35,9 +36,10 @@ class TimeSheet implements ITrackable
     /**
      * @return array
      */
-    public static function getFormatsSelect(){
+    public static function getFormatsSelect()
+    {
         static $format_labels;
-        if( $format_labels === null ){
+        if ($format_labels === null) {
             $format_labels = [
                 self::TIMESHEET_FORMAT_NONE => 'Pas de déclaration',
                 self::TIMESHEET_FORMAT_DAY => 'Quotidienne',
@@ -51,9 +53,10 @@ class TimeSheet implements ITrackable
     /**
      * @return array
      */
-    public static function getStatusSelect(){
+    public static function getStatusSelect()
+    {
         static $status_labels;
-        if( $status_labels === null ){
+        if ($status_labels === null) {
             $status_labels = [
                 self::STATUS_DRAFT => 'Brouillon',
                 self::STATUS_TOVALIDATE => 'Soumis à validation',
@@ -66,9 +69,10 @@ class TimeSheet implements ITrackable
         return $status_labels;
     }
 
-    public static function getStatusText(){
+    public static function getStatusText()
+    {
         static $status_text;
-        if( $status_text === null ){
+        if ($status_text === null) {
             $status_text = [
                 self::STATUS_DRAFT => 'draft',
                 self::STATUS_TOVALIDATE => 'send',
@@ -86,7 +90,8 @@ class TimeSheet implements ITrackable
      * @param $key
      * @return mixed
      */
-    public static function getStatusLabel( $key ){
+    public static function getStatusLabel($key)
+    {
         return self::getStatusSelect()[$key];
     }
 
@@ -94,8 +99,9 @@ class TimeSheet implements ITrackable
      * @param $key
      * @return mixed
      */
-    public static function getFormatLabel( $key ){
-       return self::getFormatsSelect()[$key];
+    public static function getFormatLabel($key)
+    {
+        return self::getFormatsSelect()[$key];
     }
 
     /**
@@ -229,11 +235,13 @@ class TimeSheet implements ITrackable
     const UNIT_MINUTE = 60;
     const UNIT_HOUR = 3600;
 
-    public function getDuration( $unit = self::UNIT_HOUR){
+    public function getDuration($unit = self::UNIT_HOUR)
+    {
         return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / $unit;
     }
 
-    public function toJson2(){
+    public function toJson2()
+    {
         $activityId = null;
         $activityLabel = null;
         $workpackageId = null;
@@ -245,7 +253,7 @@ class TimeSheet implements ITrackable
         $projectId = null;
 
 
-        if( $this->getWorkpackage() ){
+        if ($this->getWorkpackage()) {
             $workpackageId = $this->getWorkpackage()->getId();
             $workpackageLabel = (string)$this->getWorkpackage();
             $workpackageCode = $this->getWorkpackage()->getCode();
@@ -255,10 +263,9 @@ class TimeSheet implements ITrackable
             $projectId = $this->getWorkpackage()->getActivity()->getProject()->getId();
             $projectAcronym = $this->getWorkpackage()->getActivity()->getProject()->getAcronym();
             $projectLabel = $this->getWorkpackage()->getActivity()->getProject()->getLabel();
-
         }
         // Pas de lot, mais une activité ?
-        else if ( $this->getActivity() ){
+        else if ($this->getActivity()) {
             $activityId = $this->getActivity()->getId();
             $activityLabel = (string)$this->getActivity();
         }
@@ -290,11 +297,13 @@ class TimeSheet implements ITrackable
     /**
      * @return string
      */
-    public function getPeriodCode(){
+    public function getPeriodCode()
+    {
         return $this->getDateFrom()->format('Y-m');
     }
 
-    public function toJson(){
+    public function toJson()
+    {
         $activityId = null;
         $activityLabel = null;
         $workpackageId = null;
@@ -306,7 +315,7 @@ class TimeSheet implements ITrackable
         $projectId = null;
 
 
-        if( $this->getWorkpackage() ){
+        if ($this->getWorkpackage()) {
             $workpackageId = $this->getWorkpackage()->getId();
             $workpackageLabel = (string)$this->getWorkpackage();
             $workpackageCode = $this->getWorkpackage()->getCode();
@@ -316,10 +325,9 @@ class TimeSheet implements ITrackable
             $projectId = $this->getWorkpackage()->getActivity()->getProject()->getId();
             $projectAcronym = $this->getWorkpackage()->getActivity()->getProject()->getAcronym();
             $projectLabel = $this->getWorkpackage()->getActivity()->getProject()->getLabel();
-
         }
         // Pas de lot, mais une activité ?
-        else if ( $this->getActivity() ){
+        else if ($this->getActivity()) {
             $activityId = $this->getActivity()->getId();
             $activityLabel = (string)$this->getActivity();
         }
@@ -338,10 +346,10 @@ class TimeSheet implements ITrackable
             'project_acronym' => $projectAcronym,
             'project_label' => $projectLabel,
 
-            'icsuid'=> $this->getIcsUid(),
-            'icsfileuid'=> $this->getIcsFileUid(),
-            'icsfilename'=> $this->getIcsFileName(),
-            'icsfiledateadded'=> $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
+            'icsuid' => $this->getIcsUid(),
+            'icsfileuid' => $this->getIcsFileUid(),
+            'icsfilename' => $this->getIcsFileName(),
+            'icsfiledateadded' => $this->getIcsFileDateAdded() ? $this->getIcsFileDateAdded()->format('c') : null,
 
             'label' => $this->getLabel(),
             'description' => $this->getComment(),
@@ -402,7 +410,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedProjectBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidatedProjectBy();
         }
         return null;
@@ -413,7 +421,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedProjectById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationActivityById();
         }
         return null;
@@ -424,7 +432,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedProjectAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationActivityAt();
         }
         return null;
@@ -435,7 +443,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedProjectBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectActivityBy();
         }
         return null;
@@ -446,7 +454,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedProjectById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectActivityById();
         }
         return null;
@@ -457,7 +465,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedProjectAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectActivityBy();
         }
         return null;
@@ -468,7 +476,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedProjectComment()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectActivityMessage();
         }
         return null;
@@ -480,7 +488,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedSciBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationSciBy();
         }
         return null;
@@ -491,7 +499,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedSciById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationSciById();
         }
         return null;
@@ -502,7 +510,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedSciAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationSciAt();
         }
         return null;
@@ -513,7 +521,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedAdminBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationAdmBy();
         }
         return null;
@@ -524,7 +532,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedAdminById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationAdmById();
         }
         return null;
@@ -535,7 +543,7 @@ class TimeSheet implements ITrackable
      */
     public function getValidatedAdminAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getValidationAdmAt();
         }
         return null;
@@ -546,7 +554,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedSciBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectSciBy();
         }
         return null;
@@ -557,7 +565,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedSciById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectSciById();
         }
         return null;
@@ -568,7 +576,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedSciAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectSciAt();
         }
         return null;
@@ -579,7 +587,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedSciComment()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectSciMessage();
         }
         return null;
@@ -590,7 +598,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedAdminBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectAdmBy();
         }
         return null;
@@ -601,7 +609,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedAdminById()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectAdmById();
         }
         return null;
@@ -612,7 +620,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedAdminAt()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectAdmAt();
         }
         return null;
@@ -623,7 +631,7 @@ class TimeSheet implements ITrackable
      */
     public function getRejectedAdminComment()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getRejectAdmMessage();
         }
         return null;
@@ -634,7 +642,7 @@ class TimeSheet implements ITrackable
      */
     public function getSendBy()
     {
-        if( $this->getValidationPeriod() ){
+        if ($this->getValidationPeriod()) {
             return $this->getValidationPeriod()->getDeclarer();
         }
         return null;
@@ -712,8 +720,9 @@ class TimeSheet implements ITrackable
         return $this;
     }
 
-    public function getHours(){
-        return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp())/60/60;
+    public function getHours()
+    {
+        return ($this->getDateTo()->getTimestamp() - $this->getDateFrom()->getTimestamp()) / 60 / 60;
     }
 
     /**
@@ -721,7 +730,7 @@ class TimeSheet implements ITrackable
      */
     public function getLabel()
     {
-        if( $this->getWorkpackage() ){
+        if ($this->getWorkpackage()) {
             return (string)$this->getWorkpackage();
         }
         return $this->label;
@@ -770,7 +779,7 @@ class TimeSheet implements ITrackable
     public function setWorkpackage($workpackage)
     {
         $this->workpackage = $workpackage;
-        if( $workpackage ){
+        if ($workpackage) {
             $this->setActivity($workpackage->getActivity());
         }
         return $this;
@@ -851,7 +860,8 @@ class TimeSheet implements ITrackable
      *
      * @return int
      */
-    public function getYear(){
+    public function getYear()
+    {
         return intval($this->getDateFrom()->format('Y'));
     }
 
@@ -860,7 +870,8 @@ class TimeSheet implements ITrackable
      *
      * @return int
      */
-    public function getMonth(){
+    public function getMonth()
+    {
         return intval($this->getDateFrom()->format('m'));
     }
 
@@ -869,7 +880,8 @@ class TimeSheet implements ITrackable
      *
      * @return int
      */
-    public function getDate(){
+    public function getDate()
+    {
         return intval($this->getDateFrom()->format('d'));
     }
 
@@ -877,14 +889,17 @@ class TimeSheet implements ITrackable
     ///
     ///
     ///
-    public function isWaitingValidation(){
+    public function isWaitingValidation()
+    {
         return $this->getStatus() == self::STATUS_TOVALIDATE;
     }
-    public function isWaitingValidationAdmin(){
+    public function isWaitingValidationAdmin()
+    {
         return $this->getValidatedAdminAt() == null && $this->getStatus() == self::STATUS_TOVALIDATE;
     }
 
-    public function isWaitingValidationSci(){
+    public function isWaitingValidationSci()
+    {
         return $this->getValidatedSciAt() == null && $this->getStatus() == self::STATUS_TOVALIDATE;
     }
 
@@ -894,13 +909,14 @@ class TimeSheet implements ITrackable
         $activity = "Hors-Lot";
         $wpCode = $this->getLabel();
 
-        if($this->getActivity()){
+        if ($this->getActivity()) {
             $activity = $this->getActivity();
             $acronym = $this->getActivity()->getAcronym();
             $wpCode = $this->getWorkpackage() ? $this->getWorkpackage()->getCode() : 'no WP';
         }
 
-        return sprintf("[timesheet:%s] %s = %s '%s':'%s':'%s' (%s)",
+        return sprintf(
+            "[timesheet:%s] %s = %s '%s':'%s':'%s' (%s)",
             $this->getId(),
             $this->getDateFrom()->format('Y-m-d'),
             $this->getDuration(),
@@ -910,6 +926,4 @@ class TimeSheet implements ITrackable
             $this->getPerson()
         );
     }
-
-
 }

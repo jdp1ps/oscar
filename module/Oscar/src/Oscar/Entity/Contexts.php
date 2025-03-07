@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 23/02/16 15:12
@@ -25,7 +26,8 @@ class Contexts
      *
      * @return string[]
      */
-    public static function getContextsLabeled(){
+    public static function getContextsLabeled()
+    {
         return [
             self::APPLICATION =>    'Application',
             self::PROJECT =>        'Projet',

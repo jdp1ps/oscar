@@ -103,6 +103,14 @@
     "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9",
     "fullcode": "ACTIVITY-EDIT"
   },
+  "ACTIVITY-EDIT_LOCKED": {
+    "category_id": 2,
+    "spot": 7,
+    "root": "ACTIVITY-SHOW",
+    "code": "EDIT_LOCKED",
+    "libelle": "Modifier les informations g\u00e9n\u00e9rales d'une activit\u00e9 VEROUILLEE",
+    "fullcode": "ACTIVITY-EDIT_LOCKED"
+  },
   "ACTIVITY-PCRU": {
     "category_id": 2,
     "spot": 7,
@@ -898,6 +906,21 @@
     "code": "SIGNATURE_ADMIN_CONFIG",
     "libelle": "Configuration des processus métier",
     "fullcode": "SIGNATURE-SIGNATURE_ADMIN_CONFIG"
+  },
+  "ACTIVITY-AVENANTS_SHOW": {
+    "spot": 7,
+    "category_id": 2,
+    "code": "AVENANTS_SHOW",
+    "libelle": "Voir les avenants",
+    "fullcode": "ACTIVITY-AVENANTS_SHOW"
+  },
+  "ACTIVITY-AVENANTS_MANAGE": {
+    "spot": 7,
+    "category_id": 2,
+    "root": "ACTIVITY-AVENANTS_SHOW",
+    "code": "AVENANTS_MANAGE",
+    "libelle": "Créer/Modifier/Supprimer/Appliquer un avenant",
+    "fullcode": "ACTIVITY-AVENANTS_MANAGE"
   },
   "ACTIVITY-NOTES_SHOW": {
     "spot": 7,

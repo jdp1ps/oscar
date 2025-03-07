@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 29/05/15 12:01
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
@@ -18,14 +18,13 @@ use Oscar\Utils\PeriodInfos;
 
 class TimesheetRepository extends EntityRepository
 {
-
     protected function getQueryBuilderBase()
     {
         return $this->createQueryBuilder('t')
             ->orderBy('t.activity, t.dateFrom');
     }
 
-    public function getActivitiesIdsForDeclarer( int $declarerId, ?string $period = "" )
+    public function getActivitiesIdsForDeclarer(int $declarerId, ?string $period = "")
     {
         try {
             $rsm = new ResultSetMapping();
@@ -40,7 +39,7 @@ class TimesheetRepository extends EntityRepository
                         inner join activity a on wp.activity_id = a.id 
                         where wpp.person_id = :declarerId';
 
-            if( $period ){
+            if ($period) {
                 $sql .= ' and a.dateStart <= :period_end and a.dateEnd >= :period_start';
                 $p = PeriodInfos::getPeriodInfosObj($period);
                 $params['period_start'] = $p->getStart()->format('Y-m-d');
@@ -51,7 +50,6 @@ class TimesheetRepository extends EntityRepository
             $results = $query->setParameters($params)->getResult();
 
             return array_map('current', $results);
-
         } catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -65,7 +63,7 @@ class TimesheetRepository extends EntityRepository
      * @param int|null $activityId
      * @return int|mixed|string
      */
-    public function getForPerson( int $personId, bool $validatedOnly = false, ?int $activityId = null )
+    public function getForPerson(int $personId, bool $validatedOnly = false, ?int $activityId = null)
     {
         $qb = $this->getEntityManager()->getRepository(TimeSheet::class)
             ->createQueryBuilder('t')
@@ -127,7 +125,7 @@ class TimesheetRepository extends EntityRepository
      * @param array $uids
      * @return TimeSheet[]
      */
-    public function getImportedByUid( array $uids ) :array
+    public function getImportedByUid(array $uids): array
     {
         $qb = $this->createQueryBuilder('t')
             ->select('t')
@@ -145,7 +143,7 @@ class TimesheetRepository extends EntityRepository
      * @param bool $incudeNonActive
      * @return int|mixed|string
      */
-    public function getPeriodsPerson(int $personId, bool $incudeNonActive = false )
+    public function getPeriodsPerson(int $personId, bool $incudeNonActive = false)
     {
         $qb = $this->getEntityManager()->createQueryBuilder()
             ->select('a.dateStart', 'a.dateEnd', 'a.id', 'a.label', 'p.acronym')
@@ -159,7 +157,7 @@ class TimesheetRepository extends EntityRepository
             'personId' => $personId
         ];
 
-        if( $incudeNonActive == false ){
+        if ($incudeNonActive == false) {
             $qb->andWhere('a.status = :status');
             $parameters['status'] = Activity::STATUS_ACTIVE;
         }
@@ -219,9 +217,9 @@ class TimesheetRepository extends EntityRepository
                 INNER JOIN person p ON p.id = t.person_id 
                 LEFT JOIN activity a ON t.activity_id = a.id 
                 LEFT JOIN project pr ON pr.id = a.project_id 
-                WHERE p.id IN(".implode(',', $personIds).")";
+                WHERE p.id IN(" . implode(',', $personIds) . ")";
 
-        if( $periods ){
+        if ($periods) {
             $sql .= "AND to_char(t.datefrom, 'YYYY-MM') IN('" . implode("','", $periods) . "') ";
         }
         $sql .= "GROUP BY p.id, period, context, activity_id ORDER BY p.lastname, period";

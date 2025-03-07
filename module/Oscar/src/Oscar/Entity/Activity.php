@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 01/06/15 12:44
@@ -9,6 +10,7 @@ namespace Oscar\Entity;
 
 use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Laminas\Validator\Date;
@@ -360,6 +362,11 @@ class Activity implements ResourceInterface
      */
     private string $cacheLockedReason;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", options={"default": false})
+     */
+    private bool $locked = false;
 
     /**
      * Incidence financière.
@@ -413,6 +420,14 @@ class Activity implements ResourceInterface
      * @ORM\OneToMany(targetEntity="ActivityPerson", mappedBy="activity", cascade={"remove"})
      */
     protected $persons;
+
+    /**
+     * Liste des avenants
+     *
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ActivityAvenant", mappedBy="activity", cascade={"remove"})
+     */
+    protected $avenants;
 
     /**
      * @var ArrayCollection
@@ -568,8 +583,7 @@ class Activity implements ResourceInterface
     {
         if ($this->getAmount()) {
             return 100 / $this->getAmount() * abs($this->getTotalSpent());
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -714,9 +728,20 @@ class Activity implements ResourceInterface
     /**
      * @return \DateTime|null
      */
-    public function getDateCache() :?\DateTime
+    public function getDateCache(): ?\DateTime
     {
         return $this->dateCached;
+    }
+
+    public function getAvenants(): Collection
+    {
+        return $this->avenants;
+    }
+
+    public function setAvenants($avenants): self
+    {
+        $this->avenants = $avenants;
+        return $this;
     }
 
     /**
@@ -805,14 +830,12 @@ class Activity implements ResourceInterface
                     $percent = sprintf(' (%s)', $value);
                 }
                 $data = $this->getAmount() / 100 * floatval($value);
-            }
-            else {
+            } else {
                 $data = floatval($value);
             }
 
             $out = number_format($data, 2, ',', '');
-        }
-        else {
+        } else {
             $out = "0,00";
         }
 
@@ -868,8 +891,7 @@ class Activity implements ResourceInterface
             $missings = [];
             if (!$this->getProject()) {
                 $missings[] = _("L'activité doit être attachée à un projet avec un acronyme");
-            }
-            elseif (!$this->getAcronym()) {
+            } elseif (!$this->getAcronym()) {
                 $missings[] = _("Le projet de l'activité doit avoir un acronyme");
             }
 
@@ -1335,8 +1357,7 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateOpened()) {
             return $this->getDateOpened()->format($format);
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -1518,6 +1539,7 @@ class Activity implements ResourceInterface
         $this->persons = new ArrayCollection();
         $this->organizations = new ArrayCollection();
         $this->milestones = new ArrayCollection();
+        $this->avenants = new ArrayCollection();
         $this->payments = new ArrayCollection();
         $this->disciplines = new ArrayCollection();
         $this->motscles = new ArrayCollection();
@@ -2017,8 +2039,8 @@ class Activity implements ResourceInterface
 
         if (!isset($sluged[$this->getActivityType()->getNature()])) {
             $sluged[$this->getActivityType()->getNature()] = 'icon-acttype-' . $slugify->slugify(
-                    $this->getActivityType()->getNatureStr()
-                );
+                $this->getActivityType()->getNatureStr()
+            );
         }
 
         return $sluged[$this->getActivityType()->getNature()];
@@ -2059,8 +2081,7 @@ class Activity implements ResourceInterface
             if ($person == $activityPerson->getPerson()) {
                 if ($role !== null && $activityPerson->getRoleObj() !== $role) {
                     continue;
-                }
-                else {
+                } else {
                     $found = true;
                 }
             }
@@ -2126,8 +2147,7 @@ class Activity implements ResourceInterface
         }
         if (isset($this->_cachePersonsByRole[$role])) {
             return $this->_cachePersonsByRole[$role];
-        }
-        else {
+        } else {
             return [];
         }
     }
@@ -2209,8 +2229,7 @@ class Activity implements ResourceInterface
         }
         if (isset($this->_cacheOrganizationsByRole[$role])) {
             return $this->_cacheOrganizationsByRole[$role];
-        }
-        else {
+        } else {
             return [];
         }
     }
@@ -2253,8 +2272,7 @@ class Activity implements ResourceInterface
             $key = $document->getFileName();
             if (!array_key_exists($key, $out)) {
                 $out[$key] = $document;
-            }
-            else {
+            } else {
                 if ($out[$key]->getVersion() < $document->getVersion()) {
                     $out[$key] = $document;
                 }
@@ -2377,8 +2395,10 @@ class Activity implements ResourceInterface
     {
         /** @var ActivityPayment $payment */
         foreach ($this->getPayments() as $payment) {
-            if ($payment->getDatePayment() == $datePayment && $payment->getAmount(
-                ) == $amount && $payment->getDatePredicted() == $datePredicted) {
+            if (
+                $payment->getDatePayment() == $datePayment && $payment->getAmount(
+                ) == $amount && $payment->getDatePredicted() == $datePredicted
+            ) {
                 return true;
             }
         }
@@ -2523,8 +2543,7 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateStart()) {
             return $this->getDateStart()->format($format);
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -2539,8 +2558,7 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateEnd()) {
             return $this->getDateEnd()->format($format);
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -2553,8 +2571,7 @@ class Activity implements ResourceInterface
     {
         if ($this->getDateSigned()) {
             return $this->getDateSigned()->format($format);
-        }
-        else {
+        } else {
             return "";
         }
     }
@@ -2681,8 +2698,7 @@ class Activity implements ResourceInterface
                 $versementsEffectues[] = $amount;
                 $versementsEffectuesStr[] = $amount . ' le ' . $date;
                 $versementsEffectuesDate[] = $date;
-            }
-            else {
+            } else {
                 if ($payment->getDatePredicted()) {
                     $date = $payment->getDatePredicted()->format('d/m/Y');
                     $versementsPrevus[] = $amount;
@@ -3106,8 +3122,7 @@ class Activity implements ResourceInterface
             $this->_noTimesheetReason = [];
             if (!$this->getProject()) {
                 $reasons[] = "L'activité n'a pas de projet";
-            }
-            elseif (!$this->getProject()->getAcronym()) {
+            } elseif (!$this->getProject()->getAcronym()) {
                 $reasons[] = "Le projet de l'activité n'a pas d'acronyme'";
             }
 
@@ -3116,5 +3131,16 @@ class Activity implements ResourceInterface
             }
         }
         return $this->_noTimesheetReason;
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked;
+    }
+
+    public function setLocked(bool $locked): self
+    {
+        $this->locked = $locked;
+        return $this;
     }
 }

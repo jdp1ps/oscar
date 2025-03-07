@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 18/06/15 12:46
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\EntityRepository;
 

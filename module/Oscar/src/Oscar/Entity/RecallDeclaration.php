@@ -13,7 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RecallDeclaration
 {
-
     const CONTEXT_DECLARER = 'declarer';
     const CONTEXT_VALIDATOR = 'validator';
 
@@ -86,16 +85,16 @@ class RecallDeclaration
      * @param \DateTime|null $dateSend
      * @return $this
      */
-    public function logShipments( string $message = "Relance envoyée", ?\DateTime $dateSend = null ) :self
+    public function logShipments(string $message = "Relance envoyée", ?\DateTime $dateSend = null): self
     {
-        if( $dateSend == null ){
+        if ($dateSend == null) {
             $dateSend = new \DateTime();
         }
         $this->shipments[] = sprintf('%s\t%s', $dateSend->format('Y-m-d H:i:s'), $message);
         return $this;
     }
 
-    public function getRepport() :array
+    public function getRepport(): array
     {
         return [
             'lastSend' => $this->getLastSend()->format('Y-m-d H:i:s'),
@@ -105,27 +104,27 @@ class RecallDeclaration
         ];
     }
 
-    public function getShipments() :array
+    public function getShipments(): array
     {
-        if( $this->shipments == null ){
+        if ($this->shipments == null) {
             $this->shipments = [];
         }
         return $this->shipments;
     }
 
-    public function getNbrShipments() :int
+    public function getNbrShipments(): int
     {
         return count($this->getShipments());
     }
 
-    public function getShipmentsLogs() :string
+    public function getShipmentsLogs(): string
     {
         return implode( "\n", $this->getShipments() );
     }
 
-    public function getPeriod() :string
+    public function getPeriod(): string
     {
-        return sprintf('%s-%s', $this->getPeriodYear(), ($this->getPeriodMonth() < 10 ? '0' : '').$this->getPeriodMonth());
+        return sprintf('%s-%s', $this->getPeriodYear(), ($this->getPeriodMonth() < 10 ? '0' : '') . $this->getPeriodMonth());
     }
 
     /**
@@ -252,12 +251,12 @@ class RecallDeclaration
      * @param string $historyLine
      * @return $this
      */
-    public function addHistory( string $historyLine ) :self
+    public function addHistory(string $historyLine): self
     {
-        if( $this->history == null ){
+        if ($this->history == null) {
             $this->history = "";
         }
-        $this->history .= $historyLine."\n";
+        $this->history .= $historyLine . "\n";
         return $this;
     }
 
@@ -265,6 +264,4 @@ class RecallDeclaration
     {
         return sprintf('[%s] Envoyé le %s à %s pour la période %s-%s', $this->getId(), $this->getLastSend()->format('Y-m-d H:i:s'), $this->getPerson(), $this->getPeriodYear(), $this->getPeriodMonth());
     }
-
-
 }

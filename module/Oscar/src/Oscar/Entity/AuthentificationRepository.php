@@ -1,4 +1,5 @@
 <?php
+
 namespace Oscar\Entity;
 
 use Doctrine\ORM\EntityRepository;
@@ -10,7 +11,7 @@ class AuthentificationRepository extends EntityRepository
      * @param bool $normalize
      * @return Authentification|null
      */
-    public function getAuthentificationPersonNullable(Person $person, bool $normalize) :?Authentification
+    public function getAuthentificationPersonNullable(Person $person, bool $normalize): ?Authentification
     {
         try {
             return $this->getAuthentificationPerson($person, $normalize);
@@ -26,7 +27,7 @@ class AuthentificationRepository extends EntityRepository
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getAuthentificationPerson(Person $person, bool $normalize = false) :Authentification
+    public function getAuthentificationPerson(Person $person, bool $normalize = false): Authentification
     {
         return $this->getAuthentificationByUsername($person->getLadapLogin(), $normalize);
     }
@@ -38,7 +39,7 @@ class AuthentificationRepository extends EntityRepository
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getAuthentificationByUsername( $username, $normalize=false ) :Authentification
+    public function getAuthentificationByUsername($username, $normalize = false): Authentification
     {
         return $this->createQueryBuilder('a')
             ->where($normalize ? 'lower(a.username) = lower(:username)' : 'a.username = :username')

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-11-21 16:03
@@ -7,10 +8,8 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-
 
 class RecallExceptionRepository extends EntityRepository
 {
@@ -58,7 +57,7 @@ class RecallExceptionRepository extends EntityRepository
      * @param int $personId
      * @return bool
      */
-    public function isInWhiteList( int $personId ): bool
+    public function isInWhiteList(int $personId): bool
     {
         $r = $this->getBaseIncludeQueryBuilder()
             ->andWhere('p.id = :personid')
@@ -73,7 +72,7 @@ class RecallExceptionRepository extends EntityRepository
      * @param int $personId
      * @return bool
      */
-    public function isInBlackList( int $personId ): bool
+    public function isInBlackList(int $personId): bool
     {
         $r = $this->getBaseExcludeQueryBuilder()
             ->andWhere('p.id = :personid')
@@ -84,7 +83,7 @@ class RecallExceptionRepository extends EntityRepository
         return count($r) > 0;
     }
 
-    public function removeDeclarerFromBlacklist( int $personId ):void
+    public function removeDeclarerFromBlacklist(int $personId): void
     {
         $exceptions = $this->getBaseExcludeQueryBuilder()
             ->andWhere('e.person = :personId')
@@ -96,7 +95,7 @@ class RecallExceptionRepository extends EntityRepository
         }
     }
 
-    public function removeDeclarerFromWhitelist( int $personId ):void
+    public function removeDeclarerFromWhitelist(int $personId): void
     {
         $exceptions = $this->getBaseIncludeQueryBuilder()
             ->andWhere('e.person = :personId')

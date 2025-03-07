@@ -13,7 +13,6 @@ use Laminas\Permissions\Acl\Resource\ResourceInterface;
  */
 class ActivityNote implements ResourceInterface
 {
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")

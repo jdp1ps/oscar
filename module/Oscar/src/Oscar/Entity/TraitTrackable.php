@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 03/11/15 14:35
@@ -17,7 +18,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 trait TraitTrackable
 {
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -205,6 +205,4 @@ trait TraitTrackable
     {
         $this->dateCreated = new \DateTime();
     }
-
-
 }

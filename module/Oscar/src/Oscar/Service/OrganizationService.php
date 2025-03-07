@@ -698,7 +698,8 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
      * Retourne le résultat de la recherche $search.
      *
      * @param string $search
-     *
+     * @param int $page
+     * @param array $filter
      * @return UnicaenDoctrinePaginator
      */
     public function getOrganizationsSearchPaged(string $search, int $page, array $filter = []): UnicaenDoctrinePaginator

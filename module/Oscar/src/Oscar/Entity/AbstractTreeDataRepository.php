@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 18/06/15 12:05
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 use Doctrine\ORM\EntityRepository;
 
@@ -22,11 +22,12 @@ class AbstractTreeDataRepository extends EntityRepository
      * @param AbstractTreeData $child
      * @param AbstractTreeData $parent
      */
-    public function addTo( AbstractTreeData $child, AbstractTreeData $parent ){
+    public function addTo(AbstractTreeData $child, AbstractTreeData $parent)
+    {
         $parentRight = $parent->getRgt();
         $em = $this->getEntityManager();
         $child->setLft($parentRight);
-        $child->setRgt($parentRight+1);
+        $child->setRgt($parentRight + 1);
 
 
         $qb = $em->createQueryBuilder();
@@ -34,19 +35,19 @@ class AbstractTreeDataRepository extends EntityRepository
         $updateLeft = $em->createQueryBuilder()->select('e')
             ->from($this->getClassName(), 'e')
             ->where('e.lft > :parentRgt')
-            ->getQuery()->execute(array('parentRgt'=>$parentRight));
+            ->getQuery()->execute(array('parentRgt' => $parentRight));
 
-        foreach($updateLeft as $u){
-            $u->setLft($u->getLft()+2);
+        foreach ($updateLeft as $u) {
+            $u->setLft($u->getLft() + 2);
         }
 
         $updateRight = $em->createQueryBuilder()->select('e')
             ->from($this->getClassName(), 'e')
             ->where('e.rgt >= :parentRgt')
-            ->getQuery()->execute(array('parentRgt'=>$parentRight));
+            ->getQuery()->execute(array('parentRgt' => $parentRight));
 
-        foreach($updateRight as $u){
-            $u->setRgt($u->getRgt()+2);
+        foreach ($updateRight as $u) {
+            $u->setRgt($u->getRgt() + 2);
         }
 /*
         $em->createQueryBuilder()->update($this->getClassName(), 'e')
@@ -59,13 +60,13 @@ class AbstractTreeDataRepository extends EntityRepository
             ->where('e.rgt >= :parentRgt')
             ->getQuery()->execute(array('parentRgt' => $parentRight));;
 */
-       $em->persist($child);
-       $em->flush();
-       echo "SAVE";
-
+        $em->persist($child);
+        $em->flush();
+        echo "SAVE";
     }
 
-    public function deleteNode( AbstractTreeData $child ){
+    public function deleteNode(AbstractTreeData $child)
+    {
         // lft >= :lft / rgt <= :rgt
     }
 
@@ -78,7 +79,7 @@ class AbstractTreeDataRepository extends EntityRepository
         return $qb->getQuery()->setMaxResults(1)->getSingleResult();
     }
 
-    public function getPath( AbstractTreeData $node)
+    public function getPath(AbstractTreeData $node)
     {
         $qb = $this->getEntityManager()->createQueryBuilder('e');
 
@@ -93,11 +94,12 @@ class AbstractTreeDataRepository extends EntityRepository
         ))->setMaxResults(1)->execute();
     }
 
-    public function getChildren( AbstractTreeData $node ){
-
+    public function getChildren(AbstractTreeData $node)
+    {
     }
 
-    public function getAll(){
+    public function getAll()
+    {
         $query = $this->createQueryBuilder('t')->select()->addOrderBy('t.lft', 'ASC')->addOrderBy('t.rgt', 'ASC');
         return $query->getQuery()->execute();
     }

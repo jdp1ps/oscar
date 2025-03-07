@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-10-10 17:12
@@ -118,7 +119,8 @@ class NotificationPerson
         return $this->read;
     }
 
-    public function isRead(){
+    public function isRead()
+    {
         return $this->read;
     }
 
@@ -131,7 +133,4 @@ class NotificationPerson
 
         return $this;
     }
-
-
-
 }

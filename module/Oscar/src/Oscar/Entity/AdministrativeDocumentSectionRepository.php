@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: bouvry
@@ -8,19 +9,20 @@
 
 namespace Oscar\Entity;
 
-
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 
 class AdministrativeDocumentSectionRepository extends EntityRepository
 {
-    public function getAll( $asArray ){
+    public function getAll($asArray)
+    {
         return $this->getbaseQuery()
             ->getQuery()
             ->getResult($asArray ? Query::HYDRATE_ARRAY : Query::HYDRATE_OBJECT);
     }
 
-    public function getOne( $administrativeDocumentSectionId, $asArray = false ){
+    public function getOne($administrativeDocumentSectionId, $asArray = false)
+    {
         return $this->getbaseQuery()->where('s.id = :id')
             ->setParameter('id', $administrativeDocumentSectionId)
             ->getQuery()
@@ -30,7 +32,8 @@ class AdministrativeDocumentSectionRepository extends EntityRepository
     /**
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function getbaseQuery(){
+    protected function getbaseQuery()
+    {
         return $this->createQueryBuilder('s');
     }
 }

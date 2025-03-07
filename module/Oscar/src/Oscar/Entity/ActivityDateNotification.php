@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 17-10-04 14:45
@@ -13,5 +14,4 @@ namespace Oscar\Entity;
  */
 class ActivityDateNotification
 {
-
 }

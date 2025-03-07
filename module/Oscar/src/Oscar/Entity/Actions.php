@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  * @date: 23/02/16 15:18
@@ -6,7 +7,6 @@
  */
 
 namespace Oscar\Entity;
-
 
 class Actions
 {
@@ -21,7 +21,8 @@ class Actions
      *
      * @return string[]
      */
-    public static function getActionsLabeled(){
+    public static function getActionsLabeled()
+    {
         return [
             self::PROJECT_CREATE                => 'Créer un projet',
             self::PROJECT_EDIT                  => 'Éditer un projet',

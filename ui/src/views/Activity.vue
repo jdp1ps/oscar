@@ -307,7 +307,9 @@
           </p>
           <p class="texthighlight baseline">
             Mots clés :
-            <span class="cartouche xs" style="line-break: anywhere;" v-for="m in core.motscles">{{ m }}</span>
+            <span class="cartouche complementary" style="line-break: anywhere;" v-for="m in core.motscles">
+              <i class="icon-tag"></i> {{ m }}
+            </span>
           </p>
         </div>
       </div>
@@ -315,27 +317,42 @@
       <div class="row">
         <div class="col-md-12">
           <nav class="admin-bar">
-            <a class="btn btn-primary btn-xs" v-if="credentials.core.edit" :href="core.urls.edit">
+            <template v-if="credentials.lock_edit">
+            <a class="btn btn-info" v-if="credentials.lock" @click="handlerLock()">
+              <i class="icon-lock-open"></i>
+              Déverrouiller</a>
+            <a class="btn btn-info" v-else  @click="handlerUnlock()">
+              <i class="icon-lock"></i>
+              Vérrouiller</a>
+            </template>
+            <span v-else-if="credentials.lock">
+              <strong v-if="credentials.lock" class="btn btn-default disabled">
+                <i class="icon-lock"></i>
+                VERROUILLEE
+              </strong>
+            </span>
+
+            <a class="btn btn-primary" v-if="credentials.core.edit" :href="core.urls.edit">
               <i class="icon-pencil"></i>
               Modifier les informations</a>
 
-            <a class="btn btn-xs btn-default" v-if="credentials.core.change_project" :href="core.urls.change_project">
+            <a class="btn btn-default" v-if="credentials.core.change_project" :href="core.urls.change_project">
               <i class="icon-cubes"></i>
               Modifier le projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="credentials.core.new_project" :href="core.urls.new_project">
+            <a class="btn btn-default" v-if="credentials.core.new_project" :href="core.urls.new_project">
               <i class="icon-cubes"></i>
               Créer un nouveau projet</a>
 
-            <a class="btn btn-xs btn-default" v-if="core.urls.duplicate" @click="handlerDuplicate">
+            <a class="btn btn-default" v-if="core.urls.duplicate" @click="handlerDuplicate">
               <i class="icon-paste"></i>
               Dupliquer</a>
 
-            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="handlerDebugShow($data)">
+            <a class="btn btn-warning" v-if="debugEnabled" @click="handlerDebugShow($data)">
               <i class="icon-bug"></i>
               Afficher le modèle</a>
 
-            <a class="btn btn-xs btn-warning" v-if="debugEnabled" @click="fetch">
+            <a class="btn btn-warning" v-if="debugEnabled" @click="fetch">
               <i class="icon-bug"></i>
               Recharger le modèle</a>
           </nav>
@@ -361,7 +378,6 @@
                           @update="handlerUpdatePersons"
           />
         </section>
-
         <section class="section-infos" id="partners" v-if="credentials.organizations.read">
           <h2>
             <span><i class="icon-building-filled"></i>Partenaires</span>
@@ -376,6 +392,22 @@
                           :url="organizationsUrl"
                           :url-new="organizationsUrlNew"
                           @update="handlerUpdateOrganizations"
+          />
+        </section>
+        <section class="section-infos" id="avenants" v-if="credentials.avenants.read">
+          <h2>
+            <span>
+              <i class="icon-hammer"></i>
+              Avenants
+            </span>
+          </h2>
+          <activity-avenants :avenants="avenants"
+                             :roles-person="rolesPersons"
+                             :roles-organization="rolesOrganizations"
+                             :current-persons="persons"
+                             :current-organizations="organizations"
+                             :manage="credentials.avenants.edit"
+                             @update="handlerUpdateAvenants"
           />
         </section>
         <section class="section-infos" id="documents" v-if="credentials.documents.read">
@@ -615,7 +647,7 @@
   </div>
 </template>
 <script>
-
+import ActivityAvenants from "./ActivityAvenants.vue";
 import ActivityDocument from "./ActivityDocument.vue";
 import ActivityLogs from "./ActivityLogs.vue";
 import ActivityNotes from "./ActivityNotes.vue";
@@ -643,7 +675,7 @@ export default {
   name: 'Activity',
 
   components: {
-    PersonDisplay,
+    ActivityAvenants,
     ActivityNotes,
     ActivityLogs,
     ActivityDocument,
@@ -652,6 +684,7 @@ export default {
     Loader,
     Payments,
     PersonCartouche,
+    PersonDisplay,
     Milestones,
     Modal,
     VueJsonPretty,
@@ -666,6 +699,7 @@ export default {
   data() {
     return {
       administration: null,
+      avenants:null,
       budget: null,
       core: null,
       credentials: null,
@@ -757,6 +791,22 @@ export default {
   },
 
   methods: {
+    performLock(action){
+      axios.post(this.url, {'action': action}).then((response) => {
+        this.fetch();
+      }, (err) => {
+        let error = AxiosMessage.manageErrorResponse(err).message;
+        GlobalModel.commit("addError", error);
+      })
+    },
+    handlerUnlock(){
+      this.performLock('lock');
+    },
+
+    handlerLock(){
+      this.performLock('unlock');
+    },
+
     testError(evt, err = "Une erreur affichée"){
       GlobalModel.commit("addError", err);
     },
@@ -813,6 +863,11 @@ export default {
       this.documents = res;
     },
 
+    handlerUpdateAvenants(avenants){
+      console.log("AVENANTS", avenants);
+      this.avenants = avenants;
+    },
+
     ////////////////////////////////////////// Système d'épingle
     handlerPurgeSticky() {
       this.sticky = [];
@@ -866,6 +921,10 @@ export default {
 
         if (response.data.activity.datas.spents) {
           this.spents = response.data.activity.datas.spents;
+        }
+
+        if (response.data.activity.datas.avenants) {
+          this.handlerUpdateAvenants(response.data.activity.datas.avenants);
         }
 
         if (response.data.activity.datas.administration) {
