@@ -14,6 +14,13 @@
 | *Starling*        | `starling`  | *2.14.x*     | *Testing* |
 
 > [Note de mise à jour pour la version STARLING ](doc/versions/version-2.14-starling.md)
+ 
+> **A VENIR**
+>  - PCRU (En attente du CNRS)
+>  - Dépenses : 
+>    - Système permettant de l'utiliser plusieurs requêtes
+>    - Intégration SIFAC+
+>  - Signature numériques : Nouveaux parapheurs
 
 
 ### Stable (MASTER)
