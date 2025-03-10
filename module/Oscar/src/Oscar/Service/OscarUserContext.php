@@ -11,6 +11,7 @@ namespace Oscar\Service;
 use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use BjyAuthorize\Exception\UnAuthorizedException;
 use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Oscar\Entity\Activity;
 use Oscar\Entity\ActivityPerson;
@@ -756,6 +757,8 @@ class OscarUserContext implements UseOscarConfigurationService, UseLoggerService
                 $this->_currentPerson = null;
                 // $this->getLoggerService()->warning("getCurrentPerson() => " . $ex->getMessage());
                 // ... can happening with users stored in database directly
+            } catch (OscarException $ex) {
+                $this->_currentPerson = null;
             }
         }
         return $this->_currentPerson;

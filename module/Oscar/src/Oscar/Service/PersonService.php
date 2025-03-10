@@ -66,6 +66,7 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
 
     /**
      * @return Person
+     * @throws OscarException
      */
     protected function getCurrentPerson()
     {
@@ -1655,8 +1656,13 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 $query->where('p.ladapLogin = :login')
                     ->setParameter('login', $login);
             }
-
-            $this->_cachePersonLdapLogin[$login] = $query->getQuery()->getSingleResult();
+            try {
+                $this->_cachePersonLdapLogin[$login] = $query->getQuery()->getSingleResult();
+            } catch (\Exception $e) {
+                $message = "L'identifiant '$login' est partagé par plusieurs personnes !";
+                $this->getLoggerService()->critical($message);
+                throw new OscarException($message);
+            }
         }
         return $this->_cachePersonLdapLogin[$login];
     }
