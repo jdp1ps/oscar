@@ -1097,8 +1097,12 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             } catch (Exception $e) {
             }
 
+            $activityLabel = $activity->log();
             $this->getEntityManager()->remove($activity);
             $this->getEntityManager()->flush();
+            $this->getActivityLogService()->addUserInfo(
+                sprintf(_("a supprimé l'activité '%s'"), $activityLabel)
+            );
 
             if (!$project) {
                 $this->redirect()->toRoute('contract/advancedsearch');

@@ -18,9 +18,10 @@
 > **A VENIR**
 >  - PCRU (En attente du CNRS)
 >  - Dépenses : 
->    - Système permettant de l'utiliser plusieurs requêtes
->    - Intégration SIFAC+
->  - Signature numériques : Nouveaux parapheurs
+>    - Système permettant de l'utiliser plusieurs requêtes (En cours)
+>    - Intégration SIFAC+ (En attente de la documentation de l'AMUE)
+>  - Signature numérique : Nouveaux parapheurs
+>  - Oscar Docker (prod) : A consolider/tester
 
 
 ### Stable (MASTER)

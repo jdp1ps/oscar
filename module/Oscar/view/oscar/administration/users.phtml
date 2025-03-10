@@ -235,8 +235,10 @@
 </script>
 </div> */ ?>
 <section class="container">
-    <div id="authentification"></div>
+    <div id="authentification" data-url="<?= $this->url('administration/users') ?>"></div>
 </section>
+<?= $this->Vite()->addJs('src/Authentification.js'); ?>
+<?php /****
 <script>
 
     require(['vue', 'vue-resource', 'mm', 'authentification'], function(Vue, VueResource, moment, Authentification){
@@ -273,3 +275,4 @@
         }).$mount('#authentification')
     })
 </script>
+*****/ ?>

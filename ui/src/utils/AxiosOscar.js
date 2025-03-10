@@ -81,5 +81,15 @@ export default {
             pendingOff(options);
         });
         return response;
+    },
+    deleteParams: (url, params, options = {}) => {
+        pendingOn(options);
+        let response = axios.delete(url, { data: params, 'Content-Type':'application/json'});
+        response.catch((error) => {
+            GlobalModel.commit('addError', AxiosMessage.manageErrorResponse(error).message);
+        }).finally(() => {
+            pendingOff(options);
+        });
+        return response;
     }
 };

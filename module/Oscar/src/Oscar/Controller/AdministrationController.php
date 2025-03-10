@@ -10,6 +10,10 @@ namespace Oscar\Controller;
 
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\ContractDocument;
 use Oscar\Entity\ContractDocumentRepository;
@@ -1103,37 +1107,47 @@ class AdministrationController extends AbstractOscarController implements UsePro
     public function usersAction()
     {
         $this->getOscarUserContextService()->check(Privileges::DROIT_USER_VISUALISATION);
-        $authenticated = $this->getEntityManager()->getRepository(Authentification::class)->findAll();
-        $roleDb = $this->getEntityManager()->getRepository(Role::class)->findAll();
+        if( $this->getRequest()->isXmlHttpRequest() || $this->getRequest()->getQuery('f') === 'json' ){
+            $out = [
+                'users' => [],
+                'roles' => [],
+                'urlLogs' => $this->url()->fromRoute('administration/users/logs'),
+                'urlRoles' => $this->url()->fromRoute('administration/users/roles'),
+            ];
 
-        $out = [
-            'users' => [],
-            'roles' => []
-        ];
+            $authenticated = $this->getEntityManager()->getRepository(Authentification::class)->findAll();
+            $roleDb = $this->getEntityManager()->getRepository(Role::class)->findAll();
 
-        /** @var Authentification $auth */
-        foreach ($authenticated as $auth) {
-            $d = $auth->toJson();
-            $person = null;
-            try {
-                $p = $this->getOscarUserContextService()->getPersonFromAuthentification($auth);
-                if ($p) {
-                    $person = $p->toJson();
+            /** @var Authentification $auth */
+            foreach ($authenticated as $auth) {
+                $d = $auth->toJson();
+                $d['error'] = null;
+                $d['warning'] = null;
+                $person = null;
+                try {
+                    $p = $this->getOscarUserContextService()->getPersonFromAuthentification($auth);
+                    if ($p) {
+                        $person = $p->toJson();
+                    } else {
+                        $d['warning'] = "Aucune personnes associée";
+                    }
+                } catch (OscarException $e){
+                    $d['error'] = "Plusieurs personnes partage cet identifiant";
                 }
-            } catch (\Exception $e) {
-                // Pas de Personne associée à cette authentification
+
+                $d['person'] = $person;
+                $out['users'][] = $d;
             }
 
-            $d['person'] = $person;
-            $out['users'][] = $d;
+            /** @var Role $role */
+            foreach ($roleDb as $role) {
+                $out['roles'][] = $this->getJsonRole($role);
+            }
+
+            return $this->jsonOutput($out);
         }
 
-        /** @var Role $role */
-        foreach ($roleDb as $role) {
-            $out['roles'][] = $this->getJsonRole($role);
-        }
-
-        return $out;
+        return [];
     }
 
     public function userRolesAction()
@@ -1142,8 +1156,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
             return $this->getResponseUnauthorized();
         }
 
-        $authentificationId = $this->params()->fromPost('authentification_id');
-        $roleId = $this->params()->fromPost('role_id');
+        $method = $this->getHttpXMethod();
+        $datas = $this->axiosGetDatas();
+
+        $authentificationId = $datas['authentification_id'];
+        $roleId = $datas['role_id'];
 
         try {
             /** @var Authentification $authentification */
@@ -1159,6 +1176,11 @@ class AdministrationController extends AbstractOscarController implements UsePro
             if (!$role) {
                 return $this->getResponseNotFound("Rôle '$roleId' introuvable.");
             }
+
+            $roleLabel = $role->getRoleId();
+            $authentificationLabel = $authentification->getUsername();
+
+
         } catch (\Exception $e) {
             return $this->getResponseInternalError("Rôle/Authentification introuvable : " . $e->getMessage());
         }
@@ -1167,20 +1189,26 @@ class AdministrationController extends AbstractOscarController implements UsePro
 
         switch ($method) {
             case 'POST':
+                $msg = sprintf(_("a ajouté le rôle applicatif '%s' au compte '%s'"), $roleLabel, $authentificationLabel);
                 try {
                     $authentification->addRole($role);
                     $this->getEntityManager()->flush();
+                    $this->getActivityLogService()->addUserInfo($msg, LogActivity::CONTEXT_APPLICATION);
                 } catch (UniqueConstraintViolationException $e) {
                     return $this->getResponseInternalError("Ce compte a déjà ce rôle.");
+                } catch (OptimisticLockException $e) {
+                    return $this->getResponseInternalError("OptimisticLockException : " . $e->getMessage());
+                } catch (ORMException $e) {
+                    return $this->getResponseInternalError("ORMException : " . $e->getMessage());
                 }
                 return $this->ajaxResponse($authentification->toJson());
             case 'DELETE':
+                $msg = sprintf(_("a retiré le rôle applicatif '%s' au compte '%s'"), $roleLabel, $authentificationLabel);
                 try {
                     $authentification->removeRole($role);
                     $this->getEntityManager()->flush();
-                } /*catch (Doct $e ){
-                    return $this->getResponseInternalError("Impossible de supprimer le role : " . $e->getMessage());
-                }*/ catch (\Exception $e) {
+                    $this->getActivityLogService()->addUserInfo($msg, LogActivity::CONTEXT_APPLICATION);
+                } catch (\Exception $e) {
                     return $this->getResponseInternalError(
                         get_class($e) . " - Impossible de supprimer le role : " . $e->getMessage()
                     );

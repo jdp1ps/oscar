@@ -34,6 +34,7 @@ export default defineConfig({
         admintypeorganization: resolve(__dirname, 'src/AdminTypeOrganization.js'),
         adminroleorganization: resolve(__dirname, 'src/AdminRoleOrganization.js'),
         activityworkpackage: resolve(__dirname, 'src/ActivityWorkpackage.js'),
+        authentification: resolve(__dirname, 'src/Authentification.js'),
         declarerslist: resolve(__dirname, 'src/DeclarersList.js'),
         organizationfiche: resolve(__dirname, 'src/OrganizationFiche.js'),
         documentsobserved: resolve(__dirname, 'src/DocumentsObserved.js'),

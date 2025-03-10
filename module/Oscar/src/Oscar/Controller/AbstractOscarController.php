@@ -216,6 +216,7 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
 
     protected function getHttpResponse($code, $content = null)
     {
+        $this->getLoggerService()->warning("[http $code] $content");
         $response = new Response();
         $response->setStatusCode($code);
         if ($content !== null) {
@@ -303,5 +304,40 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
     protected function getJsonREST()
     {
         return $this->getJsonPosted();
+    }
+
+    ////////////// Normalisation des échanges avec AXIOS
+    ///
+    protected function axiosGetDeleteDatas(): ?array {
+        $content = $this->getRequest()->getContent();
+        if( $content ){
+            $json = json_decode($content, true);
+            if( $json === null ){
+                $this->getLoggerService()->warning("Données JSON reçues non traitées");
+                return null;
+            }
+            return $json;
+        }
+        return null;
+    }
+
+    protected function axiosGetPostDatas(): ?array {
+        $content = $this->getRequest()->getPost();
+        if( $content ){
+            return $content->toArray();
+        }
+        return null;
+    }
+
+    protected function axiosGetDatas(): ?array {
+        $method = $this->getRequest()->getMethod();
+        switch( $method ){
+            case 'POST':
+                return $this->axiosGetPostDatas();
+            case 'DELETE':
+                return $this->axiosGetDeleteDatas();
+            default:
+                throw new OscarException("Unknow method '$method'.'");
+        }
     }
 }

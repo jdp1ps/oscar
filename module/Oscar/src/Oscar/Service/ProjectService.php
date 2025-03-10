@@ -53,6 +53,16 @@ class ProjectService implements UseServiceContainer
     }
 
     /**
+     * @return ActivityLogService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getActivityLogService()
+    {
+        return $this->getServiceContainer()->get(ActivityLogService::class);
+    }
+
+    /**
      * @return PersonService
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
@@ -467,8 +477,12 @@ class ProjectService implements UseServiceContainer
     public function deleteProject(Project $project)
     {
         try {
+            $projectLabel = "$project";
             $this->getEntityManager()->remove($project);
             $this->getEntityManager()->flush($project);
+            $this->getActivityLogService()->addUserInfo(
+                sprintf(_("a supprimé le projet '%s'"), $projectLabel)
+            );
             return true;
         } catch (ConstraintViolationException $e) {
             throw new OscarException(

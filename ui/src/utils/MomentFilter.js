@@ -67,6 +67,9 @@ export default {
     timeAgo(date, nullDisplay = 'Non définie') {
         return date ? moment(date).fromNow() : nullDisplay;
     },
+    time(date) {
+        return date ? moment(date).format("H:m:s") : '';
+    },
     date(date, nullDisplay = 'Non définie') {
         return date ? "le " + moment(date).format("D MMMM YYYY") : nullDisplay;
     },
