@@ -2,6 +2,10 @@
 
 ## Technique
 
+### Fichiers de configuration
+```
+cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php
+```
 
 ### Activer les éléments d'UI (Interface d'administration)
 ```bash
