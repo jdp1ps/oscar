@@ -2,6 +2,7 @@
 
 namespace Oscar\Service;
 
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query;
 use Moment\Moment;
@@ -1658,8 +1659,12 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
             }
             try {
                 $this->_cachePersonLdapLogin[$login] = $query->getQuery()->getSingleResult();
-            } catch (\Exception $e) {
+            } catch (NonUniqueResultException $e) {
                 $message = "L'identifiant '$login' est partagé par plusieurs personnes !";
+                $this->getLoggerService()->critical($message);
+                throw new OscarException($message);
+            } catch (NonUniqueResultException $e) {
+                $message = "L'identifiant '$login' n'a aucune personne associée";
                 $this->getLoggerService()->critical($message);
                 throw new OscarException($message);
             }
