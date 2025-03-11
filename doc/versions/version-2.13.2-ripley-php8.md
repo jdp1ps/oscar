@@ -1,6 +1,6 @@
 # Mise à Jour 2.13.2 "RIPLEY"
 
-> Attention, version disponible sur la branche **"ripley"**
+> Attention, version disponible sur la branche **"ripley" / "master"**
 
 ## Mise à jour et patch
 
@@ -127,10 +127,10 @@ Depuis https://git.unicaen.fr/open-source/oscar
    826e821d..a4996af6  spartan                -> origin/spartan
 ```
 
-Basculer sur la branche **ripley** : 
+Update mars 2025 : la version "Ripley" stable est sur la branche MASTER
 
 ```bash
-git checkout ripley-laminas-php8
+git checkout master
 ```
 
 ### Installation des librairies tiers 
@@ -188,7 +188,7 @@ php bin/oscar.php check:config
 Puis MAJ de la BDD si tout est OK
 
 ```bash
-php vendor/bin/doctrine-module orm:schema-tool:update --force
+php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 ```
 
 ```bash
@@ -278,26 +278,10 @@ Mise à jour de la quête SIFAC pour le chargement des dépenses engagées. la m
 
 ```php
 <?php
-
-function migrate_implode(string $separator, ?array $array)
-{
-    if (is_null($array)) {
-        return '';
-    }
-    return implode($separator, $array);
-}
-
-$param_postgresql_host = /*oscar_php8_postgresql*/ "localhost";
-$param_gearman_host = /*"oscar_php8_gearman"*/"localhost";
-$param_elastic_host = /*"'oscar_php8_elasticsearch:9200'"*/"localhost";
-
-
+// config/autoload/local.php
+//...
 return array(
-    'view_manager' => array(
-        'display_not_found_reason' => getenv('APPLICATION_ENV') == 'development',
-        'display_exceptions' => getenv('APPLICATION_ENV') == 'development',
-    ),
-
+    //...
     // Oscar
     'oscar' => [
          // Contenu...
@@ -346,11 +330,11 @@ Créer et donner les droits d'accès en écriture au dossier des signatures :
 
 ### Configuration des parapheurs
 
+> Même si vous n'utilisez pas la signature numérique, copié quand même les fichiers de configurations
+
 ```
 cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php
 ```
 
 Se rendre dans l'administration des privilèges pour accorder les droits d'accès en fonction des rôles.
 
-
-> En cours
