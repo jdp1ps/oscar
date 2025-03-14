@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class Project
- * @ORM\Entity(repositoryClass="LogActivityRepository")
+ * @ORM\Entity(repositoryClass="ActivityLogRepository")
  */
 class LogActivity
 {
