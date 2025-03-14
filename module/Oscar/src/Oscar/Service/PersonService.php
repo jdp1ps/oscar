@@ -2527,7 +2527,8 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         Person $person,
         Role $role,
         $dateStart = null,
-        $dateEnd = null
+        $dateEnd = null,
+        ?string $connectorName = null
     ) {
         if (!$organization->hasPerson($person, $role)) {
             $message = sprintf(
@@ -2546,6 +2547,10 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                 ->setDateStart($dateStart)
                 ->setDateEnd($dateEnd);
 
+            if( $connectorName !== null ) {
+                $op->setOrigin($connectorName);
+            }
+
             $this->getEntityManager()->flush($op);
 
             if ($role->isPrincipal()) {
@@ -2557,7 +2562,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
                     }
                 }
                 foreach ($organization->getProjects() as $op) {
-                    $this->getLoggerService()->info("Projet : " . $op->getProject());
                     if ($op->isPrincipal()) {
                         foreach ($op->getProject()->getActivities() as $a) {
                             $this->getNotificationService()->jobUpdateNotificationsActivity($a);
@@ -2583,7 +2587,6 @@ class PersonService implements UseOscarConfigurationService, UseEntityManager, U
         if ($organizationPerson->isPrincipal()) {
             /** @var OrganizationService $os */
             $os = $this->getOrganizationService();
-
             foreach (
                 $os->getOrganizationActivititiesPrincipalActive(
                     $organizationPerson->getOrganization()

@@ -317,7 +317,7 @@ class ConnectorPersonDB extends AbstractConnector
     {
         if ($this->personHydrator === null) {
             $this->personHydrator = new ConnectorPersonHydrator(
-                $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
+                $this->getServiceLocator()
             );
             $this->personHydrator->setPurge($this->getOptionPurge());
         }

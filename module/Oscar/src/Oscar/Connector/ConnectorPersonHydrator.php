@@ -8,8 +8,10 @@
 namespace Oscar\Connector;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Laminas\ServiceManager\ServiceManager;
 use Oscar\Entity\Organization;
 use Oscar\Entity\OrganizationPerson;
 use Oscar\Entity\OrganizationRepository;
@@ -19,6 +21,7 @@ use Oscar\Entity\RoleRepository;
 use Oscar\Exception\ConnectorException;
 use Oscar\Exception\OscarException;
 use Oscar\Factory\JsonToPersonFactory;
+use Oscar\Service\PersonService;
 
 /**
  * Cette classe centralise l'analyse des données d'un personne pour mettre à jour un objet Person avec.
@@ -28,12 +31,15 @@ use Oscar\Factory\JsonToPersonFactory;
  */
 class ConnectorPersonHydrator
 {
+
+    private $serviceManager;
+
     /**
      * @return OrganizationRepository
      */
     public function getOrganizationRepository()
     {
-        return $this->entityManager->getRepository(Organization::class);
+        return $this->getEntityManager()->getRepository(Organization::class);
     }
 
     /**
@@ -41,15 +47,47 @@ class ConnectorPersonHydrator
      */
     public function getRoleRepository()
     {
-        return $this->entityManager->getRepository(Role::class);
+        return $this->getEntityManager()->getRepository(Role::class);
     }
 
     /**
-     * @return \Doctrine\ORM\EntityRepository
+     * @return ServiceManager
      */
-    public function getOrganizationPersonRepository()
+    public function getServiceManager()
     {
-        return $this->entityManager->getRepository(OrganizationPerson::class);
+        return $this->serviceManager;
+    }
+
+    /**
+     * @return EntityRepository
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getOrganizationPersonRepository() :EntityRepository
+    {
+        return $this->getEntityManager()->getRepository(OrganizationPerson::class);
+    }
+
+
+    /**
+     * @return EntityManager
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getEntityManager() :EntityManager
+    {
+        return $this->getServiceManager()->get('Doctrine\ORM\EntityManager');
+    }
+
+    /**
+     * @return PersonService
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function getPersonService() :PersonService
+    {
+        return $this->getServiceManager()->get(PersonService::class);
     }
 
     private $repport;
@@ -85,9 +123,9 @@ class ConnectorPersonHydrator
      * ConnectorPersonHydrator constructor.
      * @param EntityManager $entityManager
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(ServiceManager $serviceManager)
     {
-        $this->entityManager = $entityManager;
+        $this->serviceManager = $serviceManager;
     }
 
     /**
@@ -160,15 +198,15 @@ class ConnectorPersonHydrator
         ///////////////////////////////////
         /// Récupération des rôles synchronisés par organisation
         $syncRoles = [];
-        /** @var OrganizationPerson $organizationperson */
-        foreach ($personOscar->getOrganizations() as $organizationperson) {
-            if ($organizationperson->getOrigin() == $connectorName) {
-                $organizationCode = $organizationperson->getOrganization()->getCode();
+        /** @var OrganizationPerson $organizationPerson */
+        foreach ($personOscar->getOrganizations() as $organizationPerson) {
+            if ($organizationPerson->getOrigin() == $connectorName) {
+                $organizationCode = $organizationPerson->getOrganization()->getCode();
                 if (!array_key_exists($organizationCode, $syncRoles)) {
                     $syncRoles[$organizationCode] = [];
                 }
-                if (!in_array($organizationperson->getRoleObj()->getRoleId(), $syncRoles[$organizationCode])) {
-                    $syncRoles[$organizationCode][] = $organizationperson->getRoleObj()->getRoleId();
+                if (!in_array($organizationPerson->getRoleObj()->getRoleId(), $syncRoles[$organizationCode])) {
+                    $syncRoles[$organizationCode][] = $organizationPerson->getRoleObj()->getRoleId();
                 }
             }
         }
@@ -184,6 +222,7 @@ class ConnectorPersonHydrator
                         foreach ($roles as $roleId) {
                             if (array_key_exists($organizationCode, $syncRoles)) {
                                 if (in_array($roleId, $syncRoles[$organizationCode])) {
+                                    // Rôle déjà synchronisé
                                     array_splice(
                                         $syncRoles[$organizationCode],
                                         array_search($roleId, $syncRoles[$organizationCode]),
@@ -193,13 +232,9 @@ class ConnectorPersonHydrator
                             }
                             if (array_key_exists($roleId, $rolesOscar)) {
                                 if (!$organization->hasPerson($personOscar, $roleId)) {
-                                    $roleOscar = new OrganizationPerson();
-                                    $this->entityManager->persist($roleOscar);
-                                    $roleOscar->setPerson($personOscar)
-                                        ->setOrganization($organization)
-                                        ->setOrigin($connectorName)
-                                        ->setRoleObj($rolesOscar[$roleId]);
-                                    $personOscar->getOrganizations()->add($roleOscar);
+
+                                    $this->getPersonService()->personOrganizationAdd($organization, $personOscar, $rolesOscar[$roleId],null,null, $connectorName);
+
                                     $this->repport->addupdated(
                                         sprintf(
                                             "Ajout du rôle '%s' dans '%s' pour '%s' ",
@@ -249,18 +284,18 @@ class ConnectorPersonHydrator
 
         // Purge des rôles supprimés
         foreach ($syncRoles as $code => $roles) {
-            if (count($syncRoles[$code]) < 0) {
+            if (count($roles) <= 0) {
                 continue;
             }
-
             /** @var OrganizationPerson $organizationPerson */
             foreach ($personOscar->getOrganizations() as $organizationPerson) {
                 $roleId = $organizationPerson->getRole();
                 $codeOrg = $organizationPerson->getOrganization()->getCode();
+
                 if ($codeOrg == $code) {
                     if (in_array($roleId, $syncRoles[$code])) {
                         if ($this->getPurge()) {
-                            $this->entityManager->remove($organizationPerson);
+                            $this->getPersonService()->personOrganizationRemove($organizationPerson);
                             $this->repport->addremoved(
                                 sprintf(
                                     "Suppression du rôle %s pour %s dans %s.",
