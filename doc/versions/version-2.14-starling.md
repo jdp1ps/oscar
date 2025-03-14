@@ -24,6 +24,9 @@
    - Champs exportés : Ajout **Description** (de l'activité)
    - Champs exportés : Ajout **Mots-clefs** (de l'activité)
  
+ - **Feuille de temps**
+   - Refonte de l'interface de saisie (migration technique)
+   - L'écran de synthèse personnel a été enrichi avec différents sous-totaux 
 - **Système d'épingle** permettant d'épingler une activité. Les activités épinglées sont accessibles via un menu d'accès disponible depuis la fiche activité et l'accueil oscar
 
 - **Administration**
