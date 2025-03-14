@@ -74,7 +74,7 @@ class ConnectorPersonJsonHttpAuthBasic extends AbstractConnectorOscar
     {
         if( $this->personHydrator === null ){
             $this->personHydrator = new ConnectorPersonHydrator(
-                $this->getEntityManager()
+                $this->getServiceManager()
             );
             $this->personHydrator->setPurge($this->getOptionPurge());
         }

@@ -77,8 +77,9 @@ class ConnectorPersonREST extends AbstractConnector
         $connectorClass = $this->getHydratorClass();
         if ($this->personHydrator === null) {
             $this->personHydrator = new $connectorClass(
-                $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')
+                $this->getServiceLocator()
             );
+
             $this->customizeHydrator($this->personHydrator);
             $this->personHydrator->setPurge($this->getOptionPurge());
         }
