@@ -1,26 +1,60 @@
-# Configuration
+##############################################
+
+### Configuration générale
 config/autoload/local.php
 config/autoload/oscar-editable.yml
 config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 config/autoload/unicaen-signature.local.php
 config/oscarworker.service
-trash
 
-# Développement
+# Connecteurs
+/config/connectors/*.yml
+!/config/connector/*.yml.dist
+/config/connectors/*.pem
+
+### Logs
+/logs/*
+!/logs/.gitkeep
+
+### Data / Cache
+data/**.*
+
+### Customisation CSS
+/public/custom/*
+!/public/custom/.gitkeep
+
+### Maintenance DB
 databases_maintenance/*.sh
 databases_maintenance/backup/*.sql
 databases_maintenance/copy-prod-to-local.sh
 !databases_maintenance/backup/.gitkeep
 
-# Modules
+### Docker (dev)
+# Volumes
+docker/dev/volumes/*
+!docker/dev/volumes/databases/.gitkeep
+!docker/dev/volumes/documents/activity/.gitkeep
+!docker/dev/volumes/documents/pcru/.gitkeep
+!docker/dev/volumes/documents/public/.gitkeep
+!docker/dev/volumes/documents/request/.gitkeep
+!docker/dev/volumes/documents/signature/.gitkeep
+
+### Modules
 module/UnicaenSignature
 
+### Fichiers temporaires
 tmp/*
 !tmp/.gitkeep
-sandbox
-debug
-DEV.md
+!tmp/.gitkeep
+!tmp/.gitkeep
+!tmp/.gitkeep
+!tmp/.gitkeep
+
+# Old
+socket/config.json
+
+### Développement
 composer.phar
 composer-stable.phar
 config/autoload/local.docker.php
@@ -34,32 +68,18 @@ prototype/timesheet/*
 public/js/oscar/dist/index.html
 public/js/oscar/dist/client.css
 public/js/oscar/dist/client.css.map
-
-# VUE CLI
 public/js/oscar/dist/demo.html
 
+### Documentation
 doc/*.html
-
-# Connecteurs
-/config/connectors/*.yml
-!/config/connector/*.yml.dist
-/config/connectors/*.pem
-socket/config.json
-
-# Documentation
 /doc/*.pdf
 /doc/build
 
-# Logs
-/logs/*
-!/logs/.gitkeep
-
-# custom
-/public/custom/*
-!/public/custom/.gitkeep
-
-# Data & Cache
-data/**.*
+### Divers
+sandbox
+debug
+DEV.md
+trash
 
 # Cache Doctrine
 data/DoctrineORMModule
@@ -127,6 +147,9 @@ Dockerfile_*
 *#
 public/documentation
 module/Demo
+
+################################# 
+## ANCIENS
 
 # DOCKER
 dockerize/local/*

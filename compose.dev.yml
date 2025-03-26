@@ -1,0 +1,66 @@
+#
+# DOCKER (Développement)
+networks:
+  oscar-dev-network:
+    driver: bridge
+
+services:
+  oscar-dev-postgres:
+    container_name: oscar-dev-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: oscar_dev_user
+      POSTGRES_PASSWORD: oscar_dev_pass
+      POSTGRES_DB: oscar_dev_db
+    networks:
+      - oscar-dev-network
+    env_file:
+      - .env.docker.dev
+    ports:
+      - 6543:5432
+    volumes:
+      - ./docker/dev/volumes/databases/oscar_dev_data:/var/lib/postgresql/data
+      - ./docker/dev/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+    build:
+      context: ./docker/dev/postgresql
+      dockerfile: Dockerfile
+
+  oscar-dev-apache:
+    container_name: oscar-dev-apache
+    restart: unless-stopped
+    volumes:
+      - ./:/var/application
+    depends_on:
+      - oscar-dev-gearman
+    networks:
+      - oscar-dev-network
+    env_file:
+      - .env.docker.dev
+    build:
+      context: ./docker/dev/apache/
+      dockerfile: Dockerfile
+    ports:
+      - 8888:80
+
+  oscar-dev-gearman:
+    container_name: oscar-dev-gearman
+    image: artefactual/gearmand:1.1.21.2-alpine
+    networks:
+      - oscar-dev-network
+    tty: true
+    restart: "unless-stopped"
+
+#  oscar-dev-worker:
+#    container_name: oscar-dev-worker
+#    restart: unless-stopped
+#    volumes:
+#      - ./:/var/application
+#    depends_on:
+#      - oscar-dev-gearman
+#    networks:
+#      - oscar-dev-network
+#    env_file:
+#      - .env.docker.dev
+#    build:
+#      context: ./docker/dev/worker
+#      dockerfile: Dockerfile
