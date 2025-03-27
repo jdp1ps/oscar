@@ -112,3 +112,14 @@ services:
 
     ports:
       - 5173:5173
+
+  # KIBANA
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.1
+    container_name: oscar-dev-kibana
+    networks:
+      - oscar-dev-network
+    environment:
+      - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
+    ports:
+      - "5601:5601"  # Port Kibana
