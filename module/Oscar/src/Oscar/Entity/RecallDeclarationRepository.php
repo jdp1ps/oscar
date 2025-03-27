@@ -25,7 +25,7 @@ class RecallDeclarationRepository extends EntityRepository
         int $personId,
         ?int $year = null,
         ?int $month = null,
-        ?string $context
+        ?string $context = ""
     ) {
         $qb = $this->createQueryBuilder('r')
             ->where('r.person = :person AND r.context = :context ')
