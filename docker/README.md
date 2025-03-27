@@ -40,16 +40,11 @@ docker compose -f compose.dev.yml up --build
 
 # Connection à Oscar
 docker compose -f compose.dev.yml exec oscar-dev-apache /bin/bash
-
-# On Refresh l'installation
-. oscar-update.sh
-
-# Création de l'administrateur
-php bin/oscar.php auth:add
-
-# Le déclarer Admin
-php bin/oscar.php auth:promote -l administrateur
 ```
+
+Accès : http//localhost:8888
+Identifiant : administrateur
+Mdp : administrateur
 
 ## Architecture
 
