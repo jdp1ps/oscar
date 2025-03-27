@@ -69,18 +69,24 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
     protected function getTransport(){
         static $transport;
         if( $transport === null ){
-
             switch( $this->getOscarConfigurationService()->getConfiguration('mailer.transport.type') ){
                 case 'smtp':
                     $transport = (new \Swift_SmtpTransport(
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.host'),
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.port'),
-                        $this->getOscarConfigurationService()->getConfiguration('mailer.transport.security')))
-                        ->setUsername($this->getOscarConfigurationService()->getConfiguration('mailer.transport.username'))
-                        ->setPassword($this->getOscarConfigurationService()->getConfiguration('mailer.transport.password'));
+                        $this->getOscarConfigurationService()->getConfiguration('mailer.transport.security')));
+                        try {
+
+                            $transport->setUsername($this->getOscarConfigurationService()->getConfiguration('mailer.transport.username'));
+                            $transport->setPassword($this->getOscarConfigurationService()->getConfiguration('mailer.transport.password'));
+
+                        } catch (\Exception $e) {
+
+                        }
                     break;
 
                 case 'sendmail':
+                    $this->getLoggerService()->info("Use sendmail : " . $this->getOscarConfigurationService()->getConfiguration('mailer.transport.cmd'));
                     $transport = new \Swift_SendmailTransport($this->getOscarConfigurationService()->getConfiguration('mailer.transport.cmd'));
                     break;
 
@@ -137,11 +143,12 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
      */
     public function send( \Swift_Message $msg ){
 
-        $send = $this->getOscarConfigurationService()->getConfiguration('mailer.send', false);
+        $send = $this->getOscarConfigurationService()->getConfiguration('mailer.send');
         $exceptions = $this->getOscarConfigurationService()->getConfiguration('mailer.send_false_exception', []);
         $logger = $this->getLoggerService();
 
         if( $send == false ){
+
             // On teste si le mail est dans l'exception
             if( count($exceptions) > 0 ){
                 $newTo = [];

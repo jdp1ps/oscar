@@ -48,17 +48,17 @@ Mdp : administrateur
 
 ## Architecture
 
-Il y'a X containers : 
- - **oscar-dev-apache** : L'application principale (Port: 8888)
+Il y'a 8 containers : 
+ - **oscar-dev-apache** : L'application principale (http://localhost:8888)
  - **oscar-dev-posgres** : Base de donnée (Port: 6543)
- - **oscar-dev-elasticsearch** : L'index de recherche
- - **oscar-dev-gearman** : Serveur de tâche
- - **oscar-dev-worker** : Executeur de tâche Oscar
- - **oscar-dev-vite** : Serveur Vite  (Port: 5173)
+ - **oscar-dev-elasticsearch** : L'index de recherche (Ports non-exposé)
+ - **oscar-dev-gearman** : Serveur de tâche (Ports non-exposé)
+ - **oscar-dev-worker** : Tâche de fond Oscar
+ - **oscar-dev-vite** : Serveur Vite  (http://localhost:5173)
+ - **oscar-dev-kibana** : Kibana  (http://localhost:5101)
+ - **oscar-dev-mailhog** : Un mail catcher (http://localhost:8025)
 
-  TODO : 
-- **oscar-dev-kibana** : Pour les tests Elasticsearch via l'UI
-- **oscar-dev-mailhog** : Pour les mails
+   TODO/Idée d'évolution : 
  - **oscar-dev-php** : Regrouper le Worker dans un PHPFPM, et brancher le apache dessus (à voir)
  - Utiliser les fichiers .env avec Dotenc (???)
 

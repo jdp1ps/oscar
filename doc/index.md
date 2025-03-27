@@ -11,7 +11,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 
  - [Procédure d'installation](install-prod.md) : Installation détaillée d'une instance Oscar
  - [Procédure de mise à jour](update.md) : Procédure à appliquer lors d'une mise à jour 
- - [Version DOCKER](../dockerize/README.md) : Déployer une instance via *Docker*
+ - [Version DOCKER (développement)](../docker/README.md) : Déployer une instance via *Docker* (pour le développement)
 
 ## Documentation complémentaire
 

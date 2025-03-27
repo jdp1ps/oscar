@@ -56,22 +56,30 @@ return array(
         // gearman
         'gearman-job-server-host' => $param_gearman_host,
 
+        'vite' => [
+            'mode' => 'dev',
+            'src' => __DIR__ . '/../../ui',
+            'dest' => __DIR__ . '/../../public/js/oscar/vite/dist',
+            'base_url_dev' => 'http://127.0.0.1:5173',
+            'base_url_prod' => '/js/oscar/vite/dist',
+        ],
+
 
         ////////////////////////////////////////////////////////////////////////
         // ! EXPERIMENTAL !
         'generated-documents' => [
             /****
             'activity' => [
-                'sample' => [
-                    'label' => 'Exemple de document',
-                    'template' => __DIR__ . '/../../data/generated-documents/activity/sample.docx',
-                    'type' => 'Word'
-                ],
-                'bordereau' => [
-                    'label' => 'Exemple de bordereau',
-                    'template' => __DIR__ . '/../../data/generated-documents/activity/bordereau.docx',
-                    'type' => 'Word'
-                ]
+            'sample' => [
+            'label' => 'Exemple de document',
+            'template' => __DIR__ . '/../../data/generated-documents/activity/sample.docx',
+            'type' => 'Word'
+            ],
+            'bordereau' => [
+            'label' => 'Exemple de bordereau',
+            'template' => __DIR__ . '/../../data/generated-documents/activity/bordereau.docx',
+            'type' => 'Word'
+            ]
             ]
             /****/
         ],
@@ -186,30 +194,30 @@ return array(
             'timesheet_modele' => $param_path_template_timesheet,
         ],
 
-         // Système de recherche
-       'strategy' => [
-           'activity' => [
-               'search_engine' => [
-                   // Elasticsearch
-                   'class' => \Oscar\Strategy\Search\ElasticActivitySearch::class,
-                   'params' => [["$param_elastic_host"]]
-               ]
-           ],
-           'person' => [
-               'search_engine' => [
-                   // Elasticsearch
-                   'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
-                   'params' => [["$param_elastic_host"]]
-               ]
-           ],
-           'organization' => [
-               'search_engine' => [
-                   // Elasticsearch
-                   'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
-                   'params' => [["$param_elastic_host"]]
-               ]
-           ]
-       ],
+        // Système de recherche
+        'strategy' => [
+            'activity' => [
+                'search_engine' => [
+                    // Elasticsearch
+                    'class' => \Oscar\Strategy\Search\ElasticActivitySearch::class,
+                    'params' => [["$param_elastic_host"]]
+                ]
+            ],
+            'person' => [
+                'search_engine' => [
+                    // Elasticsearch
+                    'class' => \Oscar\Strategy\Search\PersonElasticSearch::class,
+                    'params' => [["$param_elastic_host"]]
+                ]
+            ],
+            'organization' => [
+                'search_engine' => [
+                    // Elasticsearch
+                    'class' => \Oscar\Strategy\Search\OrganizationElasticSearch::class,
+                    'params' => [["$param_elastic_host"]]
+                ]
+            ]
+        ],
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -226,50 +234,50 @@ return array(
             // Connection au tiers d'où seront obtenu les structures
             'organization' => [
                 /****
-               'rest' => [
-                  'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
-                  'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
-                  'editable'  => false
-               ],
-               'db' => [
-                  'class'     => \Oscar\Connector\ConnectorOrganizationDB::class,
-                  'params'    => realpath(__DIR__) . '/../connectors/organization_db.yml'
-               ]
-               /****/
+                'rest' => [
+                'class'     => \Oscar\Connector\ConnectorOrganizationREST::class,
+                'params'    => realpath(__DIR__) . '/../connectors/organization_rest.yml',
+                'editable'  => false
+                ],
+                'db' => [
+                'class'     => \Oscar\Connector\ConnectorOrganizationDB::class,
+                'params'    => realpath(__DIR__) . '/../connectors/organization_db.yml'
+                ]
+                /****/
             ],
             'person' => [
-               /****
-               'rest' => [
-                  'class'     => \Oscar\Connector\ConnectorPersonREST::class,
-                  'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
-                  'editable'  => false
-               ],
-               'db' => [
-                  'class'     => \Oscar\Connector\ConnectorPersonDB::class,
-                  'params'    => realpath(__DIR__) . '/../connectors/person_db.yml'
-               ]
-               /****/
+                /****
+                'rest' => [
+                'class'     => \Oscar\Connector\ConnectorPersonREST::class,
+                'params'    => realpath(__DIR__) . '/../connectors/person_rest.yml',
+                'editable'  => false
+                ],
+                'db' => [
+                'class'     => \Oscar\Connector\ConnectorPersonDB::class,
+                'params'    => realpath(__DIR__) . '/../connectors/person_db.yml'
+                ]
+                /****/
             ],
 
             /***************************************/
             /***** CONNECTOR SIFAC (Dépenses) ******/
             /***************************************
             'spent' => [
-                'sifac' => [
-                    'class'     => \Oscar\Connector\ConnectorSpentSifacOCI::class,
-                    'params'    => [
-                        // Identifiant/Mot de passe/adresse serveur
-                        'username'  => 'sifac_user',
-                        'password'  => 'sifac_password',
-                        'SID'  => 'F13',
-                        'port'      => 1527,
-                        'hostname'  =>'sifac.domain.ext',
+            'sifac' => [
+            'class'     => \Oscar\Connector\ConnectorSpentSifacOCI::class,
+            'params'    => [
+            // Identifiant/Mot de passe/adresse serveur
+            'username'  => 'sifac_user',
+            'password'  => 'sifac_password',
+            'SID'  => 'F13',
+            'port'      => 1527,
+            'hostname'  =>'sifac.domain.ext',
 
-                        // Requête + clause d'optimisation
-                        'optimize_clause' => ' AND STUNR > %s',
-                        'spent_query' => \Oscar\Connector\ConnectorSpentSifacOCI::SPENT_QUERY
-                    ]
-                ]
+            // Requête + clause d'optimisation
+            'optimize_clause' => ' AND STUNR > %s',
+            'spent_query' => \Oscar\Connector\ConnectorSpentSifacOCI::SPENT_QUERY
+            ]
+            ]
             ]
             /**************************************/
         ],
@@ -305,35 +313,33 @@ return array(
         'urlAbsolute' => 'http://localhost:8080',
 
         'mailer' => [
-            /**** TRANSPORT (smtp)
+            /**** TRANSPORT (smtp) ***/
             'transport' => [
                 'type' => 'smtp',
-                'host' => 'smtp.domain.tld',
-                'port' => 465,
-                'username' => 'smithagent',
-                'password' => '@m4S!n9 P4$VV0rd',
-                'security' => 'ssl',
+                'host' => 'oscar-dev-mailhog',
+                'port' => 1025,
+                'security' => false
             ],
             /****/
 
-            /**** TRANSPORT (sendmail)
+            /**** TRANSPORT (sendmail) ****
             'transport' => [
-                'type' => 'sendmail',
-                'cmd' => '/usr/sbin/sendmail -bs',
+            'type' => 'sendmail',
+            'cmd' => '/usr/local/bin/mhsendmail -bs oscar-dev-mailhog:1025',
             ],
             /****
 
             /**** TRANSPORT (exim)
             'transport' => [
-                'type' => 'sendmail',
-                'cmd' => '/usr/sbin/exim -bs',
+            'type' => 'sendmail',
+            'cmd' => '/usr/sbin/exim -bs',
             ],
             /****/
 
             /**** TRANSPORT (file)
             'transport' => [
-                'type' => 'file',
-                'path' => realpath(__DIR__.'/../../data/mails'),
+            'type' => 'file',
+            'path' => realpath(__DIR__.'/../../data/mails'),
             ],
             /****/
 

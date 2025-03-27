@@ -2,10 +2,6 @@ FROM php:8.2-apache-bookworm
 
 LABEL authors="Stéphane BOUVRY<stephane.bouvry@unicaen.fr>"
 
-ENV APACHE_DOCUMENT_ROOT /var/application/public/
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
 # RUN apt-get update && apt-get -y install php8.2-gearman
 RUN apt update && apt install -y \
     wget \
@@ -13,9 +9,6 @@ RUN apt update && apt install -y \
     postgresql-client \
     libgearman-dev \
     gearman-job-server
-
-# Configuration PHP
-COPY ./php.ini /usr/local/etc/php/conf.d/999-application.ini
 
 RUN pecl install gearman  \
     && docker-php-ext-enable gearman \
@@ -55,6 +48,7 @@ RUN apt install -y libbz2-dev \
     && docker-php-ext-install bz2
 
 RUN apt install -y apache2-suexec-custom sudo git
+RUN apt install -y sendmail
 
 RUN a2enmod rewrite
 #RUN a2enmod suexec
@@ -63,6 +57,14 @@ RUN a2enmod rewrite
 #RUN groupadd app
 #RUN useradd -m -s /bin/bash -g app app
 ## RUN chown -R app:app /var/application
+
+# Configuration PHP
+COPY ./php.ini /usr/local/etc/php/conf.d/999-application.ini
+
+## Mail rerouté var mailhog avec mhsendmail
+RUN wget https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/mhsendmail_linux_amd64
+RUN chmod +x mhsendmail_linux_amd64
+RUN mv mhsendmail_linux_amd64 /usr/local/bin/mhsendmail
 
 WORKDIR /var/application
 

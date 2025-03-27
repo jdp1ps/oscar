@@ -39,6 +39,7 @@ class OscarCheckMailerCommand extends OscarCommandAbstract
         $io->title("Vérification de la distribution des mails");
 
         try {
+
             /** @var MailingService $mailer */
             $mailer = $this->getServicemanager()->get(MailingService::class);
 
