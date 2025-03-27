@@ -76,17 +76,17 @@ services:
     tty: true
     restart: "always"
 
-  oscar-dev-worker:
-    container_name: oscar-dev-worker
-    restart: unless-stopped
-    volumes:
-      - ./:/var/application
-    depends_on:
-      - oscar-dev-gearman
-    networks:
-      - oscar-dev-network
-#    env_file: # TODO
-#      - .env.docker.dev
-    build:
-      context: ./docker/dev/worker
-      dockerfile: Dockerfile
+#  oscar-dev-worker:
+#    container_name: oscar-dev-worker
+#    restart: unless-stopped
+#    volumes:
+#      - ./:/var/application
+#    depends_on:
+#      - oscar-dev-apache
+#    networks:
+#      - oscar-dev-network
+##    env_file: # TODO
+##      - .env.docker.dev
+#    build:
+#      context: ./docker/dev/worker
+#      dockerfile: Dockerfile

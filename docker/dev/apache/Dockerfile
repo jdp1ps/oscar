@@ -66,14 +66,12 @@ RUN a2enmod rewrite
 
 WORKDIR /var/application
 
-RUN mkdir -p data/DoctrineORMModule/Proxy \
-    && chown -R www-data:www-data data/DoctrineORMModule/Proxy
+# Copier le script d'entrée
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-
-RUN mkdir -p logs
-RUN mkdir -p docker/dev/volumes/documents
-RUN chown www-data:www-data logs
-RUN chown www-data:www-data docker/dev/volumes/documents
+# Définir le script comme point d'entrée
+ENTRYPOINT ["/entrypoint.sh"]
 
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
 

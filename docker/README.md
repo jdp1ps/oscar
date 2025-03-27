@@ -23,10 +23,13 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 Copier la configuration initiale
 
 ```bash
-cp config/autoload/local.php.dist config/autoload/local.php 
+cp config/autoload/local.docker.php.dist config/autoload/local.php 
 cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php 
 cp config/autoload/unicaen-auth.local.php.dist config/autoload/unicaen-auth.local.php 
-cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php 
+cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php
+
+# On autorise l'écriture du dossier Elastic
+chmod -R 777 docker/dev/volumes/elasticsearch 
 ```
 
 Premier lancement : 
@@ -38,8 +41,14 @@ docker compose -f compose.dev.yml up --build
 # Connection à Oscar
 docker compose -f compose.dev.yml exec oscar-dev-apache /bin/bash
 
-# Depuis oscar
+# On Refresh l'installation
 . oscar-update.sh
+
+# Création de l'administrateur
+php bin/oscar.php auth:add
+
+# Le déclarer Admin
+php bin/oscar.php auth:promote -l administrateur
 ```
 
 ## Architecture
