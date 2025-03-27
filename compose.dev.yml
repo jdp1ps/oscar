@@ -5,17 +5,20 @@ networks:
     driver: bridge
 
 services:
+  # Postgresql (Base de données)
   oscar-dev-postgres:
     container_name: oscar-dev-postgres
     restart: always
     environment:
+      # Accès BDD
       POSTGRES_USER: oscar_dev_user
       POSTGRES_PASSWORD: oscar_dev_pass
       POSTGRES_DB: oscar_dev_db
+
     networks:
       - oscar-dev-network
-    env_file:
-      - .env.docker.dev
+#    env_file: # TODO
+#      - .env.docker.dev
     ports:
       - 6543:5432
     volumes:
@@ -34,8 +37,8 @@ services:
       - oscar-dev-gearman
     networks:
       - oscar-dev-network
-    env_file:
-      - .env.docker.dev
+#    env_file: # TODO
+#      - .env.docker.dev
     build:
       context: ./docker/dev/apache/
       dockerfile: Dockerfile
@@ -50,17 +53,40 @@ services:
     tty: true
     restart: "unless-stopped"
 
-#  oscar-dev-worker:
-#    container_name: oscar-dev-worker
-#    restart: unless-stopped
-#    volumes:
-#      - ./:/var/application
-#    depends_on:
-#      - oscar-dev-gearman
-#    networks:
-#      - oscar-dev-network
-#    env_file:
+  oscar-dev-elasticsearch:
+    container_name: oscar-dev-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    environment:
+      - discovery.type=single-node
+#      - node.name=oscar01
+#      - cluster.name=es-oscar-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker/dev/volumes/elasticsearch:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+
+    networks:
+      - oscar-dev-network
+    tty: true
+    restart: "always"
+
+  oscar-dev-worker:
+    container_name: oscar-dev-worker
+    restart: unless-stopped
+    volumes:
+      - ./:/var/application
+    depends_on:
+      - oscar-dev-gearman
+    networks:
+      - oscar-dev-network
+#    env_file: # TODO
 #      - .env.docker.dev
-#    build:
-#      context: ./docker/dev/worker
-#      dockerfile: Dockerfile
+    build:
+      context: ./docker/dev/worker
+      dockerfile: Dockerfile

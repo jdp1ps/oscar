@@ -13,7 +13,7 @@
 // Chemin "simplifié"
 chdir(dirname(__DIR__));
 
-$oscarCmd = '/usr/bin/php bin/oscar.php console ';
+$oscarCmd = 'php bin/oscar.php console ';
 
 // Autoload & Co
 require __DIR__ . '/../vendor/autoload.php';

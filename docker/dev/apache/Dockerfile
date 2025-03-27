@@ -17,52 +17,63 @@ RUN apt update && apt install -y \
 # Configuration PHP
 COPY ./php.ini /usr/local/etc/php/conf.d/999-application.ini
 
-RUN pecl install gearman
-RUN docker-php-ext-enable gearman
-
-RUN pecl install xdebug
-RUN docker-php-ext-enable xdebug
-
-RUN docker-php-ext-install bcmath
-RUN docker-php-ext-install gettext
-RUN docker-php-ext-install pdo
-RUN docker-php-ext-install pdo_pgsql
-RUN docker-php-ext-install sockets
-
-RUN apt install -y libsodium-dev
-RUN docker-php-ext-install sodium
-
-RUN apt-get install -y libicu-dev \ 
+RUN pecl install gearman  \
+    && docker-php-ext-enable gearman \
+    # XDebug
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && docker-php-ext-install bcmath \
+    && docker-php-ext-install gettext \
+    && docker-php-ext-install pdo \
+    && docker-php-ext-install pdo_pgsql \
+    && docker-php-ext-install sockets \
+    # Sodium
+    && apt install -y libsodium-dev \
+    && docker-php-ext-install sodium \
+    # Intl
+    && apt install -y libicu-dev \
     && docker-php-ext-configure intl \ 
-    && docker-php-ext-install intl
-
-
-# LDAP
-RUN apt-get install -y libldap2-dev && \
-docker-php-ext-install ldap
-
-RUN apt install zlib1g-dev 
-RUN apt install -y libpng-dev
-RUN docker-php-ext-install gd
-
-RUN apt install -y libzip-dev
-RUN docker-php-ext-install zip
-
-# Git
-RUN apt install -y git
+    && docker-php-ext-install intl \
+    # Ldap
+    && apt install -y libldap2-dev \
+    && docker-php-ext-install ldap \
+    # Gd
+    && apt install zlib1g-dev  \
+    && apt install -y libpng-dev \
+    && docker-php-ext-install gd \
+    # Zip
+    && apt install -y libzip-dev \
+    && docker-php-ext-install zip \
+    # Git
+    && apt install -y git
 
 # Installation de composer
 RUN wget https://getcomposer.org/download/2.2.24/composer.phar
-RUN mv composer.phar /bin/composer
-RUN chmod +x /bin/composer
+RUN mv composer.phar /bin/composer && chmod +x /bin/composer
+
+RUN apt install -y libbz2-dev \
+    && docker-php-ext-install bz2
+
+RUN apt install -y apache2-suexec-custom sudo git
 
 RUN a2enmod rewrite
-
+#RUN a2enmod suexec
+#
+#
+#RUN groupadd app
+#RUN useradd -m -s /bin/bash -g app app
+## RUN chown -R app:app /var/application
 
 WORKDIR /var/application
 
-RUN mkdir -p data/DoctrineORMModule/Proxy && chown -R www-data data/DoctrineORMModule/Proxy
-#RUN chmod 777 config/autoload/oscar-editable.yml
-#USER www-data
+RUN mkdir -p data/DoctrineORMModule/Proxy \
+    && chown -R www-data:www-data data/DoctrineORMModule/Proxy
 
-#RUN composer install
+
+RUN mkdir -p logs
+RUN mkdir -p docker/dev/volumes/documents
+RUN chown www-data:www-data logs
+RUN chown www-data:www-data docker/dev/volumes/documents
+
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+
