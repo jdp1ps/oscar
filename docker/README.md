@@ -54,11 +54,11 @@ Il y'a X containers :
  - **oscar-dev-elasticsearch** : L'index de recherche
  - **oscar-dev-gearman** : Serveur de tâche
  - **oscar-dev-worker** : Executeur de tâche Oscar
+ - **oscar-dev-vite** : Serveur Vite  (Port: 5173)
 
-TODO : 
- - **oscar-dev-kibana** : Pour les tests Elasticsearch via l'UI
- - **oscar-dev-mailhog** : Pour les mails
- - **oscar-dev-vite** : Pour VITE
+  TODO : 
+- **oscar-dev-kibana** : Pour les tests Elasticsearch via l'UI
+- **oscar-dev-mailhog** : Pour les mails
  - **oscar-dev-php** : Regrouper le Worker dans un PHPFPM, et brancher le apache dessus (à voir)
  - Utiliser les fichiers .env avec Dotenc (???)
 
@@ -124,5 +124,29 @@ Lister les tâches en attentes sur Gearman
  - Port : `6543`
 
 > Peut être modifié dans le fichier **.env.docker.dev**
+
+#### Développement UI (Vite/VueJS)
+
+Dans `config/autoload/local.php` : 
+
+```bash
+<?php
+// ...
+return array(
+    'oscar' => [
+        // ...
+        'vite' => [
+            'mode' => 'dev', // par défaut 'prod'
+            'src' => __DIR__ . '/../../ui',
+            'dest' => __DIR__ . '/../../public/js/oscar/vite/dist',
+            'base_url_dev' => 'http://127.0.0.1:5173',
+            'base_url_prod' => '/js/oscar/vite/dist',
+        ],
+        // ...
+    ]
+)
+```
+
+> Le *container* Vite installe automatiquement la dernière version de Node/NPM. à voir si cela nous bloque à un moment et nous oblige à fixer la version 
 
 

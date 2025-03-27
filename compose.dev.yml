@@ -1,11 +1,13 @@
-#
-# DOCKER (Développement)
+########################################################################
+# OSCAR DOCKER (Développement)
+########################################################################
 networks:
   oscar-dev-network:
     driver: bridge
 
 services:
-  # Postgresql (Base de données)
+
+  # POSTGRESQL
   oscar-dev-postgres:
     container_name: oscar-dev-postgres
     restart: always
@@ -28,6 +30,7 @@ services:
       context: ./docker/dev/postgresql
       dockerfile: Dockerfile
 
+  ### APACHE
   oscar-dev-apache:
     container_name: oscar-dev-apache
     restart: unless-stopped
@@ -45,6 +48,7 @@ services:
     ports:
       - 8888:80
 
+  ### GEARMAN
   oscar-dev-gearman:
     container_name: oscar-dev-gearman
     image: artefactual/gearmand:1.1.21.2-alpine
@@ -53,6 +57,7 @@ services:
     tty: true
     restart: "unless-stopped"
 
+  ### ELASTICSEARCH
   oscar-dev-elasticsearch:
     container_name: oscar-dev-elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
@@ -76,6 +81,7 @@ services:
     tty: true
     restart: "always"
 
+  ### WORKER
   oscar-dev-worker:
     container_name: oscar-dev-worker
     restart: unless-stopped
@@ -90,3 +96,19 @@ services:
     build:
       context: ./docker/dev/worker
       dockerfile: Dockerfile
+
+  ### VITE
+  oscar-dev-vite:
+    container_name: oscar-dev-vite
+    volumes:
+      - ./:/var/application
+
+    networks:
+      - oscar-dev-network
+
+    build:
+      context: ./docker/dev/vite
+      dockerfile: Dockerfile
+
+    ports:
+      - 5173:5173
