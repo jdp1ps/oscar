@@ -208,16 +208,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
      */
     public function testAction()
     {
-        if (DEBUG_OSCAR) {
-            if( $this->isAjax() ){
-                $sleep = $this->getRequest()->getQuery('sleep');
-                if( $sleep ){
-                    sleep($sleep);
-                    throw new OscarException("SLEEP : $sleep");
-                }
-            }
-            return [];
-        }
+        echo unknwo_function();
         die("DEV ONLY");
     }
 

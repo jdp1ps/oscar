@@ -41,7 +41,7 @@ $worker->addFunction('hello', 'oscarJob_hello');
 // Affiche dans le journalctl -u oscarworker.service -f
 $execDev = "2";
 echo "###################################################################\n";
-echo "# OSCAR WORKER STARTED " . \Oscar\OscarVersion::getBuild() . " SPARTAN\n";
+echo "# OSCAR WORKER STARTED\n";
 echo "# working directory : '" . __DIR__ . "'\n";
 echo "###################################################################\n";
 

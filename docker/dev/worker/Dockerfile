@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 LABEL authors="Stéphane BOUVRY<stephane.bouvry@unicaen.fr>"
 
@@ -42,5 +42,12 @@ RUN pecl install gearman  \
 # Copier le script de surveillance
 WORKDIR /var/application
 
+EXPOSE 9000
+
+# COPY ./entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+
+# ENTRYPOINT ["/entrypoint.sh"]
+
 # Exécuter le script en boucle
-CMD ["php", "/var/application/bin/oscar-worker.php"]
+# CMD ["php", "/var/application/bin/oscar-worker.php"]

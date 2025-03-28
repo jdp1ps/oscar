@@ -39,7 +39,7 @@ services:
     volumes:
       - ./:/var/application
     depends_on:
-      - oscar-dev-gearman
+      - oscar-dev-php
     networks:
       - oscar-dev-network
 #    env_file: # TODO
@@ -47,8 +47,11 @@ services:
     build:
       context: ./docker/dev/apache/
       dockerfile: Dockerfile
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
       - "8888:80"
+#      - "9003:9003"
 
 
   ######################################################################
@@ -56,6 +59,8 @@ services:
   oscar-dev-gearman:
     container_name: oscar-dev-gearman
     image: artefactual/gearmand:1.1.21.2-alpine
+    depends_on:
+      - oscar-dev-postgres
     networks:
       - oscar-dev-network
     tty: true
@@ -73,18 +78,33 @@ services:
 #      - cluster.name=es-oscar-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    depends_on:
+      - oscar-dev-postgres
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
       - ./docker/dev/volumes/elasticsearch:/usr/share/elasticsearch/data
-#    ports:
-#      - "9200:9200"
     networks:
       - oscar-dev-network
     tty: true
     restart: "always"
+
+  ######################################################################
+  ### WORKER
+  oscar-dev-php:
+    container_name: oscar-dev-php
+    restart: unless-stopped
+    depends_on:
+      - oscar-dev-gearman
+    volumes:
+      - ./:/var/application
+    networks:
+      - oscar-dev-network
+    build:
+      context: ./docker/dev/worker
+      dockerfile: Dockerfile
 
 
   ######################################################################
@@ -92,10 +112,10 @@ services:
   oscar-dev-worker:
     container_name: oscar-dev-worker
     restart: unless-stopped
+    depends_on:
+      - oscar-dev-gearman
     volumes:
       - ./:/var/application
-    depends_on:
-      - oscar-dev-apache
     networks:
       - oscar-dev-network
 #    env_file: # TODO
@@ -103,7 +123,7 @@ services:
     build:
       context: ./docker/dev/worker
       dockerfile: Dockerfile
-
+    command: ["php", "/var/application/bin/oscar-worker.php"]
 
   ######################################################################
   ### VITE
@@ -120,28 +140,28 @@ services:
       - "5173:5173"
 
 
-  ######################################################################
-  # KIBANA
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.16.1
-    container_name: oscar-dev-kibana
-    depends_on:
-      - oscar-dev-elasticsearch
-    networks:
-      - oscar-dev-network
-    environment:
-      - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
-    ports:
-      - "5601:5601"
-
-
-  ######################################################################
-  # MAILHOG (capture les mails envoyés depuis Oscar)
-  mailhog:
-    image: mailhog/mailhog
-    container_name: oscar-dev-mailhog
-    networks:
-      - oscar-dev-network
-    ports:
-      - "8025:8025" # Interface web MailHog
-      - "1025:1025" # Port SMTP pour envoyer les mails
+#  ######################################################################
+#  # KIBANA
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.16.1
+#    container_name: oscar-dev-kibana
+#    depends_on:
+#      - oscar-dev-elasticsearch
+#    networks:
+#      - oscar-dev-network
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
+#    ports:
+#      - "5601:5601"
+#
+#
+#  ######################################################################
+#  # MAILHOG (capture les mails envoyés depuis Oscar)
+#  mailhog:
+#    image: mailhog/mailhog
+#    container_name: oscar-dev-mailhog
+#    networks:
+#      - oscar-dev-network
+#    ports:
+#      - "8025:8025" # Interface web MailHog
+#      - "1025:1025" # Port SMTP pour envoyer les mails
