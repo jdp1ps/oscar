@@ -35,6 +35,22 @@ chmod -R 777 docker/dev/volumes/elasticsearch
 Premier lancement : 
 
 ```bash
+## TODO Création des volumes pour 
+# - la BDD
+# - Elastic
+# - les documents
+# Pour le moment, on fait ça à la main
+
+mkdir -p docker/dev/volumes/database
+mkdir -p docker/dev/volumes/elasticsearch
+mkdir -p docker/dev/volumes/documents/activity
+mkdir -p docker/dev/volumes/documents/pcru
+mkdir -p docker/dev/volumes/documents/public
+mkdir -p docker/dev/volumes/documents/request
+mkdir -p docker/dev/volumes/documents/signature
+
+chmod 775 -R docker/dev/volumes/*
+
 # Build / up
 docker compose -f compose.dev.yml up --build
 
@@ -57,10 +73,12 @@ Il y'a 8 containers :
  - **oscar-dev-vite** : Serveur Vite  (http://localhost:5173)
  - **oscar-dev-kibana** : Kibana  (http://localhost:5101)
  - **oscar-dev-mailhog** : Un mail catcher (http://localhost:8025)
+ - **oscar-dev-php** : Le moteur PHP
 
    TODO/Idée d'évolution : 
- - **oscar-dev-php** : Regrouper le Worker dans un PHPFPM, et brancher le apache dessus (à voir)
  - Utiliser les fichiers .env avec Dotenc (???)
+ - "Variabliser" dans un .env
+ - Gérer les accès aux volumes (pour les documents) / Documenter
 
 
 ## Usage
