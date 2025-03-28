@@ -97,7 +97,7 @@ services:
     container_name: oscar-dev-php
     restart: unless-stopped
     depends_on:
-      - oscar-dev-gearman
+      - oscar-dev-worker
     volumes:
       - ./:/var/application
     networks:
@@ -113,7 +113,7 @@ services:
     container_name: oscar-dev-worker
     restart: unless-stopped
     depends_on:
-      - oscar-dev-gearman
+      - oscar-dev-postgres
     volumes:
       - ./:/var/application
     networks:
@@ -123,7 +123,7 @@ services:
     build:
       context: ./docker/dev/worker
       dockerfile: Dockerfile
-    command: ["php", "/var/application/bin/oscar-worker.php"]
+    command: ["/bin/bash", "/entrypoint.sh"]
 
   ######################################################################
   ### VITE

@@ -39,15 +39,20 @@ RUN pecl install gearman  \
     # Git
     && apt install -y git
 
+## Mail rerouté var mailhog avec mhsendmail
+RUN wget https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/mhsendmail_linux_amd64
+RUN chmod +x mhsendmail_linux_amd64
+RUN mv mhsendmail_linux_amd64 /usr/local/bin/mhsendmail
+
+# Installation de composer
+RUN wget https://getcomposer.org/download/2.2.24/composer.phar
+RUN mv composer.phar /bin/composer
+RUN chmod +x /bin/composer
+
 # Copier le script de surveillance
 WORKDIR /var/application
 
 EXPOSE 9000
 
-# COPY ./entrypoint.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
-
-# ENTRYPOINT ["/entrypoint.sh"]
-
-# Exécuter le script en boucle
-# CMD ["php", "/var/application/bin/oscar-worker.php"]
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
