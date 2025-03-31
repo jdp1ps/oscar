@@ -12,6 +12,4 @@ RUN chmod +x /entrypoint.sh
 
 WORKDIR /var/application/ui
 
-RUN yarn install
-
 ENTRYPOINT ["/entrypoint.sh"]
