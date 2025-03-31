@@ -192,10 +192,12 @@
               <tbody>
               <tr>
                 <th>Recette <a class="label label-info xs" href="#repport-1">{{ spentlines.synthesis['1'].nbr}}</a></th>
-                <td style="text-align: right">{{ $filters.money(spentlines.synthesis['1'].total)}}</td>
+                <td style="text-align: right">{{ $filters.money(spentlines.synthesis['1'].total_engage)}}</td>
+                <td style="text-align: right">{{ $filters.money(spentlines.synthesis['1'].total_effectue)}}</td>
               </tr>
               </tbody>
             </table>
+
           </div>
 
           <div v-if="manageIgnored && spentlines.synthesis['0'].total != 0">
@@ -244,10 +246,11 @@
             <div v-if="manageRecettes && Object.keys(byMasse.datas['recettes']).length > 0">
               <h3 :id="'repport-1'">Recettes</h3>
               <spent-line-p-f-i-grouped
-                  :lines="byMasse.datas['recettes']" :total="spentlines.synthesis['1'].total"
+                  :lines="byMasse.datas['recettes']" :total="spentlines.synthesis['1'].total_effectue"
                   @editcompte="handlerEditCompte"
                   @detailsline="handlerDetailsLine"
               />
+              {{ spentlines.synthesis }}
             </div>
             <div v-if="manageIgnored && Object.keys(byMasse.datas['ignorés']).length > 0">
               <h3 :id="'repport-0'">Ignorés</h3>

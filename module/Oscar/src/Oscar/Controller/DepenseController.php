@@ -31,14 +31,16 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
     /**
      * @return SpentService
      */
-    public function getSpentService(){
+    public function getSpentService()
+    {
         return $this->getServiceContainer()->get(SpentService::class);
     }
 
     /**
      * @return ProjectGrantService
      */
-    public function getProjectGrantService(){
+    public function getProjectGrantService()
+    {
         return $this->getServiceContainer()->get(ProjectGrantService::class);
     }
 
@@ -53,7 +55,8 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
     /**
      * @return OscarUserContext
      */
-    public function getOscarUserContext(){
+    public function getOscarUserContext()
+    {
         return $this->getOscarUserContextService();
     }
 
@@ -68,14 +71,16 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
     /**
      * @return Logger
      */
-    public function getLogger(){
+    public function getLogger()
+    {
         return $this->getServiceContainer()->get(LoggerService::class);
     }
 
     /**
      * @return EntityManager
      */
-    public function getEntityManager() :EntityManager {
+    public function getEntityManager() :EntityManager
+    {
         return $this->getServiceContainer()->get(EntityManager::class);
     }
 
@@ -109,31 +114,26 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             case Request::METHOD_POST:
                 try {
                     $this->getLogger()->debug(print_r($_POST, true));
-                    if( $this->params()->fromPost("moved") ){
+                    if ($this->params()->fromPost("moved")) {
                         $result = $this->getSpentService()->moved($this->params()->fromPost('moved'), $this->params()->fromPost('to'));
-                    }
-                    elseif ($this->params()->fromPost("admin") == 'reset') {
+                    } elseif ($this->params()->fromPost("admin") == 'reset') {
                         $this->getSpentService()->loadPCG();
                         return $this->getResponseOk();
-                    }
-                    elseif ($this->params()->fromPost("admin") == 'sort') {
+                    } elseif ($this->params()->fromPost("admin") == 'sort') {
                         $this->getSpentService()->orderSpentsByCode();
                         return $this->getResponseOk();
-                    }
-                    elseif ($this->params()->fromPost("action") == 'blind') {
+                    } elseif ($this->params()->fromPost("action") == 'blind') {
                         $spent = $this->getSpentService()->getSpentTypeById($this->params()->fromPost('id'));
                         $spent->setBlind(!$spent->getBlind());
                         $this->getEntityManager()->flush($spent);
                         return $this->getResponseOk();
-                    }
-
-                    elseif ($this->params()->fromPost("action") == 'annexe') {
+                    } elseif ($this->params()->fromPost("action") == 'annexe') {
                         try {
                             $id = $this->params()->fromPost('id');
 
                             /** @var SpentTypeGroup $spent */
                             $spent = $this->getSpentService()->getSpentTypeById($id);
-                            if( !$spent ){
+                            if (!$spent) {
                                 throw new OscarException("Impossible de charger le compte $id");
                             }
                             $annexe = $spent->getAnnexe();
@@ -143,7 +143,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
 
                             $this->getLogger()->info("Modification du compte $id vers $newAnnexe");
                             // @todo Contrôler la validitée de l'annexe
-                            if( $savedAnnexe == '0' ){
+                            if ($savedAnnexe == '0') {
                                 $spent->setBlind(true);
                             } else {
                                 $spent->setBlind(false);
@@ -151,12 +151,10 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                             $spent->setAnnexe($savedAnnexe);
                             $this->getEntityManager()->flush($spent);
                             return $this->getResponseOk();
-                        } catch (\Exception $e){
+                        } catch (\Exception $e) {
                             return $this->getResponseInternalError($e->getMessage());
                         }
-                    }
-
-                    else {
+                    } else {
                         $result = $this->getSpentService()->updateSpentTypeGroup($this->params()->fromPost());
                     }
                     return $this->jsonOutput([
@@ -172,7 +170,8 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                     $this->getLogger()->debug(print_r($_GET, true));
                     $deleteId = $this->params()->fromQuery('id');
                     $result = $this->getSpentService()->deleteNode(
-                        $this->getSpentService()->getSpentGroupNodeData($deleteId));
+                        $this->getSpentService()->getSpentGroupNodeData($deleteId)
+                    );
                     return $this->jsonOutput([
                         'spenttypegroups' => $this->getSpentService()->getAllArray()
                     ]);
@@ -190,7 +189,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         }
 
 
-        if( $format == 'json' || $this->isAjax() ){
+        if ($format == 'json' || $this->isAjax()) {
             return $this->jsonOutput([
                 'spenttypegroups' => $this->getSpentService()->getAllArray(),
                 'masses' => $masses,
@@ -200,11 +199,11 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         }
     }
 
-    public function compteAffectationAction(){
+    public function compteAffectationAction()
+    {
         $method = $this->getHttpXMethod();
 
-        if( $method == 'POST' ){
-
+        if ($method == 'POST') {
             // Vérifiaction des droits d'accès
             $this->getOscarUserContextService()->check(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE);
 
@@ -212,13 +211,12 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
             $postedAffectations = $this->params()->fromPost('affectation');
 
 
-            if( !$postedAffectations ){
+            if (!$postedAffectations) {
                 return $this->getResponseBadRequest("Erreur de transmission : " . print_r($_POST, true));
             }
 
             try {
                 $this->getSpentService()->updateAffectation(json_decode($postedAffectations, true));
-
             } catch (\Exception $e) {
                 return $this->getResponseInternalError($e->getMessage());
             }
@@ -233,12 +231,13 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
      *
      * @return \Laminas\Http\Response|JsonModel
      */
-    public function activityApiAction(){
+    public function activityApiAction()
+    {
 
         try {
             $idactivity = $this->params()->fromRoute('id');
             $activity = $this->getProjectGrantService()->getActivityById($idactivity);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }
 
@@ -247,27 +246,27 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
         $format = $this->params()->fromQuery('format', 'json');
 
         try {
-            if( !$activity->getCodeEOTP() ){
+            if (!$activity->getCodeEOTP()) {
                 throw new OscarException(sprintf(_("Cette activité n'a pas de Numéro financier")));
             }
             //$spents = $this->getSpentService()->getGroupedSpentsDatas($activity->getCodeEOTP());
-            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP(),SpentService::SPENT_BOTH);
+            $spents = $this->getSpentService()->getSpentsDatas($activity->getCodeEOTP(), SpentService::SPENT_BOTH);
             $spents['informations'] = $activity->toArray();
-            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity) ){
+            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity)) {
                 $spents['url_activity'] = $this->url()->fromRoute('contract/show', ['id' => $activity->getId()]);
             }
-            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $activity) ){
+            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_SYNC, $activity)) {
                 $spents['url_sync'] = $this->url()->fromRoute('contract/list-spent', ['id' => $activity->getId()]);
             }
-            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_DOWNLOAD, $activity) ){
+            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::DEPENSE_DOWNLOAD, $activity)) {
                 $spents['url_download'] = $this->url()->fromRoute('spent/activity-api', ['id' => $activity->getId()]) . '?format=excel&mode=details';
             }
-            if( $this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE) ){
+            if ($this->getOscarUserContextService()->hasPrivileges(Privileges::MAINTENANCE_SPENDTYPEGROUP_MANAGE)) {
                 $spents['url_spentaffectation'] = $this->url()->fromRoute('spent/compte-affectation');
             }
 
-            switch($format){
-                case 'json' :
+            switch ($format) {
+                case 'json':
                     $datas = $this->baseJsonResponse();
                     $datas['spents'] = $spents;
                     return $this->jsonOutput($datas);
@@ -276,17 +275,15 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                 case 'excel':
                     $this->getOscarUserContextService()->check(Privileges::DEPENSE_DOWNLOAD, $activity);
                     $mode = $this->params()->fromQuery('mode', 'normal');
-                    if( $mode == 'normal' ){
+                    if ($mode == 'normal') {
                         $formatter = new SpentActivityExcelFormater($spents, $activity);
                         $content = $formatter->format(['download' => true]);
                         die();
-                    }
-                    elseif( $mode == 'details' ){
+                    } elseif ($mode == 'details') {
                         $formatter = new SpentActivityDetailsExcelFormater($spents, $activity);
                         $content = $formatter->format(['download' => true]);
                         die("Pas encore disponible");
-                    }
-                    else {
+                    } else {
                         throw new OscarException("Impossible de télécharger les dépenses, le mode $mode n'est pas disponible.");
                     }
 
@@ -296,9 +293,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
                     throw new OscarException("Format demandé non-pris en charge");
                     break;
             }
-
-
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return $this->getResponseInternalError("Impossible de charger l'activité : " . $e->getMessage());
         }
     }

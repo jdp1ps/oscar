@@ -98,7 +98,8 @@
           <tbody>
           <tr>
             <th>Recette <a class="label label-info xs" href="#repport-1">{{ synthesis.synthesis['1'].nbr}}</a></th>
-            <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total)}}</td>
+            <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total_engage)}}</td>
+            <td style="text-align: right"  class="text-private">{{ $filters.money(synthesis.synthesis['1'].total_effectue)}}</td>
           </tr>
           </tbody>
         </table>
@@ -123,10 +124,6 @@
         </tbody>
       </table>
     </div>
-<!--    <small v-if="dateUpdated">-->
-<!--      Données mise à jour :-->
-<!--      <strong v-if="dateUpdated">{{ $filters.fullDate(dateUpdated.date) }}</strong>-->
-<!--    </small>-->
   </section>
 </template>
 <script>
