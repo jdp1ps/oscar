@@ -216,7 +216,6 @@ class AbstractOscarController extends AbstractActionController implements UseOsc
 
     protected function getHttpResponse($code, $content = null)
     {
-        $this->getLoggerService()->warning("[http $code] $content");
         $response = new Response();
         $response->setStatusCode($code);
         if ($content !== null) {

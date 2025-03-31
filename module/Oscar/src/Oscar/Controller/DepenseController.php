@@ -14,6 +14,7 @@ use Oscar\Exception\OscarException;
 use Oscar\Formatter\Spent\SpentActivityDetailsExcelFormater;
 use Oscar\Formatter\Spent\SpentActivityExcelFormater;
 use Oscar\Provider\Privileges;
+use Oscar\Service\LoggerService;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\ProjectGrantService;
@@ -68,7 +69,7 @@ class DepenseController extends AbstractOscarController implements UseServiceCon
      * @return Logger
      */
     public function getLogger(){
-        return $this->getServiceContainer()->get('Logger');
+        return $this->getServiceContainer()->get(LoggerService::class);
     }
 
     /**
