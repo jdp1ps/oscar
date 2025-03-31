@@ -71,7 +71,7 @@ Il y'a 8 containers :
  - **oscar-dev-gearman** : Serveur de tâche (Ports non-exposé)
  - **oscar-dev-worker** : Tâche de fond Oscar
  - **oscar-dev-vite** : Serveur Vite  (http://localhost:5173)
- - **oscar-dev-kibana** : Kibana  (http://localhost:5101)
+ - **oscar-dev-kibana** : Kibana  (http://localhost:5601)
  - **oscar-dev-mailhog** : Un mail catcher (http://localhost:8025)
  - **oscar-dev-php** : Le moteur PHP (utilisé pour déclencher les commandes PHP)
 

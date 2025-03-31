@@ -71,11 +71,12 @@ services:
   ### ELASTICSEARCH
   oscar-dev-elasticsearch:
     container_name: oscar-dev-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    build:
+      context: ./docker/dev/elasticsearch
+      dockerfile: Dockerfile
+
     environment:
       - discovery.type=single-node
-#      - node.name=oscar01
-#      - cluster.name=es-oscar-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     depends_on:
@@ -85,6 +86,8 @@ services:
         soft: -1
         hard: -1
     volumes:
+      - ./docker/dev/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/dev/elasticsearch/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
       - ./docker/dev/volumes/elasticsearch:/usr/share/elasticsearch/data
     networks:
       - oscar-dev-network
@@ -143,7 +146,7 @@ services:
   ######################################################################
   # KIBANA
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.16.1
+    image: docker.elastic.co/kibana/kibana:7.17.28
     container_name: oscar-dev-kibana
     depends_on:
       - oscar-dev-elasticsearch
@@ -151,6 +154,7 @@ services:
       - oscar-dev-network
     environment:
       - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
+      - LOGGING_ROOT_LEVEL=ERROR
     ports:
       - "5601:5601"
 
@@ -162,6 +166,7 @@ services:
     container_name: oscar-dev-mailhog
     networks:
       - oscar-dev-network
+    entrypoint: ["/bin/sh", "-c", "MailHog | grep -v KEEPALIVE"]
     ports:
       - "8025:8025" # Interface web MailHog
       - "1025:1025" # Port SMTP pour envoyer les mails
