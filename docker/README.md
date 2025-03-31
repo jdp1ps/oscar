@@ -65,7 +65,7 @@ Mdp : administrateur
 ## Architecture
 
 Il y'a 8 containers : 
- - **oscar-dev-apache** : L'application principale (http://localhost:8888)
+ - **oscar-dev-apache** : Version web (http://localhost:8888)
  - **oscar-dev-posgres** : Base de donnée (Port: 6543)
  - **oscar-dev-elasticsearch** : L'index de recherche (Ports non-exposé)
  - **oscar-dev-gearman** : Serveur de tâche (Ports non-exposé)
@@ -73,7 +73,7 @@ Il y'a 8 containers :
  - **oscar-dev-vite** : Serveur Vite  (http://localhost:5173)
  - **oscar-dev-kibana** : Kibana  (http://localhost:5101)
  - **oscar-dev-mailhog** : Un mail catcher (http://localhost:8025)
- - **oscar-dev-php** : Le moteur PHP
+ - **oscar-dev-php** : Le moteur PHP (utilisé pour déclencher les commandes PHP)
 
    TODO/Idée d'évolution : 
  - Utiliser les fichiers .env avec Dotenc (???)
@@ -116,6 +116,17 @@ docker compose log compose.dev.yml -f oscar-dev-apache oscar-dev-postgres
 ```
 
 ### Autres commandes
+
+Lancer des commandes sur le container Oscar : 
+
+```bash
+docker compose -f compose.dev.yml exec oscar-dev-php php bin/oscar.php
+```
+
+Build de l'UI : 
+```bash
+docker compose -f compose.dev.yml exec oscar-dev-vite yarn run build
+```
 
 Purger la BDD (Stopper l'application)
 
