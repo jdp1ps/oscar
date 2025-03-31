@@ -49,6 +49,30 @@ RUN wget https://getcomposer.org/download/2.2.24/composer.phar
 RUN mv composer.phar /bin/composer
 RUN chmod +x /bin/composer
 
+RUN apt install -y unzip libaio1 build-essential expect
+
+# Driver OCI (Oracle)
+COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
+
+RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
+    unzip -o /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
+    unzip -o /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/
+
+RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
+    ln -sf /usr/local/instantclient/sqlplus /usr/local/bin/sqlplus
+
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
+RUN echo "extension=oci8.so" > /usr/local/etc/php/conf.d/910-php-oci8.ini
+COPY ./99-oscar.ini /usr/local/etc/php/conf.d/911-oscar.ini
+RUN echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+#
+#RUN rm /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
+#RUN rm /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip
+#RUN rm /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
+
+
 # Copier le script de surveillance
 WORKDIR /var/application
 
