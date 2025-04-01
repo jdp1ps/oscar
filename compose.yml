@@ -1,0 +1,174 @@
+########################################################################
+# OSCAR DOCKER (Prod)
+########################################################################
+networks:
+  oscar-network:
+    driver: bridge
+
+services:
+  ######################################################################
+  # POSTGRESQL
+  oscar-postgres:
+    container_name: oscar-postgres
+    restart: always
+    environment:
+      # Accès BDD
+      POSTGRES_USER: ${OSCAR_CONTAINER_POSGRESQL_USER}
+      POSTGRES_PASSWORD: ${OSCAR_CONTAINER_POSGRESQL_PASS}
+      POSTGRES_DB: ${OSCAR_CONTAINER_POSGRESQL_BASE}
+
+    networks:
+      - oscar-network
+
+    env_file:
+      - .env
+
+    volumes:
+      - ${OSCAR_VOLUMES_POSTGRESQL_DATAS}:/var/lib/postgresql/data
+      - ./docker/dev/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+
+    build:
+      context: ./docker/dev/postgresql
+      dockerfile: Dockerfile
+
+
+  ######################################################################
+  ### APACHE
+  oscar-apache:
+    container_name: oscar-apache
+    restart: unless-stopped
+    volumes:
+      - ./:/var/application
+    depends_on:
+      - oscar-php
+    networks:
+      - oscar-network
+#    env_file: # TODO
+#      - .env.docker.dev
+    build:
+      context: ./docker/dev/apache/
+      dockerfile: Dockerfile
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - "8888:80"
+
+
+  ######################################################################
+  ### GEARMAN
+  oscar-gearman:
+    container_name: oscar-gearman
+    image: artefactual/gearmand:1.1.21.2-alpine
+    depends_on:
+      - oscar-postgres
+    networks:
+      - oscar-network
+    tty: true
+    restart: "unless-stopped"
+
+
+  ######################################################################
+  ### ELASTICSEARCH
+  oscar-elasticsearch:
+    container_name: oscar-elasticsearch
+    build:
+      context: ./docker/dev/elasticsearch
+      dockerfile: Dockerfile
+
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    depends_on:
+      - oscar-postgres
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker/dev/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/dev/elasticsearch/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      - ${OSCAR_VOLUMES_ELASTICSEARCH_DATAS}:/usr/share/elasticsearch/data
+    networks:
+      - oscar-network
+    tty: true
+    restart: "always"
+
+  ######################################################################
+  ### WORKER
+  oscar-php:
+    container_name: oscar-php
+    restart: unless-stopped
+    depends_on:
+      - oscar-worker
+    volumes:
+      - ./:/var/application
+      - ${OSCAR_VOLUMES_DOCUMENTS_ACTIVITY}:/var/documents/activity
+      - ${OSCAR_VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
+      - ${OSCAR_VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
+      - ${OSCAR_VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+    networks:
+      - oscar-network
+    build:
+      context: ./docker/dev/worker
+      dockerfile: Dockerfile
+
+
+  ######################################################################
+  ### WORKER
+  oscar-worker:
+    container_name: oscar-worker
+    restart: unless-stopped
+    depends_on:
+      - oscar-postgres
+    volumes:
+      - ./:/var/application
+    networks:
+      - oscar-network
+    build:
+      context: ./docker/dev/worker
+      dockerfile: Dockerfile
+    command: ["/bin/bash", "/entrypoint.sh"]
+
+#  ######################################################################
+#  ### VITE
+#  oscar-vite:
+#    container_name: oscar-vite
+#    volumes:
+#      - ./:/var/application
+#    networks:
+#      - oscar-network
+#    build:
+#      context: ./docker/dev/vite
+#      dockerfile: Dockerfile
+#    ports:
+#      - "5173:5173"
+#
+#
+#  ######################################################################
+#  # KIBANA
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.16.1
+#    container_name: oscar-kibana
+#    depends_on:
+#      - oscar-elasticsearch
+#    networks:
+#      - oscar-network
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://oscar-elasticsearch:9200  # Connexion à Elasticsearch
+#      - LOGGING_ROOT_LEVEL=error
+#    ports:
+#      - "5601:5601"
+#
+#
+#  ######################################################################
+#  # MAILHOG (capture les mails envoyés depuis Oscar)
+#  mailhog:
+#    image: mailhog/mailhog
+#    container_name: oscar-mailhog
+#    networks:
+#      - oscar-network
+#    entrypoint: ["/bin/sh", "-c", "MailHog | grep -v KEEPALIVE"]
+#    ports:
+#      - "8025:8025" # Interface web MailHog
+#      - "1025:1025" # Port SMTP pour envoyer les mails

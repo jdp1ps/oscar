@@ -146,7 +146,7 @@ services:
   ######################################################################
   # KIBANA
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.28
+    image: docker.elastic.co/kibana/kibana:7.16.1
     container_name: oscar-dev-kibana
     depends_on:
       - oscar-dev-elasticsearch
@@ -154,7 +154,7 @@ services:
       - oscar-dev-network
     environment:
       - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
-      - LOGGING_ROOT_LEVEL=ERROR
+      - LOGGING_ROOT_LEVEL=error
     ports:
       - "5601:5601"
 

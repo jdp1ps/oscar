@@ -1,0 +1,9 @@
+oscar:
+  parameters:
+    chaînes:
+      in_param_1: "%env(string:PARAM_STRING_1)%"
+      in_param_2: "%env(string:PARAM_STRING_2)%"
+      in_param_3: "%env(string:PARAM_STRING_3)%"
+      in_param_4: "%env(string:PARAM_STRING_4)%"
+
+      in_yaml: "Dans YAML"

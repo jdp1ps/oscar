@@ -1,0 +1,4 @@
+oscar:
+  parameters:
+    value: normal
+    othervalue: %env(EXTERNAL)%

@@ -7,6 +7,9 @@ config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 config/autoload/unicaen-signature.local.php
 config/oscarworker.service
+config/autoload/oscar.yml
+.env
+.env.dev
 
 # Connecteurs
 /config/connectors/*.yml
