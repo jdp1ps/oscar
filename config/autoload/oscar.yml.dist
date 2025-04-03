@@ -9,11 +9,11 @@ doctrine:
       doctrine_type_mappings:
         enum: string
       params:
-        host: '%env(OSCAR_CONTAINER_POSGRESQL)%'
-        port: '%env(OSCAR_CONTAINER_POSGRESQL_PORT)%'
-        user: '%env(OSCAR_CONTAINER_POSGRESQL_USER)%'
-        password: '%env(OSCAR_CONTAINER_POSGRESQL_PASS)%'
-        dbname: '%env(OSCAR_CONTAINER_POSGRESQL_BASE)%'
+        host: '%env(POSGRESQL)%'
+        port: '%env(POSGRESQL_PORT)%'
+        user: '%env(POSGRESQL_USER)%'
+        password: '%env(POSGRESQL_PASS)%'
+        dbname: '%env(POSGRESQL_BASE)%'
         charset: 'utf8'
 
 oscar:
@@ -21,7 +21,7 @@ oscar:
   log_stdout_enabled: true
   log_stdout_level: '%env(OSCAR_LOG_LEVEL)%'
 
-  gearman-job-server-host: '%env(OSCAR_CONTAINER_GEARMAN)%'
+  gearman-job-server-host: '%env(GEARMAN_HOST)%'
 
 # Vite (Prod) -------------------------------------------
   vite:
@@ -36,10 +36,18 @@ oscar:
   ##############################################################
   # Emplacements
   paths:
-    # Documents des activités
-    document_oscar: '%env(OSCAR_VOLUMES_DOCUMENTS_ACTIVITY)%'
-    # Documents "Publiques"
-    document_admin_oscar: '%env(OSCAR_VOLUMES_DOCUMENTS_PUBLIC)%'
+    document_oscar: "/var/documents/activity"
+    document_admin_oscar: "/var/documents/public"
+    document_request: "/var/documents/request"
+
+  pcru:
+    files_path: '/var/documents/pcru'
+
+  # Modèle pour la génération des documents
+  timesheet_person_month_template: '/var/application/data/templates/timesheet_person_month.default.html.php'
+  timesheet_period_template: '/var/application/data/templates/timesheet_period.default.html.php'
+  timesheet_activity_synthesis_template: '/var/application/data/templates/timesheet_period.default.html.php'
+  estimated_spent_activity_template: '/var/application/data/templates/estimated_spent_activity_.default.html.php'
 
   # Documents générés
   generated-documents:
@@ -66,54 +74,60 @@ oscar:
       search_engine:
         class: \Oscar\Strategy\Search\ElasticActivitySearch
         params:
-          - "%env(!string:OSCAR_CONTAINER_ELASTICSEARCH_ADDR)%"
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
 
     person:
       search_engine:
         class: \Oscar\Strategy\Search\PersonElasticSearch
         params:
-          - "%env(!string:OSCAR_CONTAINER_ELASTICSEARCH_ADDR)%"
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
 
     organization:
       search_engine:
         class: \Oscar\Strategy\Search\OrganizationElasticSearch
         params:
-          - "%env(!string:OSCAR_CONTAINER_ELASTICSEARCH_ADDR)%"
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
 
 unicaen-app:
+  ldap:
+    connection:
+      default:
+        params:
+          host: '%env(LDAP_HOST)%'
+          port: '%env(LDAP_PORT)%'
+          username: '%env(LDAP_USERNAME)%'
+          password: '%env(LDAP_PASSWORD)%'
+          baseDn: '%env(LDAP_BASEDN)%'
+          bindRequiresDn: '%env(LDAP_BASEDN_REQUIRED)%'
+          accountFilterFormat: '%env(LDAP_ACCOUNT_FILTER_FORMAT)%'
+    dn:
+      UTILISATEURS_BASE_DN: '%env(LDAP_DN_UTILISATEURS_BASE_DN)%'
+      UTILISATEURS_DESACTIVES_BASE_DN: '%env(LDAP_DN_UTILISATEURS_DESACTIVES_BASE_DN)%'
+      GROUPS_BASE_DN: '%env(LDAP_DN_GROUPS_BASE_DN)%'
+      STRUCTURES_BASE_DN: '%env(LDAP_DN_STRUCTURES_BASE_DN)%'
+    filters:
+      LOGIN_FILTER: '%env(LDAP_FILTERS_LOGIN_FILTER)%'
+
   app_infos:
       nom:      'DkOSCAR'
-      desc:     'Organisation et Suivi des Contrats et des Activités de Recherche'
+      desc:     'Oscar dockerisé'
       version:  'docker'
       date:     '2025'
       contact:
         mail: 'dsi.applications@unicaen.fr'
       mentionsLegales: 'http://www.unicaen.fr/outils-portail-institutionnel/mentions-legales/'
       informatiqueEtLibertes: 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/'
-  connection:
-    default:
-      params:
-        host: '%env(LDAP_HOST)%'
-        port: '%env(LDAP_PORT)%'
-        username: '%env(LDAP_USERNAME)%'
-        password: '%env(LDAP_PASSWORD)%'
-        baseDn: '%env(LDAP_BASEDN)%'
-        bindRequiresDn: '%env(LDAP_BASEDN_REQUIRED)%'
-        accountFilterFormat: '%env(LDAP_ACCOUNT_FILTER_FORMAT)%'
-  dn:
-    UTILISATEURS_BASE_DN: '%env(LDAP_DN_UTILISATEURS_BASE_DN)%'
-    UTILISATEURS_DESACTIVES_BASE_DN: '%env(LDAP_DN_UTILISATEURS_DESACTIVES_BASE_DN)%'
-    GROUPS_BASE_DN: '%env(LDAP_DN_GROUPS_BASE_DN)%'
-    STRUCTURES_BASE_DN: '%env(LDAP_DN_STRUCTURES_BASE_DN)%'
+  mail:
+    transport_options:
+      host: smtp.unicaen.fr
+      port: 25
 
-  filters:
-    LOGIN_FILTER: '%env(LDAP_FILTERS_LOGIN_FILTER)%'
 
 unicaen-auth:
   # Usurpation d'identité
   usurpation_allowed_usernames:
-    - bouvry
-    - admin
+    - sbouvry
+    - turbout
   # Accès Shibboleth
   shib:
     order: 4
@@ -133,12 +147,12 @@ unicaen-auth:
   # Accès CAS
   cas:
     order: 1
-    enabled: false
+    enabled: '%env(bool:CAS_ENABLED)%'
     description: Authentification CAS
     connection:
       default:
         params:
-          hostname: 'host.domain.fr'
+          hostname: 'cas.unicaen.fr'
           port: 443
           version: "2.0"
           uri: ""

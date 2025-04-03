@@ -2,6 +2,13 @@ FROM php:8.2-fpm
 
 LABEL authors="Stéphane BOUVRY<stephane.bouvry@unicaen.fr>"
 
+ARG HTTP_PROXY
+
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV http_proxy=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTP_PROXY}
+ENV https_proxy=${HTTP_PROXY}
+
 RUN apt update && apt install -y \
     wget \
     libpq-dev \
@@ -52,9 +59,9 @@ RUN chmod +x /bin/composer
 RUN apt install -y unzip libaio1 build-essential expect
 
 # Driver OCI (Oracle)
-COPY ../../resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
-COPY ../../resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
-COPY ../../resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip /tmp/
+COPY resources/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip /tmp/
 
 RUN unzip -o /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
     unzip -o /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip -d /usr/local/ && \
@@ -65,8 +72,9 @@ RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
 
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
 RUN echo "extension=oci8.so" > /usr/local/etc/php/conf.d/910-php-oci8.ini
-COPY ./99-oscar.ini /usr/local/etc/php/conf.d/911-oscar.ini
+COPY ./app_99-app.ini /usr/local/etc/php/conf.d/99-app.ini
 RUN echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
+
 #
 #RUN rm /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
 #RUN rm /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip
@@ -78,5 +86,5 @@ WORKDIR /var/application
 
 EXPOSE 9000
 
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./app_entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
