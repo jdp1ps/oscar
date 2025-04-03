@@ -32,6 +32,8 @@ services:
     build:
       context: ./docker
       dockerfile: postgres_Dockerfile
+      args:
+        - HTTP_PROXY
 
 
   ######################################################################
