@@ -9,6 +9,14 @@ ENV http_proxy=${HTTP_PROXY}
 ENV HTTPS_PROXY=${HTTP_PROXY}
 ENV https_proxy=${HTTP_PROXY}
 
+RUN if [ "$HTTP_PROXY" != "" ]; \
+    then \
+      echo "Acquire::http::proxy \"$HTTP_PROXY\";" > /etc/apt/apt.conf.d/proxy; \
+    fi
+
+RUN pear config-set http_proxy $HTTP_PROXY
+
+
 RUN apt update && apt install -y \
     wget \
     libpq-dev \
@@ -83,6 +91,14 @@ RUN echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.con
 
 # Copier le script de surveillance
 WORKDIR /var/application
+
+RUN mkdir -p /var/documents/activity
+RUN mkdir -p /var/documents/public
+RUN mkdir -p /var/documents/request
+RUN mkdir -p /var/documents/pcru
+
+
+
 
 EXPOSE 9000
 
