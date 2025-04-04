@@ -16,6 +16,10 @@ doctrine:
         dbname: '%env(POSGRESQL_BASE)%'
         charset: 'utf8'
 
+session_config:
+  cookie_lifetime: 3600
+  gc_maxlifetime: 2592000
+
 oscar:
   socket: false
   log_stdout_enabled: true
@@ -88,6 +92,7 @@ oscar:
         params:
           - "%env(!string:ELASTICSEARCH_ADDR)%"
 
+# UNICAEN-APP (Base applicative)
 unicaen-app:
   ldap:
     connection:
@@ -109,12 +114,12 @@ unicaen-app:
       LOGIN_FILTER: '%env(LDAP_FILTERS_LOGIN_FILTER)%'
 
   app_infos:
-      nom:      'DkOSCAR'
-      desc:     'Oscar dockerisé'
-      version:  'docker'
-      date:     '2025'
+      nom: '%env(APP_NAME)%'
+      desc: '%env(APP_DESCRIPTION)%'
+      version: '%env(APP_VERSION)%'
+      date: '%env(APP_YEAR)%'
       contact:
-        mail: 'dsi.applications@unicaen.fr'
+        mail: '%env(APP_CONTACT_MAIL)%'
       mentionsLegales: 'http://www.unicaen.fr/outils-portail-institutionnel/mentions-legales/'
       informatiqueEtLibertes: 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/'
   mail:
@@ -122,12 +127,31 @@ unicaen-app:
       host: smtp.unicaen.fr
       port: 25
 
-
+# UNICAEN-AUTH (Système d'authentification)
 unicaen-auth:
-  # Usurpation d'identité
-  usurpation_allowed_usernames:
-    - sbouvry
-    - turbout
+  local:
+    order: 2
+    enabled: true
+    description: "Connexion avec un compte local"
+    db:
+      enabled: true
+    ldap:
+      enabled: true
+
+  # Accès CAS
+  cas:
+    order: 5
+    enabled: true
+    description: Authentification CAS
+    connection:
+      default:
+        params:
+          hostname: 'cas.unicaen.fr'
+          port: 443
+          version: "2.0"
+          uri: ""
+          debug: false
+
   # Accès Shibboleth
   shib:
     order: 4
@@ -144,16 +168,8 @@ unicaen-auth:
       displayName: "HTTP_DISPLAYNAME"
       sn: "HTTP_SN"
       givenName: "HTTP_GIVENNAME"
-  # Accès CAS
-  cas:
-    order: 1
-    enabled: '%env(bool:CAS_ENABLED)%'
-    description: Authentification CAS
-    connection:
-      default:
-        params:
-          hostname: 'cas.unicaen.fr'
-          port: 443
-          version: "2.0"
-          uri: ""
-          debug: false
+
+  # Usurpation d'identité
+  usurpation_allowed_usernames:
+    - jeanpierre
+    - user666
