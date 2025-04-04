@@ -84,7 +84,9 @@ RUN ln -sf /usr/local/instantclient_18_5 /usr/local/instantclient && \
 
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
 RUN echo "extension=oci8.so" > /usr/local/etc/php/conf.d/910-php-oci8.ini
-COPY ./app_99-app.ini /usr/local/etc/php/conf.d/99-app.ini
+
+COPY ./app_90-app.ini /usr/local/etc/php/conf.d/90-app.ini
+
 RUN echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
 #
@@ -100,9 +102,6 @@ RUN mkdir -p /var/documents/activity
 RUN mkdir -p /var/documents/public
 RUN mkdir -p /var/documents/request
 RUN mkdir -p /var/documents/pcru
-
-
-
 
 EXPOSE 9000
 

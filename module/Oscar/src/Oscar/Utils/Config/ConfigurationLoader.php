@@ -49,7 +49,7 @@ class ConfigurationLoader
         static $merges;
         try {
             if (is_null($merges)) {
-                error_log(date("Y-m-d H:i:s v") . " Oscar settings loaded");
+                //error_log(date("Y-m-d H:i:s v") . " Oscar settings loaded");
                 $merges = [];
                 foreach ($this->yamlFilePaths as $filePath) {
                     $fileSettings = Yaml::parseFile($filePath);
@@ -58,7 +58,7 @@ class ConfigurationLoader
 
                 array_walk_recursive(/**
                  * @throws ConfigurationLoaderException
-                 */ $merges,
+                 */                    $merges,
                     function (&$value) {
                         $this->pregReplaceCallback($value, $this->env_parameters);
                     }
@@ -113,12 +113,9 @@ class ConfigurationLoader
     /**
      * @throws ConfigurationLoaderException
      */
-    public function pregReplaceCallback(?string &$value, array $values): mixed
+    public function pregReplaceCallback(&$value, array $values)
     {
-        if ($value === null) {
-            return null;
-        }
-        if (preg_match(self::REGEX, $value, $matches)) {
+        if (is_string($value) && preg_match(self::REGEX, $value, $matches)) {
             $input = $matches[0];
             $required = ($matches[2] === '!');
             $name = $matches[4];
@@ -155,17 +152,16 @@ class ConfigurationLoader
 
                 case '':
                     break;
+
                 default:
-                    die("Erreur de configuration : Type de paramètre '$type' inconnu dans '$input'");
-//                    throw new ConfigurationLoaderException("Type de paramètre '$type' inconnu dans '$input'");
+                    throw new ConfigurationLoaderException("Type de paramètre '$type' inconnu dans '$input'");
             }
 
             if ($required && $value === "") {
                 throw new ConfigurationLoaderException("Valeur '$name' requise");
             }
-            return $value;
-        } else {
-            return $value;
         }
+
+        return $value;
     }
 }

@@ -116,6 +116,7 @@ services:
       - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
       - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+      - ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
     networks:
       - app-network
     env_file:
@@ -125,6 +126,7 @@ services:
       dockerfile: app_Dockerfile
       args:
         - HTTP_PROXY
+        - ENV_MODE
 
 
   ######################################################################
@@ -145,6 +147,7 @@ services:
       dockerfile: app_Dockerfile
       args:
         - HTTP_PROXY
+        - ENV_MODE
     command: ["/bin/bash", "/entrypoint.sh"]
 
 #  ######################################################################

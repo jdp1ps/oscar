@@ -12,7 +12,7 @@ class ConfigurationLoaderTest extends TestCase
     public function testParseFile()
     {
         $file = __DIR__ . "/config01.yml";
-        $loader = new ConfigurationLoader($file);
+        $loader = new ConfigurationLoader([$file]);
         $settings = $loader->parseFile($file);
 
         $this->assertArrayHasKey('oscar', $settings);
@@ -87,80 +87,118 @@ class ConfigurationLoaderTest extends TestCase
         ];
 
         // --- Valeur simple
-        $this->assertEquals("YearBaby", $loader->pregReplaceCallback("YearBaby", $values), "Valeur simple : Chaîne simple");
+        $value = "YearBaby";
+        $this->assertEquals(
+            "YearBaby",
+            $loader->pregReplaceCallback($value, $values),
+            "Valeur simple : Chaîne simple");
 
         // --- Variable non définie
+        $value = "%env(UNKNOW)%";
         $this->assertEquals(
             "",
-            $loader->pregReplaceCallback("%env(UNKNOW)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             "Les paramètres manquants optionnels sont des chaînes vides"
         );
 
         // --- Variables non-définie typées
+        $value = "%env(bool:UNKNOW)%";
         $this->assertEquals(
             false,
-            $loader->pregReplaceCallback("%env(bool:UNKNOW)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             "Les paramètres manquants typé bool optionnels sont des FALSE"
         );
+
+
+        $value = "%env(int:UNKNOW)%";
         $this->assertEquals(
             0,
-            $loader->pregReplaceCallback("%env(int:UNKNOW)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             "Les paramètres manquants typé int optionnels sont des 0"
         );
+
+        $value = "%env(float:UNKNOW)%";
         $this->assertEquals(
             0.0,
-            $loader->pregReplaceCallback("%env(float:UNKNOW)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             "Les paramètres manquants typé float optionnels sont des 0.0"
         );
 
-        $getArray = $loader->pregReplaceCallback("%env(array:UNKNOW)%", $values);
+        $value = "%env(array:UNKNOW)%";
+        $getArray = $loader->pregReplaceCallback($value, $values);
         $this->assertTrue(is_array($getArray), "Les paramètres manquants typé array optionnels sont des tableaux");
-        $this->assertEquals(0, count($getArray), "Les paramètres manquants typé array optionnels sont des tableaux vides");
+        $this->assertEquals(
+            0,
+            count($getArray),
+            "Les paramètres manquants typé array optionnels sont des tableaux vides"
+        );
 
 
         // Variable définie
-        $this->assertEquals("SimpleValue", $loader->pregReplaceCallback("%env(SIMPLE)%", $values));
+        $value = "%env(SIMPLE)%";
+        $this->assertEquals(
+            "SimpleValue",
+            $loader->pregReplaceCallback($value, $values)
+        );
 
         // Booleen
-        $this->assertTrue($loader->pregReplaceCallback("%env(bool:BOOLEAN_TRUE)%", $values), 'Type Boolean forcé (true)');
-        $this->assertFalse($loader->pregReplaceCallback("%env(bool:BOOLEAN_FALSE)%", $values), 'Type Boolean forcé (false)');
+        $value = "%env(bool:BOOLEAN_TRUE)%";
+        $this->assertTrue(
+            $loader->pregReplaceCallback($value, $values),
+            'Type Boolean forcé (true)'
+        );
+        $value = "%env(bool:BOOLEAN_FALSE)%";
+        $this->assertFalse(
+            $loader->pregReplaceCallback($value, $values),
+            'Type Boolean forcé (false)'
+        );
 
         // Float
+        $value = "%env(bool:FLOAT_3_14)%";
         $this->assertEquals(
             3.14,
-            $loader->pregReplaceCallback("%env(bool:FLOAT_3_14)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             'Type Float forcé'
         );
+        $value = "%env(bool:FLOAT_M_3_14)%";
         $this->assertEquals(
             -3.14,
-            $loader->pregReplaceCallback("%env(bool:FLOAT_M_3_14)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             'Type Float forcé'
         );
 
         // Int
-        $this->assertEquals(256, $loader->pregReplaceCallback("%env(bool:INT_M_256)%", $values), 'Type Int forcé');
-        $this->assertEquals(-256, $loader->pregReplaceCallback("%env(bool:INT_256)%", $values), 'Type Int forcé');
+        $value = "%env(bool:INT_M_256)%";
+        $this->assertEquals(256, $loader->pregReplaceCallback($value, $values), 'Type Int forcé');
+
+        $value = "%env(bool:INT_256)%";
+        $this->assertEquals(-256, $loader->pregReplaceCallback($value, $values), 'Type Int forcé');
+
 
         // array
+        $value = "%env(array:ARRAY1)%";
         $this->assertEquals(
             [1, 2, 3],
-            $loader->pregReplaceCallback("%env(array:ARRAY1)%", $values),
-            'Type Array forcé'
-        );
-        $this->assertEquals(
-            ["stephane@mail.com", "jean-baptiste@mail.com", "karin@mail.com"],
-            $loader->pregReplaceCallback("%env(array:ARRAY2)%", $values),
+            $loader->pregReplaceCallback($value, $values),
             'Type Array forcé'
         );
 
+        $value = "%env(array:ARRAY2)%";
+        $this->assertEquals(
+            ["stephane@mail.com", "jean-baptiste@mail.com", "karin@mail.com"],
+            $loader->pregReplaceCallback($value, $values),
+            'Type Array forcé'
+        );
+
+
         // Type inconnu
-        $var = '%env(unknow:UNKNOW_TYPE_OPTIONNAL)%';
+        $msg = $var = '%env(unknow:UNKNOW_TYPE_OPTIONNAL)%';
         try {
             $value = $loader->pregReplaceCallback($var, $values);
             $this->fail("Type inconnue non-détécté");
         } catch (ConfigurationLoaderException $e) {
             $this->assertEquals(
-                "Type de paramètre 'unknow' inconnu dans '$var'",
+                "Type de paramètre 'unknow' inconnu dans '$msg'",
                 $e->getMessage(),
                 "Message d'erreur des types explicite incorrect"
             );
