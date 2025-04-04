@@ -47,11 +47,14 @@ services:
       - app-php
     networks:
       - app-network
+    env_file:
+      - .env
     build:
       context: ./docker/
       dockerfile: apache_Dockerfile
       args:
         - HTTP_PROXY
+        - PHP_HOST
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
@@ -67,6 +70,8 @@ services:
       - app-postgres
     networks:
       - app-network
+    env_file:
+      - .env
     tty: true
     restart: "unless-stopped"
 
@@ -93,6 +98,8 @@ services:
     user: "1000:1000"
     networks:
       - app-network
+    env_file:
+      - .env
     tty: true
     restart: "always"
 
@@ -111,6 +118,8 @@ services:
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
     networks:
       - app-network
+    env_file:
+      - .env
     build:
       context: ./docker/
       dockerfile: app_Dockerfile
@@ -129,6 +138,8 @@ services:
       - ./:/var/application
     networks:
       - app-network
+    env_file:
+      - .env
     build:
       context: ./docker/
       dockerfile: app_Dockerfile

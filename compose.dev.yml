@@ -1,141 +1,149 @@
 ########################################################################
-# OSCAR DOCKER (Développement)
+# OSCAR DOCKER (Prod)
 ########################################################################
 networks:
-  oscar-dev-network:
+  app-dev-network:
     driver: bridge
+
+volumes:
+  # Les nodes de elastic sont gérés par Docker en local
+  elastic_data:
+    driver: local
 
 services:
   ######################################################################
   # POSTGRESQL
-  oscar-dev-postgres:
-    container_name: oscar-dev-postgres
+  app-dev-postgres:
+    container_name: app-dev-postgres
     restart: always
     environment:
       # Accès BDD
-      POSTGRES_USER: oscar_dev_user
-      POSTGRES_PASSWORD: oscar_dev_pass
-      POSTGRES_DB: oscar_dev_db
-
+      POSTGRES_USER: ${POSGRESQL_USER}
+      POSTGRES_PASSWORD: ${POSGRESQL_PASS}
+      POSTGRES_DB: ${POSGRESQL_BASE}
     networks:
-      - oscar-dev-network
-#    env_file: # TODO
-#      - .env.docker.dev
-    ports:
-      - "6543:5432"
+      - app-dev-network
+    env_file:
+      - .env
     volumes:
-      - ./docker/dev/volumes/databases/oscar_dev_data:/var/lib/postgresql/data
-      - ./docker/dev/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+      - ${VOLUMES_POSTGRESQL_DATAS}:/var/lib/postgresql/data
+      - ./docker/postgres_initdb.d/:/docker-entrypoint-initdb.d
+
     build:
-      context: ./docker/dev/postgresql
-      dockerfile: Dockerfile
+      context: ./docker
+      dockerfile: postgres_Dockerfile
+      args:
+        - HTTP_PROXY
 
 
   ######################################################################
   ### APACHE
-  oscar-dev-apache:
-    container_name: oscar-dev-apache
+  app-dev-apache:
+    container_name: app-dev-apache
     restart: unless-stopped
     volumes:
       - ./:/var/application
     depends_on:
-      - oscar-dev-php
+      - app-dev-php
     networks:
-      - oscar-dev-network
-#    env_file: # TODO
-#      - .env.docker.dev
+      - app-dev-network
     build:
-      context: ./docker/dev/apache/
-      dockerfile: Dockerfile
+      context: ./docker/
+      dockerfile: apache_Dockerfile
+      args:
+        - HTTP_PROXY
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
       - "8888:80"
-#      - "9003:9003"
 
 
   ######################################################################
   ### GEARMAN
-  oscar-dev-gearman:
-    container_name: oscar-dev-gearman
+  app-dev-gearman:
+    container_name: app-dev-gearman
     image: artefactual/gearmand:1.1.21.2-alpine
     depends_on:
-      - oscar-dev-postgres
+      - app-dev-postgres
     networks:
-      - oscar-dev-network
+      - app-dev-network
     tty: true
     restart: "unless-stopped"
 
 
   ######################################################################
   ### ELASTICSEARCH
-  oscar-dev-elasticsearch:
-    container_name: oscar-dev-elasticsearch
-    build:
-      context: ./docker/dev/elasticsearch
-      dockerfile: Dockerfile
-
+  app-dev-elasticsearch:
+    container_name: app-dev-elasticsearch
+    image: elasticsearch:7.17.28
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     depends_on:
-      - oscar-dev-postgres
+      - app-dev-postgres
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - ./docker/dev/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./docker/dev/elasticsearch/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
-      - ./docker/dev/volumes/elasticsearch:/usr/share/elasticsearch/data
+      - ./docker/es_elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/es_log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      - elastic_data:/usr/share/elasticsearch/data
+    user: "1000:1000"
     networks:
-      - oscar-dev-network
+      - app-dev-network
     tty: true
     restart: "always"
 
   ######################################################################
   ### WORKER
-  oscar-dev-php:
-    container_name: oscar-dev-php
+  app-dev-php:
+    container_name: app-dev-php
     restart: unless-stopped
     depends_on:
-      - oscar-dev-worker
+      - app-dev-worker
     volumes:
       - ./:/var/application
+      - ${VOLUMES_DOCUMENTS_ACTIVITY}:/var/documents/activity
+      - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
+      - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
+      - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
     networks:
-      - oscar-dev-network
+      - app-dev-network
     build:
-      context: ./docker/dev/worker
-      dockerfile: Dockerfile
+      context: ./docker/
+      dockerfile: app_Dockerfile
+      args:
+        - HTTP_PROXY
 
 
   ######################################################################
   ### WORKER
-  oscar-dev-worker:
-    container_name: oscar-dev-worker
+  app-dev-worker:
+    container_name: app-dev-worker
     restart: unless-stopped
     depends_on:
-      - oscar-dev-postgres
+      - app-dev-elasticsearch
     volumes:
       - ./:/var/application
     networks:
-      - oscar-dev-network
-#    env_file: # TODO
-#      - .env.docker.dev
+      - app-dev-network
     build:
-      context: ./docker/dev/worker
-      dockerfile: Dockerfile
+      context: ./docker/
+      dockerfile: app_Dockerfile
+      args:
+        - HTTP_PROXY
     command: ["/bin/bash", "/entrypoint.sh"]
 
   ######################################################################
   ### VITE
-  oscar-dev-vite:
-    container_name: oscar-dev-vite
+  app-dev-vite:
+    container_name: app-dev-vite
     volumes:
       - ./:/var/application
     networks:
-      - oscar-dev-network
+      - app-dev-network
     build:
       context: ./docker/dev/vite
       dockerfile: Dockerfile
@@ -147,13 +155,13 @@ services:
   # KIBANA
   kibana:
     image: docker.elastic.co/kibana/kibana:7.16.1
-    container_name: oscar-dev-kibana
+    container_name: app-dev-kibana
     depends_on:
-      - oscar-dev-elasticsearch
+      - app-dev-elasticsearch
     networks:
-      - oscar-dev-network
+      - app-dev-network
     environment:
-      - ELASTICSEARCH_HOSTS=http://oscar-dev-elasticsearch:9200  # Connexion à Elasticsearch
+      - ELASTICSEARCH_HOSTS=http://app-dev-elasticsearch:9200  # Connexion à Elasticsearch
       - LOGGING_ROOT_LEVEL=error
     ports:
       - "5601:5601"
@@ -163,9 +171,9 @@ services:
   # MAILHOG (capture les mails envoyés depuis Oscar)
   mailhog:
     image: mailhog/mailhog
-    container_name: oscar-dev-mailhog
+    container_name: app-dev-mailhog
     networks:
-      - oscar-dev-network
+      - app-dev-network
     entrypoint: ["/bin/sh", "-c", "MailHog | grep -v KEEPALIVE"]
     ports:
       - "8025:8025" # Interface web MailHog

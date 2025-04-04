@@ -14,7 +14,11 @@ RUN if [ "$HTTP_PROXY" != "" ]; \
       echo "Acquire::http::proxy \"$HTTP_PROXY\";" > /etc/apt/apt.conf.d/proxy; \
     fi
 
-RUN pear config-set http_proxy $HTTP_PROXY
+RUN if [ "$HTTP_PROXY" != "" ]; \
+    then \
+      pear config-set http_proxy $HTTP_PROXY; \
+    fi
+
 
 
 RUN apt update && apt install -y \
@@ -84,9 +88,9 @@ COPY ./app_99-app.ini /usr/local/etc/php/conf.d/99-app.ini
 RUN echo "/usr/local/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
 #
-#RUN rm /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
-#RUN rm /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip
-#RUN rm /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
+RUN rm /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
+RUN rm /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip
+RUN rm /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
 
 
 # Copier le script de surveillance
