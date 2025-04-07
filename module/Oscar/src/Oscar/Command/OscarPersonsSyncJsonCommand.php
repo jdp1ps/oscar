@@ -81,7 +81,7 @@ class OscarPersonsSyncJsonCommand extends OscarCommandAbstract
                 return self::FAILURE;
             }
 
-            $connector = new ConnectorPersonJSON($datas, $entityManager, "json");
+            $connector = new ConnectorPersonJSON($datas, $this->getServicemanager(), "json");
             $repport = $connector->syncAll();
             $connectorFormatter = new ConnectorRepportToPlainText();
 
