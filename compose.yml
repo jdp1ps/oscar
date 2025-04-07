@@ -21,6 +21,9 @@ services:
       POSTGRES_USER: ${POSGRESQL_USER}
       POSTGRES_PASSWORD: ${POSGRESQL_PASS}
       POSTGRES_DB: ${POSGRESQL_BASE}
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+
     networks:
       - app-network
     env_file:
@@ -43,10 +46,17 @@ services:
     restart: unless-stopped
     volumes:
       - ./:/var/application
+
     depends_on:
       - app-php
+
     networks:
       - app-network
+
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+
     env_file:
       - .env
     build:
@@ -55,8 +65,10 @@ services:
       args:
         - HTTP_PROXY
         - PHP_HOST
+
     extra_hosts:
       - host.docker.internal:host-gateway
+
     ports:
       - "8888:80"
 
@@ -68,6 +80,9 @@ services:
     image: artefactual/gearmand:1.1.21.2-alpine
     depends_on:
       - app-postgres
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
     networks:
       - app-network
     env_file:
@@ -121,6 +136,9 @@ services:
       - app-network
     env_file:
       - .env
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
     build:
       context: ./docker/
       dockerfile: app_Dockerfile
@@ -142,6 +160,9 @@ services:
       - app-network
     env_file:
       - .env
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
     build:
       context: ./docker/
       dockerfile: app_Dockerfile
