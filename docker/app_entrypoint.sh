@@ -28,9 +28,6 @@ touch config/autoload/oscar-editable.yml \
 ## Mise à jour du modèle (si besoin)
 php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 
-## Compte de test
-php bin/oscar.php auth:sync install/demo/authentification.docker.json
-
 ## Note de version
 php bin/oscar.php infos
 
