@@ -7,6 +7,14 @@ console.log("OSCAR BUILDER v3");
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), splitVendorChunkPlugin()],
+
+  server:{
+    cors: {
+      origin: ['http://localhost:5173', 'http://localhost.unicaen.fr']
+    },
+    allowedHosts: true
+  },
+
   build: {
     outDir: "../public/js/oscar/vite/dist",
     //outDir: "../dist",
@@ -14,6 +22,7 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: true,
     minify: true,
+
     // commonjsOptions: {
     //   transformMixedEsModules: true
     // },
