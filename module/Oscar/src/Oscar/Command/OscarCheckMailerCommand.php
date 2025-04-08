@@ -43,6 +43,9 @@ class OscarCheckMailerCommand extends OscarCommandAbstract
             /** @var MailingService $mailer */
             $mailer = $this->getServicemanager()->get(MailingService::class);
 
+            $io->info(json_encode($mailer->getConfiguration(), JSON_PRETTY_PRINT));
+
+
             /** @var OscarConfigurationService $oscarConfigurationService */
             $oscarConfigurationService = $this->getServicemanager()->get(OscarConfigurationService::class);
 
