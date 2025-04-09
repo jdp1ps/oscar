@@ -28,6 +28,8 @@ touch config/autoload/oscar-editable.yml \
 ## Mise à jour du modèle (si besoin)
 php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 
+php bin/oscar.php check:privileges -n
+
 ## Note de version
 php bin/oscar.php infos
 

@@ -4,7 +4,7 @@ Copie de travail utilisée pour le développement local
 
 ## Prérequis
 
-> Testé sous Debian 12 "Bookorm" / Ubuntu
+> Testé sous Debian 12 "Booworm" / Ubuntu
 
  - Docker version 28.0.2, build 0442a73
  - Git version 2.39.5
@@ -23,62 +23,71 @@ git clone https://git.unicaen.fr/open-source/oscar.git
 Copier la configuration initiale
 
 ```bash
+# Copie des fichiers de config "Dockerisés"
 cp config/autoload/local.docker.php.dist config/autoload/local.php 
-cp config/autoload/unicaen-app.local.php.dist config/autoload/unicaen-app.local.php 
-cp config/autoload/unicaen-auth.local.php.dist config/autoload/unicaen-auth.local.php 
+cp config/autoload/unicaen-app.local.php.docker.dist config/autoload/unicaen-app.local.php 
+cp config/autoload/unicaen-auth.local.php.docker.dist config/autoload/unicaen-auth.local.php 
 cp config/autoload/unicaen-signature.local.php.dist config/autoload/unicaen-signature.local.php
-
-# On autorise l'écriture du dossier Elastic
-chmod -R 777 docker/dev/volumes/elasticsearch 
 ```
 
-Premier lancement : 
+Puis le **.env** qui centralise toute la configuration : 
 
 ```bash
-## TODO Création des volumes pour 
-# - la BDD
-# - Elastic
-# - les documents
-# Pour le moment, on fait ça à la main
-
-mkdir -p docker/dev/volumes/database
-mkdir -p docker/dev/volumes/elasticsearch
-mkdir -p docker/dev/volumes/documents/activity
-mkdir -p docker/dev/volumes/documents/pcru
-mkdir -p docker/dev/volumes/documents/public
-mkdir -p docker/dev/volumes/documents/request
-mkdir -p docker/dev/volumes/documents/signature
-
-chmod 775 -R docker/dev/volumes/*
-
-# Build / up
-docker compose -f compose.dev.yml up --build
-
-# Connection à Oscar
-docker compose -f compose.dev.yml exec oscar-dev-apache /bin/bash
+cp .env.dist .env
 ```
 
-Accès : http//localhost:8888
-Identifiant : administrateur
-Mdp : administrateur
+> La configuration de base dans le .env est fonctionnelle pour la version développement
+
+
+Initialisation des volumes : 
+
+```bash
+# script qui va créer les volumes par défaut basé sur la configuration
+# et copier les templates
+. compose-init.sh
+```
+
+On lance les containers + build
+
+```bash
+# Build / up
+docker compose up --build
+```
+
+Une fois les containers lancés, on met à jour le modèle de données
+
+```bash
+# Mise à jour du modèle
+docker compose exec app-php php vendor/bin/doctrine-module orm:schema-tool:update --complete --force
+```
+
+Si besoin on charge les données de base de la démo :
+
+```bash
+. docker/docker-sync-demos-datas.sh
+```
+
+C'est fini
+
+Accès WEB : http://localhost:8888 (identifiant: administrateur, Mot de passe: administrateur)
+Accès BDD : localhost:6543 (Bdd: oscar_dev_db, oscar_dev_user/oscar_dev_pass)
+Accès Mailhog (voir les mails envoyés par L'application) : http://localhost:8025
+Accès Kibana (Faire du dev sur Elasticsearch) : http://localhost:5601
 
 ## Architecture
 
 Il y'a 8 containers : 
- - **oscar-dev-apache** : Version web (http://localhost:8888)
- - **oscar-dev-posgres** : Base de donnée (Port: 6543)
- - **oscar-dev-elasticsearch** : L'index de recherche (Ports non-exposé)
- - **oscar-dev-gearman** : Serveur de tâche (Ports non-exposé)
- - **oscar-dev-worker** : Tâche de fond Oscar
- - **oscar-dev-vite** : Serveur Vite  (http://localhost:5173)
- - **oscar-dev-kibana** : Kibana  (http://localhost:5601)
- - **oscar-dev-mailhog** : Un mail catcher (http://localhost:8025)
- - **oscar-dev-php** : Le moteur PHP (utilisé pour déclencher les commandes PHP)
+ - **app-apache** : Version web (http://localhost:8888)
+ - **app-posgres** : Base de donnée (Bdd: oscar_dev_db, Port: 6543, oscar_dev_user/oscar_dev_pass)
+ - **app-elasticsearch** : L'index de recherche (Ports non-exposé)
+ - **app-gearman** : Serveur de tâche (Ports non-exposé)
+ - **app-worker** : Tâche de fond Oscar
+ - **app-vite** : Serveur Vite  (http://localhost:5173)
+ - **app-kibana** : Kibana  (http://localhost:5601)
+ - **app-mailhog** : Un mail catcher (http://localhost:8025)
+ - **app-php** : Le moteur PHP (utilisé pour déclencher les commandes PHP)
 
-   TODO/Idée d'évolution : 
- - Utiliser les fichiers .env avec Dotenc (???)
- - "Variabliser" dans un .env
- - Gérer les accès aux volumes (pour les documents) / Documenter
+
 
 
 ## Usage
@@ -89,50 +98,44 @@ Lancement/Arrêt de l'application
 
 ```bash
 # lancement (Avec build, logs complets en stdout)
-docker compose -f compose.dev.yml up --build
+docker compose up --build
 
 # lancement (Avec build, mode détaché)
-docker compose -f compose.dev.yml up --build -d
+docker compose up --build -d
 
 # Arrêt (Si détaché)
-docker compose -f compose.dev.yml down
+docker compose down
 ```
 
-Se connecter à l'application avec un bash (pour faire des commandes : bin/oscar.php, commandes composer, etc...)
+Lancer des commandes sur l'application PHP
 
 ```bash
-docker compose -f compose.dev.yml exec oscar-dev-apache /bin/bash
+# Commandes OSCAR
+docker compose exec app-worker php bin/oscar.php
+
+# Mise à jour du modèle
+docker compose exec app-worker php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 ```
 
-Afficher les logs : 
-
-```bash
-# Logs complets (retirer -f pour ne pas avoir de temps réél)
-docker compose log compose.dev.yml -f
-
-# On peut préciser les containers à surveiller
-# exemple : logs apache et postgresql
-docker compose log compose.dev.yml -f oscar-dev-apache oscar-dev-postgres
-```
 
 ### Autres commandes
 
 Lancer des commandes sur le container Oscar : 
 
 ```bash
-docker compose -f compose.dev.yml exec oscar-dev-php php bin/oscar.php
+docker compose exec app-php php bin/oscar.php
 ```
 
 Build de l'UI : 
 ```bash
-docker compose -f compose.dev.yml exec oscar-dev-vite yarn run build
+docker compose exec app-vite yarn run build
 ```
 
 Purger la BDD (Stopper l'application)
 
 ```bash
 # Le volume avec les données est créé par docker - donc droit SU requis
-sudo rm -Rf docker/dev/volumes/databases/oscar_dev_data
+sudo rm -Rf volumes/postgresql/*
 ```
 
 Lister les tâches en attentes sur Gearman
@@ -146,7 +149,7 @@ Lister les tâches en attentes sur Gearman
 #### DBeaver CE
 
  - Drivers : `Postgresql`
- - Hôte : `oscar-dev-postgres`
+ - Hôte : `app-postgres`
  - Identifiant : `oscar_devdev_user`
  - Mot de passe : `oscar_devdev_pass`
  - Base de données : `oscar_devdev_db`

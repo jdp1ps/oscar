@@ -6,7 +6,6 @@ networks:
     driver: bridge
 
 volumes:
-  # Les nodes de elastic sont gérés par Docker en local
   elastic_data:
     driver: local
 
@@ -15,7 +14,9 @@ services:
   # POSTGRESQL
   app-postgres:
     container_name: app-postgres
+
     restart: always
+
     environment:
       # Accès BDD
       POSTGRES_USER: ${POSGRESQL_USER}
@@ -26,8 +27,10 @@ services:
 
     networks:
       - app-network
+
     env_file:
       - .env
+
     volumes:
       - ${VOLUMES_POSTGRESQL_DATAS}:/var/lib/postgresql/data
       - ./docker/postgres_initdb.d/:/docker-entrypoint-initdb.d
@@ -38,6 +41,8 @@ services:
       args:
         - HTTP_PROXY
 
+    ports:
+      - "6543:5432"
 
   ######################################################################
   ### APACHE
@@ -99,7 +104,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_MEMORY} -Xmx${ELASTICSEARCH_MEMORY}"
     depends_on:
       - app-postgres
     ulimits:
@@ -118,8 +123,9 @@ services:
     tty: true
     restart: "always"
 
+
   ######################################################################
-  ### WORKER
+  ### APPLICATION (Utilisée par Apache)
   app-php:
     container_name: app-php
     restart: unless-stopped
@@ -131,7 +137,9 @@ services:
       - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
       - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
-      - ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
+      - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
+      - ${VOLUME_LOG}:/var/application/logs
+      #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
     networks:
       - app-network
     env_file:
@@ -147,8 +155,8 @@ services:
         - ENV_MODE
 
 
-  ######################################################################
-  ### WORKER
+    ######################################################################
+  ### APPLICATION (Utilisée en mode CLI)
   app-worker:
     container_name: app-worker
     restart: unless-stopped
@@ -156,6 +164,12 @@ services:
       - app-elasticsearch
     volumes:
       - ./:/var/application
+      - ${VOLUMES_DOCUMENTS_ACTIVITY}:/var/documents/activity
+      - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
+      - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
+      - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+      #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
+      - ./docker/app_95-cli.ini:/usr/local/etc/php/conf.d/95-cli-debug.ini
     networks:
       - app-network
     env_file:
@@ -170,46 +184,3 @@ services:
         - HTTP_PROXY
         - ENV_MODE
     command: ["/bin/bash", "/entrypoint.sh"]
-
-#  ######################################################################
-#  ### VITE
-#  app-vite:
-#    container_name: app-vite
-#    volumes:
-#      - ./:/var/application
-#    networks:
-#      - app-network
-#    build:
-#      context: ./docker/dev/vite
-#      dockerfile: Dockerfile
-#    ports:
-#      - "5173:5173"
-#
-#
-#  ######################################################################
-#  # KIBANA
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:7.16.1
-#    container_name: app-kibana
-#    depends_on:
-#      - app-elasticsearch
-#    networks:
-#      - app-network
-#    environment:
-#      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
-#      - LOGGING_ROOT_LEVEL=error
-#    ports:
-#      - "5601:5601"
-#
-#
-#  ######################################################################
-#  # MAILHOG (capture les mails envoyés depuis Oscar)
-#  mailhog:
-#    image: mailhog/mailhog
-#    container_name: app-mailhog
-#    networks:
-#      - app-network
-#    entrypoint: ["/bin/sh", "-c", "MailHog | grep -v KEEPALIVE"]
-#    ports:
-#      - "8025:8025" # Interface web MailHog
-#      - "1025:1025" # Port SMTP pour envoyer les mails
