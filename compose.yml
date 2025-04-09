@@ -17,6 +17,14 @@ services:
 
     restart: always
 
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSGRESQL_USER} -d ${POSGRESQL_BASE}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
     environment:
       # Accès BDD
       POSTGRES_USER: ${POSGRESQL_USER}
@@ -106,7 +114,8 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_MEMORY} -Xmx${ELASTICSEARCH_MEMORY}"
     depends_on:
-      - app-postgres
+      app-postgres:
+        condition: service_healthy
     ulimits:
       memlock:
         soft: -1
@@ -138,8 +147,11 @@ services:
       - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
       - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
-      - ${VOLUME_LOG}:/var/application/logs
+      - ${VOLUMES_CONFIG}/oscar-editable.yml:/var/application/config/autoload/oscar-editable.yml
+      - ${VOLUMES_LOG}:/var/application/logs
       #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
+#    command:
+#      - chmod -R 777 /var/application/data
     networks:
       - app-network
     env_file:
@@ -168,8 +180,9 @@ services:
       - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
       - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
-      #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
-      - ./docker/app_95-cli.ini:/usr/local/etc/php/conf.d/95-cli-debug.ini
+      - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
+      - ${VOLUMES_CONFIG}/oscar-editable.yml:/var/application/config/autoload/oscar-editable.yml
+      - ${VOLUMES_LOG}:/var/application/logs
     networks:
       - app-network
     env_file:

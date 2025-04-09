@@ -98,11 +98,6 @@ RUN rm /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
 # Copier le script de surveillance
 WORKDIR /var/application
 
-RUN mkdir -p /var/documents/activity
-RUN mkdir -p /var/documents/public
-RUN mkdir -p /var/documents/request
-RUN mkdir -p /var/documents/pcru
-
 EXPOSE 9000
 
 COPY ./app_entrypoint.sh /entrypoint.sh
