@@ -2,6 +2,7 @@
 
 source .env
 
+################################################## DOSSIERS
 dossiers=(
   "📁 Données POSTGRESQL:$VOLUMES_POSTGRESQL_DATAS"
   "📁 Documents des activités:$VOLUMES_DOCUMENTS_ACTIVITY"
@@ -100,9 +101,49 @@ for ligne in "${fichiers[@]}"; do
   fi
 done
 
-
 echo " - Fichier de configuration éditable (touch $VOLUMES_CONFIG/oscar-editable.yml)"
 touch "$VOLUMES_CONFIG/oscar-editable.yml"
+
+################################################## CONFIGURATION des CONTAINERS
+mkdir -p "$VOLUMES_CONFIG/apache"
+mkdir -p "$VOLUMES_CONFIG/elasticsearch"
+mkdir -p "$VOLUMES_CONFIG/postgresql"
+mkdir -p "$VOLUMES_CONFIG/php"
+
+fichiers=(
+  #"📁 Configuration APACHE:$VOLUMES_CONFIG/apache"
+  "📄 Configuration Elasticsearch:$VOLUMES_CONFIG/elasticsearch/elasticsearch.yml:docker/es_elasticsearch.yml"
+  "📄 Configuration Log4j:$VOLUMES_CONFIG/elasticsearch/log4j2.properties:docker/es_log4j2.properties"
+  "📄 Configuration PHP:$VOLUMES_CONFIG/php/90-app.ini:docker/app_90-app.ini"
+  "📄 Configuration PHP:$VOLUMES_CONFIG/php/95-cli.ini:docker/app_95-cli.ini"
+  "📄 Configuration PHP:$VOLUMES_CONFIG/php/99-debug.ini:docker/app_99-debug.ini"
+)
+
+echo "🔧 Création des fichiers de configuration des containers..."
+
+for ligne in "${fichiers[@]}"; do
+  IFS=":" read -r msg cible source <<< "$ligne"
+
+  # Nettoyage des blancs éventuels
+  cible="$(echo "$cible" | xargs)"
+  source="$(echo "$source" | xargs)"
+
+  if [[ -z "$cible" || -z "$source" ]]; then
+    echo "⚠️ Ligne invalide, on saute : $ligne"
+    continue
+  fi
+
+  if [[ -e "$cible" ]]; then
+    echo " - $msg ($cible) : existe déjà, rien à faire."
+  else
+    if [[ -f "$source" ]]; then
+      cp "$source" "$cible"
+      echo " - $msg ($cible) : créé à partir de $source ✅"
+    else
+      echo "❌ Source manquante pour $cible : $source introuvable"
+    fi
+  fi
+done
 
 chmod -R 777 $VOLUMES_LOG
 chmod -R 777 $VOLUMES_TMP
