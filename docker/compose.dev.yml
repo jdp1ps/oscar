@@ -230,22 +230,23 @@ services:
       - "5173:5173"
 
 
-  ######################################################################
-  # KIBANA
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.16.1
-    container_name: app-kibana
-    depends_on:
-      - app-elasticsearch
-    networks:
-      - app-network
-    deploy:
-      replicas: ${DEVELOPPEMENT:-0}
-    environment:
-      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
-      - LOGGING_ROOT_LEVEL=error
-    ports:
-      - "5601:5601"
+#  ######################################################################
+#  # KIBANA
+#  # Décommenté si besoin de faire des tests de requête sur Elasticsearch
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.16.1
+#    container_name: app-kibana
+#    depends_on:
+#      - app-elasticsearch
+#    networks:
+#      - app-network
+#    deploy:
+#      replicas: ${DEVELOPPEMENT:-0}
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
+#      - LOGGING_ROOT_LEVEL=error
+#    ports:
+#      - "5601:5601"
 
 
   ######################################################################

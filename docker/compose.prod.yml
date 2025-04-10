@@ -213,51 +213,51 @@ services:
         - ENV_MODE
     command: ["/bin/bash", "/entrypoint.sh"]
 
-  ######################################################################
-  ### VITE
-  app-vite:
-    container_name: app-vite
-    volumes:
-      - ./:/var/application
-    networks:
-      - app-network
-    build:
-      context: ./docker/dev/vite
-      dockerfile: Dockerfile
-    deploy:
-      replicas: ${DEVELOPPEMENT:-0}
-    ports:
-      - "5173:5173"
-
-
-  ######################################################################
-  # KIBANA
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.16.1
-    container_name: app-kibana
-    depends_on:
-      - app-elasticsearch
-    networks:
-      - app-network
-    deploy:
-      replicas: ${DEVELOPPEMENT:-0}
-    environment:
-      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
-      - LOGGING_ROOT_LEVEL=error
-    ports:
-      - "5601:5601"
-
-
-  ######################################################################
-  # MAILHOG (capture les mails envoyés depuis Oscar)
-  mailhog:
-    image: mailhog/mailhog
-    container_name: app-mailhog
-    networks:
-      - app-network
-    deploy:
-      replicas: ${DEVELOPPEMENT:-0}
-    entrypoint: ["/bin/sh", "-c", "MailHog"]
-    ports:
-      - "8025:8025" # Interface web MailHog
-      - "1025:1025" # Port SMTP pour envoyer les mails
+#  ######################################################################
+#  ### VITE
+#  app-vite:
+#    container_name: app-vite
+#    volumes:
+#      - ./:/var/application
+#    networks:
+#      - app-network
+#    build:
+#      context: ./docker/dev/vite
+#      dockerfile: Dockerfile
+#    deploy:
+#      replicas: ${DEVELOPPEMENT:-0}
+#    ports:
+#      - "5173:5173"
+#
+#
+#  ######################################################################
+#  # KIBANA
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.16.1
+#    container_name: app-kibana
+#    depends_on:
+#      - app-elasticsearch
+#    networks:
+#      - app-network
+#    deploy:
+#      replicas: ${DEVELOPPEMENT:-0}
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
+#      - LOGGING_ROOT_LEVEL=error
+#    ports:
+#      - "5601:5601"
+#
+#
+#  ######################################################################
+#  # MAILHOG (capture les mails envoyés depuis Oscar)
+#  mailhog:
+#    image: mailhog/mailhog
+#    container_name: app-mailhog
+#    networks:
+#      - app-network
+#    deploy:
+#      replicas: ${DEVELOPPEMENT:-0}
+#    entrypoint: ["/bin/sh", "-c", "MailHog"]
+#    ports:
+#      - "8025:8025" # Interface web MailHog
+#      - "1025:1025" # Port SMTP pour envoyer les mails

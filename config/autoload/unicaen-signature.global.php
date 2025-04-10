@@ -10,7 +10,7 @@ return [
 
         /////////////////////////////////////////////////////////////////////////////////
         // DEVELOPPEMENT
-        'vite_mode'              => 'prod', // mode développement de l'UI
+        //'vite_mode'              => 'prod', // mode développement de l'UI
 
         // Emplacement où sont archivés les documents en cours de signature
         'documents_path' => __DIR__ . '/../../data/documents/signature',

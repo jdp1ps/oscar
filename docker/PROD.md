@@ -9,6 +9,9 @@ cd oscar
 
 # Copie de la configuration par défaut
 cp docker/.env.prod.dist .env
+
+# 
+cp docker/compose.prod.yml ./compose.yml
 ```
 
 ## Etape 2 : Proxy

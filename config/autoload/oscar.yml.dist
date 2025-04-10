@@ -21,6 +21,7 @@ session_config:
   gc_maxlifetime: 2592000
 
 oscar:
+  urlAbsolute: '%env(APP_URL)%'
   socket: false
   log_stdout_enabled: true
   log_stdout_level: '%env(OSCAR_LOG_LEVEL)%'
@@ -29,11 +30,12 @@ oscar:
 
 # Vite (Prod) -------------------------------------------
   vite:
-    mode: 'prod'
+    mode: '%env(VITE_MODE)%'
     src: '/var/application/ui'
     dest: '/var/application/public/js/oscar/vite/dist'
-    base_url_dev: '/'
-    base_url_prod: '/js/oscar/vite/dist'
+    base_url_dev: '%env(VITE_BASE_URL_DEV)%/'
+    base_url_prod: '%env(VITE_BASE_URL_PROD)%'
+
 
   ##############################################################
   # DOCUMENTS
