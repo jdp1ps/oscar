@@ -383,6 +383,12 @@ return array(
             'fixed' => []
         ],
 
+        'spenttypeannexes' => [
+            "F" => "Fonctionnement",
+            "I" => "Investissement",
+            "P" => "Personnel"
+        ],
+
         'urlAbsolute' => 'http://localhost:8080',
 
 //        // Système d'envoi des mails
