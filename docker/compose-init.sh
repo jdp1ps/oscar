@@ -2,67 +2,106 @@
 
 source .env
 
-echo " - création du dossier des données Postgresql (mkdir -p $VOLUMES_POSTGRESQL_DATAS)"
-mkdir -p $VOLUMES_POSTGRESQL_DATAS
-#sudo chown -R 1000:1000 $VOLUMES_POSTGRESQL_DATAS
-echo " - création du dossier des documents des activités (mkdir -p $VOLUMES_DOCUMENTS_ACTIVITY)"
-mkdir -p $VOLUMES_DOCUMENTS_ACTIVITY
-#sudo chown -R 1000:1000 $VOLUMES_DOCUMENTS_ACTIVITY
-echo " - création du dossier des documents publiques  (mkdir -p $VOLUMES_DOCUMENTS_PUBLIC)"
-mkdir -p $VOLUMES_DOCUMENTS_PUBLIC
-#sudo chown -R 1000:1000 $VOLUMES_DOCUMENTS_PUBLIC
-echo " - création du dossier des documents des demandes d'activité  (mkdir -p $VOLUMES_DOCUMENTS_REQUEST)"
-mkdir -p $VOLUMES_DOCUMENTS_REQUEST
-#sudo chown -R 1000:1000 $VOLUMES_DOCUMENTS_REQUEST
-echo " - création du dossier des documents PCRU  (mkdir -p $VOLUMES_DOCUMENTS_PCRU)"
-mkdir -p $VOLUMES_DOCUMENTS_PCRU
-#sudo chown -R 1000:1000 $VOLUMES_DOCUMENTS_PCRU
-echo " - création du dossier de cache doctrine (mkdir -p $VOLUMES_CACHE_DOCTRINE)"
-mkdir -p $VOLUMES_CACHE_DOCTRINE
-#sudo chown -R 1000:1000 $VOLUMES_CACHE_DOCTRINE
-echo " - création du dossier des logs (mkdir -p $VOLUMES_LOG)"
-mkdir -p $VOLUMES_LOG
-echo " - création du dossier temporaire (mkdir -p $VOLUMES_TMP)"
-mkdir -p $VOLUMES_TMP
-echo " - création du dossier de configuration personnalisé (mkdir -p $VOLUMES_CONFIG)"
-mkdir -p $VOLUMES_CONFIG
-#sudo chown -R 1000:1000 $VOLUMES_LOG
-echo " - création du dossier des gabarits  (mkdir -p $VOLUMES_TEMPLATES)"
-mkdir -p $VOLUMES_TEMPLATES
-#sudo chown -R 1000:1000 $VOLUMES_TEMPLATES
+dossiers=(
+  "📁 Données POSTGRESQL:$VOLUMES_POSTGRESQL_DATAS"
+  "📁 Documents des activités:$VOLUMES_DOCUMENTS_ACTIVITY"
+  "📁 Documents public:$VOLUMES_DOCUMENTS_PUBLIC"
+  "📁 Documents des demandes d'activités:$VOLUMES_DOCUMENTS_REQUEST"
+  "📁 Documents PCRU:$VOLUMES_DOCUMENTS_PCRU"
+  "📁 Proxy Cache Doctrine:$VOLUMES_CACHE_DOCTRINE"
+  "📁 LOGS (oscar):$VOLUMES_LOG"
+  "📁 Dossier temporaire (oscar):$VOLUMES_TMP"
+  "📁 Dossier de configuration (oscar):$VOLUMES_CONFIG"
+  "📁 Dossier des gabarits:$VOLUMES_TEMPLATES"
+)
+
+echo "🔧 Création de l'arborescence..."
+
+for ligne in "${dossiers[@]}"; do
+  IFS=":" read -r msg dossier <<< "$ligne"
+
+  if [[ -e "$dossier" ]]; then
+    echo " - $msg ($dossier) existe déjà, rien à faire."
+  else
+    mkdir -p "$dossier"
+    echo " - $msg ($dossier) créé ✅"
+  fi
+done
+
+################################################## Fichiers de template
+fichiers=(
+  "Corps des mail:$VOLUMES_TEMPLATE_MAIL:./data/templates/mail.phtml"
+  "Feuille de temps (personne):$VOLUMES_TIMESHEET_PERSON_MONTH:./data/templates/timesheet_person_month.default.html.php"
+  "Feuille de temps (période):$VOLUMES_TIMESHEET_PERIOD:./data/templates/timesheet_period.default.html.php"
+  "Feuille de temps (synthèse):$VOLUMES_TIMESHEET_ACTIVITY_SYNTHESIS:./data/templates/timesheet_activity_synthesis.default.html.php"
+  "Logo:$VOLUMES_TEMPLATES/logo.png:/data/templates/logo.example.png"
+
+)
+
+echo "🔧 Création des gabarits..."
 
 # Copie des templates
+for ligne in "${fichiers[@]}"; do
+  IFS=":" read -r msg cible source <<< "$ligne"
 
-if [ ! -f "$VOLUMES_TEMPLATE_MAIL" ]; then
-  echo "cp ./data/templates/mail.phtml $VOLUMES_TEMPLATE_MAIL"
-  cp ./data/templates/mail.phtml "$VOLUMES_TEMPLATE_MAIL"
-fi
+  # Nettoyage des blancs éventuels
+  cible="$(echo "$cible" | xargs)"
+  source="$(echo "$source" | xargs)"
 
-if [ ! -f "$VOLUMES_TIMESHEET_PERSON_MONTH" ]; then
-  echo "cp ./data/templates/timesheet_person_month.default.html.php $VOLUMES_TIMESHEET_PERSON_MONTH"
-  cp ./data/templates/timesheet_person_month.default.html.php "$VOLUMES_TIMESHEET_PERSON_MONTH"
-fi
+  if [[ -z "$cible" || -z "$source" ]]; then
+    echo "⚠️  Ligne invalide, on saute : $ligne"
+    continue
+  fi
 
-if [ ! -f "$VOLUMES_TIMESHEET_PERIOD" ]; then
-  echo "cp ./data/templates/timesheet_period.default.html.php $VOLUMES_TIMESHEET_PERIOD"
-  cp ./data/templates/timesheet_period.default.html.php "$VOLUMES_TIMESHEET_PERIOD"
-fi
+  if [[ -e "$cible" ]]; then
+    echo " - 📄 $cible existe déjà, rien à faire."
+  else
+    if [[ -f "$source" ]]; then
+      cp "$source" "$cible"
+      echo "- 📄 $cible créé à partir de $source ✅"
+    else
+      echo "❌ Source manquante pour $cible : $source introuvable"
+    fi
+  fi
+done
 
-if [ ! -f "$VOLUMES_TIMESHEET_ACTIVITY_SYNTHESIS" ]; then
-  echo "cp ./data/templates/timesheet_activity_synthesis.default.html.php $VOLUMES_TIMESHEET_ACTIVITY_SYNTHESIS"
-  cp ./data/templates/timesheet_period.default.html.php "$VOLUMES_TIMESHEET_ACTIVITY_SYNTHESIS"
-fi
+################################################## Fichiers de configuration
+fichiers=(
+  "$VOLUMES_CONFIG/local.php:config/autoload/local.docker.php.dist"
+  "$VOLUMES_CONFIG/oscar.yml:config/autoload/oscar.yml.dist"
+  "$VOLUMES_CONFIG/unicaen-app.local.php:config/autoload/unicaen-app.local.php.docker-dist"
+  "$VOLUMES_CONFIG/unicaen-auth.local.php:config/autoload/unicaen-auth.local.php.docker-dist"
+  "$VOLUMES_CONFIG/unicaen-signature.local.php:config/autoload/unicaen-signature.local.php"
+)
 
-LOGO="$VOLUMES_TEMPLATES/logo.png"
-if [ ! -f "$LOGO" ]; then
-  echo "cp ./data/templates/logo.example.png $LOGO"
-  cp ./data/templates/logo.example.png "$LOGO"
-fi
+echo "🔧 Fichiers de configuration..."
 
-echo "cp ./data/templates/functions.inc.php $VOLUMES_TEMPLATES/functions.inc.php"
-cp ./data/templates/functions.inc.php "$VOLUMES_TEMPLATES/functions.inc.php"
+for ligne in "${fichiers[@]}"; do
+  IFS=":" read -r cible source <<< "$ligne"
 
-echo "touch $VOLUMES_CONFIG/oscar-editable.yml"
+  # Nettoyage des blancs éventuels
+  cible="$(echo "$cible" | xargs)"
+  source="$(echo "$source" | xargs)"
+
+  if [[ -z "$cible" || -z "$source" ]]; then
+    echo "⚠️ Ligne invalide, on saute : $ligne"
+    continue
+  fi
+
+  if [[ -e "$cible" ]]; then
+    echo " - 📄 $cible existe déjà, rien à faire."
+  else
+    if [[ -f "$source" ]]; then
+      cp "$source" "$cible"
+      echo " - 📄 $cible créé à partir de $source ✅"
+    else
+      echo "❌ Source manquante pour $cible : $source introuvable"
+    fi
+  fi
+done
+
+
+echo " - Fichier de configuration éditable (touch $VOLUMES_CONFIG/oscar-editable.yml)"
 touch "$VOLUMES_CONFIG/oscar-editable.yml"
 
 chmod -R 777 $VOLUMES_LOG

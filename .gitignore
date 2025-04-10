@@ -37,6 +37,7 @@ databases_maintenance/copy-prod-to-local.sh
 .env.docker.dev
 
 # Volumes
+demo
 docker/dev/volumes/*
 !docker/dev/volumes/databases/.gitkeep
 !docker/dev/volumes/documents/activity/.gitkeep
