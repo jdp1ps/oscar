@@ -221,7 +221,7 @@ class ConnectorActivityJSON implements ConnectorInterface
      * @param bool $doNotCreate
      * @return Project
      */
-    protected function getProjectOrCreate($acronym, $label = "", ConnectorRepport $repport, $doNotCreate = false)
+    protected function getProjectOrCreate($acronym, string $label, ConnectorRepport $repport, $doNotCreate = false)
     {
         try {
             // Obtention du projet si il existe
