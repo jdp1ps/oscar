@@ -35,7 +35,7 @@ fichiers=(
   "Feuille de temps (personne):$VOLUMES_TIMESHEET_PERSON_MONTH:./data/templates/timesheet_person_month.default.html.php"
   "Feuille de temps (période):$VOLUMES_TIMESHEET_PERIOD:./data/templates/timesheet_period.default.html.php"
   "Feuille de temps (synthèse):$VOLUMES_TIMESHEET_ACTIVITY_SYNTHESIS:./data/templates/timesheet_activity_synthesis.default.html.php"
-  "Logo:$VOLUMES_TEMPLATES/logo.png:/data/templates/logo.example.png"
+  "Logo:$VOLUMES_TEMPLATES/logo.png:./data/templates/logo.example.png"
 
 )
 
@@ -72,7 +72,7 @@ fichiers=(
   "$VOLUMES_CONFIG/oscar.yml:config/autoload/oscar.yml.dist"
   "$VOLUMES_CONFIG/unicaen-app.local.php:config/autoload/unicaen-app.local.php.docker-dist"
   "$VOLUMES_CONFIG/unicaen-auth.local.php:config/autoload/unicaen-auth.local.php.docker-dist"
-  "$VOLUMES_CONFIG/unicaen-signature.local.php:config/autoload/unicaen-signature.local.php"
+  "$VOLUMES_CONFIG/unicaen-signature.local.php:config/autoload/unicaen-signature.local.php.dist"
 )
 
 echo "🔧 Fichiers de configuration..."
