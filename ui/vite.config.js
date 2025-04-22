@@ -10,7 +10,7 @@ export default defineConfig({
 
   server:{
     cors: {
-      origin: ['http://localhost:5173', 'http://localhost.unicaen.fr']
+      origin: ['http://localhost:5173', 'http://localhost.unicaen.fr', 'http://localhost:8888']
     },
     allowedHosts: true
   },
