@@ -24,7 +24,6 @@ services:
       retries: 5
       start_period: 10s
 
-
     environment:
       # Accès BDD
       POSTGRES_USER: ${POSGRESQL_USER}
@@ -51,6 +50,7 @@ services:
 
     ports:
       - "6543:5432"
+
 
   ######################################################################
   ### APACHE
@@ -121,8 +121,10 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./docker/es_elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./docker/es_log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      # Fichier de configuration
+      - ${VOLUMES_CONFIG}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ${VOLUMES_CONFIG}/elasticsearch/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      # Dossier avec les NODES (géré par Docker sur cette version)
       - elastic_data:/usr/share/elasticsearch/data
     user: "1000:1000"
     networks:
@@ -157,7 +159,10 @@ services:
       - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
       - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
       # Fichiers (DEVELOPPEMENT UNIQUEMENT)
-      #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
+      - ${VOLUMES_CONFIG}/php/999-application.ini:/usr/local/etc/php/conf.d/90-app.ini
+      - ${VOLUMES_CONFIG}/php/999-application.ini:/usr/local/etc/php/conf.d/90-cli.ini
+      # Debug
+      #- ${VOLUMES_CONFIG}/php/90-debug.ini:/usr/local/etc/php/conf.d/90-debug.ini
 #    command:
 #      - chmod -R 777 /var/application/data
     networks:
@@ -198,6 +203,10 @@ services:
       - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
       - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
       - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+      # Fichiers (DEVELOPPEMENT UNIQUEMENT)
+      - ${VOLUMES_CONFIG}/php/999-application.ini:/usr/local/etc/php/conf.d/90-cli.ini
+      # Debug
+      #- ${VOLUMES_CONFIG}/php/90-debug.ini:/usr/local/etc/php/conf.d/90-debug.ini
     networks:
       - app-network
     env_file:
@@ -212,6 +221,7 @@ services:
         - HTTP_PROXY
         - ENV_MODE
     command: ["/bin/bash", "/entrypoint.sh"]
+
 
   ######################################################################
   ### VITE
@@ -260,4 +270,4 @@ services:
     entrypoint: ["/bin/sh", "-c", "MailHog"]
     ports:
       - "8025:8025" # Interface web MailHog
-      - "1025:1025" # Port SMTP pour envoyer les mails
+#      - "1025:1025" # Port SMTP pour envoyer les mails
