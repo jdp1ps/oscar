@@ -1,0 +1,264 @@
+########################################################################
+# OSCAR DOCKER (Prod)
+########################################################################
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  elastic_data:
+    driver: local
+
+services:
+  ######################################################################
+  # POSTGRESQL
+  app-postgres:
+    container_name: app-postgres
+
+    restart: always
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSGRESQL_USER} -d ${POSGRESQL_BASE}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+    environment:
+      # Accès BDD
+      POSTGRES_USER: ${POSGRESQL_USER}
+      POSTGRES_PASSWORD: ${POSGRESQL_PASS}
+      POSTGRES_DB: ${POSGRESQL_BASE}
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+
+    networks:
+      - app-network
+
+    env_file:
+      - .env
+
+    volumes:
+      - ${VOLUMES_POSTGRESQL_DATAS}:/var/lib/postgresql/data
+      - ./docker/postgres_initdb.d/:/docker-entrypoint-initdb.d
+
+    build:
+      context: ./docker
+      dockerfile: postgres_Dockerfile
+      args:
+        - HTTP_PROXY
+
+    ports:
+      - "6543:5432"
+
+  ######################################################################
+  ### APACHE
+  app-apache:
+    container_name: app-apache
+    restart: unless-stopped
+    volumes:
+      - ./:/var/application
+
+    depends_on:
+      - app-php
+
+    networks:
+      - app-network
+
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+
+    env_file:
+      - .env
+    build:
+      context: ./docker/
+      dockerfile: apache_Dockerfile
+      args:
+        - HTTP_PROXY
+        - PHP_HOST
+
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+    ports:
+      - "8888:80"
+
+
+  ######################################################################
+  ### GEARMAN
+  app-gearman:
+    container_name: app-gearman
+    image: artefactual/gearmand:1.1.21.2-alpine
+    depends_on:
+      - app-postgres
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+    networks:
+      - app-network
+    env_file:
+      - .env
+    tty: true
+    restart: "unless-stopped"
+
+
+  ######################################################################
+  ### ELASTICSEARCH
+  app-elasticsearch:
+    container_name: app-elasticsearch
+    image: elasticsearch:7.17.28
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_MEMORY} -Xmx${ELASTICSEARCH_MEMORY}"
+    depends_on:
+      app-postgres:
+        condition: service_healthy
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker/es_elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/es_log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      - elastic_data:/usr/share/elasticsearch/data
+    user: "1000:1000"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    tty: true
+    restart: "always"
+
+
+  ######################################################################
+  ### APPLICATION (Utilisée par Apache)
+  app-php:
+    container_name: app-php
+    restart: unless-stopped
+    depends_on:
+      - app-worker
+    volumes:
+      - ./:/var/application
+      # Dossiers
+      - ${VOLUMES_DOCUMENTS_ACTIVITY}:/var/documents/activity
+      - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
+      - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
+      - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+      - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
+      - ${VOLUMES_LOG}:/var/application/logs
+      # Fichiers de configuration
+      - ${VOLUMES_CONFIG}/oscar-editable.yml:/var/application/config/autoload/oscar-editable.yml
+      - ${VOLUMES_CONFIG}/local.php:/var/application/config/autoload/local.php
+      - ${VOLUMES_CONFIG}/oscar.yml:/var/application/config/autoload/oscar.yml
+      - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
+      - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
+      - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+      # Fichiers (DEVELOPPEMENT UNIQUEMENT)
+      #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
+#    command:
+#      - chmod -R 777 /var/application/data
+    networks:
+      - app-network
+    env_file:
+      - .env
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+    build:
+      context: ./docker/
+      dockerfile: app_Dockerfile
+      args:
+        - HTTP_PROXY
+        - ENV_MODE
+
+
+    ######################################################################
+  ### APPLICATION (Utilisée en mode CLI)
+  app-worker:
+    container_name: app-worker
+    restart: unless-stopped
+    depends_on:
+      - app-elasticsearch
+    volumes:
+      - ./:/var/application
+      # Dossiers
+      - ${VOLUMES_DOCUMENTS_ACTIVITY}:/var/documents/activity
+      - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
+      - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
+      - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+      - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
+      - ${VOLUMES_LOG}:/var/application/logs
+      # Fichiers de configuration
+      - ${VOLUMES_CONFIG}/oscar-editable.yml:/var/application/config/autoload/oscar-editable.yml
+      - ${VOLUMES_CONFIG}/local.php:/var/application/config/autoload/local.php
+      - ${VOLUMES_CONFIG}/oscar.yml:/var/application/config/autoload/oscar.yml
+      - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
+      - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
+      - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+    networks:
+      - app-network
+    env_file:
+      - .env
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      no_proxy: ${NO_PROXY}
+    build:
+      context: ./docker/
+      dockerfile: app_Dockerfile
+      args:
+        - HTTP_PROXY
+        - ENV_MODE
+    command: ["/bin/bash", "/entrypoint.sh"]
+
+  ######################################################################
+  ### VITE
+  app-vite:
+    container_name: app-vite
+    volumes:
+      - ./:/var/application
+    networks:
+      - app-network
+    build:
+      context: ./docker/dev/vite
+      dockerfile: Dockerfile
+    deploy:
+      replicas: ${DEVELOPPEMENT:-0}
+    ports:
+      - "5173:5173"
+
+
+#  ######################################################################
+#  # KIBANA
+#  # Décommenté si besoin de faire des tests de requête sur Elasticsearch
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.16.1
+#    container_name: app-kibana
+#    depends_on:
+#      - app-elasticsearch
+#    networks:
+#      - app-network
+#    deploy:
+#      replicas: ${DEVELOPPEMENT:-0}
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
+#      - LOGGING_ROOT_LEVEL=error
+#    ports:
+#      - "5601:5601"
+
+
+  ######################################################################
+  # MAILHOG (capture les mails envoyés depuis Oscar)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: app-mailhog
+    networks:
+      - app-network
+    deploy:
+      replicas: ${DEVELOPPEMENT:-0}
+    entrypoint: ["/bin/sh", "-c", "MailHog"]
+    ports:
+      - "8025:8025" # Interface web MailHog
+      - "1025:1025" # Port SMTP pour envoyer les mails

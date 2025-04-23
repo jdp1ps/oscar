@@ -1,0 +1,6 @@
+oscar:
+  merged:
+    value: config01_merge.yml
+    in:
+      deep:
+        change: changed

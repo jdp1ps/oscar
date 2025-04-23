@@ -1,0 +1,23 @@
+FROM debian:12-slim
+
+LABEL authors="Stéphane BOUVRY<stephane.bouvry@unicaen.fr>"
+
+ARG HTTP_PROXY
+ARG PHP_HOST
+
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV http_proxy=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTP_PROXY}
+ENV https_proxy=${HTTP_PROXY}
+
+RUN apt update && apt install -y apache2
+
+RUN a2enmod proxy_fcgi setenvif rewrite
+
+EXPOSE 80
+
+COPY ./apache_000-default.conf /etc/apache2/sites-available/000-default.conf
+
+RUN sed -i "s/container-name-php/${PHP_HOST}/g" /etc/apache2/sites-available/000-default.conf
+
+CMD ["apachectl", "-DFOREGROUND"]

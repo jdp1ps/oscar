@@ -11,6 +11,7 @@ namespace Oscar\Connector;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NoResultException;
+use Laminas\ServiceManager\ServiceManager;
 use Oscar\Entity\Person;
 use Oscar\Entity\PersonRepository;
 
@@ -19,6 +20,9 @@ class ConnectorPersonJSON implements ConnectorInterface
     private $jsonDatas;
     private $connectorPersonHydrator;
     private $entityManager;
+
+    private $serviceManager;
+
     private $connectorName;
 
     /**
@@ -26,11 +30,12 @@ class ConnectorPersonJSON implements ConnectorInterface
      * @param array $jsonData
      * @param EntityManager $entityManager
      */
-    public function __construct( array $jsonData, EntityManager $entityManager , $connectorName = 'json' )
+    public function __construct( array $jsonData, ServiceManager $serviceManager , $connectorName = 'json' )
     {
         $this->jsonDatas = $jsonData;
-        $this->entityManager = $entityManager;
-        $this->connectorPersonHydrator = new ConnectorPersonHydrator($entityManager);
+        $this->serviceManager = $serviceManager;
+        $this->entityManager = $serviceManager->get('doctrine.entitymanager.orm_default');
+        $this->connectorPersonHydrator = new ConnectorPersonHydrator($serviceManager);
         $this->connectorName = $connectorName;
     }
 

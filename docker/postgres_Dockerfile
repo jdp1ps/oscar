@@ -1,0 +1,12 @@
+FROM postgres:14-alpine
+
+LABEL authors="Stéphane BOUVRY<stephane.bouvry@unicaen.fr>"
+
+ARG HTTP_PROXY
+
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV http_proxy=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTP_PROXY}
+ENV https_proxy=${HTTP_PROXY}
+
+

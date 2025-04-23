@@ -28,9 +28,9 @@ abstract class ElasticSearchEngine
      * @param Logger $logger
      * @param string $search_variant
      */
-    public function __construct(array $hosts, Logger $logger, string $search_variant = self::VARIANT_RAPID_SEARCH_TEXT)
+    public function __construct(array|string $hosts, Logger $logger, string $search_variant = self::VARIANT_RAPID_SEARCH_TEXT)
     {
-        $this->hosts = $hosts;
+        $this->hosts = is_string($hosts) ? [$hosts] : $hosts;
         $this->loggerService = $logger;
         $this->searchVariant = $search_variant;
     }

@@ -875,7 +875,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             try {
                 FileSystemUtils::getInstance()->checkDirWritable($path);
             } catch (\Exception $e) {
-                throw new OscarException(_("L'emplacement de stockage des documents est manquant/inaccessible."));
+                throw new OscarException(_("L'emplacement de stockage des documents '$path' est manquant/inaccessible."));
             }
             $documentDropLocation = $path;
         }

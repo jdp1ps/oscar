@@ -1,0 +1,4 @@
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+logger.org.elasticsearch.discovery: warn
+ingest.geoip.downloader.enabled: false

@@ -1,0 +1,3 @@
+<?php
+$oscar_config_loader = include __DIR__ . '/oscar_config_loader.php';
+return $oscar_config_loader->getSettings("unicaen-app");

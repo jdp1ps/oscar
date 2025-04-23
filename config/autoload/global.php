@@ -63,6 +63,42 @@ return array(
 //            ]
         ],
 
+        // Durée par défaut des journées
+        'declarationsDurations' => [
+            'dayLength' => [
+                'value' => 7.5,
+                'max' => 10.0,
+                'min' => 5.0,
+                'days' => [
+                    '1' => 8.0,
+                    '2' => 8.0,
+                    '3' => 8.0,
+                    '4' => 8.0,
+                    '5' => 8.0,
+                    '6' => 0.0,
+                    '7' => 0.0,
+                ]
+            ],
+
+            'weekLength' => [
+                'value' => 37.0,
+                'max' => 44.0,
+                'min' => 20.0,
+                'userChange' => false
+            ],
+
+            'monthLength' => [
+                'value' => 144.0,
+                'max' => 184.0,
+                'min' => 80.0,
+                'userChange' => false
+            ],
+
+            'weekExceptions' => [
+                '3' => 3.0,
+            ],
+        ],
+
 
         'pcru' => [
             // Référenciel PCRU (Fichiers contenant les données officielles)
@@ -162,7 +198,7 @@ return array(
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// JOURS FERIÉS
-        'closedDays' => function(&$joursFeries, $annee, $mois){
+        'closedDays' => function (&$joursFeries, $annee, $mois) {
             $feries = [
                 '1' => [
                     "$annee-1-1"    => 'Jour férié  (Nouvel an)',
@@ -209,12 +245,13 @@ return array(
             $pentecote->add(new DateInterval('P50D'));
             $feries[$pentecote->format('n')][$pentecote->format('Y-n-j')] = "Jour ferié (Pentecôte)";
 
-            foreach ($feries[$mois] as $jour => $message){
+            foreach ($feries[$mois] as $jour => $message) {
                 $joursFeries[$jour] = $message;
             }
         },
 
-        'closedDaysExtras' => function($locked, $year, $month){},
+        'closedDaysExtras' => function ($locked, $year, $month) {
+        },
 
         // Mode de déclaration
         // FALSE => en pourcentage
@@ -273,24 +310,24 @@ return array(
 
         'horslots' => [
             ////////////////////////////////// EXEMPLE de CONFIGURATION DES HORS-LOTS
-//            'conges' => [ 'code' => 'conges',  'label' => 'Congés',
-//                'group' => 'abs',
-//                'description' => 'Congès, RTT, récupération', 'icon' => true ],
-//            'training' => [ 'code' => 'training',  'label' => 'Formation',
-//                'group' => 'other',
-//                'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
-//            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',
-//                'group' => 'education',
-//                'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
-//            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',
-//                'group' => 'abs',
-//                'description' => '', 'icon' => true ],
-//            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',
-//                'group' => 'research',
-//                'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
-//            'other' => [ 'code' => 'other', 'label' => 'Divers',
-//                'group' => 'other',
-//                'description' => 'Autre activité', 'icon' => true ],
+            'conges' => [ 'code' => 'conges',  'label' => 'Congés',
+                'group' => 'abs',
+                'description' => 'Congès, RTT, récupération', 'icon' => true ],
+            'training' => [ 'code' => 'training',  'label' => 'Formation',
+                'group' => 'other',
+                'description' => 'Vous avez suivi un formation, DIFF, etc...', 'icon' => true ],
+            'teaching' => [ 'code' => 'teaching',  'label' => 'Enseignement',
+                'group' => 'education',
+                'description' => 'Cours, TD, fonction pédagogique', 'icon' => true ],
+            'sickleave' => [ 'code' => 'sickleave', 'label' => 'Arrêt maladie',
+                'group' => 'abs',
+                'description' => '', 'icon' => true ],
+            'research' => [ 'code' => 'research', 'label' => 'Autre recherche',
+                'group' => 'research',
+                'description' => 'Autre projet de recherche (sans feuille de temps)', 'icon' => true ],
+            'other' => [ 'code' => 'other', 'label' => 'Divers',
+                'group' => 'other',
+                'description' => 'Autre activité', 'icon' => true ],
 
         ],
 
@@ -299,13 +336,13 @@ return array(
         // Emplacement des dossiers pour les documents
         'paths' => [
             // Documents des activités
-            'document_oscar' => realpath( __DIR__.'/../../data/documents/activity/'),
+            'document_oscar' => realpath(__DIR__.'/../../data/documents/activity/'),
 
             // Documents des demandes d'activités
-            'document_request' => realpath( __DIR__.'/../../data/documents/request'),
+            'document_request' => realpath(__DIR__.'/../../data/documents/request'),
 
             // Documents 'publiques"
-            'document_admin_oscar' => realpath( __DIR__.'/../../data/documents/public/'),
+            'document_admin_oscar' => realpath(__DIR__.'/../../data/documents/public/'),
 
             // Modèle de feuille de temps
             'timesheet_modele' => realpath(__DIR__.'/../../data/timesheet_model.xls'),
@@ -344,6 +381,12 @@ return array(
         'notifications' => [
             // Envoi automatique (ex: Lun8 (Lundis à 8 heure), Mer22 (Mercredis à 22 heures)
             'fixed' => []
+        ],
+
+        'spenttypeannexes' => [
+            "F" => "Fonctionnement",
+            "I" => "Investissement",
+            "P" => "Personnel"
         ],
 
         'urlAbsolute' => 'http://localhost:8080',

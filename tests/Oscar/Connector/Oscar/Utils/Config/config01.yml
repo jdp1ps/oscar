@@ -1,0 +1,19 @@
+oscar:
+  parameters:
+    value: foo
+    othervalue: bar
+  types:
+    boolean_true: true
+    boolean_false: false
+    int_1: 128
+    int_2: -256
+    float_p: 3.14
+    float_n: -256.1024
+    string1: Chaîne de caractère
+    string2: YearBaby
+  merged:
+    value: config01.yml
+    in:
+      deep:
+        unchange: unchange
+        change: default

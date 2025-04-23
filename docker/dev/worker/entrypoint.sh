@@ -13,14 +13,13 @@ mkdir -p data/DoctrineORMModule/Proxy \
     && chown -R www-data:www-data data/DoctrineORMModule \
     && chmod 775 data/DoctrineORMModule
 
+# Ecriture des dossiers (documents)
+chown www-data -R /var/documents
+
 # Logs
 mkdir -p logs \
   && touch logs/oscar.log \
-  && chown www-data:www-data logs
-
-# Document
-mkdir -p docker/dev/volumes/documents \
-  && chown www-data:www-data docker/dev/volumes/documents
+  && chown www-data logs
 
 # Oscar Config Editable
 touch config/autoload/oscar-editable.yml \

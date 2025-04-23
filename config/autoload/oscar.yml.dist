@@ -1,0 +1,177 @@
+# unicaen-app
+doctrine:
+  ##############################################################
+  # Accès BDD (Doctrine)
+  connection:
+    orm_default:
+      # Driver
+      driverClass: \Doctrine\DBAL\Driver\PDO\PgSQL\Driver
+      doctrine_type_mappings:
+        enum: string
+      params:
+        host: '%env(POSGRESQL)%'
+        port: '%env(POSGRESQL_PORT)%'
+        user: '%env(POSGRESQL_USER)%'
+        password: '%env(POSGRESQL_PASS)%'
+        dbname: '%env(POSGRESQL_BASE)%'
+        charset: 'utf8'
+
+session_config:
+  cookie_lifetime: 3600
+  gc_maxlifetime: 2592000
+
+oscar:
+  urlAbsolute: '%env(APP_URL)%'
+  socket: false
+  log_stdout_enabled: true
+  log_stdout_level: '%env(OSCAR_LOG_LEVEL)%'
+
+  gearman-job-server-host: '%env(GEARMAN_HOST)%'
+
+# Vite (Prod) -------------------------------------------
+  vite:
+    mode: '%env(VITE_MODE)%'
+    src: '/var/application/ui'
+    dest: '/var/application/public/js/oscar/vite/dist'
+    base_url_dev: '%env(VITE_BASE_URL_DEV)%/'
+    base_url_prod: '%env(VITE_BASE_URL_PROD)%'
+
+
+  ##############################################################
+  # DOCUMENTS
+  ##############################################################
+  # Emplacements
+  paths:
+    document_oscar: "/var/documents/activity"
+    document_admin_oscar: "/var/documents/public"
+    document_request: "/var/documents/request"
+
+  pcru:
+    files_path: '/var/documents/pcru'
+
+  # Modèle pour la génération des documents
+  timesheet_person_month_template: '/var/application/data/templates/timesheet_person_month.default.html.php'
+  timesheet_period_template: '/var/application/data/templates/timesheet_period.default.html.php'
+  timesheet_activity_synthesis_template: '/var/application/data/templates/timesheet_period.default.html.php'
+  estimated_spent_activity_template: '/var/application/data/templates/estimated_spent_activity_.default.html.php'
+
+  # Documents générés
+  generated-documents:
+    activity:
+      sample:
+        label: "Exemple de document"
+        template: "'%env(OSCAR_PATH)%'/data/generated-documents/activity/sample.docx"
+        type: "Word"
+      bordereau:
+        label: "Exemple de bordereau"
+        template: "'%env(OSCAR_PATH)%'/data/generated-documents/activity/bordereau.docx"
+        type: "Word"
+
+  ##############################################################
+  # FEUILLES de TEMPS
+  ##############################################################
+  importEnable: '%env(OSCAR_TIMESHEET_IMPORT_ENABLE)%'
+
+  ##############################################################
+  # RECHERCHE
+  ##############################################################
+  strategy:
+    activity:
+      search_engine:
+        class: \Oscar\Strategy\Search\ElasticActivitySearch
+        params:
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
+
+    person:
+      search_engine:
+        class: \Oscar\Strategy\Search\PersonElasticSearch
+        params:
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
+
+    organization:
+      search_engine:
+        class: \Oscar\Strategy\Search\OrganizationElasticSearch
+        params:
+          - "%env(!string:ELASTICSEARCH_ADDR)%"
+
+# UNICAEN-APP (Base applicative)
+unicaen-app:
+  ldap:
+    connection:
+      default:
+        params:
+          host: '%env(LDAP_HOST)%'
+          port: '%env(LDAP_PORT)%'
+          username: '%env(LDAP_USERNAME)%'
+          password: '%env(LDAP_PASSWORD)%'
+          baseDn: '%env(LDAP_BASEDN)%'
+          bindRequiresDn: '%env(LDAP_BASEDN_REQUIRED)%'
+          accountFilterFormat: '%env(LDAP_ACCOUNT_FILTER_FORMAT)%'
+    dn:
+      UTILISATEURS_BASE_DN: '%env(LDAP_DN_UTILISATEURS_BASE_DN)%'
+      UTILISATEURS_DESACTIVES_BASE_DN: '%env(LDAP_DN_UTILISATEURS_DESACTIVES_BASE_DN)%'
+      GROUPS_BASE_DN: '%env(LDAP_DN_GROUPS_BASE_DN)%'
+      STRUCTURES_BASE_DN: '%env(LDAP_DN_STRUCTURES_BASE_DN)%'
+    filters:
+      LOGIN_FILTER: '%env(LDAP_FILTERS_LOGIN_FILTER)%'
+
+  app_infos:
+      nom: '%env(APP_NAME)%'
+      desc: '%env(APP_DESCRIPTION)%'
+      version: '%env(APP_VERSION)%'
+      date: '%env(APP_YEAR)%'
+      contact:
+        mail: '%env(APP_CONTACT_MAIL)%'
+      mentionsLegales: 'http://www.unicaen.fr/outils-portail-institutionnel/mentions-legales/'
+      informatiqueEtLibertes: 'http://www.unicaen.fr/outils-portail-institutionnel/informatique-et-libertes/'
+  mail:
+    transport_options:
+      host: smtp.unicaen.fr
+      port: 25
+
+# UNICAEN-AUTH (Système d'authentification)
+unicaen-auth:
+  local:
+    order: 2
+    enabled: true
+    description: "Connexion avec un compte local"
+    db:
+      enabled: true
+    ldap:
+      enabled: true
+
+  # Accès CAS
+  cas:
+    order: 5
+    enabled: true
+    description: Authentification CAS
+    connection:
+      default:
+        params:
+          hostname: 'cas.unicaen.fr'
+          port: 443
+          version: "2.0"
+          uri: ""
+          debug: false
+
+  # Accès Shibboleth
+  shib:
+    order: 4
+    enabled: false
+    description: "Fédération d'identitié"
+    logout_url: "/Shibboleth.sso/Logout?return="
+    aliases:
+      eppn: "HTTP_EPPN"
+      mail: "HTTP_MAIL"
+      eduPersonPrincipalName: "HTTP_EPPN"
+      supannEtuId: "HTTP_SUPANNETUID"
+      supannEmpId: "HTTP_SUPANNEMPID"
+      supannCivilite: "HTTP_SUPANNCIVILITE"
+      displayName: "HTTP_DISPLAYNAME"
+      sn: "HTTP_SN"
+      givenName: "HTTP_GIVENNAME"
+
+  # Usurpation d'identité
+  usurpation_allowed_usernames:
+    - jeanpierre
+    - user666

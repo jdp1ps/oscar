@@ -48,6 +48,10 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
         return $config;
     }
 
+    public function getConfiguration():array {
+        return $this->getConfig();
+    }
+
     /**
      * Le mailer.
      *
@@ -71,6 +75,8 @@ class MailingService implements UseEntityManager, UseOscarConfigurationService, 
         if( $transport === null ){
             switch( $this->getOscarConfigurationService()->getConfiguration('mailer.transport.type') ){
                 case 'smtp':
+//                    var_dump($this->getOscarConfigurationService()->getConfiguration('mailer.transport.security'));;
+//                    die();
                     $transport = (new \Swift_SmtpTransport(
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.host'),
                         $this->getOscarConfigurationService()->getConfiguration('mailer.transport.port'),

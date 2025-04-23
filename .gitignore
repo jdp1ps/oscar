@@ -7,6 +7,9 @@ config/autoload/unicaen-app.local.php
 config/autoload/unicaen-auth.local.php
 config/autoload/unicaen-signature.local.php
 config/oscarworker.service
+config/autoload/oscar.yml
+.env
+.env.dev
 
 # Connecteurs
 /config/connectors/*.yml
@@ -30,10 +33,12 @@ databases_maintenance/backup/*.sql
 databases_maintenance/copy-prod-to-local.sh
 !databases_maintenance/backup/.gitkeep
 
-### Docker (dev)
+### Docker (dev/prod)
+compose.yml
 .env.docker.dev
 
 # Volumes
+demo
 docker/dev/volumes/*
 !docker/dev/volumes/databases/.gitkeep
 !docker/dev/volumes/documents/activity/.gitkeep
@@ -156,7 +161,6 @@ module/Demo
 # DOCKER
 dockerize/local/*
 !dockerize/local/.gitkeep
-.env
 supervisord.log
 
 # Fichier à générer
