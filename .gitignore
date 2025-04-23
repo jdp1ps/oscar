@@ -33,7 +33,8 @@ databases_maintenance/backup/*.sql
 databases_maintenance/copy-prod-to-local.sh
 !databases_maintenance/backup/.gitkeep
 
-### Docker (dev)
+### Docker (dev/prod)
+compose.yml
 .env.docker.dev
 
 # Volumes
@@ -160,7 +161,6 @@ module/Demo
 # DOCKER
 dockerize/local/*
 !dockerize/local/.gitkeep
-.env
 supervisord.log
 
 # Fichier à générer

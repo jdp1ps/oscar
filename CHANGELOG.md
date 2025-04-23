@@ -1,6 +1,11 @@
 # 📢 CHANGEMENTS (MASTER/RIPLEY)
 ## 2025
 
+### Avril
+ - [starling] Version docker (Test/Preprod) + Script d'installation (copie des fichiers de configuration / template)
+ - [starling] Version docker ( container de dev Mailhog / Kibana / Vite) - Doc
+ - [starling] Version docker configuration via .env centralisée
+
 ### Mars
  - [starling] Application d'un avenant
  - [starling] Ajout des privilèges pour l'accès aux avenants
