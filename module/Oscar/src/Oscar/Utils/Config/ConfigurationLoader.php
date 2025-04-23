@@ -44,9 +44,12 @@ class ConfigurationLoader
      * @return array
      * @throws ConfigurationLoaderException
      */
-    public function load(): array
+    public function load(bool $reset = false): array
     {
         static $merges;
+        if ($reset === true) {
+            $merges = null;
+        }
         try {
             if (is_null($merges)) {
                 //error_log(date("Y-m-d H:i:s v") . " Oscar settings loaded");
@@ -58,7 +61,7 @@ class ConfigurationLoader
 
                 array_walk_recursive(/**
                  * @throws ConfigurationLoaderException
-                 */                    $merges,
+                 */ $merges,
                     function (&$value) {
                         $this->pregReplaceCallback($value, $this->env_parameters);
                     }
