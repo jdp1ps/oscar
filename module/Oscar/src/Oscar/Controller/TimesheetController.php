@@ -1644,7 +1644,7 @@ class TimesheetController extends AbstractOscarController
         }
 
         if (!$period) {
-            return $this->getResponseBadRequest("La période est non définit");
+            return $this->getResponseBadRequest("La période est non défini");
         }
 
         $personId = $this->params()->fromQuery('person', null);
