@@ -2,6 +2,8 @@
 
 namespace Oscar\Form;
 
+use Laminas\Validator\GreaterThan;
+use Laminas\Validator\NotEmpty;
 use Oscar\Hydrator\OrganizationFormHydrator;
 use Oscar\Service\OrganizationService;
 use Laminas\Form\Element;
@@ -19,8 +21,10 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
     private $connectors = [];
     private $types = [];
     private $countries = [];
+    private bool $countryRequired = false;
+    private bool $typeRequired = false;
 
-    function __construct(OrganizationService $organizationService, $types = [])
+    public function __construct(OrganizationService $organizationService, $types = [])
     {
         parent::__construct('organization');
         $this->connectors = $organizationService->getConnectorsList();
@@ -28,31 +32,38 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
         $this->types = $types;
     }
 
-    public function init(){
+    public function configureRequired(array $params): void
+    {
+        $this->countryRequired = $params['country'] == true;
+        $this->typeRequired = $params['type'] == true;
+    }
+
+    public function init(): void
+    {
         $this->setHydrator(new OrganizationFormHydrator($this->connectors, $this->types, $this->countries));
 
         $typesSelect = [];
         $typesSelect[] = "";
 
-        foreach ($this->types as $id=>$t ){
+        foreach ($this->types as $id => $t) {
             $typesSelect[$id] = (string)$t;
         }
 
         $this->add(array(
-            'name'  => 'id',
-            'type'  => 'Hidden',
+            'name' => 'id',
+            'type' => 'Hidden',
         ));
 
         $this->add(array(
-            'name'  => 'label',
-            'type'  => 'Text',
-            'attributes'    => [
-                'class'       => 'form-control',
-                'placeholder'   => 'Nom du projet'
+            'name' => 'label',
+            'type' => 'Text',
+            'attributes' => [
+                'class' => 'form-control',
+                'placeholder' => 'Nom du projet'
             ],
-            'options'   => array(
+            'options' => array(
                 'label' => 'Nom du projet',
-                'label_attributes'  => [
+                'label_attributes' => [
                     'class' => 'form-label required'
                 ]
             )
@@ -60,7 +71,7 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
 
         // Type
         $this->add([
-            'name'   => 'typeObj',
+            'name' => 'typeObj',
             'options' => [
                 'label' => 'Type d\'organisation',
                 'value_options' => $typesSelect
@@ -68,49 +79,49 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
             'attributes' => [
                 'class' => 'form-control'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
 
         $shortName = new Element\Text('shortName');
         $shortName->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Acronyme'
+            'class' => 'form-control',
+            'placeholder' => 'Acronyme'
         ]);
         $this->add($shortName);
 
         $labintel = new Element\Text('labintel');
         $labintel->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Code LABINTEL'
+            'class' => 'form-control',
+            'placeholder' => 'Code LABINTEL'
         ]);
         $this->add($labintel);
 
         $duns = new Element\Text('duns');
         $duns->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'N°DUNS'
+            'class' => 'form-control',
+            'placeholder' => 'N°DUNS'
         ]);
         $this->add($duns);
 
         $tvaintra = new Element\Text('tvaintra');
         $tvaintra->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'TVA Intracommunautaire'
+            'class' => 'form-control',
+            'placeholder' => 'TVA Intracommunautaire'
         ]);
         $this->add($tvaintra);
 
         $rnsr = new Element\Text('rnsr');
         $rnsr->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'N°RNSR'
+            'class' => 'form-control',
+            'placeholder' => 'N°RNSR'
         ]);
         $this->add($rnsr);
 
         $fullName = new Element\Text('fullName');
         $fullName->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Nom complet',
+            'class' => 'form-control',
+            'placeholder' => 'Nom complet',
         ]);
         $this->add($fullName);
         /*
@@ -129,7 +140,7 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
         */
         // Source
         $this->add([
-            'name'   => 'type',
+            'name' => 'type',
             'options' => [
                 'label' => "Type",
                 'value_options' => $this->types
@@ -138,28 +149,28 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
                 'class' => 'form-control',
                 'list' => 'types'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         ////////////////////////////////////////////////////////////////////////
         // Connectors (Ajout dynamique des champs pour les valeurs des connectors)
-        foreach( $this->connectors as $connector ){
+        foreach ($this->connectors as $connector) {
             $this->add([
-                'name'   => 'connector_' . $connector,
+                'name' => 'connector_' . $connector,
                 'options' => [
                     'label' => 'N° ' . $connector
                 ],
                 'attributes' => [
                     'class' => 'form-control',
-                    'placeholder'   => 'N° ' . $connector
+                    'placeholder' => 'N° ' . $connector
                 ],
-                'type'=>'Text'
+                'type' => 'Text'
             ]);
         }
 
         // DateStart
         $this->add([
-            'name'   => 'dateStart',
+            'name' => 'dateStart',
             'options' => [
                 'label' => 'Début du contrat',
                 'format' => 'Y-m-d'
@@ -167,13 +178,13 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'DateTime'
+            'type' => 'DateTime'
         ]);
 
 
         // DateEnd
         $this->add([
-            'name'   => 'dateEnd',
+            'name' => 'dateEnd',
             'options' => [
                 'label' => 'Date de fermeture',
                 'format' => 'Y-m-d'
@@ -181,84 +192,83 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
             'attributes' => [
                 'class' => 'input-date form-control'
             ],
-            'type'=>'DateTime'
+            'type' => 'DateTime'
         ]);
-
 
 
         $eotp = new Element\Text('code');
         $eotp->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Code interne'
+            'class' => 'form-control',
+            'placeholder' => 'Code interne'
         ]);
         $this->add($eotp);
 
         $email = new Element\Text('email');
         $email->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Email'
+            'class' => 'form-control',
+            'placeholder' => 'Email'
         ]);
         $this->add($email);
 
         $url = new Element\Text('url');
         $url->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'URL'
+            'class' => 'form-control',
+            'placeholder' => 'URL'
         ]);
         $this->add($url);
 
         $zipCode = new Element\Text('zipCode');
         $zipCode->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Code Postal'
+            'class' => 'form-control',
+            'placeholder' => 'Code Postal'
         ]);
         $this->add($zipCode);
 
         $city = new Element\Text('city');
         $city->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Ville'
+            'class' => 'form-control',
+            'placeholder' => 'Ville'
         ]);
         $this->add($city);
 
         $this->add([
-            'name'   => 'country',
+            'name' => 'country',
             'options' => [
                 'label' => 'Pays (ISO)',
                 'value_options' => $this->countries
             ],
             'attributes' => [
                 'class' => 'form-control',
-                'placeholder'   => 'Pays'
+                'placeholder' => 'Pays'
             ],
-            'type'=>'Select'
+            'type' => 'Select'
         ]);
 
         $phone = new Element\Text('phone');
         $phone->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Téléphone'
+            'class' => 'form-control',
+            'placeholder' => 'Téléphone'
         ]);
         $this->add($phone);
 
         $street1 = new Element\Text('street1');
         $street1->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Adresse 1'
+            'class' => 'form-control',
+            'placeholder' => 'Adresse 1'
         ]);
         $this->add($street1);
 
         $street2 = new Element\Text('street2');
         $street2->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Adresse 2'
+            'class' => 'form-control',
+            'placeholder' => 'Adresse 2'
         ]);
         $this->add($street2);
 
         $street3 = new Element\Text('street3');
         $street3->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Adresse 3'
+            'class' => 'form-control',
+            'placeholder' => 'Adresse 3'
         ]);
         $this->add($street3);
 
@@ -271,36 +281,69 @@ class OrganizationIdentificationForm extends \Laminas\Form\Form implements Input
 
         $description = new Element\Textarea('description');
         $description->setAttributes([
-            'class'       => 'form-control',
-            'placeholder'   => 'Description',
-            'row'           => 5
+            'class' => 'form-control',
+            'placeholder' => 'Description',
+            'row' => 5
         ]);
         $this->add($description);
 
         $this->add(array(
-            'name'  => 'secure',
-            'type'  => 'Csrf',
+            'name' => 'secure',
+            'type' => 'Csrf',
         ));
     }
 
     public function getInputFilterSpecification()
     {
-        return [
-           'dateStart'=> [
+        $filterSpecification = [
+            'dateStart' => [
                 'required' => false,
             ],
 
-            'dateEnd'=> [
+            'dateEnd' => [
                 'required' => false,
             ],
 
             'country' => [
+                'required' => $this->countryRequired,
+                'validators' => [
+                    [
+                        'name' => NotEmpty::class,
+                        'options' => [
+                            'messages' => [
+                                NotEmpty::IS_EMPTY => "Vous devez définir un pays"
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'type' => [
                 'required' => false
             ],
 
-            'type' => [
+            'typeObj' => [
                 'required' => false
             ]
         ];
+
+        if ($this->typeRequired) {
+            $filterSpecification['typeObj'] = [
+                'required' => true,
+                'validators' => [
+                    [
+                        'name' => \Laminas\Validator\GreaterThan::class,
+                        'options' => [
+                            'min' => 1,
+                            'inclusive' => true,
+                            'messages' => [
+                                GreaterThan::NOT_GREATER_INCLUSIVE => "Vous devez choisir un type d'organisation"
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+        }
+
+        return $filterSpecification;
     }
 }

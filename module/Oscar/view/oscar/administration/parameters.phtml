@@ -8,20 +8,6 @@
 
 ?>
 <style>
-    /*
-    .two-tile {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-    .two-tile > .tile {
-        display: flex;
-        flex-direction: column;
-        flex-basis: 100%;
-        min-width: 40%;
-        flex: 1;
-    }*/
 
     .nav-link:target {
         background: red !important;
@@ -55,6 +41,10 @@
             <a class="nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab"
                aria-controls="nav-contact" aria-selected="false">
                 Feuille de temps
+            </a>
+            <a class="nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-organization" role="tab"
+               aria-controls="nav-contact" aria-selected="false">
+                Organisations
             </a>
         </div>
     </nav>
@@ -448,6 +438,43 @@
                     <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
                 </form>
             </article>
+        </div>
+        <div class="tab-pane active" id="nav-organization" role="tabpanel" aria-labelledby="nav-organization-tab">
+            <h2>Organisation</h2>
+            <h3><i class="icon-key"></i>Champs obligatoires</h3>
+            <p class="help-message">
+                <i class="icon-help-circled"></i>
+                Ces options ne sont effectives QUE pour la création et l'édition des fiches, les oraganisations importées via les connecteurs ne sont pas soumises à ces régles
+            </p>
+            <form action="" method="post" class="form">
+                <input type="hidden" name="parameter_name" value="organization_required" />
+                <div class="row">
+                    <div class="col-md-7 col-md-push-1">
+                        <strong>Type d'organisation</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="material-switch">
+                            <input id="organization_type" name="organization_type"
+                                   type="checkbox" <?= $organizationRequire['type'] ? "checked" : "" ?> />
+                            <label for="organization_type" class="label-primary"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-7 col-md-push-1">
+                        <strong>Pays de l'organisation</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="material-switch">
+                            <input id="organization_country" name="organization_country"
+                                   type="checkbox" <?= $organizationRequire['country'] ? "checked" : "" ?> />
+                            <label for="organization_country" class="label-primary"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary"><i class="icon-floppy"></i> Enregistrer</button>
+            </form>
         </div>
     </div>
 

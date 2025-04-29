@@ -45,8 +45,18 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     const spent_effective_clause = 'spent_effective_clause';
     const spent_predicted_clause = 'spent_predicted_clause';
 
+    const ORGANIZATION_REQUIRED = 'organization_required';
+
 
     const theme = 'theme';
+
+    public function getOrganizationRequired(): array
+    {
+        return [
+            'type' => $this->getEditableConfKey('organization_require_type', false),
+            'country' => $this->getEditableConfKey('organization_require_country', false),
+        ];
+    }
 
     public function emptyProjectRequireValidation(): bool
     {
@@ -183,7 +193,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      *
      * @return string
      */
-    public function getSpentEffectiveClauseValue() :string
+    public function getSpentEffectiveClauseValue(): string
     {
         return $this->getEditableConfKey(self::spent_effective_clause, '9A');
     }
@@ -194,7 +204,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      *
      * @return string
      */
-    public function getSpentPredictedClauseValue() :string
+    public function getSpentPredictedClauseValue(): string
     {
         return $this->getEditableConfKey(self::spent_predicted_clause, '9B');
     }
@@ -225,7 +235,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @throws OscarException
      * @throws ReflectionException
      */
-    public function getHtmlToPdfMethod() :IHtmlToPdfFormatter
+    public function getHtmlToPdfMethod(): IHtmlToPdfFormatter
     {
         try {
             $config = $this->getConfiguration('htmltopdfrenderer');
@@ -272,7 +282,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return array|mixed|\stdClass|\Symfony\Component\Yaml\Tag\TaggedValue
      * @throws OscarException
      */
-    protected function getEditableConfRoot() :array
+    protected function getEditableConfRoot(): array
     {
         $path = $this->getYamlConfigPath();
         if (file_exists($path)) {
@@ -294,12 +304,14 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
      * @return $this
      * @throws OscarException
      */
-    public function saveEditableConfKey($key, $value) :self
+    public function saveEditableConfKey($key, $value): self
     {
         $conf = $this->getEditableConfRoot();
         $conf[$key] = $value;
         $writer = new Dumper();
-        file_put_contents($this->getYamlConfigPath(), $writer->dump($conf));
+        if (!file_put_contents($this->getYamlConfigPath(), $writer->dump($conf))) {
+            throw new OscarException("Impossible d'enregistrer la configuration");
+        }
         return $this;
     }
 
@@ -510,7 +522,7 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
         $this->saveEditableConfKey('timesheet_preview', (boolean)$bool ? true : false);
     }
 
-    public function getTimesheetTemplateActivityPeriod() :string
+    public function getTimesheetTemplateActivityPeriod(): string
     {
         return $this->getConfiguration('timesheet_activity_synthesis_template');
     }
@@ -836,12 +848,12 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
             $this->getConfiguration('pcru.filename_contrats');
     }
 
-    public function getPcruSendCsvOkFile() :string
+    public function getPcruSendCsvOkFile(): string
     {
         return $this->getConfiguration('pcru.filename_csv_ok');
     }
 
-    public function getPcruSendPdfOkFile() :string
+    public function getPcruSendPdfOkFile(): string
     {
         return $this->getConfiguration('pcru.filename_pdf_ok');
     }
@@ -950,8 +962,17 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     }
 
     //////////////////////////////////////////////////////////////////////// CONTRATS SIGNES
-    public function signatureEnabled() :bool
+    public function signatureEnabled(): bool
     {
         return $this->getServiceLocator()->get('Config')['unicaen-signature']['enabled'] == true;
+    }
+
+
+    public function getRequiredOrganization()
+    {
+        return [
+            'type' => $this->getEditableConfKey('organization_require_type') == true,
+            'country' => $this->getEditableConfKey('organization_require_country') == true
+        ];
     }
 }
