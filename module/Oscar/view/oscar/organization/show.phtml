@@ -89,7 +89,7 @@
                         . $organization->getStreet3() . '<br/>'
                         . $organization->getZipcode() . ' '
                         . $organization->getCity()
-                        . ($organization->getCountry()??' (' . $organization->getCountry() . ')')
+                        . ($organization->getCountry()?' (' . $organization->getCountry() . ')' : "")
                         ?>
                     </address>
                 </dd>
