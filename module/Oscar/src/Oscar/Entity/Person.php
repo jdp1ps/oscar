@@ -275,7 +275,12 @@ class Person implements ResourceInterface
 
     public function getCustomSettingsObj()
     {
-        return json_decode($this->getCustomSettings(), JSON_OBJECT_AS_ARRAY);
+        $customSetting = $this->getCustomSettings();
+        if ($customSetting !== null) {
+            return json_decode($this->getCustomSettings(), JSON_OBJECT_AS_ARRAY);
+        } else {
+            return [];
+        }
     }
 
     public function getCustomSettingsKey($key)
@@ -918,22 +923,22 @@ class Person implements ResourceInterface
     public function toArray()
     {
         return array(
-            'id'                   => $this->getId(),
-            'firstname'            => $this->getFirstname(),
-            'firstName'            => $this->getFirstname(),
-            'lastname'             => $this->getLastname(),
-            'lastName'             => $this->getLastname(),
-            'displayname'          => $this->getDisplayName(),
-            'login'                => $this->getLadapLogin(),
-            'label'                => $this->getDisplayName(),
-            'text'                 => $this->getDisplayName(),
-            'closed'                => !$this->isLdapActive(),
-            'email'                => $this->getEmail(),
-            'phone'                => $this->getPhone(),
-            'mail'                 => $this->getEmail(),
-            'mailMd5'              => md5($this->getEmail()),
+            'id' => $this->getId(),
+            'firstname' => $this->getFirstname(),
+            'firstName' => $this->getFirstname(),
+            'lastname' => $this->getLastname(),
+            'lastName' => $this->getLastname(),
+            'displayname' => $this->getDisplayName(),
+            'login' => $this->getLadapLogin(),
+            'label' => $this->getDisplayName(),
+            'text' => $this->getDisplayName(),
+            'closed' => !$this->isLdapActive(),
+            'email' => $this->getEmail(),
+            'phone' => $this->getPhone(),
+            'mail' => $this->getEmail(),
+            'mailMd5' => md5($this->getEmail()),
             'ucbnSiteLocalisation' => $this->getLdapSiteLocation() ? $this->getLdapSiteLocation() : "",
-            'affectation'          => $this->getLdapAffectation() ? $this->getLdapAffectation() : ""
+            'affectation' => $this->getLdapAffectation() ? $this->getLdapAffectation() : ""
         );
     }
 
@@ -948,7 +953,7 @@ class Person implements ResourceInterface
             if (!array_key_exists($organisation->getId())) {
                 $organisations[$organisation->getId()] = [
                     'organisation' => $organisation->displayName(),
-                    'roles'        => []
+                    'roles' => []
                 ];
             }
             if (!in_array($role, $organisations[$organisation->getId()]['roles'])) {
