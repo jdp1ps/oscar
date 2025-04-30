@@ -96,6 +96,9 @@ RUN rm /tmp/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip
 RUN rm /tmp/instantclient-sdk-linux.x64-18.5.0.0.0dbru.zip
 RUN rm /tmp/instantclient-sqlplus-linux.x64-18.5.0.0.0dbru.zip
 
+# librairie wkhtmltopdf : Génération des PDF
+RUN apt install -y wkhtmltopdf
+
 
 # Copier le script de surveillance
 WORKDIR /var/application
