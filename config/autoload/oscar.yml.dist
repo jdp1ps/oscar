@@ -73,6 +73,29 @@ oscar:
   importEnable: '%env(OSCAR_TIMESHEET_IMPORT_ENABLE)%'
 
   ##############################################################
+  # MAILER
+  ##############################################################
+  mailer:
+    transport:
+      type: '%env(MAILER_TYPE)%'
+      host: '%env(MAILER_HOST)%'
+      port: '%env(MAILER_PORT)%'
+      username: '%env(MAILER_USERNAME)%'
+      password: '%env(MAILER_PASSWORD)%'
+      security: '%env(MAILER_SECURITY)%'
+    from:
+      "oscar-bot@unicaen.fr": "Oscar Bot"
+
+    copy: ""
+    send: true
+    send_false_exception: false
+    subjectPrefix: '%env(MAILER_SUBJECT_PREFIX)%'
+    template: '%env(VOLUMES_TEMPLATE_MAIL)%'
+    administrators:
+
+
+
+  ##############################################################
   # RECHERCHE
   ##############################################################
   strategy:
