@@ -570,4 +570,21 @@ class ValidationPeriodRepository extends EntityRepository
             ->select('vp.object_id')->getQuery()->getResult();
         return $ids = array_map('current', $datas);
     }
+
+    /**
+     * @return ValidationPeriod[]
+     */
+    public function getValidationPeriodsUnvalidated() :array
+    {
+        $query = $this->createQueryBuilder('vp');
+        $query->where("vp.status IN(:status)");
+        $query->setParameters([
+            'status' => [
+                ValidationPeriod::STATUS_STEP1,
+                ValidationPeriod::STATUS_STEP2,
+                ValidationPeriod::STATUS_STEP3
+            ]
+        ]);
+        return $query->getQuery()->getResult();
+    }
 }
