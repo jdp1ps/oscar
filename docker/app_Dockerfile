@@ -55,6 +55,8 @@ RUN pecl install gearman  \
     # Zip
     && apt install -y libzip-dev \
     && docker-php-ext-install zip \
+    # Calendar
+    && docker-php-ext-install calendar zip \
     # Git
     && apt install -y git
 
