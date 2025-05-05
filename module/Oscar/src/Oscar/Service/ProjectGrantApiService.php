@@ -521,6 +521,14 @@ class ProjectGrantApiService implements UseEntityManager,
                 'url_show'    => $urlPlugin->fromRoute('project/show', ['id' => $activity->getProject()->getId()])
             ];
         }
+
+        // Numérotation
+        $numeros = [];
+        foreach ($activity->getNumbers() as $key => $value) {
+            $numeros[$key] = $value;
+        }
+
+
         return [
             'id'           => $activity->getId(),
             'label'        => $activity->getLabel(),
@@ -531,6 +539,7 @@ class ProjectGrantApiService implements UseEntityManager,
             'acronym'      => $activity->getAcronym(),
             'project'      => $project,
             'disciplines'  => $activity->getDisciplinesArray(),
+            'numeros'      => $numeros,
             'motscles'     => $activity->getMotsclesArray(),
             'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
             'type_chain'   => $typesJson,
