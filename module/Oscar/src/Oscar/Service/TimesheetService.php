@@ -4718,6 +4718,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
         $validationsStates = $this->getValidationStatePersonPeriod($person, $period, $restrictedActivityId);
 
         $commentaires = "";
+        $numbers = [];
         $acronyms = [];
         $debut = "";
         $num = [];
@@ -4769,6 +4770,14 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
                     }
                     if (!in_array($timesheet->getActivity(), $activities)) {
                         $activities[] = $timesheet->getActivity();
+                    }
+                    foreach ($timesheet->getActivity()->getNumbers() as $key => $value) {
+                        if( !array_key_exists($key, $numbers) ){
+                            $numbers[$key] = [];
+                        }
+                        if( !in_array($value, $numbers[$key]) ){
+                            $numbers[$key][] = $value;
+                        }
                     }
                 }
             }
@@ -4925,6 +4934,7 @@ class TimesheetService implements UseOscarUserContextService, UseOscarConfigurat
             'activities' => $activities,
             'totalGroup' => $totalGroup,
             'organizations' => $organizationsPrimary,
+            'numbers' => $numbers,
             'num' => implode(', ', $num),
             'pfi' => implode(', ', $pfi),
             'acronyms' => implode(', ', $acronyms),
