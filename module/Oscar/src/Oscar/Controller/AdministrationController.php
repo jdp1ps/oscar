@@ -352,6 +352,16 @@ class AdministrationController extends AbstractOscarController implements UsePro
         if ($this->getHttpXMethod() == "POST") {
             $option = $this->params()->fromPost('parameter_name');
             switch ($option) {
+                case OscarConfigurationService::ORGANIZATION_REQUIRED:
+                    $this->getLoggerService()->info("Enregistrement des options des organisations");
+                    $typeRequired = $this->params()->fromPost('organization_type') == "on";
+                    $countryRequired = $this->params()->fromPost('organization_country') == "on";
+                    $this->getOscarConfigurationService()
+                        ->saveEditableConfKey("organization_require_type", $typeRequired);
+                    $this->getOscarConfigurationService()
+                        ->saveEditableConfKey("organization_require_country", $countryRequired);
+                    return $this->redirect()->toRoute('administration/parameters');
+
                 case OscarConfigurationService::allow_node_selection:
                     $value = $this->params()->fromPost('parameter_value') == "on";
                     $this->getOscarConfigurationService()->setAllowNodeSelection($value);
@@ -427,9 +437,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
                         );
                     }
                     return $this->redirect()->toRoute('administration/parameters');
-
+                case OscarConfigurationService::ORGANIZATION_REQUIRED:
+                    throw new OscarException("A faire");
                 default:
-                    return $this->getResponseBadRequest("Paramètres non-reconnue");
+                    return $this->getResponseBadRequest("Paramètres $option non-reconnue");
             }
         }
 
@@ -466,6 +477,10 @@ class AdministrationController extends AbstractOscarController implements UsePro
             )->getConfiguration('validation.pfi'),
             "allow_node_selection"                                  => $this->getOscarConfigurationService(
             )->isAllowNodeSelection(),
+            "organizationRequire" => [
+                "type" => $this->getOscarConfigurationService()->getOrganizationRequired()['type'],
+                "country" => $this->getOscarConfigurationService()->getOrganizationRequired()['country']
+            ]
         ];
     }
 

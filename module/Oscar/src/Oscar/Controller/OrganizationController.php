@@ -498,6 +498,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $this->getOrganizationService(),
             $this->getOrganizationService()->getOrganizationTypesObject()
         );
+        $form->configureRequired($this->getOscarConfigurationService()->getRequiredOrganization());
         $entity = new Organization();
         $form->init();
         $form->bind($entity);
@@ -883,6 +884,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
             $this->getOrganizationService(),
             $this->getOrganizationService()->getOrganizationTypesObject()
         );
+        $form->configureRequired($this->getOscarConfigurationService()->getRequiredOrganization());
         $form->init();
         $form->bind($entity);
 

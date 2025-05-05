@@ -29,9 +29,9 @@ class Country3166Repository extends EntityRepository
         return $q->getQuery()->getResult();
     }
 
-    public function getAllForSelects()
+    public function getAllForSelects() :array
     {
-        $out = ["" => "Non-définit"];
+        $out = ["" => "Non défini"];
         /** @var Country3166 $country */
         foreach ($this->getAll() as $country) {
             $out[$country->getFr()] = $country->getFr();
