@@ -156,6 +156,11 @@ services:
       - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
       - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
       - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+      # Templates
+      - ${VOLUMES_TEMPLATES}/mail.phtml:/var/application/data/templates/mail.phtml
+      - ${VOLUMES_TEMPLATES}/logo.png:/var/application/data/templates/logo.png
+      - ${VOLUMES_TEMPLATES}/timesheet_period.default.html.php:/var/application/data/templates/timesheet_period.default.html.php
+      - ${VOLUMES_TEMPLATES}/timesheet_person_month.default.html.php:/var/application/data/templates/timesheet_person_month.default.html.php
       # Fichiers (DEVELOPPEMENT UNIQUEMENT)
       #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
 #    command:
