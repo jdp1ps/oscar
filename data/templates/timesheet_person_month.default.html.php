@@ -5,7 +5,7 @@ require_once __DIR__."/functions.inc.php";
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Feuille de temps</title>
+    <title>Feuille de temps (DEMO)</title>
     <style>
         <?php include __DIR__.'/common.css'; ?>
     </style>
@@ -42,6 +42,24 @@ require_once __DIR__."/functions.inc.php";
         <td colspan="<?= $padding ?>">&nbsp;</td>
         <td colspan="<?= $colSize4 ?>" class="valueLabel">N°Oscar : </td>
         <td colspan="<?= $colSize4 ?>" class="value"><?= $num ?></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td colspan="<?= $colSize4 ?>" class="valueLabel">&nbsp;</td>
+        <td colspan="<?= $colSize4 ?>" class="value">&nbsp;</td>
+        <td colspan="<?= $padding ?>">&nbsp;</td>
+        <td colspan="<?= $colSize4 ?>" class="valueLabel">Autre numérotation : </td>
+        <td colspan="<?= $colSize4 ?>" class="value">
+            <?php foreach ($numbers as $numberLabel => $numberValues): ?>
+            <div>
+                <?= $numberLabel ?> :
+                <strong>
+                    <?= implode(', ', $numberValues) ?> :
+                </strong>
+            </div>
+            <?php endforeach; ?>
+        </td>
         <td>&nbsp;</td>
     </tr>
     <tr>
