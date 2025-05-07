@@ -46,6 +46,7 @@ S'adresse aux gestionnaires d'application souhaitant installer et configurer une
 - [Activier le mode ADAJ](adaj.md)
 - [Personnaliser le numéro OSCAR (20xxDRIxxxxxx)](configuration/config-numerotation.md) : Modifier le formalisme de la numérotation automatique de Oscar
 - [Export des activité - Champ calculé](./activities-export.md)
+- [Configuration PCRU](./configuration/config-pcru.md)
 
 
 # Développeurs

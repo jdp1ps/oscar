@@ -14,7 +14,7 @@ Ces informations ont été ajoutées au modèle de données (optionnelles) mais 
 
 Rendez-vous dans **Administration > Configuration et maintenance > Modules > PCRU** puis, cliquer sur *Mettre à jour les référentiels* 
 
-![Configuration PCRU](images/pcru-config.png)
+![Configuration PCRU](../images/pcru-config.png)
 
 Cette opération va actualiser les référentiels suivant : 
 

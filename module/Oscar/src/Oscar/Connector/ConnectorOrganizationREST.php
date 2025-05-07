@@ -204,7 +204,7 @@ class ConnectorOrganizationREST extends AbstractConnector
                                     try {
                                         $this->getOrganizationService()->saveSubStructure($parent, $organization->getId());
                                     }catch (\Exception $e) {
-                                        $this->errorOut("Un problème est survenu lors de l'enregistrement du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
+                                        $this->errorOut($repport,"Un problème est survenu lors de l'enregistrement du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
                                         continue;
                                     }
 
@@ -213,7 +213,7 @@ class ConnectorOrganizationREST extends AbstractConnector
                                 try {
                                     $this->getOrganizationService()->removeSubStructure(null, $organization->getId());
                                 } catch (\Exception $e) {
-                                    $this->errorOut("Un problème est survenu lors de la suppression du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
+                                    $this->errorOut($repport,"Un problème est survenu lors de la suppression du parent '$newParentCode' dans l'organisation $organisationId' : " . $e->getMessage());
                                     continue;
                                 }
                             }
@@ -252,7 +252,7 @@ class ConnectorOrganizationREST extends AbstractConnector
                         $repport->addnotice("'$uid' n'est plus dans le connecteur");
                     }
                 } catch (\Exception $e) {
-                    $this->errorOut("Problème avec l'organisation $uid : " . $e->getMessage());
+                    $this->errorOut($repport,"Problème avec l'organisation $uid : " . $e->getMessage());
                 }
             }
             foreach ($idsToDelete as $id) {
@@ -265,7 +265,7 @@ class ConnectorOrganizationREST extends AbstractConnector
                 }
             }
         } catch (\Exception $e ){
-            $this->errorOut("Erreur inattendue : " . $e->getMessage());
+            $this->errorOut($repport,"Erreur inattendue : " . $e->getMessage());
             throw $e;
         }
 
