@@ -18,9 +18,10 @@ class Duration extends AbstractHtmlElement
 {
     public function format($duration)
     {
+        $duration = floatval($duration);
         $heures = floor($duration);
         $minutes = round(($duration - $heures)*60);
-        if( $minutes < 10 ){
+        if ($minutes < 10) {
             $minutes = '0'.$minutes;
         }
         return sprintf('%s:%s', $heures, $minutes);
