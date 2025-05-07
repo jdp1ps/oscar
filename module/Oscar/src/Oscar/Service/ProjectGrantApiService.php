@@ -54,12 +54,12 @@ use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Utils\SignatureConstants;
 
 class ProjectGrantApiService implements UseEntityManager,
-                                        UseLoggerService,
-                                        UseOscarConfigurationService,
-                                        UsePersonService,
-                                        UseProjectGrantService,
-                                        UseServiceContainer,
-                                        UseSpentService
+    UseLoggerService,
+    UseOscarConfigurationService,
+    UsePersonService,
+    UseProjectGrantService,
+    UseServiceContainer,
+    UseSpentService
 {
 
     use UseEntityManagerTrait,
@@ -123,11 +123,12 @@ class ProjectGrantApiService implements UseEntityManager,
      * @throws OscarException
      */
     public function getActivityJson(
-        int $activityId,
-        ?Url $urlPlugin = null,
+        int               $activityId,
+        ?Url              $urlPlugin = null,
         ?OscarUserContext $oscarUserContext = null,
-        ?string $perimeters = null
-    ): array {
+        ?string           $perimeters = null
+    ): array
+    {
         try {
             $activity = $this->getActivityRepository()->find($activityId);
         } catch (\Exception $exception) {
@@ -136,38 +137,34 @@ class ProjectGrantApiService implements UseEntityManager,
 
         if ($perimeters !== null) {
             $perimeters = array_intersect(explode(',', $perimeters), $this->getPerimetersKeys());
-        }
-        else {
+        } else {
             $perimeters = $this->getPerimetersKeys();
         }
 
         $credentials = $this->getActivityJsonCredentials($activity, $oscarUserContext, $perimeters);
 
         $out = [
-            'date'        => date('Y-m-d H:i:s'),
-            'error'       => null,
-            'warnings'    => null,
-            'perimeter'   => $perimeters,
+            'date' => date('Y-m-d H:i:s'),
+            'error' => null,
+            'warnings' => null,
+            'perimeter' => $perimeters,
             'credentials' => null,
-            'datas'       => null
+            'datas' => null
         ];
 
         if ($credentials['read'] !== true) {
             $out['error'] = 'access denied';
             return $out;
-        }
-        else {
+        } else {
             $out['credentials'] = $credentials;
             $out['datas'] = $this->getActivityJsonDatas($activity, $urlPlugin, $perimeters);
             foreach ($out['datas'] as $key => $content) {
                 if (!array_key_exists($key, $credentials)) {
                     unset($out['datas'][$key]);
-                }
-                else {
+                } else {
                     if ($credentials[$key]['read'] !== true) {
                         unset($out['datas'][$key]);
-                    }
-                    else {
+                    } else {
                         // Traitement des onglets de documents
                         if ($key === 'documents') {
                             foreach ($credentials[$key]['tabs'] as $tabId => $tabAccess) {
@@ -206,10 +203,11 @@ class ProjectGrantApiService implements UseEntityManager,
      * @throws OscarException
      */
     public function getActivityJsonCredentials(
-        Activity $activity,
+        Activity         $activity,
         OscarUserContext $oscarUserContext,
-        array $perimeters
-    ): array {
+        array            $perimeters
+    ): array
+    {
         $locked = $activity->isLocked();
         $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
         $lockEditable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $activity);
@@ -219,10 +217,10 @@ class ProjectGrantApiService implements UseEntityManager,
 
         $credentials = [
             'currentPersonId' => $oscarUserContext->getCurrentPersonId() ?: -1,
-            'read'            => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity),
-            'edit'            => $editable,
-            'lock'            => $locked,
-            'lock_edit'       => $lockEditable,
+            'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_SHOW, $activity),
+            'edit' => $editable,
+            'lock' => $locked,
+            'lock_edit' => $lockEditable,
         ];
 
         foreach ($perimeters as $perimeter) {
@@ -249,11 +247,11 @@ class ProjectGrantApiService implements UseEntityManager,
 
                 case self::PERIMETER_CORE:
                     $credentials['core'] = [
-                        'read'           => $oscarUserContext->hasPrivileges(
+                        'read' => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_PERSON_SHOW,
                             $activity
                         ),
-                        'edit'           => $editable && $oscarUserContext->hasPrivileges(
+                        'edit' => $editable && $oscarUserContext->hasPrivileges(
                                 Privileges::ACTIVITY_EDIT,
                                 $activity
                             ),
@@ -261,7 +259,7 @@ class ProjectGrantApiService implements UseEntityManager,
                                 Privileges::ACTIVITY_CHANGE_PROJECT,
                                 $activity
                             ),
-                        'new_project'    => !$locked && $oscarUserContext->hasPrivileges(
+                        'new_project' => !$locked && $oscarUserContext->hasPrivileges(
                                 Privileges::ACTIVITY_CHANGE_PROJECT,
                                 $activity
                             ),
@@ -285,10 +283,10 @@ class ProjectGrantApiService implements UseEntityManager,
                         $tabId = $tabDocument->getId();
                         $access = $oscarUserContext->getAccessTabDocument($tabDocument, $rolesMerged);
                         $arrayTabs[$tabId] = [
-                            'id'    => $tabDocument->getId(),
+                            'id' => $tabDocument->getId(),
                             'label' => $tabDocument->getLabel(),
-                            'read'  => $access['read'],
-                            'edit'  => $access['write'],
+                            'read' => $access['read'],
+                            'edit' => $access['write'],
                         ];
                     }
 
@@ -310,8 +308,8 @@ class ProjectGrantApiService implements UseEntityManager,
 
                 case self::PERIMETER_NOTES:
                     $credentials['notes'] = [
-                        'read'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity),
-                        'edit'   => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity),
+                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_SHOW, $activity),
+                        'edit' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_NOTES_MANAGE_USER, $activity),
                         'manage' => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_NOTES_MANAGE_ADMIN,
                             $activity
@@ -321,11 +319,11 @@ class ProjectGrantApiService implements UseEntityManager,
 
                 case self::PERIMETER_MILESTONES:
                     $credentials['milestones'] = [
-                        'read'        => $oscarUserContext->hasPrivileges(
+                        'read' => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_MILESTONE_SHOW,
                             $activity
                         ),
-                        'edit'        => $oscarUserContext->hasPrivileges(
+                        'edit' => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_MILESTONE_MANAGE,
                             $activity
                         ),
@@ -382,7 +380,7 @@ class ProjectGrantApiService implements UseEntityManager,
 
                 case 'timesheets':
                     $credentials['timesheets'] = [
-                        'read'     => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity),
+                        'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_TIMESHEET_VIEW, $activity),
                         'validate' => $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_TIMESHEET_VALIDATE_ACTIVITY,
                             $activity
@@ -417,9 +415,10 @@ class ProjectGrantApiService implements UseEntityManager,
      */
     public function getActivityJsonDatas(
         Activity $activity,
-        ?Url $urlPlugin = null,
-        ?array $perimeters = null
-    ): array {
+        ?Url     $urlPlugin = null,
+        ?array   $perimeters = null
+    ): array
+    {
         $datas = [
             "api" => "Oscar Activity API"
         ];
@@ -514,11 +513,11 @@ class ProjectGrantApiService implements UseEntityManager,
         $project = null;
         if ($activity->getProject() !== null) {
             $project = [
-                'id'          => $activity->getProject()->getId(),
-                'label'       => $activity->getProject()->getLabel(),
-                'acronym'     => $activity->getProject()->getAcronym(),
+                'id' => $activity->getProject()->getId(),
+                'label' => $activity->getProject()->getLabel(),
+                'acronym' => $activity->getProject()->getAcronym(),
                 'description' => $activity->getProject()->getDescription(),
-                'url_show'    => $urlPlugin->fromRoute('project/show', ['id' => $activity->getProject()->getId()])
+                'url_show' => $urlPlugin->fromRoute('project/show', ['id' => $activity->getProject()->getId()])
             ];
         }
 
@@ -530,30 +529,31 @@ class ProjectGrantApiService implements UseEntityManager,
 
 
         return [
-            'id'           => $activity->getId(),
-            'label'        => $activity->getLabel(),
-            'numOscar'     => $activity->getOscarNum(),
-            'status'       => $activity->getStatus(),
+            'id' => $activity->getId(),
+            'label' => $activity->getLabel(),
+            'numOscar' => $activity->getOscarNum(),
+            'status' => $activity->getStatus(),
             'status_label' => $activity->getStatusLabel(),
-            'pfi'          => $activity->getCodeEOTP(),
-            'acronym'      => $activity->getAcronym(),
-            'project'      => $project,
-            'disciplines'  => $activity->getDisciplinesArray(),
-            'numeros'      => $numeros,
-            'motscles'     => $activity->getMotsclesArray(),
-            'type'         => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
-            'type_chain'   => $typesJson,
-            'type_id'      => $activity->getActivityType()?->getId(),
-            'dateStart'    => $this->formatDateTime($activity->getDateStart()),
-            'dateEnd'      => $this->formatDateTime($activity->getDateEnd()),
-            'dateSigned'   => $this->formatDateTime($activity->getDateSigned()),
-            'dateUpdated'  => $this->formatDateTime($activity->getDateUpdated()),
-            'dateOpened'   => $this->formatDateTime($activity->getDateOpened()),
-            'urls'         => [
-                'edit'           => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
+            'pfi' => $activity->getCodeEOTP(),
+            'notefinanciere' => $activity->getNoteFinanciere(),
+            'acronym' => $activity->getAcronym(),
+            'project' => $project,
+            'disciplines' => $activity->getDisciplinesArray(),
+            'numeros' => $numeros,
+            'motscles' => $activity->getMotsclesArray(),
+            'type' => $activity->getActivityType() ? (string)$activity->getActivityType() : null,
+            'type_chain' => $typesJson,
+            'type_id' => $activity->getActivityType()?->getId(),
+            'dateStart' => $this->formatDateTime($activity->getDateStart()),
+            'dateEnd' => $this->formatDateTime($activity->getDateEnd()),
+            'dateSigned' => $this->formatDateTime($activity->getDateSigned()),
+            'dateUpdated' => $this->formatDateTime($activity->getDateUpdated()),
+            'dateOpened' => $this->formatDateTime($activity->getDateOpened()),
+            'urls' => [
+                'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
-                'new_project'    => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
-                'pcru'           => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
+                'new_project' => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
+                'pcru' => $urlPlugin->fromRoute('contract/pcru-infos', ['id' => $activity->getId()])
             ]
         ];
     }
@@ -568,15 +568,15 @@ class ProjectGrantApiService implements UseEntityManager,
     public function getBudgetActivity(Activity $activity, ?Url $urlPlugin): array
     {
         return [
-            'amount'                         => $activity->getAmount(),
-            'montant'                        => $activity->getAmount(),
-            'currency'                       => $activity->getCurrency()->toJson(),
-            'fraisDeGestion'                 => $activity->getFraisDeGestionDisplay(),
-            'fraisDeGestionPartHebergeur'    => $activity->getFraisDeGestionPartHebergeurDisplay(),
-            'fraisDeGestionPartUnite'        => $activity->getFraisDeGestionPartUniteDisplay(),
+            'amount' => $activity->getAmount(),
+            'montant' => $activity->getAmount(),
+            'currency' => $activity->getCurrency()->toJson(),
+            'fraisDeGestion' => $activity->getFraisDeGestionDisplay(),
+            'fraisDeGestionPartHebergeur' => $activity->getFraisDeGestionPartHebergeurDisplay(),
+            'fraisDeGestionPartUnite' => $activity->getFraisDeGestionPartUniteDisplay(),
             'fraisDeGestionPartGestionnaire' => $activity->getFraisDeGestionPartGestionnaireDisplay(),
-            'tva'                            => (string)$activity->getTva(),
-            'assietteSubventionnable'        => $activity->getAssietteSubventionnable(),
+            'tva' => (string)$activity->getTva(),
+            'assietteSubventionnable' => $activity->getAssietteSubventionnable(),
         ];
     }
 
@@ -591,7 +591,7 @@ class ProjectGrantApiService implements UseEntityManager,
     {
         // TODO Traitement des documents ici (pour le moment, le composant récupère un URL qui fournie les documents)
         $out = [
-            'url'                => $urlPlugin->fromRoute(
+            'url' => $urlPlugin->fromRoute(
                 'contractdocument/activity',
                 ['activity_id' => $activity->getId()]
             ),
@@ -599,10 +599,10 @@ class ProjectGrantApiService implements UseEntityManager,
                 'contractdocument/upload',
                 ['idactivity' => $activity->getId()]
             ),
-            'url_sign_document'  => "/url_sign_document",
-            'entities'           => [],
-            'typesDocuments'     => [],
-            'tabs'               => []
+            'url_sign_document' => "/url_sign_document",
+            'entities' => [],
+            'typesDocuments' => [],
+            'tabs' => []
         ];
 
         /////// DOCUMENTS des ONGLETS
@@ -643,8 +643,7 @@ class ProjectGrantApiService implements UseEntityManager,
                     $allowProcessUpdate = false;
                     $allowProcessDelete = false;
                     $allowDelete = true;
-                }
-                else {
+                } else {
                     $allowProcessDelete = true;
                     $allowDelete = true;
                 }
@@ -655,8 +654,7 @@ class ProjectGrantApiService implements UseEntityManager,
                         ['id' => $doc->getId()]
                     );
                 }
-            }
-            else {
+            } else {
                 $allowProcessCreate = true;
             }
 
@@ -697,9 +695,9 @@ class ProjectGrantApiService implements UseEntityManager,
                 ]);
             }
             $docAdded['uploader'] = $doc->getPerson() ? [
-                'id'        => $doc->getPerson()->getId(),
+                'id' => $doc->getPerson()->getId(),
                 'firstname' => $doc->getPerson()->getFirstname(),
-                'lastname'  => $doc->getPerson()->getLastname(),
+                'lastname' => $doc->getPerson()->getLastname(),
             ] : null;
 
             $docAdded['process_triggerable'] = $allowProcessCreate;
@@ -723,7 +721,7 @@ class ProjectGrantApiService implements UseEntityManager,
         $generatedDocumentsJson = [];
         foreach ($generatedDocuments as $key => $infos) {
             $generatedDocumentsJson[] = [
-                'url'   => $urlPlugin->fromRoute(
+                'url' => $urlPlugin->fromRoute(
                     'contract/generatedocument',
                     ['id' => $activity->getId(), 'doc' => $key]
                 ),
@@ -790,9 +788,9 @@ class ProjectGrantApiService implements UseEntityManager,
         $dates = $qb->setParameter('idactivity', $activity->getId())->getQuery()->getResult();
 
         $out = [
-            'url'              => $urlPlugin->fromRoute('activitydate', ['idactivity' => $activity->getId()]),
+            'url' => $urlPlugin->fromRoute('activitydate', ['idactivity' => $activity->getId()]),
             'urlNotifications' => $urlPlugin->fromRoute('contract/notifications', ['id' => $activity->getId()]),
-            'entities'         => [],
+            'entities' => [],
         ];
 
         // Types
@@ -802,11 +800,11 @@ class ProjectGrantApiService implements UseEntityManager,
         /** @var DateType $type */
         foreach ($types as $type) {
             $typesArr[$type->getId()] = [
-                'id'          => $type->getId(),
-                'label'       => $type->getLabel(),
+                'id' => $type->getId(),
+                'label' => $type->getLabel(),
                 'description' => $type->getDescription(),
-                'facet'       => $type->getFacet(),
-                'finishable'  => $type->isFinishable()
+                'facet' => $type->getFacet(),
+                'finishable' => $type->isFinishable()
             ];
         }
 
@@ -818,13 +816,13 @@ class ProjectGrantApiService implements UseEntityManager,
         foreach ($dates as $data) {
             $date = $data->getDateStartStr();
             $data = [
-                'id'        => $data->getId(),
-                'past'      => $date < $now,
+                'id' => $data->getId(),
+                'past' => $date < $now,
                 'dateStart' => $this->formatDateTime($data->getDateStart()),
-                'comment'   => $data->getComment(),
-                'type'      => $typesArr[$data->getType()->getId()],
-                'type_id'   => $data->getType()->getId(),
-                'finished'  => $data->getFinished(),
+                'comment' => $data->getComment(),
+                'type' => $typesArr[$data->getType()->getId()],
+                'type_id' => $data->getType()->getId(),
+                'finished' => $data->getFinished(),
                 'validable' => $data->getType()->isFinishable()
                 //'hasProgression' => $data->getProgressInfo()
             ];
@@ -842,8 +840,9 @@ class ProjectGrantApiService implements UseEntityManager,
      */
     public function getNotesActivity(
         Activity $activity,
-        ?Url $urlPlugin = null
-    ): array {
+        ?Url     $urlPlugin = null
+    ): array
+    {
         /** @var ActivityNoteRepository $notesActivityRepository */
         $notesActivityRepository = $this->getEntityManager()->getRepository(ActivityNote::class);
 
@@ -860,24 +859,24 @@ class ProjectGrantApiService implements UseEntityManager,
                 $createdBy_username = $note->getCreatedBy()->getFullname();
             }
             $notes[] = [
-                'id'          => $note->getId(),
-                'content'     => $note->getContent(),
+                'id' => $note->getId(),
+                'content' => $note->getContent(),
                 'dateCreated' => $this->formatDateTime($note->getDateCreated()),
                 'dateUpdated' => $this->formatDateTime($note->getDateUpdated()),
-                'dateRef'     => $note->getDateUpdated() ?
+                'dateRef' => $note->getDateUpdated() ?
                     $this->formatDateTime($note->getDateUpdated()) :
                     $this->formatDateTime($note->getDateCreated()),
-                'createdBy'   => [
-                    'id'        => $createdBy_id,
+                'createdBy' => [
+                    'id' => $createdBy_id,
                     'firstname' => $createdBy_firstname,
-                    'lastname'  => $createdBy_lastname,
-                    'username'  => $createdBy_username,
+                    'lastname' => $createdBy_lastname,
+                    'username' => $createdBy_username,
                 ]
             ];
         }
 
         return [
-            'url'      => $urlPlugin->fromRoute('activity-notes/api') . '?activityid=' . $activity->getId(),
+            'url' => $urlPlugin->fromRoute('activity-notes/api') . '?activityid=' . $activity->getId(),
             'entities' => $notes
         ];
     }
@@ -898,16 +897,16 @@ class ProjectGrantApiService implements UseEntityManager,
             $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']) as $role
         ) {
             $roles[] = [
-                'id'    => $role->getId(),
+                'id' => $role->getId(),
                 'label' => $role->getLabel()
             ];
         }
 
         $classRoutes = [
             ActivityOrganization::class => 'organizationactivity',
-            ActivityPerson::class       => 'personactivity',
-            ProjectMember::class        => 'personproject',
-            ProjectPartner::class       => 'organizationproject'
+            ActivityPerson::class => 'personactivity',
+            ProjectMember::class => 'personproject',
+            ProjectPartner::class => 'organizationproject'
         ];
 
         /**
@@ -928,8 +927,7 @@ class ProjectGrantApiService implements UseEntityManager,
                 $roleprincipal = false;
                 $rolelabel = "Rôle inconnu";
                 $role = null;
-            }
-            else {
+            } else {
                 $roleId = $activityOrganization->getRoleObj()->getId();
                 $roleprincipal = $activityOrganization->getRoleObj()->isPrincipal();
                 $rolelabel = $activityOrganization->getRoleObj()->getRoleId();
@@ -940,8 +938,7 @@ class ProjectGrantApiService implements UseEntityManager,
             if ($class == ActivityOrganization::class) {
                 $context = "activity";
                 $contextKey = $activityOrganization->getActivity()->getOscarNum();
-            }
-            else {
+            } else {
                 $context = "project";
                 $contextKey = $activityOrganization->getProject()->getAcronym();
             }
@@ -960,30 +957,30 @@ class ProjectGrantApiService implements UseEntityManager,
             );
 
             $entities[] = [
-                'id'            => $activityOrganization->getId(),
-                'roleId'        => $roleId,
-                'role'          => $rolelabel,
-                'roleLabel'     => $rolelabel,
+                'id' => $activityOrganization->getId(),
+                'roleId' => $roleId,
+                'role' => $rolelabel,
+                'roleLabel' => $rolelabel,
                 'rolePrincipal' => $roleprincipal,
-                'urlDelete'     => $urlDelete,
-                'context'       => $context,
-                'contextKey'    => $contextKey,
-                'urlEdit'       => $urlEdit,
-                'urlShow'       => $urlShow,
-                'enroller'      => $activity->getId(),
+                'urlDelete' => $urlDelete,
+                'context' => $context,
+                'contextKey' => $contextKey,
+                'urlEdit' => $urlEdit,
+                'urlShow' => $urlShow,
+                'enroller' => $activity->getId(),
                 'enrollerLabel' => (string)$activity,
-                'enrolled'      => $activityOrganization->getOrganization()->getId(),
+                'enrolled' => $activityOrganization->getOrganization()->getId(),
                 'enrolledLabel' => $activityOrganization->getOrganization()->getFullName(),
-                'past'          => !$activityOrganization->isActive(),
-                'start'         => $this->formatDateTime($activityOrganization->getDateStart()),
-                'end'           => $this->formatDateTime($activityOrganization->getDateEnd())
+                'past' => !$activityOrganization->isActive(),
+                'start' => $this->formatDateTime($activityOrganization->getDateStart()),
+                'end' => $this->formatDateTime($activityOrganization->getDateEnd())
             ];
         }
         return [
-            'roles'    => $roles,
+            'roles' => $roles,
             'entities' => $entities,
-            'urlNew'   => $urlPlugin->fromRoute('organizationactivity/new', ['idenroller' => $activity->getId()]),
-            'url'      => $urlPlugin->fromRoute('contract/organizations', ['id' => $activity->getId()]),
+            'urlNew' => $urlPlugin->fromRoute('organizationactivity/new', ['idenroller' => $activity->getId()]),
+            'url' => $urlPlugin->fromRoute('contract/organizations', ['id' => $activity->getId()]),
         ];
     }
 
@@ -1002,7 +999,7 @@ class ProjectGrantApiService implements UseEntityManager,
             $this->getEntityManager()->getRepository(Role::class)->getRolesAvailableForPersonInActivity() as $role
         ) {
             $roles[] = [
-                'id'    => $role->getId(),
+                'id' => $role->getId(),
                 'label' => $role->getRoleId()
             ];
         }
@@ -1023,8 +1020,7 @@ class ProjectGrantApiService implements UseEntityManager,
                 $context = "activity";
                 $contextKey = $activityPerson->getActivity()->getOscarNum();
                 $idEnroller = $activityPerson->getActivity()->getId();
-            }
-            else {
+            } else {
                 $urlDelete = $urlPlugin->fromRoute(
                     'personproject/delete',
                     ['idenroll' => $activityPerson->getId()]
@@ -1042,35 +1038,35 @@ class ProjectGrantApiService implements UseEntityManager,
                 ['id' => $activityPerson->getPerson()->getId()]
             );
             $output[] = [
-                'id'            => $activityPerson->getId(),
-                'role'          => $activityPerson->getRole(),
-                'roleLabel'     => $activityPerson->getRole(),
-                'roleId'        => $activityPerson->getRoleObj() ? $activityPerson->getRoleObj()->getId() : "",
+                'id' => $activityPerson->getId(),
+                'role' => $activityPerson->getRole(),
+                'roleLabel' => $activityPerson->getRole(),
+                'roleId' => $activityPerson->getRoleObj() ? $activityPerson->getRoleObj()->getId() : "",
                 'rolePrincipal' => $activityPerson->isPrincipal(),
-                'context'       => $context,
-                'contextKey'    => $contextKey,
-                'urlShow'       => $urlShow,
-                'urlEdit'       => $urlEdit,
-                'urlDelete'     => $urlDelete,
-                'past'          => $activityPerson->isPast(),
-                'enroller'      => $idEnroller,
+                'context' => $context,
+                'contextKey' => $contextKey,
+                'urlShow' => $urlShow,
+                'urlEdit' => $urlEdit,
+                'urlDelete' => $urlDelete,
+                'past' => $activityPerson->isPast(),
+                'enroller' => $idEnroller,
                 'enrollerLabel' => $activity->getLabel(),
-                'enrolled'      => $activityPerson->getPerson()->getId(),
+                'enrolled' => $activityPerson->getPerson()->getId(),
                 'enrolledLabel' => $activityPerson->getPerson()->getDisplayName(),
-                'firstName'     => $activityPerson->getPerson()->getFirstname(),
-                'firstname'     => $activityPerson->getPerson()->getFirstname(),
-                'lastName'      => $activityPerson->getPerson()->getLastname(),
-                'lastname'      => $activityPerson->getPerson()->getLastname(),
-                'start'         => $this->formatDateTime($activityPerson->getDateStart()),
-                'end'           => $this->formatDateTime($activityPerson->getDateEnd()),
+                'firstName' => $activityPerson->getPerson()->getFirstname(),
+                'firstname' => $activityPerson->getPerson()->getFirstname(),
+                'lastName' => $activityPerson->getPerson()->getLastname(),
+                'lastname' => $activityPerson->getPerson()->getLastname(),
+                'start' => $this->formatDateTime($activityPerson->getDateStart()),
+                'end' => $this->formatDateTime($activityPerson->getDateEnd()),
             ];
         }
 
         return [
-            'roles'    => $roles,
+            'roles' => $roles,
             'entities' => $output,
-            'urlNew'   => $urlPlugin->fromRoute('personactivity/new', ['idenroller' => $activity->getId()]),
-            'url'      => $urlPlugin->fromRoute('contract/persons', ['id' => $activity->getId()]),
+            'urlNew' => $urlPlugin->fromRoute('personactivity/new', ['idenroller' => $activity->getId()]),
+            'url' => $urlPlugin->fromRoute('contract/persons', ['id' => $activity->getId()]),
         ];
     }
 
@@ -1083,7 +1079,7 @@ class ProjectGrantApiService implements UseEntityManager,
     {
         $out = [
             'entities' => [],
-            'url'      => $urlPlugin->fromRoute("workpackage/rest", ['idactivity' => $activity->getId()]),
+            'url' => $urlPlugin->fromRoute("workpackage/rest", ['idactivity' => $activity->getId()]),
         ];
 
         /** @var WorkPackage $workPackage */
@@ -1104,20 +1100,19 @@ class ProjectGrantApiService implements UseEntityManager,
      */
     public function getTimesheetsActivity(
         Activity $activity,
-        ?Url $urlPlugin = null
-    ): array {
+        ?Url     $urlPlugin = null
+    ): array
+    {
         $out = [
-            'enabled'      => false,
+            'enabled' => false,
             'informations' => ""
         ];
 
         if (!$activity->getProject()) {
             $out['informations'] = "Cette activité doit avoir un projet";
-        }
-        elseif (!$activity->getProject()->getAcronym()) {
+        } elseif (!$activity->getProject()->getAcronym()) {
             $out['informations'] = "Le projet de cette activité doit avoir un acronyme";
-        }
-        else {
+        } else {
             $out['enabled'] = true;
             $out['url'] = $urlPlugin->fromRoute('contract/timesheet', ['id' => $activity->getId()]);
             $out['urlSynthesis'] = $urlPlugin->fromRoute('timesheet/synthesis') . '?activity_id=' . $activity->getId();
@@ -1153,12 +1148,12 @@ class ProjectGrantApiService implements UseEntityManager,
                 if ($activity->hasDeclarant($personActivity->getPerson())) {
                     $hasDeclaration = $personActivity->getPerson()->hasDeclarationIn($activity);
                     $declarers[$personActivity->getPerson()->getId()] = [
-                        'id'             => $personActivity->getPerson()->getId(),
-                        'fullname'       => $personActivity->getPerson()->getFullname(),
-                        'firstname'      => $personActivity->getPerson()->getFirstname(),
-                        'lastname'       => $personActivity->getPerson()->getLastname(),
+                        'id' => $personActivity->getPerson()->getId(),
+                        'fullname' => $personActivity->getPerson()->getFullname(),
+                        'firstname' => $personActivity->getPerson()->getFirstname(),
+                        'lastname' => $personActivity->getPerson()->getLastname(),
                         'hasDeclaration' => $hasDeclaration,
-                        'url_details'    => $urlPlugin->fromRoute('timesheet/resume')
+                        'url_details' => $urlPlugin->fromRoute('timesheet/resume')
                             . '?person_id='
                             . $personActivity->getPerson()->getId(),
                     ];
@@ -1183,25 +1178,25 @@ class ProjectGrantApiService implements UseEntityManager,
         /** @var ActivityPayment $payment */
         foreach ($activity->getPayments() as $payment) {
             $entities[] = [
-                'id'              => $payment->getId(),
-                'activity_id'     => $activity->getId(),
-                'datePayment'     => $this->formatDateTime($payment->getDatePayment()),
-                'datePredicted'   => $this->formatDateTime($payment->getDatePredicted()),
-                'amount'          => $payment->getAmount(),
-                'rate'            => $payment->getRate(),
-                'currency'        => $payment->getCurrency() ? $payment->getCurrency()->asArray() : null,
+                'id' => $payment->getId(),
+                'activity_id' => $activity->getId(),
+                'datePayment' => $this->formatDateTime($payment->getDatePayment()),
+                'datePredicted' => $this->formatDateTime($payment->getDatePredicted()),
+                'amount' => $payment->getAmount(),
+                'rate' => $payment->getRate(),
+                'currency' => $payment->getCurrency() ? $payment->getCurrency()->asArray() : null,
                 'codeTransaction' => $payment->getCodeTransaction(),
-                'comment'         => $payment->getComment(),
-                'status'          => $payment->getStatus(),
-                'statusLabel'     => $payment->getStatusLabel(),
-                'late'            => $payment->isLate()
+                'comment' => $payment->getComment(),
+                'status' => $payment->getStatus(),
+                'statusLabel' => $payment->getStatusLabel(),
+                'late' => $payment->isLate()
             ];
         }
 
         return [
-            'url'        => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
+            'url' => $urlPlugin->fromRoute('activitypayment_rest', ['idactivity' => $activity->getId()]),
             'currencies' => $this->getCurrencies(),
-            'entities'   => $entities
+            'entities' => $entities
         ];
     }
 
@@ -1218,12 +1213,12 @@ class ProjectGrantApiService implements UseEntityManager,
         }
 
         $out = [
-            'enabled'=>false,
+            'enabled' => false,
             'url_sync' => '',
-            'enabled_reason'=>'',
-            'pfi'     => $pfis,
+            'enabled_reason' => '',
+            'pfi' => $pfis,
             'warning' => "",
-            'error'   => "",
+            'error' => "",
         ];
 
         if (!count($pfis)) {
@@ -1257,12 +1252,12 @@ class ProjectGrantApiService implements UseEntityManager,
      */
     private function formatDateTime(
         ?\DateTime $datetime,
-        string $format = 'Y-m-d H:i:s'
-    ): ?string {
+        string     $format = 'Y-m-d H:i:s'
+    ): ?string
+    {
         if ($datetime === null) {
             return null;
-        }
-        else {
+        } else {
             return $datetime->format($format);
         }
     }
@@ -1285,7 +1280,7 @@ class ProjectGrantApiService implements UseEntityManager,
      * @return array
      * @throws NotSupported
      */
-    private function getAvenantsActivity(Activity $activity, ?Url $urlPlugin) :array
+    private function getAvenantsActivity(Activity $activity, ?Url $urlPlugin): array
     {
         $result = $this->getEntityManager()
             ->getRepository(ActivityAvenant::class)
@@ -1302,17 +1297,17 @@ class ProjectGrantApiService implements UseEntityManager,
             }
 
             $out[] = [
-                'id'           => $item->getId(),
-                'comment'      => $item->getComment(),
-                'filename'     => $item->getFilename(),
-                'date'         => $item->getDateAvenant()->format('Y-m-d'),
-                'status'       => $item->getStatus(),
-                'status_text'  => $item->getStatusLabel(),
-                'editable'     => ActivityAvenant::STATUS_DRAFT === $item->getStatus(),
-                'modifications'      => $modifications,
-                'url_api'      => $urlPlugin->fromRoute('avenant/api', [
+                'id' => $item->getId(),
+                'comment' => $item->getComment(),
+                'filename' => $item->getFilename(),
+                'date' => $item->getDateAvenant()->format('Y-m-d'),
+                'status' => $item->getStatus(),
+                'status_text' => $item->getStatusLabel(),
+                'editable' => ActivityAvenant::STATUS_DRAFT === $item->getStatus(),
+                'modifications' => $modifications,
+                'url_api' => $urlPlugin->fromRoute('avenant/api', [
                     'activity_id' => $activity->getId(),
-                    'avenant_id'  => $item->getId()
+                    'avenant_id' => $item->getId()
                 ]),
                 'url_download' => $urlPlugin->fromRoute('avenant/download', [
                     'avenant_id' => $item->getId()
@@ -1320,7 +1315,7 @@ class ProjectGrantApiService implements UseEntityManager,
             ];
         }
         return [
-            'url_api'  => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
+            'url_api' => $urlPlugin->fromRoute('avenant/api', ['activity_id' => $activity->getId()]),
             'avenants' => $out
         ];
     }

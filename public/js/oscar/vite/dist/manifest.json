@@ -187,14 +187,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-ed5cb27b.css",
+    "file": "assets/Activity-39e6caf4.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-ed5cb27b.css"
+      "assets/Activity-39e6caf4.css"
     ],
-    "file": "assets/activity-60e009f3.js",
+    "file": "assets/activity-f2d4829d.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",

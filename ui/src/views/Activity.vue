@@ -429,7 +429,6 @@
               :url-sign-document="documents.url_sign_document"
           />
         </section>
-
         <section class="section-infos" id="notes" v-if="credentials.notes.read">
           <h2><span><i class="icon-comment"></i>Notes</span></h2>
           <activity-notes
@@ -594,8 +593,11 @@
                     @debug="handlerDebugShow"
                     @update="handlerUpdatePayments"
           />
+          <div v-if="core.notefinanciere">
+            <h3>Note</h3>
+            <blockquote>{{ core.notefinanciere }}</blockquote>
+          </div>
         </section>
-
 
         <section id="spents" class="section-infos" v-if="credentials.spents.read">
           <h2><span><i class="icon-bank"></i>Dépenses</span></h2>
