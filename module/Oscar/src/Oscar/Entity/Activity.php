@@ -2606,6 +2606,7 @@ class Activity implements ResourceInterface
         // Info Projet
         $datas['project-label'] = $this->getProject() ? $this->getProject()->getLabel() : '';
         $datas['project-acronym'] = $this->getProject() ? $this->getProject()->getAcronym() : '';
+        $datas['project-description'] = $this->getProject() ? $this->getProject()->getDescription() : '';
 
         $datas['type'] = (string)$this->getActivityType();
 
