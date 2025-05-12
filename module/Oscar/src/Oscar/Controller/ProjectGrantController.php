@@ -783,7 +783,7 @@ class ProjectGrantController extends AbstractOscarController implements UseNotif
             if (is_array($value)) {
             }
             else {
-                $templateProcessor->setValue($key, $value);
+                $templateProcessor->setValue($key, htmlspecialchars($value, ENT_COMPAT | ENT_HTML401, NULL, false));
             }
         }
 
