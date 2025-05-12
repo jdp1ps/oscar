@@ -482,6 +482,30 @@
     "isEntry": true,
     "src": "src/OrganizationSubOrganizations.js"
   },
+  "src/ParametersUserSendFrequency.js": {
+    "file": "assets/parameters_user_send_frequency-ddcede49.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor8.js",
+      "_vendor7.js",
+      "_vendor14.js",
+      "_vendor16.js"
+    ],
+    "isEntry": true,
+    "src": "src/ParametersUserSendFrequency.js"
+  },
+  "src/PersonSchedule.js": {
+    "file": "assets/person_schedule-8e774e42.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor8.js",
+      "_vendor7.js",
+      "_vendor14.js",
+      "_vendor16.js"
+    ],
+    "isEntry": true,
+    "src": "src/PersonSchedule.js"
+  },
   "src/ProjectActivityLogs.js": {
     "file": "assets/ProjectActivityLogs-934299c2.js",
     "imports": [

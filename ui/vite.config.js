@@ -55,6 +55,8 @@ export default defineConfig({
         ProjectActivitySpentSynthesis: resolve(__dirname, 'src/ProjectActivitySpentSynthesis.js'),
         timesheetpersonresume: resolve(__dirname, 'src/TimesheetPersonResume.js'),
         timesheetdeclarations: resolve(__dirname, 'src/TimesheetDeclaration.js'),
+        parameters_user_send_frequency: resolve(__dirname, 'src/ParametersUserSendFrequency.js'),
+        person_schedule: resolve(__dirname, 'src/PersonSchedule.js'),
         persons_roled: resolve(__dirname, 'src/EntityWithRolePersons.js'),
         sticky: resolve(__dirname, 'src/Sticky.js'),
         //other: resolve(__dirname, 'src/other.js')

@@ -29,7 +29,7 @@ use UnicaenSignature\Service\SignatureServiceAwareTrait;
  * @author  Stéphane Bouvry<stephane.bouvry@unicaen.fr>
  */
 class PublicController extends AbstractOscarController implements UseTimesheetService, UsePersonService,
-                                                                  UseUserParametersService
+    UseUserParametersService
 {
     use UseTimesheetServiceTrait, UsePersonServiceTrait, UseUserParametersServiceTrait, SignatureServiceAwareTrait;
 
@@ -70,14 +70,14 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
     public function gitlogAction()
     {
-        $file = file_get_contents(__DIR__.'/../../../../../oscar-info.json');
+        $file = file_get_contents(__DIR__ . '/../../../../../oscar-info.json');
         $infos = false;
         $error = false;
-        if( !$file ){
+        if (!$file) {
             $error = '<div class="alert alert-danger">GITLOG non-disponible, vous pouvez le générer avec la commande <code>php bin/oscar.php infos</code></div>';
         } else {
             $infos = json_decode($file, true);
-            if( !$infos ){
+            if (!$infos) {
                 $error = "Bad format JSON";
             }
         }
@@ -86,6 +86,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
     public function parametersAction()
     {
+
         /** @var Authentification $auth */
         $auth = $this->getOscarUserContextService()->getAuthentification();
 
@@ -96,6 +97,10 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
         // Récupération des envois automatiques
         $forceSend = $this->getOscarConfigurationService()->getConfiguration('notifications.fixed');
+
+        $notificationsFixed = $this->getOscarConfigurationService()->getConfiguration('notifications.fixed');
+        $notificationsOverride = $this->getOscarConfigurationService()->getConfiguration('notifications.override');
+
 
         $method = $this->getHttpXMethod();
 
@@ -108,8 +113,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             if ($method == 'GET') {
                 $datas = $timesheetService->getDayLengthPerson($this->getCurrentPerson());
                 return $this->ajaxResponse($datas);
-            }
-            elseif ($method == 'POST') {
+            } elseif ($method == 'POST') {
                 $schedule = $this->params()->fromPost('days');
                 try {
                     $this->getUserParametersService()->performChangeSchedule(
@@ -170,6 +174,18 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             return $this->getResponseBadRequest("Erreur d'usage");
         }
 
+        if ($this->isAjax() && $this->params()->fromQuery('a') == 'frequency') {
+            if ($method == 'GET') {
+                $userSettings = $auth->getSettings() ?: [];
+                return $this->jsonOutput([
+                    'frequency' => array_key_exists('frequency', $userSettings) ? $userSettings['frequency'] : [],
+                    'parameters' => $auth->getSettings() ?: [],
+                    'notificationsFixed' => $notificationsFixed,
+                    'notificationsOverride' => $notificationsOverride,
+                ]);
+            }
+        }
+
         /** @var TimesheetService $timesheetService */
         $timesheetService = $this->getTimesheetService();
 
@@ -178,18 +194,19 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             'declarationsHoursOverwriteByAuth'
         );
 
+
         return [
-            'subordinates'                     => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
-            'managers'                         => $this->getPersonService()->getManagers($this->getCurrentPerson()),
-            'subordonates'                     => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
-            'scheduleEditable'                 => $this->getUserParametersService()->scheduleEditable(),
-            'declarationsConfiguration'        => null,
+            'subordinates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'managers' => $this->getPersonService()->getManagers($this->getCurrentPerson()),
+            'subordonates' => $this->getPersonService()->getSubordinates($this->getCurrentPerson()),
+            'scheduleEditable' => $this->getUserParametersService()->scheduleEditable(),
+            'declarationsConfiguration' => null,
             //$timesheetService->getDeclarationConfigurationPerson($this->getCurrentPerson()),
-            'person'                           => $this->getCurrentPerson(),
-            'declarationsHours'                => $declarationsHours,
+            'person' => $this->getCurrentPerson(),
+            'declarationsHours' => $declarationsHours,
             'declarationsHoursOverwriteByAuth' => $declarationsHoursOverwriteByAuth,
-            'parameters'                       => $auth->getSettings() ?: [],
-            'forceSend'                        => $forceSend
+            'parameters' => $auth->getSettings() ?: [],
+            'forceSend' => $forceSend
         ];
     }
 
@@ -199,7 +216,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         $actions = $accessResolverService->getActions();
         return [
             'actions' => $actions,
-            'roles'   => ActivityPerson::getRoles(),
+            'roles' => ActivityPerson::getRoles(),
         ];
     }
 
@@ -264,8 +281,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                 // Accès globale
                 if ($this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_REQUEST_MANAGE)) {
                     $requests = $serviceDemandeActivite->getAllRequestActivityUnDraft();
-                }
-                elseif (count(
+                } elseif (count(
                         $organizations = $this->getOscarUserContextService()->getOrganizationsWithPrivilege(
                             Privileges::ACTIVITY_REQUEST_MANAGE
                         )
@@ -288,11 +304,11 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
         return [
             'isRequestValidator' => $isRequestValidator,
             'requestValidations' => $requestValidations,
-            'validations'        => $validations,
-            'isValidator'        => $isValidator,
-            'periodsRejected'    => $periodsRejected,
-            'documentsWait'      => $documentsWait,
-            'user'               => $person
+            'validations' => $validations,
+            'isValidator' => $isValidator,
+            'periodsRejected' => $periodsRejected,
+            'documentsWait' => $documentsWait,
+            'user' => $person
         ];
     }
 
@@ -334,8 +350,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
             return [
                 'contenu' => "super doc"
             ];
-        }
-        else {
+        } else {
             return [
                 'contenu' => 'foo'
             ];

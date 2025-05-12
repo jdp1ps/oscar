@@ -63,6 +63,50 @@ class ConfigurationLoaderTest extends TestCase
         // $this->assertEquals("changed", $settings["oscar"]["merged"]["in"]["deep"]["change"]);
     }
 
+    public function testPregReplaceCallbackBoolean()
+    {
+        $file = __DIR__ . "/config02.yml";
+        $loader = new ConfigurationLoader([$file]);
+
+
+        // --- Valeur simple
+        $value = "%env(bool:boolean_value)%";
+        $this->assertTrue(
+            $loader->pregReplaceCallback($value, ['boolean_value' => 'true']),
+            "la chaîne 'true' devient TRUE"
+        );
+
+        $value = "%env(bool:boolean_value)%";
+        $this->assertFalse(
+            $loader->pregReplaceCallback($value, ['boolean_value' => 'false']),
+            "la chaîne 'false' devient FALSE"
+        );
+
+        $value = "%env(bool:boolean_value)%";
+        $this->assertTrue(
+            $loader->pregReplaceCallback($value, ['boolean_value' => '1']),
+            "la chaîne '1' devient TRUE"
+        );
+
+        $value = "%env(bool:boolean_value)%";
+        $this->assertFalse(
+            $loader->pregReplaceCallback($value, ['boolean_value' => '0']),
+            "la chaîne '0' devient FALSE"
+        );
+
+        $value = "%env(bool:boolean_value)%";
+        $this->assertTrue(
+            $loader->pregReplaceCallback($value, ['boolean_value' => 'on']),
+            "la chaîne 'on' devient TRUE"
+        );
+
+        $value = "%env(bool:boolean_value)%";
+        $this->assertFalse(
+            $loader->pregReplaceCallback($value, ['boolean_value' => 'off']),
+            "la chaîne 'off' devient FALSE"
+        );
+    }
+
 
     public function testPregReplaceCallback()
     {

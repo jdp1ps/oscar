@@ -57,8 +57,6 @@
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  PersonSchedule --filename.css PersonSchedule.css --filename.js PersonSchedule.js --dist public/js/oscar/dist public/js/oscar/src/PersonSchedule.vue
-    import AjaxResolve from "./AjaxResolve";
 
     export default {
         name: 'PersonSchedule',

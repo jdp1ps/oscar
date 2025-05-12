@@ -93,7 +93,11 @@ oscar:
     template: '%env(VOLUMES_TEMPLATE_MAIL)%'
     administrators:
 
-
+  ##############################################################
+  # NOTIFICATIONS
+  notifications:
+    override: '%env(bool:NOTIFICATIONS_OVERRIDE)%'
+    fixed: '%env(array:NOTIFICATIONS_FIXED)%'
 
   ##############################################################
   # RECHERCHE

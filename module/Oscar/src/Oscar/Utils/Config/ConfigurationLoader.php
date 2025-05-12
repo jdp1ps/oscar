@@ -138,7 +138,14 @@ class ConfigurationLoader
 
             switch ($type) {
                 case 'bool':
-                    $value = boolval($value);
+                    if (is_string($value) && (strtolower($value) === 'true' || strtolower($value) === 'on')) {
+                        $value = true;
+                    }
+                    if (is_string($value) && (strtolower($value) === 'false' || strtolower($value) === 'off')) {
+                        $value = false;
+                    } else {
+                        $value = boolval($value);
+                    }
                     break;
                 case 'string':
                     $value = strval($value);

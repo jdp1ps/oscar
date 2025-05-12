@@ -19,46 +19,46 @@
             </div>
         </transition>
 
-        <p>La répartition horaire est issue de {{ from }}
+        <div v-if="days">
+          <p>La répartition horaire est issue de {{ from }}
+            <strong v-if="from == 'application'">la configuration Oscar par défaut</strong>
+            <strong v-if="from == 'sync'">la synchronisation (Connector)</strong>
+            <strong v-if="from == 'custom'">la configuration prédéfinie</strong>
+            <strong v-if="from == 'free'">la configuration manuelle</strong>
+          </p>
 
-        <strong v-if="from == 'application'">la configuration Oscar par défaut</strong>
-        <strong v-if="from == 'sync'">la synchronisation (Connector)</strong>
-        <strong v-if="from == 'custom'">la configuration prédéfinie</strong>
-        <strong v-if="from == 'free'">la configuration manuelle</strong>
-        </p>
-
-
-        <article class="card xs" v-for="total, day in days">
+          <article class="card xs" v-for="total, day in days">
             <h3 class="card-title">
-                <strong>{{daysLabels[day]}}</strong>
-                <input type="text" v-model="days[day]" v-if="editDay">
-                <em class="big right" @click="handlerEditDays()" v-else>{{ total | heures }}</em>
+              <strong>{{daysLabels[day]}}</strong>
+              <input type="text" v-model="days[day]" v-if="editDay">
+              <em class="big right" @click="handlerEditDays()" v-else>{{ $filters.duration(total) }}</em>
             </h3>
-        </article>
+          </article>
 
-        <article class="card">
+          <article class="card">
             <h3 class="card-title">
-                <strong>Total / semaine</strong>
-                <em class="big right">{{ totalWeek | heures }}</em>
+              <strong>Total / semaine</strong>
+              <em class="big right">{{ $filters.duration(totalWeek) }}</em>
             </h3>
-        </article>
+          </article>
 
-        <nav v-if="editable">
+          <nav v-if="editable">
             <button @click.prevent="handlerEditDays()" class="btn btn-default" v-if="!editDay"><i class="icon-pencil"></i> modifier</button>
             <button @click.prevent="handlerSaveDays()" class="btn btn-primary" v-if="editDay"><i class="icon-floppy"></i> enregistrer</button>
             <select v-model="model" class="form-inline" v-if="models && editDay" @change="handlerSaveDays(model)">
-                <option value="default">Aucun</option>
-                <option v-for="m, key in models" :value="key" :selected="model == key">{{ m.label }}</option>
+              <option value="default">Aucun</option>
+              <option v-for="m, key in models" :value="key" :selected="model == key">{{ m.label }}</option>
             </select>
 
             <button @click.prevent="handlerSaveDays('default')" class="btn btn-primary" v-if="editDay && from != 'default'"><i class="icon-floppy"></i> Horaires par défaut</button>
             <button @click.prevent="handlerCancel()" class="btn btn-primary" v-if="editDay"><i class="icon-cancel-circled"></i> annuler</button>
-        </nav>
+          </nav>
+
+         </div>
     </section>
 </template>
 <script>
-    // poi watch --format umd --moduleName  PersonSchedule --filename.css PersonSchedule.css --filename.js PersonSchedule.js --dist public/js/oscar/dist public/js/oscar/src/PersonSchedule.vue
-    import AjaxResolve from "./AjaxResolve";
+    import AxiosOscar from '../utils/AxiosOscar.js'
 
     export default {
         name: 'PersonSchedule',
@@ -84,7 +84,7 @@
                 error: null,
                 dayLength: 0.0,
                 from: null,
-                days: {},
+                days: null,
                 editDay: null,
                 newValue: 0,
                 models: [],
@@ -115,6 +115,7 @@
             },
 
             handlerCancel(){
+                this.editDay = false;
                 if( !this.urlapi ){
                     this.$emit('cancel');
                 } else {
@@ -127,7 +128,6 @@
                     this.$emit('changeschedule', this.days);
                 }
                 else {
-                    this.loading = "Enregistrement des horaires";
                     let datas = new FormData();
                     if( model == 'input' ){
                         datas.append('days', JSON.stringify(this.days));
@@ -137,12 +137,9 @@
                     }
 
 
-                    this.$http.post(this.urlapi, datas).then(
+                    AxiosOscar.post(this.urlapi, datas).then(
                         ok => {
                             this.fetch();
-                        },
-                        ko => {
-                            this.error = AjaxResolve.resolve('Impossible de modifier les horaires', ko);
                         }
                     ).then(foo => {
                         this.loading = false
@@ -153,27 +150,19 @@
 
             fetch(clear = true) {
                 if( this.schedule == null ){
-
-                    this.loading = "Chargement des données";
-
-                    this.$http.get(this.urlapi).then(
+                    AxiosOscar.get(this.urlapi, {
+                      pendingMsg: "Chargement de la répartition horaire",
+                      pendingBack: true
+                    }).then(
                         ok => {
-                            console.log(ok.body);
-                            this.days = ok.body.days;
-                            this.dayLength = ok.body.dayLength;
-                            this.from = ok.body.from;
-                            this.models = ok.body.models;
-                            this.model = ok.body.model;
-                        },
-                        ko => {
-                            this.error = AjaxResolve.resolve('Impossible de charger les données', ko);
+                            this.days = ok.data.days;
+                            this.dayLength = ok.data.dayLength;
+                            this.from = ok.data.from;
+                            this.models = ok.data.models;
+                            this.model = ok.data.model;
                         }
-                    ).then(foo => {
-                        this.loading = false;
-                        this.editDay = null;
-                    });
+                    );
                 } else {
-                    console.log(this.schedule);
                     this.days = this.schedule.days;
                     this.dayLength = this.schedule.dayLength;
                     this.editDay = true;
@@ -182,7 +171,7 @@
         },
 
         mounted() {
-            this.fetch(true)
+          this.fetch(true)
         }
     }
 </script>

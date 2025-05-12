@@ -170,100 +170,44 @@
                 <h3><i class="icon-calendar"></i>
                     Mode de déclaration</h3>
 
-                <div id="declarationsHours"></div>
+                <section>
+                    <p class="alert alert-info">
+                        Le mode de déclaration est fixé sur
+                        <strong>
+                            <?php echo $declarationsHours ? 'en heure' : 'en pourcentage jour' ?>
+                        </strong>
+                    </p>
+                    <?php if($declarationsHoursOverwriteByAuth): ?>
+                        <form action="">
+                            <input type="hidden" name="action" value="declaration-mode" />
+                            <button type="submit" name="declarationsHours" value="<?php echo $declarationsHours ? 'off' : 'on' ?>">
+                                <?php echo $declarationsHours ? 'Passer en pourcentage' : 'Passer en heure' ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </section>
 
                 <?php if($this->grant()->privilege(\Oscar\Provider\Privileges::PERSON_SHOW_SCHEDULE)): ?>
                 <h3><i class="icon-clock"></i>
                     Répartition Horaire</h3>
-                <div id="schedule"></div>
-                <script>
-                    require(['vue', 'vue-resource', 'mm', 'PersonSchedule'], function(Vue, VueResource, moment, PersonSchedule){
-                        Vue.use(VueResource);
-                        Vue.filter('heures', function(v){
-                            var heure = Math.floor(v);
-                            var minutes = Math.round((v-heure)*60);
-                            return heure +':' +minutes;
-                        });
-                        new Vue({
-                            'el': '#schedule',
-                            render: function(h){
-                                return h(PersonSchedule.default, { props: {urlapi:'?a=schedule', editable: <?= $scheduleEditable ? 'true' : 'false' ?>}})
-                            }
-                        })
-                    });
-                </script>
+                <div id="schedule"
+                     data-urlapi="<?= $this->url('user_parameters') ?>?a=schedule"
+                     data-editable="<?= $editable ? true : false ?>"
+                ></div>
+                <?= $this->Vite()->addJs('src/PersonSchedule.js'); ?>
                 <?php endif; ?>
 
 
-
-                <h3><i class="icon-history"></i>
-                    Fréquence des envois</h3>
-
-                <?php if( $forceSend ): ?>
-                <p class="help">
-                    Vous ne recevrez des courriels que si vous avez des notifications non-lues dans Oscar.
-                    Vous ne pouvez pas vous désinscrire des créneaux marqués avec un <i class="icon-lock"></i>.
-                </p>
-                <?php endif; ?>
-
-                <div class="uc-cron" id="parameters-nf">
-
-                </div>
-
+                <div class="uc-cron" id="parameters-nf"></div>
+                <?= $this->Vite()->addJs('src/ParametersUserSendFrequency.js'); ?>
             </div>
         </div>
     </form>
-    <style>
-
-    </style>
 </div>
 <script>
+    /*****
     require(['vue', 'vue-resource'], function(Vue, VueResource){
 
-
-
-        Vue.use(VueResource);
-        Vue.http.options.emulateJSON = true;
-        Vue.http.options.emulateHTTP = true;
-        new Vue({
-            data: {
-                declarationsHours: <?= $declarationsHours ? 'true':'false' ?>,
-                declarationsHoursOverwrite: <?= $declarationsHoursOverwriteByAuth ? 'true' : 'false'?>
-            },
-            el: '#declarationsHours',
-            template: `<div>
-                <section>
-                    <p v-if="declarationsHoursOverwrite">
-                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en pourcentage jour' }}</strong><br>
-                        <a @click="switchDeclarationMode()" href="#" class="btn btn-primary">
-                            {{ declarationsHours ? 'utiliser la déclaration en pourcentage jour' : 'utiliser la déclaration en heure' }}
-                        </a>
-                    </p>
-                    <p v-else class="alert alert-info">
-                        Le mode de déclaration est fixé sur <strong>{{ declarationsHours ? 'en heure' : 'en pourcentage jour' }}</strong>
-                    </p>
-                </section>
-                </div>`,
-            methods: {
-                switchDeclarationMode: function(){
-                    this.declarationsHours = !this.declarationsHours;
-                    var formData = new FormData();
-                    formData.append('declarationsHours', this.declarationsHours ? 'on' : 'off');
-                    formData.append('action', 'declaration-mode');
-
-                    this.$http.post('', formData)
-                        .then(
-                            success => {
-                                console.log('OK');
-                            },
-                            fail => {
-                                console.log(fail);
-                            }
-                        ).then( (foo) => {
-                    });
-                }
-            }
-        });
 
         new Vue({
             data: {
@@ -327,7 +271,6 @@
                 },
 
 
-                /** Retourne TRUE si des féquences sont configurés le jour D */
                 hasFrequencyInDay(d){
                     for( var i=0; i<this.frequency.length; i++ ){
                         if( this.frequency[i].indexOf(d) == 0 )
@@ -336,7 +279,6 @@
                     return false;
                 },
 
-                /** Retourne TRUE si des féquences sont configurés à l'heure H */
                 hasFrequencyInHour(h){
                     for( var i=0; i<this.frequency.length; i++ ){
                         if( this.frequency[i].indexOf(h) == 3 )
@@ -408,4 +350,5 @@
             }
         })
     })
+     /**********/
 </script>
