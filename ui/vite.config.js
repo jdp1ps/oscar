@@ -53,6 +53,7 @@ export default defineConfig({
         oscarcss: resolve(__dirname, 'src/oscar-css.js'),
         ProjectActivityLogs: resolve(__dirname, 'src/ProjectActivityLogs.js'),
         ProjectActivitySpentSynthesis: resolve(__dirname, 'src/ProjectActivitySpentSynthesis.js'),
+        test: resolve(__dirname, 'src/Test.js'),
         timesheetpersonresume: resolve(__dirname, 'src/TimesheetPersonResume.js'),
         timesheetdeclarations: resolve(__dirname, 'src/TimesheetDeclaration.js'),
         parameters_user_send_frequency: resolve(__dirname, 'src/ParametersUserSendFrequency.js'),

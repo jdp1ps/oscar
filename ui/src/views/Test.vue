@@ -4,6 +4,10 @@
   <button @click="handlerTestErrorFullscreen" class="btn btn-primary">Test error fullscreen</button>
   <br>
   <button @click="handlerLoad" class="btn btn-primary">Test loading</button>
+
+  <pre>date: {{ foo.dateInput }}</pre>
+  <datepicker v-model="foo.dateInput" />
+
   <pre>
     {{ response }}
   </pre>
@@ -11,16 +15,21 @@
 <script>
 import AxiosOscar from "../utils/AxiosOscar.js";
 import GlobalModel from "../models/GlobalModel.js";
+import Datepicker from "../components/Datepicker.vue";
 export default {
   name: 'Test',
-  datas(){
+  components: {Datepicker},
+  data(){
     return {
-      response:null
+      response:null,
+      foo: {
+        dateInput: "2022-01-01"
+      }
     }
   },
   methods:{
     fetch(){
-      GlobalModel.commit('addErrorFullScreen', "Test fullscreen");
+
     },
     handlerTestErrorFullscreen(){
       GlobalModel.commit('addErrorFullScreen', "Test fullscreen");
