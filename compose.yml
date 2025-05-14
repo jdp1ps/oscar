@@ -147,6 +147,7 @@ services:
       - ${VOLUMES_DOCUMENTS_PUBLIC}:/var/documents/public
       - ${VOLUMES_DOCUMENTS_REQUEST}:/var/documents/request
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
+      - ${VOLUMES_DOCUMENTS_SIGNATURE}:/var/documents/signature
       - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
       - ${VOLUMES_LOG}:/var/application/logs
       # Fichiers de configuration
