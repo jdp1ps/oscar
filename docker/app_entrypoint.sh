@@ -29,6 +29,9 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 
 php bin/oscar.php check:privileges -n
 
+mkdir -p public/unicaen
+ln -s vendor/unicaen/signature/public/dist public/unicaen/signature
+
 ## Note de version
 php bin/oscar.php infos
 

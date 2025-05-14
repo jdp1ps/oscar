@@ -9,6 +9,7 @@ dossiers=(
   "📁 Documents public:$VOLUMES_DOCUMENTS_PUBLIC"
   "📁 Documents des demandes d'activités:$VOLUMES_DOCUMENTS_REQUEST"
   "📁 Documents PCRU:$VOLUMES_DOCUMENTS_PCRU"
+  "📁 Documents Signature:$VOLUMES_DOCUMENTS_SIGNATURE"
   "📁 Proxy Cache Doctrine:$VOLUMES_CACHE_DOCTRINE"
   "📁 LOGS (oscar):$VOLUMES_LOG"
   "📁 Dossier temporaire (oscar):$VOLUMES_TMP"
