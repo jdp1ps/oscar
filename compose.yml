@@ -164,8 +164,8 @@ services:
       - ${VOLUMES_TEMPLATES}/timesheet_person_month.default.html.php:/var/application/data/templates/timesheet_person_month.default.html.php
       # Fichiers (DEVELOPPEMENT UNIQUEMENT)
       #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
-#    command:
-#      - chmod -R 777 /var/application/data
+    #    command:
+    #      - chmod -R 777 /var/application/data
     networks:
       - app-network
     env_file:
@@ -230,8 +230,8 @@ services:
     build:
       context: ./docker/dev/vite
       dockerfile: Dockerfile
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
+    #    deploy:
+    #      replicas: ${DEVELOPPEMENT:-0}
     ports:
       - "5173:5173"
 
@@ -245,8 +245,8 @@ services:
       - app-elasticsearch
     networks:
       - app-network
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
+    #    deploy:
+    #      replicas: ${DEVELOPPEMENT:-0}
     environment:
       - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
       - LOGGING_ROOT_LEVEL=error
@@ -261,8 +261,8 @@ services:
     container_name: app-mailhog
     networks:
       - app-network
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
+    #    deploy:
+    #      replicas: ${DEVELOPPEMENT:-0}
     entrypoint: ["/bin/sh", "-c", "MailHog"]
     ports:
       - "8025:8025" # Interface web MailHog
