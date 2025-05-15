@@ -62,7 +62,7 @@ return array(
 //                'process' => 'todo'
 //            ]
         ],
-
+        /****
         // Durée par défaut des journées
         'declarationsDurations' => [
             'dayLength' => [
@@ -98,7 +98,7 @@ return array(
                 '3' => 3.0,
             ],
         ],
-
+        /******/
 
         'pcru' => [
             // Référenciel PCRU (Fichiers contenant les données officielles)
