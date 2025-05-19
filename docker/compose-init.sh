@@ -5,6 +5,7 @@ source .env
 ################################################## DOSSIERS
 dossiers=(
   "📁 Données POSTGRESQL:$VOLUMES_POSTGRESQL_DATAS"
+  "📁 Données d'initialisation POSTGRESQL:$VOLUMES_POSTGRESQL_INIT"
   "📁 Documents des activités:$VOLUMES_DOCUMENTS_ACTIVITY"
   "📁 Documents public:$VOLUMES_DOCUMENTS_PUBLIC"
   "📁 Documents des demandes d'activités:$VOLUMES_DOCUMENTS_REQUEST"
@@ -29,6 +30,11 @@ for ligne in "${dossiers[@]}"; do
     echo " - $msg ($dossier) créé ✅"
   fi
 done
+
+### Données d'initialisation POSTGRESQL
+echo "🔧 Copie des données Postgrestgres d'initialisation dans $VOLUMES_POSTGRESQL_INIT"
+cp -R docker/postgres_initdb.d/* $VOLUMES_POSTGRESQL_INIT
+cp ./docker/postgresql_initdb.d/*
 
 ################################################## Fichiers de template
 fichiers=(

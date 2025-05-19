@@ -41,7 +41,7 @@ services:
 
     volumes:
       - ${VOLUMES_POSTGRESQL_DATAS}:/var/lib/postgresql/data
-      - ./docker/postgres_initdb.d/:/docker-entrypoint-initdb.d
+      - ${VOLUMES_POSTGRESQL_INIT}:/docker-entrypoint-initdb.d
 
     build:
       context: ./docker
@@ -157,10 +157,17 @@ services:
       - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
       - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
       - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+      # Templates
+      - ${VOLUMES_TEMPLATES}/mail.phtml:/var/application/data/templates/mail.phtml
+      - ${VOLUMES_TEMPLATES}/logo.png:/var/application/data/templates/logo.png
+      - ${VOLUMES_TEMPLATES}/timesheet_period.default.html.php:/var/application/data/templates/timesheet_period.default.html.php
+      - ${VOLUMES_TEMPLATES}/timesheet_person_month.default.html.php:/var/application/data/templates/timesheet_person_month.default.html.php
+      # Fichiers de configuration (PHP)
+      - ${VOLUMES_CONFIG}/php/90-app.ini:/usr/local/etc/php/conf.d/90-app.ini
       # Fichiers (DEVELOPPEMENT UNIQUEMENT)
       #- ./docker/app_99-debug.ini:/usr/local/etc/php/conf.d/99-app-debug.ini
-#    command:
-#      - chmod -R 777 /var/application/data
+    #    command:
+    #      - chmod -R 777 /var/application/data
     networks:
       - app-network
     env_file:
@@ -192,13 +199,15 @@ services:
       - ${VOLUMES_DOCUMENTS_PCRU}:/var/documents/pcru
       - ${VOLUMES_CACHE_DOCTRINE}:/var/application/data/DoctrineORMModule/Proxy
       - ${VOLUMES_LOG}:/var/application/logs
-      # Fichiers de configuration
+      # Fichiers de configuration (OSCAR)
       - ${VOLUMES_CONFIG}/oscar-editable.yml:/var/application/config/autoload/oscar-editable.yml
       - ${VOLUMES_CONFIG}/local.php:/var/application/config/autoload/local.php
       - ${VOLUMES_CONFIG}/oscar.yml:/var/application/config/autoload/oscar.yml
       - ${VOLUMES_CONFIG}/unicaen-app.local.php:/var/application/config/autoload/unicaen-app.local.php
       - ${VOLUMES_CONFIG}/unicaen-auth.local.php:/var/application/config/autoload/unicaen-auth.local.php
       - ${VOLUMES_CONFIG}/unicaen-signature.local.php:/var/application/config/autoload/unicaen-signature.local.php
+      # Fichiers de configuration (PHP)
+      - ${VOLUMES_CONFIG}/php/95-cli.ini:/usr/local/etc/php/conf.d/95-cli.ini
     networks:
       - app-network
     env_file:
@@ -213,52 +222,3 @@ services:
         - HTTP_PROXY
         - ENV_MODE
     command: ["/bin/bash", "/entrypoint.sh"]
-
-#  ######################################################################
-#  ### VITE
-#  app-vite:
-#    container_name: app-vite
-#    volumes:
-#      - ./:/var/application
-#    networks:
-#      - app-network
-#    build:
-#      context: ./docker/dev/vite
-#      dockerfile: Dockerfile
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
-#    ports:
-#      - "5173:5173"
-#
-#
-#  ######################################################################
-#  # KIBANA
-#  kibana:
-#    image: docker.elastic.co/kibana/kibana:7.16.1
-#    container_name: app-kibana
-#    depends_on:
-#      - app-elasticsearch
-#    networks:
-#      - app-network
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
-#    environment:
-#      - ELASTICSEARCH_HOSTS=http://app-elasticsearch:9200  # Connexion à Elasticsearch
-#      - LOGGING_ROOT_LEVEL=error
-#    ports:
-#      - "5601:5601"
-#
-#
-#  ######################################################################
-#  # MAILHOG (capture les mails envoyés depuis Oscar)
-#  mailhog:
-#    image: mailhog/mailhog
-#    container_name: app-mailhog
-#    networks:
-#      - app-network
-#    deploy:
-#      replicas: ${DEVELOPPEMENT:-0}
-#    entrypoint: ["/bin/sh", "-c", "MailHog"]
-#    ports:
-#      - "8025:8025" # Interface web MailHog
-#      - "1025:1025" # Port SMTP pour envoyer les mails
