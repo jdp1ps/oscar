@@ -151,7 +151,7 @@ abstract class AbstractConnector implements IConnector
         foreach ($paths as $path) {
 
             if( !isset($config[$path]) ) {
-                if ( $default == null ){
+                if ( $default === null ){
                     throw new OscarException(sprintf(
                         "La clef '%s' absente dans le fichier de configuration '%s'.",
                         $key,

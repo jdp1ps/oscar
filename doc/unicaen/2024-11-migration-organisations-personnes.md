@@ -253,6 +253,25 @@ WHERE
 UPDATE organizationperson SET origin = 'db' WHERE origin = 'rest';
 ```
 
+Définir dans le fichier person_db.yml la correspondance entre les rôles lus en DB et les rôles internes à OSCAR, par exemple :
+
+```yml
+roles_correspondance:
+  D30: Directeur de composante
+  R00: Responsable
+  R40: Directeur de composante
+  P50: Directeur de composante
+  T87: Informaticien
+  T98: Gestionnaire de laboratoire
+  A009: Gestion financière
+  Gestionnaire financière des contrats de recherche: Gestion financière
+  Gestionnaire financiere des contrats de recherche: Gestion financière
+  Directrice: Directeur
+  Directeur adjoint: Directeur
+  Directrice adjointe: Directeur
+  Responsable administrative: Responsable administratif
+```
+
 Enfin, lancer la synchronisation des personnes :
 
 ```bash
