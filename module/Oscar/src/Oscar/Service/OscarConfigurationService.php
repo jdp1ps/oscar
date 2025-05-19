@@ -172,6 +172,14 @@ class OscarConfigurationService implements ServiceLocatorAwareInterface
     /**
      * @return string
      */
+    public function getLoggerDirPath(): string
+    {
+        return $this->getOptionalConfiguration('log_dir', __DIR__ . '/../../../../../logs');
+    }
+
+    /**
+     * @return string
+     */
     public function getLoggerLevel(): int
     {
         return $this->getOptionalConfiguration('log_level', Logger::INFO);

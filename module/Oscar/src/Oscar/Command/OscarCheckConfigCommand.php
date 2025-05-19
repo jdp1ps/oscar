@@ -8,7 +8,6 @@
 
 namespace Oscar\Command;
 
-
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaValidator;
 use Monolog\Logger;
@@ -19,6 +18,7 @@ use Oscar\Service\ConfigurationParser;
 use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Parser;
@@ -30,7 +30,9 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
     protected function configure()
     {
         $this
-            ->setDescription("Vérification de la configuration");
+            ->setDescription("Vérification de la configuration")
+            ->addOption('docker', 'd', InputOption::VALUE_NONE, "Mode DOCKER")
+        ;
     }
 
     /**
@@ -80,10 +82,11 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $parser = new Parser();
                 $paramsPhp = $parser->parse(file_get_contents($fileYml));
                 foreach ($paramsPhp as $paramKey => $paramValue) {
-                    if (is_array($paramValue))
+                    if (is_array($paramValue)) {
                         $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, '...'));
-                    else
+                    } else {
                         $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                    }
                 }
                 if ($key == 'ldap') {
                     $io->newLine();
@@ -98,7 +101,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $checkResult = $class->checkAccess();
                 if ($checkResult) {
                     $io->write(" <green>OK</green>");
-                    if ($checkResult !== TRUE) {
+                    if ($checkResult !== true) {
                         $io->writeln(" => " . $checkResult . " person trouvées");
                     }
                 } else {
@@ -137,10 +140,11 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $parser = new Parser();
                 $paramsPhp = $parser->parse(file_get_contents($fileYml));
                 foreach ($paramsPhp as $paramKey => $paramValue) {
-                    if (is_array($paramValue))
+                    if (is_array($paramValue)) {
                         $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, '...'));
-                    else
+                    } else {
                         $io->text(sprintf('  + %s : <bold>%s</bold>', $paramKey, $paramValue));
+                    }
                 }
                 if ($key == 'ldap') {
                     $io->newLine();
@@ -155,7 +159,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
                 $checkResult = $class->checkAccess();
                 if ($checkResult) {
                     $io->write(" <green>OK</green>");
-                    if ($checkResult !== TRUE) {
+                    if ($checkResult !== true) {
                         $io->writeln(" => " . $checkResult . " organisations trouvées");
                     }
                 } else {
@@ -180,10 +184,10 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
         $io->title("Vérification de la configuration");
 
-
         /** @var OscarConfigurationService $oscarConfig */
         $oscarConfig = $this->getServicemanager()->get(OscarConfigurationService::class);
 
+        $docker = $input->getOption("docker");
 
         $rootPath = __DIR__ . '/../../../../../';
         $configPath = 'config/autoload/local.php';
@@ -261,10 +265,10 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
         }
         $io->writeln("<green>OK</green>");
 
-        $logPath = $oscarConfig->getLoggerFilePath();
-        $io->write(" - Fichier de LOG (<bold>$logPath</bold>) :  ");
+        $logPath = $oscarConfig->getLoggerDirPath();
+        $io->write(" - Dossier de LOG (<bold>$logPath</bold>) :  ");
         if (!is_writable($logPath)) {
-            $io->error("Le fichier de log n'est pas éditable");
+            $io->error("Le dossier de log n'est pas éditable");
             return self::FAILURE;
         }
         $io->writeln("<green>OK</green>");
@@ -354,17 +358,17 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             if ($typeTransportValid) {
                 $io->writeln("<green>$typeTransport</green>");
                 switch ($typeTransport) {
-                    case 'sendmail' :
+                    case 'sendmail':
                         $io->writeln("Attention, l'utilisation de SENDMAIL n'est pas testée dans cette version");
                         //
                         break;
 
-                    case 'smtp' :
+                    case 'smtp':
                         $io->writeln("Attention, l'utilisation d'un serveur SMTP n'est pas testée dans cette version");
                         //
                         break;
 
-                    case 'file' :
+                    case 'file':
                         $pathDocuments = $config->getConfiguration('oscar.mailer.transport.path');
                         $this->checkPath($io, $pathDocuments, "Dossier où sont archivés les mails (DEBUG)");
                         break;
@@ -445,7 +449,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
         // On teste la présence du worker
         $oscarWorkerFile = __DIR__ . '/../../../../../config/oscarworker.service';
-        if (!file_exists($oscarWorkerFile)) {
+        if (!$docker && !file_exists($oscarWorkerFile)) {
             $io->error("Le fichier OscarWorker est absent (config/oscarworker.service)");
             return self::FAILURE;
         }
@@ -490,7 +494,6 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
             $ldap->searchEntries(sprintf($options['default']['accountFilterFormat'], "test"));
 
             $io->writeln("Connexion au serveur LDAP <green>OK</green>\n");
-
         } catch (\Exception $e) {
             $io->error(
                 "LDAP FAIL, Impossible de se connecter au serveur LDAP : \n Erreur : " . $e
