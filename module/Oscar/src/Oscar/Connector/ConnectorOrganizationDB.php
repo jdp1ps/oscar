@@ -290,6 +290,8 @@ class ConnectorOrganizationDB extends AbstractConnector
 
     }
 
+    function setEditable(){}
+
     public function getPathAll(): string
     {
         return $this->getParameter('url_organizations');
