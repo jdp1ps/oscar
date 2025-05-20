@@ -6,6 +6,23 @@ url_person: 'https://rest.service.tld/api/person/%s'
 # Accès spécifique
 access_strategy:  Oscar\Connector\Access\ConnectorAccessOracleDB
 
+# Correspondance des rôles entre le connecteur et oscar
+roles_correspondance:
+  D30: Directeur de composante
+  R00: Responsable
+  R40: Directeur de composante
+  P50: Directeur de composante
+  T87: Informaticien
+  T98: Gestionnaire de laboratoire
+  A009: Gestion financière
+  Gestionnaire financière des contrats de recherche: Gestion financière
+  Gestionnaire financiere des contrats de recherche: Gestion financière
+  Directrice: Directeur
+  Directeur adjoint: Directeur
+  Directrice adjointe: Directeur
+  Responsable administrative: Responsable administratif
+
+
 db_host:
 db_port:
 db_user:

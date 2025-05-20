@@ -87,6 +87,8 @@ La requête `db_query_all` ne doit pas avoir de doublon (la valeur de la colonne
 
 ## Données attendues pour les personnes
 
+> UPDATE : le fichier person_db.yml permet d'utiliser une clef `roles_correspondance` permettant de gérer la correspondance entre les rôles depuis le connecteur et leurs correspondances dans Oscar.
+
 Les requêtes `db_query_single` et `db_query_all` du fichier `person_db.yml` permettant de récupérer les informations des personnes doivent retourner les colonnes suivantes :
 
 |       Nom colonne       |               Exemple                       | Type                 | Obligatoire |                 Description                                  |

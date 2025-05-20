@@ -1,6 +1,18 @@
 # 📢 CHANGEMENTS (MASTER/RIPLEY)
 ## 2025
 
+### Mai
+ - [starling] Mise à jour de la librairie **unicaen/signature** (v 1.0.6) avec prise en charge de l'API TOKEN
+ - [starling] Connecteur DB : Ajout d'une option `roles_correspondance` afin de configurer la correspondance entre les rôles du connecteur et ceux présents dans Oscar
+ - [starling] Docker : Possibilité de personnaliser le script d'initialisation Postgresql (permet de faire des répliques)
+ - [starling] Docker : Ajout des fichiers INI de php dans les volumes
+ - [starling] FIX : durée des journées affichées en double
+ - [starling] UP : Les *datepicker* dans les Jalons/Versements permettent maintenant la saisie manuelle
+ - [starling] FIX : La note financière est de retour sous les versements
+ - [starling] UP : Les numérotations personnalisées sont accessibles depuis le gabarit des feuilles de temps (voir le gabarit par défaut)
+ - [starling] Docker : Les templates / logos ont été ajouté comme volume pour faciliter la personnalisation 
+ - [starling] Fix : Le mail pour le validateur de l'étape 2 et 3 partent correctement  
+
 ### Avril
  - [starling] Version docker (Test/Preprod) + Script d'installation (copie des fichiers de configuration / template)
  - [starling] Version docker ( container de dev Mailhog / Kibana / Vite) - Doc
