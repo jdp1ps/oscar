@@ -11,6 +11,16 @@ use Oscar\Exception\OscarException;
 class ConnectorPersonDB extends AbstractConnector
 {
 
+    private bool $editable = false;
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function isEditable(){
+        return $this->editable;
+    }
+
     /** @var  ConnectorPersonHydrator */
     private $personHydrator = null;
 
@@ -258,38 +268,15 @@ class ConnectorPersonDB extends AbstractConnector
         }
 
         $roles_json = $row['ROLES'];
+        $correspondances = $this->getParameter('roles_correspondance', []);
         $oscar_roles = new \stdClass();
         if ($roles_json != NULL) {
             $roles = json_decode($roles_json);
             foreach ($roles as $key => $values) {
                 $oscar_role_for_structure = [];
                 foreach ($values as $value) {
-                    if ($value == 'D30') {
-                        $oscar_role_for_structure[] = 'Directeur de composante';
-                    } else if ($value == 'R00') {
-                        $oscar_role_for_structure[] = 'Responsable';
-                    } else if ($value == 'R40') {
-                        $oscar_role_for_structure[] = 'Directeur de composante';
-                    } else if ($value == 'P50') {
-                        $oscar_role_for_structure[] = 'Directeur de composante';
-                    } else if ($value == 'T87') {
-                        $oscar_role_for_structure[] = 'Informaticien';
-                    } else if ($value == 'T98') {
-                        $oscar_role_for_structure[] = 'Gestionnaire de laboratoire';
-                    } else if ($value == 'A009') {
-                        $oscar_role_for_structure[] = 'Gestion financière';
-                    } else if ($value == 'Gestionnaire financière des contrats de recherche') {
-                        $oscar_role_for_structure[] = 'Gestion financière';
-                    } else if ($value == 'Gestionnaire financiere des contrats de recherche') {
-                        $oscar_role_for_structure[] = 'Gestion financière';
-                    } else if ($value == 'Directrice') {
-                        $oscar_role_for_structure[] = 'Directeur';
-                    } else if ($value == 'Directeur adjoint') {
-                        $oscar_role_for_structure[] = 'Directeur';
-                    } else if ($value == 'Directrice adjointe') {
-                        $oscar_role_for_structure[] = 'Directeur';
-                    } else if ($value == 'Responsable administrative') {
-                        $oscar_role_for_structure[] = 'Responsable administratif';
+                    if (array_key_exists($value, $correspondances)) {
+                        $oscar_role_for_structure[] = $correspondances[$value];
                     } else {
                         $oscar_role_for_structure[] = $value;
                     }

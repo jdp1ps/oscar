@@ -15,6 +15,16 @@ use Oscar\Service\OrganizationService;
 class ConnectorOrganizationDB extends AbstractConnector
 {
 
+    private bool $editable = false;
+
+    public function setEditable($editable){
+        $this->editable = $editable;
+    }
+
+    public function isEditable(){
+        return $this->editable;
+    }
+
     /**
      * @param bool $force
      * @return ConnectorRepport
