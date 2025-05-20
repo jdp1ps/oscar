@@ -5,22 +5,6 @@ echo "OSCAR INITIALISATION...\n"
 # On régle le safe.directory de GIT
 git config --global --add safe.directory /var/application
 
-
-#mkdir -p /var/application/data/documents/activity
-#mkdir -p /var/application/data/documents/public
-#mkdir -p /var/application/data/documents/request
-#mkdir -p /var/application/data/documents/pcru
-#mkdir -p /var/application/logs
-#mkdir -p /var/application/data/DoctrineORMModule/Proxy
-#touch /var/application/config/autoload/oscar-editable.yml
-#touch /var/application/logs/oscar.log
-#
-#chmod -R 777 /var/application/data/documents
-#chmod -R 777 /var/application/data/DoctrineORMModule
-#chmod -R 777 /var/application/logs
-#chmod -R 777 /var/application/config/autoload/oscar-editable.yml
-
-
 # Installation des dépendances PHP
 composer install --no-interaction
 
@@ -30,7 +14,7 @@ php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 php bin/oscar.php check:privileges -n
 
 mkdir -p public/unicaen
-ln -s vendor/unicaen/signature/public/dist public/unicaen/signature
+ln -sf vendor/unicaen/signature/public/dist public/unicaen/signature
 
 ## Note de version
 php bin/oscar.php infos

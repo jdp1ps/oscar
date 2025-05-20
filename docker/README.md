@@ -46,6 +46,7 @@ docker compose exec app-worker php vendor/bin/doctrine-module orm:schema-tool:up
 
 ### Autres commandes
 
+
 Lancer des commandes sur le container Oscar : 
 
 ```bash
@@ -63,6 +64,15 @@ Purger la BDD (Stopper l'application avant)
 # Le volume avec les données est créé par docker - donc droit SU requis
 sudo rm -Rf volumes/postgresql/*
 ```
+
+Copier une base de données existante :
+
+> Pensez à adapter l'emplacement du fichier SQL si besoin
+
+```bash
+pg_dump --clean --if-exists --no-owner -h HOST -U USER BASE > demo/default/postgresql/init/sql/install.sql
+```
+
 
 Lister les tâches en attentes sur Gearman
 

@@ -28,7 +28,7 @@ esac
 if [ $NODUMP == "0" ]; then
     echo "START DUMP de $SOURCE_USER@$SOURCE_HOST/$SOURCE_BASE vers $BACKUP...";
     PGPASSWORD="$SOURCE_PASS";
-    pg_dump --clean --no-owner -h $SOURCE_HOST -U $SOURCE_USER $SOURCE_BASE > $BACKUP
+    pg_dump --clean --if-exists --no-owner -h $SOURCE_HOST -U $SOURCE_USER $SOURCE_BASE > $BACKUP
     echo "END DUMP"
 fi
 
