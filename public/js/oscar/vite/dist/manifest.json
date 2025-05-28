@@ -204,14 +204,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-39e6caf4.css",
+    "file": "assets/Activity-45993ec6.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-39e6caf4.css"
+      "assets/Activity-45993ec6.css"
     ],
-    "file": "assets/activity-ea5d0c11.js",
+    "file": "assets/activity-6f747725.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -308,7 +308,7 @@
     "src": "src/ActivityNotes.js"
   },
   "src/ActivitySpentDetails.js": {
-    "file": "assets/activityspentdetails-1ce1581e.js",
+    "file": "assets/activityspentdetails-6f5f7675.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js",
