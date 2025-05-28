@@ -187,7 +187,7 @@
           </table>
 
           <div v-if="manageRecettes">
-            <h3><i class="icon-calculator"></i>Recettes</h3>
+            <h3><i class="icon-down-outline"></i>Recettes</h3>
             <table class="table table-condensed card synthesis" v-if="spentlines">
               <tbody>
               <tr>
@@ -200,13 +200,9 @@
 
           </div>
 
-          <div v-if="manageIgnored && spentlines.synthesis['0'].total != 0">
-            <a href="#" @click.prevent="displayIgnored = !displayIgnored">
-              <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
-              <span v-else><i class="icon-eye"></i> Montrer</span>
-              les données ignorées
-            </a>
-            <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
+          <div v-if="manageIgnored && spentlines && spentlines.synthesis['0'] && spentlines.synthesis['0'].total != 0">
+            <h3><i class="icon-eye-off"></i>Ignorées</h3>
+            <table class="table table-condensed card synthesis">
               <tbody>
               <tr>
                 <th>
@@ -223,7 +219,10 @@
 
           <div v-if="spentlines != null">
             <div v-for="m, k in masses">
-              <h3 :id="'repport-' + k">{{ m }}</h3>
+              <h3 :id="'repport-' + k">
+                <i class="icon-calculator"></i>
+                Dépenses ({{ m }})
+              </h3>
               <spent-line-p-f-i-grouped
                   :lines="byMasse.datas[k]" :total="spentlines.synthesis[k].total"
                   @editcompte="handlerEditCompte"
@@ -232,9 +231,11 @@
             </div>
 
             <div v-if="Object.keys(byMasse.datas['N.B']).length > 0">
-              <h3 :id="'repport-nb'">Hors-masse</h3>
+              <h3 :id="'repport-nb'">
+                <i class="icon-attention"></i> Hors-masse
+              </h3>
               <div class="alert alert-warning">
-                <i class="icon-attention"></i> Les comptes des entrées suivantes ne sont pas qualifié.
+                <i class="icon-attention"></i> Les comptes des entrées suivantes ne sont pas qualifiés.
               </div>
               <spent-line-p-f-i-grouped
                   :lines="byMasse.datas['N.B']" :total="spentlines.synthesis['N.B'].total"
@@ -244,16 +245,21 @@
             </div>
 
             <div v-if="manageRecettes && Object.keys(byMasse.datas['recettes']).length > 0">
-              <h3 :id="'repport-1'">Recettes</h3>
+              <h3 :id="'repport-1'">
+                <i class="icon-down-outline"></i>
+                  Recettes
+              </h3>
               <spent-line-p-f-i-grouped
                   :lines="byMasse.datas['recettes']" :total="spentlines.synthesis['1'].total_effectue"
                   @editcompte="handlerEditCompte"
                   @detailsline="handlerDetailsLine"
               />
-              {{ spentlines.synthesis }}
             </div>
             <div v-if="manageIgnored && Object.keys(byMasse.datas['ignorés']).length > 0">
-              <h3 :id="'repport-0'">Ignorés</h3>
+              <h3 :id="'repport-0'">
+                <i class="icon-eye-off"></i>
+                Ignorés
+              </h3>
               <spent-line-p-f-i-grouped
                   :lines="byMasse.datas['ignorés']" :total="spentlines.synthesis['0'].total"
                   @editcompte="handlerEditCompte"
@@ -293,8 +299,10 @@ export default {
       editCompte: null,
       informations: null,
 
+
       //
       manageRecettes: true,
+      manageIgnored: true,
 
       // URL
       url_activity: null,

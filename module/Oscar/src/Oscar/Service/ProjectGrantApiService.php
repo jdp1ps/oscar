@@ -53,7 +53,8 @@ use UnicaenSignature\Provider\SignaturePrivileges;
 use UnicaenSignature\Service\SignatureService;
 use UnicaenSignature\Utils\SignatureConstants;
 
-class ProjectGrantApiService implements UseEntityManager,
+class ProjectGrantApiService implements
+    UseEntityManager,
     UseLoggerService,
     UseOscarConfigurationService,
     UsePersonService,
@@ -127,8 +128,7 @@ class ProjectGrantApiService implements UseEntityManager,
         ?Url              $urlPlugin = null,
         ?OscarUserContext $oscarUserContext = null,
         ?string           $perimeters = null
-    ): array
-    {
+    ): array {
         try {
             $activity = $this->getActivityRepository()->find($activityId);
         } catch (\Exception $exception) {
@@ -206,8 +206,7 @@ class ProjectGrantApiService implements UseEntityManager,
         Activity         $activity,
         OscarUserContext $oscarUserContext,
         array            $perimeters
-    ): array
-    {
+    ): array {
         $locked = $activity->isLocked();
         $editable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT, $activity);
         $lockEditable = $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_EDIT_LOCKED, $activity);
@@ -252,17 +251,17 @@ class ProjectGrantApiService implements UseEntityManager,
                             $activity
                         ),
                         'edit' => $editable && $oscarUserContext->hasPrivileges(
-                                Privileges::ACTIVITY_EDIT,
-                                $activity
-                            ),
+                            Privileges::ACTIVITY_EDIT,
+                            $activity
+                        ),
                         'change_project' => !$locked && $oscarUserContext->hasPrivileges(
-                                Privileges::ACTIVITY_CHANGE_PROJECT,
-                                $activity
-                            ),
+                            Privileges::ACTIVITY_CHANGE_PROJECT,
+                            $activity
+                        ),
                         'new_project' => !$locked && $oscarUserContext->hasPrivileges(
-                                Privileges::ACTIVITY_CHANGE_PROJECT,
-                                $activity
-                            ),
+                            Privileges::ACTIVITY_CHANGE_PROJECT,
+                            $activity
+                        ),
                     ];
                     break;
 
@@ -337,9 +336,9 @@ class ProjectGrantApiService implements UseEntityManager,
                 case self::PERIMETER_ORGANIZATIONS:
                     $credentials['organizations'] = [
                         'edit' => !$locked && $oscarUserContext->hasPrivileges(
-                                Privileges::ACTIVITY_ORGANIZATION_MANAGE,
-                                $activity
-                            ),
+                            Privileges::ACTIVITY_ORGANIZATION_MANAGE,
+                            $activity
+                        ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_ORGANIZATION_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::ORGANIZATION_SHOW),
                     ];
@@ -355,9 +354,9 @@ class ProjectGrantApiService implements UseEntityManager,
                 case self::PERIMETER_PERSONS:
                     $credentials['persons'] = [
                         'edit' => !$locked && $oscarUserContext->hasPrivileges(
-                                Privileges::ACTIVITY_PERSON_MANAGE,
-                                $activity
-                            ),
+                            Privileges::ACTIVITY_PERSON_MANAGE,
+                            $activity
+                        ),
                         'read' => $oscarUserContext->hasPrivileges(Privileges::ACTIVITY_PERSON_SHOW, $activity),
                         'show' => $oscarUserContext->hasPrivileges(Privileges::PERSON_SHOW),
                     ];
@@ -375,6 +374,7 @@ class ProjectGrantApiService implements UseEntityManager,
                         'read' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_SHOW, $activity),
                         'sync' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_SYNC, $activity),
                         'details' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_DETAILS, $activity),
+                        'manageIgnored' => $oscarUserContext->hasPrivileges(Privileges::DEPENSE_IGNORED, $activity),
                     ];
                     break;
 
@@ -417,8 +417,7 @@ class ProjectGrantApiService implements UseEntityManager,
         Activity $activity,
         ?Url     $urlPlugin = null,
         ?array   $perimeters = null
-    ): array
-    {
+    ): array {
         $datas = [
             "api" => "Oscar Activity API"
         ];
@@ -841,8 +840,7 @@ class ProjectGrantApiService implements UseEntityManager,
     public function getNotesActivity(
         Activity $activity,
         ?Url     $urlPlugin = null
-    ): array
-    {
+    ): array {
         /** @var ActivityNoteRepository $notesActivityRepository */
         $notesActivityRepository = $this->getEntityManager()->getRepository(ActivityNote::class);
 
@@ -893,8 +891,7 @@ class ProjectGrantApiService implements UseEntityManager,
 
         $roles = [];
         /** @var OrganizationRole $role */
-        foreach (
-            $this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']) as $role
+        foreach ($this->getEntityManager()->getRepository(OrganizationRole::class)->findBy([], ['label' => 'ASC']) as $role
         ) {
             $roles[] = [
                 'id' => $role->getId(),
@@ -995,8 +992,7 @@ class ProjectGrantApiService implements UseEntityManager,
         $output = [];
         $roles = [];
 
-        foreach (
-            $this->getEntityManager()->getRepository(Role::class)->getRolesAvailableForPersonInActivity() as $role
+        foreach ($this->getEntityManager()->getRepository(Role::class)->getRolesAvailableForPersonInActivity() as $role
         ) {
             $roles[] = [
                 'id' => $role->getId(),
@@ -1101,8 +1097,7 @@ class ProjectGrantApiService implements UseEntityManager,
     public function getTimesheetsActivity(
         Activity $activity,
         ?Url     $urlPlugin = null
-    ): array
-    {
+    ): array {
         $out = [
             'enabled' => false,
             'informations' => ""
@@ -1253,8 +1248,7 @@ class ProjectGrantApiService implements UseEntityManager,
     private function formatDateTime(
         ?\DateTime $datetime,
         string     $format = 'Y-m-d H:i:s'
-    ): ?string
-    {
+    ): ?string {
         if ($datetime === null) {
             return null;
         } else {

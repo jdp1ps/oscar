@@ -105,14 +105,9 @@
         </table>
       </div>
     </div>
-
     <div v-if="manageIgnored && synthesis && synthesis.synthesis['0'].total != 0">
-      <a href="#" @click.prevent="displayIgnored = !displayIgnored">
-        <span v-if="displayIgnored"><i class="icon-eye-off"></i> Cacher</span>
-        <span v-else><i class="icon-eye"></i> Montrer</span>
-        les données ignorées
-      </a>
-      <table class="table table-condensed card synthesis" v-if="spentlines && displayIgnored">
+      <h3><i class="icon-eye-off"></i>Ignorées</h3>
+      <table class="table table-condensed card synthesis">
         <tbody>
         <tr>
           <th>
@@ -133,7 +128,8 @@ export default {
   props: {
     url: { default: "" },
     standalone: { default: true },
-    datas: { default: {} }
+    datas: { default: {} },
+    manageIgnored: { default: false }
   },
 
   computed:{

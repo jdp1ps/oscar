@@ -29,7 +29,6 @@ use Oscar\Utils\AccountInfoUtil;
 use Oscar\Utils\StringUtils;
 use Laminas\Log\Logger;
 
-
 class SpentService implements UseLoggerService, UseOscarConfigurationService, UseEntityManager
 {
     use UseEntityManagerTrait, UseOscarConfigurationServiceTrait, UseLoggerServiceTrait;
@@ -81,8 +80,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 $compteLabel = $compteInfos['label'];
                 $compteInherit = $compteInfos['compte_inherit'];
                 $masseInherit = $compteInfos['masse_inherit'];
-                if( !$compteMasse )
+                if (!$compteMasse) {
                     $compteMasse = $masseInherit;
+                }
 
                 if (!array_key_exists($compteMasse, $out)) {
                     $out[$compteMasse] = [
@@ -130,12 +130,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                         break;
                     }
                     $lastOpen = $open[$openIndex];
-
                 }
             }
             $spent->setLft($bound++);
             $open[] = $spent;
-
         }
 
         while (count($open) > 0) {
@@ -198,24 +196,30 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             return $type;
         } else {
             $insiderId = intval($inside);
-            if ($insiderId < 1) throw new OscarException(_("DATA ERROR : Type de destination incohérent"));
+            if ($insiderId < 1) {
+                throw new OscarException(_("DATA ERROR : Type de destination incohérent"));
+            }
 
             // Récupération du noeud racine
             /** @var SpentTypeGroup $insider */
             $insider = $this->getSpentTypeRepository()->find($insiderId);
 
-            if (!$insider) throw new OscarException(_("Impossible de localiser l'emplacement pour le nouveau type"));
+            if (!$insider) {
+                throw new OscarException(_("Impossible de localiser l'emplacement pour le nouveau type"));
+            }
 
             $lgt = $insider->getRgt();
             $rgt = $lgt + 1;
 
             // Mise à jour des bornes
             $this->getEntityManager()->createNativeQuery(
-                'UPDATE spenttypegroup SET lft = lft+2 WHERE lft > :lft', new ResultSetMapping()
+                'UPDATE spenttypegroup SET lft = lft+2 WHERE lft > :lft',
+                new ResultSetMapping()
             )->execute(['lft' => $lgt]);
 
             $this->getEntityManager()->createNativeQuery(
-                'UPDATE spenttypegroup SET rgt = rgt+2 WHERE rgt >= :rgt', new ResultSetMapping()
+                'UPDATE spenttypegroup SET rgt = rgt+2 WHERE rgt >= :rgt',
+                new ResultSetMapping()
             )->execute(['rgt' => $lgt]);
 
             $type->setLft($lgt)->setRgt($rgt);
@@ -279,11 +283,13 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         // Mise à jour des bornes
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET rgt = rgt - :decalage WHERE rgt > :rgt', new ResultSetMapping()
+            'UPDATE spenttypegroup SET rgt = rgt - :decalage WHERE rgt > :rgt',
+            new ResultSetMapping()
         )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET lft = lft - :decalage WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE spenttypegroup SET lft = lft - :decalage WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['decalage' => $decalage, 'rgt' => $rgt, 'lft' => $lft]);
     }
 
@@ -301,12 +307,14 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $borneMovedRight = $move->getRgt();
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET lft = lft - :rgt, rgt = rgt - :rgt WHERE lft >= :lft AND rgt <= :rgt', new ResultSetMapping()
+            'UPDATE spenttypegroup SET lft = lft - :rgt, rgt = rgt - :rgt WHERE lft >= :lft AND rgt <= :rgt',
+            new ResultSetMapping()
         )->execute(['lft' => $borneMovedLeft, 'rgt' => $borneMovedRight]);
 
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET lft = lft - :size, rgt = rgt - :size WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE spenttypegroup SET lft = lft - :size, rgt = rgt - :size WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $borneMovedRight, 'size' => $sizeBranch]);
 
 
@@ -318,17 +326,20 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         // TROU
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET lft = lft + :size WHERE lft >= :lft', new ResultSetMapping()
+            'UPDATE spenttypegroup SET lft = lft + :size WHERE lft >= :lft',
+            new ResultSetMapping()
         )->execute(['lft' => $destPoint, 'size' => $sizeBranch]);
 
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET rgt = rgt + :size WHERE rgt >= :rgt', new ResultSetMapping()
+            'UPDATE spenttypegroup SET rgt = rgt + :size WHERE rgt >= :rgt',
+            new ResultSetMapping()
         )->execute(['rgt' => $destPoint, 'size' => $sizeBranch]);
 
         // ON replace la branche
         $deplacement = $sizeBranch + $destPoint - 1;
         $this->getEntityManager()->createNativeQuery(
-            'UPDATE spenttypegroup SET lft = lft + :size, rgt = rgt + :size WHERE rgt <= :pos', new ResultSetMapping()
+            'UPDATE spenttypegroup SET lft = lft + :size, rgt = rgt + :size WHERE rgt <= :pos',
+            new ResultSetMapping()
         )->execute(['size' => $deplacement, 'pos' => 0]);
     }
 
@@ -336,11 +347,13 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
     public function getYearsListActivity(Activity $activity)
     {
 
-        if (!$activity->getDateStart())
+        if (!$activity->getDateStart()) {
             throw new OscarException(sprintf(_("L'activité %s n'a pas de date de début"), $activity));
+        }
 
-        if (!$activity->getDateEnd())
+        if (!$activity->getDateEnd()) {
             throw new OscarException(sprintf(_("L'activité %s n'a pas de date de fin"), $activity));
+        }
 
         if ($activity->getDateEnd() < $activity->getDateStart()) {
             throw new OscarException(sprintf(_("L'activité %s a une date de fin antérieur à sa date de début"), $activity));
@@ -428,7 +441,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                         $p['empty'] = false;
                     }
                 }
-
             }
         }
 
@@ -452,19 +464,18 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         $re = '/(\d+)\.?/';
 
-        if (($handle = fopen($filepath, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-
+        if (($handle = fopen($filepath, "r")) !== false) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== false) {
                 if (preg_match($re, $data[0], $matches)) {
                     $code = $matches[1];
                     $label = $data[1];
-                } else if (preg_match($re, $data[1], $matches)) {
+                } elseif (preg_match($re, $data[1], $matches)) {
                     $code = $matches[1];
                     $label = $data[2];
-                } else if (preg_match($re, $data[2], $matches)) {
+                } elseif (preg_match($re, $data[2], $matches)) {
                     $code = $matches[1];
                     $label = $data[3];
-                } else if (preg_match($re, $data[3], $matches)) {
+                } elseif (preg_match($re, $data[3], $matches)) {
                     $code = $matches[1];
                     $label = $data[4];
                 } else {
@@ -472,7 +483,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 }
 
                 if (array_key_exists($code, $spentTypes)) {
-
                 } else {
                     $spentType = new SpentTypeGroup();
                     $this->getEntityManager()->persist($spentType);
@@ -484,7 +494,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         }
 
         $this->orderSpentsByCode();
-
     }
 
 
@@ -497,7 +506,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $node->setLft(++$i)->setRgt(++$i);
         }
         $this->getEntityManager()->flush();
-
     }
 
     public function updateSpentTypeGroup($datas)
@@ -593,15 +601,16 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param $codeEnfant
      * @return array
      */
-    protected function getParentWithAnnexe($plan, $codeEnfant){
+    protected function getParentWithAnnexe($plan, $codeEnfant)
+    {
         $indexInPlan = '00'.StringUtils::feedString($codeEnfant);
         $parentCode = '';
         $parentlabel = '';
         $parentmasse = '';
 
         // Si on est au dernier niveau
-        if( strlen($codeEnfant) <= 1 ){
-            if( array_key_exists($indexInPlan, $plan) ){
+        if (strlen($codeEnfant) <= 1) {
+            if (array_key_exists($indexInPlan, $plan)) {
                 $parentCode = $plan[$indexInPlan]->getCode();
                 $parentlabel = $plan[$indexInPlan]->getLabel();
                 $parentmasse = $plan[$indexInPlan]->getAnnexe();
@@ -616,12 +625,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $codeParent = substr($codeEnfant, 0, strlen($codeEnfant)-1);
         $indexParent = '00' . StringUtils::feedString($codeParent);
 
-        if( array_key_exists($indexParent, $plan) ){
+        if (array_key_exists($indexParent, $plan)) {
             $parent = $plan[$indexParent];
             $labelParent = $parent->getLabel();
             $masseParent = $parent->getAnnexe();
 
-            if( $masseParent ){
+            if ($masseParent) {
                 return [
                     'parentCode' => $codeParent,
                     'parentLabel' => $labelParent,
@@ -632,7 +641,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $this->getParentWithAnnexe($plan, $codeParent);
     }
 
-    public function getIdsActivitiesForCompteGeneral( array $compteGeneral ) :array
+    public function getIdsActivitiesForCompteGeneral(array $compteGeneral) :array
     {
         $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($compteGeneral);
         /** @var ActivityRepository $activityRepository */
@@ -641,7 +650,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $idsActivities;
     }
 
-    public function getIdsActivitiesForAccounts( array $codesAccounts ) :array
+    public function getIdsActivitiesForAccounts(array $codesAccounts) :array
     {
         $pfis = $this->getSpentTypeRepository()->getPfiForCodesAccounts($codesAccounts);
 
@@ -673,7 +682,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $reduce = strval($code);
             $out = [];
             for ($i = strlen($reduce) - 1; $find == null && $i > 0; $i--) {
-                if( $reduce[$i] == '0' ) continue;
+                if ($reduce[$i] == '0') {
+                    continue;
+                }
                 if (array_key_exists($reduce, $plan)) {
                     $parent = $this->getParentWithAnnexe($plan, $plan[$reduce]->getCode());
                     $out['id'] = $plan[$reduce]->getId();
@@ -713,7 +724,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @return array
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getSpentsByPFIs(array $pfis, $spentType = self::SPENT_EFFECTIVE){
+    public function getSpentsByPFIs(array $pfis, $spentType = self::SPENT_EFFECTIVE)
+    {
         $out = [];
         foreach ($pfis as $pfi) {
             $spents = $this->getSpentsByPFI($pfi, $spentType);
@@ -750,12 +762,12 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             ->orderBy('s.datePaiement', 'ASC')
             ->setParameter('ids', $ids);
 
-        if( $spentType == self::SPENT_EFFECTIVE ){
+        if ($spentType == self::SPENT_EFFECTIVE) {
             $qb->andWhere('s.btart = :btart')
                 ->setParameter('btart', '0250');
         }
 
-        if( $spentType == self::SPENT_PREVISIONNAL ){
+        if ($spentType == self::SPENT_PREVISIONNAL) {
             $qb->andWhere('s.btart = :btart')
                 ->setParameter('btart', '0100');
         }
@@ -776,14 +788,14 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param $affectations
      * @throws OscarException
      */
-    public function updateAffectation( $affectations )
+    public function updateAffectation($affectations)
     {
         $dump = [];
         $masses = $this->getOscarConfigurationService()->getMasses();
 
         foreach ($affectations as $codeCompteFull => $compteAffectation) {
             $infos = $this->getCompte($codeCompteFull);
-            if( $infos['code'] ){
+            if ($infos['code']) {
                 /** @var SpentTypeGroup $spentType */
                 $spentType = $this->getSpentTypeRepository()->findOneByCode($infos['code']);
             } else {
@@ -791,20 +803,17 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
                 throw new OscarException("Le compte $codeCompteFull n'existe pas dans le plan comptable.");
             }
 
-            if( $compteAffectation == '1' ){
+            if ($compteAffectation == '1') {
                 // Recette / Ignorer
                 $spentType->setBlind(false);
                 $spentType->setAnnexe($compteAffectation);
-            }
-            elseif ( $compteAffectation == '0' ){
+            } elseif ($compteAffectation == '0') {
                 $spentType->setAnnexe('0');
                 $spentType->setBlind(true);
-            }
-            elseif ( $compteAffectation == '' ){
+            } elseif ($compteAffectation == '') {
                 $this->getLoggerService()->error("Erreur d'affectation pour $codeCompteFull (valeur nulle).");
                 throw new OscarException("Erreur d'affectation (valeur nulle)");
-            }
-            else {
+            } else {
                 $spentType->setBlind(false);
                 $spentType->setAnnexe($compteAffectation);
             }
@@ -824,6 +833,9 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $accountInfos = [];
         foreach ($usedAccounts as $compte) {
             $infos = $this->getCompte($compte);
+            if ($infos['annexe'] === null && $infos['masse_inherit'] !== null) {
+                $infos['annexe'] = $infos['masse_inherit'];
+            }
             $accountInfos[] = $infos;
         }
         return $accountInfos;
@@ -849,7 +861,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @return array
      * @throws Exception
      */
-    public function getSynthesisDatasPFI($pfis, $curationNB = false, string $mode = 'advanced' ) :array
+    public function getSynthesisDatasPFI($pfis, $curationNB = false, string $mode = 'advanced') :array
     {
         $spents = [];
         foreach ($pfis as $pfi) {
@@ -901,7 +913,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         ]);
 
         if (count($activities) > 0) {
-
             // synchro
             try {
                 $this->getConnector()->sync($eotp);
@@ -942,10 +953,13 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         static $assoc;
 
         // Fix : Pas de type chargé en base de donnée
-        if ($code === false) return "0";
+        if ($code === false) {
+            return "0";
+        }
 
-        if ($types === null)
+        if ($types === null) {
             $types = $this->getSpentsTypes();
+        }
 
         if ($assoc === null) {
             $assoc = [];
@@ -1031,7 +1045,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param $pfi
      * @return array
      */
-    public function getSpentsDatas($pfi, $spentType = self::SPENT_EFFECTIVE){
+    public function getSpentsDatas($pfi, $spentType = self::SPENT_EFFECTIVE)
+    {
 
         $array = [];
         $spents = $this->getSpentsByPFI($pfi, $spentType);
@@ -1040,7 +1055,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
 
         /** @var SpentLine $spent */
-        foreach ( $spents as $spent) {
+        foreach ($spents as $spent) {
             $compte = $this->getCompte($spent->getCompteGeneral());
             $comptes[$spent->getCompteGeneral()] = $compte;
             $masse = $masseGroup = $compte['annexe'] != '' ? $compte['annexe'] : $compte['masse_inherit'];
@@ -1065,7 +1080,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
      * @param $spents
      * @return array[]
      */
-    public function getSpentDatasSynthesisBySpents($spents){
+    public function getSpentDatasSynthesisBySpents($spents)
+    {
         $pfis = [];
         $synthesis = [
             'lines' => count($spents),
@@ -1120,10 +1136,10 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $numSifacDone = [];
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
-            if( !in_array($spent->getPfi(), $pfis) ){
+            if (!in_array($spent->getPfi(), $pfis)) {
                 $pfis[] = $spent->getPfi();
             }
-            if($spent->getBtart() == SpentLine::BTART_EFFECTUE && !in_array($spent->getNumSifac(), $numSifacDone)){
+            if ($spent->getBtart() == SpentLine::BTART_EFFECTUE && !in_array($spent->getNumSifac(), $numSifacDone)) {
                 $numSifacDone[] = $spent->getNumSifac();
             }
         }
@@ -1132,21 +1148,21 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         foreach ($spents as $spent) {
             $compte = $this->getCompte($spent->getCompteGeneral());
             $masse = $masseGroup = $compte['annexe'] != '' ? $compte['annexe'] : $compte['masse_inherit'];
-            if( !array_key_exists($masse, $synthesis) ){
+            if (!array_key_exists($masse, $synthesis)) {
                 $masse = 'N.B';
             }
 
             $totalEffectue = 0.0;
             $totalEngage = 0.0;
 
-            if( $spent->getBtart() == SpentLine::BTART_ENGAGE ){
+            if ($spent->getBtart() == SpentLine::BTART_ENGAGE) {
                 $synthesis[$masse]['nbr_engage']++;
-                if( !in_array($spent->getNumSifac(), $numSifacDone) ){
+                if (!in_array($spent->getNumSifac(), $numSifacDone)) {
                     $totalEngage = $spent->getMontant();
                 }
             }
 
-            if( $spent->getBtart() == SpentLine::BTART_EFFECTUE ){
+            if ($spent->getBtart() == SpentLine::BTART_EFFECTUE) {
                 $synthesis[$masse]['nbr_effectue']++;
                 $totalEffectue = $spent->getMontant();
             }
@@ -1155,12 +1171,11 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $synthesis[$masse]['total_effectue'] += $totalEffectue;
             $synthesis[$masse]['total_engage'] += $totalEngage;
 
-            if( in_array($masse, $massesKeys) ){
+            if (in_array($masse, $massesKeys)) {
                 $synthesis['totaux']['effectue'] += $totalEffectue;
                 $synthesis['totaux']['engage'] += $totalEngage;
             }
             $synthesis[$masse]['nbr']++;
-
         }
         $synthesis['pfis'] = $pfis;
 
@@ -1168,7 +1183,8 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         return $synthesis;
     }
 
-    public function getSpentDatasSynthesisByPfi($pfi){
+    public function getSpentDatasSynthesisByPfi($pfi)
+    {
         $spents = $this->getSpentsByPFI($pfi);
         return $this->getSpentDatasSynthesisBySpents($spents);
     }
@@ -1204,7 +1220,7 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
         $massesKey[] = '1';
 
         // Rangement des dépenses par masse
-        foreach ($this->getOscarConfigurationService()->getMasses() as $masseKey=>$masseLabel) {
+        foreach ($this->getOscarConfigurationService()->getMasses() as $masseKey => $masseLabel) {
             $byMasses[$masseKey] = [
                 'label' => $masseLabel,
                 'key' => $masseKey,
@@ -1214,20 +1230,20 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
 
         /** @var SpentLine $spent */
         foreach ($spents as $spent) {
-
             $numPiece = $spent->getNumPiece();
             $compteBudg = $spent->getCompteBudgetaire();
             $compte = $this->getCompte($spent->getCompteGeneral());
             $masse = $masseGroup = $compte['annexe'] ? $compte['annexe'] : $compte['masse_inherit'];
             $type = $this->getTypeByCode($spent->getCompteGeneral());
 
-            if( !in_array($masseGroup, $massesKey) ){
+            if (!in_array($masseGroup, $massesKey)) {
                 $masseGroup = 'N.B';
             }
-            if( !is_array($byMasses[$masseGroup]) ){
+            if (!is_array($byMasses[$masseGroup])) {
                 echo "<h1>$masseGroup</h1>";
                 var_dump($compte);
-                var_dump($byMasses); die();
+                var_dump($byMasses);
+                die();
             }
             if (!array_key_exists($numPiece, $byMasses[$masseGroup]['spents'])) {
                 $byMasses[$masseGroup]['spents'][] = [
@@ -1361,7 +1377,6 @@ class SpentService implements UseLoggerService, UseOscarConfigurationService, Us
             $this->getLoggerService()->critical("Erreur : Plusieurs connector configuré pour les dépenses");
             throw new OscarException("Oscar ne prends en charge qu'une source de synchronisation pour les dépenses.");
         } else {
-
             $conf = $connectorConfig[$keysConfig[0]];
             $class = $conf['class'];
             $factory = new \ReflectionClass($class);

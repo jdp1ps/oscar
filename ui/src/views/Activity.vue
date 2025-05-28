@@ -608,6 +608,7 @@
             <ActivitySpentSynthesis
                 :standalone="false"
                 :datas="spents"
+                :manage-ignored="credentials.spents.manageIgnored"
             />
             <nav class="buttons xs">
               <a :href="spents.url_details" class="btn btn-primary btn" v-if="credentials.spents.details">
