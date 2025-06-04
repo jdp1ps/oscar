@@ -222,6 +222,7 @@ class OscarCheckConfigCommand extends OscarCommandAbstract
 
         $modulesRequires = [
             'bz2',
+            'calendar',
             'curl',
             'fileinfo',
             'gd',
