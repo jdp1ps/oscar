@@ -1272,4 +1272,44 @@ class OrganizationService implements UseOscarConfigurationService, UseEntityMana
         $this->getOrganizationRoleRepository()->doublonDeleteProjectPartnerBydIds($toDelProject);
         return count($toDelActivity) + count($toDelProject);
     }
+
+    /**
+     * Utilisé pour le module SIGNATURE.
+     *
+     * @param array $ids_organization
+     * @param array|null $roles
+     * @return array
+     * @throws \Doctrine\ORM\Exception\NotSupported
+     */
+    public function getMembers( array $ids_organization, ?array $roles = null)
+    {
+        $out = [];
+        $repo = $this->getEntityManager()->getRepository(OrganizationPerson::class);
+
+        $qb = $repo->createQueryBuilder('op');
+        $qb
+            ->innerJoin('op.organization', 'o')
+            ->where('o.id IN(:ids)')
+            ->setParameter('ids', $ids_organization)
+        ;
+        if( $roles != null ){
+            $qb->innerJoin('op.roleObj', 'r')
+                ->andWhere('r.roleId IN(:roles)')
+                ->setParameter('roles', $roles);
+        }
+
+
+        $result = $qb->getQuery()->getResult();
+        /** @var OrganizationPerson $r */
+        foreach ($result as $r) {
+            $out[] = [
+                'id' => $r->getPerson()->getId(),
+                'firstname' => $r->getPerson()->getFirstname(),
+                'lastname' => $r->getPerson()->getLastname(),
+                'fullname' => $r->getPerson()->getFullname(),
+                'email' => $r->getPerson()->getEmail(),
+            ];
+        }
+        return $out;
+    }
 }
