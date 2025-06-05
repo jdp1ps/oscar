@@ -278,8 +278,8 @@ export default {
     handlerEdit(payment) {
       this.formData = JSON.parse(JSON.stringify(payment));
       this.formData.currencyId = payment.currency.id;
-      this.formData.datePayment = payment.datePayment ? moment(payment.datePayment.date).format('YYYY-MM-DD') : "";
-      this.formData.datePredicted = payment.datePredicted ? moment(payment.datePredicted.date).format('YYYY-MM-DD') : "";
+      this.formData.datePayment = payment.datePayment ? moment(payment.datePayment).format('YYYY-MM-DD') : "";
+      this.formData.datePredicted = payment.datePredicted ? moment(payment.datePredicted).format('YYYY-MM-DD') : "";
       this.formData.currencyId = payment.currency.id;
     },
 
