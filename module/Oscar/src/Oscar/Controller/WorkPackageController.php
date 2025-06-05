@@ -120,6 +120,11 @@ class WorkPackageController extends AbstractOscarController implements UseServic
         ///////////////////////////////////: AJOUT d'un déclarant
         if( $method == 'PUT' ){
             $this->getLoggerService()->info("WORKPACKAGE PUT ");
+
+            if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
+                return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
+            }
+
             $data = $this->getRequest()->getPost()->toArray();
             if( !$data ){
                 try {
@@ -189,7 +194,7 @@ class WorkPackageController extends AbstractOscarController implements UseServic
                 $declarant->setWorkPackage($workpackage);
                 $this->getEntityManager()->flush($declarant);
             } catch ( \Exception $e ){
-                return $this->getResponseBadRequest("L'ajout a bouzé : " . print_r($data, true));
+                return $this->getResponseBadRequest("L'ajout a échoué : " . print_r($data, true));
             }
             return $this->getResponseOk();
         }
@@ -329,6 +334,10 @@ class WorkPackageController extends AbstractOscarController implements UseServic
         /** @var WorkPackage $entity */
         $entity = $this->getEntityManager()->getRepository(WorkPackage::class)->find($id);
 
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity->getActivity()) ){
+            return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
+        }
+
         $this->getEntityManager()->remove($entity);
 
         $entity->getActivity()->touch();
@@ -347,6 +356,10 @@ class WorkPackageController extends AbstractOscarController implements UseServic
 
         /** @var WorkPackage $entity */
         $entity = $this->getEntityManager()->getRepository(WorkPackage::class)->find($id);
+
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $entity->getActivity()) ){
+            return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
+        }
 
         if( !$entity ){
             return $this->getResponseNotFound(sprintf("Impossible de charger le lot '%s'", $id));
@@ -388,6 +401,10 @@ class WorkPackageController extends AbstractOscarController implements UseServic
     public function newAction()
     {
         $activity = $this->getEntityManager()->getRepository(Activity::class)->find($this->params()->fromRoute('idactivity'));
+
+        if( !$this->getOscarUserContextService()->hasPrivileges(Privileges::ACTIVITY_WORKPACKAGE_MANAGE, $activity) ){
+            return $this->getResponseBadRequest("'Vous n'avez pas le droit de faire ça");
+        }
 
         $entity = new WorkPackage();
         $entity->setActivity($activity);
