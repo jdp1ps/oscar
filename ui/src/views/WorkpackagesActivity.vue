@@ -25,7 +25,7 @@
     </transition>
 
     <nav class="admin-bar">
-      <a href="" class="btn btn-primary btn-xs" @click.prevent="handlerWorkPackageNew">
+      <a href="" class="btn btn-primary btn-xs" @click.prevent="handlerWorkPackageNew" v-if="editable">
         <i class="icon-book"></i>
         Nouveau lot</a>
       <a href="" class="btn btn-warning btn-xs" @click.prevent="fetch" v-if="debugEnabled">
