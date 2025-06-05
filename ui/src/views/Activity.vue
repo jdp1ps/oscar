@@ -503,6 +503,7 @@
                   </span>
                   <nav>
                     <a :href="timesheets.url +'#validators'"
+                       v-if="credentials.workpackages.edit"
                        class="btn btn-primary btn-xs">
                       <i class="icon-user-md"></i>
                       Désigner des validateurs
