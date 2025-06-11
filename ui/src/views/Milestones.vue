@@ -187,7 +187,7 @@
         <i class="icon-calendar-plus-o"></i>
         Nouveau Jalon
       </a>
-      <a href="#" @click.prevent="fetch" class="btn btn-xs btn-warning">
+      <a href="#" @click.prevent="fetch" class="btn btn-xs btn-warning" v-if="debugEnabled">
         <i class="icon-bug"></i>
         fetch
       </a>
@@ -229,7 +229,8 @@ export default {
     // Payements chargés depuis un autre composant
     'items' : { default: [], type: Array },
     'types' : { default: [], type: Array },
-    'payments': {'required': false, default: [], type: Array}
+    'payments': {'required': false, default: [], type: Array},
+    'debugEnabled': { default: false }
   },
 
   components: {

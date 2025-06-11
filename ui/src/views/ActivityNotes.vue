@@ -22,7 +22,7 @@
     <!-- LISTE DES NOTES -->
     <nav class="admin-bar text-right">
       <a class="btn btn-default btn-xs" v-if="manageadminallowed || manageuserallowed" @click="handlerNew()"><i class="icon-doc-add"></i> Nouvelle </a>
-      <a class="btn btn-default btn-xs" @click="fetch()">
+      <a class="btn btn-default btn-xs" @click="fetch()" v-if="debugEnabled">
         <i class="icon-ref"></i> Reload
       </a>
     </nav>
@@ -111,7 +111,8 @@ export default {
     showallowed: { default: false },
     manageuserallowed: { default:false },
     manageadminallowed: { default:false },
-    items: { default: [] }
+    items: { default: [] },
+    debugEnabled: { default: false }
   },
 
   data() {

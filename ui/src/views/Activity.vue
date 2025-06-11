@@ -435,6 +435,7 @@
               :showallowed="credentials.notes.read"
               :manageuserallowed="credentials.notes.edit"
               :manageadminallowed="credentials.notes.manage"
+              :debug-enabled="debugEnabled"
               :items="notes"
               @update="handlerUpdateNotes"
           />
@@ -573,6 +574,7 @@
                       :payments="payments"
                       :items="milestones"
                       :types="milestonesTypes"
+                      :debug-enabled="debugEnabled"
                       @update="handlerUpdateMilestones"
           />
 
@@ -590,6 +592,7 @@
                     :amount="budget.amount"
                     :payments="payments"
                     :currencies="currencies"
+                    :debug-enabled="debugEnabled"
                     @debug="handlerDebugShow"
                     @update="handlerUpdatePayments"
           />

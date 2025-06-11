@@ -157,7 +157,7 @@
       <a href="#" @click.prevent="handlerNewPayment" class="btn btn-default btn-xs">
         <i class="icon-bank"></i>
         Nouveau versement</a>
-      <button class="btn btn-warning btn-xs" @click.prevent="fetch">
+      <button class="btn btn-warning btn-xs" @click.prevent="fetch" v-if="debugEnabled">
         <i class="icon-bug"></i>
         fetch
       </button>
@@ -200,7 +200,7 @@ import moment from "moment";
 import AxiosMessage from "../utils/AxiosMessage.js";
 
 export default {
-  props: ['url', 'amount', 'currency', 'currencies', 'manage', 'payments'],
+  props: ['url', 'amount', 'currency', 'currencies', 'manage', 'payments', 'debugEnabled'],
 
   data() {
     return {
