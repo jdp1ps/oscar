@@ -117,3 +117,34 @@ body:not(.privatize){
   }
 }
 
+
+// Fiche ACTIVITY
+.activity-header {
+
+  .activity-description {
+    &:before {
+      content: "Description : ";
+      font-size: .75em;
+      color: #95afe3;
+    }
+    font-size: 1.2em;
+    max-height: 4em;
+    overflow: hidden;
+    color: #111;
+    padding: 1em 2em 1em;
+    border-bottom: solid thin #DDD;
+    &.can-scroll {
+      cursor: zoom-in;
+      &.can-scroll--open {
+        overflow: auto;
+        max-height: none;
+        cursor: zoom-out;
+        color: #000;
+      }
+    }
+  }
+  .activity-description-packed {
+    cursor: pointer;
+  }
+}
+

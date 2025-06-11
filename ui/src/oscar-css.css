@@ -1,6 +1,5 @@
-@charset "UTF-8";
 body {
-  background-color: #d2d2d2;
+  background-color: rgb(210, 210, 210);
   background-blend-mode: lighten;
 }
 
@@ -61,7 +60,7 @@ body:not(.privatize) #btn-toggle-private .on {
   display: inline-block;
   padding: 0 0.3em 0 0;
   font-family: "fontello";
-  content: "";
+  content: "\e86e";
   color: #eee;
 }
 .admin-bar:hover {
@@ -86,6 +85,32 @@ body:not(.privatize) #btn-toggle-private .on {
 .sup-info.neutral {
   background-color: #9baab2;
   color: #314752;
+}
+
+.activity-header .activity-description {
+  font-size: 1.2em;
+  max-height: 4em;
+  overflow: hidden;
+  color: #111;
+  padding: 1em 2em 1em;
+  border-bottom: solid thin #DDD;
+}
+.activity-header .activity-description:before {
+  content: "Description : ";
+  font-size: 0.75em;
+  color: #95afe3;
+}
+.activity-header .activity-description.can-scroll {
+  cursor: zoom-in;
+}
+.activity-header .activity-description.can-scroll.can-scroll--open {
+  overflow: auto;
+  max-height: none;
+  cursor: zoom-out;
+  color: #000;
+}
+.activity-header .activity-description-packed {
+  cursor: pointer;
 }
 
 /*# sourceMappingURL=oscar-css.css.map */

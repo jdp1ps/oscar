@@ -532,6 +532,7 @@ class ProjectGrantApiService implements
             'label' => $activity->getLabel(),
             'numOscar' => $activity->getOscarNum(),
             'status' => $activity->getStatus(),
+            'description' => $activity->getDescription(),
             'status_label' => $activity->getStatusLabel(),
             'pfi' => $activity->getCodeEOTP(),
             'notefinanciere' => $activity->getNoteFinanciere(),

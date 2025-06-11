@@ -243,9 +243,8 @@
         </div>
       </div>
 
-      <p class="baseline" :class="{'descriptionPacked': !descriptionFull}" @click="descriptionFull=!descriptionFull"
-         v-if="core.description">
-        <small>{{ core.description }}</small>
+      <p class="baseline activity-description" v-scroll-status v-if="core.description">
+        {{ core.description }}
       </p>
 
       <div class="row">
@@ -669,6 +668,7 @@ import VueJsonPretty from 'vue-json-pretty';
 import WorkpackagesActivity from "./WorkpackagesActivity.vue";
 import 'vue-json-pretty/lib/styles.css';
 import PersonDisplay from "../components/PersonDisplay.vue";
+import vScrollStatus from "../directives/vScrollStatus.js";
 
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -755,6 +755,15 @@ export default {
       error: null,
       loading: true
     }
+  },
+  watch:{
+    core(el){
+      console.log("Core change", el);
+    }
+  },
+
+  directives: {
+    scrollStatus: vScrollStatus
   },
 
   computed: {
@@ -1168,12 +1177,6 @@ header {
       color: #000;
     }
   }
-}
-
-.descriptionPacked {
-  cursor: pointer;
-  max-height: 4em;
-  overflow: hidden;
 }
 
 .budget {
