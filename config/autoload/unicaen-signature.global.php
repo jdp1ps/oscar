@@ -61,22 +61,7 @@ return [
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Diffusion des notifications
-        'notification_strategy' => [
-            function(ContainerInterface $container, string $email, string $subject, string $message) {
-                $logger = $container->get("Logger");
-                try {
-                    /** @var \Oscar\Service\MailingService $mailer */
-                    $mailer = $container->get(\Oscar\Service\MailingService::class);
-                    $mail = $mailer->newMessage($subject);
-                    $mail->setTo($email)
-                        ->setSubject($subject)
-                        ->setBody($message);
-                    $mailer->send($mail);
-                } catch (Exception $e) {
-                    $logger->error("ERREUR MAIL SIGNATURE : ". $e->getMessage());
-                }
-            }
-        ],
+        'notification_strategy' => [],
 
         /**
          * Méthodes personnalisées de récupération des utilisateurs
