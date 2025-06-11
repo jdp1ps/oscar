@@ -8,7 +8,7 @@
     "src": "ActivityLogs.css"
   },
   "ActivityNotes.css": {
-    "file": "assets/ActivityNotes-57bb9039.css",
+    "file": "assets/ActivityNotes-e2e19dac.css",
     "src": "ActivityNotes.css"
   },
   "Datepicker.css": {
@@ -67,7 +67,7 @@
   },
   "_vendor13.js": {
     "css": [
-      "assets/ActivityNotes-57bb9039.css"
+      "assets/ActivityNotes-e2e19dac.css"
     ],
     "file": "vendor13.js",
     "imports": [
@@ -204,14 +204,14 @@
     ]
   },
   "src/Activity.css": {
-    "file": "assets/Activity-ee682dc1.css",
+    "file": "assets/Activity-a7094939.css",
     "src": "src/Activity.css"
   },
   "src/Activity.js": {
     "css": [
-      "assets/Activity-ee682dc1.css"
+      "assets/Activity-a7094939.css"
     ],
-    "file": "assets/activity-a9479a0a.js",
+    "file": "assets/activity-b8acd801.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -239,7 +239,7 @@
     "src": "src/Activity.js"
   },
   "src/ActivityDocuments.js": {
-    "file": "assets/activitydocuments-0310e9c8.js",
+    "file": "assets/activitydocuments-6a61b66e.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -265,7 +265,7 @@
     "css": [
       "assets/ActivityMotsCles-67bc6dce.css"
     ],
-    "file": "assets/activitymotscles-cafd5b2d.js",
+    "file": "assets/activitymotscles-abba3657.js",
     "imports": [
       "_vendor.js",
       "_vendor15.js",
@@ -283,7 +283,7 @@
     "css": [
       "assets/ActivityMotsClesAdmin-7828ebc8.css"
     ],
-    "file": "assets/activitymotsclesadmin-532c9f15.js",
+    "file": "assets/activitymotsclesadmin-f9028ca0.js",
     "imports": [
       "_vendor.js",
       "_vendor15.js",
@@ -294,7 +294,7 @@
     "src": "src/ActivityMotsClesAdmin.js"
   },
   "src/ActivityNotes.js": {
-    "file": "assets/activitynotes-5ae39c06.js",
+    "file": "assets/activitynotes-7df19288.js",
     "imports": [
       "_vendor.js",
       "_vendor13.js",
@@ -308,7 +308,7 @@
     "src": "src/ActivityNotes.js"
   },
   "src/ActivitySpentDetails.js": {
-    "file": "assets/activityspentdetails-6f5f7675.js",
+    "file": "assets/activityspentdetails-a2f582ed.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js",
@@ -318,7 +318,7 @@
     "src": "src/ActivitySpentDetails.js"
   },
   "src/ActivitySpentSynthesis.js": {
-    "file": "assets/activityspentsynthesis-29e5c1fc.js",
+    "file": "assets/activityspentsynthesis-1892c85d.js",
     "imports": [
       "_vendor.js",
       "_vendor14.js",
@@ -329,7 +329,7 @@
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityWorkpackage.js": {
-    "file": "assets/activityworkpackage-db6bf6ca.js",
+    "file": "assets/activityworkpackage-724df4fc.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js"
@@ -338,7 +338,7 @@
     "src": "src/ActivityWorkpackage.js"
   },
   "src/AdminRoleOrganization.js": {
-    "file": "assets/adminroleorganization-cbf876f6.js",
+    "file": "assets/adminroleorganization-1e6dab43.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js"
@@ -347,7 +347,7 @@
     "src": "src/AdminRoleOrganization.js"
   },
   "src/AdminTypeDocument.js": {
-    "file": "assets/admintypedocument-16fe738a.js",
+    "file": "assets/admintypedocument-0f198175.js",
     "imports": [
       "_vendor.js",
       "_vendor22.js",
@@ -357,7 +357,7 @@
     "src": "src/AdminTypeDocument.js"
   },
   "src/AdminTypeOrganization.js": {
-    "file": "assets/admintypeorganization-85c05902.js",
+    "file": "assets/admintypeorganization-d306974a.js",
     "imports": [
       "_vendor.js",
       "_vendor15.js",
@@ -369,7 +369,7 @@
     "src": "src/AdminTypeOrganization.js"
   },
   "src/Authentification.js": {
-    "file": "assets/authentification-71613c4d.js",
+    "file": "assets/authentification-3753ad1c.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -392,7 +392,7 @@
     "css": [
       "assets/DeclarersList-87a946a0.css"
     ],
-    "file": "assets/declarerslist-5fd95fec.js",
+    "file": "assets/declarerslist-a6b93bec.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js",
@@ -402,7 +402,7 @@
     "src": "src/DeclarersList.js"
   },
   "src/DocumentsIndex.js": {
-    "file": "assets/documentsindex-4df59260.js",
+    "file": "assets/documentsindex-abaa08b1.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -419,7 +419,7 @@
     "src": "src/DocumentsIndex.js"
   },
   "src/DocumentsObserved.js": {
-    "file": "assets/documentsobserved-bb5d20d8.js",
+    "file": "assets/documentsobserved-4b380025.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -436,7 +436,7 @@
     "src": "src/DocumentsObserved.js"
   },
   "src/EntityWithRoleOrganizations.js": {
-    "file": "assets/organizations_roled-59a2d6f3.js",
+    "file": "assets/organizations_roled-c1691fbb.js",
     "imports": [
       "_vendor.js",
       "_vendor16.js",
@@ -454,7 +454,7 @@
     "src": "src/EntityWithRoleOrganizations.js"
   },
   "src/EntityWithRolePersons.js": {
-    "file": "assets/persons_roled-4017eb4f.js",
+    "file": "assets/persons_roled-504ac7be.js",
     "imports": [
       "_vendor.js",
       "_vendor16.js",
@@ -479,7 +479,7 @@
     "css": [
       "assets/OrganizationFiche-058e2475.css"
     ],
-    "file": "assets/organizationfiche-974d2695.js",
+    "file": "assets/organizationfiche-03801002.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js"
@@ -495,7 +495,7 @@
     "css": [
       "assets/OrganizationSubOrganizations-b532b187.css"
     ],
-    "file": "assets/organizationsuborganizations-b993e494.js",
+    "file": "assets/organizationsuborganizations-c4963536.js",
     "imports": [
       "_vendor.js",
       "_vendor10.js",
@@ -506,7 +506,7 @@
     "src": "src/OrganizationSubOrganizations.js"
   },
   "src/ParametersUserSendFrequency.js": {
-    "file": "assets/parameters_user_send_frequency-46e22b07.js",
+    "file": "assets/parameters_user_send_frequency-db1a004b.js",
     "imports": [
       "_vendor.js",
       "_vendor9.js",
@@ -518,7 +518,7 @@
     "src": "src/ParametersUserSendFrequency.js"
   },
   "src/PersonSchedule.js": {
-    "file": "assets/person_schedule-8e29300a.js",
+    "file": "assets/person_schedule-33362ddc.js",
     "imports": [
       "_vendor.js",
       "_vendor9.js",
@@ -530,7 +530,7 @@
     "src": "src/PersonSchedule.js"
   },
   "src/ProjectActivityLogs.js": {
-    "file": "assets/ProjectActivityLogs-bcc5dd09.js",
+    "file": "assets/ProjectActivityLogs-b7125ec4.js",
     "imports": [
       "_vendor.js",
       "_vendor2.js",
@@ -545,7 +545,7 @@
     "src": "src/ProjectActivityLogs.js"
   },
   "src/ProjectActivitySpentSynthesis.js": {
-    "file": "assets/ProjectActivitySpentSynthesis-8b8fe745.js",
+    "file": "assets/ProjectActivitySpentSynthesis-1990b7ff.js",
     "imports": [
       "_vendor.js",
       "_vendor14.js",
@@ -556,7 +556,7 @@
     "src": "src/ProjectActivitySpentSynthesis.js"
   },
   "src/Sticky.js": {
-    "file": "assets/sticky-f851c7f2.js",
+    "file": "assets/sticky-76ea4433.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js"
@@ -565,7 +565,7 @@
     "src": "src/Sticky.js"
   },
   "src/Test.js": {
-    "file": "assets/test-c9e77858.js",
+    "file": "assets/test-06113177.js",
     "imports": [
       "_vendor.js",
       "_vendor9.js",
@@ -585,7 +585,7 @@
     "css": [
       "assets/TimesheetDeclaration-d2772701.css"
     ],
-    "file": "assets/timesheetdeclarations-d122db43.js",
+    "file": "assets/timesheetdeclarations-a08fd6e5.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js",
@@ -607,7 +607,7 @@
     "css": [
       "assets/TimesheetPersonResume-9b0a7e87.css"
     ],
-    "file": "assets/timesheetpersonresume-b953db2b.js",
+    "file": "assets/timesheetpersonresume-8874586b.js",
     "imports": [
       "_vendor.js",
       "_vendor9.js",
@@ -621,14 +621,14 @@
     "src": "src/TimesheetPersonResume.js"
   },
   "src/oscar-css.css": {
-    "file": "assets/oscar-css-84bc208b.css",
+    "file": "assets/oscar-css-bc9bf596.css",
     "src": "src/oscar-css.css"
   },
   "src/oscar-css.js": {
     "css": [
-      "assets/oscar-css-84bc208b.css"
+      "assets/oscar-css-bc9bf596.css"
     ],
-    "file": "assets/oscarcss-8f465ac9.js",
+    "file": "assets/oscarcss-6ec17abc.js",
     "imports": [
       "_vendor.js",
       "_vendor17.js",

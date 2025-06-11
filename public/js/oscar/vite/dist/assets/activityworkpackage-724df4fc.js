@@ -1,0 +1,1 @@
+import{o as t,c as e,z as o}from"../vendor.js";import{_ as r}from"../vendor7.js";const c={data(){return{foo:"bar"}}};function n(i,m,k,l,u,_){return t(),e("div",null,"Workpackage")}const p=r(c,[["render",n]]);let a=document.querySelector("#activityworkpackage");const s=o(p,{url:a.dataset.url,manage:a.dataset.manage});s.mount("#activityworkpackage");
