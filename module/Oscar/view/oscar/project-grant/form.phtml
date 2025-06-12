@@ -86,25 +86,15 @@
             <div class="col-md-3">
                 <?php echo $this->formLabel($form->get('activityType'));?>
                 <?php /* echo $this->formSelect($form->get('activityType')); */?>
-                <div id="activityType"></div>
-                <script>
-                    require(["vue", "vue-resource", "activitytypeselector", "activitytypeitem"], function(Vue, VueResource, ActivityTypeSelector, ActivityTypeItem){
-                        Vue.use(VueResource);
-                        Vue.component('activity-type-item', ActivityTypeItem);
 
-                        new Vue({
-                            el: "#activityType",
-                            render: function(e) {
-                                return e(ActivityTypeSelector, { props: {
-                                        initialSelected: "<?= $activity && $activity->getActivityType() ? $activity->getActivityType()->getId() : '' ?>",
-                                        allowNodeSelection: <?= $allowNodeSelection ? 'true' : 'false' ?>,
-                                        inputName: "activityType",
-                                        typesAvailable: <?= json_encode($tree) ?>
-                                    } });
-                            }
-                        });
-                    })
-                </script>
+                <div id="activity-type-select"
+                     data-initial-selected="<?= $activity && $activity->getActivityType() ? $activity->getActivityType()->getId() : '' ?>"
+                     data-allow-node-selection="<?= $allowNodeSelection ? 'true' : 'false' ?>"
+                     data-input-name="activityType"
+                     data-types-available='<?= base64_encode(json_encode($tree)) ?>'
+                ></div>
+                <?php echo $this->Vite()->addJs('src/ActivityTypeSelect.js'); ?>
+
                 <?php echo $this->formElementErrors($form->get('activityType'), ["class" => "alert alert-danger"]); ?>
             </div>
             <div class="col-md-3">

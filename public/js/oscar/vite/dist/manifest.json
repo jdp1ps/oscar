@@ -328,6 +328,15 @@
     "isEntry": true,
     "src": "src/ActivitySpentSynthesis.js"
   },
+  "src/ActivityTypeSelect.js": {
+    "file": "assets/activitytypeselect-f02b637f.js",
+    "imports": [
+      "_vendor.js",
+      "_vendor7.js"
+    ],
+    "isEntry": true,
+    "src": "src/ActivityTypeSelect.js"
+  },
   "src/ActivityWorkpackage.js": {
     "file": "assets/activityworkpackage-724df4fc.js",
     "imports": [
