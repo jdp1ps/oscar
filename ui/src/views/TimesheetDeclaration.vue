@@ -12,7 +12,7 @@
           </h2>
 
           <div class="alert alert-info">
-            Le commentaire saisi sera repris dans le feuille de temps
+            Le commentaire saisi sera repris dans la feuille de temps
           </div>
 
           <textarea name="comment" class="form-control" id="" cols="30" rows="10" v-model="commentEditedContent"
