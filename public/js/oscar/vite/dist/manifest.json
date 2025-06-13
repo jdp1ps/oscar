@@ -515,7 +515,7 @@
     "src": "src/OrganizationSubOrganizations.js"
   },
   "src/ParametersUserSendFrequency.js": {
-    "file": "assets/parameters_user_send_frequency-db1a004b.js",
+    "file": "assets/parameters_user_send_frequency-eb3bf776.js",
     "imports": [
       "_vendor.js",
       "_vendor9.js",
