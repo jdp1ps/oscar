@@ -140,7 +140,7 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
                         $this->getUserParametersService()->performChangeDeclarationMode(
                             $this->params()->fromPost('declarationsHours')
                         );
-                        return $this->getResponseOk();
+                        return $this->redirect()->toRoute('user_parameters');
                     } catch (OscarException $e) {
                         return $this->getResponseInternalError(
                             sprintf('%s : %s', _('Impossible de modifier le mode de déclaration'), $e->getMessage())
@@ -173,6 +173,8 @@ class PublicController extends AbstractOscarController implements UseTimesheetSe
 
             return $this->getResponseBadRequest("Erreur d'usage");
         }
+
+
 
         if ($this->isAjax() && $this->params()->fromQuery('a') == 'frequency') {
             if ($method == 'GET') {

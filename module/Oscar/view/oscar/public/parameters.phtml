@@ -4,7 +4,7 @@
     </h1>
 
 
-    <form action="">
+
         <div class="row">
 
             <div class="col-md-6">
@@ -178,7 +178,7 @@
                         </strong>
                     </p>
                     <?php if($declarationsHoursOverwriteByAuth): ?>
-                        <form action="">
+                        <form action="" method="post">
                             <input type="hidden" name="action" value="declaration-mode" />
                             <button type="submit" name="declarationsHours" value="<?php echo $declarationsHours ? 'off' : 'on' ?>">
                                 <?php echo $declarationsHours ? 'Passer en pourcentage' : 'Passer en heure' ?>
@@ -202,7 +202,6 @@
                 <?= $this->Vite()->addJs('src/ParametersUserSendFrequency.js'); ?>
             </div>
         </div>
-    </form>
 </div>
 <script>
     /*****
