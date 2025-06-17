@@ -94,7 +94,6 @@
                      data-types-available='<?= base64_encode(json_encode($tree)) ?>'
                 ></div>
                 <?php echo $this->Vite()->addJs('src/ActivityTypeSelect.js'); ?>
-
                 <?php echo $this->formElementErrors($form->get('activityType'), ["class" => "alert alert-danger"]); ?>
             </div>
             <div class="col-md-3">

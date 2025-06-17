@@ -6,10 +6,8 @@ import ActivityTypeItem from "./components/ActivityTypeItem.vue";
 let elemId = '#activity-type-select';
 let elemDatas = document.querySelector(elemId);
 
-console.log(atob(elemDatas.dataset.typesAvailable));
-
 const app = createApp(ActivityTypeSelect, {
-    activityInitalSelected: elemDatas.dataset.activityInitalSelected,
+    initialSelected: elemDatas.dataset.initialSelected,
     allowNodeSelection: elemDatas.dataset.allowNodeSelection === "true",
     inputName: elemDatas.dataset.inputName,
     typesAvailable: JSON.parse(atob(elemDatas.dataset.typesAvailable)),
