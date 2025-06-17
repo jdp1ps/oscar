@@ -329,7 +329,7 @@
     "src": "src/ActivitySpentSynthesis.js"
   },
   "src/ActivityTypeSelect.js": {
-    "file": "assets/activitytypeselect-f02b637f.js",
+    "file": "assets/activitytypeselect-600b653d.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js"
@@ -594,7 +594,7 @@
     "css": [
       "assets/TimesheetDeclaration-d2772701.css"
     ],
-    "file": "assets/timesheetdeclarations-a08fd6e5.js",
+    "file": "assets/timesheetdeclarations-f084b19e.js",
     "imports": [
       "_vendor.js",
       "_vendor7.js",
