@@ -106,7 +106,8 @@
           </span>
           <span class="overlay-closer" @click="editedDocument = null">X</span>
         </h2>
-        <!--        <pre style="font-size: .7em">{{ editedDocument }}</pre>-->
+        <pre style="font-size: .7em">{{ editedDocument }}</pre>
+
         <div class="row">
 
           <div class="col-md-6">
@@ -284,12 +285,12 @@
         </nav>
         <document-list
             :documents="tab.documents"
-            :tabs="tabsWithDocuments"
+            :tabs="saTabs"
             :manage="saCredentials.tabs[tab.id].edit"
             :process-start="saCredentials.process_start"
             :process-manage="saCredentials.process_manage"
             :process-admin="saCredentials.process_admin"
-            :types="typesDocuments"
+            :types="saTypes"
             :sign-process="useProcessDatas"
             :display-activity="false"
             @fetch="fetch"

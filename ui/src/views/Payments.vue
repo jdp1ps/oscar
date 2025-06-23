@@ -306,6 +306,8 @@ export default {
         return;
       }
 
+      this.formData.amount = this.formData.amount.toString().replace(',', '.');
+
       if (this.formData.id) {
         axios.post(this.url, this.formData).then(
             (response) => {
