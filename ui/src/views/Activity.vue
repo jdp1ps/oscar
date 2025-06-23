@@ -343,7 +343,7 @@
               <i class="icon-cubes"></i>
               Créer un nouveau projet</a>
 
-            <a class="btn btn-default" v-if="core.urls.duplicate" @click="handlerDuplicate">
+            <a class="btn btn-default" v-if="credentials.core.duplicate" @click="handlerDuplicate">
               <i class="icon-paste"></i>
               Dupliquer</a>
 

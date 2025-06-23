@@ -254,6 +254,9 @@ class ProjectGrantApiService implements
                             Privileges::ACTIVITY_EDIT,
                             $activity
                         ),
+                        'duplicate' => $oscarUserContext->hasPrivileges(
+                                Privileges::ACTIVITY_CREATE
+                            ),
                         'change_project' => !$locked && $oscarUserContext->hasPrivileges(
                             Privileges::ACTIVITY_CHANGE_PROJECT,
                             $activity
@@ -550,6 +553,7 @@ class ProjectGrantApiService implements
             'dateUpdated' => $this->formatDateTime($activity->getDateUpdated()),
             'dateOpened' => $this->formatDateTime($activity->getDateOpened()),
             'urls' => [
+                'duplicate' => $urlPlugin->fromRoute('contract/duplicate', ['id' => $activity->getId()]),
                 'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
                 'change_project' => $urlPlugin->fromRoute('contract/moveToProject', ['id' => $activity->getId()]),
                 'new_project' => $urlPlugin->fromRoute('project/new') . '?ids=' . $activity->getId(),
