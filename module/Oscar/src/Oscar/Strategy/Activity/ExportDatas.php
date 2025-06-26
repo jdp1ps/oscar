@@ -20,6 +20,8 @@ use Oscar\Service\OscarConfigurationService;
 use Oscar\Service\OscarUserContext;
 use Oscar\Service\OscarUserContextFactory;
 use Oscar\Service\ProjectGrantService;
+use Oscar\Traits\UseActivityTypeService;
+use Oscar\Traits\UseActivityTypeServiceTrait;
 use Oscar\Traits\UseEntityManager;
 use Oscar\Traits\UseEntityManagerTrait;
 use Oscar\Traits\UseOscarConfigurationService;
@@ -29,9 +31,9 @@ use Oscar\Traits\UseOscarUserContextServiceTrait;
 use Oscar\Traits\UseProjectGrantService;
 use Oscar\Traits\UseProjectGrantServiceTrait;
 
-class ExportDatas implements UseOscarConfigurationService, UseProjectGrantService, UseEntityManager, UseOscarUserContextService
+class ExportDatas implements UseOscarConfigurationService, UseProjectGrantService, UseEntityManager, UseOscarUserContextService, UseActivityTypeService
 {
-    use UseOscarConfigurationServiceTrait, UseProjectGrantServiceTrait, UseEntityManagerTrait, UseOscarUserContextServiceTrait;
+    use UseOscarConfigurationServiceTrait, UseProjectGrantServiceTrait, UseEntityManagerTrait, UseOscarUserContextServiceTrait, UseActivityTypeServiceTrait;
 
     private ?string $rewriteDateFormat = null;
 
@@ -42,6 +44,7 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
     {
         $this->setProjectGrantService($pgs);
         $this->setOscarConfigurationService($pgs->getOscarConfigurationService());
+        $this->setActivityTypeService($pgs->getActivityTypeService());
         $this->setEntityManager($pgs->getEntityManager());
         $this->setOscarUserContextService($ouc);
         if( $rewriteDateFormat === null ){
@@ -264,8 +267,10 @@ class ExportDatas implements UseOscarConfigurationService, UseProjectGrantServic
                     }
                 }
 
-
-                foreach ( $entity->csv($dateFormat) as $col=>$value ){
+                $activityTypeChainFormatted = $entity->getActivityType() ? $this->getActivityTypeService()->getActivityTypeChainFormatted(
+                    $entity->getActivityType()
+                ) : '';
+                foreach ( $entity->csv($dateFormat, $activityTypeChainFormatted) as $col=>$value ){
                     if( $columns[$col] === true )
                         $datas[] = $value;
                 }

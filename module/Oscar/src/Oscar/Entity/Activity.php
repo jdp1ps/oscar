@@ -2724,7 +2724,7 @@ class Activity implements ResourceInterface
         return $datas;
     }
 
-    public function csv($dateFormat = 'Y-m-d')
+    public function csv($dateFormat = 'Y-m-d', $activityTypeChainFormatted)
     {
         return array(
             'ID'                                   => $this->getId(),
@@ -2742,6 +2742,7 @@ class Activity implements ResourceInterface
             'numéro SAIC'                          => $this->getCentaureNumConvention(),
             'numéro oscar'                         => $this->getOscarNum(),
             'Type'                                 => $this->getActivityType() ? (string)$this->getActivityType() : '',
+            'Type avec arborescence'               => $activityTypeChainFormatted,
             'Statut'                               => Activity::getStatusLabel(),
             'Début'                                => $this->getDateStart() ? $this->getDateStart()->format(
                 $dateFormat
@@ -2803,6 +2804,7 @@ class Activity implements ResourceInterface
             'numéro SAIC',
             'numéro oscar',
             'Type',
+            'Type avec arborescence',
             'Statut',
             'Début',
             'Fin',
