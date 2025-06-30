@@ -42,20 +42,6 @@
     "approles": []
   },
   {
-    "displayname": "Flying Spagetti Monster",
-    "email": "flyingsm@jacksay.com",
-    "password": "bcrypt:$2y$14$kYmzTH0KHFegg7ss7Yq6xOd2rULd9zEmniZmrb.isOUfIDWAd9DTO",
-    "login": "flyingsm",
-    "approles": ["Administrateur"]
-  },
-  {
-    "displayname": "Administrateur",
-    "email": "administrateur@oscar-demo.com",
-    "password": "administrateur",
-    "login": "administrateur",
-    "approles": ["Administrateur"]
-  },
-  {
     "displayname": "Déclarant",
     "email": "sarah.declarant@jacksay.com",
     "password": "declarant",
