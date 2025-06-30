@@ -1,86 +1,79 @@
 [
   {
-    "displayname": "Albert Einstein",
-    "email": "albert.einstein@jacksay.com",
-    "password": "alberteinstein",
-    "login": "alberteinstein",
-    "approles": []
-  },
-  {
-    "displayname": "Maurice Solovine",
-    "email": "maurice.solovine@jacksay.com",
-    "password": "mauricesolovine",
-    "login": "mauricesolovine",
-    "approles": []
-  },
-  {
-    "displayname": "Marcel Grossmann",
-    "email": "marcel.grossmann@jacksay.com",
-    "password": "marcelgrossmann",
-    "login": "marcelgrossmann",
-    "approles": []
-  },
-  {
-    "displayname": "Max Plank",
-    "email": "max.plank@jacksay.com",
-    "password": "maxplank",
-    "login": "maxplank",
-    "approles": []
-  },
-  {
-    "displayname": "Niels Bohr",
-    "email": "niels.bohr@jacksay.com",
-    "password": "nielsbohr",
-    "login": "nielsbohr",
-    "approles": []
-  },
-  {
-    "displayname": "Erwin Schrödinger",
-    "email": "erwin.schrodinger@jacksay.com",
-    "password": "erwinschrodinger",
-    "login": "erwinschrodinger",
-    "approles": []
-  },
-  {
-    "displayname": "Déclarant",
-    "email": "sarah.declarant@jacksay.com",
-    "password": "declarant",
-    "login": "declarant",
-    "approles": []
-  },
-  {
-    "displayname": "Responsable de labo",
-    "email": "raphaelle.responsable@jacksay.com",
-    "password": "responsable",
-    "login": "responsable",
-    "approles": []
-  },
-  {
     "displayname": "Administrateur",
-    "email": "romane.administrateur@jacksay.com",
+    "email": "admin@jacksay.com",
     "password": "administrateur",
     "login": "administrateur",
     "approles": ["Administrateur"]
   },
   {
-    "displayname": "Direction de composante",
-    "email": "emmanuelle.directrice@jacksay.com",
-    "password": "direction",
-    "login": "direction",
+    "displayname": "Charles Darwin",
+    "email": "charles.darwin@jacksay.com",
+    "password": "charlesd",
+    "login": "charlesd",
     "approles": []
   },
   {
-    "displayname": "Chargé de valorisation",
-    "email": "valorisation@oscar-demo.com",
-    "password": "valorisation",
-    "login": "valorisation",
-    "approles": ["Chargé de valorisation"]
+    "displayname": "Maryam Mirzakhani",
+    "email": "maryam.mirzakhani@jacksay.com",
+    "password": "maryamm",
+    "login": "maryamm",
+    "approles": []
   },
   {
-    "displayname": "Responsable financier",
-    "email": "financier@oscar-demo.com",
-    "password": "financier",
-    "login": "financier",
-    "approles": ["Responsable Financier"]
+    "displayname": "Marie Curie",
+    "email": "marie.curie@jacksay.com",
+    "password": "mariec",
+    "login": "mariec",
+    "approles": []
+  },
+  {
+    "displayname": "Albert Einstein",
+    "email": "albert.einstein@jacksay.com",
+    "password": "alberte",
+    "login": "alberte",
+    "approles": []
+  },
+  {
+    "displayname": "Maurice Solovine",
+    "email": "maurice.solovine@jacksay.com",
+    "password": "maurices",
+    "login": "maurices",
+    "approles": []
+  },
+  {
+    "displayname": "Marcel Grossmann",
+    "email": "marcel.grossmann@jacksay.com",
+    "password": "marcelg",
+    "login": "marcelg",
+    "approles": []
+  },
+  {
+    "displayname": "Max Plank",
+    "email": "max.plank@jacksay.com",
+    "password": "maxp",
+    "login": "maxp",
+    "approles": []
+  },
+  {
+    "displayname": "Niels Bohr",
+    "email": "niels.bohr@jacksay.com",
+    "password": "nielsb",
+    "login": "nielsb",
+    "approles": []
+  },
+  {
+    "displayname": "Erwin Schrödinger",
+    "email": "erwin.schrodinger@jacksay.com",
+    "password": "erwins",
+    "login": "erwins",
+    "approles": []
+  },
+  {
+    "displayname": "François Gros",
+    "email": "francois.gros@jacksay.com",
+    "password": "francoisg",
+    "login": "francoisg",
+    "approles": []
   }
 ]

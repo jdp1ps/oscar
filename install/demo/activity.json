@@ -1,18 +1,57 @@
 [
   {
-    "uid": "A0001",
-    "acronym": "RELACSV",
+    "uid": "bio01",
+    "acronym": "ARNM",
+    "projectlabel": "ARN messager",
+    "description": "",
+    "label": "Acide ribonucléique messager",
+    "datestart": "2024-01-01",
+    "dateend": "2025-12-31",
+    "datesigned": "2024-01-05",
+    "pfi": "",
+    "status": 101,
+    "datePFI": "2024-01-01",
+    "type": "ANR",
+    "amount": 9000.0,
+    "financialImpact": "Recette",
+    "milestones": [
+      {
+        "type": "Rapport scientifique",
+        "date": "2025-01-01"
+      },
+      {
+        "type": "Fin des dépenses",
+        "date": "2025-11-30"
+      }
+    ],
+    "organizations": {
+      "Laboratoire": [
+        "Laboratoire de Biologie"
+      ],
+      "Composante": [
+        "UFR des Sciences"
+      ]
+    },
+    "persons": {
+      "Responsable": [
+        "François Gros"
+      ]
+    }
+  },
+  {
+    "uid": "phy01",
+    "acronym": "RELATIV",
     "projectlabel": "Théorie de la relativité",
-    "description": "Description le d'activité 1",
-    "label": "Exemple d'activité 1",
+    "description": "",
+    "label": "Relativité réstrinte",
     "datestart": "2014-01-01",
     "dateend": "2023-03-31",
     "datesigned": "2017-06-01",
-    "pfi": "99PFI1234",
+    "pfi": "",
     "status": 101,
     "datePFI": "2018-01-01",
     "type": "ANR",
-    "amount": "0.0",
+    "amount": 5000.0,
     "financialImpact": "Recette",
     "milestones": [
       {
@@ -25,34 +64,34 @@
       }
     ],
     "organizations": {
-      "Référent extérieur": [],
       "Laboratoire": [
-        "Cyberdyne",
-        "US Robots"
+        "Laboratoire de Physique"
+      ],
+      "Composante": [
+        "UFR des Sciences"
       ]
     },
     "persons": {
-      "Responsable scientifique": [
+      "Responsable": [
         "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe",
-        "Sarah Déclarant"
+        "Marcel Grossmann"
       ]
     }
   },
   {
-    "uid": "A0002",
-    "acronym": "RELACSV",
+    "uid": "phy02",
+    "acronym": "RELATIV",
     "projectlabel": "Théorie de la relativité",
-    "description": "Description le d'activité 2",
-    "label": "Exemple d'activité 2",
+    "description": "",
+    "label": "Relativité générale",
     "datestart": "2021-01-01",
     "dateend": "2022-12-31",
     "datesigned": "2021-01-05",
     "pfi": "",
     "status": 101,
-    "type": "Colloques",
+    "type": "ANR",
     "amount": 15000,
     "financialImpact": "Recettes",
     "milestones": [
@@ -61,22 +100,18 @@
     ],
     "organizations": {
       "Laboratoire": [
-        "Cyberdyne",
-        "US Robots"
+        "Laboratoire de Physique"
       ],
-      "Composante responsable": [
-        "ACME"
+      "Composante": [
+        "UFR des Sciences"
       ]
     },
     "persons": {
-      "Responsable scientifique": [
-        "Albert Einstein",
-        "Maurice Solovine"
+      "Responsable": [
+        "Albert Einstein"
       ],
       "Ingénieur": [
-        "John Doe",
-        "Marcel Grossmann",
-        "Sarah Déclarant"
+        "Marcel Grossmann"
       ]
     },
     "workpackages": [
@@ -85,9 +120,7 @@
         "label": "Etude et analyse",
         "declarers": [
           "Albert Einstein",
-          "Maurice Solovine",
-          "Marcel Grossmann",
-          "Sarah Déclarant"
+          "Marcel Grossmann"
         ]
       },
       {
@@ -95,7 +128,6 @@
         "label": "Rédaction d'article",
         "declarers": [
           "Albert Einstein",
-          "Maurice Solovine",
           "Marcel Grossmann"
         ]
       },
@@ -110,7 +142,7 @@
     ]
   },
   {
-    "uid": "A0003",
+    "uid": "phy03",
     "acronym": "MECAQUAN",
     "projectlabel": "Mécanique quantique",
     "label": "Étude des quanta",
@@ -128,22 +160,18 @@
     ],
     "organizations": {
       "Laboratoire": [
-        "US Robots"
+        "Laboratoire de Physique"
       ],
-      "Composante responsable": [
-        "ACME"
+      "Composante": [
+        "UFR des Sciences"
       ]
     },
     "persons": {
-      "Responsable scientifique": [
+      "Responsable": [
         "Max Plank"
       ],
-      "Chercheur": [
-        "Erwin Schrödinger"
-      ],
       "Ingénieur": [
-        "Marcel Grossmann",
-        "Sarah Déclarant"
+        "Marcel Grossmann"
       ]
     },
     "workpackages": [
@@ -152,9 +180,7 @@
         "label": "Travaux préparatoires",
         "declarers": [
           "Max Plank",
-          "Erwin Schrödinger",
-          "Marcel Grossmann",
-          "Sarah Déclarant"
+          "Marcel Grossmann"
         ]
       },
       {
@@ -162,7 +188,6 @@
         "label": "Rédaction d'article",
         "declarers": [
           "Max Plank",
-          "Erwin Schrödinger",
           "Marcel Grossmann"
         ]
       },
@@ -170,45 +195,9 @@
         "code": "WP3",
         "label": "Expériences",
         "declarers": [
-          "Marcel Grossmann",
-          "Sarah Déclarant"
+          "Marcel Grossmann"
         ]
       }
     ]
-  },
-  {
-    "uid": "A0004",
-    "acronym": "TESTPCRU",
-    "projectlabel": "Projet PCRUifié",
-    "label": "Contrat vers PCRU",
-    "datestart": "2022-01-01",
-    "dateend": "2022-12-31",
-    "datesigned": "2022-01-05",
-    "financialImpact": "Dépense",
-    "pfi": "2022PFI04079",
-    "status": 101,
-    "type": "ANR",
-    "amount": 15250,
-    "milestones": [
-    ],
-    "payments": [
-    ],
-    "organizations": {
-      "Laboratoire": [
-        "Groupe Olympia"
-      ]
-    },
-    "persons": {
-      "Responsable scientifique": [
-        "Max Plank"
-      ],
-      "Chercheur": [
-        "Erwin Schrödinger"
-      ],
-      "Ingénieur": [
-        "Sarah Déclarant"
-      ]
-    },
-    "workpackages": []
   }
 ]

@@ -7,31 +7,10 @@
     "type": "Société"
   },
   {
-    "uid": "OSCORP",
-    "code": "OSCORP",
-    "shortname": "Oscorp",
-    "longname": "Oscorp Industries",
-    "type": "Société",
-    "address": {
-      "city": "New York",
-      "country": "United States Of America"
-    }
-  },
-  {
-    "uid": "WAYNE",
-    "code": "WAYNE",
-    "shortname": "WE",
-    "longname": "Wayne Enterprises",
-    "address": {
-      "city": "Gotham"
-    },
-    "type": "Société"
-  },
-  {
-    "uid": "LABO1",
-    "code": "LABO1",
-    "shortname": "Olympia",
-    "longname": "Groupe Olympia",
+    "uid": "LABOPHY",
+    "code": "LABOPHY",
+    "shortname": "LDP",
+    "longname": "Laboratoire de Physique",
     "url": "http://www.jacksay.com",
     "email": "olympia@jacksay.com",
     "siret": "SIRETOLYMPIA",
@@ -46,17 +25,24 @@
     }
   },
   {
-    "uid": "UNIV1",
-    "code": "UNIV1",
-    "shortname": "USB",
-    "longname": "Université des sciences de Berne",
+    "uid": "UFRSCIENCES",
+    "code": "UFRSCIENCES",
+    "shortname": "UFRDS",
+    "longname": "UFR des Sciences",
     "type": "Établissement publique"
   },
   {
-    "uid": "UNIV2",
-    "code": "UNIV2",
-    "shortname": "USB",
-    "longname": "Université des sciences de Berlin",
+    "uid": "LABOBIO",
+    "code": "LABOBIO",
+    "shortname": "LDB",
+    "longname": "Laboratoire de Biologie",
+    "type": "Établissement publique"
+  },
+  {
+    "uid": "LABOMATH",
+    "code": "LABOMATH",
+    "shortname": "LDM",
+    "longname": "Laboratoire de Mathématique",
     "type": "Établissement publique"
   }
 ]

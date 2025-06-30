@@ -2,6 +2,8 @@
 
 sudo docker compose exec app-php php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
 
+sudo docker compose exec app-php php bin/oscar.php check:sequences-num
+
 # Chargement des organisations
 sudo docker compose exec app-php php bin/oscar.php organizations:sync-json install/demo/organizations.json
 

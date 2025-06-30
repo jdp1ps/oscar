@@ -3270,7 +3270,7 @@ COPY public.unicaen_signature_signatureflowstep (id, recipientsmethod, label, le
 
 COPY public.user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal, displayed, accessible_exterieur) FROM stdin;
 1	\N	Administrateur	f	\N	7	\N	f	t	t
-3	\N	Responsabe	f	\N	1	Responsable sur un contrat	t	f	t
+3	\N	Responsable	f	\N	1	Responsable sur un contrat	t	f	t
 5	\N	Déclarant	f	\N	1	Personne identifiée sur un contrat	f	f	t
 2	\N	Chargé de projet	f	\N	15	Personne responsable du suivi des contrats	t	f	t
 4	\N	Gestionnaire	f	\N	2	Personne gestionnaire dans un laboratoire ou une composante	t	f	t

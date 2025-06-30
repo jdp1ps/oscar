@@ -1,120 +1,77 @@
-# OSCAR DOCKER
+# Installation OSCAR avec Docker
 
-## Démo/Préprod
+> Note : Si vous êtes développeur/testeur, une version plus spécifique (locale) est disponible ici [Oscar Docker Dev](./DEV.md)
 
-### Installation/build
-
-Suivez la [procédure d'installation en production](./PROD.md)
-
-
-
-## Développement
-
-### Installation
-
-Suivez la procédure de production,
-puis dans le fichier **compose.yml**, décommentez les containers en fin de fichier : 
- - mailhog
- - vite (Si développement UI)
- - kibana (Si développement sur Elasticsearch)
-
-### Commandes de base
-
-Lancement/Arrêt de l'application
+## Etape 1 : Récupération des sources
 
 ```bash
-# lancement (Avec build, logs complets en stdout)
-docker compose up --build
+# Récupération du dépôt
+git clone https://git.unicaen.fr/open-source/oscar.git
+cd oscar
 
-# lancement (Avec build, mode détaché)
-docker compose up --build -d
+# Copie de la configuration par défaut
+cp docker/.env.prod.dist .env
 
-# Arrêt (Si détaché)
-docker compose down
+# 
+cp docker/compose.prod.yml ./compose.yml
 ```
 
-Lancer des commandes sur l'application PHP
+## Etape 2 : Proxy
+
+Si vous n'êtes pas derrière un proxy, passez cette étape
 
 ```bash
-# Commandes OSCAR
-docker compose exec app-worker php bin/oscar.php
-
-# Mise à jour du modèle
-docker compose exec app-worker php vendor/bin/doctrine-module orm:schema-tool:update --force --complete
+# MAJ du Proxy
+sed -i 's%^HTTP_PROXY=.*%HTTP_PROXY=http://votre-proxy:3128%' .env
 ```
 
+## Etape 3 : Volumes
 
-### Autres commandes
+Vous devez créer tous les volumes de l'application pour l'archivage des fichiers, écriture des logs, configuration personnalisées, etc...
 
-
-Lancer des commandes sur le container Oscar : 
+Un script permet de vous simplifier cette étape (en se basant sur votre .env) :
 
 ```bash
-docker compose exec app-php php bin/oscar.php
+. docker/compose-init.sh
 ```
 
-Build de l'UI : 
-```bash
-docker compose exec app-vite yarn run build
-```
+Si vous êtes en démo, tout est prêt.
 
-Purger la BDD (Stopper l'application avant)
 
-```bash
-# Le volume avec les données est créé par docker - donc droit SU requis
-sudo rm -Rf volumes/postgresql/*
-```
+## Etape 4 : Proxypass de l'hôte > container oscar
 
-Copier une base de données existante :
-
-> Pensez à adapter l'emplacement du fichier SQL si besoin
+Si vous êtes en local, passez cette étape
 
 ```bash
-pg_dump --clean --if-exists --no-owner -h HOST -U USER BASE > demo/default/postgresql/init/sql/install.sql
+# Activation du mod Proxy
+sudo  a2enmod proxy proxy_http
+
+# Un exemple de Vhost
+sudo cp docker/host.apache.proxy.conf /etc/apache2/sites-available/000-default.conf
+
+# Renseigner votre domaine (ou avec votre éditeur préféré)
+sed -i 's%^oscar-host-name%VOTRE-NOM-DE-DOMAINE.EXT%' /etc/apache2/sites-available/000-default.conf
+
+# Reboot apache 
+sudo systemctl restart apache2
 ```
 
 
-Lister les tâches en attentes sur Gearman
+## Etape 5 : Lancement
 
 ```bash
-# TODO
+sudo docker compose up
 ```
 
-### Accès à la base de données
+Vous avez un oscar fonctionnel à cette étape
 
-#### DBeaver CE
+- En local : http://localhost:8888
+- Avec Proxypass : http://VOTRE-NOM-DE-DOMAINE.EXT
 
- - Drivers : `Postgresql`
- - Hôte : `app-postgres`
- - Identifiant : `oscar_devdev_user`
- - Mot de passe : `oscar_devdev_pass`
- - Base de données : `oscar_devdev_db`
- - Port : `6543`
-
-> Peut être modifié dans le fichier **.env.docker.dev**
-
-#### Développement UI (Vite/VueJS)
-
-Dans `config/autoload/local.php` : 
+## Etape 6 : Données de démonstration
 
 ```bash
-<?php
-// ...
-return array(
-    'oscar' => [
-        // ...
-        'vite' => [
-            'mode' => 'dev', // par défaut 'prod'
-            'src' => __DIR__ . '/../../ui',
-            'dest' => __DIR__ . '/../../public/js/oscar/vite/dist',
-            'base_url_dev' => 'http://127.0.0.1:5173',
-            'base_url_prod' => '/js/oscar/vite/dist',
-        ],
-        // ...
-    ]
-)
+. docker/docker-sync-demos-datas.sh
 ```
 
-> Le *container* Vite installe automatiquement la dernière version de Node/NPM. à voir si cela nous bloque à un moment et nous oblige à fixer la version 
-
-
+Accès : administrateur/administrateur

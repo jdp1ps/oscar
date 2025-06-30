@@ -3,39 +3,25 @@
     "firstname": "Albert",
     "lastname": "Einstein",
     "mail": "albert.einstein@jacksay.com",
-    "login": "alberteinstein",
-    "uid": "alberteinstein",
-    "dateupdated": "2025-03-05",
-    "roles": {
-      "LABO1": ["Directeur"]
-    }
-  },
-
-  {
-    "firstname": "Cet enregistrement sera ignoré, pas d'UID",
-    "lastname": "",
-    "mail": "",
-    "login": ""
+    "login": "alberte",
+    "uid": "alberte",
+    "dateupdated": "2025-03-05"
   },
   {
     "firstname": "Maurice",
     "lastname": "Solovine",
     "mail": "maurice.solovine@jacksay.com",
     "dateupdated": "2025-03-05",
-    "login": "mauricesolovine",
-    "uid": "mauricesolovine",
-    "roles": {
-      "UNIV1": ["Responsable scientifique", "Doctorant"],
-      "LABO1": ["Gestionnaire"]
-    }
+    "login": "maurices",
+    "uid": "maurices"
   },
   {
     "firstname": "Marcel",
     "lastname": "Grossmann",
     "mail": "marcel.grossmann@jacksay.com",
-    "login": "marcelgrossmann",
+    "login": "marcelg",
     "dateupdated": "2025-03-05",
-    "uid": "marcelgrossmann",
+    "uid": "marcelg",
     "referents": ["maxplank"]
   },
   {
@@ -43,56 +29,59 @@
     "lastname": "Plank",
     "mail": "max.plank@jacksay.com",
     "dateupdated": "2025-03-05",
-    "login": "maxplank",
-    "uid": "maxplank",
+    "login": "maxp",
+    "uid": "maxp",
     "roles": {
-      "14": ["Turlututu"],
-      "ED209": ["Code Absent de oscar => Ignoré"],
-      "UNIV2": ["Gestionnaire"]
+      "LABOPHY": ["Gestionnaire"]
+    }
+  },
+  {
+    "firstname": "Charles",
+    "lastname": "Darwin",
+    "mail": "charles.darwin@jacksay.com",
+    "dateupdated": "2025-03-05",
+    "login": "charlesd",
+    "uid": "charlesd",
+    "roles": {
+      "LABOBIO": ["Gestionnaire"]
+    }
+  },
+  {
+    "firstname": "Maryam",
+    "lastname": "Mirzakhani",
+    "mail": "maryam.mirzakhani@jacksay.com",
+    "dateupdated": "2025-03-05",
+    "login": "maryamm",
+    "uid": "maryamm",
+    "roles": {
+      "LABOMATH": ["Gestionnaire"]
     }
   },
   {
     "firstname": "Niels",
     "lastname": "Bohr",
     "mail": "niels.bohr@jacksay.com",
-    "login": "nielsbohr",
+    "login": "nielsb",
     "dateupdated": "2025-03-05",
-    "uid": "nielsbohr"
-  },
-
-  {
-    "firstname": "Romane",
-    "lastname": "Administrateur",
-    "mail": "romane.administrateur@jacksay.com",
-    "login": "administrateur",
-    "dateupdated": "2025-03-05",
-    "uid": "administrateur"
+    "uid": "nielsb"
   },
   {
-    "firstname": "Raphaelle",
-    "lastname": "Responsable",
-    "mail": "raphaelle.responsable@jacksay.com",
-    "login": "responsable",
+    "firstname": "Marie",
+    "lastname": "Curie",
+    "mail": "marie.curie@jacksay.com",
+    "login": "mariec",
     "dateupdated": "2025-03-05",
-    "uid": "responsable"
-  },
-  {
-    "firstname": "Sarah",
-    "lastname": "Déclarant",
-    "mail": "sarah.declarant@jacksay.com",
-    "login": "declarant",
-    "dateupdated": "2025-03-05",
-    "uid": "declarant"
-  },
-  {
-    "firstname": "Emmanuelle",
-    "lastname": "Direction",
-    "mail": "emmanuelle.direction@jacksay.com",
-    "login": "direction",
-    "uid": "direction",
-    "dateupdated": "2025-03-05",
+    "uid": "mariec",
     "roles": {
-
+      "UFRSCIENCES": ["Gestionnaire"]
     }
+  },
+  {
+    "firstname": "François",
+    "lastname": "Gros",
+    "mail": "francois.gros@jacksay.com",
+    "login": "francoisg",
+    "dateupdated": "2025-03-05",
+    "uid": "francoisg"
   }
 ]
