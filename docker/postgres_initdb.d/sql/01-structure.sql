@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.16 (Debian 13.16-0+deb11u1)
--- Dumped by pg_dump version 13.16 (Debian 13.16-0+deb11u1)
+-- Dumped from database version 14.18
+-- Dumped by pg_dump version 15.13 (Debian 15.13-0+deb12u1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,31 +16,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: ProjectRemoveClone(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public."ProjectRemoveClone"() RETURNS void
-    LANGUAGE plpgsql
-    AS $$DECLARE
--- TOTO
-BEGIN
-	RAISE NOTICE 'Appel de ProjectRemoveClone()';
-
-	-- On récupère les projet en double
-SELECT eotp
-FROM project
-GROUP BY eotp
-HAVING count(*) > 1;
-
-RETURN;
-END
-$$;
-
-
---
--- Name: activity_num_auto(integer); Type: FUNCTION; Schema: public; Owner: -
---
 
 CREATE FUNCTION public.activity_num_auto(activity_id integer) RETURNS text
     LANGUAGE plpgsql
@@ -53,45 +28,45 @@ year int;
 	separator text := 'DRI';
 	counter_val int;
 BEGIN
-    ------------------------------------------------------------------------------------
-    -- On récupère l'activité qui va bien
+	------------------------------------------------------------------------------------
+	-- On récupère l'activité qui va bien
 SELECT * INTO activity_record FROM activity WHERE id = activity_id;
 
 -- Err : Pas d'activité
 IF activity_record IS NULL THEN
-        RAISE EXCEPTION 'Activité % non trouve', activity_id;
+		RAISE EXCEPTION 'Activité % non trouve', activity_id;
 END IF;
 
-    -- Err : Activité déjà numérotée
-    IF activity_record.oscarnum IS NOT NULL THEN
-        RAISE EXCEPTION 'Cette activité (%) est déjà numérotée', activity_id;
+	-- Err : Activité déjà numérotée
+	IF activity_record.oscarnum IS NOT NULL THEN
+		RAISE EXCEPTION 'Cette activité (%) est déjà numérotée', activity_id;
 END IF;
-    -------------------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------
 
-    -------------------------------------------------------------------------------------
-    -- Récupération du plus grand numéro précédent :
+	-------------------------------------------------------------------------------------
+	-- Récupération du plus grand numéro précédent :
 
-    -- On récupère l'année de l'activité (Si elle est null, on utilise l'année courante)
+	-- On récupère l'année de l'activité (Si elle est null, on utilise l'année courante)
 year := EXTRACT(YEAR FROM activity_record.dateSigned);
-    IF year IS NULL THEN
-        year = EXTRACT(YEAR FROM activity_record.dateCreated);
+	IF year IS NULL THEN
+		year = EXTRACT(YEAR FROM activity_record.dateCreated);
 END IF;
-    IF year IS NULL THEN
-        year = EXTRACT(YEAR FROM CURRENT_TIMESTAMP);
+	IF year IS NULL THEN
+		year = EXTRACT(YEAR FROM CURRENT_TIMESTAMP);
 END IF;
 
-    -- On récupère le dernier numéro pour cette année
-SELECT MAX(oscarNum) INTO last_num FROM activity WHERE oscarnum LIKE year || (separator ||'%');
-
+	-- On récupère le dernier numéro pour cette année
+SELECT MAX(oscarNum) INTO last_num FROM activity WHERE oscarnum LIKE year || 'DRI%';
 IF last_num IS NULL THEN
-        counter_val := 0;
+		counter_val := 0;
 ELSE
-        counter_val := substring(last_num FROM (5 + char_length(separator)) FOR 5)::int;
+		counter_val := substring(last_num FROM 8 FOR 5)::int;
 END IF;
 
-    counter_val := counter_val + 1;
+	counter_val := counter_val + 1;
 
-    num := CONCAT(year, separator, to_char(counter_val, 'fm00000'));
+
+	num := CONCAT(year, 'DRI', to_char(counter_val, 'fm00000'));
 
 UPDATE activity SET oscarNum = num WHERE id = activity_id;
 
@@ -118,6 +93,7 @@ END IF;
 RETURN NULL;
 END$$;
 
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -130,9 +106,17 @@ CREATE TABLE public.activity (
                                  id integer NOT NULL,
                                  project_id integer,
                                  type_id integer,
+                                 currency_id integer,
+                                 tva_id integer,
+                                 oscarid character varying(255) DEFAULT NULL::character varying,
                                  centaureid character varying(128) DEFAULT NULL::character varying,
+                                 oscarnum character varying(20) DEFAULT NULL::character varying,
                                  centaurenumconvention character varying(64) DEFAULT NULL::character varying,
+                                 pcruvalidpolecompetitivite boolean DEFAULT false NOT NULL,
                                  codeeotp character varying(64) DEFAULT NULL::character varying,
+                                 fraisdegestion character varying(255) DEFAULT NULL::character varying,
+                                 fraisdegestionparthebergeur character varying(255) DEFAULT NULL::character varying,
+                                 fraisdegestionpartunite character varying(255) DEFAULT NULL::character varying,
                                  label character varying(255) DEFAULT NULL::character varying,
                                  description text,
                                  hassheet boolean,
@@ -140,35 +124,34 @@ CREATE TABLE public.activity (
                                  justifyworkingtime integer,
                                  justifycost double precision,
                                  amount double precision,
+                                 totalspent double precision,
+                                 datetotalspent timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  datestart date,
                                  dateend date,
                                  datesigned date,
                                  dateopened date,
+                                 financialimpact character varying(32) DEFAULT 'Recette'::character varying NOT NULL,
+                                 notefinanciere text,
+                                 assiettesubventionnable double precision,
+                                 timesheetformat character varying(255) DEFAULT 'none'::character varying NOT NULL,
+                                 numbers text,
                                  status integer,
                                  datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                 activitytype_id integer,
+                                 pcrupolecompetitivite_id integer,
+                                 pcrusourcefinancement_id integer,
                                  createdby_id integer,
                                  updatedby_id integer,
                                  deletedby_id integer,
-                                 activitytype_id integer,
-                                 currency_id integer,
-                                 tva_id integer,
-                                 oscarid character varying(255) DEFAULT NULL::character varying,
-                                 oscarnum character varying(20) DEFAULT NULL::character varying,
-                                 timesheetformat character varying(255) DEFAULT 'none'::character varying NOT NULL,
-                                 numbers text,
-                                 financialimpact character varying(32) DEFAULT 'Recette'::character varying NOT NULL,
-                                 fraisdegestion character varying(255),
-                                 notefinanciere text,
-                                 assiettesubventionnable double precision,
-                                 pcruvalidpolecompetitivite boolean DEFAULT false NOT NULL,
-                                 fraisdegestionparthebergeur character varying(255) DEFAULT NULL::character varying,
-                                 fraisdegestionpartunite character varying(255) DEFAULT NULL::character varying,
-                                 totalspent double precision,
-                                 datetotalspent timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                 pcrupolecompetitivite_id integer,
-                                 pcrusourcefinancement_id integer
+                                 fraisdegestionpartgestionnaire character varying(255) DEFAULT NULL::character varying,
+                                 datecached date,
+                                 datenegociation date,
+                                 cache text DEFAULT ''::text,
+                                 cachelocked boolean DEFAULT false NOT NULL,
+                                 cachelockedreason character varying(255) DEFAULT ''::character varying,
+                                 locked boolean DEFAULT false NOT NULL
 );
 
 
@@ -177,6 +160,16 @@ CREATE TABLE public.activity (
 --
 
 COMMENT ON COLUMN public.activity.numbers IS '(DC2Type:object)';
+
+
+--
+-- Name: activity_activitymotcle; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activity_activitymotcle (
+                                                activity_id integer NOT NULL,
+                                                activitymotcle_id integer NOT NULL
+);
 
 
 --
@@ -202,6 +195,76 @@ CREATE SEQUENCE public.activity_id_seq
 
 
 --
+-- Name: activityavenant; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activityavenant (
+                                        id integer NOT NULL,
+                                        activity_id integer,
+                                        dateavenant timestamp(0) without time zone NOT NULL,
+                                        filename character varying(255) NOT NULL,
+                                        comment character varying(255) NOT NULL,
+                                        status integer DEFAULT 100 NOT NULL
+);
+
+
+--
+-- Name: activityavenant_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activityavenant_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activityavenant_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.activityavenant_id_seq OWNED BY public.activityavenant.id;
+
+
+--
+-- Name: activityavenantmodification; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activityavenantmodification (
+                                                    id integer NOT NULL,
+                                                    avenant_id integer,
+                                                    type character varying(255) NOT NULL,
+                                                    newvalue1 character varying(255) DEFAULT NULL::character varying,
+                                                    oldvalue1 character varying(255) DEFAULT NULL::character varying,
+                                                    newvalue2 character varying(255) DEFAULT NULL::character varying,
+                                                    oldvalue2 character varying(255) DEFAULT NULL::character varying,
+                                                    info character varying(255) DEFAULT NULL::character varying
+);
+
+
+--
+-- Name: activityavenantmodification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activityavenantmodification_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activityavenantmodification_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.activityavenantmodification_id_seq OWNED BY public.activityavenantmodification.id;
+
+
+--
 -- Name: activitydate; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -211,16 +274,16 @@ CREATE TABLE public.activitydate (
                                      activity_id integer,
                                      datestart date NOT NULL,
                                      comment text,
+                                     finished integer,
+                                     finishedby character varying(255) DEFAULT NULL::character varying,
+                                     datefinish date,
                                      status integer,
                                      datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      createdby_id integer,
                                      updatedby_id integer,
-                                     deletedby_id integer,
-                                     finished integer,
-                                     datefinish date,
-                                     finishedby character varying(255) DEFAULT NULL::character varying
+                                     deletedby_id integer
 );
 
 
@@ -237,6 +300,73 @@ CREATE SEQUENCE public.activitydate_id_seq
 
 
 --
+-- Name: activitymotcle; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activitymotcle (
+                                       id integer NOT NULL,
+                                       label character varying(128) NOT NULL,
+                                       datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                       createdby_id integer
+);
+
+
+--
+-- Name: activitymotcle_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activitymotcle_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activitymotcle_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.activitymotcle_id_seq OWNED BY public.activitymotcle.id;
+
+
+--
+-- Name: activitynote; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activitynote (
+                                     id integer NOT NULL,
+                                     activity_id integer,
+                                     content text NOT NULL,
+                                     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                     dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                     createdby_id integer,
+                                     updatedby_id integer
+);
+
+
+--
+-- Name: activitynote_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activitynote_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activitynote_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.activitynote_id_seq OWNED BY public.activitynote.id;
+
+
+--
 -- Name: activityorganization; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -246,16 +376,16 @@ CREATE TABLE public.activityorganization (
                                              activity_id integer,
                                              main boolean,
                                              role character varying(255) DEFAULT NULL::character varying,
+                                             datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                             dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                              status integer,
                                              datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                              dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                              datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                             roleobj_id integer,
                                              createdby_id integer,
                                              updatedby_id integer,
-                                             deletedby_id integer,
-                                             datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                             dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                             roleobj_id integer
+                                             deletedby_id integer
 );
 
 
@@ -280,6 +410,10 @@ CREATE TABLE public.activitypayment (
                                         activity_id integer,
                                         currency_id integer,
                                         datepayment date,
+                                        datepredicted date,
+                                        amount double precision NOT NULL,
+                                        rate double precision,
+                                        codetransaction character varying(255) DEFAULT NULL::character varying,
                                         comment text,
                                         status integer,
                                         datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
@@ -287,11 +421,7 @@ CREATE TABLE public.activitypayment (
                                         datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                         createdby_id integer,
                                         updatedby_id integer,
-                                        deletedby_id integer,
-                                        amount double precision NOT NULL,
-                                        rate double precision,
-                                        codetransaction character varying(255) DEFAULT NULL::character varying,
-                                        datepredicted date
+                                        deletedby_id integer
 );
 
 
@@ -390,16 +520,16 @@ CREATE TABLE public.activityperson (
                                        activity_id integer,
                                        main boolean,
                                        role character varying(255) DEFAULT NULL::character varying,
+                                       datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                       dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        status integer,
                                        datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                       roleobj_id integer,
                                        createdby_id integer,
                                        updatedby_id integer,
-                                       deletedby_id integer,
-                                       datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                       dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                       roleobj_id integer
+                                       deletedby_id integer
 );
 
 
@@ -421,6 +551,7 @@ CREATE SEQUENCE public.activityperson_id_seq
 
 CREATE TABLE public.activityrequest (
                                         id integer NOT NULL,
+                                        organisation_id integer,
                                         label character varying(255) DEFAULT NULL::character varying,
                                         description text,
                                         amount double precision,
@@ -433,8 +564,7 @@ CREATE TABLE public.activityrequest (
                                         datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                         createdby_id integer,
                                         updatedby_id integer,
-                                        deletedby_id integer,
-                                        organisation_id integer
+                                        deletedby_id integer
 );
 
 
@@ -463,12 +593,12 @@ CREATE SEQUENCE public.activityrequest_id_seq
 
 CREATE TABLE public.activityrequestfollow (
                                               id integer NOT NULL,
+                                              activityrequest_id integer,
                                               description text,
                                               status integer,
                                               datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                               dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                               datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                              activityrequest_id integer,
                                               createdby_id integer,
                                               updatedby_id integer,
                                               deletedby_id integer
@@ -493,19 +623,19 @@ CREATE SEQUENCE public.activityrequestfollow_id_seq
 
 CREATE TABLE public.activitytype (
                                      id integer NOT NULL,
+                                     label character varying(255) DEFAULT NULL::character varying,
+                                     description character varying(255) DEFAULT NULL::character varying,
+                                     nature character varying(255) DEFAULT NULL::character varying,
                                      lft integer NOT NULL,
                                      rgt integer NOT NULL,
+                                     centaureid character varying(255) DEFAULT NULL::character varying,
                                      status integer,
                                      datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      createdby_id integer,
                                      updatedby_id integer,
-                                     deletedby_id integer,
-                                     label character varying(255) DEFAULT NULL::character varying,
-                                     description character varying(255) DEFAULT NULL::character varying,
-                                     nature character varying(255) DEFAULT NULL::character varying,
-                                     centaureid character varying(255) DEFAULT NULL::character varying
+                                     deletedby_id integer
 );
 
 
@@ -528,15 +658,15 @@ CREATE SEQUENCE public.activitytype_id_seq
 CREATE TABLE public.administrativedocument (
                                                id integer NOT NULL,
                                                person_id integer,
-                                               dateupdoad timestamp(0) without time zone,
+                                               section_id integer,
+                                               dateupdoad timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                                path character varying(255) NOT NULL,
                                                information text,
                                                filetypemime character varying(255) DEFAULT NULL::character varying,
                                                filesize integer,
                                                filename character varying(255) DEFAULT NULL::character varying,
                                                version integer,
-                                               status integer DEFAULT 1 NOT NULL,
-                                               section_id integer
+                                               status integer DEFAULT 1 NOT NULL
 );
 
 
@@ -651,24 +781,24 @@ CREATE SEQUENCE public.categorie_privilege_id_seq
 
 CREATE TABLE public.contractdocument (
                                          id integer NOT NULL,
-                                         grant_id integer,
                                          person_id integer,
-                                         dateupdoad timestamp(0) without time zone,
+                                         grant_id integer,
+                                         process_id integer,
+                                         dateupdoad timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                          path character varying(255) NOT NULL,
                                          information text,
-                                         centaureid character varying(255) DEFAULT NULL::character varying,
                                          filetypemime character varying(255) DEFAULT NULL::character varying,
                                          filesize integer,
                                          filename character varying(255) DEFAULT NULL::character varying,
                                          version integer,
-                                         typedocument_id integer,
                                          status integer DEFAULT 1 NOT NULL,
-                                         datedeposit date,
-                                         datesend date,
-                                         process_id integer,
+                                         centaureid character varying(255) DEFAULT NULL::character varying,
                                          private boolean,
                                          signable boolean DEFAULT false NOT NULL,
+                                         datedeposit date,
+                                         datesend date,
                                          location character varying(255) DEFAULT 'local'::character varying NOT NULL,
+                                         typedocument_id integer,
                                          tabdocument_id integer
 );
 
@@ -743,16 +873,16 @@ CREATE SEQUENCE public.country3166_id_seq
 
 CREATE TABLE public.currency (
                                  id integer NOT NULL,
+                                 label character varying(20) NOT NULL,
+                                 symbol character varying(4) NOT NULL,
+                                 rate double precision NOT NULL,
                                  status integer,
                                  datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  createdby_id integer,
                                  updatedby_id integer,
-                                 deletedby_id integer,
-                                 label character varying(20) DEFAULT NULL::character varying NOT NULL,
-                                 symbol character varying(4) DEFAULT NULL::character varying NOT NULL,
-                                 rate double precision NOT NULL
+                                 deletedby_id integer
 );
 
 
@@ -775,17 +905,17 @@ CREATE SEQUENCE public.currency_id_seq
 CREATE TABLE public.datetype (
                                  id integer NOT NULL,
                                  label character varying(255) DEFAULT NULL::character varying,
+                                 facet character varying(255) DEFAULT NULL::character varying,
                                  description character varying(255) DEFAULT NULL::character varying,
+                                 recursivity character varying(255) DEFAULT NULL::character varying,
+                                 finishable boolean DEFAULT false NOT NULL,
                                  status integer,
                                  datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                  createdby_id integer,
                                  updatedby_id integer,
-                                 deletedby_id integer,
-                                 facet character varying(255) DEFAULT NULL::character varying,
-                                 recursivity character varying(255) DEFAULT NULL::character varying,
-                                 finishable boolean DEFAULT false NOT NULL
+                                 deletedby_id integer
 );
 
 
@@ -807,8 +937,8 @@ CREATE SEQUENCE public.datetype_id_seq
 
 CREATE TABLE public.discipline (
                                    id integer NOT NULL,
-                                   label character varying(128) NOT NULL,
-                                   centaureid character varying(10) DEFAULT NULL::character varying
+                                   centaureid character varying(10) DEFAULT NULL::character varying,
+                                   label character varying(128) NOT NULL
 );
 
 
@@ -822,17 +952,6 @@ CREATE SEQUENCE public.discipline_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
---
--- Name: doctrine_migration_versions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.doctrine_migration_versions (
-                                                    version character varying(191) NOT NULL,
-                                                    executed_at timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                                    execution_time integer
-);
 
 
 --
@@ -853,18 +972,6 @@ CREATE TABLE public.estimatedspentline (
 --
 
 CREATE SEQUENCE public.estimatedspentline_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: grantsource_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.grantsource_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -978,28 +1085,22 @@ CREATE SEQUENCE public.notificationperson_id_seq
 
 CREATE TABLE public.organization (
                                      id integer NOT NULL,
+                                     parent_id integer,
                                      centaureid character varying(10) DEFAULT NULL::character varying,
                                      shortname character varying(128) DEFAULT NULL::character varying,
                                      fullname character varying(255) DEFAULT NULL::character varying,
                                      code character varying(255) DEFAULT NULL::character varying,
                                      email character varying(255) DEFAULT NULL::character varying,
                                      url character varying(255) DEFAULT NULL::character varying,
-                                     description text DEFAULT NULL::character varying,
+                                     description text,
                                      street1 character varying(255) DEFAULT NULL::character varying,
                                      street2 character varying(255) DEFAULT NULL::character varying,
                                      street3 character varying(255) DEFAULT NULL::character varying,
                                      city character varying(255) DEFAULT NULL::character varying,
                                      zipcode character varying(255) DEFAULT NULL::character varying,
                                      phone character varying(255) DEFAULT NULL::character varying,
-                                     dateupdated timestamp(0) without time zone,
-                                     datecreated timestamp(0) without time zone,
-                                     dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                     status integer,
-                                     datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                     createdby_id integer,
-                                     updatedby_id integer,
-                                     deletedby_id integer,
+                                     dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      ldapsupanncodeentite character varying(255) DEFAULT NULL::character varying,
                                      country character varying(255) DEFAULT NULL::character varying,
                                      sifacid character varying(255) DEFAULT NULL::character varying,
@@ -1010,13 +1111,19 @@ CREATE TABLE public.organization (
                                      sifacgroup character varying(255) DEFAULT NULL::character varying,
                                      sifacgroupid character varying(255) DEFAULT NULL::character varying,
                                      numtvaca character varying(255) DEFAULT NULL::character varying,
-                                     connectors text,
-                                     typeobj_id integer,
-                                     parent_id integer,
                                      labintel character varying(255) DEFAULT NULL::character varying,
                                      rnsr character varying(255) DEFAULT NULL::character varying,
+                                     connectors text,
                                      duns character varying(255) DEFAULT NULL::character varying,
-                                     tvaintra character varying(255) DEFAULT NULL::character varying
+                                     tvaintra character varying(255) DEFAULT NULL::character varying,
+                                     status integer,
+                                     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                     dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                     datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                     typeobj_id integer,
+                                     createdby_id integer,
+                                     updatedby_id integer,
+                                     deletedby_id integer
 );
 
 
@@ -1040,30 +1147,6 @@ CREATE SEQUENCE public.organization_id_seq
 
 
 --
--- Name: organization_role; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.organization_role (
-                                          id integer NOT NULL,
-                                          role_id character varying(255) NOT NULL,
-                                          description character varying(255) DEFAULT NULL::character varying,
-                                          principal boolean DEFAULT false NOT NULL
-);
-
-
---
--- Name: organization_role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.organization_role_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
 -- Name: organizationperson; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1071,6 +1154,7 @@ CREATE TABLE public.organizationperson (
                                            id integer NOT NULL,
                                            person_id integer,
                                            organization_id integer,
+                                           origin character varying(255) DEFAULT NULL::character varying,
                                            main boolean,
                                            role character varying(255) DEFAULT NULL::character varying,
                                            datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
@@ -1079,11 +1163,10 @@ CREATE TABLE public.organizationperson (
                                            datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                            dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                            datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                           roleobj_id integer,
                                            createdby_id integer,
                                            updatedby_id integer,
-                                           deletedby_id integer,
-                                           roleobj_id integer,
-                                           origin character varying(255) DEFAULT NULL::character varying
+                                           deletedby_id integer
 );
 
 
@@ -1239,7 +1322,9 @@ CREATE TABLE public.person (
                                codeharpege character varying(255) DEFAULT NULL::character varying,
                                centaureid text,
                                codeldap character varying(255) DEFAULT NULL::character varying,
+                               connectors text,
                                email character varying(255) DEFAULT NULL::character varying,
+                               emailprive character varying(255) DEFAULT NULL::character varying,
                                ldapstatus character varying(255) DEFAULT NULL::character varying,
                                ldapsitelocation character varying(255) DEFAULT NULL::character varying,
                                ldapaffectation character varying(255) DEFAULT NULL::character varying,
@@ -1248,19 +1333,17 @@ CREATE TABLE public.person (
                                ladaplogin character varying(255) DEFAULT NULL::character varying,
                                phone character varying(255) DEFAULT NULL::character varying,
                                datesyncldap timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                               harpegeinm character varying(255) DEFAULT NULL::character varying,
+                               ldapmemberof text,
+                               schedulekey character varying(255) DEFAULT NULL::character varying,
+                               customsettings text,
                                status integer,
                                datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                createdby_id integer,
                                updatedby_id integer,
-                               deletedby_id integer,
-                               emailprive character varying(255) DEFAULT NULL::character varying,
-                               harpegeinm character varying(255) DEFAULT NULL::character varying,
-                               connectors text,
-                               ldapmemberof text,
-                               customsettings text,
-                               schedulekey character varying(255) DEFAULT NULL::character varying
+                               deletedby_id integer
 );
 
 
@@ -1344,10 +1427,10 @@ CREATE TABLE public.persons_documents (
 CREATE TABLE public.privilege (
                                   id integer NOT NULL,
                                   categorie_id integer,
+                                  root_id integer,
                                   code character varying(150) NOT NULL,
                                   libelle character varying(200) NOT NULL,
                                   ordre integer,
-                                  root_id integer,
                                   spot integer DEFAULT 7
 );
 
@@ -1374,7 +1457,7 @@ CREATE TABLE public.project (
                                 code character varying(48) DEFAULT NULL::character varying,
                                 eotp character varying(64) DEFAULT NULL::character varying,
                                 composanteprincipal character varying(32) DEFAULT NULL::character varying,
-                                acronym character varying(255),
+                                acronym character varying(255) DEFAULT NULL::character varying,
                                 label character varying(255) NOT NULL,
                                 description text,
                                 datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
@@ -1406,18 +1489,6 @@ CREATE SEQUENCE public.project_id_seq
 
 
 --
--- Name: projectgrant_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.projectgrant_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
 -- Name: projectmember; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1425,18 +1496,18 @@ CREATE TABLE public.projectmember (
                                       id integer NOT NULL,
                                       project_id integer,
                                       person_id integer,
-                                      role character varying(255),
+                                      main boolean,
+                                      role character varying(255) DEFAULT NULL::character varying,
                                       datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                       dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                      main boolean,
                                       status integer,
                                       datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                       dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                       datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                      roleobj_id integer,
                                       createdby_id integer,
                                       updatedby_id integer,
-                                      deletedby_id integer,
-                                      roleobj_id integer
+                                      deletedby_id integer
 );
 
 
@@ -1460,18 +1531,18 @@ CREATE TABLE public.projectpartner (
                                        id integer NOT NULL,
                                        project_id integer,
                                        organization_id integer,
-                                       datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                       dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        main boolean,
                                        role character varying(255) DEFAULT NULL::character varying,
+                                       datestart timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                       dateend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        status integer,
                                        datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                        datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                       roleobj_id integer,
                                        createdby_id integer,
                                        updatedby_id integer,
-                                       deletedby_id integer,
-                                       roleobj_id integer
+                                       deletedby_id integer
 );
 
 
@@ -1572,18 +1643,6 @@ CREATE TABLE public.role_datetype (
                                       datetype_id integer NOT NULL,
                                       role_id integer NOT NULL
 );
-
-
---
--- Name: role_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.role_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
 --
@@ -1733,27 +1792,27 @@ CREATE SEQUENCE public.tabsdocumentsroles_id_seq
 CREATE TABLE public.timesheet (
                                   id integer NOT NULL,
                                   workpackage_id integer,
+                                  activity_id integer,
                                   person_id integer,
                                   datefrom timestamp(0) without time zone NOT NULL,
                                   dateto timestamp(0) without time zone NOT NULL,
+                                  datesync timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                  syncid character varying(255) DEFAULT NULL::character varying,
                                   comment text,
+                                  label text,
+                                  icsuid text,
+                                  icsfileuid text,
+                                  icsfilename text,
+                                  icsfiledateadded timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                  sendby character varying(255) DEFAULT NULL::character varying,
                                   status integer,
                                   datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                   dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                   datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
+                                  validationperiod_id integer,
                                   createdby_id integer,
                                   updatedby_id integer,
-                                  deletedby_id integer,
-                                  activity_id integer,
-                                  label text,
-                                  sendby character varying(255) DEFAULT NULL::character varying,
-                                  icsuid text,
-                                  icsfileuid text,
-                                  icsfilename text,
-                                  icsfiledateadded timestamp(0) without time zone,
-                                  datesync timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                  syncid character varying(255) DEFAULT NULL::character varying,
-                                  validationperiod_id integer
+                                  deletedby_id integer
 );
 
 
@@ -1847,15 +1906,14 @@ CREATE TABLE public.typedocument (
                                      label character varying(255) NOT NULL,
                                      description character varying(255) DEFAULT NULL::character varying,
                                      codecentaure character varying(255) DEFAULT NULL::character varying,
+                                     isdefault boolean DEFAULT false NOT NULL,
                                      status integer,
                                      datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                      createdby_id integer,
                                      updatedby_id integer,
-                                     deletedby_id integer,
-                                     isdefault boolean DEFAULT false NOT NULL,
-                                     signatureflow_id integer
+                                     deletedby_id integer
 );
 
 
@@ -1864,35 +1922,6 @@ CREATE TABLE public.typedocument (
 --
 
 CREATE SEQUENCE public.typedocument_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: unicaen_signature_notification; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.unicaen_signature_notification (
-                                                       id integer NOT NULL,
-                                                       datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                                       datelastsend timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
-                                                       context character varying(32) DEFAULT NULL::character varying,
-                                                       send boolean DEFAULT false NOT NULL,
-                                                       message character varying(255) DEFAULT NULL::character varying,
-                                                       signaturerecipient_id integer,
-                                                       signatureobserver_id integer,
-                                                       subject character varying(255) DEFAULT NULL::character varying
-);
-
-
---
--- Name: unicaen_signature_notification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.unicaen_signature_notification_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1936,7 +1965,8 @@ CREATE TABLE public.unicaen_signature_process (
                                                   status integer,
                                                   currentstep integer NOT NULL,
                                                   document_name character varying(255) NOT NULL,
-                                                  signatureflow_id integer
+                                                  signatureflow_id integer,
+                                                  label text
 );
 
 
@@ -1960,7 +1990,7 @@ CREATE TABLE public.unicaen_signature_process_step (
                                                        id integer NOT NULL,
                                                        process_id integer,
                                                        signature_id integer,
-                                                       signatureflowstep_id integer
+                                                       label text
 );
 
 
@@ -2025,8 +2055,9 @@ CREATE TABLE public.unicaen_signature_signature (
                                                     document_path character varying(255) NOT NULL,
                                                     document_remotekey character varying(255) DEFAULT NULL::character varying,
                                                     document_localkey character varying(255) DEFAULT NULL::character varying,
-                                                    context_short character varying(255),
+                                                    context_short character varying(255) DEFAULT NULL::character varying,
                                                     context_long text,
+                                                    refused_text text,
                                                     letterfile_key character varying(255) DEFAULT NULL::character varying,
                                                     letterfile_process character varying(255) DEFAULT NULL::character varying,
                                                     letterfile_url character varying(255) DEFAULT NULL::character varying,
@@ -2166,6 +2197,9 @@ CREATE SEQUENCE public.useraccessdefinition_id_seq
 CREATE TABLE public.validationperiod (
                                          id integer NOT NULL,
                                          declarer_id integer,
+                                         validatorsprjdefault boolean DEFAULT true NOT NULL,
+                                         validatorsscidefault boolean DEFAULT true NOT NULL,
+                                         validatorsadmdefault boolean DEFAULT true NOT NULL,
                                          object character varying(255) NOT NULL,
                                          objectgroup character varying(255) NOT NULL,
                                          object_id character varying(255) NOT NULL,
@@ -2199,9 +2233,6 @@ CREATE TABLE public.validationperiod (
                                          rejectadmmessage text,
                                          schedule text,
                                          status character varying(255) NOT NULL,
-                                         validatorsprjdefault boolean DEFAULT true NOT NULL,
-                                         validatorsscidefault boolean DEFAULT true NOT NULL,
-                                         validatorsadmdefault boolean DEFAULT true NOT NULL,
                                          comment text
 );
 
@@ -2255,18 +2286,18 @@ CREATE TABLE public.validationperiod_sci (
 CREATE TABLE public.workpackage (
                                     id integer NOT NULL,
                                     activity_id integer,
+                                    code character varying(255) NOT NULL,
+                                    label character varying(255) NOT NULL,
+                                    description text,
+                                    datestart date,
+                                    dateend date,
                                     status integer,
                                     datecreated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                     dateupdated timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                     datedeleted timestamp(0) without time zone DEFAULT NULL::timestamp without time zone,
                                     createdby_id integer,
                                     updatedby_id integer,
-                                    deletedby_id integer,
-                                    code character varying(255) DEFAULT NULL::character varying NOT NULL,
-                                    label character varying(255) NOT NULL,
-                                    description text,
-                                    datestart date,
-                                    dateend date
+                                    deletedby_id integer
 );
 
 
@@ -2314,43 +2345,60 @@ CREATE SEQUENCE public.workpackageperson_id_seq
 
 
 --
+-- Name: activityavenant id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenant ALTER COLUMN id SET DEFAULT nextval('public.activityavenant_id_seq'::regclass);
+
+
+--
+-- Name: activityavenantmodification id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenantmodification ALTER COLUMN id SET DEFAULT nextval('public.activityavenantmodification_id_seq'::regclass);
+
+
+--
+-- Name: activitymotcle id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitymotcle ALTER COLUMN id SET DEFAULT nextval('public.activitymotcle_id_seq'::regclass);
+
+
+--
+-- Name: activitynote id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitynote ALTER COLUMN id SET DEFAULT nextval('public.activitynote_id_seq'::regclass);
+
+
+--
 -- Data for Name: activitytype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.activitytype (id, lft, rgt, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, description, nature, centaureid) FROM stdin;
-709	21	22	1	2024-09-03 13:51:16	\N	\N	\N	\N	\N	INTERREG		0	\N
-710	23	24	1	2024-09-03 13:52:04	\N	\N	\N	\N	\N	H2020		0	\N
-699	3	4	1	2024-09-03 13:45:25	\N	\N	\N	\N	\N	Doctorant		0	\N
-701	14	33	1	2024-09-03 13:46:25	\N	\N	\N	\N	\N	Programme UE		0	\N
-693	1	42	1	2024-06-26 14:39:30	\N	\N	\N	\N	\N	ROOT		Recherche et valorisation	\N
-711	25	32	1	2024-09-03 13:52:19	\N	\N	\N	\N	\N	Horizon Europe		0	\N
-695	2	7	1	2024-09-03 13:41:36	\N	\N	\N	\N	\N	Subvention région		0	\N
-697	9	10	1	2024-09-03 13:43:34	\N	\N	\N	\N	\N	ANR		0	\N
-696	8	13	1	2024-09-03 13:41:57	\N	\N	\N	\N	\N	Subvention nationale		0	\N
-698	11	12	1	2024-09-03 13:43:49	\N	\N	\N	\N	\N	PIA		0	\N
-700	5	6	1	2024-09-03 13:46:02	\N	\N	\N	\N	\N	Tremplin		0	\N
-703	35	36	1	2024-09-03 13:49:32	\N	\N	\N	\N	\N	CPER - Etat		0	\N
-704	37	38	1	2024-09-03 13:49:46	\N	\N	\N	\N	\N	CPER - Région		0	\N
-702	34	41	1	2024-09-03 13:47:37	\N	\N	\N	\N	\N	CPER		0	\N
-705	39	40	1	2024-09-03 13:50:17	\N	\N	\N	\N	\N	CPER - FEDER		0	\N
-714	30	31	1	2024-09-03 13:55:17	\N	\N	\N	\N	\N	Cluster 1 : Santé		0	\N
-712	26	27	1	2024-09-03 13:53:41	\N	\N	\N	\N	\N	P1 ERC		0	\N
-706	15	16	1	2024-09-03 13:50:31	\N	\N	\N	\N	\N	EUREKA		0	\N
-713	28	29	1	2024-09-03 13:54:26	\N	\N	\N	\N	\N	P1 Action Marie Curie		0	\N
-707	17	18	1	2024-09-03 13:50:45	\N	\N	\N	\N	\N	FP6		0	\N
-708	19	20	1	2024-09-03 13:50:57	\N	\N	\N	\N	\N	FP7		0	\N
+COPY public.activitytype (id, label, description, nature, lft, rgt, centaureid, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+3	CPER		0	2	3	\N	1	2025-06-27 09:57:17	\N	\N	\N	\N	\N
+11	EUREKA		0	13	14	\N	1	2025-06-27 10:00:23	\N	\N	\N	\N	\N
+12	INTERREG		0	15	16	\N	1	2025-06-27 10:01:10	\N	\N	\N	\N	\N
+4	Subvention européenne		0	12	19	\N	1	2025-06-27 09:57:31	\N	\N	\N	\N	\N
+15	Partenariat		0	4	11	\N	1	2025-06-27 10:02:44	\N	\N	\N	\N	\N
+5	Subvention nationale		0	20	29	\N	1	2025-06-27 09:58:13	\N	\N	\N	\N	\N
+2	ROOT		Recherche et valorisation	1	40	\N	1	2025-06-27 09:57:09	\N	\N	\N	\N	\N
+10	Région Innovation 2021-2027		0	33	34	\N	1	2025-06-27 09:59:54	\N	\N	\N	\N	\N
+9	Région Innovation 2014-2020		0	31	32	\N	1	2025-06-27 09:59:39	\N	\N	\N	\N	\N
+7	Tremplin		0	35	36	\N	1	2025-06-27 09:58:59	\N	\N	\N	\N	\N
+6	Subvention régionale		0	30	39	\N	1	2025-06-27 09:58:42	\N	\N	\N	\N	\N
+8	Autre		0	37	38	\N	1	2025-06-27 09:59:17	\N	\N	\N	\N	\N
+14	Accords cadre		0	5	6	\N	1	2025-06-27 10:02:21	\N	\N	\N	\N	\N
+16	Accord de confidentialité		0	7	8	\N	1	2025-06-27 10:03:18	\N	\N	\N	\N	\N
+1	ANR		0	21	22	\N	1	2025-06-27 09:57:09	\N	\N	\N	\N	\N
+13	Horizon Europe		0	17	18	\N	1	2025-06-27 10:01:32	\N	\N	\N	\N	\N
+17	Accord de consortium		0	9	10	\N	1	2025-06-27 10:03:37	\N	\N	\N	\N	\N
+18	BPI		0	23	24	\N	1	2025-06-27 10:04:02	\N	\N	\N	\N	\N
+19	PIA		0	25	26	\N	1	2025-06-27 10:04:10	\N	\N	\N	\N	\N
+20	Autre		0	27	28	\N	1	2025-06-27 10:04:20	\N	\N	\N	\N	\N
 \.
 
---
--- Data for Name: administrativedocumentsection; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.administrativedocumentsection (id, label, description) FROM stdin;
-1	ANR	\N
-2	REGION	\N
-3	FEDER	\N
-4	INTERREG	\N
-\.
 
 --
 -- Data for Name: categorie_privilege; Type: TABLE DATA; Schema: public; Owner: -
@@ -2369,260 +2417,260 @@ COPY public.categorie_privilege (id, code, libelle, ordre) FROM stdin;
 10	SIGNATURE	Signatures éléctroniques	\N
 \.
 
---
+
 -- Data for Name: country3166; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.country3166 (id, fr, en, alpha2, alpha3, "numeric") FROM stdin;
-5	Andorre	Andorra	AD	AND	20
-233	Émirats arabes unis	United Arab Emirates (the)	AE	ARE	784
 1	Afghanistan	Afghanistan	AF	AFG	4
-9	Antigua-et-Barbuda	Antigua and Barbuda	AG	ATG	28
-7	Anguilla	Anguilla	AI	AIA	660
 2	Albanie	Albania	AL	ALB	8
-11	Arménie	Armenia	AM	ARM	51
-6	Angola	Angola	AO	AGO	24
-8	Antarctique	Antarctica	AQ	ATA	10
-10	Argentine	Argentina	AR	ARG	32
+3	Algérie	Algeria	DZ	DZA	12
 4	Samoa américaines	American Samoa	AS	ASM	16
-14	Autriche	Austria	AT	AUT	40
-13	Australie	Australia	AU	AUS	36
+5	Andorre	Andorra	AD	AND	20
+6	Angola	Angola	AO	AGO	24
+7	Anguilla	Anguilla	AI	AIA	660
+8	Antarctique	Antarctica	AQ	ATA	10
+9	Antigua-et-Barbuda	Antigua and Barbuda	AG	ATG	28
+10	Argentine	Argentina	AR	ARG	32
+11	Arménie	Armenia	AM	ARM	51
 12	Aruba	Aruba	AW	ABW	533
-249	Åland(les Îles)	Åland Islands	AX	ALA	248
+13	Australie	Australia	AU	AUS	36
+14	Autriche	Austria	AT	AUT	40
 15	Azerbaïdjan	Azerbaijan	AZ	AZE	31
-28	Bosnie-Herzégovine	Bosnia and Herzegovina	BA	BIH	70
-19	Barbade	Barbados	BB	BRB	52
-18	Bangladesh	Bangladesh	BD	BGD	50
-21	Belgique	Belgium	BE	BEL	56
-35	Burkina Faso	Burkina Faso	BF	BFA	854
-34	Bulgarie	Bulgaria	BG	BGR	100
+16	Bahamas	Bahamas (the)	BS	BHS	44
 17	Bahreïn	Bahrain	BH	BHR	48
-36	Burundi	Burundi	BI	BDI	108
+18	Bangladesh	Bangladesh	BD	BGD	50
+19	Barbade	Barbados	BB	BRB	52
+20	Bélarus	Belarus	BY	BLR	112
+21	Belgique	Belgium	BE	BEL	56
+22	Belize	Belize	BZ	BLZ	84
 23	Bénin	Benin	BJ	BEN	204
-185	Saint-Barthélemy	Saint Barthélemy	BL	BLM	652
 24	Bermudes	Bermuda	BM	BMU	60
-33	Brunéi Darussalam	Brunei Darussalam	BN	BRN	96
+25	Bhoutan	Bhutan	BT	BTN	64
 26	Bolivie (État plurinational de)	Bolivia (Plurinational State of)	BO	BOL	68
 27	Bonaire, Saint-Eustache et Saba	Bonaire, Sint Eustatius and Saba	BQ	BES	535
-31	Brésil	Brazil	BR	BRA	76
-16	Bahamas	Bahamas (the)	BS	BHS	44
-25	Bhoutan	Bhutan	BT	BTN	64
-30	Bouvet (l'Île)	Bouvet Island	BV	BVT	74
+28	Bosnie-Herzégovine	Bosnia and Herzegovina	BA	BIH	70
 29	Botswana	Botswana	BW	BWA	72
-20	Bélarus	Belarus	BY	BLR	112
-22	Belize	Belize	BZ	BLZ	84
-40	Canada	Canada	CA	CAN	124
-47	Cocos (les Îles)/ Keeling (les Îles)	Cocos (Keeling) Islands (the)	CC	CCK	166
-50	Congo (la République démocratique du)	Congo (the Democratic Republic of the)	CD	COD	180
-42	République centrafricaine	Central African Republic (the)	CF	CAF	140
-51	Congo	Congo (the)	CG	COG	178
-215	Suisse	Switzerland	CH	CHE	756
-59	Côte d'Ivoire	Côte d'Ivoire	CI	CIV	384
-52	Cook (les Îles)	Cook Islands (the)	CK	COK	184
-44	Chili	Chile	CL	CHL	152
-39	Cameroun	Cameroon	CM	CMR	120
-45	Chine	China	CN	CHN	156
-48	Colombie	Colombia	CO	COL	170
-53	Costa Rica	Costa Rica	CR	CRI	188
-55	Cuba	Cuba	CU	CUB	192
+30	Bouvet (l'Île)	Bouvet Island	BV	BVT	74
+31	Brésil	Brazil	BR	BRA	76
+32	Indien (le Territoire britannique de l'océan)	British Indian Ocean Territory (the)	IO	IOT	86
+33	Brunéi Darussalam	Brunei Darussalam	BN	BRN	96
+34	Bulgarie	Bulgaria	BG	BGR	100
+35	Burkina Faso	Burkina Faso	BF	BFA	854
+36	Burundi	Burundi	BI	BDI	108
 37	Cabo Verde	Cabo Verde	CV	CPV	132
-56	Curaçao	Curaçao	CW	CUW	531
+38	Cambodge	Cambodia	KH	KHM	116
+39	Cameroun	Cameroon	CM	CMR	120
+40	Canada	Canada	CA	CAN	124
+41	Caïmans (les Îles)	Cayman Islands (the)	KY	CYM	136
+42	République centrafricaine	Central African Republic (the)	CF	CAF	140
+43	Tchad	Chad	TD	TCD	148
+44	Chili	Chile	CL	CHL	152
+45	Chine	China	CN	CHN	156
 46	Christmas (l'Île)	Christmas Island	CX	CXR	162
+47	Cocos (les Îles)/ Keeling (les Îles)	Cocos (Keeling) Islands (the)	CC	CCK	166
+48	Colombie	Colombia	CO	COL	170
+49	Comores	Comoros (the)	KM	COM	174
+50	Congo (la République démocratique du)	Congo (the Democratic Republic of the)	CD	COD	180
+51	Congo	Congo (the)	CG	COG	178
+52	Cook (les Îles)	Cook Islands (the)	CK	COK	184
+53	Costa Rica	Costa Rica	CR	CRI	188
+54	Croatie	Croatia	HR	HRV	191
+55	Cuba	Cuba	CU	CUB	192
+56	Curaçao	Curaçao	CW	CUW	531
 57	Chypre	Cyprus	CY	CYP	196
 58	Tchéquie	Czechia	CZ	CZE	203
-83	Allemagne	Germany	DE	DEU	276
-61	Djibouti	Djibouti	DJ	DJI	262
+59	Côte d'Ivoire	Côte d'Ivoire	CI	CIV	384
 60	Danemark	Denmark	DK	DNK	208
+61	Djibouti	Djibouti	DJ	DJI	262
 62	Dominique	Dominica	DM	DMA	212
 63	dominicaine (la République)	Dominican Republic (the)	DO	DOM	214
-3	Algérie	Algeria	DZ	DZA	12
 64	Équateur	Ecuador	EC	ECU	218
-69	Estonie	Estonia	EE	EST	233
 65	Égypte	Egypt	EG	EGY	818
-245	Sahara occidental	Western Sahara*	EH	ESH	732
+66	El Salvador	El Salvador	SV	SLV	222
+67	Guinée équatoriale	Equatorial Guinea	GQ	GNQ	226
 68	Érythrée	Eritrea	ER	ERI	232
-209	Espagne	Spain	ES	ESP	724
+69	Estonie	Estonia	EE	EST	233
+70	Eswatini	Eswatini	SZ	SWZ	748
 71	Éthiopie	Ethiopia	ET	ETH	231
-75	Finlande	Finland	FI	FIN	246
-74	Fidji	Fiji	FJ	FJI	242
 72	Falkland (les Îles)/Malouines (les Îles)	Falkland Islands (the) [Malvinas]	FK	FLK	238
-144	Micronésie (États fédérés de)	Micronesia (Federated States of)	FM	FSM	583
 73	Féroé (les Îles)	Faroe Islands (the)	FO	FRO	234
+74	Fidji	Fiji	FJ	FJI	242
+75	Finlande	Finland	FI	FIN	246
 76	France	France	FR	FRA	250
-80	Gabon	Gabon	GA	GAB	266
-234	Royaume-Uni de Grande-Bretagne et d'Irlande du Nord	United Kingdom of Great Britain and Northern Ireland (the)	GB	GBR	826
-88	Grenade	Grenada	GD	GRD	308
-82	Géorgie	Georgia	GE	GEO	268
 77	Guyane française (la )	French Guiana	GF	GUF	254
-92	Guernesey	Guernsey	GG	GGY	831
+78	Polynésie française	French Polynesia	PF	PYF	258
+79	Terres australes françaises	French Southern Territories (the)	TF	ATF	260
+80	Gabon	Gabon	GA	GAB	266
+81	Gambie	Gambia (the)	GM	GMB	270
+82	Géorgie	Georgia	GE	GEO	268
+83	Allemagne	Germany	DE	DEU	276
 84	Ghana	Ghana	GH	GHA	288
 85	Gibraltar	Gibraltar	GI	GIB	292
-87	Groenland	Greenland	GL	GRL	304
-81	Gambie	Gambia (the)	GM	GMB	270
-93	Guinée	Guinea	GN	GIN	324
-89	Guadeloupe	Guadeloupe	GP	GLP	312
-67	Guinée équatoriale	Equatorial Guinea	GQ	GNQ	226
 86	Grèce	Greece	GR	GRC	300
-207	Géorgie du Sud-et-les Îles Sandwich du Sud	South Georgia and the South Sandwich Islands	GS	SGS	239
-91	Guatemala	Guatemala	GT	GTM	320
+87	Groenland	Greenland	GL	GRL	304
+88	Grenade	Grenada	GD	GRD	308
+89	Guadeloupe	Guadeloupe	GP	GLP	312
 90	Guam	Guam	GU	GUM	316
+91	Guatemala	Guatemala	GT	GTM	320
+92	Guernesey	Guernsey	GG	GGY	831
+93	Guinée	Guinea	GN	GIN	324
 94	Guinée-Bissau	Guinea-Bissau	GW	GNB	624
 95	Guyana	Guyana	GY	GUY	328
-100	Hong Kong	Hong Kong	HK	HKG	344
-97	Heard-et-Îles MacDonald (l'Île)	Heard Island and McDonald Islands	HM	HMD	334
-99	Honduras	Honduras	HN	HND	340
-54	Croatie	Croatia	HR	HRV	191
 96	Haïti	Haiti	HT	HTI	332
+97	Heard-et-Îles MacDonald (l'Île)	Heard Island and McDonald Islands	HM	HMD	334
+98	Saint-Siège	Holy See (the)	VA	VAT	336
+99	Honduras	Honduras	HN	HND	340
+100	Hong Kong	Hong Kong	HK	HKG	344
 101	Hongrie	Hungary	HU	HUN	348
-104	Indonésie	Indonesia	ID	IDN	360
-107	Irlande	Ireland	IE	IRL	372
-109	Israël	Israel	IL	ISR	376
-108	Île de Man	Isle of Man	IM	IMN	833
-103	Inde	India	IN	IND	356
-32	Indien (le Territoire britannique de l'océan)	British Indian Ocean Territory (the)	IO	IOT	86
-106	Iraq	Iraq	IQ	IRQ	368
-105	Iran (République Islamique d')	Iran (Islamic Republic of)	IR	IRN	364
 102	Islande	Iceland	IS	ISL	352
+103	Inde	India	IN	IND	356
+104	Indonésie	Indonesia	ID	IDN	360
+105	Iran (République Islamique d')	Iran (Islamic Republic of)	IR	IRN	364
+106	Iraq	Iraq	IQ	IRQ	368
+107	Irlande	Ireland	IE	IRL	372
+108	Île de Man	Isle of Man	IM	IMN	833
+109	Israël	Israel	IL	ISR	376
 110	Italie	Italy	IT	ITA	380
-113	Jersey	Jersey	JE	JEY	832
 111	Jamaïque	Jamaica	JM	JAM	388
-114	Jordanie	Jordan	JO	JOR	400
 112	Japon	Japan	JP	JPN	392
+113	Jersey	Jersey	JE	JEY	832
+114	Jordanie	Jordan	JO	JOR	400
+115	Kazakhstan	Kazakhstan	KZ	KAZ	398
 116	Kenya	Kenya	KE	KEN	404
-121	Kirghizistan	Kyrgyzstan	KG	KGZ	417
-38	Cambodge	Cambodia	KH	KHM	116
 117	Kiribati	Kiribati	KI	KIR	296
-49	Comores	Comoros (the)	KM	COM	174
-187	Saint-Kitts-et-Nevis	Saint Kitts and Nevis	KN	KNA	659
 118	Corée (la République populaire démocratique de)	Korea (the Democratic People's Republic of)	KP	PRK	408
 119	Corée (la République de)	Korea (the Republic of)	KR	KOR	410
 120	Koweït	Kuwait	KW	KWT	414
-41	Caïmans (les Îles)	Cayman Islands (the)	KY	CYM	136
-115	Kazakhstan	Kazakhstan	KZ	KAZ	398
+121	Kirghizistan	Kyrgyzstan	KG	KGZ	417
 122	Lao (la République démocratique populaire)	Lao People's Democratic Republic (the)	LA	LAO	418
+123	Lettonie	Latvia	LV	LVA	428
 124	Liban	Lebanon	LB	LBN	422
-188	Sainte-Lucie	Saint Lucia	LC	LCA	662
-128	Liechtenstein	Liechtenstein	LI	LIE	438
-210	Sri Lanka	Sri Lanka	LK	LKA	144
-126	Libéria	Liberia	LR	LBR	430
 125	Lesotho	Lesotho	LS	LSO	426
+126	Libéria	Liberia	LR	LBR	430
+127	Libye	Libya	LY	LBY	434
+128	Liechtenstein	Liechtenstein	LI	LIE	438
 129	Lituanie	Lithuania	LT	LTU	440
 130	Luxembourg	Luxembourg	LU	LUX	442
-123	Lettonie	Latvia	LV	LVA	428
-127	Libye	Libya	LY	LBY	434
-150	Maroc	Morocco	MA	MAR	504
-146	Monaco	Monaco	MC	MCO	492
-145	Moldova (la République de)	Moldova (the Republic of)	MD	MDA	498
-148	Monténégro	Montenegro	ME	MNE	499
-189	Saint-Martin (partie française)	Saint Martin (French part)	MF	MAF	663
-132	Madagascar	Madagascar	MG	MDG	450
-138	Marshall (les Îles)	Marshall Islands (the)	MH	MHL	584
-164	Macédoine du Nord	North Macedonia	MK	MKD	807
-136	Mali	Mali	ML	MLI	466
-152	Myanmar	Myanmar	MM	MMR	104
-147	Mongolie	Mongolia	MN	MNG	496
 131	Macao	Macao	MO	MAC	446
-165	Mariannes du Nord (les Îles)	Northern Mariana Islands (the)	MP	MNP	580
+132	Madagascar	Madagascar	MG	MDG	450
+133	Malawi	Malawi	MW	MWI	454
+134	Malaisie	Malaysia	MY	MYS	458
+135	Maldives	Maldives	MV	MDV	462
+136	Mali	Mali	ML	MLI	466
+137	Malte	Malta	MT	MLT	470
+138	Marshall (les Îles)	Marshall Islands (the)	MH	MHL	584
 139	Martinique	Martinique	MQ	MTQ	474
 140	Mauritanie	Mauritania	MR	MRT	478
-149	Montserrat	Montserrat	MS	MSR	500
-137	Malte	Malta	MT	MLT	470
 141	Maurice	Mauritius	MU	MUS	480
-135	Maldives	Maldives	MV	MDV	462
-133	Malawi	Malawi	MW	MWI	454
+142	Mayotte	Mayotte	YT	MYT	175
 143	Mexique	Mexico	MX	MEX	484
-134	Malaisie	Malaysia	MY	MYS	458
+144	Micronésie (États fédérés de)	Micronesia (Federated States of)	FM	FSM	583
+145	Moldova (la République de)	Moldova (the Republic of)	MD	MDA	498
+146	Monaco	Monaco	MC	MCO	492
+147	Mongolie	Mongolia	MN	MNG	496
+148	Monténégro	Montenegro	ME	MNE	499
+149	Montserrat	Montserrat	MS	MSR	500
+150	Maroc	Morocco	MA	MAR	504
 151	Mozambique	Mozambique	MZ	MOZ	508
+152	Myanmar	Myanmar	MM	MMR	104
 153	Namibie	Namibia	NA	NAM	516
-157	Nouvelle-Calédonie	New Caledonia	NC	NCL	540
-160	Niger	Niger (the)	NE	NER	562
-163	Norfolk (l'Île)	Norfolk Island	NF	NFK	574
-161	Nigéria	Nigeria	NG	NGA	566
-159	Nicaragua	Nicaragua	NI	NIC	558
-156	Pays-Bas	Netherlands (the)	NL	NLD	528
-166	Norvège	Norway	NO	NOR	578
-155	Népal	Nepal	NP	NPL	524
 154	Nauru	Nauru	NR	NRU	520
-162	Niue	Niue	NU	NIU	570
+155	Népal	Nepal	NP	NPL	524
+156	Pays-Bas	Netherlands (the)	NL	NLD	528
+157	Nouvelle-Calédonie	New Caledonia	NC	NCL	540
 158	Nouvelle-Zélande	New Zealand	NZ	NZL	554
+159	Nicaragua	Nicaragua	NI	NIC	558
+160	Niger	Niger (the)	NE	NER	562
+161	Nigéria	Nigeria	NG	NGA	566
+162	Niue	Niue	NU	NIU	570
+163	Norfolk (l'Île)	Norfolk Island	NF	NFK	574
+164	Macédoine du Nord	North Macedonia	MK	MKD	807
+165	Mariannes du Nord (les Îles)	Northern Mariana Islands (the)	MP	MNP	580
+166	Norvège	Norway	NO	NOR	578
 167	Oman	Oman	OM	OMN	512
-171	Panama	Panama	PA	PAN	591
-174	Pérou	Peru	PE	PER	604
-78	Polynésie française	French Polynesia	PF	PYF	258
-172	Papouasie-Nouvelle-Guinée	Papua New Guinea	PG	PNG	598
-175	Philippines	Philippines (the)	PH	PHL	608
 168	Pakistan	Pakistan	PK	PAK	586
-177	Pologne	Poland	PL	POL	616
-190	Saint-Pierre-et-Miquelon	Saint Pierre and Miquelon	PM	SPM	666
-176	Pitcairn	Pitcairn	PN	PCN	612
-179	Porto Rico	Puerto Rico	PR	PRI	630
-170	Palestine, État de	Palestine, State of	PS	PSE	275
-178	Portugal	Portugal	PT	PRT	620
 169	Palaos	Palau	PW	PLW	585
+170	Palestine, État de	Palestine, State of	PS	PSE	275
+171	Panama	Panama	PA	PAN	591
+172	Papouasie-Nouvelle-Guinée	Papua New Guinea	PG	PNG	598
 173	Paraguay	Paraguay	PY	PRY	600
+174	Pérou	Peru	PE	PER	604
+175	Philippines	Philippines (the)	PH	PHL	608
+176	Pitcairn	Pitcairn	PN	PCN	612
+177	Pologne	Poland	PL	POL	616
+178	Portugal	Portugal	PT	PRT	620
+179	Porto Rico	Puerto Rico	PR	PRI	630
 180	Qatar	Qatar	QA	QAT	634
-184	Réunion	Réunion	RE	REU	638
 181	Roumanie	Romania	RO	ROU	642
-197	Serbie	Serbia	RS	SRB	688
 182	Russie (la Fédération de)	Russian Federation (the)	RU	RUS	643
 183	Rwanda	Rwanda	RW	RWA	646
-195	Arabie saoudite	Saudi Arabia	SA	SAU	682
-204	Salomon (les Îles)	Solomon Islands	SB	SLB	90
-198	Seychelles	Seychelles	SC	SYC	690
-211	Soudan	Sudan (the)	SD	SDN	729
-214	Suède	Sweden	SE	SWE	752
-200	Singapour	Singapore	SG	SGP	702
+184	Réunion	Réunion	RE	REU	638
+185	Saint-Barthélemy	Saint Barthélemy	BL	BLM	652
 186	Sainte-Hélène, Ascension et Tristan da Cunha	Saint Helena, Ascension and Tristan da Cunha	SH	SHN	654
-203	Slovénie	Slovenia	SI	SVN	705
-213	Svalbard et l'Île Jan Mayen	Svalbard and Jan Mayen	SJ	SJM	744
-202	Slovaquie	Slovakia	SK	SVK	703
-199	Sierra Leone	Sierra Leone	SL	SLE	694
+187	Saint-Kitts-et-Nevis	Saint Kitts and Nevis	KN	KNA	659
+188	Sainte-Lucie	Saint Lucia	LC	LCA	662
+189	Saint-Martin (partie française)	Saint Martin (French part)	MF	MAF	663
+190	Saint-Pierre-et-Miquelon	Saint Pierre and Miquelon	PM	SPM	666
+191	Saint-Vincent-et-les Grenadines	Saint Vincent and the Grenadines	VC	VCT	670
+192	Samoa	Samoa	WS	WSM	882
 193	Saint-Marin	San Marino	SM	SMR	674
-196	Sénégal	Senegal	SN	SEN	686
-205	Somalie	Somalia	SO	SOM	706
-212	Suriname	Suriname	SR	SUR	740
-208	Soudan du Sud	South Sudan	SS	SSD	728
 194	Sao Tomé-et-Principe	Sao Tome and Principe	ST	STP	678
-66	El Salvador	El Salvador	SV	SLV	222
+195	Arabie saoudite	Saudi Arabia	SA	SAU	682
+196	Sénégal	Senegal	SN	SEN	686
+197	Serbie	Serbia	RS	SRB	688
+198	Seychelles	Seychelles	SC	SYC	690
+199	Sierra Leone	Sierra Leone	SL	SLE	694
+200	Singapour	Singapore	SG	SGP	702
 201	Saint-Martin (partie néerlandaise)	Sint Maarten (Dutch part)	SX	SXM	534
+202	Slovaquie	Slovakia	SK	SVK	703
+203	Slovénie	Slovenia	SI	SVN	705
+204	Salomon (les Îles)	Solomon Islands	SB	SLB	90
+205	Somalie	Somalia	SO	SOM	706
+206	Afrique du Sud	South Africa	ZA	ZAF	710
+207	Géorgie du Sud-et-les Îles Sandwich du Sud	South Georgia and the South Sandwich Islands	GS	SGS	239
+208	Soudan du Sud	South Sudan	SS	SSD	728
+209	Espagne	Spain	ES	ESP	724
+210	Sri Lanka	Sri Lanka	LK	LKA	144
+211	Soudan	Sudan (the)	SD	SDN	729
+212	Suriname	Suriname	SR	SUR	740
+213	Svalbard et l'Île Jan Mayen	Svalbard and Jan Mayen	SJ	SJM	744
+214	Suède	Sweden	SE	SWE	752
+215	Suisse	Switzerland	CH	CHE	756
 216	République arabe syrienne	Syrian Arab Republic (the)	SY	SYR	760
-70	Eswatini	Eswatini	SZ	SWZ	748
-229	Turks-et-Caïcos (les Îles)	Turks and Caicos Islands (the)	TC	TCA	796
-43	Tchad	Chad	TD	TCD	148
-79	Terres australes françaises	French Southern Territories (the)	TF	ATF	260
-222	Togo	Togo	TG	TGO	768
-220	Thaïlande	Thailand	TH	THA	764
-218	Tadjikistan	Tajikistan	TJ	TJK	762
-223	Tokelau	Tokelau	TK	TKL	772
-221	Timor-Leste	Timor-Leste	TL	TLS	626
-228	Turkménistan	Turkmenistan	TM	TKM	795
-226	Tunisie	Tunisia	TN	TUN	788
-224	Tonga	Tonga	TO	TON	776
-227	Turquie	Turkey	TR	TUR	792
-225	Trinité-et-Tobago	Trinidad and Tobago	TT	TTO	780
-230	Tuvalu	Tuvalu	TV	TUV	798
 217	Taïwan (Province de Chine)	Taiwan (Province of China)	TW	TWN	158
+218	Tadjikistan	Tajikistan	TJ	TJK	762
 219	Tanzanie (la République-Unie de)	Tanzania, the United Republic of	TZ	TZA	834
-232	Ukraine	Ukraine	UA	UKR	804
+220	Thaïlande	Thailand	TH	THA	764
+221	Timor-Leste	Timor-Leste	TL	TLS	626
+222	Togo	Togo	TG	TGO	768
+223	Tokelau	Tokelau	TK	TKL	772
+224	Tonga	Tonga	TO	TON	776
+225	Trinité-et-Tobago	Trinidad and Tobago	TT	TTO	780
+226	Tunisie	Tunisia	TN	TUN	788
+227	Turquie	Turkey	TR	TUR	792
+228	Turkménistan	Turkmenistan	TM	TKM	795
+229	Turks-et-Caïcos (les Îles)	Turks and Caicos Islands (the)	TC	TCA	796
+230	Tuvalu	Tuvalu	TV	TUV	798
 231	Ouganda	Uganda	UG	UGA	800
+232	Ukraine	Ukraine	UA	UKR	804
+233	Émirats arabes unis	United Arab Emirates (the)	AE	ARE	784
+234	Royaume-Uni de Grande-Bretagne et d'Irlande du Nord	United Kingdom of Great Britain and Northern Ireland (the)	GB	GBR	826
 235	Îles mineures éloignées des États-Unis	United States Minor Outlying Islands (the)	UM	UMI	581
 236	États-Unis d'Amérique	United States of America (the)	US	USA	840
 237	Uruguay	Uruguay	UY	URY	858
 238	Ouzbékistan	Uzbekistan	UZ	UZB	860
-98	Saint-Siège	Holy See (the)	VA	VAT	336
-191	Saint-Vincent-et-les Grenadines	Saint Vincent and the Grenadines	VC	VCT	670
+239	Vanuatu	Vanuatu	VU	VUT	548
 240	Venezuela (République bolivarienne du)	Venezuela (Bolivarian Republic of)	VE	VEN	862
+241	Viet Nam	Viet Nam	VN	VNM	704
 242	Vierges britanniques (les Îles)	Virgin Islands (British)	VG	VGB	92
 243	Vierges des États-Unis (les Îles)	Virgin Islands (U.S.)	VI	VIR	850
-241	Viet Nam	Viet Nam	VN	VNM	704
-239	Vanuatu	Vanuatu	VU	VUT	548
 244	Wallis-et-Futuna	Wallis and Futuna	WF	WLF	876
-192	Samoa	Samoa	WS	WSM	882
+245	Sahara occidental	Western Sahara*	EH	ESH	732
 246	Yémen	Yemen	YE	YEM	887
-142	Mayotte	Mayotte	YT	MYT	175
-206	Afrique du Sud	South Africa	ZA	ZAF	710
 247	Zambie	Zambia	ZM	ZMB	894
 248	Zimbabwe	Zimbabwe	ZW	ZWE	716
+249	Åland(les Îles)	Åland Islands	AX	ALA	248
 \.
 
 
@@ -2630,11 +2678,11 @@ COPY public.country3166 (id, fr, en, alpha2, alpha3, "numeric") FROM stdin;
 -- Data for Name: currency; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.currency (id, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, label, symbol, rate) FROM stdin;
-1	1	2015-11-03 14:48:10	\N	\N	\N	\N	\N	Euro	€	1
-4	1	2015-11-03 14:58:31	\N	\N	\N	\N	\N	Yens	¥	132.651
-3	1	2015-11-03 14:57:20	\N	\N	\N	\N	\N	Livre	£	0.7133
-2	1	2015-11-03 14:56:38	\N	\N	\N	\N	\N	Dollars	$	1.096
+COPY public.currency (id, label, symbol, rate, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+1	Euro	€	1	1	2015-11-03 14:48:10	\N	\N	\N	\N	\N
+4	Yens	¥	132.651	1	2015-11-03 14:58:31	\N	\N	\N	\N	\N
+3	Livre	£	0.7133	1	2015-11-03 14:57:20	\N	\N	\N	\N	\N
+2	Dollars	$	1.096	1	2015-11-03 14:56:38	\N	\N	\N	\N	\N
 \.
 
 
@@ -2642,34 +2690,23 @@ COPY public.currency (id, status, datecreated, dateupdated, datedeleted, created
 -- Data for Name: datetype; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.datetype (id, label, description, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, facet, recursivity, finishable) FROM stdin;
-19	Rapport final		1	2016-02-08 13:30:42	\N	\N	\N	\N	\N	Scientifique	\N	f
-21	Soutenance de thèse		1	2016-02-08 13:31:40	\N	\N	\N	\N	\N	Scientifique	\N	f
-53	Rapport financier		1	2016-08-26 13:53:40	\N	\N	\N	\N	\N	Financier		t
-55	Soumission du projet		1	2018-02-08 18:09:50	\N	\N	\N	\N	\N	Administratif		t
-52	Date de fin d'éligibilité des dépenses		1	2016-04-07 12:58:56	\N	\N	\N	\N	\N	Financier		f
-3	Début d'éligibilité des dépenses		1	2016-01-27 14:26:21	\N	\N	\N	\N	\N	Financier		f
-7	Dépôt de dossier		1	2016-01-27 14:49:01	\N	\N	\N	\N	\N	Administratif		f
+COPY public.datetype (id, label, facet, description, recursivity, finishable, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+1	Rapport financier	Financier		30,15,7,3	t	1	\N	\N	\N	\N	\N	\N
+2	Rapport scientifique	Scientifique		30,15,7	t	1	\N	\N	\N	\N	\N	\N
+3	Début des dépenses	Financier			f	1	\N	\N	\N	\N	\N	\N
+4	Fin des dépenses	Financier		60,30,15	f	1	\N	\N	\N	\N	\N	\N
+5	Soumission du contrat	Général			t	1	\N	\N	\N	\N	\N	\N
 \.
+
 
 --
 -- Data for Name: organizationrole; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.organizationrole (id, label, description, principal, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
-5	Co-financeur	\N	f	\N	\N	\N	\N	\N	\N	\N
-6	Coordinateur	\N	f	\N	\N	\N	\N	\N	\N	\N
-8	Client	\N	f	\N	\N	\N	\N	\N	\N	\N
-2	Composante de gestion	\N	t	\N	\N	\N	\N	\N	\N	\N
-1	Laboratoire	\N	t	\N	\N	\N	\N	\N	\N	\N
-3	Financeur	\N	t	\N	\N	\N	\N	\N	\N	\N
-4	Composante responsable	\N	t	\N	\N	\N	\N	\N	\N	\N
-9	Co-contractant	\N	f	\N	\N	\N	\N	\N	\N	\N
-10	Tutelle de gestion	\N	t	\N	\N	\N	\N	\N	\N	\N
-12	Conseiller	\N	f	\N	\N	\N	\N	\N	\N	\N
-13	Partenaire	\N	f	\N	\N	\N	\N	\N	\N	\N
-7	Scientifique		f	\N	\N	\N	\N	\N	\N	\N
-14	Tiers		f	1	2018-02-08 18:08:03	\N	\N	\N	\N	\N
+1	Laboratoire		t	1	2025-06-27 10:53:47	\N	\N	\N	\N	\N
+2	Composante		t	1	2025-06-27 10:54:00	\N	\N	\N	\N	\N
+3	Partenaire tiers		f	1	2025-06-27 10:54:28	\N	\N	\N	\N	\N
 \.
 
 
@@ -2678,431 +2715,255 @@ COPY public.organizationrole (id, label, description, principal, status, datecre
 --
 
 COPY public.organizationtype (id, root_id, label, description, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
-1	\N	Association	\N	1	\N	\N	\N	\N	\N	\N
-2	\N	Collectivité territoriale	\N	1	\N	\N	\N	\N	\N	\N
-3	\N	Composante	\N	1	\N	\N	\N	\N	\N	\N
-4	\N	Groupement d'intérêt économique	\N	1	\N	\N	\N	\N	\N	\N
-5	\N	Inconnue	\N	1	\N	\N	\N	\N	\N	\N
-6	\N	Institution	\N	1	\N	\N	\N	\N	\N	\N
-7	\N	Laboratoire	\N	1	\N	\N	\N	\N	\N	\N
-8	\N	Plateau technique	\N	1	\N	\N	\N	\N	\N	\N
-9	\N	Société	\N	1	\N	\N	\N	\N	\N	\N
-10	\N	Établissement publique	\N	1	\N	\N	\N	\N	\N	\N
+1	\N	Collectivité territoriale	\N	1	\N	\N	\N	\N	\N	\N
+2	\N	Groupement d'intérêt économique	\N	1	\N	\N	\N	\N	\N	\N
+3	\N	Institution	\N	1	\N	\N	\N	\N	\N	\N
+4	\N	Laboratoire	\N	1	\N	\N	\N	\N	\N	\N
+5	\N	Société	\N	1	\N	\N	\N	\N	\N	\N
+6	\N	Établissement publique	\N	1	\N	\N	\N	\N	\N	\N
+7	\N	Fondation		1	\N	\N	\N	\N	\N	\N
+8	\N	Association		1	\N	\N	\N	\N	\N	\N
+9	\N	Groupement d'intérêt public		1	\N	\N	\N	\N	\N	\N
+10	\N	Structure de recherche		1	\N	\N	\N	\N	\N	\N
 \.
+
+
 
 --
 -- Data for Name: privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.privilege (id, categorie_id, code, libelle, ordre, root_id, spot) FROM stdin;
-6	7	privilege-visualisation	Privilèges - Visualisation	\N	\N	7
-18	2	SHOW	Afficher la fiche d'une activité	\N	\N	7
-20	2	PAYMENT_SHOW	Voir les versements et le budget	\N	\N	7
-22	2	MILESTONE_SHOW	Peut voir les jalons	\N	\N	7
-24	2	DOCUMENT_SHOW	Peut voir les documents	\N	\N	7
-30	2	PERSON_SHOW	Peut voir les membres d'une activité	\N	\N	7
-31	2	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N	\N	7
-3	1	SHOW	Voir les détails d'un projet	\N	\N	7
-32	1	PERSON_SHOW	Voir les membres d'un projet	\N	\N	7
-33	1	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N	\N	7
-34	1	DOCUMENT_SHOW	Voir les documents d'un projet	\N	\N	7
-35	1	ACTIVITY_SHOW	Voir les activités d'un projet	\N	\N	7
-54	2	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N	\N	7
-56	2	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N	\N	7
-62	9	SHOW	Voir les dépenses	\N	\N	7
-70	6	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N	\N	7
-69	2	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N	\N	7
-72	2	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N	\N	7
-75	2	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N	\N	7
-76	3	VIEW_TIMESHEET	Peut voir les feuilles de temps de n'importe quelle personne	\N	\N	7
-78	2	TIMESHEET_VIEW	Voir les feuilles de temps	\N	\N	7
-79	6	ACTIVITYTYPE_MANAGE	Configurer les types d'activités disponibles	\N	\N	7
-80	6	MILESTONETYPE_MANAGE	Configurer les types de jalons disponibles	\N	\N	7
-81	6	ORGANIZATIONTYPE_MANAGE	Configurer les types d'organisation disponibles	\N	\N	7
-82	6	SEARCH_BUILD	Peut lancer la reconstruction de l'index de recherche des activités	\N	\N	7
-4	7	role-visualisation	Visualisation des rôles	\N	\N	4
-5	7	role-edition	Édition des rôles	\N	4	4
-7	7	privilege-edition	Privilèges - Édition	\N	6	4
-8	1	CREATE	Création d'un nouveau projet	\N	\N	4
-9	1	EDIT	Modifier un projet	\N	3	4
-10	1	ACTIVITY-ADD	Ajouter une activité dans le projet	\N	\N	4
-11	1	PERSON_MANAGE	Gérer les membres d'un projet	\N	32	7
-12	1	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N	33	7
-1	1	DASHBOARD	Tableau de bord	\N	\N	4
-13	2	EXPORT	Exporter les données des activités	\N	17	4
-15	2	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N	31	7
-19	2	EDIT	Modifier les informations générales d'une activité	\N	18	7
-17	2	INDEX	Afficher / rechercher dans les activités	\N	\N	4
-23	2	MILESTONE_MANAGE	Peut gérer les jalons	\N	22	7
-25	2	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N	24	7
-27	2	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N	\N	4
-28	2	DELETE	Peut supprimer définitivement une activité	\N	\N	4
-29	2	STATUS_OFF	Peut modifier le statut vers "Désactivé"	\N	\N	4
-36	3	SHOW	Voir la fiche d'une personne	\N	\N	4
-37	3	EDIT	Modifier la fiche d'une personne	\N	36	4
-41	4	SHOW	Voir la fiche d'une organisation	\N	\N	4
-42	4	EDIT	Modifier la fiche d'une organisation	\N	41	4
-14	2	PERSON_MANAGE	Gestion des membres d'une activité	\N	30	7
-51	6	MENU_ADMIN	Accès au menu d'administration	\N	\N	4
-40	4	INDEX	Voir la liste des organisations	\N	\N	4
-39	3	INDEX	Voir la liste des personnes	\N	\N	4
-53	3	PROJECTS	Voir les projets d'une personnes	\N	36	7
-52	3	INFOS_RH	Voir les données administratives	\N	36	4
-55	2	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N	54	7
-58	8	DOCUMENT_INDEX	Voir les documents adminstratifs	\N	\N	4
-60	8	DOCUMENT_DELETE	Supprimer un document	\N	58	4
-61	8	DOCUMENT_DOWNLOAD	Télécharger un document	\N	58	4
-59	8	DOCUMENT_NEW	Téléverser un nouveau document	\N	58	4
-63	7	USER_VISUALISATION	Voir les authentifications utilisateur	\N	\N	4
-64	7	USER_EDITION	Gérer les authentifications des utilisateurs	\N	\N	4
-65	7	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N	\N	4
-66	7	ROLEORGA_EDITION	Configurer les rôles des organisations	\N	65	4
-73	2	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N	72	7
-67	2	TIMESHEET_VALIDATE_SCI	Validation scientifique des feuilles de temps	\N	78	7
-68	2	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N	78	7
-77	2	MILESTONE_PROGRESSION	Peut gérer l'état d'avancement des jalons	\N	22	7
-83	6	DISCIPLINE_MANAGE	Configurer les disciplines disponibles pour les activités	\N	\N	7
-38	3	SYNC_LDAP	Synchroniser les données depuis les connecteurs	\N	36	4
-43	4	SYNC_LDAP	Synchroniser les données avec les connecteurs	\N	41	4
-84	3	MANAGE_SCHEDULE	Peut  modifier et valider la répartition horaire d'une personne	\N	36	7
-85	3	SHOW_SCHEDULE	Peut  voir la répartition horaire d'une personne	\N	36	7
-86	4	DELETE	Autorise la suppression définitive d'une organisation	\N	40	4
-87	2	TIMESHEET_VALIDATE_ACTIVITY	Validation niveau activité des feuilles de temps	\N	78	7
-89	2	REQUEST	Faire une demande d'activité	\N	\N	4
-90	6	TVA_MANAGE	Configurer les TVAs disponibles	\N	\N	7
-96	2	REQUEST_MANAGE	Traiter les demandes d'activité	\N	\N	4
-97	2	REQUEST_ADMIN	Administrer toutes les demandes d'activité	\N	\N	4
-101	3	FEED_TIMESHEET	Peut compléter les feuilles de temps de n'importe quel déclarant	\N	\N	7
-2	1	INDEX	Lister et rechercher dans les projets	\N	\N	6
-16	2	PAYMENT_MANAGE	Gestion des versements d'une activité	\N	20	7
-26	2	DUPLICATE	Peut dupliquer l'activité	\N	\N	4
-88	6	VALIDATION_MANAGE	Peut gérer, modifier ou supprimer l'état des déclarations envoyées	\N	\N	7
-102	7	API_ACCESS	Gérer les accès à l'API	\N	\N	4
-103	2	CREATE	Créer une nouvelle activité de recherche	\N	\N	4
-104	2	PCRU	Permet d'afficher les informations PCRU de l'activité de recherche	\N	18	7
-105	2	PCRU_ACTIVATE	Permet d'activer les données PCRU pour une activité	\N	18	7
-106	2	CONTRACT_SHOW	Voir le contrat signé	\N	18	7
-107	2	CONTRACT_SEND	Soumettre un contrat signé	\N	18	7
-108	2	ESTIMATEDSPENT_SHOW	Voir les dépenses prévisionnelles	\N	\N	7
-109	2	ESTIMATEDSPENT_MANAGE	Gestion des dépenses prévisionnelle de l'activité	\N	108	7
-110	2	DOCUMENT_DELETEDSIGNED	Peut supprimer un document signé	\N	24	7
-111	9	DETAILS	Voir le détail des dépenses	\N	\N	7
-112	9	SYNC	Peut forcer la synchronisation des dépenses	\N	\N	7
-113	9	DOWNLOAD	Peut télécharger les dépenses (Excel/CSV)	\N	\N	7
-114	9	RECETTES	Peut voir les recettes	\N	\N	7
-115	9	IGNORED	Peut voir les données ignorées	\N	\N	7
-116	6	SPENDTYPEGROUP_MANAGE	Configuration des types de dépenses	\N	\N	7
-117	6	PCRU_LIST	Peut visualiser la liste des données PCRU	\N	\N	7
-118	6	PCRU_UPLOAD	Peut déclencher manuellement le transfert des donnèes vers PCRU	\N	\N	7
-119	6	DOCUMENTTYPE_MANAGE	Configurer les types de document disponibles	\N	\N	7
-120	6	DOCPUBSEC_MANAGE	Configurer les sections des documents publiques	\N	\N	7
-121	6	NUMEROTATION_MANAGE	Configurer les numérotations disponibles pour les activités	\N	\N	7
-122	6	PARAMETERS_MANAGE	Peut gérer les paramètres	\N	\N	7
-123	10	SIGNATURE_INDEX	Liste des signatures	\N	\N	7
-124	10	SIGNATURE_DELETE	Suppression des signatures	\N	\N	7
-125	10	SIGNATURE_CREATE	Création de signature	\N	\N	7
-126	10	SIGNATURE_SYNC	Synchronisation de signature	\N	\N	7
-127	10	SIGNATURE_ADMIN	Accès à l'interface d'administration / gestion des signatures et processus en cours	\N	\N	7
-128	10	SIGNATURE_ADMIN_CONFIG	Configuration des processus métier	\N	\N	7
-74	6	NOTIFICATION_PERSON	Peut notifier manuellement une personne	\N	\N	7
-129	6	SIGNATURE_DELETE	Peut supprimer les documents signés	\N	\N	7
-130	2	NOTES_SHOW	Voir les notes	\N	\N	7
-131	2	NOTES_MANAGE_USER	Créer/Modifier/Supprimer mes propres notes	\N	130	7
-132	2	NOTES_MANAGE_ADMIN	Créer/Modifier/Supprimer toutes les notes	\N	130	7
+COPY public.privilege (id, categorie_id, root_id, code, libelle, ordre, spot) FROM stdin;
+6	7	\N	privilege-visualisation	Privilèges - Visualisation	\N	7
+18	2	\N	SHOW	Afficher la fiche d'une activité	\N	7
+20	2	\N	PAYMENT_SHOW	Voir les versements et le budget	\N	7
+22	2	\N	MILESTONE_SHOW	Peut voir les jalons	\N	7
+24	2	\N	DOCUMENT_SHOW	Peut voir les documents	\N	7
+30	2	\N	PERSON_SHOW	Peut voir les membres d'une activité	\N	7
+31	2	\N	ORGANIZATION_SHOW	Peut voir les partenaires d'un projet	\N	7
+3	1	\N	SHOW	Voir les détails d'un projet	\N	7
+32	1	\N	PERSON_SHOW	Voir les membres d'un projet	\N	7
+33	1	\N	ORGANIZATION_SHOW	Voir les partenaires d'un projet	\N	7
+34	1	\N	DOCUMENT_SHOW	Voir les documents d'un projet	\N	7
+35	1	\N	ACTIVITY_SHOW	Voir les activités d'un projet	\N	7
+54	2	\N	WORKPACKAGE_SHOW	Voir les lots de travail d'une activité	\N	7
+56	2	\N	WORKPACKAGE_COMMIT	Déclarer des heures pour un lot de travail	\N	7
+62	9	\N	SHOW	Voir les dépenses	\N	7
+70	6	\N	CONNECTOR_ACCESS	Peut exécuter la synchronisation des données	\N	7
+69	2	\N	TIMESHEET_USURPATION	Peut remplir les feuilles de temps des déclarants d'une activité	\N	7
+72	2	\N	NOTIFICATIONS_SHOW	Peut voir les notifications planifiées dans la fiche activité	\N	7
+75	2	\N	PERSON_ACCESS	Voir les personnes qui ont la vision sur l'activité	\N	7
+76	3	\N	VIEW_TIMESHEET	Peut voir les feuilles de temps de n'importe quelle personne	\N	7
+78	2	\N	TIMESHEET_VIEW	Voir les feuilles de temps	\N	7
+79	6	\N	ACTIVITYTYPE_MANAGE	Configurer les types d'activités disponibles	\N	7
+80	6	\N	MILESTONETYPE_MANAGE	Configurer les types de jalons disponibles	\N	7
+81	6	\N	ORGANIZATIONTYPE_MANAGE	Configurer les types d'organisation disponibles	\N	7
+82	6	\N	SEARCH_BUILD	Peut lancer la reconstruction de l'index de recherche des activités	\N	7
+4	7	\N	role-visualisation	Visualisation des rôles	\N	4
+5	7	4	role-edition	Édition des rôles	\N	4
+7	7	6	privilege-edition	Privilèges - Édition	\N	4
+8	1	\N	CREATE	Création d'un nouveau projet	\N	4
+9	1	3	EDIT	Modifier un projet	\N	4
+10	1	\N	ACTIVITY-ADD	Ajouter une activité dans le projet	\N	4
+11	1	32	PERSON_MANAGE	Gérer les membres d'un projet	\N	7
+12	1	33	ORGANIZATION_MANAGE	Gérer les partenaires d'un projet	\N	7
+1	1	\N	DASHBOARD	Tableau de bord	\N	4
+13	2	17	EXPORT	Exporter les données des activités	\N	4
+15	2	31	ORGANIZATION_MANAGE	Gestion des partenaires d'une activité	\N	7
+19	2	18	EDIT	Modifier les informations générales d'une activité	\N	7
+17	2	\N	INDEX	Afficher / rechercher dans les activités	\N	4
+23	2	22	MILESTONE_MANAGE	Peut gérer les jalons	\N	7
+25	2	24	DOCUMENT_MANAGE	Peut gérer les documents (Ajouter)	\N	7
+27	2	\N	CHANGE_PROJECT	Peut modifier le projet d'une activité	\N	4
+28	2	\N	DELETE	Peut supprimer définitivement une activité	\N	4
+29	2	\N	STATUS_OFF	Peut modifier le statut vers "Désactivé"	\N	4
+36	3	\N	SHOW	Voir la fiche d'une personne	\N	4
+37	3	36	EDIT	Modifier la fiche d'une personne	\N	4
+41	4	\N	SHOW	Voir la fiche d'une organisation	\N	4
+42	4	41	EDIT	Modifier la fiche d'une organisation	\N	4
+14	2	30	PERSON_MANAGE	Gestion des membres d'une activité	\N	7
+51	6	\N	MENU_ADMIN	Accès au menu d'administration	\N	4
+40	4	\N	INDEX	Voir la liste des organisations	\N	4
+39	3	\N	INDEX	Voir la liste des personnes	\N	4
+53	3	36	PROJECTS	Voir les projets d'une personnes	\N	7
+52	3	36	INFOS_RH	Voir les données administratives	\N	4
+55	2	54	WORKPACKAGE_MANAGE	Gérer les lots de travail d'une activité	\N	7
+58	8	\N	DOCUMENT_INDEX	Voir les documents adminstratifs	\N	4
+60	8	58	DOCUMENT_DELETE	Supprimer un document	\N	4
+61	8	58	DOCUMENT_DOWNLOAD	Télécharger un document	\N	4
+59	8	58	DOCUMENT_NEW	Téléverser un nouveau document	\N	4
+63	7	\N	USER_VISUALISATION	Voir les authentifications utilisateur	\N	4
+64	7	\N	USER_EDITION	Gérer les authentifications des utilisateurs	\N	4
+65	7	\N	ROLEORGA_VISUALISATION	Voir les rôles des organisations	\N	4
+66	7	65	ROLEORGA_EDITION	Configurer les rôles des organisations	\N	4
+73	2	72	NOTIFICATIONS_GENERATE	Peut regénérer manuellement les notifications d'une activité	\N	7
+67	2	78	TIMESHEET_VALIDATE_SCI	Validation scientifique des feuilles de temps	\N	7
+68	2	78	TIMESHEET_VALIDATE_ADM	Validation administrative des feuilles de temps	\N	7
+77	2	22	MILESTONE_PROGRESSION	Peut gérer l'état d'avancement des jalons	\N	7
+83	6	\N	DISCIPLINE_MANAGE	Configurer les disciplines disponibles pour les activités	\N	7
+38	3	36	SYNC_LDAP	Synchroniser les données depuis les connecteurs	\N	4
+43	4	41	SYNC_LDAP	Synchroniser les données avec les connecteurs	\N	4
+84	3	36	MANAGE_SCHEDULE	Peut  modifier et valider la répartition horaire d'une personne	\N	7
+85	3	36	SHOW_SCHEDULE	Peut  voir la répartition horaire d'une personne	\N	7
+86	4	40	DELETE	Autorise la suppression définitive d'une organisation	\N	4
+87	2	78	TIMESHEET_VALIDATE_ACTIVITY	Validation niveau activité des feuilles de temps	\N	7
+89	2	\N	REQUEST	Faire une demande d'activité	\N	4
+90	2	\N	REQUEST_MANAGE	Traiter les demandes d'activité	\N	4
+91	2	\N	REQUEST_ADMIN	Administrer toutes les demandes d'activité	\N	4
+92	3	\N	FEED_TIMESHEET	Peut compléter les feuilles de temps de n'importe quel déclarant	\N	7
+93	6	\N	DOCUMENTTYPE_MANAGE	Configurer les types de document disponibles	\N	7
+2	1	\N	INDEX	Lister et rechercher dans les projets	\N	6
+16	2	20	PAYMENT_MANAGE	Gestion des versements d'une activité	\N	7
+26	2	\N	DUPLICATE	Peut dupliquer l'activité	\N	4
+94	6	\N	TVA_MANAGE	Configurer les TVAs disponibles	\N	7
+95	6	\N	NUMEROTATION_MANAGE	Configurer les numérotations disponibles pour les activités	\N	7
+74	6	\N	NOTIFICATION_PERSON	Peut notifier manuellement une personne	\N	7
+96	6	\N	DOCPUBSEC_MANAGE	Configurer les sections des documents publiques	\N	7
+97	7	\N	API_ACCESS	Gérer les accès à l'API	\N	4
+98	2	\N	CREATE	Créer une nouvelle activité de recherche	\N	4
+99	2	\N	ESTIMATEDSPENT_SHOW	Voir les dépenses prévisionnelles	\N	7
+100	2	99	ESTIMATEDSPENT_MANAGE	Gestion des dépenses prévisionnelle de l'activité	\N	7
+101	9	\N	SYNC	Peut forcer la synchronisation des dépenses	\N	7
+102	9	\N	DOWNLOAD	Peut télécharger les dépenses (Excel/CSV)	\N	7
+103	6	\N	SPENDTYPEGROUP_MANAGE	Configuration des types de dépenses	\N	7
+88	6	\N	VALIDATION_MANAGE	Peut gérer, modifier ou supprimer l'état des déclarations envoyées	\N	7
+104	6	\N	PARAMETERS_MANAGE	Peut gérer les paramètres	\N	7
+105	9	\N	RECETTES	Peut voir les recettes	\N	7
+106	9	\N	IGNORED	Peut voir les données ignorées	\N	7
+107	9	\N	DETAILS	Voir le détail des dépenses	\N	7
+108	2	18	PCRU	Permet d'afficher les informations PCRU de l'activité de recherche	\N	7
+109	2	18	PCRU_ACTIVATE	Permet d'activer les données PCRU pour une activité	\N	7
+110	6	\N	PCRU_LIST	Peut visualiser la liste des données PCRU	\N	7
+111	6	\N	PCRU_UPLOAD	Peut déclencher manuellement le transfert des donnèes vers PCRU	\N	7
+112	2	18	CONTRACT_SHOW	Voir le contrat signé	\N	7
+113	2	18	CONTRACT_SEND	Soumettre un contrat signé	\N	7
+114	10	\N	SIGNATURE_INDEX	Liste des signatures	\N	7
+115	10	\N	SIGNATURE_DELETE	Suppression des signatures	\N	7
+116	10	\N	SIGNATURE_CREATE	Création de signature	\N	7
+117	10	\N	SIGNATURE_SYNC	Synchronisation de signature	\N	7
+118	10	\N	SIGNATURE_ADMIN	Accès à l'interface d'administration / gestion des signatures et processus en cours	\N	7
+119	10	\N	SIGNATURE_ADMIN_CONFIG	Configuration des processus métier	\N	7
+120	2	18	EDIT_LOCKED	Modifier les informations générales d'une activité VEROUILLEE	\N	7
+121	2	24	DOCUMENT_DELETEDSIGNED	Peut supprimer un document signé	\N	7
+122	6	\N	SIGNATURE_DELETE	Peut supprimer les documents signés	\N	7
+123	2	\N	AVENANTS_SHOW	Voir les avenants	\N	7
+124	2	123	AVENANTS_MANAGE	Créer/Modifier/Supprimer/Appliquer un avenant	\N	7
+125	2	\N	NOTES_SHOW	Voir les notes	\N	7
+126	2	125	NOTES_MANAGE_USER	Créer/Modifier/Supprimer mes propres notes	\N	7
+127	2	125	NOTES_MANAGE_ADMIN	Créer/Modifier/Supprimer toutes les notes	\N	7
 \.
 
---
--- Data for Name: user_role; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal, displayed, accessible_exterieur) FROM stdin;
-1	\N	Administrateur	f	\N	4	\N	f	t	t
-8	\N	Responsable RH	f	\N	6	\N	f	t	t
-9	\N	Responsable financier	f	(memberOf=cn=projet_oscar_agence_comptable,ou=groups,dc=unicaen,dc=fr)	6	\N	f	t	t
-11	\N	Ingénieur	f	\N	1	\N	f	t	t
-15	\N	Responsable juridique	f	\N	6	\N	f	t	t
-10	\N	Responsable scientifique	f	\N	3		t	t	t
-7	\N	Chargé de valorisation	f	(memberOf=cn=structure_dir-recherche-innov,ou=groups,dc=unicaen,dc=fr)	7		t	t	t
-6	\N	user	t	\N	4	Rôle par défaut	f	t	t
-21	\N	Directeur	f	\N	2	Contient la liste des directeurs de laboratoires/composante et assimilés (directeurs adjoints, directeurs temporaire, etc.)	t	t	t
-24	\N	Gestionnaire	f	\N	2	Gestionnaire de laboratoire / composante	t	t	t
-\.
 
 --
 -- Data for Name: role_privilege; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.role_privilege (privilege_id, role_id) FROM stdin;
-3	6
-33	6
-3	10
-33	10
-35	10
-20	10
-24	10
-31	10
-25	10
-54	1
-53	9
-2	9
-32	9
-34	9
-13	9
-18	9
-22	9
-30	9
-36	9
-40	9
-1	15
-3	15
-33	15
-35	15
-17	15
-20	15
-24	15
-31	15
-36	15
-41	15
-55	7
-1	11
-32	11
-35	11
-18	11
-30	11
-56	8
-59	1
-51	9
-59	9
-58	10
-58	15
-61	7
-61	10
-61	15
-58	6
-16	9
-54	9
-63	1
-65	1
-53	7
-13	24
-18	24
-22	24
-30	24
-54	24
-36	24
-53	24
-52	24
-40	24
-61	24
-61	21
-40	21
-52	21
-39	21
-54	21
-30	21
-22	21
-18	21
-13	21
-34	24
-32	24
-35	21
-33	21
-3	21
-1	24
-4	1
-5	1
 6	1
-7	1
-8	7
-8	1
-9	1
-9	7
-10	1
-10	7
-11	1
-11	7
-12	1
-12	7
-1	1
-1	7
-1	6
-2	1
-2	7
-13	7
-13	1
-16	1
-16	7
-15	1
-15	7
-19	1
-19	7
-17	1
-17	7
 18	1
-18	7
 20	1
-20	7
 22	1
-22	7
-23	1
-23	7
 24	1
-24	7
-25	1
-25	7
-26	1
-26	7
-27	7
-27	1
-28	1
+30	1
+31	1
+3	1
+32	1
+33	1
+34	1
+35	1
+54	1
+56	1
+62	1
 70	1
 69	1
-75	1
 72	1
-76	7
-76	9
-29	1
-30	1
-30	7
-31	1
-31	7
-3	1
-3	7
-32	7
-32	1
-33	7
-33	1
-34	7
-34	1
-35	7
-35	1
-36	7
-36	1
-37	7
-37	1
-38	1
-41	7
-41	1
-42	1
-43	7
-43	1
-14	1
-14	7
-51	7
-51	1
-40	7
-40	1
-39	7
-39	1
-53	1
-61	9
-32	6
-1	10
-32	10
-34	10
-18	10
-22	10
-30	10
-54	10
-55	1
-56	1
-56	10
-1	9
-3	9
-33	9
-35	9
-17	9
-20	9
-24	9
-31	9
-39	9
-41	9
-2	15
-32	15
-34	15
-13	15
-18	15
-22	15
-30	15
-54	15
-39	15
-40	15
-54	7
-56	7
-3	11
-54	11
-56	11
-56	15
-58	1
-60	1
-58	9
-61	1
-58	7
-58	8
-58	11
-59	7
-61	8
-61	11
-23	9
-64	1
-66	1
-17	24
-20	24
-24	24
-31	24
-39	24
-41	24
-58	24
-58	21
-41	21
-53	21
-36	21
-31	21
-24	21
-20	21
-17	21
-35	24
-33	24
-3	24
-34	21
-32	21
-1	21
-68	21
-73	1
+75	1
 76	1
-76	8
-76	15
-74	1
+78	1
 79	1
 80	1
 81	1
 82	1
-78	1
-67	24
-78	10
-78	21
-78	24
-78	7
-78	8
-78	9
-78	15
-87	10
-89	21
-83	1
-62	1
-89	1
-96	1
-89	6
-96	7
-97	1
-85	1
-84	1
-88	1
-101	1
+4	1
+5	1
+7	1
+8	1
+9	1
+10	1
+11	1
+12	1
+1	1
+13	1
+15	1
+19	1
+17	1
+23	1
+25	1
+27	1
+28	1
+29	1
+36	1
+37	1
+41	1
+42	1
+14	1
+51	1
+40	1
+39	1
+53	1
+52	1
+55	1
+58	1
+60	1
+61	1
+59	1
+63	1
+64	1
+65	1
+66	1
+73	1
+67	1
+68	1
 77	1
-90	1
-42	7
+83	1
+38	1
+43	1
+84	1
+85	1
 86	1
+87	1
+89	1
+90	1
+91	1
+92	1
+93	1
+2	1
+16	1
+26	1
+94	1
+95	1
+74	1
+96	1
+97	1
+98	1
+99	1
+100	1
+101	1
+102	1
+103	1
+88	1
+104	1
+105	1
+106	1
+107	1
+108	1
+109	1
+110	1
+111	1
+112	1
+113	1
+114	1
+115	1
 116	1
 117	1
 118	1
@@ -3110,40 +2971,219 @@ COPY public.role_privilege (privilege_id, role_id) FROM stdin;
 120	1
 121	1
 122	1
-103	1
 123	1
 124	1
 125	1
 126	1
 127	1
-128	1
-129	1
-111	1
-112	1
-113	1
-115	1
-62	9
-111	9
-113	9
-114	9
-115	9
-62	10
-62	21
-62	24
-62	7
-111	7
-113	7
-114	7
-114	24
-114	21
-114	10
-114	15
-62	15
-62	8
-114	8
-115	7
-51	15
+3	3
+32	3
+33	3
+34	3
+35	3
+18	3
+20	3
+22	3
+24	3
+30	3
+31	3
+54	3
+17	3
+123	3
+125	3
+126	3
+62	3
+102	3
+105	3
+106	3
+107	3
+3	4
+9	4
+32	4
+11	4
+33	4
+12	4
+34	4
+35	4
+18	4
+19	4
+20	4
+16	4
+22	4
+77	4
+77	3
+23	4
+24	4
+25	4
+25	3
+30	4
+14	4
+31	4
+15	4
+54	4
+78	4
+78	3
+17	4
+13	4
+27	2
+13	2
+17	2
+78	2
+72	2
+54	2
+15	2
+31	2
+14	2
+30	2
+25	2
+24	2
+23	2
+77	2
+22	2
+20	2
+16	2
+18	2
+19	2
+3	2
+3	5
+9	2
+32	2
+32	5
+33	2
+34	5
+34	2
+35	2
+35	5
+8	2
+10	2
+1	2
+2	2
+18	5
+24	5
+30	5
+31	5
+54	5
+76	2
+76	4
+36	4
+36	2
+52	2
+53	2
+41	2
+41	4
+40	2
+40	4
+79	2
+80	2
+81	2
+94	2
+93	2
+83	2
+82	2
+51	2
+95	2
+74	2
+96	2
+103	2
+88	2
+104	2
+110	2
+111	2
+6	2
+4	2
+63	2
+65	2
+58	2
+59	2
+61	2
+60	2
+58	4
+58	3
+62	4
+62	2
+101	2
+101	4
+102	4
+102	2
+105	4
+106	4
+107	4
+105	2
+106	2
+107	2
+114	2
+116	2
+117	2
+118	2
+26	2
+98	2
+39	2
+39	4
+123	2
+125	2
+125	4
+123	4
+98	4
+42	2
+127	4
 \.
+
+
+--
+-- Data for Name: spentline; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.spentline (id, syncid, pfi, rldnr, btart, numsifac, numcommandeaff, numpiece, numfournisseur, pieceref, codesociete, codeservicefait, codedomainefonct, designation, textefacture, typedocument, montant, centredeprofit, comptebudgetaire, centrefinancier, comptegeneral, datepiece, datecomptable, dateanneeexercice, datepaiement, dateservicefait) FROM stdin;
+\.
+
+
+--
+-- Data for Name: spenttypegroup; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.spenttypegroup (id, parent_id, label, description, code, annexe, rgt, lft, blind, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tabdocument; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.tabdocument (id, label, description, isdefault) FROM stdin;
+\.
+
+
+--
+-- Data for Name: tabsdocumentsroles; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.tabsdocumentsroles (id, role_id, access, tabdocument_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: timesheet; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.timesheet (id, workpackage_id, activity_id, person_id, datefrom, dateto, datesync, syncid, comment, label, icsuid, icsfileuid, icsfilename, icsfiledateadded, sendby, status, datecreated, dateupdated, datedeleted, validationperiod_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: timesheetcommentperiod; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.timesheetcommentperiod (id, declarer_id, object, objectgroup, object_id, comment, month, year) FROM stdin;
+\.
+
+
+--
+-- Data for Name: timesheetsby; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.timesheetsby (person_id, usurpation_person_id) FROM stdin;
+\.
+
 
 --
 -- Data for Name: tva; Type: TABLE DATA; Schema: public; Owner: -
@@ -3156,21 +3196,140 @@ COPY public.tva (id, label, rate, active, status, datecreated, dateupdated, date
 4	Taux DOM-TOM	8.5	t	1	\N	\N	\N	\N	\N	\N
 5	Taux réduit 7%	7	t	1	\N	\N	\N	\N	\N	\N
 6	Taux normal 20%	20	t	1	\N	\N	\N	\N	\N	\N
-7	Taux réduit 10%	10	f	1	\N	\N	\N	\N	\N	\N
+7	Taux réduit 10%	10	t	1	\N	\N	\N	\N	\N	\N
 \.
+
 
 --
 -- Data for Name: typedocument; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.typedocument (id, label, description, codecentaure, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id, isdefault, signatureflow_id) FROM stdin;
-1	Bordereau d'envoi	Importé depuis centaure	BORD	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-2	Fiche d'analyse	Importé depuis centaure	ANA	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-3	Document de travail	Importé depuis centaure	DOC	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-4	Annexe	Importé depuis centaure	ANN	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-6	Contrat Version Définitive Signée	Importé depuis centaure	VDEF	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-7	Annexe budgétaire lors de l'ouverture du contrat	Importé depuis centaure	ANN_BUDGET	1	2015-12-03 14:36:30	\N	\N	\N	\N	\N	f	\N
-10	Fiche mouvement Contractuel	\N	\N	1	2016-05-18 11:06:54	\N	\N	\N	\N	\N	f	\N
+COPY public.typedocument (id, label, description, codecentaure, isdefault, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_observer; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_observer (id, signature_id, firstname, lastname, email) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_process; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_process (id, datecreated, lastupdate, status, currentstep, document_name, signatureflow_id, label) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_process_step; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_process_step (id, process_id, signature_id, label) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_recipient; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_recipient (id, signature_id, status, firstname, lastname, email, phone, dateupdate, datefinished, keyaccess, informations, urldocument) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_signature; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_signature (id, datecreated, type, status, ordering, label, description, datesend, dateupdate, document_path, document_remotekey, document_localkey, context_short, context_long, refused_text, letterfile_key, letterfile_process, letterfile_url, allsigntocomplete, notificationsrecipients) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_signatureflow; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_signatureflow (id, label, description, enabled) FROM stdin;
+\.
+
+
+--
+-- Data for Name: unicaen_signature_signatureflowstep; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.unicaen_signature_signatureflowstep (id, recipientsmethod, label, letterfilename, signlevel, ordering, allrecipientssign, notificationsrecipients, editablerecipients, options, observers_options, observersmethod, signatureflow_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user_role; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.user_role (id, parent_id, role_id, is_default, ldap_filter, spot, description, principal, displayed, accessible_exterieur) FROM stdin;
+1	\N	Administrateur	f	\N	7	\N	f	t	t
+3	\N	Responsabe	f	\N	1	Responsable sur un contrat	t	f	t
+5	\N	Déclarant	f	\N	1	Personne identifiée sur un contrat	f	f	t
+2	\N	Chargé de projet	f	\N	15	Personne responsable du suivi des contrats	t	f	t
+4	\N	Gestionnaire	f	\N	2	Personne gestionnaire dans un laboratoire ou une composante	t	f	t
+\.
+
+
+--
+-- Data for Name: useraccessdefinition; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.useraccessdefinition (id, context, label, description, key) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod (id, declarer_id, validatorsprjdefault, validatorsscidefault, validatorsadmdefault, object, objectgroup, object_id, month, year, datesend, log, validationactivityat, validationactivityby, validationactivitybyid, validationactivitymessage, validationsciat, validationsciby, validationscibyid, validationscimessage, validationadmat, validationadmby, validationadmbyid, validationadmmessage, rejectactivityat, rejectactivityby, rejectactivitybyid, rejectactivitymessage, rejectsciat, rejectsciby, rejectscibyid, rejectscimessage, rejectadmat, rejectadmby, rejectadmbyid, rejectadmmessage, schedule, status, comment) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_adm; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_adm (validationperiod_id, person_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_prj; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_prj (validationperiod_id, person_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: validationperiod_sci; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.validationperiod_sci (validationperiod_id, person_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: workpackage; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.workpackage (id, activity_id, code, label, description, datestart, dateend, status, datecreated, dateupdated, datedeleted, createdby_id, updatedby_id, deletedby_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: workpackageperson; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.workpackageperson (id, person_id, duration, status, datecreated, dateupdated, datedeleted, workpackage_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 \.
 
 
@@ -3178,21 +3337,49 @@ COPY public.typedocument (id, label, description, codecentaure, status, datecrea
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activity_id_seq', 2, true);
+SELECT pg_catalog.setval('public.activity_id_seq', 3, true);
+
+
+--
+-- Name: activityavenant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityavenant_id_seq', 1, false);
+
+
+--
+-- Name: activityavenantmodification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activityavenantmodification_id_seq', 1, false);
 
 
 --
 -- Name: activitydate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activitydate_id_seq', 3, true);
+SELECT pg_catalog.setval('public.activitydate_id_seq', 1, false);
+
+
+--
+-- Name: activitymotcle_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activitymotcle_id_seq', 2, true);
+
+
+--
+-- Name: activitynote_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.activitynote_id_seq', 1, true);
 
 
 --
 -- Name: activityorganization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activityorganization_id_seq', 5, true);
+SELECT pg_catalog.setval('public.activityorganization_id_seq', 3, true);
 
 
 --
@@ -3213,28 +3400,28 @@ SELECT pg_catalog.setval('public.activitypcruinfos_id_seq', 1, false);
 -- Name: activityperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activityperson_id_seq', 1, false);
+SELECT pg_catalog.setval('public.activityperson_id_seq', 4, true);
 
 
 --
 -- Name: activityrequest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activityrequest_id_seq', 79, true);
+SELECT pg_catalog.setval('public.activityrequest_id_seq', 1, false);
 
 
 --
 -- Name: activityrequestfollow_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activityrequestfollow_id_seq', 54, true);
+SELECT pg_catalog.setval('public.activityrequestfollow_id_seq', 1, false);
 
 
 --
 -- Name: activitytype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.activitytype_id_seq', 715, false);
+SELECT pg_catalog.setval('public.activitytype_id_seq', 1, false);
 
 
 --
@@ -3248,21 +3435,21 @@ SELECT pg_catalog.setval('public.administrativedocument_id_seq', 1, false);
 -- Name: administrativedocumentsection_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.administrativedocumentsection_id_seq', 4, true);
+SELECT pg_catalog.setval('public.administrativedocumentsection_id_seq', 1, false);
 
 
 --
 -- Name: authentification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.authentification_id_seq', 3, false);
+SELECT pg_catalog.setval('public.authentification_id_seq', 1, true);
 
 
 --
 -- Name: categorie_privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.categorie_privilege_id_seq', 11, false);
+SELECT pg_catalog.setval('public.categorie_privilege_id_seq', 1, false);
 
 
 --
@@ -3276,7 +3463,7 @@ SELECT pg_catalog.setval('public.contractdocument_id_seq', 1, false);
 -- Name: contracttype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.contracttype_id_seq', 232, false);
+SELECT pg_catalog.setval('public.contracttype_id_seq', 1, false);
 
 
 --
@@ -3290,21 +3477,21 @@ SELECT pg_catalog.setval('public.country3166_id_seq', 249, true);
 -- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.currency_id_seq', 5, false);
+SELECT pg_catalog.setval('public.currency_id_seq', 1, false);
 
 
 --
 -- Name: datetype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.datetype_id_seq', 56, false);
+SELECT pg_catalog.setval('public.datetype_id_seq', 1, false);
 
 
 --
 -- Name: discipline_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.discipline_id_seq', 120, false);
+SELECT pg_catalog.setval('public.discipline_id_seq', 1, false);
 
 
 --
@@ -3315,17 +3502,10 @@ SELECT pg_catalog.setval('public.estimatedspentline_id_seq', 1, false);
 
 
 --
--- Name: grantsource_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.grantsource_id_seq', 33, true);
-
-
---
 -- Name: logactivity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.logactivity_id_seq', 229, true);
+SELECT pg_catalog.setval('public.logactivity_id_seq', 21, true);
 
 
 --
@@ -3346,35 +3526,28 @@ SELECT pg_catalog.setval('public.notificationperson_id_seq', 1, false);
 -- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.organization_id_seq', 1, false);
-
-
---
--- Name: organization_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.organization_role_id_seq', 1, false);
+SELECT pg_catalog.setval('public.organization_id_seq', 5, true);
 
 
 --
 -- Name: organizationperson_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.organizationperson_id_seq', 1, false);
+SELECT pg_catalog.setval('public.organizationperson_id_seq', 3, true);
 
 
 --
 -- Name: organizationrole_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.organizationrole_id_seq', 16, false);
+SELECT pg_catalog.setval('public.organizationrole_id_seq', 1, false);
 
 
 --
 -- Name: organizationtype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.organizationtype_id_seq', 10, true);
+SELECT pg_catalog.setval('public.organizationtype_id_seq', 1, false);
 
 
 --
@@ -3402,28 +3575,21 @@ SELECT pg_catalog.setval('public.pcrutypecontract_id_seq', 1, false);
 -- Name: person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.person_id_seq', 1, false);
+SELECT pg_catalog.setval('public.person_id_seq', 9, true);
 
 
 --
 -- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.privilege_id_seq', 130, false);
+SELECT pg_catalog.setval('public.privilege_id_seq', 1, false);
 
 
 --
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.project_id_seq', 1, false);
-
-
---
--- Name: projectgrant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.projectgrant_id_seq', 8654, true);
+SELECT pg_catalog.setval('public.project_id_seq', 2, true);
 
 
 --
@@ -3458,14 +3624,7 @@ SELECT pg_catalog.setval('public.recallexception_id_seq', 1, false);
 -- Name: referent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.referent_id_seq', 1, true);
-
-
---
--- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.role_id_seq', 25, false);
+SELECT pg_catalog.setval('public.referent_id_seq', 1, false);
 
 
 --
@@ -3486,14 +3645,14 @@ SELECT pg_catalog.setval('public.spenttypegroup_id_seq', 1, false);
 -- Name: tabdocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.tabdocument_id_seq', 2, true);
+SELECT pg_catalog.setval('public.tabdocument_id_seq', 1, false);
 
 
 --
 -- Name: tabsdocumentsroles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.tabsdocumentsroles_id_seq', 63, true);
+SELECT pg_catalog.setval('public.tabsdocumentsroles_id_seq', 1, false);
 
 
 --
@@ -3514,77 +3673,70 @@ SELECT pg_catalog.setval('public.timesheetcommentperiod_id_seq', 1, false);
 -- Name: tva_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.tva_id_seq', 8, false);
+SELECT pg_catalog.setval('public.tva_id_seq', 1, false);
 
 
 --
 -- Name: typedocument_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.typedocument_id_seq', 11, false);
-
-
---
--- Name: unicaen_signature_notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.unicaen_signature_notification_id_seq', 29, true);
+SELECT pg_catalog.setval('public.typedocument_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_observer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_observer_id_seq', 303, true);
+SELECT pg_catalog.setval('public.unicaen_signature_observer_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_process_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_process_id_seq', 79, true);
+SELECT pg_catalog.setval('public.unicaen_signature_process_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_process_step_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_process_step_id_seq', 186, true);
+SELECT pg_catalog.setval('public.unicaen_signature_process_step_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_recipient_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_recipient_id_seq', 226, true);
+SELECT pg_catalog.setval('public.unicaen_signature_recipient_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_signature_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_signature_id_seq', 199, true);
+SELECT pg_catalog.setval('public.unicaen_signature_signature_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_signatureflow_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_signatureflow_id_seq', 2, true);
+SELECT pg_catalog.setval('public.unicaen_signature_signatureflow_id_seq', 1, false);
 
 
 --
 -- Name: unicaen_signature_signatureflowstep_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.unicaen_signature_signatureflowstep_id_seq', 5, true);
+SELECT pg_catalog.setval('public.unicaen_signature_signatureflowstep_id_seq', 1, false);
 
 
 --
 -- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_role_id_seq', 25, false);
+SELECT pg_catalog.setval('public.user_role_id_seq', 1, false);
 
 
 --
@@ -3598,7 +3750,7 @@ SELECT pg_catalog.setval('public.useraccessdefinition_id_seq', 1, false);
 -- Name: validationperiod_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.validationperiod_id_seq', 7, true);
+SELECT pg_catalog.setval('public.validationperiod_id_seq', 1, false);
 
 
 --
@@ -3613,6 +3765,14 @@ SELECT pg_catalog.setval('public.workpackage_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.workpackageperson_id_seq', 1, false);
+
+
+--
+-- Name: activity_activitymotcle activity_activitymotcle_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_activitymotcle
+    ADD CONSTRAINT activity_activitymotcle_pkey PRIMARY KEY (activity_id, activitymotcle_id);
 
 
 --
@@ -3632,11 +3792,43 @@ ALTER TABLE ONLY public.activity
 
 
 --
+-- Name: activityavenant activityavenant_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenant
+    ADD CONSTRAINT activityavenant_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activityavenantmodification activityavenantmodification_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenantmodification
+    ADD CONSTRAINT activityavenantmodification_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activitydate activitydate_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.activitydate
     ADD CONSTRAINT activitydate_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activitymotcle activitymotcle_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitymotcle
+    ADD CONSTRAINT activitymotcle_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activitynote activitynote_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitynote
+    ADD CONSTRAINT activitynote_pkey PRIMARY KEY (id);
 
 
 --
@@ -3784,14 +3976,6 @@ ALTER TABLE ONLY public.discipline
 
 
 --
--- Name: doctrine_migration_versions doctrine_migration_versions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.doctrine_migration_versions
-    ADD CONSTRAINT doctrine_migration_versions_pkey PRIMARY KEY (version);
-
-
---
 -- Name: estimatedspentline estimatedspentline_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3829,14 +4013,6 @@ ALTER TABLE ONLY public.notificationperson
 
 ALTER TABLE ONLY public.organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
-
-
---
--- Name: organization_role organization_role_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.organization_role
-    ADD CONSTRAINT organization_role_pkey PRIMARY KEY (id);
 
 
 --
@@ -4080,14 +4256,6 @@ ALTER TABLE ONLY public.typedocument
 
 
 --
--- Name: unicaen_signature_notification unicaen_signature_notification_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unicaen_signature_notification
-    ADD CONSTRAINT unicaen_signature_notification_pkey PRIMARY KEY (id);
-
-
---
 -- Name: unicaen_signature_observer unicaen_signature_observer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4233,6 +4401,13 @@ CREATE INDEX idx_205cd03781c06096 ON public.activity_discipline USING btree (act
 --
 
 CREATE INDEX idx_205cd037a5522701 ON public.activity_discipline USING btree (discipline_id);
+
+
+--
+-- Name: idx_22294f543174800f; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_22294f543174800f ON public.activitymotcle USING btree (createdby_id);
 
 
 --
@@ -4439,6 +4614,27 @@ CREATE INDEX idx_4850672625e297e4 ON public.validationperiod_adm USING btree (va
 
 
 --
+-- Name: idx_48ec09aa3174800f; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_48ec09aa3174800f ON public.activitynote USING btree (createdby_id);
+
+
+--
+-- Name: idx_48ec09aa65ff1aec; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_48ec09aa65ff1aec ON public.activitynote USING btree (updatedby_id);
+
+
+--
+-- Name: idx_48ec09aa81c06096; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_48ec09aa81c06096 ON public.activitynote USING btree (activity_id);
+
+
+--
 -- Name: idx_4a390fe81b50f2d9; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4471,6 +4667,20 @@ CREATE INDEX idx_4a390fe85c0c89f3 ON public.contractdocument USING btree (grant_
 --
 
 CREATE INDEX idx_4a390fe87ec2f574 ON public.contractdocument USING btree (process_id);
+
+
+--
+-- Name: idx_4ca4a03a81c06096; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_4ca4a03a81c06096 ON public.activity_activitymotcle USING btree (activity_id);
+
+
+--
+-- Name: idx_4ca4a03a93593db7; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_4ca4a03a93593db7 ON public.activity_activitymotcle USING btree (activitymotcle_id);
 
 
 --
@@ -4653,13 +4863,6 @@ CREATE INDEX idx_6547bd5063d8c20e ON public.typedocument USING btree (deletedby_
 --
 
 CREATE INDEX idx_6547bd5065ff1aec ON public.typedocument USING btree (updatedby_id);
-
-
---
--- Name: idx_6547bd50b4090c8a; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_6547bd50b4090c8a ON public.typedocument USING btree (signatureflow_id);
 
 
 --
@@ -5125,10 +5328,10 @@ CREATE INDEX idx_cf70b0a57ec2f574 ON public.unicaen_signature_process_step USING
 
 
 --
--- Name: idx_cf70b0a5c352c4; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cfd9096585631a3a; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_cf70b0a5c352c4 ON public.unicaen_signature_process_step USING btree (signatureflowstep_id);
+CREATE INDEX idx_cfd9096585631a3a ON public.activityavenantmodification USING btree (avenant_id);
 
 
 --
@@ -5265,20 +5468,6 @@ CREATE INDEX idx_d9dfb884e5915d19 ON public.organization USING btree (typeobj_id
 
 
 --
--- Name: idx_dc74ea6642e26054; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_dc74ea6642e26054 ON public.unicaen_signature_notification USING btree (signaturerecipient_id);
-
-
---
--- Name: idx_dc74ea669f268069; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_dc74ea669f268069 ON public.unicaen_signature_notification USING btree (signatureobserver_id);
-
-
---
 -- Name: idx_dd65739b166d1f9c; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5363,6 +5552,13 @@ CREATE INDEX idx_eac19423ed61183a ON public.unicaen_signature_observer USING btr
 
 
 --
+-- Name: idx_eec35c6481c06096; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_eec35c6481c06096 ON public.activityavenant USING btree (activity_id);
+
+
+--
 -- Name: idx_f40fcdc4a1b4b28c; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5419,13 +5615,6 @@ CREATE UNIQUE INDEX uniq_598638fb8a90aba9 ON public.useraccessdefinition USING b
 
 
 --
--- Name: uniq_6e60b4f7d60322ac; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX uniq_6e60b4f7d60322ac ON public.organization_role USING btree (role_id);
-
-
---
 -- Name: uniq_9de7cd62e7927c74; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5461,13 +5650,6 @@ CREATE UNIQUE INDEX uniq_cf70b0a5ed61183a ON public.unicaen_signature_process_st
 
 
 --
--- Name: activity activity_numauto; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER activity_numauto AFTER INSERT ON public.activity FOR EACH ROW EXECUTE FUNCTION public.oscar_activity_numauto();
-
-
---
 -- Name: validationperiod_sci fk_1fde42e6217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5500,11 +5682,19 @@ ALTER TABLE ONLY public.activity_discipline
 
 
 --
+-- Name: activitymotcle fk_22294f543174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitymotcle
+    ADD CONSTRAINT fk_22294f543174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
 -- Name: notificationperson fk_22ba6515217bbb47; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.notificationperson
-    ADD CONSTRAINT fk_22ba6515217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+    ADD CONSTRAINT fk_22ba6515217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE CASCADE;
 
 
 --
@@ -5732,6 +5922,30 @@ ALTER TABLE ONLY public.validationperiod_adm
 
 
 --
+-- Name: activitynote fk_48ec09aa3174800f; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitynote
+    ADD CONSTRAINT fk_48ec09aa3174800f FOREIGN KEY (createdby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activitynote fk_48ec09aa65ff1aec; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitynote
+    ADD CONSTRAINT fk_48ec09aa65ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
+
+
+--
+-- Name: activitynote fk_48ec09aa81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activitynote
+    ADD CONSTRAINT fk_48ec09aa81c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
+
+
+--
 -- Name: contractdocument fk_4a390fe81b50f2d9; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5744,7 +5958,7 @@ ALTER TABLE ONLY public.contractdocument
 --
 
 ALTER TABLE ONLY public.contractdocument
-    ADD CONSTRAINT fk_4a390fe8217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+    ADD CONSTRAINT fk_4a390fe8217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE SET NULL;
 
 
 --
@@ -5769,6 +5983,22 @@ ALTER TABLE ONLY public.contractdocument
 
 ALTER TABLE ONLY public.contractdocument
     ADD CONSTRAINT fk_4a390fe87ec2f574 FOREIGN KEY (process_id) REFERENCES public.unicaen_signature_process(id) ON DELETE SET NULL;
+
+
+--
+-- Name: activity_activitymotcle fk_4ca4a03a81c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_activitymotcle
+    ADD CONSTRAINT fk_4ca4a03a81c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id) ON DELETE CASCADE;
+
+
+--
+-- Name: activity_activitymotcle fk_4ca4a03a93593db7; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_activitymotcle
+    ADD CONSTRAINT fk_4ca4a03a93593db7 FOREIGN KEY (activitymotcle_id) REFERENCES public.activitymotcle(id) ON DELETE CASCADE;
 
 
 --
@@ -5977,14 +6207,6 @@ ALTER TABLE ONLY public.typedocument
 
 ALTER TABLE ONLY public.typedocument
     ADD CONSTRAINT fk_6547bd5065ff1aec FOREIGN KEY (updatedby_id) REFERENCES public.person(id);
-
-
---
--- Name: typedocument fk_6547bd50b4090c8a; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.typedocument
-    ADD CONSTRAINT fk_6547bd50b4090c8a FOREIGN KEY (signatureflow_id) REFERENCES public.unicaen_signature_signatureflow(id);
 
 
 --
@@ -6472,7 +6694,7 @@ ALTER TABLE ONLY public.activitytype
 --
 
 ALTER TABLE ONLY public.administrativedocument
-    ADD CONSTRAINT fk_c311ba72217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id);
+    ADD CONSTRAINT fk_c311ba72217bbb47 FOREIGN KEY (person_id) REFERENCES public.person(id) ON DELETE SET NULL;
 
 
 --
@@ -6524,19 +6746,19 @@ ALTER TABLE ONLY public.unicaen_signature_process_step
 
 
 --
--- Name: unicaen_signature_process_step fk_cf70b0a5c352c4; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unicaen_signature_process_step
-    ADD CONSTRAINT fk_cf70b0a5c352c4 FOREIGN KEY (signatureflowstep_id) REFERENCES public.unicaen_signature_signatureflowstep(id);
-
-
---
 -- Name: unicaen_signature_process_step fk_cf70b0a5ed61183a; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.unicaen_signature_process_step
     ADD CONSTRAINT fk_cf70b0a5ed61183a FOREIGN KEY (signature_id) REFERENCES public.unicaen_signature_signature(id);
+
+
+--
+-- Name: activityavenantmodification fk_cfd9096585631a3a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenantmodification
+    ADD CONSTRAINT fk_cfd9096585631a3a FOREIGN KEY (avenant_id) REFERENCES public.activityavenant(id);
 
 
 --
@@ -6692,22 +6914,6 @@ ALTER TABLE ONLY public.organization
 
 
 --
--- Name: unicaen_signature_notification fk_dc74ea6642e26054; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unicaen_signature_notification
-    ADD CONSTRAINT fk_dc74ea6642e26054 FOREIGN KEY (signaturerecipient_id) REFERENCES public.unicaen_signature_recipient(id);
-
-
---
--- Name: unicaen_signature_notification fk_dc74ea669f268069; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.unicaen_signature_notification
-    ADD CONSTRAINT fk_dc74ea669f268069 FOREIGN KEY (signatureobserver_id) REFERENCES public.unicaen_signature_observer(id);
-
-
---
 -- Name: projectpartner fk_dd65739b166d1f9c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6804,6 +7010,14 @@ ALTER TABLE ONLY public.unicaen_signature_observer
 
 
 --
+-- Name: activityavenant fk_eec35c6481c06096; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activityavenant
+    ADD CONSTRAINT fk_eec35c6481c06096 FOREIGN KEY (activity_id) REFERENCES public.activity(id);
+
+
+--
 -- Name: pcrutypecontract fk_f40fcdc4a1b4b28c; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6817,6 +7031,14 @@ ALTER TABLE ONLY public.pcrutypecontract
 
 ALTER TABLE ONLY public.unicaen_signature_recipient
     ADD CONSTRAINT fk_f47c5330ed61183a FOREIGN KEY (signature_id) REFERENCES public.unicaen_signature_signature(id);
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

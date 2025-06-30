@@ -34,7 +34,7 @@ done
 ### Données d'initialisation POSTGRESQL
 echo "🔧 Copie des données Postgrestgres d'initialisation dans $VOLUMES_POSTGRESQL_INIT"
 cp -R docker/postgres_initdb.d/* $VOLUMES_POSTGRESQL_INIT
-cp ./docker/postgresql_initdb.d/*
+
 
 ################################################## Fichiers de template
 fichiers=(
