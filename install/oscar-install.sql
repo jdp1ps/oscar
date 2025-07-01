@@ -2418,7 +2418,25 @@ COPY public.categorie_privilege (id, code, libelle, ordre) FROM stdin;
 \.
 
 
--- Data for Name: country3166; Type: TABLE DATA; Schema: public; Owner: -
+COPY public.tabdocument (id,"label",description,isdefault) FROM stdin;
+1	Général	\N	true
+\.
+
+COPY public.tabsdocumentsroles (id,role_id,"access",tabdocument_id) FROM stdin;
+1	1	2	1
+2	3	2	1
+3	5	0	1
+4	2	2	1
+5	4	1	1
+\.
+
+COPY public.typedocument (id,"label",description,codecentaure,isdefault,status,datecreated,dateupdated,datedeleted,createdby_id,updatedby_id,deletedby_id) FROM stdin;
+1	Document de travail	\N	\N	true	1	'2025-07-01 16:28:09'	\N	\N	\N	\N	\N
+2	Annexe financière	 \N	\N	false	1	'2025-07-01 16:28:47'	\N	\N	\N	\N	\N
+3	Contrat signé	\N	\N	false	1	'2025-07-01 16:28:59'	\N	\N	\N	\N	\N
+\.
+
+--	Data 	o	 Name: country3166; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.country3166 (id, fr, en, alpha2, alpha3, "numeric") FROM stdin;
@@ -3331,7 +3349,6 @@ COPY public.workpackage (id, activity_id, code, label, description, datestart, d
 
 COPY public.workpackageperson (id, person_id, duration, status, datecreated, dateupdated, datedeleted, workpackage_id, createdby_id, updatedby_id, deletedby_id) FROM stdin;
 \.
-
 
 --
 -- Name: activity_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
