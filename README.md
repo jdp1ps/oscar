@@ -1,4 +1,4 @@
-# OSCAR 2.13 "Ripley" (Documentation technique)
+# OSCAR 2.14 "Starling" (Documentation technique)
 
 ## Derniers changements
 
@@ -14,7 +14,7 @@
 
 ### Prochaine version 2.15 "Kusanagi"
 
-Prévu (Fin Juin 2025) : 
+Prévu (Septembre 2025 - preprod) : 
  - PCRU
  - Docker (prod)
  - SIFAC+ (Selon la mise à disposition des APIs AMUE)
