@@ -1,5 +1,13 @@
-# 📢 CHANGEMENTS (MASTER/RIPLEY)
+# 📢 CHANGEMENTS (MASTER/STARLING)
 ## 2025
+
+### Juin
+ - [starling] Mise à jour des scripts d'installation (possiblité de personaliser les scripts d'initialisation de la base de donnée)
+ - [starling] Fix : Retour du bouton "Dupliquer" dans la fiche activité
+ - [starling] Fix : Conversion automatique des virgules en points pour faciliter les copiés/collés des montants
+ - [starling] Fix : Le type d'activité est correctement repris lors de l'édition
+ - [starling] Fix : Bascule heures/pourcentage depuis les paramètres
+ - [starling] Affichage de certaines options correctement cachées en fonction des privilèges
 
 ### Mai
  - [starling] Mise à jour de la librairie **unicaen/signature** (v 1.0.6) avec prise en charge de l'API TOKEN
