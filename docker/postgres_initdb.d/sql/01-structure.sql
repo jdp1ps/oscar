@@ -154,6 +154,7 @@ CREATE TABLE public.activity (
                                  locked boolean DEFAULT false NOT NULL
 );
 
+CREATE TRIGGER activity_numauto AFTER INSERT ON public.activity FOR EACH ROW EXECUTE FUNCTION public.oscar_activity_numauto();
 
 --
 -- Name: COLUMN activity.numbers; Type: COMMENT; Schema: public; Owner: -
