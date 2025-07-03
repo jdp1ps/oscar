@@ -3,7 +3,7 @@
 
     <loader :visible="loading" :text="loading"></loader>
 
-    <modal title="Erreur" :visible="error != null && error != false">
+    <modal title="Erreur" :visible="error != null && error != false" @modal-valid="error = null" @modal-cancel="error = null">
       <div class="alert alert-danger">
         ERREUR : {{ error }}
       </div>
@@ -180,9 +180,9 @@
             <i class="icon-angle-left"></i>
             Annuler
           </button>
-          <button class="btn btn-primary" type="button" @click="performNew">
+          <button class="btn btn-primary" :class="{'disabled': !submitableNew}" @click="performNew">
             <i class="icon-floppy"></i>
-            Enregistrer
+            Ajouter
           </button>
         </nav>
       </div>
@@ -328,6 +328,12 @@ export default {
   },
 
   computed: {
+    submitableNew(){
+      if( this.entityNew && this.entityNew.role && this.entityNew.enroled ){
+        return true;
+      }
+      return false;
+    },
     rolesList(){
       return this.standalone ? this.standalone_roles : this.roles;
     },
@@ -433,7 +439,14 @@ export default {
 
       axios.post(url, {}).then(ok => {
       }, ko => {
-        this.error = ko.body;
+        let message = "Erreur inconnue";
+        if( ko && ko.response && ko.response.data ) {
+          message = ko.response.data;
+        }
+        if( ko.status == 403 ) {
+          message = "Vous n'êtes pas authorisé à faire ça";
+        }
+        this.error = message;
       }).then(foo => {
         this.loading = false;
         this.fetch();
@@ -456,7 +469,14 @@ export default {
       axios.post(url, data).then(ok => {
 
       }, ko => {
-        this.error = "Erreur : Impossible de modifier le rôle : " + ko.body;
+        let message = "Erreur inconnue";
+        if( ko && ko.response && ko.response.data ) {
+          message = ko.response.data;
+        }
+        if( ko.status == 403 ) {
+          message = "Vous n'êtes pas authorisé à faire ça";
+        }
+        this.error = message;
       }).then(foo => {
         this.loading = false;
         this.fetch();
@@ -465,6 +485,9 @@ export default {
     },
 
     performNew() {
+      if( !this.submitableNew ){
+        return;
+      }
       let data = new FormData();
       this.loading = "Création...";
       var enroled = this.entityNew.enroled;
@@ -472,15 +495,22 @@ export default {
       data.append('dateEnd', this.entityNew.end);
       data.append('role', this.entityNew.role);
       data.append('enroled', enroled);
-      this.entityNew = null;
+
 
       axios.post(this.urlNewUse + '/' + enroled, data).then(ok => {
-
-      }, ko => {
-        this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
-      }).then(foo => {
+        this.entityNew = null;
         this.loading = false;
         this.fetch();
+      }, ko => {
+        let message = "Erreur inconnue";
+        if( ko && ko.response && ko.response.data ) {
+          message = ko.response.data;
+        }
+        if( ko.status == 403 ) {
+          message = "Vous n'êtes pas authorisé à faire ça";
+        }
+        this.loading = false;
+        this.error = message;
       })
     },
 
@@ -494,7 +524,14 @@ export default {
       axios.post(this.urlNewUse, data).then(ok => {
 
       }, ko => {
-        this.error = ko.status == 403 ? "Vous n'êtes pas authorisé à faire ça" : "Erreur : " + ko.body;
+        let message = "Erreur inconnue";
+        if( ko && ko.response && ko.response.data ) {
+          message = ko.response.data;
+        }
+        if( ko.status == 403 ) {
+          message = "Vous n'êtes pas authorisé à faire ça";
+        }
+        this.error = message;
       }).then(foo => {
         this.loading = false;
         this.toPaste = null;
@@ -531,7 +568,6 @@ export default {
               } else {
                 items = ok.data;
               }
-              console.log("emit", items);
               this.$emit('update', {
                 datas: {
                   items: items,
@@ -542,7 +578,14 @@ export default {
             }
           },
           ko => {
-            this.error = "Erreur : " + ko.body;
+            let message = "Erreur inconnue";
+            if( ko && ko.response && ko.response.data ) {
+              message = ko.response.data;
+            }
+            if( ko.status == 403 ) {
+              message = "Vous n'êtes pas authorisé à faire ça";
+            }
+            this.error = message;
           }).finally(e => this.loading = null);
     },
 
