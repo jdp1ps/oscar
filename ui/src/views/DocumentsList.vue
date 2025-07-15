@@ -50,9 +50,7 @@
           </span>
         <span class="overlay-closer" @click="editedDocument = null">X</span>
       </h2>
-      {{ editedDocument.tabDocument.id }}
       <div class="row">
-
         <div class="col-md-6">
           <div v-if="mode != 'edit'">
             <label for="file">Fichier</label>

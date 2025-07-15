@@ -101,12 +101,8 @@
           <span v-else>
             Nouveau document dans <strong>{{ editedDocument.tabDocument.label }}</strong>
           </span>
-          <span>
-            ({{ mode }})
-          </span>
           <span class="overlay-closer" @click="editedDocument = null">X</span>
         </h2>
-        <pre style="font-size: .7em">{{ editedDocument }}</pre>
 
         <div class="row">
 
