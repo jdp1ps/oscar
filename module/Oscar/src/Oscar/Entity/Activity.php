@@ -35,25 +35,25 @@ class Activity implements ResourceInterface
         if ($statusSelect === null) {
             $statusSelect = [
                 self::STATUS_ERROR_STATUS     => 'Conflit : pas de statut',
+                self::STATUS_ABORDED          => 'Abandonné',
                 self::STATUS_ACCEPTED         => 'Accepté',
                 self::STATUS_ACCEPTED_2       => 'Accepté en phase 2',
                 self::STATUS_ACTIVE           => 'Actif',
                 self::STATUS_PROGRESS         => 'Brouillon',
                 self::STATUS_FENCED           => 'Clôturé',
-                self::STATUS_DEPOSIT          => 'Déposée',
-                self::STATUS_ABORDED          => 'Dossier abandonné',
+                self::STATUS_DEPOSIT          => 'Déposé',
                 self::STATUS_TERMINATED       => 'En cours de clôture',
                 self::STATUS_PENDING_ACCEPTED => 'En cours de conventionnement',
-                self::STATUS_IDENTIFY         => 'Identifiée',
-                self::STATUS_JUSTIFY          => 'Justifiée',
+                self::STATUS_IDENTIFY         => 'Identifié',
+                self::STATUS_JUSTIFY          => 'Justifié',
                 self::STATUS_DISPUTE          => 'Litige',
+                self::STATUS_MONTAGE          => 'Montage',
                 self::STATUS_REFUSED          => 'Refusé',
                 self::STATUS_REFUSED_2        => 'Refusé en phase 2',
                 self::STATUS_REORIENTED       => 'Réorienté',
                 self::STATUS_TERMINATED       => 'Résilié',
                 self::STATUS_CLOSED           => 'Terminé',
                 self::STATUS_TRANSFERED       => 'Transféré',
-                self::STATUS_MONTAGE          => 'Montage',
             ];
         }
         return $statusSelect;
