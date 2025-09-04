@@ -659,7 +659,9 @@ class ProjectGrantApiService implements
                     );
                 }
             } else {
-                $allowProcessCreate = true;
+                if( strpos($doc->getFileTypeMime(), 'application/pdf' ) !== false ){
+                    $allowProcessCreate = true;
+                }
             }
 
             // Accès aux fonctionnalités du document.
