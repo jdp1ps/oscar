@@ -795,7 +795,7 @@ class OrganizationController extends AbstractOscarController implements UseOrgan
 
                 // tester destination vide
                 $fusionDatas['to'] = $to = $this->params()->fromPost('to', null);
-                if (count($to) == 0) {
+                if ($to == null) {
                     $errors[] = "Vous devez spécifer une organisation cible.";
                 }
 
