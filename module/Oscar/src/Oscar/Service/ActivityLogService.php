@@ -9,8 +9,8 @@ namespace Oscar\Service;
 
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Oscar\Entity\ActivityLogRepository;
 use Oscar\Entity\LogActivity;
+use Oscar\Entity\LogActivityRepository;
 use Oscar\Entity\Authentification;
 use Oscar\Entity\Person;
 use Oscar\Traits\UseServiceContainer;
@@ -107,7 +107,7 @@ class ActivityLogService implements UseServiceContainer {
     }
 
     public function getAuthentificationActivities( $authentificationId, $limit=20 ){
-        /** @var ActivityLogRepository $repo */
+        /** @var LogActivityRepository $repo */
         $repo = $this->getEntityManager()->getRepository(LogActivity::class);
 
         return $repo->getUserActivity($authentificationId, $limit);

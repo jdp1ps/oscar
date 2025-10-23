@@ -13,6 +13,26 @@ use Doctrine\ORM\EntityRepository;
 
 class LogActivityRepository extends EntityRepository
 {
+
+    /**
+     * Retourne les dernières actions de l'utilisateur.
+     *
+     * @param $userId
+     * @param int $limit
+     * @return LogActivity[]
+     */
+    public function getUserActivity($userId, $limit = 20)
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a')
+            ->where('a.userId = :userId')
+            ->andWhere('a.type != \'debug\'')
+            ->setMaxResults($limit)
+            ->addOrderBy('a.dateCreated', 'DESC')
+            ->setParameter('userId', $userId);
+        return $qb->getQuery()->getResult();
+    }
+
     public function getLogsProject(int $projectId):array {
         // ID des activités du projet
         $idsActivity = array_map('current', $this->getEntityManager()->createQueryBuilder()
