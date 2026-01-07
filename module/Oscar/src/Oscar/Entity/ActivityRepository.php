@@ -1026,13 +1026,14 @@ class ActivityRepository extends EntityRepository
         if ($min !== null) {
             $qb->where('c.amount >= :min');
             $parameters['min'] = $min;
-        }
-
-        if ($max !== null) {
-            $qb->where('c.amount >= :max');
+            if ($max !== null) {
+                $qb->andWhere('c.amount <= :max');
+                $parameters['max'] = $max;
+            }
+        } else if ($max !== null) {
+            $qb->where('c.amount <= :max');
             $parameters['max'] = $max;
         }
-
 
         return array_map('current', $qb->getQuery()->setParameters($parameters)->getResult());
     }
