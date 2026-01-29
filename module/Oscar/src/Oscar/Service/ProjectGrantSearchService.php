@@ -527,6 +527,7 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // FILTRES de RECHERCHE
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $activityTypeFilteredIds = null;
         foreach ($params['filters'] as &$filter) {
             $this->getLoggerService()->debug("Traitement du filtre '" . $filter['raw'] . "'");
             $value1 = $filter['val1'];
@@ -908,6 +909,24 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
 
                     ///////////////////////////////// ACTIVITY / TYPE
                     case 'at' :
+                        if ($value2 == 1) {
+                            $types = [$value1];
+                        }
+                        else {
+                            $types = $this->getProjectGrantService()->getActivityTypeService()->getTypeIdsInside(
+                                $value1
+                            );
+                        }
+
+                        if ($activityTypeFilteredIds === NULL) {
+                            $activityTypeFilteredIds = [];
+                        }
+                        $activityTypeFilteredIds = array_unique(array_merge($activityTypeFilteredIds,
+                            $this->getProjectGrantService()->getActivityRepository()
+                                ->getIdsWithTypes($types, $type === 'st')));
+
+                        break;
+
                     case 'st' :
 
                         if ($value2 == 1) {
@@ -958,6 +977,17 @@ class ProjectGrantSearchService implements UseEntityManager, UsePersonService, U
             } catch (Exception $e) {
                 $filter['error'] = $e->getMessage();
             }
+        }
+
+        if ($activityTypeFilteredIds !== null) {
+            $this->getLoggerService()->debug(
+                "Filtre at : " . count($activityTypeFilteredIds) . ' activité(s) trouvée(s)'
+            );
+            // On filtre les IDS à garder sur au filtrage
+            $activitiesIds = $activitiesIds == null ? $activityTypeFilteredIds :
+                array_intersect($activitiesIds, $activityTypeFilteredIds);
+
+            $filter['filtered'] = count($activityTypeFilteredIds);
         }
 
         /////////////////////////////
