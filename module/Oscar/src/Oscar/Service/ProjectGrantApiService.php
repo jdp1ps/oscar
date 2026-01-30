@@ -552,6 +552,7 @@ class ProjectGrantApiService implements
             'dateSigned' => $this->formatDateTime($activity->getDateSigned()),
             'dateUpdated' => $this->formatDateTime($activity->getDateUpdated()),
             'dateOpened' => $this->formatDateTime($activity->getDateOpened()),
+            'dateNegociation' => $this->formatDateTime($activity->getDateNegociation()),
             'urls' => [
                 'duplicate' => $urlPlugin->fromRoute('contract/duplicate', ['id' => $activity->getId()]),
                 'edit' => $urlPlugin->fromRoute('contract/edit', ['id' => $activity->getId()]),
