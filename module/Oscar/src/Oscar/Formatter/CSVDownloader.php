@@ -64,7 +64,7 @@ class CSVDownloader
     public function downloadCSVToExcel($csvPath)
     {
         $xlsPath = $csvPath . '.xls';
-        $re_single_date = '/^([0-9]{4})-((0[1-9])|(1[1-2]))-[0-9]{2}$/';
+        $re_single_date = '/^([0-9]{4})-((0[1-9])|(1[0-2]))-[0-9]{2}$/';
         $doc = new Spreadsheet();
         $this->reset();
 
