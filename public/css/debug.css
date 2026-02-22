@@ -6787,9 +6787,6 @@ mark {
 .icon-acttype-production:before {
   content: '\e879'; }
 
-#user-current-info small {
-  display: none; }
-
 .site-footer {
   font-size: 12px;
   background: #444444;
