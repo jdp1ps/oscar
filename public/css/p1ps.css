@@ -11099,6 +11099,9 @@ article.wp {
 .bold {
   font-weight: bold; }
 
+body {
+  background-blend-mode: normal !important; }
+
 .private-document {
   border-left: 8px #DD423E solid !important; }
 

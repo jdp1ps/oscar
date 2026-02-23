@@ -94,6 +94,8 @@ $colorGreyBlack: #222;
   font-weight: bold;
 }
 body {
+  //Fix issue of disappearing background after starling update
+  background-blend-mode: normal !important;
 }
 
 .private-document {
