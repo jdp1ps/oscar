@@ -1,0 +1,119 @@
+/* ! Oscar © 2015, Université de Caen, Basse-Normandie
+ * Stéphane Bouvry <stephane.bouvry@unicaen.fr>
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Configuration
+////////////////////////////////////////////////////////////////////////////////
+
+// v.202303
+
+$brand-primary: #455790 !default;
+$brand-complementary: #27556C !default;
+$bg-image: 'p1ps.jpg' !default;
+
+//rgb(255 - red($brand-primary), 255 - green($brand-primary), 255 - blue($brand-primary));
+$brand-secondary1: #6a5999;
+$brand-secondary2: #ff6600;
+$brand-success: #5cb85c !default;
+$brand-info: #5bc0de !default;
+$brand-warning: #f0ad4e !default;
+$brand-danger: #d9534f !default;
+$brand-error: #cb0b05 !default;
+
+
+$colorGreyUltraLight: #CCC;
+$colorGreyLight: #AAA;
+
+$font-size-smallest: 9px;
+$font-size-smaller: 10px;
+$font-size-smaller: 10px;
+$font-size-small: 12px;
+$font-size-base: 14px;
+$font-size-big: 16px;
+$font-size-bigger: 18px;
+$font-size-biggest: 20px;
+
+$grey-ultra-light: #CCC;
+$grid-float-breakpoint: 1024px;
+$colorGreyMedium: #999;
+$colorGreyDark: #555;
+$colorGreyBlack: #222;
+
+
+// Update 2020-11-04
+@import "_common.scss";
+
+.div-connexion {
+  .card {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    ul.card-header-tabs {
+      background: none;
+      .nav-link {
+        padding: .4em 1em;
+        &.active {
+          color: black;
+          background-color: white;
+        }
+      }
+    }
+  }
+}
+
+.cartouche.light {
+  background: $grey-ultra-light;
+  color: #333;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.cartouche.off, .cartouche.off .addon{
+  text-decoration: line-through;
+}
+
+.cartouche .addon .addon-module {
+  border-right: none;
+}
+
+.cartouche .addon .addon-module:after {
+  font-weight: 100;
+  content: ', ';
+}
+.cartouche .addon .addon-module:last-child:after {
+  content: '';
+}
+
+.cartouche .addon .addon-module.primary {
+  font-weight: bold;
+  text-shadow: 1px -1x 0 rgba(255,255,255,1);
+}
+
+.bold {
+  font-weight: bold;
+}
+body {
+  //Fix issue of disappearing background after starling update
+  background-blend-mode: normal !important;
+}
+
+.private-document {
+  border-left: 8px $colorRed solid !important;
+}
+
+.overlay {
+  .overlay-title {
+    margin-top: 0;
+    font-size: 1.6em;
+    padding: .75em 0;
+  }
+  .overlay-message {
+    padding: 0 2em;
+  }
+  .buttons-bar {
+    padding: .75em 0 0;
+    margin-top: .75em;
+    border-top: thin solid #ddd;
+  }
+}

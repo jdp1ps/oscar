@@ -73,13 +73,12 @@ class JsonToPersonFactory extends JsonToObject implements IJsonToPerson
             $object->setLdapSiteLocation($jsonData->structure);
         }
 
-        if (property_exists($jsonData, 'datefininscription')) {
-            $date = null;
-            if ($jsonData->datefininscription) {
-                $date = (new \DateTime($jsonData->datefininscription))->format('Y-m-d');
-            }
-            $object->setLdapFinInscription($date);
+        // Toujours renseigné : une clef absente signifie que le compte est (re)activé
+        $date = null;
+        if (property_exists($jsonData, 'datefininscription') && $jsonData->datefininscription) {
+            $date = (new \DateTime($jsonData->datefininscription))->format('Y-m-d');
         }
+        $object->setLdapFinInscription($date);
         if (property_exists($jsonData, 'affectation')) {
             $object->setLdapAffectation($jsonData->affectation);
         }
