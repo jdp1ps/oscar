@@ -187,6 +187,11 @@ class ConnectorPersonHydrator
         $rolesOscar = $this->getRolesOscarByRoleId();
         $this->repport = new ConnectorRepport();
 
+        // La personne est présente dans la source : son compte est (re)activé,
+        // la date de fin d'inscription éventuellement enregistrée lors d'une synchronisation
+        // précédente est réinitialisée
+        $personOscar->setLdapFinInscription(null);
+
         try {
             $personOscar = $this->factory()->hydrateWithDatas($personOscar, $personData, $connectorName);
         } catch (OscarException $e) {
